@@ -1,0 +1,18 @@
+[
+  {
+    "modid": "momentum",
+    "name": "Momentum",
+    "description": "Example placeholder mod.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "linus"
+    ],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
