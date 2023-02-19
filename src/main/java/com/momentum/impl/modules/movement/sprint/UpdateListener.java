@@ -2,6 +2,7 @@ package com.momentum.impl.modules.movement.sprint;
 
 import com.momentum.api.event.FeatureListener;
 import com.momentum.asm.mixins.vanilla.accessors.IEntity;
+import com.momentum.asm.mixins.vanilla.accessors.INetHandlerPlayClient;
 import com.momentum.impl.events.vanilla.entity.UpdateEvent;
 
 /**
@@ -16,6 +17,11 @@ public class UpdateListener extends FeatureListener<SprintModule, UpdateEvent> {
     @Override
     public void invoke(UpdateEvent event) {
 
+        // null check
+        if (mc.player == null || mc.world == null || !((INetHandlerPlayClient) mc.player.connection).isDoneLoadingTerrain()) {
+            return;
+        }
+
         // reset state
         // sprint state
         boolean sprint = false;
@@ -27,7 +33,7 @@ public class UpdateListener extends FeatureListener<SprintModule, UpdateEvent> {
             if (mc.player.getFoodStats().getFoodLevel() > 6) {
 
                 // directional
-                if (feature.mode.getVal() == SprintMode.RAGE) {
+                if (feature.modeOption.getVal() == SprintMode.RAGE) {
 
                     // always sprint
                     sprint = true;

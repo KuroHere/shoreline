@@ -22,7 +22,7 @@ public class RenderPumpkinOverlayListener extends FeatureListener<NoRenderModule
     public void invoke(RenderPumpkinOverlayEvent event) {
 
         // cancel the pumpkin overlay when wearing pumpkins
-        if (feature.pumpkinOverlay.getVal()) {
+        if (feature.pumpkinOverlayOption.getVal()) {
 
             // prevent pumpkin overlay from rendering
             event.setCanceled(true);

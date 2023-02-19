@@ -30,6 +30,6 @@ public class RenderItemActivationEvent extends Event {
      * @return The item being activated
      */
     public Item getItem() {
-        return item.getItem();
+        return item != null ? item.getItem() : null;
     }
 }

@@ -21,7 +21,7 @@ public class PushOutOfBlocksListener extends FeatureListener<VelocityModule, Pus
         }
 
         // no push blocks
-        if (feature.blocks.getVal()) {
+        if (feature.blocksOption.getVal()) {
 
             // cancel event
             event.setCanceled(true);

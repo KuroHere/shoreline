@@ -4,6 +4,7 @@ import com.momentum.api.feature.Option;
 import com.momentum.api.module.Module;
 import com.momentum.api.module.ModuleCategory;
 import com.momentum.api.util.render.Formatter;
+import com.momentum.impl.init.Modules;
 
 /**
  * @author linus
@@ -12,11 +13,11 @@ import com.momentum.api.util.render.Formatter;
 public class SpeedModule extends Module {
 
     // speed options
-    public final Option<SpeedMode> mode =
+    public final Option<SpeedMode> modeOption =
             new Option<>("Mode", "Mode for speed", SpeedMode.STRAFE);
-    public final Option<Boolean> useTimer =
+    public final Option<Boolean> useTimerOption =
             new Option<>("UseTimer", "Use Timer to speed", true);
-    public final Option<Boolean> speedInWater =
+    public final Option<Boolean> speedInWaterOption =
             new Option<>("SpeedInWater", "Functional in liquids", false);
 
     // listeners
@@ -42,9 +43,9 @@ public class SpeedModule extends Module {
 
         // options
         associate(
-                mode,
-                useTimer,
-                speedInWater,
+                modeOption,
+                useTimerOption,
+                speedInWaterOption,
                 bind,
                 drawn
         );
@@ -64,12 +65,15 @@ public class SpeedModule extends Module {
         speed = 0;
         distance = 0;
         strafeStage = 4;
+
+        // reset timer
+        Modules.TIMER_MODULE.provide(1f);
     }
 
     @Override
     public String getData() {
 
         // speed mode
-        return Formatter.formatEnum(mode.getVal());
+        return Formatter.formatEnum(modeOption.getVal());
     }
 }

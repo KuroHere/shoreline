@@ -38,7 +38,7 @@ public class InboundPacketListener extends FeatureListener<VelocityModule, Inbou
             if (packet.getEntityID() == mc.player.getEntityId()) {
 
                 // if our settings are 0, then we can cancel this packet
-                if (feature.horizontal.getVal() == 0 && feature.vertical.getVal() == 0) {
+                if (feature.horizontalOption.getVal() == 0 && feature.verticalOption.getVal() == 0) {
                     event.setCanceled(true);
                 }
 
@@ -54,9 +54,9 @@ public class InboundPacketListener extends FeatureListener<VelocityModule, Inbou
                         int motionZ = packet.getMotionZ() / 100;
 
                         // modify motion
-                        ((ISPacketEntityVelocity) packet).setMotionX(motionX * feature.horizontal.getVal());
-                        ((ISPacketEntityVelocity) packet).setMotionY(motionY * feature.vertical.getVal());
-                        ((ISPacketEntityVelocity) packet).setMotionZ(motionZ * feature.horizontal.getVal());
+                        ((ISPacketEntityVelocity) packet).setMotionX(motionX * feature.horizontalOption.getVal());
+                        ((ISPacketEntityVelocity) packet).setMotionY(motionY * feature.verticalOption.getVal());
+                        ((ISPacketEntityVelocity) packet).setMotionZ(motionZ * feature.horizontalOption.getVal());
                     }
                 }
             }
@@ -69,7 +69,7 @@ public class InboundPacketListener extends FeatureListener<VelocityModule, Inbou
             SPacketExplosion packet = (SPacketExplosion) event.getPacket();
 
             // if our settings are 0, then we can cancel this packet
-            if (feature.horizontal.getVal() == 0 && feature.vertical.getVal() == 0) {
+            if (feature.horizontalOption.getVal() == 0 && feature.verticalOption.getVal() == 0) {
                 event.setCanceled(true);
             }
 
@@ -83,15 +83,15 @@ public class InboundPacketListener extends FeatureListener<VelocityModule, Inbou
                 float motionZ = packet.getMotionZ() / 100;
 
                 // modify motion
-                ((ISPacketExplosion) packet).setMotionX(motionX * feature.horizontal.getVal());
-                ((ISPacketExplosion) packet).setMotionY(motionY * feature.vertical.getVal());
-                ((ISPacketExplosion) packet).setMotionZ(motionZ * feature.horizontal.getVal());
+                ((ISPacketExplosion) packet).setMotionX(motionX * feature.horizontalOption.getVal());
+                ((ISPacketExplosion) packet).setMotionY(motionY * feature.verticalOption.getVal());
+                ((ISPacketExplosion) packet).setMotionZ(motionZ * feature.horizontalOption.getVal());
             }
         }
 
         // packet for being pulled by fishhooks
         if (event.getPacket() instanceof SPacketEntityStatus && ((SPacketEntityStatus) event.getPacket()).getOpCode() == 31) {
-            if (feature.fishHook.getVal()) {
+            if (feature.fishHookOption.getVal()) {
 
                 // get the entity that is pulling us
                 Entity entity = ((SPacketEntityStatus) event.getPacket()).getEntity(mc.world);

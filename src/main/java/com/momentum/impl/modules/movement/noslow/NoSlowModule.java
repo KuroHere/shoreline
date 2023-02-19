@@ -19,29 +19,29 @@ import net.minecraftforge.client.settings.KeyConflictContext;
 public class NoSlowModule extends Module {
 
     // anticheat options
-    public final Option<Boolean> strict =
+    public final Option<Boolean> strictOption =
             new Option<>("Strict", new String[] {"NCPStrict"}, "Bypass NCP-Updated servers", false);
-    public final Option<Boolean> airStrict =
+    public final Option<Boolean> airStrictOption =
             new Option<>("AirStrict", "Bypass NCP-Updated servers while moving in air", false);
 
     // inventory move options
-    public final Option<Boolean> inventoryMove =
-            new Option<>("InventoryMove", "Allows player to move in inventories", false);
-    public final Option<Boolean> arrowMove =
+    public final Option<Boolean> inventoryMoveOption =
+            new Option<>("InventoryMove", "Allows player to move in inventories", true);
+    public final Option<Boolean> arrowMoveOption =
             new Option<>("ArrowMove", "Allows player to move camera with arrow keys in inventories", false);
 
     // slowdown options
-    public final Option<Boolean> items =
+    public final Option<Boolean> itemsOption =
             new Option<>("Items", "Removes item use slowdowns", true);
-    public final Option<Boolean> webs =
+    public final Option<Boolean> websOption =
             new Option<>("Webs", "Removes web slowdown", true);
-    public final Option<Float> webSpeed =
+    public final Option<Float> webSpeedOption =
             new Option<>("WebSpeed", "Web move speed", 0.0f, 3.5f, 20.0f);
-    public final Option<Boolean> soulSand =
+    public final Option<Boolean> soulSandOption =
             new Option<>("SoulSand", "Removes soul sand slowdown", true);
-    public final Option<Boolean> slime =
+    public final Option<Boolean> slimeOption =
             new Option<>("Slime", "Removes slime slowdown", true);
-    public final Option<Boolean> ice =
+    public final Option<Boolean> iceOption =
             new Option<>("Ice", "Removes ice slipperiness slowdown", true);
 
     // listeners
@@ -79,16 +79,16 @@ public class NoSlowModule extends Module {
 
         // options
         associate(
-                strict,
-                airStrict,
-                inventoryMove,
-                arrowMove,
-                items,
-                webs,
-                webSpeed,
-                soulSand,
-                slime,
-                ice,
+                strictOption,
+                airStrictOption,
+                inventoryMoveOption,
+                arrowMoveOption,
+                itemsOption,
+                websOption,
+                webSpeedOption,
+                soulSandOption,
+                slimeOption,
+                iceOption,
                 bind,
                 drawn
         );
@@ -110,7 +110,7 @@ public class NoSlowModule extends Module {
         super.onEnable();
 
         // set the slipperiness of ice to the normal block value
-        if (ice.getVal()) {
+        if (iceOption.getVal()) {
             Blocks.ICE.setDefaultSlipperiness(0.6F);
             Blocks.PACKED_ICE.setDefaultSlipperiness(0.6F);
             Blocks.FROSTED_ICE.setDefaultSlipperiness(0.6F);
@@ -122,7 +122,7 @@ public class NoSlowModule extends Module {
         super.onDisable();
 
         // update our sneak state
-        if (serverSneaking && airStrict.getVal()) {
+        if (serverSneaking && airStrictOption.getVal()) {
 
             // send stop sneak to match our server state
             mc.player.connection.sendPacket(new CPacketEntityAction(mc.player, CPacketEntityAction.Action.STOP_SNEAKING));
@@ -139,7 +139,7 @@ public class NoSlowModule extends Module {
         }
 
         // reset ice slipperiness to default value
-        if (ice.getVal()) {
+        if (iceOption.getVal()) {
             Blocks.ICE.setDefaultSlipperiness(0.98F);
             Blocks.FROSTED_ICE.setDefaultSlipperiness(0.98F);
             Blocks.PACKED_ICE.setDefaultSlipperiness(0.98F);
@@ -155,7 +155,7 @@ public class NoSlowModule extends Module {
      * @return Whether the player is slowed
      */
     public boolean isSlowed() {
-        return !mc.player.isRiding() && !mc.player.isElytraFlying() && mc.player.isHandActive() && items.getVal();
+        return !mc.player.isRiding() && !mc.player.isElytraFlying() && mc.player.isHandActive() && itemsOption.getVal();
     }
 
     /**

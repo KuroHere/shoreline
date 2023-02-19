@@ -12,7 +12,7 @@ import com.momentum.api.util.render.Formatter;
 public class SprintModule extends Module {
 
     // sprint options
-    public final Option<SprintMode> mode =
+    public final Option<SprintMode> modeOption =
             new Option<>("Mode", "Mode for sprinting", SprintMode.RAGE);
 
     // listeners
@@ -29,7 +29,7 @@ public class SprintModule extends Module {
 
         // options
         associate(
-                mode,
+                modeOption,
                 bind,
                 drawn
         );
@@ -45,6 +45,6 @@ public class SprintModule extends Module {
     public String getData() {
 
         // array list data is mode
-        return Formatter.formatEnum(mode.getVal());
+        return Formatter.formatEnum(modeOption.getVal());
     }
 }

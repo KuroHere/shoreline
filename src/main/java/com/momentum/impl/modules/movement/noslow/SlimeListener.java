@@ -22,7 +22,7 @@ public class SlimeListener extends FeatureListener<NoSlowModule, SlimeEvent> {
     public void invoke(SlimeEvent event) {
 
         // prevent slime slowdown
-        if (feature.slime.getVal()) {
+        if (feature.slimeOption.getVal()) {
 
             // cancel player from walking on slime
             event.setCanceled(true);

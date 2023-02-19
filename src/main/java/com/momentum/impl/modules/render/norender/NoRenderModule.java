@@ -11,27 +11,35 @@ import com.momentum.api.module.ModuleCategory;
 public class NoRenderModule extends Module {
 
     // overlay options
-    public final Option<Boolean> fire =
+    public final Option<Boolean> fireOption =
             new Option<>("Fire", "Removes the fire overlay", true);
-    public final Option<Boolean> hurtCamera =
+    public final Option<Boolean> hurtCameraOption =
             new Option<>("HurtCamera", new String[] {"NoHurtCam"}, "Removes the hurt camera effect", true);
-    public final Option<Boolean> bossOverlay =
+    public final Option<Boolean> bossOverlayOption =
             new Option<>("BossOverlay", "Removes the boss bar overlay", true);
-    public final Option<Boolean> pumpkinOverlay =
+    public final Option<Boolean> pumpkinOverlayOption =
             new Option<>("PumpkinOverlay", "Removes the pumpkin overlay", true);
-    public final Option<Boolean> blockOverlay =
+    public final Option<Boolean> blockOverlayOption =
             new Option<>("BlockOverlay", "Removes the block overlay", true);
+    public final Option<Boolean> waterOverlayOption =
+            new Option<>("WaterOverlay", "Removes the water overlay", true);
 
     // render options
-    public final Option<Boolean> blindness =
+    public final Option<Boolean> blindnessOption =
             new Option<>("Blindness", "Removes blindness effect", true);
-    public final Option<Boolean> totemAnimation =
+    public final Option<Boolean> totemAnimationOption =
             new Option<>("TotemAnimation", "Removes the totem pop animation", false);
-    public final Option<Boolean> signText =
+    public final Option<Boolean> signTextOption =
             new Option<>("SignText", "Removes sign text rendering", false);
-    public final Option<Boolean> armor =
+    public final Option<Boolean> beaconBeamOption =
+            new Option<>("BeaconBeam", "Removes beacon beam rendering", false);
+    public final Option<Boolean> witherSkullOption =
+            new Option<>("WitherSkull", "Removes flying wither skulls rendering", false);
+    public final Option<Boolean> barrierOption =
+            new Option<>("Barrier", "Removes barrier rendering", true);
+    public final Option<Boolean> armorOption =
             new Option<>("Armor", "Removes armor rendering", false);
-    public final Option<Boolean> explosions =
+    public final Option<Boolean> explosionsOption =
             new Option<>("Explosions", "Removes the explosion particle effect", true);
 
     // listeners
@@ -45,26 +53,39 @@ public class NoRenderModule extends Module {
             new RenderHurtCameraListener(this);
     public final RenderBlindnessListener renderBlindnessListener =
             new RenderBlindnessListener(this);
-    public final RenderArmorModelListener renderArmorModelListener =
-            new RenderArmorModelListener(this);
     public final RenderItemActivationListener renderItemActivationListener =
             new RenderItemActivationListener(this);
+    public final RenderSignTextListener renderSignTextListener =
+            new RenderSignTextListener(this);
+    public final RenderWitherSkullListener renderWitherSkullListener =
+            new RenderWitherSkullListener(this);
+    public final RenderBeaconBeamListener renderBeaconBeamListener =
+            new RenderBeaconBeamListener(this);
+    public final RenderArmorModelListener renderArmorModelListener =
+            new RenderArmorModelListener(this);
+    public final RenderBarrierListener renderBarrierListener =
+            new RenderBarrierListener(this);
+    public final ExplosionListener explosionListener =
+            new ExplosionListener(this);
 
     public NoRenderModule() {
         super("NoRender", "Prevents certain elements from rendering", ModuleCategory.RENDER);
 
         // options
         associate(
-                fire,
-                hurtCamera,
-                bossOverlay,
-                pumpkinOverlay,
-                blockOverlay,
-                blindness,
-                totemAnimation,
-                signText,
-                armor,
-                explosions,
+                fireOption,
+                hurtCameraOption,
+                bossOverlayOption,
+                pumpkinOverlayOption,
+                blockOverlayOption,
+                waterOverlayOption,
+                blindnessOption,
+                totemAnimationOption,
+                signTextOption,
+                beaconBeamOption,
+                witherSkullOption,
+                armorOption,
+                explosionsOption,
                 bind,
                 drawn
         );
@@ -76,8 +97,13 @@ public class NoRenderModule extends Module {
                 renderBossOverlayListener,
                 renderHurtCameraListener,
                 renderBlindnessListener,
+                renderItemActivationListener,
+                renderSignTextListener,
+                renderWitherSkullListener,
+                renderBeaconBeamListener,
                 renderArmorModelListener,
-                renderItemActivationListener
+                renderBarrierListener,
+                explosionListener
         );
     }
 }

@@ -1,6 +1,7 @@
 package com.momentum.impl.modules.movement.speed;
 
 import com.momentum.api.event.FeatureListener;
+import com.momentum.asm.mixins.vanilla.accessors.INetHandlerPlayClient;
 import com.momentum.impl.events.vanilla.entity.UpdateEvent;
 
 /**
@@ -20,6 +21,11 @@ public class UpdateListener extends FeatureListener<SpeedModule, UpdateEvent> {
 
     @Override
     public void invoke(UpdateEvent event) {
+
+        // null check
+        if (mc.player == null || mc.world == null || !((INetHandlerPlayClient) mc.player.connection).isDoneLoadingTerrain()) {
+            return;
+        }
 
         // diffs
         double xdiff = mc.player.posX - mc.player.prevPosX;

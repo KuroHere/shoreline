@@ -1,4 +1,4 @@
-package com.momentum.impl.events.forge;
+package com.momentum.impl.events.forge.event;
 
 import com.momentum.api.event.StageEvent;
 

@@ -1,4 +1,4 @@
-package com.momentum.api.feature;
+package com.momentum.api.registry;
 
 import com.momentum.api.registry.Registry;
 
@@ -8,7 +8,7 @@ import com.momentum.api.registry.Registry;
  * @author linus
  * @since 02/09/2023
  */
-public interface Labeled {
+public interface ILabel {
 
     /**
      * Gets the label

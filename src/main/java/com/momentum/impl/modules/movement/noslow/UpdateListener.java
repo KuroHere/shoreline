@@ -2,6 +2,7 @@ package com.momentum.impl.modules.movement.noslow;
 
 import com.momentum.api.event.FeatureListener;
 import com.momentum.asm.mixins.vanilla.accessors.IEntity;
+import com.momentum.asm.mixins.vanilla.accessors.INetHandlerPlayClient;
 import com.momentum.impl.events.vanilla.entity.UpdateEvent;
 import com.momentum.impl.init.Modules;
 import net.minecraft.client.settings.KeyBinding;
@@ -22,11 +23,16 @@ public class UpdateListener extends FeatureListener<NoSlowModule, UpdateEvent> {
     @Override
     public void invoke(UpdateEvent event) {
 
+        // null check
+        if (mc.player == null || mc.world == null || !((INetHandlerPlayClient) mc.player.connection).isDoneLoadingTerrain()) {
+            return;
+        }
+
         // server sneaking
         if (feature.serverSneaking) {
 
             // needs update
-            if (feature.airStrict.getVal() && !mc.player.isHandActive()) {
+            if (feature.airStrictOption.getVal() && !mc.player.isHandActive()) {
 
                 // update server state
                 feature.serverSneaking = false;
@@ -47,13 +53,13 @@ public class UpdateListener extends FeatureListener<NoSlowModule, UpdateEvent> {
         if (((IEntity) mc.player).isInWeb()) {
 
             // webs and going down
-            if (mc.gameSettings.keyBindSneak.isPressed() && feature.webs.getVal()) {
+            if (mc.gameSettings.keyBindSneak.isPressed() && feature.websOption.getVal()) {
 
                 // fall
                 if (!mc.player.onGround) {
 
                     // update timer
-                    Modules.TIMER_MODULE.provide(feature.webSpeed.getVal());
+                    Modules.TIMER_MODULE.provide(feature.webSpeedOption.getVal());
                 }
 
                 // reset
@@ -66,7 +72,7 @@ public class UpdateListener extends FeatureListener<NoSlowModule, UpdateEvent> {
         }
 
         // allows you to move normally while in GUI screens
-        if (feature.isInScreen() && feature.inventoryMove.getVal()) {
+        if (feature.isInScreen() && feature.inventoryMoveOption.getVal()) {
 
             // update keybind state and conflict context
             for (KeyBinding binding : NoSlowModule.KEYS) {
@@ -79,7 +85,7 @@ public class UpdateListener extends FeatureListener<NoSlowModule, UpdateEvent> {
             }
 
             // update rotation based on arrow key movement
-            if (feature.arrowMove.getVal()) {
+            if (feature.arrowMoveOption.getVal()) {
 
                 // rotation values
                 float yaw = mc.player.rotationYaw;

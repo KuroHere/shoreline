@@ -1,7 +1,10 @@
 package com.momentum;
 
 import com.momentum.api.event.EventBus;
+import com.momentum.impl.managers.ChatManager;
+import com.momentum.impl.managers.CommandManager;
 import com.momentum.impl.managers.ModuleManager;
+import com.momentum.impl.registers.CommandRegistry;
 import com.momentum.impl.registers.ConfigRegistry;
 import com.momentum.impl.registers.ModuleRegistry;
 import com.momentum.impl.init.Configs;
@@ -25,20 +28,21 @@ public class Momentum {
     public static final String MOD_VERSION = "1.0";
 
     // client info
-    public static String CLIENT_ID = "momentum";
-    public static String CLIENT_NAME = "Momentum";
-    public static String CLIENT_VERSION = "1.0";
+    public static String CLIENT_NAME = MOD_NAME;
 
     // event bus
     public static EventBus EVENT_BUS;
 
     // registries
     public static ModuleRegistry MODULE_REGISTRY;
+    public static CommandRegistry COMMAND_REGISTRY;
     public static ConfigRegistry CONFIG_REGISTRY;
 
     // managers
     public static ModuleManager MODULE_MANAGER;
+    public static CommandManager COMMAND_MANAGER;
     public static TickManager TICK_MANAGER;
+    public static ChatManager CHAT_MANAGER;
 
     // click gui
     public static ClickGuiScreen CLICK_GUI;
@@ -56,11 +60,14 @@ public class Momentum {
 
         // initialize registries
         MODULE_REGISTRY = new ModuleRegistry();
+        COMMAND_REGISTRY = new CommandRegistry();
         CONFIG_REGISTRY = new ConfigRegistry();
 
         // initialize managers
         MODULE_MANAGER = new ModuleManager();
+        COMMAND_MANAGER = new CommandManager();
         TICK_MANAGER = new TickManager();
+        CHAT_MANAGER = new ChatManager();
 
         // initialize click gui
         CLICK_GUI = new ClickGuiScreen();
@@ -69,7 +76,7 @@ public class Momentum {
         try {
 
             // attempt load
-            Configs.save();
+            Configs.DEFAULT_CONFIG.save();
             Configs.load();
         }
 
@@ -77,8 +84,5 @@ public class Momentum {
         catch (Exception e) {
             e.printStackTrace();
         }
-
-        // some example code
-        // logger.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
     }
 }

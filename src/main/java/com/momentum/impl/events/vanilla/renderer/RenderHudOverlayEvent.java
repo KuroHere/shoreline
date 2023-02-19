@@ -1,4 +1,4 @@
-package com.momentum.impl.events.forge;
+package com.momentum.impl.events.vanilla.renderer;
 
 import com.momentum.api.event.Event;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent.OverlayType;

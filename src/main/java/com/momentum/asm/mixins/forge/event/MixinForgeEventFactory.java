@@ -2,15 +2,11 @@ package com.momentum.asm.mixins.forge.event;
 
 import com.momentum.Momentum;
 import com.momentum.api.util.Wrapper;
-import com.momentum.impl.events.forge.ItemUseEvent;
-import com.momentum.impl.events.forge.ItemUseStage;
-import com.momentum.impl.events.forge.RenderHudOverlayEvent;
-import net.minecraft.block.state.IBlockState;
+import com.momentum.impl.events.forge.event.ClientSendMessageEvent;
+import com.momentum.impl.events.forge.event.ItemUseEvent;
+import com.momentum.impl.events.forge.event.ItemUseStage;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.client.event.RenderBlockOverlayEvent.OverlayType;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,7 +22,7 @@ public class MixinForgeEventFactory implements Wrapper {
     /**
      * Called when an item use is started
      */
-    @Inject(method = "onItemUseStart", at = @At("HEAD"), remap = false)
+    @Inject(method = "onItemUseStart", at = @At(value = "HEAD"), remap = false)
     private static void onOnItemUseStart(EntityLivingBase entity, ItemStack item, int duration, CallbackInfoReturnable<Integer> cir) {
         
         // player item use
@@ -41,7 +37,7 @@ public class MixinForgeEventFactory implements Wrapper {
     /**
      * Called when an item use is ticked (updated)
      */
-    @Inject(method = "onItemUseTick", at = @At("HEAD"), remap = false)
+    @Inject(method = "onItemUseTick", at = @At(value = "HEAD"), remap = false)
     private static void onOnItemUseTick(EntityLivingBase entity, ItemStack item, int duration, CallbackInfoReturnable<Integer> cir) {
 
         // player item use
@@ -57,7 +53,7 @@ public class MixinForgeEventFactory implements Wrapper {
     /**
      * Called when an item use is stopped
      */
-    @Inject(method = "onUseItemStop", at = @At("HEAD"), remap = false)
+    @Inject(method = "onUseItemStop", at = @At(value = "HEAD"), remap = false)
     private static void onOnUseItemStop(EntityLivingBase entity, ItemStack item, int duration, CallbackInfoReturnable<Integer> cir) {
 
         // player item use
@@ -73,7 +69,7 @@ public class MixinForgeEventFactory implements Wrapper {
     /**
      * Called when an item use is finished
      */
-    @Inject(method = "onItemUseFinish", at = @At("HEAD"), remap = false)
+    @Inject(method = "onItemUseFinish", at = @At(value = "HEAD"), remap = false)
     private static void onOnUseItemFinish(EntityLivingBase entity, ItemStack item, int duration, ItemStack result, CallbackInfoReturnable<ItemStack> cir) {
 
         // player item use
@@ -86,21 +82,17 @@ public class MixinForgeEventFactory implements Wrapper {
         }
     }
 
-    @Inject(method = "renderBlockOverlay", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void onRenderBlockOverlay(EntityPlayer player, float renderPartialTicks, OverlayType type, IBlockState block, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "onClientSendMessage", at = @At(value = "HEAD"), cancellable = true, remap = false)
+    private static void onOnClientSendMessage(String message, CallbackInfoReturnable<String> cir) {
 
-        // player check
-        if (player == mc.player) {
+        // post the client send message event
+        ClientSendMessageEvent clientSendMessageEvent = new ClientSendMessageEvent(message);
+        Momentum.EVENT_BUS.dispatch(clientSendMessageEvent);
 
-            // post the render hud overlay event
-            RenderHudOverlayEvent renderHudOverlayEvent = new RenderHudOverlayEvent(type);
-            Momentum.EVENT_BUS.dispatch(renderHudOverlayEvent);
-
-            // prevent overlay from rendering
-            if (renderHudOverlayEvent.isCanceled()) {
-                cir.cancel();
-                cir.setReturnValue(false);
-            }
+        // prevent message from sending
+        if (clientSendMessageEvent.isCanceled()) {
+            cir.cancel();
+            cir.setReturnValue(null);
         }
     }
 }

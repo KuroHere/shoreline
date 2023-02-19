@@ -39,7 +39,7 @@ public class OutboundPacketListener extends FeatureListener<NoSlowModule, Outbou
                     // }
 
                     // Updated NCP bypass
-                    if (feature.strict.getVal()) {
+                    if (feature.strictOption.getVal()) {
 
                         // doesn't work on servers with switch timeout
                         // (i.e. silent switch patched servers)
@@ -53,7 +53,7 @@ public class OutboundPacketListener extends FeatureListener<NoSlowModule, Outbou
         if (event.getPacket() instanceof CPacketClickWindow) {
 
             // Updated NCP bypass for inventory move
-            if (feature.strict.getVal()) {
+            if (feature.strictOption.getVal()) {
 
                 // with NCP-Updated, we cannot use items while in inventories
                 if (mc.player.isSneaking() || feature.serverSneaking) {

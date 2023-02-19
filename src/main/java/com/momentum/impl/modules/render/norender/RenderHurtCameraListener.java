@@ -22,7 +22,7 @@ public class RenderHurtCameraListener extends FeatureListener<NoRenderModule, Re
     public void invoke(RenderHurtCameraEvent event) {
 
         // remove hurt camera effect
-        if (feature.hurtCamera.getVal()) {
+        if (feature.hurtCameraOption.getVal()) {
 
             // prevent from applying
             event.setCanceled(true);

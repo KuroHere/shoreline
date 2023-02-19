@@ -1,7 +1,5 @@
 package com.momentum.api.registry;
 
-import com.momentum.api.feature.Labeled;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author linus
  * @since 02/02/2023
  */
-public class Registry<T extends Labeled> implements IRegistry<T> {
+public class Registry<T extends ILabel> implements IRegistry<T> {
 
     // register backed by HashMap
     protected final Map<String, T> register;
@@ -31,7 +29,7 @@ public class Registry<T extends Labeled> implements IRegistry<T> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void register(Labeled in) {
+    public void register(ILabel in) {
 
         // null check
         if (in == null) {
@@ -44,10 +42,10 @@ public class Registry<T extends Labeled> implements IRegistry<T> {
 
     @SafeVarargs
     @Override
-    public final void register(Labeled... in) {
+    public final void register(ILabel... in) {
 
         // index through list
-        for (Labeled tRegistryData : in) {
+        for (ILabel tRegistryData : in) {
 
             // register data
             register(tRegistryData);

@@ -1,4 +1,4 @@
-package com.momentum.impl.events.forge;
+package com.momentum.impl.events.forge.event;
 
 /**
  * @author linus

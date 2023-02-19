@@ -22,7 +22,7 @@ public class SoulSandListener extends FeatureListener<NoSlowModule, SoulSandEven
     public void invoke(SoulSandEvent event) {
 
         // prevent slowdown from soul sand
-        if (feature.soulSand.getVal()) {
+        if (feature.soulSandOption.getVal()) {
 
             // cancel soul sand collision
             event.setCanceled(true);

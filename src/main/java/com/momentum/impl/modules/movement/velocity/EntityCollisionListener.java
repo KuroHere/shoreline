@@ -16,7 +16,7 @@ public class EntityCollisionListener extends FeatureListener<VelocityModule, Ent
     public void invoke(EntityCollisionEvent event) {
 
         // cancel velocity from entities
-        if (feature.entities.getVal()) {
+        if (feature.entitiesOption.getVal()) {
 
             // cancel event
             event.setCanceled(true);

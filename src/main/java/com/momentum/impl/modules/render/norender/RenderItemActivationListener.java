@@ -23,7 +23,7 @@ public class RenderItemActivationListener extends FeatureListener<NoRenderModule
     public void invoke(RenderItemActivationEvent event) {
 
         // cancel totem pop animations
-        if (feature.totemAnimation.getVal()) {
+        if (feature.totemAnimationOption.getVal()) {
 
             // activated item is totem
             if (event.getItem() != null && event.getItem() == Items.TOTEM_OF_UNDYING) {

@@ -26,6 +26,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,9 +66,9 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         bottomRight = resHeight - 11;
 
         // effect hud is displayed
-        if (feature.potionHud.getVal() == PotionHud.MOVE) {
+        if (feature.potionHudOption.getVal() == PotionHud.MOVE) {
 
-            // check if potion effects are active (i.e. hud is rendering)
+            // check if potion effects are active (i.e. hud is renderingOption)
             if (!mc.player.getActivePotionEffects().isEmpty()) {
 
                 // move top right corner to account for effect hud
@@ -84,12 +85,12 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // display client name and version
-        if (feature.watermark.getVal()) {
+        if (feature.watermarkOption.getVal()) {
 
             // build display string
             StringBuilder watermarkString =
                     new StringBuilder()
-                    .append(Momentum.MOD_NAME)
+                    .append(Momentum.CLIENT_NAME)
                     .append(TextFormatting.WHITE)
                     .append(" ")
                     .append(Momentum.MOD_VERSION);
@@ -100,13 +101,13 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // active modules
-        if (feature.arraylist.getVal()) {
+        if (feature.arraylistOption.getVal()) {
 
             // sorted list of modules
-            List<Module> arrayList = new ArrayList<>(Momentum.MODULE_REGISTRY.getModules());
+            Collection<Module> modules = Momentum.MODULE_REGISTRY.getModules();
 
             // sort
-            arrayList = arrayList.stream()
+            modules = modules.stream()
                     .filter(Module::isEnabled)
                     .sorted(Comparator.comparing(module -> {
 
@@ -126,7 +127,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
                         }
 
                         // name length
-                        if (feature.ordering.getVal() == Ordering.LENGTH) {
+                        if (feature.orderingOption.getVal() == Ordering.LENGTH) {
 
                             // string width
                             return mc.fontRenderer.getStringWidth(formatted.toString()) * -1;
@@ -142,7 +143,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
                     .collect(Collectors.toList());
 
             // render arraylist
-            for (Module module : arrayList) {
+            for (Module module : modules) {
 
                 // ignore modules that aren't drawn to the arraylist
                 if (module.isDrawn()) {
@@ -165,10 +166,10 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
                     float width = mc.fontRenderer.getStringWidth(formatted.toString());
 
                     // draw string
-                    mc.fontRenderer.drawStringWithShadow(formatted.toString(), resWidth - 1 - width, feature.rendering.getVal() == Rendering.UP ? topRight : bottomRight, Modules.COLOR_MODULE.getColorInt());
+                    mc.fontRenderer.drawStringWithShadow(formatted.toString(), resWidth - 1 - width, feature.renderingOption.getVal() == Rendering.UP ? topRight : bottomRight, Modules.COLOR_MODULE.getColorInt());
 
                     // offset bottom right
-                    if (feature.rendering.getVal() == Rendering.UP) {
+                    if (feature.renderingOption.getVal() == Rendering.UP) {
                         offset(Corner.TOP_RIGHT);
                     }
 
@@ -181,7 +182,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // display active potion effects
-        if (feature.potionEffects.getVal()) {
+        if (feature.potionEffectsOption.getVal()) {
 
             // active potions
             for (PotionEffect p : mc.player.getActivePotionEffects()) {
@@ -206,10 +207,10 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
                 float width = mc.fontRenderer.getStringWidth(potionString.toString());
 
                 // draw string
-                mc.fontRenderer.drawStringWithShadow(potionString.toString(), resWidth - 1 - width, feature.rendering.getVal() == Rendering.UP ? bottomRight : topRight, p.getPotion().getLiquidColor());
+                mc.fontRenderer.drawStringWithShadow(potionString.toString(), resWidth - 1 - width, feature.renderingOption.getVal() == Rendering.UP ? bottomRight : topRight, p.getPotion().getLiquidColor());
 
                 // offset bottom right
-                if (feature.rendering.getVal() == Rendering.UP) {
+                if (feature.renderingOption.getVal() == Rendering.UP) {
                     offset(Corner.BOTTOM_RIGHT);
                 }
 
@@ -221,7 +222,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // display server's "brand"
-        if (feature.serverBrand.getVal()) {
+        if (feature.serverBrandOption.getVal()) {
 
             // formatted string
             StringBuilder brandString =
@@ -231,10 +232,10 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
             float width = mc.fontRenderer.getStringWidth(brandString.toString());
 
             // draw string
-            mc.fontRenderer.drawStringWithShadow(brandString.toString(), resWidth - 1 - width, feature.rendering.getVal() == Rendering.UP ? bottomRight : topRight, Modules.COLOR_MODULE.getColorInt());
+            mc.fontRenderer.drawStringWithShadow(brandString.toString(), resWidth - 1 - width, feature.renderingOption.getVal() == Rendering.UP ? bottomRight : topRight, Modules.COLOR_MODULE.getColorInt());
 
             // offset bottom right
-            if (feature.rendering.getVal() == Rendering.UP) {
+            if (feature.renderingOption.getVal() == Rendering.UP) {
                 offset(Corner.BOTTOM_RIGHT);
             }
 
@@ -245,7 +246,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // display player movement speed
-        if (feature.speed.getVal()) {
+        if (feature.speedOption.getVal()) {
 
             // position diffs
             double xdiff = mc.player.posX - mc.player.prevPosX;
@@ -272,10 +273,10 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
             float width = mc.fontRenderer.getStringWidth(speedString.toString());
 
             // draw string
-            mc.fontRenderer.drawStringWithShadow(speedString.toString(), resWidth - 1 - width, feature.rendering.getVal() == Rendering.UP ? bottomRight : topRight, Modules.COLOR_MODULE.getColorInt());
+            mc.fontRenderer.drawStringWithShadow(speedString.toString(), resWidth - 1 - width, feature.renderingOption.getVal() == Rendering.UP ? bottomRight : topRight, Modules.COLOR_MODULE.getColorInt());
 
             // offset bottom right
-            if (feature.rendering.getVal() == Rendering.UP) {
+            if (feature.renderingOption.getVal() == Rendering.UP) {
                 offset(Corner.BOTTOM_RIGHT);
             }
 
@@ -286,7 +287,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // display server response time
-        if (feature.ping.getVal()) {
+        if (feature.pingOption.getVal()) {
 
             // server response time
             int responseTime = 0;
@@ -317,10 +318,10 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
             float width = mc.fontRenderer.getStringWidth(pingString.toString());
 
             // draw string
-            mc.fontRenderer.drawStringWithShadow(pingString.toString(), resWidth - 1 - width, feature.rendering.getVal() == Rendering.UP ? bottomRight : topRight, Modules.COLOR_MODULE.getColorInt());
+            mc.fontRenderer.drawStringWithShadow(pingString.toString(), resWidth - 1 - width, feature.renderingOption.getVal() == Rendering.UP ? bottomRight : topRight, Modules.COLOR_MODULE.getColorInt());
 
             // offset bottom right
-            if (feature.rendering.getVal() == Rendering.UP) {
+            if (feature.renderingOption.getVal() == Rendering.UP) {
                 offset(Corner.BOTTOM_RIGHT);
             }
 
@@ -331,7 +332,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // display the server TPS
-        if (feature.tps.getVal()) {
+        if (feature.tpsOption.getVal()) {
 
             // tps values
             String tps = String.valueOf(Momentum.TICK_MANAGER.getTps());
@@ -358,10 +359,10 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
             float width = mc.fontRenderer.getStringWidth(tpsString.toString());
 
             // draw to HUD
-            mc.fontRenderer.drawStringWithShadow(tpsString.toString(), resWidth - 1 - width, feature.rendering.getVal() == Rendering.UP ? bottomRight : topRight, Modules.COLOR_MODULE.getColorInt());
+            mc.fontRenderer.drawStringWithShadow(tpsString.toString(), resWidth - 1 - width, feature.renderingOption.getVal() == Rendering.UP ? bottomRight : topRight, Modules.COLOR_MODULE.getColorInt());
 
             // offset bottom right
-            if (feature.rendering.getVal() == Rendering.UP) {
+            if (feature.renderingOption.getVal() == Rendering.UP) {
                 offset(Corner.BOTTOM_RIGHT);
             }
 
@@ -372,7 +373,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // displays game FPS
-        if (feature.fps.getVal()) {
+        if (feature.fpsOption.getVal()) {
 
             // formatted string
             StringBuilder fpsString =
@@ -385,10 +386,10 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
             float width = mc.fontRenderer.getStringWidth(fpsString.toString());
 
             // draw string
-            mc.fontRenderer.drawStringWithShadow(fpsString.toString(), resWidth - 1 - width, feature.rendering.getVal() == Rendering.UP ? bottomRight : topRight, Modules.COLOR_MODULE.getColorInt());
+            mc.fontRenderer.drawStringWithShadow(fpsString.toString(), resWidth - 1 - width, feature.renderingOption.getVal() == Rendering.UP ? bottomRight : topRight, Modules.COLOR_MODULE.getColorInt());
 
             // offset bottom right
-            if (feature.rendering.getVal() == Rendering.UP) {
+            if (feature.renderingOption.getVal() == Rendering.UP) {
                 offset(Corner.BOTTOM_RIGHT);
             }
 
@@ -399,7 +400,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // display player coordinates in the world
-        if (feature.coordinates.getVal()) {
+        if (feature.coordinatesOption.getVal()) {
 
             // overworld pos
             String x = String.valueOf(mc.player.posX);
@@ -420,7 +421,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
                             .append(")");
 
             // display players coordinates in the nether/overworld
-            if (feature.netherCoordinates.getVal()) {
+            if (feature.netherCoordinatesOption.getVal()) {
 
                 // checks if the player is in the nether
                 boolean nether = mc.world.getBiome(mc.player.getPosition()).getBiomeName().equalsIgnoreCase("Hell");
@@ -446,7 +447,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // display player's axis direction
-        if (feature.direction.getVal()) {
+        if (feature.directionOption.getVal()) {
 
             // facing direction
             EnumFacing direction = mc.player.getHorizontalFacing();
@@ -471,7 +472,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         }
 
         // display player's equipped armor
-        if (feature.armor.getVal()) {
+        if (feature.armorOption.getVal()) {
 
             // armor render offset
             // display each armor piece

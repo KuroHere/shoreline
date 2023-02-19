@@ -1,12 +1,12 @@
 package com.momentum.api.feature;
 
 /**
- * Toggleable property that allows modification of the enable state
+ * IToggleable property that allows modification of the enable state
  *
  * @author linus
  * @since 02/02/2023
  */
-public interface Toggleable {
+public interface IToggleable {
 
     /**
      * Binds the feature to a keybind

@@ -1,7 +1,7 @@
 package com.momentum.impl.modules.movement.noslow;
 
 import com.momentum.api.event.FeatureListener;
-import com.momentum.impl.events.forge.ItemUseEvent;
+import com.momentum.impl.events.forge.event.ItemUseEvent;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketEntityAction.Action;
 
@@ -21,7 +21,7 @@ public class ItemUseListener extends FeatureListener<NoSlowModule, ItemUseEvent>
         if (!feature.serverSneaking) {
 
             // send sneaking packet when we use an item
-            if (feature.isSlowed() && feature.airStrict.getVal()) {
+            if (feature.isSlowed() && feature.airStrictOption.getVal()) {
 
                 // update serverside sneak state
                 feature.serverSneaking = true;

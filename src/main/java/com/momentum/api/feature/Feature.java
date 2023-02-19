@@ -48,6 +48,70 @@ public class Feature implements Wrapper {
     }
 
     /**
+     * Checks if a given name matches this feature
+     *
+     * @param in The given name
+     * @return Whether the given name matches this feature
+     */
+    public boolean equals(String in) {
+
+        // main name matches
+        if (name.equalsIgnoreCase(in)) {
+            return true;
+        }
+
+        // alias matches
+        else if (aliases != null) {
+
+            // check aliases
+            for (String alias : aliases) {
+
+                // alias match
+                if (alias.equalsIgnoreCase(in)) {
+                    return true;
+                }
+            }
+        }
+
+        // none match
+        return false;
+    }
+
+    /**
+     * Checks if a given text starts with this feature's name/aliases
+     *
+     * @param in The given text
+     * @return Whether them given text starts with this feature's name/aliases
+     */
+    public int startsWith(String in) {
+
+        // main name matches
+        if (name.toLowerCase().startsWith(in.toLowerCase())) {
+
+            // match
+            return -1;
+        }
+
+        // alias matches
+        else if (aliases != null) {
+
+            // index through aliases
+            for (int i = 0; i < aliases.length; i++) {
+
+                // match
+                if (aliases[i].toLowerCase().startsWith(in.toLowerCase())) {
+
+                    // return index
+                    return i;
+                }
+            }
+        }
+
+        // none match
+        return -2;
+    }
+
+    /**
      * Gets the name of the feature
      *
      * @return The name of the feature
@@ -72,5 +136,15 @@ public class Feature implements Wrapper {
      */
     public String[] getAliases() {
         return aliases;
+    }
+
+    /**
+     * Gets the specified alias of the feature
+     *
+     * @param in The index of the alias
+     * @return The specified alias of the feature
+     */
+    public String getAlias(int in) {
+        return aliases[in];
     }
 }

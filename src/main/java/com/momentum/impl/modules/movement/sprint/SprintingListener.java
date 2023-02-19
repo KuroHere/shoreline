@@ -15,14 +15,18 @@ public class SprintingListener extends FeatureListener<SprintModule, SprintingEv
     @Override
     public void invoke(SprintingEvent event) {
 
-        // check if player is moving
-        if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
+        // prevent stop sprint
+        if (feature.modeOption.getVal() == SprintMode.RAGE) {
 
-            // check hunger level, cannot sprint if hunger level is too low
-            if (mc.player.getFoodStats().getFoodLevel() > 6) {
+            // check if player is moving
+            if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
 
-                // prevent living update from canceling
-                event.setCanceled(true);
+                // check hunger level, cannot sprint if hunger level is too low
+                if (mc.player.getFoodStats().getFoodLevel() > 6) {
+
+                    // prevent living update from canceling
+                    event.setCanceled(true);
+                }
             }
         }
     }

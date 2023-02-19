@@ -16,7 +16,7 @@ public class RenderPotionOverlayListener extends FeatureListener<HudModule, Rend
     public void invoke(RenderPotionOverlayEvent event) {
 
         // hide potion hud
-        if (feature.potionHud.getVal() == PotionHud.HIDE) {
+        if (feature.potionHudOption.getVal() == PotionHud.HIDE) {
 
             // prevent potion hud from rendering
             event.setCanceled(true);

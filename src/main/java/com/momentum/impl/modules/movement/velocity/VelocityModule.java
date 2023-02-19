@@ -12,19 +12,19 @@ import net.minecraft.util.text.TextFormatting;
 public class VelocityModule extends Module {
 
     // velocity multipliers
-    public final Option<Integer> horizontal =
+    public final Option<Integer> horizontalOption =
             new Option<>("Horizontal", new String[] {"H"}, "Horizontal velocity multiplier", 0, 0, 100);
-    public final Option<Integer> vertical =
+    public final Option<Integer> verticalOption =
             new Option<>("Vertical", new String[] {"V"}, "Vertical velocity multiplier", 0, 0, 100);
 
     // no-push options
-    public final Option<Boolean> entities =
+    public final Option<Boolean> entitiesOption =
             new Option<>("Entities", new String[] {"NoPushEntities"}, "Prevents being pushed by entities", true);
-    public final Option<Boolean> blocks =
+    public final Option<Boolean> blocksOption =
             new Option<>("Blocks", new String[] {"NoPushBlocks"}, "Prevents being pushed out of blocks", true);
-    public final Option<Boolean> liquids =
+    public final Option<Boolean> liquidsOption =
             new Option<>("Liquids", new String[] {"NoPushLiquids"}, "Prevents being pushed by liquids", true);
-    public final Option<Boolean> fishHook =
+    public final Option<Boolean> fishHookOption =
             new Option<>("Fishhooks", new String[] {"Bobbers"}, "Prevents being pulled by fishhooks", true);
 
     // listeners
@@ -42,12 +42,12 @@ public class VelocityModule extends Module {
 
         // options
         associate(
-                horizontal,
-                vertical,
-                entities,
-                blocks,
-                liquids,
-                fishHook,
+                horizontalOption,
+                verticalOption,
+                entitiesOption,
+                blocksOption,
+                liquidsOption,
+                fishHookOption,
                 bind,
                 drawn
         );
@@ -65,6 +65,6 @@ public class VelocityModule extends Module {
     public String getData() {
 
         // module data
-        return "H" + horizontal.getVal().floatValue() + "%" + TextFormatting.GRAY + "|" + TextFormatting.WHITE + "V" + vertical.getVal().floatValue() + "%";
+        return "H" + horizontalOption.getVal().floatValue() + "%" + TextFormatting.GRAY + "|" + TextFormatting.WHITE + "V" + verticalOption.getVal().floatValue() + "%";
     }
 }

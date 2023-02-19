@@ -1,6 +1,7 @@
 package com.momentum.api.feature;
 
 import com.momentum.Momentum;
+import com.momentum.api.registry.ILabel;
 import com.momentum.impl.events.client.OptionUpdateEvent;
 
 /**
@@ -11,7 +12,7 @@ import com.momentum.impl.events.client.OptionUpdateEvent;
  * @since 01/09/2023
  */
 @SuppressWarnings("rawtypes")
-public class Option<V> extends Feature implements Labeled {
+public class Option<V> extends Feature implements ILabel {
 
     // associated feature
     private Feature feature;

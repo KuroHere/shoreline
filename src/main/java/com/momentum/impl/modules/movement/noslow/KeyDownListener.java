@@ -25,7 +25,7 @@ public class KeyDownListener extends FeatureListener<NoSlowModule, KeyDownEvent>
         if (feature.isInScreen()) {
 
             // remove conflict context when pressing keys
-            if (feature.inventoryMove.getVal()) {
+            if (feature.inventoryMoveOption.getVal()) {
 
                 // cancel context
                 event.setCanceled(true);

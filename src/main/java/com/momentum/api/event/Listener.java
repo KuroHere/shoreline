@@ -1,6 +1,6 @@
 package com.momentum.api.event;
 
-import com.momentum.api.feature.Labeled;
+import com.momentum.api.registry.ILabel;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
  * @since 01/09/2023
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public abstract class Listener<E extends Event> implements Invoker<E>, Labeled {
+public abstract class Listener<E extends Event> implements Invoker<E>, ILabel {
 
     // event type
     private Class<E> type;

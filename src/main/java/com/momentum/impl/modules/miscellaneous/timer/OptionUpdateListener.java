@@ -23,7 +23,12 @@ public class OptionUpdateListener extends FeatureListener<TimerModule, OptionUpd
     @Override
     public void invoke(OptionUpdateEvent event) {
 
-        // update tick length
-        ((ITimer) ((IMinecraft) mc).getTimer()).setTickLength(50 / feature.ticks.getVal());
+        // ticks option is changes
+        if (event.getOption() == feature.ticksOption) {
+
+            // update tick length
+            ((ITimer) ((IMinecraft) mc).getTimer()).setTickLength(50 / feature.ticksOption.getVal());
+            feature.pticksOption = feature.ticksOption.getVal();
+        }
     }
 }

@@ -1,6 +1,6 @@
 package com.momentum.api.config;
 
-import com.momentum.api.feature.Labeled;
+import com.momentum.api.registry.ILabel;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @param <T> The config type
  */
 @SuppressWarnings("rawtypes")
-public abstract class Config<T> implements IConfig<T>, Labeled {
+public abstract class Config<T> implements IConfig<T>, ILabel {
 
     // shutdown hook
     protected static final ShutdownHook SHUTDOWN_HOOK = new ShutdownHook();

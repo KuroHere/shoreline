@@ -3,8 +3,8 @@ package com.momentum.api.module;
 import com.momentum.api.event.Listener;
 import com.momentum.api.feature.Option;
 import com.momentum.api.feature.Feature;
-import com.momentum.api.feature.Toggleable;
-import com.momentum.api.feature.Labeled;
+import com.momentum.api.feature.IToggleable;
+import com.momentum.api.registry.ILabel;
 import com.momentum.Momentum;
 import org.lwjgl.input.Keyboard;
 
@@ -20,7 +20,7 @@ import java.util.List;
  * @since 01/16/2023
  */
 @SuppressWarnings("rawtypes")
-public class Module extends Feature implements Toggleable, Labeled {
+public class Module extends Feature implements IToggleable, ILabel {
 
     // category of the module
     // determines which category the module will appear under in the UI
@@ -100,7 +100,6 @@ public class Module extends Feature implements Toggleable, Labeled {
             e.printStackTrace();
         }
          */
-
 
         // assign category on instantiation
         this.category = category;

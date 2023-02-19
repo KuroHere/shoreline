@@ -3,11 +3,11 @@ package com.momentum.api.feature;
 import java.util.List;
 
 /**
- * Service providing feature
+ * IService providing feature
  * @author linus
  * @since 02/06/2023
  */
-public interface Service<T> {
+public interface IService<T> {
 
     /**
      * Provides the service

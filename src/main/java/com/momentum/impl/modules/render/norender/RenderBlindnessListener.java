@@ -22,7 +22,7 @@ public class RenderBlindnessListener extends FeatureListener<NoRenderModule, Ren
     public void invoke(RenderBlindnessEvent event) {
 
         // cancel blindness effect
-        if (feature.blindness.getVal()) {
+        if (feature.blindnessOption.getVal()) {
 
             // prevent blindness fog from rendering
             event.setCanceled(true);

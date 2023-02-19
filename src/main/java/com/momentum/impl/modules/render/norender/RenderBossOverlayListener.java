@@ -22,7 +22,7 @@ public class RenderBossOverlayListener extends FeatureListener<NoRenderModule, R
     public void invoke(RenderBossOverlayEvent event) {
 
         // remove boss overlay from hud
-        if (feature.bossOverlay.getVal()) {
+        if (feature.bossOverlayOption.getVal()) {
 
             // prevent boss overlays from rendering
             event.setCanceled(true);

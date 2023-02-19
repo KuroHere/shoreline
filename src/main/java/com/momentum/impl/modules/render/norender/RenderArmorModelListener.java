@@ -22,7 +22,7 @@ public class RenderArmorModelListener extends FeatureListener<NoRenderModule, Re
     public void invoke(RenderArmorModelEvent event) {
 
         // cancel armor rendering
-        if (feature.armor.getVal()) {
+        if (feature.armorOption.getVal()) {
 
             // armor model visibility = false
             event.setCanceled(true);

@@ -25,7 +25,7 @@ public class MoveListener extends FeatureListener<SpeedModule, MoveEvent> {
     public void invoke(MoveEvent event) {
 
         // liquid check
-        if (mc.player.isInWater() || mc.player.isInLava()) {
+        if (!feature.speedInWaterOption.getVal() && (mc.player.isInWater() || mc.player.isInLava())) {
             return;
         }
 
@@ -72,13 +72,13 @@ public class MoveListener extends FeatureListener<SpeedModule, MoveEvent> {
          * Incredibly similar to sprint jumping, bypasses lots of anticheats as the movement is similar
          * to sprint jumping. Max speed: ~29 kmh
          */
-        if (feature.mode.getVal() == SpeedMode.STRAFE) {
+        if (feature.modeOption.getVal() == SpeedMode.STRAFE) {
 
             // check if player is moving
             if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
 
                 // use timer
-                if (feature.useTimer.getVal()) {
+                if (feature.useTimerOption.getVal()) {
 
                     // bypass is 1.088
                     Modules.TIMER_MODULE.provide(1.088f);
@@ -205,13 +205,13 @@ public class MoveListener extends FeatureListener<SpeedModule, MoveEvent> {
          * Strafe for NCP Updated
          * Max speed: ~26 or 27 kmh
          */
-        else if (feature.mode.getVal() == SpeedMode.STRAFE_STRICT) {
+        else if (feature.modeOption.getVal() == SpeedMode.STRAFE_STRICT) {
 
             // check if player is moving
             if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
 
                 // use timer
-                if (feature.useTimer.getVal()) {
+                if (feature.useTimerOption.getVal()) {
 
                     // bypass is 1.088
                     Modules.TIMER_MODULE.provide(1.088f);
@@ -276,6 +276,9 @@ public class MoveListener extends FeatureListener<SpeedModule, MoveEvent> {
                     // collision speed
                     feature.speed = feature.distance - (feature.distance / 159);
                 }
+
+                // do not allow movements slower than base speed
+                feature.speed = Math.max(feature.speed, base);
 
                 // base speeds
                 double baseStrict = 0.465;

@@ -16,7 +16,7 @@ public class PushedByWaterListener extends FeatureListener<VelocityModule, Pushe
     public void invoke(PushedByWaterEvent event) {
 
         // cancel velocity from liquids
-        if (feature.liquids.getVal()) {
+        if (feature.liquidsOption.getVal()) {
 
             // cancel event
             event.setCanceled(true);

@@ -1,7 +1,5 @@
 package com.momentum.api.registry;
 
-import com.momentum.api.feature.Labeled;
-
 /**
  * Interface enabling the ability to configure persistent settings
  *
@@ -15,14 +13,14 @@ public interface IRegistry<T> {
      *
      * @param in The data to register
      */
-    void register(Labeled in);
+    void register(ILabel in);
 
     /**
      * Registers given data
      *
      * @param in The data to register
      */
-    void register(Labeled... in);
+    void register(ILabel... in);
 
     /**
      * Unregisters given data

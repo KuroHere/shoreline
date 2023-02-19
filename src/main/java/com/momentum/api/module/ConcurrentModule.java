@@ -1,6 +1,6 @@
 package com.momentum.api.module;
 
-import com.momentum.api.feature.Concurrent;
+import com.momentum.api.feature.IConcurrent;
 
 /**
  * Module without toggle capabilities
@@ -8,7 +8,7 @@ import com.momentum.api.feature.Concurrent;
  * @author linus
  * @since 02/08/2023
  */
-public class ConcurrentModule extends Module implements Concurrent {
+public class ConcurrentModule extends Module implements IConcurrent {
 
     /**
      * Module with aliases
