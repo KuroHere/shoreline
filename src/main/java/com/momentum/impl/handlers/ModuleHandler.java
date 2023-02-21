@@ -1,4 +1,4 @@
-package com.momentum.impl.managers;
+package com.momentum.impl.handlers;
 
 import com.momentum.Momentum;
 import com.momentum.api.event.Listener;
@@ -12,12 +12,12 @@ import org.lwjgl.input.Keyboard;
  * @author linus
  * @since 02/11/2023
  */
-public class ModuleManager {
+public class ModuleHandler {
 
     /**
      * Manages module functionality
      */
-    public ModuleManager() {
+    public ModuleHandler() {
 
         // keybind impl
         Momentum.EVENT_BUS.subscribe(new Listener<KeyInputEvent>() {
@@ -26,7 +26,7 @@ public class ModuleManager {
             public void invoke(KeyInputEvent event) {
 
                 // check all modules for toggle
-                for (Module m : Momentum.MODULE_REGISTRY.getModules()) {
+                for (Module m : Momentum.MODULE_REGISTRY.getData()) {
 
                     // check if the module is toggle-able
                     // check if module's bind key is pressed

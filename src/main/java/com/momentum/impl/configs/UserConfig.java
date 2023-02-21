@@ -42,7 +42,7 @@ public class UserConfig extends Config<Module> {
     public void save() {
 
         // module
-        for (Module module : Momentum.MODULE_REGISTRY.getModules()) {
+        for (Module module : Momentum.MODULE_REGISTRY.getData()) {
 
             // path with module name
             Path f = modules.resolve(module.getName() + ".toml");
@@ -140,7 +140,7 @@ public class UserConfig extends Config<Module> {
     public void load() {
 
         // module
-        for (Module module : Momentum.MODULE_REGISTRY.getModules()) {
+        for (Module module : Momentum.MODULE_REGISTRY.getData()) {
 
             // path with module name
             Path f = modules.resolve(module.getName() + ".toml");

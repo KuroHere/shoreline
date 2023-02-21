@@ -17,14 +17,14 @@ import java.util.Collection;
 public class FastPlaceModule extends Module {
 
     // whitelist
-    public final Collection<Item> whitelist = Arrays.asList(
+    private final Collection<Item> whitelist = Arrays.asList(
             Items.EXPERIENCE_BOTTLE,
             Items.SNOWBALL,
             Items.EGG
     );
 
     // blacklist
-    public final Collection<Item> blacklist = Arrays.asList(
+    private final Collection<Item> blacklist = Arrays.asList(
             Items.ENDER_EYE,
             Items.ENDER_PEARL
     );
@@ -86,7 +86,7 @@ public class FastPlaceModule extends Module {
      * @param item The item to check
      * @return Whether the item is selected
      */
-    public boolean isItemSelected(Item item) {
+    protected boolean isItemSelected(Item item) {
 
         // whitelist selection/
         if (selectionOption.getVal() == ItemSelection.WHITELIST) {

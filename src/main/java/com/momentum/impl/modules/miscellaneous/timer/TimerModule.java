@@ -48,7 +48,6 @@ public class TimerModule extends Module implements IService<Float> {
         super.onEnable();
 
         // reset tick length
-        penabled = true;
         pticksOption = ticksOption.getVal();
         ((ITimer) ((IMinecraft) mc).getTimer()).setTickLength(50.0f / ticksOption.getVal());
     }
@@ -58,7 +57,6 @@ public class TimerModule extends Module implements IService<Float> {
         super.onDisable();
 
         // reset tick length
-        penabled = false;
         ((ITimer) ((IMinecraft) mc).getTimer()).setTickLength(50.0f);
     }
 
@@ -90,8 +88,8 @@ public class TimerModule extends Module implements IService<Float> {
         }
 
         // update tick length
+        penabled = enabled.getVal();
         enable();
-        penabled = false;
 
         // save old
         float oticksOption = pticksOption;

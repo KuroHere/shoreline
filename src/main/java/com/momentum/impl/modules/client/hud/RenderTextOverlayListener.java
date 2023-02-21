@@ -109,7 +109,7 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         if (feature.arraylistOption.getVal()) {
 
             // sorted list of modules
-            Collection<Module> modules = Momentum.MODULE_REGISTRY.getModules();
+            Collection<Module> modules = Momentum.MODULE_REGISTRY.getData();
 
             // sort
             modules = modules.stream()
@@ -340,8 +340,8 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
         if (feature.tpsOption.getVal()) {
 
             // tps values
-            String tps = String.valueOf(Momentum.TICK_MANAGER.getTps());
-            String last = String.valueOf(Momentum.TICK_MANAGER.getLast());
+            String tps = String.valueOf(Momentum.TICK_HANDLER.getTps());
+            String last = String.valueOf(Momentum.TICK_HANDLER.getLast());
 
             // index of decimal places
             int tpsDecimal = tps.indexOf(".");

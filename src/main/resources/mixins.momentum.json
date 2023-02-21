@@ -18,6 +18,7 @@
     "vanilla.entity.player.MixinEntityPlayer",
     "vanilla.entity.MixinEntityLivingBase",
     "vanilla.entity.MixinEntityPlayerSP",
+    "vanilla.entity.MixinEntity",
     "vanilla.gui.MixinGuiInGame",
     "vanilla.gui.MixinGuiBossOverlay",
     "vanilla.gui.MixinGuiTextField",

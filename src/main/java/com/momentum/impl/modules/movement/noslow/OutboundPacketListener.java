@@ -55,6 +55,13 @@ public class OutboundPacketListener extends FeatureListener<NoSlowModule, Outbou
             // Updated NCP bypass for inventory move
             if (feature.strictOption.getVal()) {
 
+                // shield blocking
+                if (mc.player.isActiveItemStackBlocking()) {
+
+                    // stop blocking
+                    mc.playerController.onStoppedUsingItem(mc.player);
+                }
+
                 // with NCP-Updated, we cannot use items while in inventories
                 if (mc.player.isSneaking() || feature.serverSneaking) {
 

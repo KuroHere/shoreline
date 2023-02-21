@@ -5,11 +5,14 @@ import com.momentum.api.registry.Registry;
 import com.momentum.impl.modules.client.clickgui.ClickGuiModule;
 import com.momentum.impl.modules.client.color.ColorModule;
 import com.momentum.impl.modules.client.hud.HudModule;
+import com.momentum.impl.modules.combat.autobowrelease.AutoBowReleaseModule;
 import com.momentum.impl.modules.combat.autototem.AutoTotemModule;
+import com.momentum.impl.modules.exploit.antihunger.AntiHungerModule;
 import com.momentum.impl.modules.miscellaneous.timer.TimerModule;
 import com.momentum.impl.modules.movement.noslow.NoSlowModule;
 import com.momentum.impl.modules.movement.speed.SpeedModule;
 import com.momentum.impl.modules.movement.sprint.SprintModule;
+import com.momentum.impl.modules.movement.step.StepModule;
 import com.momentum.impl.modules.movement.velocity.VelocityModule;
 import com.momentum.impl.modules.render.norender.NoRenderModule;
 import com.momentum.impl.modules.world.fastplace.FastPlaceModule;
@@ -32,9 +35,11 @@ public class ModuleRegistry extends Registry<Module> {
         // initialize modules
         register(
                 // COMBAT
+                new AutoBowReleaseModule(),
                 new AutoTotemModule(),
 
                 // EXPLOIT
+                new AntiHungerModule(),
 
                 // MISCELLANEOUS
                 new TimerModule(),
@@ -43,6 +48,7 @@ public class ModuleRegistry extends Registry<Module> {
                 new NoSlowModule(),
                 new SpeedModule(),
                 new SprintModule(),
+                new StepModule(),
                 new VelocityModule(),
 
                 // RENDER
@@ -56,16 +62,5 @@ public class ModuleRegistry extends Registry<Module> {
                 new ColorModule(),
                 new HudModule()
         );
-    }
-
-    /**
-     * Gets all client modules as a list
-     *
-     * @return All client modules as a list
-     */
-    public Collection<Module> getModules() {
-
-        // list of modules
-        return register.values();
     }
 }

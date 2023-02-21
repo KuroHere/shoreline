@@ -1,4 +1,4 @@
-package com.momentum.impl.managers;
+package com.momentum.impl.handlers;
 
 import com.mojang.realmsclient.gui.ChatFormatting;
 import com.momentum.Momentum;
@@ -20,7 +20,7 @@ import java.util.Arrays;
  * @author linus
  * @since 02/18/2023
  */
-public class CommandManager implements Wrapper {
+public class CommandHandler implements Wrapper {
 
     // suggestion
     StringBuilder suggestionBuilder = new StringBuilder();
@@ -28,7 +28,7 @@ public class CommandManager implements Wrapper {
     /**
      * Manages command functionality
      */
-    public CommandManager() {
+    public CommandHandler() {
 
         // command invoke impl
         Momentum.EVENT_BUS.subscribe(new Listener<ClientSendMessageEvent>() {

@@ -1,4 +1,4 @@
-package com.momentum.impl.managers;
+package com.momentum.impl.handlers;
 
 import com.momentum.Momentum;
 import com.momentum.api.event.Listener;
@@ -17,7 +17,7 @@ import java.util.Queue;
  * @author linus
  * @since 02/11/2023
  */
-public class TickManager implements Wrapper {
+public class TickHandler implements Wrapper {
 
     // time since last tick
     private long time;
@@ -32,7 +32,7 @@ public class TickManager implements Wrapper {
     /**
      * Manages server ticks
      */
-    public TickManager() {
+    public TickHandler() {
 
         // tick impl
         Momentum.EVENT_BUS.subscribe(new Listener<InboundPacketEvent>() {
@@ -108,6 +108,6 @@ public class TickManager implements Wrapper {
      * @return The latest time
      */
     public float getLast() {
-        return time;
+        return last;
     }
 }

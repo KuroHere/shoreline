@@ -2,13 +2,13 @@ package com.momentum;
 
 import com.momentum.api.event.EventBus;
 import com.momentum.impl.managers.ChatManager;
-import com.momentum.impl.managers.CommandManager;
-import com.momentum.impl.managers.ModuleManager;
+import com.momentum.impl.handlers.CommandHandler;
+import com.momentum.impl.handlers.ModuleHandler;
 import com.momentum.impl.registers.CommandRegistry;
 import com.momentum.impl.registers.ConfigRegistry;
 import com.momentum.impl.registers.ModuleRegistry;
 import com.momentum.impl.init.Configs;
-import com.momentum.impl.managers.TickManager;
+import com.momentum.impl.handlers.TickHandler;
 import com.momentum.impl.ui.ClickGuiScreen;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -38,10 +38,12 @@ public class Momentum {
     public static CommandRegistry COMMAND_REGISTRY;
     public static ConfigRegistry CONFIG_REGISTRY;
 
+    // handler
+    public static ModuleHandler MODULE_HANDLER;
+    public static CommandHandler COMMAND_HANDLER;
+    public static TickHandler TICK_HANDLER;
+
     // managers
-    public static ModuleManager MODULE_MANAGER;
-    public static CommandManager COMMAND_MANAGER;
-    public static TickManager TICK_MANAGER;
     public static ChatManager CHAT_MANAGER;
 
     // click gui
@@ -63,10 +65,12 @@ public class Momentum {
         COMMAND_REGISTRY = new CommandRegistry();
         CONFIG_REGISTRY = new ConfigRegistry();
 
+        // initialize handlers
+        MODULE_HANDLER = new ModuleHandler();
+        COMMAND_HANDLER = new CommandHandler();
+        TICK_HANDLER = new TickHandler();
+
         // initialize managers
-        MODULE_MANAGER = new ModuleManager();
-        COMMAND_MANAGER = new CommandManager();
-        TICK_MANAGER = new TickManager();
         CHAT_MANAGER = new ChatManager();
 
         // initialize click gui

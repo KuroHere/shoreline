@@ -41,7 +41,7 @@ public class Frame extends DrawableRect {
         this.category = Formatter.formatEnum(category);
 
         // sort all modules
-        for (Module d : Momentum.MODULE_REGISTRY.getModules()) {
+        for (Module d : Momentum.MODULE_REGISTRY.getData()) {
 
             // check if the module's category matches
             if (d.getCategory() == category) {

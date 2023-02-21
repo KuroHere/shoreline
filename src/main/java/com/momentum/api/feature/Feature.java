@@ -53,7 +53,7 @@ public class Feature implements Wrapper {
      * @param in The given name
      * @return Whether the given name matches this feature
      */
-    public boolean equals(String in) {
+    public boolean equalsIgnoreCase(String in) {
 
         // main name matches
         if (name.equalsIgnoreCase(in)) {

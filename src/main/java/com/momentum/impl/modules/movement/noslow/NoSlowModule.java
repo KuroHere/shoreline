@@ -154,7 +154,7 @@ public class NoSlowModule extends Module {
      *
      * @return Whether the player is slowed
      */
-    public boolean isSlowed() {
+    protected boolean isSlowed() {
         return !mc.player.isRiding() && !mc.player.isElytraFlying() && mc.player.isHandActive() && itemsOption.getVal();
     }
 
@@ -163,7 +163,7 @@ public class NoSlowModule extends Module {
      *
      * @return Whether the player is in a screen
      */
-    public boolean isInScreen() {
+    protected boolean isInScreen() {
         return mc.currentScreen != null && !(mc.currentScreen instanceof GuiChat || mc.currentScreen instanceof GuiEditSign || mc.currentScreen instanceof GuiRepair);
     }
 }

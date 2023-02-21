@@ -15,35 +15,42 @@ public class Formatter {
     public static String formatEnum(Enum<?> in) {
 
         // enum name to string
-        String enumName = in.name();
+        String name = in.name();
 
-        // no capitalization
-        if (!enumName.contains("_")) {
+        // abbreviations
+        if (name.equalsIgnoreCase("NCP") || name.equalsIgnoreCase("AAC")) {
 
-            // first character of the enum
-            char firstChar = enumName.charAt(0);
-
-            // rest of the string
-            String suffixChars = enumName.split(String.valueOf(firstChar), 2)[1];
-
-            // combine uppercase first char and remaining string
-            return String.valueOf(firstChar).toUpperCase() + suffixChars.toLowerCase();
+            // return name
+            return name.toUpperCase();
         }
 
-        // split by spaces
-        String[] names = enumName.split("_");
-
-        // to return
-        StringBuilder nameToReturn = new StringBuilder();
-
-        // combine spaces
-        for (String name : names) {
+        // no capitalization
+        if (!name.contains("_")) {
 
             // first character of the enum
             char firstChar = name.charAt(0);
 
             // rest of the string
             String suffixChars = name.split(String.valueOf(firstChar), 2)[1];
+
+            // combine uppercase first char and remaining string
+            return String.valueOf(firstChar).toUpperCase() + suffixChars.toLowerCase();
+        }
+
+        // split by spaces
+        String[] names = name.split("_");
+
+        // to return
+        StringBuilder nameToReturn = new StringBuilder();
+
+        // combine spaces
+        for (String n : names) {
+
+            // first character of the enum
+            char firstChar = n.charAt(0);
+
+            // rest of the string
+            String suffixChars = n.split(String.valueOf(firstChar), 2)[1];
 
             // combine the phrases
             nameToReturn.append(String.valueOf(firstChar).toUpperCase())

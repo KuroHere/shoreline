@@ -95,33 +95,33 @@ public class UpdateListener extends FeatureListener<NoSlowModule, UpdateEvent> {
                 if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
 
                     // look up
-                    pitch -= 3;
+                    pitch -= 2;
                 }
 
                 // down arrow key
                 else if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
 
                     // look down
-                    pitch += 3;
+                    pitch += 2;
                 }
 
                 // right arrow key
                 else if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
 
                     // look right
-                    yaw += 3;
+                    yaw += 2;
                 }
 
                 // left arrow key
                 else if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
 
                     // look left
-                    yaw -= 3;
+                    yaw -= 2;
                 }
 
                 // update player rotation
                 mc.player.rotationYaw = yaw;
-                mc.player.rotationPitch = MathHelper.clamp(pitch, -90f, 90f);
+                mc.player.rotationPitch = MathHelper.clamp(pitch, -90.0f, 90.0f);
             }
         }
 
