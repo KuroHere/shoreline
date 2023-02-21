@@ -11,7 +11,6 @@ import com.momentum.impl.events.client.OptionUpdateEvent;
  * @author linus
  * @since 01/09/2023
  */
-@SuppressWarnings("rawtypes")
 public class Option<V> extends Feature implements ILabel {
 
     // associated feature

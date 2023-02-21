@@ -7,20 +7,26 @@ import com.momentum.api.module.ConcurrentModule;
 import com.momentum.api.module.Module;
 import com.momentum.Momentum;
 import com.momentum.api.util.render.Formatter;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.lwjgl.input.Keyboard;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author linus
  * @since 02/03/2023
  */
+@SuppressWarnings("rawtypes")
 public class UserConfig extends Config<Module> {
 
     /**
@@ -235,6 +241,55 @@ public class UserConfig extends Config<Module> {
                             // update option value
                             ((Option<Color>) option).setVal(val);
                         }
+
+                        // list option
+                        else if (option.getVal() instanceof List) {
+
+                            // value of the toml field
+                            List<String> val = data.getList(module.getName() + option.getName());
+
+                            // lists
+                            List<Item> items = new ArrayList<>();
+                            List<Block> blocks = new ArrayList<>();
+
+                            // values in list
+                            for (String entry : val) {
+
+                                // item entry
+                                if (entry.startsWith("item_")) {
+
+                                    // item value
+                                    Item item = Item.getByNameOrId(entry.substring(5));
+
+                                    // add to item list
+                                    items.add(item);
+                                }
+
+                                // block entry
+                                else if (entry.startsWith("block_")) {
+
+                                    // block value
+                                    Block block = Block.getBlockFromName(entry.substring(6));
+
+                                    // add to block list
+                                    blocks.add(block);
+                                }
+                            }
+
+                            // items list
+                            if (!items.isEmpty()) {
+
+                                // update option value
+                                ((Option<List<Item>>) option).setVal(items);
+                            }
+
+                            // blocks list
+                            else if (!blocks.isEmpty()) {
+
+                                // update option value
+                                ((Option<List<Block>>) option).setVal(blocks);
+                            }
+                        }
                     }
                 }
             }
@@ -344,6 +399,51 @@ public class UserConfig extends Config<Module> {
                 data.append("'")
                         .append(hexval)
                         .append("'");
+            }
+
+            // list option
+            else if (option.getVal() instanceof List) {
+
+                // list start
+                data.append("[");
+
+                // list values
+                for (Object object : ((Option<List>) option).getVal()) {
+
+                    // string val
+                    data.append("'");
+
+                    // check val is registry entry impl
+                    if (object instanceof IForgeRegistryEntry.Impl) {
+
+                        // register entry
+                        IForgeRegistryEntry.Impl registryEntry = (IForgeRegistryEntry.Impl) object;
+
+                        // item entry
+                        if (registryEntry instanceof Item) {
+
+                            // mark data type
+                            data.append("item_");
+                        }
+
+                        // block entry
+                        if (registryEntry instanceof Block) {
+
+                            // mark data type
+                            data.append("block_");
+                        }
+
+                        // registry name
+                        data.append(registryEntry.getRegistryName());
+                    }
+
+                    // close string, end element
+                    data.append("'")
+                            .append(", ");
+                }
+
+                // list end
+                data.append("]");
             }
 
             // all other configurations

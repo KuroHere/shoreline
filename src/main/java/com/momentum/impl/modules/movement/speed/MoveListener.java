@@ -68,14 +68,14 @@ public class MoveListener extends FeatureListener<SpeedModule, MoveEvent> {
             base /= 1 + (0.2 * (amplifier + 1));
         }
 
-        /*
-         * Incredibly similar to sprint jumping, bypasses lots of anticheats as the movement is similar
-         * to sprint jumping. Max speed: ~29 kmh
-         */
-        if (feature.modeOption.getVal() == SpeedMode.STRAFE) {
+        // check if player is moving
+        if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
 
-            // check if player is moving
-            if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
+            /*
+             * Incredibly similar to sprint jumping, bypasses lots of anticheats as the movement is similar
+             * to sprint jumping. Max speed: ~29 kmh with timer
+             */
+            if (feature.modeOption.getVal() == SpeedMode.STRAFE) {
 
                 // use timer
                 if (feature.useTimerOption.getVal()) {
@@ -199,16 +199,12 @@ public class MoveListener extends FeatureListener<SpeedModule, MoveEvent> {
                 event.setZ(mz);
                 feature.strafeStage++;
             }
-        }
 
-        /*
-         * Strafe for NCP Updated
-         * Max speed: ~26 or 27 kmh
-         */
-        else if (feature.modeOption.getVal() == SpeedMode.STRAFE_STRICT) {
-
-            // check if player is moving
-            if (mc.player.moveForward != 0 || mc.player.moveStrafing != 0) {
+            /*
+             * Strafe for NCP Updated
+             * Max speed: ~26 or 27 kmh with timer
+             */
+            else if (feature.modeOption.getVal() == SpeedMode.STRAFE_STRICT) {
 
                 // use timer
                 if (feature.useTimerOption.getVal()) {
@@ -367,6 +363,16 @@ public class MoveListener extends FeatureListener<SpeedModule, MoveEvent> {
                 event.setZ(mz);
                 feature.strafeStage++;
             }
+        }
+
+        else {
+
+            // reset
+            feature.speed = 0;
+            feature.distance = 0;
+            feature.accelerate = false;
+            feature.timeout = 0;
+            feature.strafeStage = 4;
         }
     }
 }

@@ -6,6 +6,7 @@ import com.momentum.api.event.FeatureListener;
 import com.momentum.api.module.Module;
 import com.momentum.api.util.render.Formatter;
 import com.momentum.asm.mixins.vanilla.accessors.IMinecraft;
+import com.momentum.asm.mixins.vanilla.accessors.INetHandlerPlayClient;
 import com.momentum.asm.mixins.vanilla.accessors.ITimer;
 import com.momentum.impl.events.forge.RenderTextOverlayEvent;
 import com.momentum.impl.init.Modules;
@@ -25,10 +26,8 @@ import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -44,8 +43,9 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
     private float bottomRight;
 
     /**
+     * Default constructor
      *
-     * @param feature
+     * @param feature The associated feature
      */
     protected RenderTextOverlayListener(HudModule feature) {
         super(feature);
@@ -53,6 +53,11 @@ public class RenderTextOverlayListener extends FeatureListener<HudModule, Render
 
     @Override
     public void invoke(RenderTextOverlayEvent event) {
+
+        // null check
+        if (mc.player == null || mc.world == null || !((INetHandlerPlayClient) mc.player.connection).isDoneLoadingTerrain()) {
+            return;
+        }
 
         // resolutions
         ScaledResolution resolution = new ScaledResolution(mc);

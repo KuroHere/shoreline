@@ -16,8 +16,8 @@ public class BindButton extends OptionButton<Integer> {
     /**
      * Bind button
      *
-     * @param x             The x-position
-     * @param y             The y-position
+     * @param x      The x-position
+     * @param y      The y-position
      * @param option The associated config
      */
     protected BindButton(float x, float y, Option<Integer> option) {

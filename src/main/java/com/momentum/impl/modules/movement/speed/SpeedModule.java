@@ -25,6 +25,8 @@ public class SpeedModule extends Module {
             new UpdateListener(this);
     public final MoveListener moveListener =
             new MoveListener(this);
+    public final InboundPacketListener inboundPacketListener =
+            new InboundPacketListener(this);
 
     // movement info
     public double speed;
@@ -53,7 +55,8 @@ public class SpeedModule extends Module {
         // listeners
         associate(
                 updateListener,
-                moveListener
+                moveListener,
+                inboundPacketListener
         );
     }
 
@@ -64,6 +67,8 @@ public class SpeedModule extends Module {
         // reset
         speed = 0;
         distance = 0;
+        accelerate = false;
+        timeout = 0;
         strafeStage = 4;
 
         // reset timer

@@ -17,7 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @since 02/06/2023
  * @param <T> The config type
  */
-@SuppressWarnings("rawtypes")
 public abstract class Config<T> implements IConfig<T>, ILabel {
 
     // shutdown hook
@@ -67,9 +66,19 @@ public abstract class Config<T> implements IConfig<T>, ILabel {
         // catches I0Exception
         try {
 
-            // create directories
-            Files.createDirectory(main);
-            Files.createDirectory(modules);
+            // check if it already exists
+            if (!Files.exists(main)) {
+
+                // create directories
+                Files.createDirectory(main);
+            }
+
+            // check if it already exists
+            if (!Files.exists(modules)) {
+
+                // create directories
+                Files.createDirectory(modules);
+            }
         }
 
         // error when writing file

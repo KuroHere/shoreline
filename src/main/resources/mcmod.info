@@ -2,7 +2,7 @@
   {
     "modid": "momentum",
     "name": "Momentum",
-    "description": "Example placeholder mod.",
+    "description": "1.12.2",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "",

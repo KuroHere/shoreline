@@ -84,6 +84,7 @@ public class NoRenderModule extends Module {
                 signTextOption,
                 beaconBeamOption,
                 witherSkullOption,
+                barrierOption,
                 armorOption,
                 explosionsOption,
                 bind,

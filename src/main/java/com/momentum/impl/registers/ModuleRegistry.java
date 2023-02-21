@@ -5,12 +5,14 @@ import com.momentum.api.registry.Registry;
 import com.momentum.impl.modules.client.clickgui.ClickGuiModule;
 import com.momentum.impl.modules.client.color.ColorModule;
 import com.momentum.impl.modules.client.hud.HudModule;
+import com.momentum.impl.modules.combat.autototem.AutoTotemModule;
 import com.momentum.impl.modules.miscellaneous.timer.TimerModule;
 import com.momentum.impl.modules.movement.noslow.NoSlowModule;
 import com.momentum.impl.modules.movement.speed.SpeedModule;
 import com.momentum.impl.modules.movement.sprint.SprintModule;
 import com.momentum.impl.modules.movement.velocity.VelocityModule;
 import com.momentum.impl.modules.render.norender.NoRenderModule;
+import com.momentum.impl.modules.world.fastplace.FastPlaceModule;
 
 import java.util.Collection;
 
@@ -30,6 +32,7 @@ public class ModuleRegistry extends Registry<Module> {
         // initialize modules
         register(
                 // COMBAT
+                new AutoTotemModule(),
 
                 // EXPLOIT
 
@@ -46,6 +49,7 @@ public class ModuleRegistry extends Registry<Module> {
                 new NoRenderModule(),
 
                 // WORLD
+                new FastPlaceModule(),
 
                 // CLIENT
                 new ClickGuiModule(),

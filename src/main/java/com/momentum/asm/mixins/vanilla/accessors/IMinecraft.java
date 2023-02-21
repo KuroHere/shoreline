@@ -10,4 +10,7 @@ public interface IMinecraft {
 
     @Accessor("timer")
     Timer getTimer();
+
+    @Accessor("rightClickDelayTimer")
+    void setRightClickDelayTimer(int rightClickDelayTimer);
 }

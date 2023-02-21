@@ -19,8 +19,8 @@ public class EnumButton extends OptionButton<Enum<?>> {
     /**
      * Config button
      *
-     * @param x             The x-position
-     * @param y             The y-position
+     * @param x      The x-position
+     * @param y      The y-position
      * @param option The associated config
      */
     protected EnumButton(float x, float y, Option<Enum<?>> option) {

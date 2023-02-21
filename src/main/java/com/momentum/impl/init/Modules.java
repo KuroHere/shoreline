@@ -5,12 +5,14 @@ import com.momentum.api.module.Module;
 import com.momentum.impl.modules.client.clickgui.ClickGuiModule;
 import com.momentum.impl.modules.client.color.ColorModule;
 import com.momentum.impl.modules.client.hud.HudModule;
+import com.momentum.impl.modules.combat.autototem.AutoTotemModule;
 import com.momentum.impl.modules.miscellaneous.timer.TimerModule;
 import com.momentum.impl.modules.movement.noslow.NoSlowModule;
 import com.momentum.impl.modules.movement.speed.SpeedModule;
 import com.momentum.impl.modules.movement.sprint.SprintModule;
 import com.momentum.impl.modules.movement.velocity.VelocityModule;
 import com.momentum.impl.modules.render.norender.NoRenderModule;
+import com.momentum.impl.modules.world.fastplace.FastPlaceModule;
 
 /**
  * @author linus
@@ -20,15 +22,17 @@ public class Modules {
 
     // MAINTAIN ORDER
     // module instances
-    public static final ColorModule COLOR_MODULE;
-    public static final ClickGuiModule CLICKGUI_MODULE;
-    public static final HudModule HUD_MODULE;
+    public static final AutoTotemModule AUTOTOTEM_MODULE;
     public static final TimerModule TIMER_MODULE;
     public static final NoSlowModule NOSLOW_MODULE;
     public static final SpeedModule SPEED_MODULE;
     public static final SprintModule SPRINT_MODULE;
     public static final VelocityModule VELOCITY_MODULE;
     public static final NoRenderModule NORENDER_MODULE;
+    public static final FastPlaceModule FASTPLACE_MODULE;
+    public static final ColorModule COLOR_MODULE;
+    public static final ClickGuiModule CLICKGUI_MODULE;
+    public static final HudModule HUD_MODULE;
 
     /**
      * Gets the registered module
@@ -45,6 +49,7 @@ public class Modules {
     static {
 
         // COMBAT
+        AUTOTOTEM_MODULE = (AutoTotemModule) getRegisteredModule("autototem_module");
 
         // EXPLOIT
 
@@ -61,6 +66,7 @@ public class Modules {
         NORENDER_MODULE = (NoRenderModule) getRegisteredModule("norender_module");
 
         // WORLD
+        FASTPLACE_MODULE = (FastPlaceModule) getRegisteredModule("fastplace_module");
 
         // CLIENT
         CLICKGUI_MODULE = (ClickGuiModule) getRegisteredModule("clickgui_module");
