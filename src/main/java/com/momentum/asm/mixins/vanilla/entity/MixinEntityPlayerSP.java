@@ -5,6 +5,7 @@ import com.momentum.Momentum;
 import com.momentum.impl.events.vanilla.entity.MoveEvent;
 import com.momentum.impl.events.vanilla.entity.SprintingEvent;
 import com.momentum.impl.events.vanilla.entity.PushOutOfBlocksEvent;
+import com.momentum.impl.events.vanilla.entity.UpdatePlayerSpEvent;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.MoverType;
@@ -12,6 +13,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -26,6 +28,13 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
     // updateAutoJump method
     @Shadow
     protected abstract void updateAutoJump(float p_189810_1_, float p_189810_2_);
+
+    // updates player
+    @Shadow
+    protected abstract void onUpdateWalkingPlayer();
+
+    // locks the update function
+    private boolean lock;
 
     /**
      * Dummy constructor
@@ -92,6 +101,41 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
 
             // update auto jump
             updateAutoJump((float) (posX - px), (float) (posZ - pz));
+        }
+    }
+
+    /**
+     * Called after the onUpdateWalkingPlayer method
+     */
+    @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "net/minecraft/client/entity/EntityPlayerSP.onUpdateWalkingPlayer()V", shift = Shift.AFTER, ordinal = 0), cancellable = true)
+    public void onOnUpdate(CallbackInfo ci) {
+
+        // check if inject is locked
+        if (!lock) {
+
+            // post the update playerSP event
+            UpdatePlayerSpEvent updatePlayerSPEvent = new UpdatePlayerSpEvent();
+            Momentum.EVENT_BUS.dispatch(updatePlayerSPEvent);
+
+            // event is canceled
+            if (updatePlayerSPEvent.isCanceled()) {
+
+                // prevent player from updating
+                ci.cancel();
+
+                // run dummy onUpdateWalkingPlayer
+                for (int i = 0; i < updatePlayerSPEvent.getIterations(); i++) {
+
+                    // lock
+                    // run onUpdate, this updates motion
+                    lock = true;
+                    onUpdate();
+                    lock = false;
+
+                    // run onUpdateWalkingPlayer, this updates packets
+                    onUpdateWalkingPlayer();
+                }
+            }
         }
     }
 }

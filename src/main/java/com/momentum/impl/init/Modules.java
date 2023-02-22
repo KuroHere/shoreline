@@ -7,13 +7,16 @@ import com.momentum.impl.modules.client.color.ColorModule;
 import com.momentum.impl.modules.client.hud.HudModule;
 import com.momentum.impl.modules.combat.autobowrelease.AutoBowReleaseModule;
 import com.momentum.impl.modules.combat.autototem.AutoTotemModule;
+import com.momentum.impl.modules.combat.criticals.CriticalsModule;
 import com.momentum.impl.modules.exploit.antihunger.AntiHungerModule;
 import com.momentum.impl.modules.miscellaneous.timer.TimerModule;
+import com.momentum.impl.modules.movement.fastfall.FastFallModule;
 import com.momentum.impl.modules.movement.noslow.NoSlowModule;
 import com.momentum.impl.modules.movement.speed.SpeedModule;
 import com.momentum.impl.modules.movement.sprint.SprintModule;
 import com.momentum.impl.modules.movement.step.StepModule;
 import com.momentum.impl.modules.movement.velocity.VelocityModule;
+import com.momentum.impl.modules.render.fullbright.FullBrightModule;
 import com.momentum.impl.modules.render.norender.NoRenderModule;
 import com.momentum.impl.modules.world.fastplace.FastPlaceModule;
 
@@ -27,13 +30,16 @@ public class Modules {
     // module instances
     public static final AutoBowReleaseModule AUTOBOWRELEASE_MODULE;
     public static final AutoTotemModule AUTOTOTEM_MODULE;
+    public static final CriticalsModule CRITICALS_MODULE;
     public static final AntiHungerModule ANTIHUNGER_MODULE;
     public static final TimerModule TIMER_MODULE;
+    public static final FastFallModule FASTFALL_MODULE;
     public static final NoSlowModule NOSLOW_MODULE;
     public static final SpeedModule SPEED_MODULE;
     public static final SprintModule SPRINT_MODULE;
     public static final StepModule STEP_MODULE;
     public static final VelocityModule VELOCITY_MODULE;
+    public static final FullBrightModule FULLBRIGHT_MODULE;
     public static final NoRenderModule NORENDER_MODULE;
     public static final FastPlaceModule FASTPLACE_MODULE;
     public static final ColorModule COLOR_MODULE;
@@ -57,6 +63,7 @@ public class Modules {
         // COMBAT
         AUTOBOWRELEASE_MODULE = (AutoBowReleaseModule) getRegisteredModule("autobowrelease_module");
         AUTOTOTEM_MODULE = (AutoTotemModule) getRegisteredModule("autototem_module");
+        CRITICALS_MODULE = (CriticalsModule) getRegisteredModule("criticals_module");
 
         // EXPLOIT
         ANTIHUNGER_MODULE = (AntiHungerModule) getRegisteredModule("antihunger_module");
@@ -65,6 +72,7 @@ public class Modules {
         TIMER_MODULE = (TimerModule) getRegisteredModule("timer_module");
 
         // MOVEMENT
+        FASTFALL_MODULE = (FastFallModule) getRegisteredModule("fastfall_module");
         NOSLOW_MODULE = (NoSlowModule) getRegisteredModule("noslow_module");
         SPEED_MODULE = (SpeedModule) getRegisteredModule("speed_module");
         SPRINT_MODULE = (SprintModule) getRegisteredModule("sprint_module");
@@ -72,6 +80,7 @@ public class Modules {
         VELOCITY_MODULE = (VelocityModule) getRegisteredModule("velocity_module");
 
         // RENDER
+        FULLBRIGHT_MODULE = (FullBrightModule) getRegisteredModule("fullbright_module");
         NORENDER_MODULE = (NoRenderModule) getRegisteredModule("norender_module");
 
         // WORLD

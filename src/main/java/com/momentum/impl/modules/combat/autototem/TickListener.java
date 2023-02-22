@@ -36,6 +36,9 @@ public class TickListener extends FeatureListener<AutoTotemModule, TickEvent> {
         // can't switch while we are in a screen
         if (mc.currentScreen == null) {
 
+            // reset totem count
+            feature.totems = 0;
+
             // desired offhand mode
             TotemMode offhand = feature.offhandOption.getVal();
 

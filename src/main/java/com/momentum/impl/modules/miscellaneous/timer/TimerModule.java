@@ -24,7 +24,7 @@ public class TimerModule extends Module implements IService<Float> {
             new OptionUpdateListener(this);
 
     // previous states
-    private boolean penabled = enabled.getVal();
+    public boolean penabled = enabled.getVal();
     public float pticksOption = ticksOption.getVal();
 
     public TimerModule() {

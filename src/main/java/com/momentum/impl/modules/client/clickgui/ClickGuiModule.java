@@ -10,6 +10,7 @@ import org.lwjgl.input.Keyboard;
  * @since 01/17/2023
  */
 public class ClickGuiModule extends Module {
+
     public ClickGuiModule() {
         super("ClickGui", new String[] { "Gui" }, "Opens the ClickGui screen", ModuleCategory.CLIENT);
 

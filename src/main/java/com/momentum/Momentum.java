@@ -1,6 +1,7 @@
 package com.momentum;
 
 import com.momentum.api.event.EventBus;
+import com.momentum.impl.handlers.NcpHandler;
 import com.momentum.impl.managers.ChatManager;
 import com.momentum.impl.handlers.CommandHandler;
 import com.momentum.impl.handlers.ModuleHandler;
@@ -41,6 +42,7 @@ public class Momentum {
     // handler
     public static ModuleHandler MODULE_HANDLER;
     public static CommandHandler COMMAND_HANDLER;
+    public static NcpHandler NCP_HANDLER;
     public static TickHandler TICK_HANDLER;
 
     // managers
@@ -68,6 +70,7 @@ public class Momentum {
         // initialize handlers
         MODULE_HANDLER = new ModuleHandler();
         COMMAND_HANDLER = new CommandHandler();
+        NCP_HANDLER = new NcpHandler();
         TICK_HANDLER = new TickHandler();
 
         // initialize managers

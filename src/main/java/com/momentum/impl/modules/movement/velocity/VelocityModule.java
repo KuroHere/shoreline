@@ -28,13 +28,13 @@ public class VelocityModule extends Module {
             new Option<>("Fishhooks", new String[] {"Bobbers"}, "Prevents being pulled by fishhooks", true);
 
     // listeners
-    EntityCollisionListener entityCollisionListener
+    public final EntityCollisionListener entityCollisionListener
             = new EntityCollisionListener(this);
-    InboundPacketListener inboundPacketListener
+    public final InboundPacketListener inboundPacketListener
             = new InboundPacketListener(this);
-    PushedByWaterListener pushedByWaterListener
+    public final PushedByWaterListener pushedByWaterListener
             = new PushedByWaterListener(this);
-    PushOutOfBlocksListener pushOutOfBlocksListener
+    public final PushOutOfBlocksListener pushOutOfBlocksListener
             = new PushOutOfBlocksListener(this);
 
     public VelocityModule() {

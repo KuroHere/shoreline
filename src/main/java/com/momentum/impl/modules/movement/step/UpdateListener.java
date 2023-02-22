@@ -1,6 +1,7 @@
 package com.momentum.impl.modules.movement.step;
 
 import com.momentum.api.event.FeatureListener;
+import com.momentum.asm.mixins.vanilla.accessors.INetHandlerPlayClient;
 import com.momentum.impl.events.vanilla.entity.UpdateEvent;
 import com.momentum.impl.init.Modules;
 import net.minecraft.entity.Entity;
@@ -23,17 +24,13 @@ public class UpdateListener extends FeatureListener<StepModule, UpdateEvent> {
     @Override
     public void invoke(UpdateEvent event) {
 
-        // the riding entity
-        Entity riding = null;
-
-        // get the riding entity
-        if (mc.player.isRiding()) {
-            riding = mc.player.getRidingEntity();
+        // null check
+        if (mc.player == null || mc.world == null || !((INetHandlerPlayClient) mc.player.connection).isDoneLoadingTerrain()) {
+            return;
         }
 
         // reset step height
         mc.player.stepHeight = 0.6f;
-        riding.stepHeight = feature.isAbstractHorse(riding) ? 1.0f : 0.5f;
 
         // make sure player is on ground
         if (mc.player.onGround) {
@@ -50,11 +47,21 @@ public class UpdateListener extends FeatureListener<StepModule, UpdateEvent> {
             mc.player.stepHeight = feature.heightOption.getVal();
         }
 
-        // make sure riding entity is on ground
-        if (riding.onGround) {
+        // the riding entity
+        Entity riding = mc.player.getRidingEntity();
 
-            // update our riding entity's step height
-            riding.stepHeight = 256.0f;
+        // check if the riding entity exists
+        if (riding != null) {
+
+            // reset step height
+            riding.stepHeight = feature.isAbstractHorse(riding) ? 1.0f : 0.5f;
+
+            // make sure riding entity is on ground
+            if (riding.onGround) {
+
+                // update our riding entity's step height
+                riding.stepHeight = 256.0f;
+            }
         }
     }
 }

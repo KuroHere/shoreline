@@ -45,9 +45,9 @@ public class HudModule extends Module {
             new Option<>("Rendering", "Arraylist rendering position", Rendering.UP);
 
     // listeners
-    RenderTextOverlayListener renderTextOverlayListener
+    public final RenderTextOverlayListener renderTextOverlayListener
             = new RenderTextOverlayListener(this);
-    RenderPotionOverlayListener renderPotionOverlayListener
+    public final RenderPotionOverlayListener renderPotionOverlayListener
             = new RenderPotionOverlayListener(this);
 
     public HudModule() {

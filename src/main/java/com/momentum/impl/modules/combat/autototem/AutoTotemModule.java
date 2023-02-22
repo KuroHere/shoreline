@@ -29,7 +29,7 @@ public class AutoTotemModule extends Module {
             new InboundPacketListener(this);
 
     // info
-    protected int totems;
+    public int totems;
 
     public AutoTotemModule() {
         super("AutoTotem", new String[] {"Offhand", "AutoOffhand"}, "Replaces totems in the offhand", ModuleCategory.COMBAT);

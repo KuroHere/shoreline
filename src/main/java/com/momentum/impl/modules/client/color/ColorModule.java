@@ -13,7 +13,7 @@ import java.awt.*;
 public class ColorModule extends ConcurrentModule {
 
     // option
-    private final Option<Color> colorOption =
+    public final Option<Color> colorOption =
             new Option<>("Color", "Client color", new Color(252, 3, 82));
 
     public ColorModule() {

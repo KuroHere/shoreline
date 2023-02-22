@@ -33,7 +33,7 @@ public class StepListener extends FeatureListener<StepModule, StepEvent> {
             if (step > 0 && step <= feature.heightOption.getVal()) {
 
                 // one block jump
-                double[] one = new double[]{
+                double[] packets = new double[] {
                         0.42,
                         step < 1.0 && step > 0.8 ? 0.753 : 0.75,
                         1.0,
@@ -42,17 +42,21 @@ public class StepListener extends FeatureListener<StepModule, StepEvent> {
                         1.2
                 };
 
-                // two block jump
-                double[] two = new double[]{
-                        0.42,
-                        0.78,
-                        0.63,
-                        0.51,
-                        0.9,
-                        1.21,
-                        1.45,
-                        1.43
-                };
+                // two block stop
+                if (step >= 2) {
+
+                    // two block jump
+                    packets = new double[] {
+                            0.42,
+                            0.78,
+                            0.63,
+                            0.51,
+                            0.9,
+                            1.21,
+                            1.45,
+                            1.43
+                    };
+                }
 
                 // use timer to slow down motion
                 if (feature.useTimerOption.getVal()) {
@@ -63,10 +67,10 @@ public class StepListener extends FeatureListener<StepModule, StepEvent> {
                 }
 
                 // send our NCP offsets
-                for (double off : step < 2 ? one : two) {
+                for (int i = 0; i < (step > 1 ? packets.length : 2); i++) {
 
                     // send position packet
-                    mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + off, mc.player.posZ, false));
+                    mc.player.connection.sendPacket(new CPacketPlayer.Position(mc.player.posX, mc.player.posY + packets[i], mc.player.posZ, false));
                 }
             }
         }

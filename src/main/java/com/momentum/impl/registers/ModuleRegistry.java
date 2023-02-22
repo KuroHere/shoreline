@@ -7,13 +7,16 @@ import com.momentum.impl.modules.client.color.ColorModule;
 import com.momentum.impl.modules.client.hud.HudModule;
 import com.momentum.impl.modules.combat.autobowrelease.AutoBowReleaseModule;
 import com.momentum.impl.modules.combat.autototem.AutoTotemModule;
+import com.momentum.impl.modules.combat.criticals.CriticalsModule;
 import com.momentum.impl.modules.exploit.antihunger.AntiHungerModule;
 import com.momentum.impl.modules.miscellaneous.timer.TimerModule;
+import com.momentum.impl.modules.movement.fastfall.FastFallModule;
 import com.momentum.impl.modules.movement.noslow.NoSlowModule;
 import com.momentum.impl.modules.movement.speed.SpeedModule;
 import com.momentum.impl.modules.movement.sprint.SprintModule;
 import com.momentum.impl.modules.movement.step.StepModule;
 import com.momentum.impl.modules.movement.velocity.VelocityModule;
+import com.momentum.impl.modules.render.fullbright.FullBrightModule;
 import com.momentum.impl.modules.render.norender.NoRenderModule;
 import com.momentum.impl.modules.world.fastplace.FastPlaceModule;
 
@@ -34,9 +37,11 @@ public class ModuleRegistry extends Registry<Module> {
 
         // initialize modules
         register(
+
                 // COMBAT
                 new AutoBowReleaseModule(),
                 new AutoTotemModule(),
+                new CriticalsModule(),
 
                 // EXPLOIT
                 new AntiHungerModule(),
@@ -45,6 +50,7 @@ public class ModuleRegistry extends Registry<Module> {
                 new TimerModule(),
 
                 // MOVEMENT
+                new FastFallModule(),
                 new NoSlowModule(),
                 new SpeedModule(),
                 new SprintModule(),
@@ -52,6 +58,7 @@ public class ModuleRegistry extends Registry<Module> {
                 new VelocityModule(),
 
                 // RENDER
+                new FullBrightModule(),
                 new NoRenderModule(),
 
                 // WORLD
