@@ -1,29 +1,49 @@
 package com.momentum.api.event;
 
+import com.momentum.api.event.handler.EventHandler;
+
 /**
+ * Event that can be listened to by a {@link Listener}. Processed by
+ * the {@link EventHandler}.
+ *
  * @author linus
- * @since 01/09/2023
+ * @since 03/20/2023
  */
-public class Event {
+public abstract class Event implements ICancelable {
 
-    // event info
-    private boolean cancel;
+    // cancelled state. Indicates if the event should run.
+    private boolean cancelled;
 
     /**
-     * Cancels the event
+     * Sets this event's cancelled state
      *
-     * @param in The new cancel state
+     * @param in The cancelled state
      */
-    public void setCanceled(boolean in) {
-        cancel = in;
+    @Override
+    public void setCancelled(boolean in) {
+
+        // update cancelled state
+        if (isCancelable())
+        {
+            cancelled = in;
+        }
     }
 
     /**
-     * Checks whether the event is canceled
+     * Gets this event's cancelled state
      *
-     * @return Whether the event is canceled
+     * @return The cancelled state
      */
+    @Override
     public boolean isCanceled() {
-        return cancel;
+        return cancelled;
     }
+
+    /**
+     * Gets this event's cancelable state
+     *
+     * @return The cancelable state
+     */
+    @Override
+    public abstract boolean isCancelable();
 }

@@ -1,89 +1,148 @@
 package com.momentum.api.registry;
 
-import java.util.Collection;
+import com.momentum.api.config.Config;
+
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Registry implementation backed by {@link java.util.concurrent.ConcurrentHashMap}
+ * Registry implementation backed by a {@link LinkedHashMap}
  *
  * @author linus
- * @since 02/02/2023
+ * @since 03/23/2023
+ * @param <T> The registry data type
  */
-public class Registry<T extends ILabel> implements IRegistry<T> {
+public class Registry<T extends ILabeled> implements IRegistry<T> {
 
-    // register backed by HashMap
-    protected final Map<String, T> register;
+    // register
+    // underlying hash map with String keys
+    protected Map<String, Config<?>> register = new LinkedHashMap<>();
 
     /**
-     * Creates a new register
+     * Replaces the current register
+     *
+     * @param reg The new register
      */
-    public Registry() {
-        register = new ConcurrentHashMap<>();
+    @Override
+    public void replace(Map<String, T> reg) {
+        register = reg;
     }
 
     /**
-     * Registers given data
+     * Registers the given data to a register, which can later be retrieved
+     * using {@link IRegistry#retrieve(String)}
      *
-     * @param in The data to register
+     * @param l    The data label
+     * @param data The data
+     * @return The registered data
+     * @throws NullPointerException if data is <tt>null</tt>
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public void register(ILabel in) {
+    public T register(String l, T data) {
 
         // null check
-        if (in == null) {
-            throw new NullPointerException();
+        if (data == null)
+        {
+            throw new NullPointerException(
+                    "Null data not supported in registry");
         }
 
         // add to register
-        register.put(in.getLabel(), (T) in);
-    }
-
-    @SafeVarargs
-    @Override
-    public final void register(ILabel... in) {
-
-        // index through list
-        for (ILabel tRegistryData : in) {
-
-            // register data
-            register(tRegistryData);
-        }
-    }
-
-    @Override
-    public void unregister(String l) {
-
-        // null check
-        if (l == null) {
-            throw new NullPointerException();
-        }
-
-        // add to register
-        register.remove(l);
+        return register.put(l, data);
     }
 
     /**
-     * Finds a certain key's value
+     * Registers the given data to a register, which can later be retrieved
+     * using {@link IRegistry#retrieve(String)}
      *
-     * @return The key's value
+     * @param data The data
+     * @return The registered data
+     * @throws NullPointerException if data is <tt>null</tt>
      */
     @Override
-    public T lookup(String l) {
+    public T register(T data) {
 
-        // find by label
+        // null check
+        if (data == null)
+        {
+            throw new NullPointerException(
+                    "Null data not supported in registry");
+        }
+
+        // add to register
+        register.put(data.getLabel(), data);
+        return data;
+    }
+
+    /**
+     * Unregisters the given data to a register, which removes its mapping from
+     * the register. Unregistering data also frees its {@link ILabeled} label
+     *
+     * @param data The data
+     * @throws NullPointerException if data is <tt>null</tt>
+     */
+    @Override
+    public T unregister(T data) {
+
+        // null check
+        if (data == null)
+        {
+            throw new NullPointerException(
+                    "Null data not supported in registry");
+        }
+
+        // remove from register
+        return register.remove(data.getLabel());
+    }
+
+    /**
+     * Retrieves the data from the register by the String value of the label
+     *
+     * @param l The label of the data
+     * @return The data from the register
+     * @throws NullPointerException if label is <tt>null</tt>
+     */
+    @Override
+    public T retrieve(String l) {
+
+        // null check
+        if (l == null)
+        {
+            throw new NullPointerException(
+                    "Null label not supported in registry");
+        }
+
+        // retrieve by label
         return register.get(l);
     }
 
     /**
-     * Gets the data in the registry
+     * Retrieves the data from the register by the String value of the label,
+     * Returns <tt>null</tt> if the retrieved data does not match the class type.
      *
-     * @return The collection of the data
+     * @param l     The label of the data
+     * @param clazz The class type of the data
+     * @return The data from the register
+     * @throws NullPointerException if label or the class type are <tt>null</tt>
      */
-    public Collection<T> getData() {
+    @Override
+    public T retrieve(String l, Class<?> clazz) {
 
-        // return values collection in register
-        return register.values();
+        // null check
+        if (l == null)
+        {
+            throw new NullPointerException(
+                    "Null label not supported in registry");
+        }
+
+        // retrieved data
+        T data = register.get(l);
+        if (clazz.isInstance(data))
+        {
+            return data;
+        }
+
+        // class type mismatch
+        return null;
     }
 }

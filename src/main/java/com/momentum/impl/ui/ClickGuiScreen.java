@@ -1,56 +1,24 @@
 package com.momentum.impl.ui;
 
-import com.momentum.api.module.ModuleCategory;
-import com.momentum.impl.init.Modules;
 import net.minecraft.client.gui.GuiScreen;
+<<<<<<< Updated upstream
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+=======
+>>>>>>> Stashed changes
 
 /**
- * @author linus
- * @since 01/16/2023
+ *
  */
 public class ClickGuiScreen extends GuiScreen {
 
-    // mouse position
-    public static int MOUSE_X;
-    public static int MOUSE_Y;
-
-    // mouse states
-    public static boolean MOUSE_RIGHT_CLICK;
-    public static boolean MOUSE_RIGHT_HOLD;
-    public static boolean MOUSE_LEFT_CLICK;
-    public static boolean MOUSE_LEFT_HOLD;
-
-    // category frames
-    private final List<Frame> frames = new CopyOnWriteArrayList<>();
-
-    /**
-     * Initializes the ClickGui screen
-     */
-    public ClickGuiScreen() {
-
-        // add all categories
-        int x = 2;
-        for (ModuleCategory category : ModuleCategory.values()) {
-
-            // check if the category is valid
-            if (!category.equals(ModuleCategory.HIDDEN)) {
-
-                // add to category frames
-                frames.add(new Frame(x, 10, category));
-                x += 90;
-            }
-        }
-    }
-
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        super.drawScreen(mouseX, mouseY, partialTicks);
+    public void initGui() {
 
+<<<<<<< Updated upstream
         // run events on all category frames
         for (Frame c : frames) {
 
@@ -147,5 +115,7 @@ public class ClickGuiScreen extends GuiScreen {
      */
     public Collection<Frame> getFrames() {
         return frames;
+=======
+>>>>>>> Stashed changes
     }
 }

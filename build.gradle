@@ -74,9 +74,18 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
+<<<<<<< Updated upstream
     compile 'org.spongepowered:mixin:0.8.2'
     compile ('com.moandjiezana.toml:toml4j:0.7.2') {
         exclude module: 'gson'
+=======
+    compile ('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+        exclude module: 'gson'
+        exclude module: 'commons-io'
+        exclude module: 'log4j-core'
+>>>>>>> Stashed changes
     }
 }
 

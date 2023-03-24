@@ -1,169 +1,149 @@
 package com.momentum.api.config;
 
-import com.momentum.api.registry.ILabel;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import com.google.gson.JsonElement;
+import com.momentum.api.config.factory.ConfigContainer;
+import com.momentum.api.config.file.ConfigFile;
+import com.momentum.api.config.file.IConfigurable;
+import com.momentum.api.registry.ILabeled;
 
 /**
- * Config implementation
+ * Config implementation which will be saved locally in a <tt>.json</tt> file
+ * and updated based on user input. The value of a config can be updated
+ * through commands or the {@link com.momentum.impl.ui.ClickGuiScreen}.
  *
  * @author linus
- * @since 02/06/2023
- * @param <T> The config type
+ * @since 03/20/2023
+ * @param <T> The value type
+ *
+ * @see com.momentum.api.config.configs.BooleanConfig
+ * @see com.momentum.api.config.configs.EnumConfig
+ * @see com.momentum.api.config.configs.MacroConfig
+ * @see com.momentum.api.config.configs.NumberConfig
  */
-public abstract class Config<T> implements IConfig<T>, ILabel {
+public abstract class Config<T>
+        implements IConfigurable<JsonElement>, ILabeled {
 
-    // shutdown hook
-    protected static final ShutdownHook SHUTDOWN_HOOK = new ShutdownHook();
+    // config identifier
+    // must be unique
+    protected String name;
+    private String label;
 
-    // paths that are being written to
-    private final List<Path> writing = new CopyOnWriteArrayList<>();
+    // description of the functionality or property that
+    // the configuration modifies
+    protected String desc;
 
-    // user home directory
-    // running directory
-    protected Path dir;
-    protected Path rdir = Paths.get("");
+    // value associated with config
+    // mutable
+    protected T value;
 
-    // sub directories
-    protected Path main;
-    protected Path modules;
+    // configuration container pointer
+    protected ConfigContainer container;
 
     /**
-     * Custom config
+     * Config default constructor
+     *
+     * @param name The config name
+     * @param desc The config description
+     * @param value The config value
      */
-    public Config() {
-
-        // catches exception
-        try {
-
-            // user home dir
-            dir = new File(System.getProperty("user.home")).toPath();
-        }
-
-        // handles the property DNE
-        catch (Exception e) {
-
-            // dir becomes running dir
-            dir = rdir;
-            e.printStackTrace();
-        }
-
-        // if we cannot write, minecraft always has access to the running directory, so we'll allow that
-        if (dir == null || !Files.exists(dir) || !Files.isWritable(dir)) {
-            dir = rdir;
-        }
-
-        // create directories
-        main = dir.resolve("Momentum");
-        modules = main.resolve("modules");
-
-        // catches I0Exception
-        try {
-
-            // check if it already exists
-            if (!Files.exists(main)) {
-
-                // create directories
-                Files.createDirectory(main);
-            }
-
-            // check if it already exists
-            if (!Files.exists(modules)) {
-
-                // create directories
-                Files.createDirectory(modules);
-            }
-        }
-
-        // error when writing file
-        catch (IOException e) {
-            e.printStackTrace();
-        }
+    public Config(String name, String desc, T value)
+    {
+        this.name = name;
+        this.desc = desc;
+        this.value = value;
     }
 
     /**
-     * Saves all configurations
-     */
-    @Override
-    public abstract void save();
-
-    /**
-     * Saves a specific option profile
+     * Returns the name that is most commonly associated with the configuration
      *
-     * @param in The option profile
+     * @return The primary name
      */
-    @Override
-    public abstract void save(String in);
+    public String getName() {
+        return name;
+    }
 
     /**
-     * Loads all configurations
-     */
-    @Override
-    public abstract void load();
-
-    /**
-     * Loads a specific option profile
+     * Gets the config description
      *
-     * @param in The option profile
+     * @return The config description
      */
-    @Override
-    public abstract void load(String in);
+    public String getDescription() {
+        return desc;
+    }
 
     /**
-     * Gets the registry label
+     * Returns the configuration value
      *
-     * @return The registry label (Must be unique!)
+     * @param val The new configuration value
+     */
+    public void setValue(T val) {
+        value = val;
+    }
+
+    /**
+     * Returns the configuration value
+     *
+     * @return The configuration value
+     */
+    public T getValue() {
+        return value;
+    }
+
+    /**
+     * Sets the configuration parent {@link ConfigContainer}
+     *
+     * @param cont The new configuration parent container
+     */
+    public void setContainer(ConfigContainer cont) {
+        container = cont;
+    }
+
+    /**
+     * Returns the configuration parent {@link ConfigContainer}
+     *
+     * @return The configuration parent container
+     */
+    public ConfigContainer getContainer() {
+        return container;
+    }
+
+    /**
+     * Sets the configuration label
+     *
+     * @param l The new configuration label
+     */
+    public void setLabel(String l) {
+        label = l;
+    }
+
+    /**
+     * Overwritten by {@link Configuration#value()}. Returns the
+     * configuration label.
+     *
+     * @return The configuration label
      */
     @Override
     public String getLabel() {
 
-        // class name with identifier
-        String clazz = getClass().getSimpleName().toLowerCase();
-
-        // class name
-        clazz = clazz.substring(0, clazz.length() - 6);
-
-        // create label
-        return clazz + "_file";
+        // no impl
+        return label;
     }
 
     /**
-     * Mark path as writing
+     * Parses the values from a {@link JsonElement} and updates all
+     * {@link com.momentum.api.config.Config} values in the objects
      *
-     * @param in The path that is writing
+     * @param e The Json element
      */
-    public void markDirty(Path in) {
-
-        // add to list of writing dirs
-        writing.add(in);
-    }
+    @Override
+    public abstract void fromJson(JsonElement e);
 
     /**
-     * Removes from current writing dirs
+     * Returns configs as a string which will be passed to the
+     * {@link ConfigFile} writer and written to a <tt>.json</tt> file
      *
-     * @param in The path to remove
+     * @return The configs as a parsable Json string
      */
-    public void clean(Path in) {
-
-        // remove from list of writing dirs
-        writing.remove(in);
-    }
-
-    /**
-     * Checks if a given path is dirty
-     *
-     * @param in The path
-     * @return Whether a given path is dirty
-     */
-    public boolean isDirty(Path in) {
-
-        // check if currently writing
-        return writing.contains(in);
-    }
+    @Override
+    public abstract JsonElement toJson();
 }

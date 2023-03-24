@@ -1,5 +1,6 @@
 package com.momentum;
 
+<<<<<<< Updated upstream
 import com.momentum.api.event.EventBus;
 import com.momentum.impl.handlers.NcpHandler;
 import com.momentum.impl.managers.ChatManager;
@@ -15,25 +16,22 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+=======
+import com.momentum.api.event.handler.EventHandler;
+>>>>>>> Stashed changes
 
 /**
+ * Client main
+ *
  * @author linus
  * @since 01/09/2023
  */
-@Mod(modid = Momentum.MOD_ID, name = Momentum.MOD_NAME, version = Momentum.MOD_VERSION, acceptedMinecraftVersions = "[1.12.2]")
 public class Momentum {
 
-    // forge mod info
-    public static final String MOD_ID = "momentum";
-    public static final String MOD_NAME = "Momentum";
-    public static final String MOD_VERSION = "1.0";
-
-    // client info
-    public static String CLIENT_NAME = MOD_NAME;
-
     // event bus
-    public static EventBus EVENT_BUS;
+    public static EventHandler EVENT_HANDLER;
 
+<<<<<<< Updated upstream
     // registries
     public static ModuleRegistry MODULE_REGISTRY;
     public static CommandRegistry COMMAND_REGISTRY;
@@ -57,11 +55,25 @@ public class Momentum {
         // create event bus
         EVENT_BUS = new EventBus();
         // logger = event.getModLog();
+=======
+    /**
+     * Runs
+     * during {@link net.minecraftforge.fml.common.event.FMLPreInitializationEvent}
+     */
+    public static void preInit() {
+
+        // init event bus
+        EVENT_HANDLER = new EventHandler();
+>>>>>>> Stashed changes
     }
 
-    @EventHandler
-    public void init(FMLInitializationEvent event) {
+    /**
+     * Runs during
+     * {@link net.minecraftforge.fml.common.event.FMLInitializationEvent}
+     */
+    public static void init() {
 
+<<<<<<< Updated upstream
         // initialize registries
         MODULE_REGISTRY = new ModuleRegistry();
         COMMAND_REGISTRY = new CommandRegistry();
@@ -91,5 +103,15 @@ public class Momentum {
         catch (Exception e) {
             e.printStackTrace();
         }
+=======
+    }
+
+    /**
+     * Runs
+     * during {@link net.minecraftforge.fml.common.event.FMLPostInitializationEvent}
+     */
+    public static void postInit() {
+
+>>>>>>> Stashed changes
     }
 }

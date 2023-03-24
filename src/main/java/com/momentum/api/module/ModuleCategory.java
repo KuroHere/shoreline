@@ -1,18 +1,21 @@
 package com.momentum.api.module;
 
 /**
+ * Categories for modules
+ *
  * @author linus
  * @since 01/16/2023
  */
 public enum ModuleCategory {
 
     /**
-     * Modules used for combat (Ex: KillAura, AutoCrystal, Surround, etc.)
+     * Modules used for combat (Ex: Aura, AutoCrystal, Surround, etc.)
      */
     COMBAT,
 
     /**
-     * Modules that exploit certain anticheats to allow for "non-vanilla" behavior (Ex: AntiHunger, PacketFlight, Reach, etc.)
+     * Modules that exploit certain anticheats to allow for "non-vanilla"
+     * behavior (Ex: AntiHunger, PacketFlight, Reach, etc.)
      */
     EXPLOITS,
 
@@ -22,27 +25,24 @@ public enum ModuleCategory {
     MISCELLANEOUS,
 
     /**
-     * Modules that allow the player to move in unnatural ways (Ex: Flight, Speed, ReverseStep, etc.)
+     * Modules that allow the player to move in unnatural ways (Ex: Flight,
+     * Speed, FastFall, etc.)
      */
     MOVEMENT,
 
     /**
-     * Modules that are visual modifications (Ex: ESP, Nametags, HoleESP, etc.)
+     * Modules that are visual modifications (Ex: Esp, Nametags, HoleEsp, etc.)
      */
     RENDER,
 
     /**
-     * Modules that are modifications to world (Ex: Wallhack, SpeedMine, FastUse, etc.)
+     * Modules that are modifications to world (Ex: Wallhack, Speedmine,
+     * FastPlace, etc.)
      */
     WORLD,
 
     /**
      * Modules associated with client processes
      */
-    CLIENT,
-
-    /**
-     * Modules hidden from the ClickGUI
-     */
-    HIDDEN
+    CLIENT
 }

@@ -5,6 +5,7 @@
   "minVersion": "0.7.3",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+<<<<<<< Updated upstream
     "vanilla.accessors.ISPacketEntityVelocity",
     "vanilla.accessors.ISPacketExplosion",
     "vanilla.accessors.IMinecraft",
@@ -36,5 +37,8 @@
     "forge.event.MixinForgeEventFactory",
     "forge.MixinGuiIngameForge",
     "forge.MixinForgeHooksClient"
+=======
+
+>>>>>>> Stashed changes
   ]
 }

@@ -1,7 +1,9 @@
 package com.momentum.asm;
 
-import net.minecraftforge.common.ForgeVersion;
+import com.momentum.MomentumMod;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.Name;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.Mixins;
 
@@ -10,15 +12,16 @@ import java.util.Map;
 
 /**
  * @author linus
- * @since 01/09/2023
+ * @since 03/19/2023
  */
-@IFMLLoadingPlugin.MCVersion(ForgeVersion.mcVersion)
+@Name(MomentumMod.modName) @MCVersion(MomentumMod.modMcVer)
 public class FMLLoadingPlugin implements IFMLLoadingPlugin {
 
     /**
-     * Constructor that initializes the mixin option
+     * Initializes the mixin option
      */
-    public FMLLoadingPlugin() {
+    public FMLLoadingPlugin()
+    {
 
         // initialize mixin option
         MixinBootstrap.init();

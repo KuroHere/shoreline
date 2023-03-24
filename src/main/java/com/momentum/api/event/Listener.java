@@ -1,100 +1,89 @@
 package com.momentum.api.event;
 
-import com.momentum.api.registry.ILabel;
+import com.momentum.api.registry.ILabeled;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
- * Listener class that listens for a certain event
+ * Listener implementation for {@link Event} event. Invokes when event
+ * occurs.
  *
- * @param <E> The event type to listen for
  * @author linus
- * @since 01/09/2023
+ * @since 03/20/2023
+ * @param <E> The event type
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
-public abstract class Listener<E extends Event> implements Invoker<E>, ILabel {
+public abstract class Listener<E extends Event>
+        implements IListener<E>, ILabeled {
 
-    // event type
-    private Class<E> type;
-
-    // listener priority
-    private int priority;
+    // The listening event class. This class is used to identify the
+    // event that is associated with the current listener.
+    private Class<E> event;
 
     /**
-     * Default constructor
+     * Initializes the listening event class
      */
-    protected Listener() {
+    protected Listener()
+    {
 
-        // generic type (event type)
-        Type generic = getClass().getGenericSuperclass();
+        // superclass
+        Type superclass = getClass().getGenericSuperclass();
 
-        // check generic type
-        if (generic instanceof ParameterizedType) {
-            for (Type type : ((ParameterizedType) generic).getActualTypeArguments()) {
+        // check if superclass contains a parameterized type
+        if (superclass instanceof ParameterizedType)
+        {
 
-                // make sure type is valid
-                if (!(type instanceof Class) || !Event.class.isAssignableFrom((Class<E>) type)) {
-                    continue;
+            // check parameter types
+            for (Type t : ((ParameterizedType) superclass)
+                    .getActualTypeArguments())
+            {
+
+                // check if parameter type is a class
+                if (t instanceof Class)
+                {
+
+                    // express parameter type as Class obj
+                    Class<E> event = (Class<E>) t;
+
+                    // check if parameter type is Event subclass
+                    if (Event.class.isAssignableFrom(event))
+                    {
+
+                        // initialize listener type
+                        this.event = event;
+                        break;
+                    }
                 }
-
-                // initialize listener type
-                this.type = (Class<E>) type;
-                break;
             }
         }
     }
 
     /**
-     * Listener with a custom priority
+     * Gets the listening event {@link Event} class
      *
-     * @param priority Listener priority
+     * @return The listening event {@link Event} class
      */
-    protected Listener(int priority) {
-        this();
-        this.priority = priority;
+    @Override
+    public Class<E> getEventClass() {
+        return event;
     }
 
     /**
-     * Called when an event is posted by the event bus
      *
-     * @param event The event
-     */
-    public abstract void invoke(E event);
-
-    /**
-     * Gets the registry label
      *
-     * @return The registry label (Must be unique!)
+     * @return
      */
     @Override
     public String getLabel() {
-
-        // lowercase of the type name
-        String type = getType().getTypeName().toLowerCase();
-
-        // event name
-        type = type.substring(0, type.length() - 8);
-
-        // create label
-        return type + "_listener";
+        return null;
     }
 
     /**
-     * Gets the event {@link Event} type to listen for
+     * Calls the listener for the {@link Event}
+     * event
      *
-     * @return The event {@link Event} type to listen for
+     * @param event The event
      */
-    public Class<E> getType() {
-        return type;
-    }
-
-    /**
-     * Gets the listener priority (highest priority gets called first)
-     *
-     * @return The listener priority
-     */
-    public int getPriority() {
-        return priority;
-    }
+    @Override
+    public abstract void invoke(E event);
 }

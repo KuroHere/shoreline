@@ -1,5 +1,6 @@
 package com.momentum.api.module;
 
+<<<<<<< Updated upstream
 import com.momentum.api.event.Listener;
 import com.momentum.api.feature.Option;
 import com.momentum.api.feature.Feature;
@@ -7,131 +8,109 @@ import com.momentum.api.feature.IToggleable;
 import com.momentum.api.registry.ILabel;
 import com.momentum.Momentum;
 import org.lwjgl.input.Keyboard;
+=======
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.momentum.api.config.Config;
+import com.momentum.api.config.Configuration;
+import com.momentum.api.config.Macro;
+import com.momentum.api.config.configs.BooleanConfig;
+import com.momentum.api.config.factory.ConfigContainer;
+import com.momentum.api.config.file.ConfigFile;
+import com.momentum.api.config.file.IConfigurable;
+import com.momentum.api.module.exceptions.IncompatibleInterfaceException;
+import com.momentum.api.module.property.IConcurrent;
+import com.momentum.api.module.property.IHideable;
+import com.momentum.api.module.property.IToggleable;
+import com.momentum.api.registry.ILabeled;
+import com.momentum.api.util.Globals;
+>>>>>>> Stashed changes
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.Map.Entry;
 
 /**
- * Client module that appears in the UI
+ * Configurable client feature that is displayed in the
+ * {@link com.momentum.impl.ui.ClickGuiScreen} and the Hud. Modules can be
+ * toggled using a {@link Macro}. Modules can be hidden from Hud.
  *
  * @author linus
- * @since 01/16/2023
+ * @since 03/20/2023
+ *
+ * @see com.momentum.api.module.modules.SubscriberModule
+ * @see com.momentum.api.module.modules.ConcurrentModule
+ * @see com.momentum.api.module.modules.ToggleModule
  */
-@SuppressWarnings("rawtypes")
-public class Module extends Feature implements IToggleable, ILabel {
+public class Module extends ConfigContainer
+        implements Globals, IConfigurable<JsonObject>, IHideable, ILabeled {
 
-    // category of the module
-    // determines which category the module will appear under in the UI
+    // module identifier
+    // must be unique for each module
+    private final String name;
+
+    // description of module functionality
+    private final String desc;
+
+    // module category
     private final ModuleCategory category;
 
-    // listeners associated with this feature
-    private final List<Listener> listeners = new ArrayList<>();
-
-    // configurations associated with this feature
-    private final List<Option> options = new ArrayList<>();
-
-    // global options
-    // enabled states
-    protected final Option<Integer> bind =
-            new Option<>("Bind", "Bind state", Keyboard.KEY_NONE);
-    protected final Option<Boolean> enabled =
-            new Option<>("Enabled", "Enabled state", false);
-    protected final Option<Boolean> drawn =
-            new Option<>("Drawn", "Drawn state", true);
+    // hidden state
+    // default set to false
+    @Configuration("module_hidden")
+    final BooleanConfig hidden = new BooleanConfig("Hidden",
+            "Hidden state. Global in all modules. This config determines " +
+                    "whether the module will appear in the Hud", false);
 
     /**
-     * Module with aliases
+     * Default module constructor. Name must be unique for all modules.
      *
-     * @param name The name of the module
-     * @param aliases The aliases of the module
-     * @param description The description of the module
-     * @param category The category that the module will appear under in the UI
+     * @param name The module name
+     * @param desc The module description
+     * @param category The module category
+     * @throws IncompatibleInterfaceException if module implements incompatible
+     * interfaces
      */
-    public Module(String name, String[] aliases, String description, ModuleCategory category) {
-        super(name, aliases, description);
+    public Module(String name, String desc, ModuleCategory category)
+    {
+        // {@see ReflectionConfigFactory#build(Class)}
+        super();
 
-        /*
-        // catches IllegalArgumentException and IllegalAccessException
-        try {
-
-            // class declared fields
-            for (Field f : getClass().getDeclaredFields()) {
-
-                // option field
-                if (f.getType().isInstance(Option.class) || Option.class.isAssignableFrom(f.getType())) {
-
-                    // check accessibility
-                    if (!f.isAccessible()) {
-
-                        // access field
-                        f.setAccessible(true);
-                    }
-
-                    // config value
-                    Object config = f.get(this);
-
-                    // add to list of options
-                    options.add((Option) config);
-                }
-
-                // listener field
-                else if (f.getType().isInstance(FeatureListener.class) || FeatureListener.class.isAssignableFrom(f.getType())) {
-
-                    // check accessibility
-                    if (!f.isAccessible()) {
-
-                        // access field
-                        f.setAccessible(true);
-                    }
-
-                    // config value
-                    Object listener = f.get(this);
-
-                    // add to list of options
-                    listeners.add((Listener) listener);
-                }
-            }
+        // incompatible module interfaces
+        if (this instanceof IToggleable
+                && this instanceof IConcurrent)
+        {
+            throw new IncompatibleInterfaceException(
+                    "Module cannot implement IToggleable and IConcurrent at " +
+                            "the same time");
         }
 
-        // get method throws
-        catch (IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-         */
-
-        // assign category on instantiation
+        // init
+        this.name = name;
+        this.desc = desc;
         this.category = category;
     }
 
     /**
-     * Default module
+     * Gets the module name
      *
-     * @param name The name of the module
-     * @param description The description of the module
-     * @param category The category that the module will appear under in the UI
+     * @return The module name
      */
-    public Module(String name, String description, ModuleCategory category) {
-        this(name, new String[] {}, description, category);
+    public String getName() {
+        return name;
     }
 
     /**
-     * Binds the feature to a key
+     * Gets the module description
      *
-     * @param in The key
+     * @return The module description
      */
-    @Override
-    public void bind(int in) {
-
-        // set the feature bind
-        bind.setVal(in);
-        onBind();
+    public String getDescription() {
+        return desc;
     }
 
     /**
-     * Drawn state
+     * Gets the {@link ModuleCategory} module category
      *
+<<<<<<< Updated upstream
      * @param in The new drawn state
      */
     public void draw(boolean in) {
@@ -270,55 +249,121 @@ public class Module extends Feature implements IToggleable, ILabel {
      * Gets the module's category
      *
      * @return The module's category
+=======
+     * @return The module category
+>>>>>>> Stashed changes
      */
     public ModuleCategory getCategory() {
         return category;
     }
 
     /**
-     * Gets the keybind
+     * Returns whether the object is hidden
      *
-     * @return The keybind
+     * @return The hidden state
      */
-    public int getBind() {
-        return bind.getVal();
+    @Override
+    public boolean isHidden() {
+
+        // hidden state val
+        return hidden.getValue();
     }
 
     /**
-     * Checks whether the module is enabled
+     * Sets the object's hidden state
      *
-     * @return Whether the module is enabled
+     * @param hide The new hide state
      */
-    public boolean isEnabled() {
-        return enabled.getVal();
+    @Override
+    public void setHidden(boolean hide) {
+
+        // update hidden state val
+        hidden.setValue(hide);
     }
 
     /**
-     * Checks whether the module is drawn
+     * Gets the module label
      *
-     * @return Whether the module is drawn
+     * @return The module label
      */
-    public boolean isDrawn() {
-        return drawn.getVal();
+    @Override
+    public String getLabel() {
+
+        // module label
+        return name.toLowerCase() + "_module";
     }
 
     /**
-     * Gets the configurations associated with this module
+     * Parses the values from a {@link JsonObject} and updates all
+     * {@link Config} values in the objects
      *
-     * @return The configurations associated with this module
+     * @param o The Json object
      */
-    public Collection<Option> getOptions() {
-        return options;
+    @Override
+    public void fromJson(JsonObject o) {
+
+        // JsonElement set
+        for (Entry<String, JsonElement> entry : o.entrySet())
+        {
+            // cfg from key
+            Config<?> cfg = retrieve(entry.getKey());
+
+            // check retrieved
+            if (cfg != null)
+            {
+                // catches read exceptions
+                try
+                {
+                    // parse Json value
+                    cfg.fromJson(entry.getValue());
+                }
+
+                // couldn't parse Json value
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     /**
-     * Gets the arraylist data
+     * Returns configs as a string which will be passed to the
+     * {@link ConfigFile} writer and written to a <tt>.json</tt> file
      *
-     * @return The arraylist data
+     * @return The configs as a parsable Json string
      */
-    public String getData() {
+    @Override
+    public JsonObject toJson() {
 
-        // implemented by module
-        return "";
+        // json object
+        JsonObject out = new JsonObject();
+
+        // write all configurations
+        for (Config<?> cfg : getConfigs())
+        {
+
+            // toggleable configs
+            if (cfg.getName().equalsIgnoreCase("Enabled")
+                    || cfg.getName().equalsIgnoreCase("Bind"))
+            {
+
+                // concurrent module
+                if (this instanceof IConcurrent) {
+
+                    // skip config
+                    continue;
+                }
+            }
+
+            // JsonElement from config value
+            JsonElement e = cfg.toJson();
+
+            // add to output
+            out.add(cfg.getLabel(), e);
+        }
+
+        // output JsonObject
+        return out;
     }
 }
