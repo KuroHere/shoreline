@@ -22,8 +22,7 @@ public class BindModule extends ToggleModule implements IBindable
     final MacroConfig keybind = new MacroConfig("Bind",
             "Bind state. Global config in toggleable modules. Currently " +
                     "supports LWJGL keyboard and mouse keybindings",
-            Keyboard.KEY_NONE,
-            this::toggle);
+            Keyboard.KEY_NONE, this::toggle);
 
     /**
      * Default module constructor. Name must be unique for all modules.

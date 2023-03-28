@@ -53,7 +53,6 @@ public class MomentumMod
     @EventHandler
     public void init(FMLInitializationEvent event)
     {
-
         Momentum.init();
     }
 

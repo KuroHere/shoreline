@@ -1,8 +1,12 @@
 package com.momentum.impl.handler;
 
+import com.momentum.Momentum;
 import com.momentum.api.config.Macro;
+import com.momentum.api.event.Event;
+import com.momentum.api.event.Listener;
 import com.momentum.api.module.Module;
 import com.momentum.api.module.modules.BindModule;
+import com.momentum.impl.event.TickKeyboardEvent;
 import com.momentum.init.Handlers;
 import org.lwjgl.input.Keyboard;
 
@@ -15,6 +19,28 @@ import org.lwjgl.input.Keyboard;
 public class MacroHandler
 {
 
+    // TODO: This is temporary until I figure out how I want to do managers
+    public MacroHandler()
+    {
+        Momentum.EVENT_HANDLER.subscribe(new Listener<TickKeyboardEvent>()
+        {
+            /**
+             * Calls the listener for the {@link Event}
+             * event
+             *
+             * @param event The event
+             */
+            @Override
+            public void invoke(TickKeyboardEvent event)
+            {
+                runTickKeyboard();
+            }
+        });
+    }
+
+    /**
+     * Runs on the {@link TickKeyboardEvent}
+     */
     @Deprecated
     public void runTickKeyboard()
     {
