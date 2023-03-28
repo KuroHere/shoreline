@@ -4,18 +4,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.momentum.api.config.Config;
 import com.momentum.api.config.file.ConfigFile;
+import com.momentum.impl.ui.click.ClickGuiScreen;
 
 import java.awt.Color;
 
 /**
  * Color configuration associated with {@link } in
- * {@link com.momentum.impl.ui.ClickGuiScreen}.
+ * {@link ClickGuiScreen}.
  *
  * @author linus
  * @since 03/23/2023
  */
-public class ColorConfig extends Config<Color> {
-
+public class ColorConfig extends Config<Color>
+{
     // rgb value of color
     // equivalent to {@link Color#getRGB()} of value
     private int rgb;
@@ -52,8 +53,8 @@ public class ColorConfig extends Config<Color> {
      * @param val The new color value
      */
     @Override
-    public void setValue(Color val) {
-
+    public void setValue(Color val)
+    {
         // update rgb value
         super.setValue(val);
         rgb = val.getRGB();
@@ -64,8 +65,8 @@ public class ColorConfig extends Config<Color> {
      *
      * @param rgb The new color rgb value
      */
-    public void setValue(int rgb) {
-
+    public void setValue(int rgb)
+    {
         // update rgb value
         setValue(new Color(rgb, (rgb & 0xff000000) != 0xff000000));
         this.rgb = rgb;
@@ -76,7 +77,8 @@ public class ColorConfig extends Config<Color> {
      *
      * @return The rgb value
      */
-    public int getRgb() {
+    public int getRgb()
+    {
         return rgb;
     }
 
@@ -85,7 +87,8 @@ public class ColorConfig extends Config<Color> {
      *
      * @return The red component
      */
-    public int getRed() {
+    public int getRed()
+    {
         return (rgb >> 16) & 0xff;
     }
 
@@ -94,7 +97,8 @@ public class ColorConfig extends Config<Color> {
      *
      * @return The green component
      */
-    public int getGreen() {
+    public int getGreen()
+    {
         return (rgb >> 8) & 0xff;
     }
 
@@ -103,7 +107,8 @@ public class ColorConfig extends Config<Color> {
      *
      * @return The blue component
      */
-    public int getBlue() {
+    public int getBlue()
+    {
         return rgb & 0xff;
     }
 
@@ -112,7 +117,8 @@ public class ColorConfig extends Config<Color> {
      *
      * @return The alpha component
      */
-    public int getAlpha() {
+    public int getAlpha()
+    {
         return (rgb >> 24) & 0xff;
     }
 
@@ -123,8 +129,8 @@ public class ColorConfig extends Config<Color> {
      * @param e The Json element
      */
     @Override
-    public void fromJson(JsonElement e) {
-
+    public void fromJson(JsonElement e)
+    {
         // value of json element
         String sval = e.getAsString();
 
@@ -140,8 +146,8 @@ public class ColorConfig extends Config<Color> {
      * @return The configs as a parsable Json string
      */
     @Override
-    public JsonElement toJson() {
-
+    public JsonElement toJson()
+    {
         // hex value of color
         return new JsonPrimitive("#" + Integer.toHexString(rgb));
     }

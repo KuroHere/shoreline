@@ -18,8 +18,8 @@ import java.util.Set;
  * @param <T> Type of config, can only save those of type {@link IConfigurable}
  */
 public abstract class ConfigFile<T extends IConfigurable<?>>
-        implements IConfigFile {
-
+        implements IConfigFile
+{
     // curr working directory
     protected Path dir;
 
@@ -32,7 +32,6 @@ public abstract class ConfigFile<T extends IConfigurable<?>>
      */
     public ConfigFile()
     {
-
         // game running dir
         final Path running = Paths.get("");
 
@@ -50,7 +49,6 @@ public abstract class ConfigFile<T extends IConfigurable<?>>
         // cannot write
         catch (Exception e)
         {
-
             // current dir becomes running dir
             e.printStackTrace();
             dir = running;
@@ -59,14 +57,12 @@ public abstract class ConfigFile<T extends IConfigurable<?>>
         // check running directory
         finally
         {
-
             // if we cannot write, minecraft always has access
             // to the running dir
             if (dir == null
                     || !Files.exists(dir)
                     || !Files.isWritable(dir))
             {
-
                 // working dir becomes running dir
                 dir = running;
             }
@@ -77,7 +73,6 @@ public abstract class ConfigFile<T extends IConfigurable<?>>
             // check exists
             if (!Files.exists(dir))
             {
-
                 // catches IOException
                 try
                 {
@@ -88,8 +83,6 @@ public abstract class ConfigFile<T extends IConfigurable<?>>
                 // write error
                 catch (IOException e)
                 {
-
-                    // print error
                     e.printStackTrace();
                     dir = running;
                 }

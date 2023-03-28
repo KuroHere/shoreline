@@ -4,16 +4,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.momentum.api.config.Config;
 import com.momentum.api.config.file.ConfigFile;
+import com.momentum.impl.ui.click.ClickGuiScreen;
 
 /**
  * Boolean configuration associated with {@link } in
- * {@link com.momentum.impl.ui.ClickGuiScreen}.
+ * {@link ClickGuiScreen}.
  *
  * @author linus
  * @since 03/20/2023
  */
-public class BooleanConfig extends Config<Boolean> {
-
+public class BooleanConfig extends Config<Boolean>
+{
     /**
      * Config default constructor
      *
@@ -33,8 +34,8 @@ public class BooleanConfig extends Config<Boolean> {
      * @param e The Json element
      */
     @Override
-    public void fromJson(JsonElement e) {
-
+    public void fromJson(JsonElement e)
+    {
         // set value to the json element value
         boolean val = e.getAsBoolean();
         setValue(val);
@@ -47,8 +48,8 @@ public class BooleanConfig extends Config<Boolean> {
      * @return The configs as a parsable Json string
      */
     @Override
-    public JsonElement toJson() {
-
+    public JsonElement toJson()
+    {
         // boolean value to string
         return new JsonPrimitive(value.toString());
     }

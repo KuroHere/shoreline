@@ -10,8 +10,8 @@ package com.momentum.api.registry;
  * @see IRegistry
  * @see Registry
  */
-public interface ILabeled {
-
+public interface ILabeled
+{
     /**
      * Gets the unique label
      *

@@ -18,9 +18,9 @@ import java.util.Map;
  * @author linus
  * @since 03/22/2023
  */
-public class SubscriberModule extends Module implements ISubscriber {
-
-    // register
+public class SubscriberModule extends Module implements ISubscriber
+{
+    // listener register
     // underlying hash map with String keys
     private final Map<String, Listener> listenerRegister = new HashMap<>();
 
@@ -47,8 +47,8 @@ public class SubscriberModule extends Module implements ISubscriber {
      * @throws NullPointerException if data is <tt>null</tt>
      */
     @Override
-    public <L, C extends Listener> C register(C data) {
-
+    public <L, C extends Listener> C register(C data)
+    {
         // null check
         if (data == null)
         {
@@ -69,8 +69,8 @@ public class SubscriberModule extends Module implements ISubscriber {
      * @return The unregistered data
      * @throws NullPointerException if data is <tt>null</tt>
      */
-    public Listener<?> unregister(Listener data) {
-
+    public Listener<?> unregister(Listener data)
+    {
         // null check
         if (data == null)
         {
@@ -87,8 +87,8 @@ public class SubscriberModule extends Module implements ISubscriber {
      * @return The list of all active {@link Listener} listeners
      */
     @Override
-    public Collection<Listener> getListeners() {
-
+    public Collection<Listener> getListeners()
+    {
         // register values
         return listenerRegister.values();
     }

@@ -9,8 +9,8 @@ import com.momentum.api.event.handler.EventHandler;
  * @author linus
  * @since 03/20/2023
  */
-public abstract class Event implements ICancelable {
-
+public abstract class Event implements ICancelable
+{
     // cancelled state. Indicates if the event should run.
     private boolean cancelled;
 
@@ -20,8 +20,8 @@ public abstract class Event implements ICancelable {
      * @param in The cancelled state
      */
     @Override
-    public void setCancelled(boolean in) {
-
+    public void setCancelled(boolean in)
+    {
         // update cancelled state
         if (isCancelable())
         {
@@ -35,7 +35,8 @@ public abstract class Event implements ICancelable {
      * @return The cancelled state
      */
     @Override
-    public boolean isCanceled() {
+    public boolean isCanceled()
+    {
         return cancelled;
     }
 

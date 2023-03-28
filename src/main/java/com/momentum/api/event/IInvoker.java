@@ -7,8 +7,8 @@ package com.momentum.api.event;
  * @since 03/23/2023
  * @param <T> The argument type
  */
-public interface IInvoker<T> {
-
+public interface IInvoker<T>
+{
     /**
      * Invokes for the given argument
      *

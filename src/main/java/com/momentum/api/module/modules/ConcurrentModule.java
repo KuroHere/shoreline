@@ -13,8 +13,8 @@ import com.momentum.api.module.exceptions.IncompatibleInterfaceException;
  * @author linus
  * @since 03/21/2023
  */
-public class ConcurrentModule extends SubscriberModule implements IConcurrent {
-
+public class ConcurrentModule extends SubscriberModule implements IConcurrent
+{
     /**
      * Default module constructor. Name must be unique for all modules.
      *
@@ -28,11 +28,9 @@ public class ConcurrentModule extends SubscriberModule implements IConcurrent {
     {
         super(name, desc, category);
 
-        // all active listeners
+        // subscribe all listeners
         for (Listener l : getListeners())
         {
-
-            // subscribe to event handler
             Momentum.EVENT_HANDLER.subscribe(l);
         }
     }

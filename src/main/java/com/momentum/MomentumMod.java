@@ -12,37 +12,37 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
  * @since 01/09/2023
  */
 @Mod(
-        modid = MomentumMod.modId,
-        name = MomentumMod.modName,
-        version = MomentumMod.modVer,
-        acceptedMinecraftVersions = "[" + MomentumMod.modMcVer + "]"
+        modid = MomentumMod.MOD_ID,
+        name = MomentumMod.MOD_NAME,
+        version = MomentumMod.MOD_VER,
+        acceptedMinecraftVersions = "[" + MomentumMod.MOD_MC_VER + "]"
 )
-public class MomentumMod {
-
+public class MomentumMod
+{
     // mod instance
     @Instance
-    public MomentumMod instance;
+    public static MomentumMod INSTANCE;
 
     // mod identifier
-    public static final String modId = "momentum";
+    public static final String MOD_ID = "momentum";
 
     // mod name
-    public static final String modName = "Momentum";
+    public static final String MOD_NAME = "Momentum";
 
     // mod version
     // UPDATE BEFORE RELEASE
-    public static final String modVer = "1.0";
+    public static final String MOD_VER = "1.0";
 
     // mod mc version
-    public static final String modMcVer = "1.12.2";
+    public static final String MOD_MC_VER = "1.12.2";
 
     /**
      *
      * @param event
      */
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-
+    public void preInit(FMLPreInitializationEvent event)
+    {
         Momentum.preInit();
     }
 
@@ -51,7 +51,8 @@ public class MomentumMod {
      * @param event
      */
     @EventHandler
-    public void init(FMLInitializationEvent event) {
+    public void init(FMLInitializationEvent event)
+    {
 
         Momentum.init();
     }
@@ -61,8 +62,8 @@ public class MomentumMod {
      * @param event
      */
     @EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
-
+    public void postInit(FMLPostInitializationEvent event)
+    {
         Momentum.postInit();
     }
 }

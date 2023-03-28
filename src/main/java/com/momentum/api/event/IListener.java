@@ -7,9 +7,8 @@ package com.momentum.api.event;
  * @since 03/20/2023
  * @param <E> Event type to listen for
  */
-public interface IListener<E extends Event>
-        extends IInvoker<E> {
-
+public interface IListener<E extends Event> extends IInvoker<E>
+{
     /**
      * Calls the listener for the {@link Event} event
      *
@@ -23,7 +22,8 @@ public interface IListener<E extends Event>
      * @param events The events
      */
     @Override
-    default void invoke(E[] events) {
+    default void invoke(E[] events)
+    {
         // no impl
     }
 

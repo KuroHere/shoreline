@@ -4,18 +4,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.momentum.api.config.Config;
 import com.momentum.api.config.file.ConfigFile;
+import com.momentum.impl.ui.click.ClickGuiScreen;
 
 /**
  * Number configuration associated with {@link } in
- * {@link com.momentum.impl.ui.ClickGuiScreen}. Calling
+ * {@link ClickGuiScreen}. Calling
  * {@link Config#setValue(Object)} will check the min and max bounds before
  * updating the value.
  *
  * @author linus
  * @since 03/20/2023
  */
-public class NumberConfig extends Config<Number> {
-
+public class NumberConfig extends Config<Number>
+{
     // min and max bounds
     private final Number min, max;
 
@@ -43,8 +44,8 @@ public class NumberConfig extends Config<Number> {
      * @throws NullPointerException if val is null
      */
     @Override
-    public void setValue(Number val) {
-
+    public void setValue(Number val)
+    {
         // null check
         if (val == null)
         {
@@ -75,8 +76,8 @@ public class NumberConfig extends Config<Number> {
      *
      * @return The value rounding scale
      */
-    public int getRoundingScale() {
-
+    public int getRoundingScale()
+    {
         // value as a string
         String val = String.valueOf(value);
 
@@ -89,7 +90,8 @@ public class NumberConfig extends Config<Number> {
      *
      * @return The minimum bound
      */
-    public Number getMin() {
+    public Number getMin()
+    {
         return min;
     }
 
@@ -98,7 +100,8 @@ public class NumberConfig extends Config<Number> {
      *
      * @return The maximum bound
      */
-    public Number getMax() {
+    public Number getMax()
+    {
         return max;
     }
 
@@ -109,12 +112,11 @@ public class NumberConfig extends Config<Number> {
      * @param e The Json element
      */
     @Override
-    public void fromJson(JsonElement e) {
-
+    public void fromJson(JsonElement e)
+    {
         // int config
         if (value instanceof Integer)
         {
-
             // set value to the json element value
             int val = e.getAsInt();
             setValue(val);
@@ -123,7 +125,6 @@ public class NumberConfig extends Config<Number> {
         // float config
         else if (value instanceof Float)
         {
-
             // set value to the json element value
             float val = e.getAsFloat();
             setValue(val);
@@ -132,7 +133,6 @@ public class NumberConfig extends Config<Number> {
         // double config
         else if (value instanceof Double)
         {
-
             // set value to the json element value
             double val = e.getAsDouble();
             setValue(val);
@@ -146,8 +146,8 @@ public class NumberConfig extends Config<Number> {
      * @return The configs as a parsable Json string
      */
     @Override
-    public JsonElement toJson() {
-
+    public JsonElement toJson()
+    {
         // number to string
         return new JsonPrimitive(value.toString());
     }

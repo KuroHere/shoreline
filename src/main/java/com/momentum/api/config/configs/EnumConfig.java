@@ -4,16 +4,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.momentum.api.config.Config;
 import com.momentum.api.config.file.ConfigFile;
+import com.momentum.impl.ui.click.ClickGuiScreen;
 
 /**
  * Enum configuration associated with {@link } in
- * {@link com.momentum.impl.ui.ClickGuiScreen}.
+ * {@link ClickGuiScreen}.
  *
  * @author linus
  * @since 03/20/2023
  */
-public class EnumConfig<T extends Enum<T>> extends Config<T> {
-
+public class EnumConfig<T extends Enum<T>> extends Config<T>
+{
     // mode values
     private final T[] values;
 
@@ -36,7 +37,8 @@ public class EnumConfig<T extends Enum<T>> extends Config<T> {
      *
      * @return The configuration mode values
      */
-    public T[] getValues() {
+    public T[] getValues()
+    {
         return values;
     }
 
@@ -48,8 +50,8 @@ public class EnumConfig<T extends Enum<T>> extends Config<T> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void fromJson(JsonElement e) {
-
+    public void fromJson(JsonElement e)
+    {
         // value of the json element
         String sval = e.getAsString();
 
@@ -67,8 +69,8 @@ public class EnumConfig<T extends Enum<T>> extends Config<T> {
      * @return The configs as a parsable Json string
      */
     @Override
-    public JsonElement toJson() {
-
+    public JsonElement toJson()
+    {
         // enum value to string
         return new JsonPrimitive(value.toString());
     }

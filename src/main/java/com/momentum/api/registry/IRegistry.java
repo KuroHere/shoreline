@@ -15,8 +15,8 @@ import java.util.Map;
  * @see ConfigContainer
  * @see ILabeled
  */
-public interface IRegistry<T extends ILabeled> {
-
+public interface IRegistry<T extends ILabeled>
+{
     /**
      * Replaces the current register
      *

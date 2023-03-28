@@ -7,8 +7,8 @@ package com.momentum.api.event;
  * @author linus
  * @since 03/20/2023
  */
-public interface ICancelable {
-
+public interface ICancelable
+{
     /**
      * Sets the cancelled state
      *

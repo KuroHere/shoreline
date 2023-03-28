@@ -6,8 +6,8 @@ package com.momentum.api.module;
  * @author linus
  * @since 01/16/2023
  */
-public enum ModuleCategory {
-
+public enum ModuleCategory
+{
     /**
      * Modules used for combat (Ex: Aura, AutoCrystal, Surround, etc.)
      */

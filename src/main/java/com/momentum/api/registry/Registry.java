@@ -12,11 +12,11 @@ import java.util.Map;
  * @since 03/23/2023
  * @param <T> The registry data type
  */
-public class Registry<T extends ILabeled> implements IRegistry<T> {
-
+public class Registry<T extends ILabeled> implements IRegistry<T>
+{
     // register
     // underlying hash map with String keys
-    protected Map<String, Config<?>> register = new LinkedHashMap<>();
+    protected Map<String, T> register = new LinkedHashMap<>();
 
     /**
      * Replaces the current register
@@ -24,7 +24,9 @@ public class Registry<T extends ILabeled> implements IRegistry<T> {
      * @param reg The new register
      */
     @Override
-    public void replace(Map<String, T> reg) {
+    public void replace(Map<String, T> reg)
+    {
+        // replace old register
         register = reg;
     }
 
@@ -38,8 +40,8 @@ public class Registry<T extends ILabeled> implements IRegistry<T> {
      * @throws NullPointerException if data is <tt>null</tt>
      */
     @Override
-    public T register(String l, T data) {
-
+    public T register(String l, T data)
+    {
         // null check
         if (data == null)
         {
@@ -60,8 +62,8 @@ public class Registry<T extends ILabeled> implements IRegistry<T> {
      * @throws NullPointerException if data is <tt>null</tt>
      */
     @Override
-    public T register(T data) {
-
+    public T register(T data)
+    {
         // null check
         if (data == null)
         {
@@ -82,8 +84,8 @@ public class Registry<T extends ILabeled> implements IRegistry<T> {
      * @throws NullPointerException if data is <tt>null</tt>
      */
     @Override
-    public T unregister(T data) {
-
+    public T unregister(T data)
+    {
         // null check
         if (data == null)
         {
@@ -103,8 +105,8 @@ public class Registry<T extends ILabeled> implements IRegistry<T> {
      * @throws NullPointerException if label is <tt>null</tt>
      */
     @Override
-    public T retrieve(String l) {
-
+    public T retrieve(String l)
+    {
         // null check
         if (l == null)
         {
@@ -126,8 +128,8 @@ public class Registry<T extends ILabeled> implements IRegistry<T> {
      * @throws NullPointerException if label or the class type are <tt>null</tt>
      */
     @Override
-    public T retrieve(String l, Class<?> clazz) {
-
+    public T retrieve(String l, Class<?> clazz)
+    {
         // null check
         if (l == null)
         {

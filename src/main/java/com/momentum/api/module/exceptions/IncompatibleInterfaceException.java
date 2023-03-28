@@ -6,12 +6,13 @@ package com.momentum.api.module.exceptions;
  * @author linus
  * @since 03/22/2023
  */
-public class IncompatibleInterfaceException extends RuntimeException {
-
+public class IncompatibleInterfaceException extends RuntimeException
+{
     /**
      * Default constructor
      */
-    public IncompatibleInterfaceException() {
+    public IncompatibleInterfaceException()
+    {
         super();
     }
 
@@ -20,7 +21,8 @@ public class IncompatibleInterfaceException extends RuntimeException {
      *
      * @param message The detail message
      */
-    public IncompatibleInterfaceException(String message) {
+    public IncompatibleInterfaceException(String message)
+    {
         super(message);
     }
 }

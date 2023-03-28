@@ -10,8 +10,8 @@ import com.momentum.api.event.Listener;
  * @author linus
  * @since 03/20/2023
  */
-public interface IEventHandler {
-
+public interface IEventHandler
+{
     /**
      * Subscribes a given event {@link Listener} to the handler
      *
@@ -35,7 +35,7 @@ public interface IEventHandler {
     void clear();
 
     /**
-     * Invokes all {@link Listener} associated with an event
+     * Invokes all {@link Listener} associated with an {@link Event}
      *
      * @param e The event
      * @return Whether the event was canceled

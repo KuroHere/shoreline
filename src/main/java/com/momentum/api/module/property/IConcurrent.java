@@ -11,6 +11,7 @@ import com.momentum.api.module.modules.ConcurrentModule;
  *
  * @see ConcurrentModule
  */
-public interface IConcurrent {
+public interface IConcurrent
+{
 
 }

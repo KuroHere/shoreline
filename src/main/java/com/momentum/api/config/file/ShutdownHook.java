@@ -10,8 +10,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author linus
  * @since 03/20/2023
  */
-public class ShutdownHook extends Thread {
-
+public class ShutdownHook extends Thread
+{
     // shutdown hooks
     private final List<Runnable> hooks =
             new CopyOnWriteArrayList<>();
@@ -21,9 +21,9 @@ public class ShutdownHook extends Thread {
      */
     public ShutdownHook()
     {
+        setName("Momentum-ShutdownHook");
 
         // add as runtime shutdown hook
-        setName("Momentum-ShutdownHook");
         Runtime runtime = Runtime.getRuntime();
         runtime.addShutdownHook(this);
     }
@@ -32,8 +32,8 @@ public class ShutdownHook extends Thread {
      * Runs all hooks when runtime is being shutdown
      */
     @Override
-    public void run() {
-
+    public void run()
+    {
         // run all hooks
         for (Runnable h : hooks)
         {
@@ -46,8 +46,8 @@ public class ShutdownHook extends Thread {
      *
      * @param r The runnable
      */
-    public void hook(Runnable r) {
-
+    public void hook(Runnable r)
+    {
         // add to hooks
         hooks.add(r);
     }

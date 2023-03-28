@@ -14,10 +14,10 @@ import java.lang.reflect.Type;
  * @param <E> The event type
  */
 public abstract class Listener<E extends Event>
-        implements IListener<E>, ILabeled {
-
-    // The listening event class. This class is used to identify the
-    // event that is associated with the current listener.
+        implements IListener<E>, ILabeled
+{
+    // The listening event class. This class is used to identify the event
+    // that is associated with the current listener.
     private Class<E> event;
 
     /**
@@ -25,30 +25,25 @@ public abstract class Listener<E extends Event>
      */
     protected Listener()
     {
-
         // superclass
         Type superclass = getClass().getGenericSuperclass();
 
         // check if superclass contains a parameterized type
         if (superclass instanceof ParameterizedType)
         {
-
             // check parameter types
             for (Type t : ((ParameterizedType) superclass)
                     .getActualTypeArguments())
             {
-
                 // check if parameter type is a class
                 if (t instanceof Class)
                 {
-
                     // express parameter type as Class obj
                     Class<E> event = (Class<E>) t;
 
                     // check if parameter type is Event subclass
                     if (Event.class.isAssignableFrom(event))
                     {
-
                         // initialize listener type
                         this.event = event;
                         break;
@@ -64,7 +59,8 @@ public abstract class Listener<E extends Event>
      * @return The listening event {@link Event} class
      */
     @Override
-    public Class<E> getEventClass() {
+    public Class<E> getEventClass()
+    {
         return event;
     }
 
@@ -74,8 +70,9 @@ public abstract class Listener<E extends Event>
      * @return
      */
     @Override
-    public String getLabel() {
-        return null;
+    public String getLabel()
+    {
+        return event.getCanonicalName() + "_listener";
     }
 
     /**

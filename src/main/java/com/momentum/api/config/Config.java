@@ -5,15 +5,17 @@ import com.momentum.api.config.factory.ConfigContainer;
 import com.momentum.api.config.file.ConfigFile;
 import com.momentum.api.config.file.IConfigurable;
 import com.momentum.api.registry.ILabeled;
+import com.momentum.impl.ui.click.ClickGuiScreen;
 
 /**
  * Config implementation which will be saved locally in a <tt>.json</tt> file
  * and updated based on user input. The value of a config can be updated
- * through commands or the {@link com.momentum.impl.ui.ClickGuiScreen}.
+ * through commands or the {@link ClickGuiScreen}.
  *
  * @author linus
  * @since 03/20/2023
- * @param <T> The value type
+ *
+ * @param <T> The configuration value data type
  *
  * @see com.momentum.api.config.configs.BooleanConfig
  * @see com.momentum.api.config.configs.EnumConfig
@@ -21,8 +23,8 @@ import com.momentum.api.registry.ILabeled;
  * @see com.momentum.api.config.configs.NumberConfig
  */
 public abstract class Config<T>
-        implements IConfigurable<JsonElement>, ILabeled {
-
+        implements IConfigurable<JsonElement>, ILabeled
+{
     // config identifier
     // must be unique
     protected String name;
@@ -58,7 +60,8 @@ public abstract class Config<T>
      *
      * @return The primary name
      */
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
@@ -67,7 +70,8 @@ public abstract class Config<T>
      *
      * @return The config description
      */
-    public String getDescription() {
+    public String getDescription()
+    {
         return desc;
     }
 
@@ -76,7 +80,8 @@ public abstract class Config<T>
      *
      * @param val The new configuration value
      */
-    public void setValue(T val) {
+    public void setValue(T val)
+    {
         value = val;
     }
 
@@ -85,7 +90,8 @@ public abstract class Config<T>
      *
      * @return The configuration value
      */
-    public T getValue() {
+    public T getValue()
+    {
         return value;
     }
 
@@ -94,7 +100,8 @@ public abstract class Config<T>
      *
      * @param cont The new configuration parent container
      */
-    public void setContainer(ConfigContainer cont) {
+    public void setContainer(ConfigContainer cont)
+    {
         container = cont;
     }
 
@@ -103,7 +110,8 @@ public abstract class Config<T>
      *
      * @return The configuration parent container
      */
-    public ConfigContainer getContainer() {
+    public ConfigContainer getContainer()
+    {
         return container;
     }
 
@@ -112,7 +120,8 @@ public abstract class Config<T>
      *
      * @param l The new configuration label
      */
-    public void setLabel(String l) {
+    public void setLabel(String l)
+    {
         label = l;
     }
 
@@ -123,8 +132,8 @@ public abstract class Config<T>
      * @return The configuration label
      */
     @Override
-    public String getLabel() {
-
+    public String getLabel()
+    {
         // no impl
         return label;
     }

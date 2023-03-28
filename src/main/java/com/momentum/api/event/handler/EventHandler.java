@@ -9,13 +9,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * EventHandler implementation for {@link Event} events (also known as an <i>EventBus</i>).
- * Manages all {@link Listener} listeners for an event.
+ * EventHandler implementation for {@link Event} events (also known as an
+ * <i>EventBus</i>). Manages all {@link Listener} listeners for an event.
  *
  * @author linus
  * @since 03/20/2023
  */
-public class EventHandler implements IEventHandler {
+public class EventHandler implements IEventHandler
+{
 
     // set of listeners
     // concurrent for thread safety
@@ -30,12 +31,13 @@ public class EventHandler implements IEventHandler {
      * @throws NullPointerException if the listener is <tt>null</tt>
      */
     @Override
-    public void subscribe(Listener l) {
-
+    public void subscribe(Listener l)
+    {
         // null check
         if (l == null)
         {
-            throw new NullPointerException("EventHandler does not support null listeners");
+            throw new NullPointerException(
+                    "EventHandler does not support null listeners");
         }
 
         // active listeners
@@ -54,12 +56,13 @@ public class EventHandler implements IEventHandler {
      * @throws NullPointerException if the listener is <tt>null</tt>
      */
     @Override
-    public void unsubscribe(Listener l) {
-
+    public void unsubscribe(Listener l)
+    {
         // null check
         if (l == null)
         {
-            throw new NullPointerException("EventHandler does not support null listeners");
+            throw new NullPointerException(
+                    "EventHandler does not support null listeners");
         }
 
         // active listeners
@@ -69,7 +72,6 @@ public class EventHandler implements IEventHandler {
         active.remove(l);
         if (active.isEmpty())
         {
-
             // remove from list
             listeners.remove(l.getEventClass());
         }
@@ -80,7 +82,8 @@ public class EventHandler implements IEventHandler {
      * be empty after calling <tt>clear</tt>
      */
     @Override
-    public void clear() {
+    public void clear()
+    {
         listeners.clear();
     }
 
@@ -89,15 +92,16 @@ public class EventHandler implements IEventHandler {
      * with an event
      *
      * @param e The event
-     * @throws NullPointerException if the event is </t>null</tt>
+     * @throws NullPointerException if the event is <tt>null</tt>
      */
     @Override
-    public boolean dispatch(Event e) {
-
+    public boolean dispatch(Event e)
+    {
         // null check
         if (e == null)
         {
-            throw new NullPointerException("EventHandler does not dispatch null events");
+            throw new NullPointerException(
+                    "EventHandler does not dispatch null events");
         }
 
         // set of all associated listeners
@@ -106,8 +110,6 @@ public class EventHandler implements IEventHandler {
         // invoke all listeners
         for (Listener l : active)
         {
-
-            // invoke listener
             l.invoke(e);
         }
 

@@ -1,13 +1,28 @@
 package com.momentum.impl.ui.shape;
 
+import com.momentum.api.util.Globals;
+
 /**
+ * Basic {@link IShape} implementation
+ *
  * @author linus
  * @since 03/24/2023
  */
-public abstract class SimpleShape implements IShape {
-
+public abstract class SimpleShape implements Globals, IShape
+{
     // shape positions
     protected float x, y, cx, cy;
+
+    /**
+     * Sets the x position
+     *
+     * @param xv The new x position
+     */
+    @Override
+    public void setX(float xv)
+    {
+        x = xv;
+    }
 
     /**
      * Gets the x position using
@@ -16,8 +31,20 @@ public abstract class SimpleShape implements IShape {
      * @return The x position
      */
     @Override
-    public float getX() {
+    public float getX()
+    {
         return x;
+    }
+
+    /**
+     * Sets the y position
+     *
+     * @param yv The new y position
+     */
+    @Override
+    public void setY(float yv)
+    {
+        x = yv;
     }
 
     /**
@@ -26,7 +53,8 @@ public abstract class SimpleShape implements IShape {
      * @return The y position
      */
     @Override
-    public float getY() {
+    public float getY()
+    {
         return y;
     }
 
@@ -36,7 +64,8 @@ public abstract class SimpleShape implements IShape {
      * @return The center x position
      */
     @Override
-    public float getCenterX() {
+    public float getCenterX()
+    {
         return cx;
     }
 
@@ -46,17 +75,10 @@ public abstract class SimpleShape implements IShape {
      * @return The center y position
      */
     @Override
-    public float getCenterY() {
+    public float getCenterY()
+    {
         return cy;
     }
-
-    /**
-     * Draws the shape
-     *
-     * @param c The color
-     */
-    @Override
-    public abstract void draw(int c);
 
     /**
      * Returns whether the x and y fall within the shape's bounds

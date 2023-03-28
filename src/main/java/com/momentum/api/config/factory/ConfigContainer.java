@@ -5,8 +5,10 @@ import com.momentum.api.registry.ILabeled;
 import com.momentum.api.registry.IRegistry;
 import com.momentum.api.registry.Registry;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
+
 /**
  * Configuration container implementation for {@link Config}. Supports adding,
  * removing, and retrieving through the use of a {@link Registry} which is
@@ -17,18 +19,30 @@ import java.util.HashMap;
  *
  * @see com.momentum.api.module.Module
  */
-public class ConfigContainer extends Registry<Config<?>> {
-
+public class ConfigContainer extends Registry<Config<?>>
+{
     /**
-     * Default constructor. Uses {@link ReflectionConfigFactory} to populate
+     * Default constructor. Uses {@link ConfigFactory} to populate
      * the register through reflection
      */
     public ConfigContainer()
     {
+        // config factory
+        final ConfigFactory factory = new ConfigFactory();
 
-        // populate
-        ReflectionConfigFactory factory = new ReflectionConfigFactory();
-        register = factory.build(getClass());
+        // declaring class
+        Class<?> declaring = getClass().getDeclaringClass();
+
+        // config factory t
+        if (declaring != null)
+        {
+            // build all configuration field
+            for (Field f : declaring.getDeclaredFields())
+            {
+                // register config
+                register(factory.build(f));
+            }
+        }
     }
 
     /**
@@ -41,8 +55,8 @@ public class ConfigContainer extends Registry<Config<?>> {
      * @throws NullPointerException if data is <tt>null</tt>
      */
     @Override
-    public Config register(String l, Config data) {
-
+    public Config<?> register(String l, Config<?> data)
+    {
         // null check
         if (data == null)
         {
@@ -64,8 +78,8 @@ public class ConfigContainer extends Registry<Config<?>> {
      * @throws NullPointerException if data is <tt>null</tt>
      */
     @Override
-    public Config register(Config data) {
-
+    public Config<?> register(Config<?> data)
+    {
         // null check
         if (data == null)
         {
@@ -88,8 +102,8 @@ public class ConfigContainer extends Registry<Config<?>> {
      * @throws NullPointerException if data is <tt>null</tt>
      */
     @Override
-    public Config<?> unregister(Config data) {
-
+    public Config<?> unregister(Config<?> data)
+    {
         // null check
         if (data == null)
         {
@@ -108,8 +122,8 @@ public class ConfigContainer extends Registry<Config<?>> {
      *
      * @return A list of configs
      */
-    public Collection<Config<?>> getConfigs() {
-
+    public Collection<Config<?>> getConfigs()
+    {
         // value list in map
         return register.values();
     }

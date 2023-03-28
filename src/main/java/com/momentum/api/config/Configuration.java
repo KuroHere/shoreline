@@ -1,5 +1,6 @@
 package com.momentum.api.config;
 
+import com.momentum.api.config.factory.ConfigFactory;
 import com.momentum.api.registry.ILabeled;
 
 import java.lang.annotation.ElementType;
@@ -16,12 +17,12 @@ import java.lang.annotation.Target;
  * @since 03/23/2023
  *
  * @see Config
- * @see com.momentum.api.config.factory.ReflectionConfigFactory
+ * @see ConfigFactory
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Configuration {
-
+public @interface Configuration
+{
     /**
      * Gets the config {@link com.momentum.api.registry.ILabeled} label which
      * will be used as the config id

@@ -7,8 +7,8 @@ package com.momentum.api.module.property;
  * @author linus
  * @since 03/24/2023
  */
-public interface IHideable {
-
+public interface IHideable
+{
     /**
      * Returns whether the object is hidden
      *

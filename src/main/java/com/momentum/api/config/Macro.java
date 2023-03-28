@@ -9,8 +9,8 @@ import org.lwjgl.input.Keyboard;
  * @author linus
  * @since 03/20/2023
  */
-public class Macro {
-
+public class Macro
+{
     // macro key
     // preform action on press
     private final Integer keycode;
@@ -28,7 +28,6 @@ public class Macro {
      */
     public Macro(Integer keycode, Runnable action)
     {
-
         // check keycode is valid
         if (keycode < 0 || keycode > 255)
         {
@@ -44,10 +43,9 @@ public class Macro {
     /**
      * Called when the macro key is pressed
      */
-    public void invoke() {
-
-        // default impl
-        // toggle parent module
+    public void invoke()
+    {
+        // run action runnable
         action.run();
     }
 
@@ -56,8 +54,8 @@ public class Macro {
      *
      * @return The macro key name
      */
-    public String getKeyName() {
-
+    public String getKeyName()
+    {
         // keyboard key name
         return Keyboard.getKeyName(keycode);
     }
@@ -67,7 +65,8 @@ public class Macro {
      *
      * @return The macro key code
      */
-    public int getKeyCode() {
+    public int getKeycode()
+    {
         return keycode;
     }
 
@@ -76,7 +75,8 @@ public class Macro {
      *
      * @return The macro action
      */
-    public Runnable getAction() {
+    public Runnable getAction()
+    {
         return action;
     }
 }

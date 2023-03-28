@@ -5,17 +5,18 @@ import com.google.gson.JsonPrimitive;
 import com.momentum.api.config.Config;
 import com.momentum.api.config.Macro;
 import com.momentum.api.config.file.ConfigFile;
+import com.momentum.impl.ui.click.ClickGuiScreen;
 import org.lwjgl.input.Keyboard;
 
 /**
  * Macro configuration associated with {@link } in
- * {@link com.momentum.impl.ui.ClickGuiScreen}.
+ * {@link ClickGuiScreen}.
  *
  * @author linus
  * @since 03/20/2023
  */
-public class MacroConfig extends Config<Macro> {
-
+public class MacroConfig extends Config<Macro>
+{
     /**
      * Config default constructor
      *
@@ -49,8 +50,8 @@ public class MacroConfig extends Config<Macro> {
      * @param keycode The config value keycode
      * @throws IllegalArgumentException if keycode is not a valid LWJGL keycode
      */
-    public void setValue(Integer keycode) {
-
+    public void setValue(Integer keycode)
+    {
         // create new macro
         value = new Macro(keycode, value.getAction());
     }
@@ -62,8 +63,8 @@ public class MacroConfig extends Config<Macro> {
      * @param action The config value action
      * @throws IllegalArgumentException if keycode is not a valid LWJGL keycode
      */
-    public void setValue(Integer keycode, Runnable action) {
-
+    public void setValue(Integer keycode, Runnable action)
+    {
         // create new macro
         value = new Macro(keycode, action);
     }
@@ -75,8 +76,8 @@ public class MacroConfig extends Config<Macro> {
      * @param e The Json element
      */
     @Override
-    public void fromJson(JsonElement e) {
-
+    public void fromJson(JsonElement e)
+    {
         // value of json element
         String sval = e.getAsString();
 
@@ -92,8 +93,8 @@ public class MacroConfig extends Config<Macro> {
      * @return The configs as a parsable Json string
      */
     @Override
-    public JsonElement toJson() {
-
+    public JsonElement toJson()
+    {
         // keybinding key name
         return new JsonPrimitive(value.getKeyName());
     }

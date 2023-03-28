@@ -14,8 +14,8 @@ import java.util.Collection;
  *
  * @see com.momentum.api.module.modules.SubscriberModule
  */
-public interface ISubscriber {
-
+public interface ISubscriber
+{
     /**
      * Registers the given data to a register, which can later be subscribed to an
      * event bus

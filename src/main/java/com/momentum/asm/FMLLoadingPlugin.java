@@ -14,15 +14,15 @@ import java.util.Map;
  * @author linus
  * @since 03/19/2023
  */
-@Name(MomentumMod.modName) @MCVersion(MomentumMod.modMcVer)
-public class FMLLoadingPlugin implements IFMLLoadingPlugin {
-
+@Name(MomentumMod.MOD_NAME + "CorePlugin")
+@MCVersion(MomentumMod.MOD_MC_VER)
+public class FMLLoadingPlugin implements IFMLLoadingPlugin
+{
     /**
      * Initializes the mixin option
      */
     public FMLLoadingPlugin()
     {
-
         // initialize mixin option
         MixinBootstrap.init();
         Mixins.addConfiguration("mixins.momentum.json");
@@ -34,7 +34,8 @@ public class FMLLoadingPlugin implements IFMLLoadingPlugin {
      * @return a list of classes that implements the IClassTransformer interface
      */
     @Override
-    public String[] getASMTransformerClass() {
+    public String[] getASMTransformerClass()
+    {
         return new String[0];
     }
 
@@ -49,7 +50,8 @@ public class FMLLoadingPlugin implements IFMLLoadingPlugin {
      * normal loading events
      */
     @Override
-    public String getModContainerClass() {
+    public String getModContainerClass()
+    {
         return null;
     }
 
@@ -63,7 +65,8 @@ public class FMLLoadingPlugin implements IFMLLoadingPlugin {
      */
     @Nullable
     @Override
-    public String getSetupClass() {
+    public String getSetupClass()
+    {
         return null;
     }
 
@@ -77,7 +80,8 @@ public class FMLLoadingPlugin implements IFMLLoadingPlugin {
      * @param data
      */
     @Override
-    public void injectData(Map<String, Object> data) {
+    public void injectData(Map<String, Object> data)
+    {
 
     }
 
@@ -88,7 +92,8 @@ public class FMLLoadingPlugin implements IFMLLoadingPlugin {
      * @return the name of an access transformer class or null if none is provided
      */
     @Override
-    public String getAccessTransformerClass() {
+    public String getAccessTransformerClass()
+    {
         return null;
     }
 }

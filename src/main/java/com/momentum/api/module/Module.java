@@ -1,14 +1,5 @@
 package com.momentum.api.module;
 
-<<<<<<< Updated upstream
-import com.momentum.api.event.Listener;
-import com.momentum.api.feature.Option;
-import com.momentum.api.feature.Feature;
-import com.momentum.api.feature.IToggleable;
-import com.momentum.api.registry.ILabel;
-import com.momentum.Momentum;
-import org.lwjgl.input.Keyboard;
-=======
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.momentum.api.config.Config;
@@ -24,13 +15,13 @@ import com.momentum.api.module.property.IHideable;
 import com.momentum.api.module.property.IToggleable;
 import com.momentum.api.registry.ILabeled;
 import com.momentum.api.util.Globals;
->>>>>>> Stashed changes
+import com.momentum.impl.ui.click.ClickGuiScreen;
 
 import java.util.Map.Entry;
 
 /**
  * Configurable client feature that is displayed in the
- * {@link com.momentum.impl.ui.ClickGuiScreen} and the Hud. Modules can be
+ * {@link ClickGuiScreen} and the Hud. Modules can be
  * toggled using a {@link Macro}. Modules can be hidden from Hud.
  *
  * @author linus
@@ -41,8 +32,8 @@ import java.util.Map.Entry;
  * @see com.momentum.api.module.modules.ToggleModule
  */
 public class Module extends ConfigContainer
-        implements Globals, IConfigurable<JsonObject>, IHideable, ILabeled {
-
+        implements Globals, IConfigurable<JsonObject>, IHideable, ILabeled
+{
     // module identifier
     // must be unique for each module
     private final String name;
@@ -71,7 +62,7 @@ public class Module extends ConfigContainer
      */
     public Module(String name, String desc, ModuleCategory category)
     {
-        // {@see ReflectionConfigFactory#build(Class)}
+        // {@see ConfigFactory#build(Class)}
         super();
 
         // incompatible module interfaces
@@ -94,7 +85,8 @@ public class Module extends ConfigContainer
      *
      * @return The module name
      */
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
@@ -103,170 +95,19 @@ public class Module extends ConfigContainer
      *
      * @return The module description
      */
-    public String getDescription() {
+    public String getDescription()
+    {
         return desc;
     }
 
     /**
-     * Gets the {@link ModuleCategory} module category
+     * Gets the {@link ModuleCategory}
      *
-<<<<<<< Updated upstream
-     * @param in The new drawn state
-     */
-    public void draw(boolean in) {
-
-        // set the drawn config
-        drawn.setVal(in);
-    }
-
-    /**
-     * Called when the feature is bound to a key
-     */
-    @Override
-    public void onBind() {
-
-    }
-
-    /**
-     * Toggles the enabled state
-     */
-    @Override
-    public void toggle() {
-
-        // check enabled state
-        if (enabled.getVal()) {
-            enabled.setVal(false);
-            onDisable();
-        }
-
-        // not enabled
-        else {
-            enabled.setVal(true);
-            onEnable();
-        }
-
-        // event
-        onToggle();
-    }
-
-    @Override
-    public void onToggle() {
-
-    }
-
-    /**
-     * Enables the module
-     */
-    @Override
-    public void enable() {
-
-        // enabled state = true
-        enabled.setVal(true);
-        onEnable();
-    }
-
-    /**
-     * Called when feature is enabled
-     */
-    @Override
-    public void onEnable() {
-
-        // subscribe all listeners
-        for (Listener d : listeners) {
-
-            // subscribe
-            Momentum.EVENT_BUS.subscribe(d);
-        }
-    }
-
-    /**
-     * Disables the module
-     */
-    @Override
-    public void disable() {
-
-        // enabled state = false
-        enabled.setVal(false);
-        onDisable();
-    }
-
-    /**
-     * Called when feature is disabled
-     */
-    @Override
-    public void onDisable() {
-
-        // subscribe all listeners
-        for (Listener d : listeners) {
-
-            // subscribe
-            Momentum.EVENT_BUS.unsubscribe(d);
-        }
-    }
-
-    /**
-     * Gets the registry label
-     *
-     * @return The registry label (Must be unique!)
-     */
-    @Override
-    public String getLabel() {
-
-        // create label
-        return name.toLowerCase() + "_module";
-    }
-
-    /**
-     * Associates options with this module
-     *
-     * @param config The options
-     */
-    public void associate(Option... config) {
-
-        // associate all
-        for (Option option : config) {
-            
-            // create association
-            // add to list of associated options
-            option.associate(this);
-            options.add(option);
-        }
-    }
-
-    /**
-     * Associates listeners with this module
-     *
-     * @param config The listeners
-     */
-    public void associate(Listener... config) {
-
-        // associate all
-        // add to list of associated listeners
-        listeners.addAll(Arrays.asList(config));
-    }
-
-    /**
-     * Gets the module's category
-     *
-     * @return The module's category
-=======
      * @return The module category
->>>>>>> Stashed changes
      */
-    public ModuleCategory getCategory() {
+    public ModuleCategory getCategory()
+    {
         return category;
-    }
-
-    /**
-     * Returns whether the object is hidden
-     *
-     * @return The hidden state
-     */
-    @Override
-    public boolean isHidden() {
-
-        // hidden state val
-        return hidden.getValue();
     }
 
     /**
@@ -275,10 +116,22 @@ public class Module extends ConfigContainer
      * @param hide The new hide state
      */
     @Override
-    public void setHidden(boolean hide) {
-
+    public void setHidden(boolean hide)
+    {
         // update hidden state val
         hidden.setValue(hide);
+    }
+
+    /**
+     * Returns whether the object is hidden
+     *
+     * @return The hidden state
+     */
+    @Override
+    public boolean isHidden()
+    {
+        // hidden state val
+        return hidden.getValue();
     }
 
     /**
@@ -287,8 +140,8 @@ public class Module extends ConfigContainer
      * @return The module label
      */
     @Override
-    public String getLabel() {
-
+    public String getLabel()
+    {
         // module label
         return name.toLowerCase() + "_module";
     }
@@ -300,8 +153,8 @@ public class Module extends ConfigContainer
      * @param o The Json object
      */
     @Override
-    public void fromJson(JsonObject o) {
-
+    public void fromJson(JsonObject o)
+    {
         // JsonElement set
         for (Entry<String, JsonElement> entry : o.entrySet())
         {
@@ -334,33 +187,27 @@ public class Module extends ConfigContainer
      * @return The configs as a parsable Json string
      */
     @Override
-    public JsonObject toJson() {
-
+    public JsonObject toJson()
+    {
         // json object
         JsonObject out = new JsonObject();
 
         // write all configurations
         for (Config<?> cfg : getConfigs())
         {
-
             // toggleable configs
-            if (cfg.getName().equalsIgnoreCase("Enabled")
-                    || cfg.getName().equalsIgnoreCase("Bind"))
+            if (cfg.getLabel().equalsIgnoreCase("module_enabled")
+                    || cfg.getLabel().equalsIgnoreCase("module_keybind"))
             {
-
                 // concurrent module
-                if (this instanceof IConcurrent) {
-
-                    // skip config
+                if (this instanceof IConcurrent)
+                {
                     continue;
                 }
             }
 
-            // JsonElement from config value
-            JsonElement e = cfg.toJson();
-
             // add to output
-            out.add(cfg.getLabel(), e);
+            out.add(cfg.getLabel(), cfg.toJson());
         }
 
         // output JsonObject

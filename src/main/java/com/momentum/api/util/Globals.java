@@ -8,8 +8,8 @@ import net.minecraft.client.Minecraft;
  * @author linus
  * @since 03/22/2023
  */
-public interface Globals {
-
+public interface Globals
+{
     // game instance
     Minecraft mc = Minecraft.getMinecraft();
 }

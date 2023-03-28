@@ -12,8 +12,8 @@ import java.nio.file.Path;
  * @author linus
  * @since 03/20/2023
  */
-public interface IConfigFile {
-
+public interface IConfigFile
+{
     /**
      * Saves all configurations to current file
      */
