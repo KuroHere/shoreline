@@ -22,7 +22,7 @@ public class MomentumMod implements ModInitializer {
     public static final String MOD_MC_VER = "1.12.2";
 
     /**
-     *
+     * Called when the fabric mod initializes
      */
     @Override
     public void onInitialize()
