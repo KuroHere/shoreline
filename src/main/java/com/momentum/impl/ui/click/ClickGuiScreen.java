@@ -3,7 +3,9 @@ package com.momentum.impl.ui.click;
 import com.momentum.impl.module.ClickGuiModule;
 import com.momentum.impl.ui.click.frame.Frame;
 import com.momentum.init.Modules;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 
 import java.io.IOException;
 
@@ -13,23 +15,29 @@ import java.io.IOException;
  * @author linus
  * @since 03/25/2023
  */
-public class ClickGuiScreen extends GuiScreen
+public class ClickGuiScreen extends Screen
 {
     // clickgui frame main
     private final Frame main = new Frame();
+
+    /**
+     * Default constructor to create instance of a ClickGui screen
+     */
+    public ClickGuiScreen()
+    {
+        super(Text.literal("ClickGui"));
+    }
 
     /**
      * Draws the screen and all components
      *
      * @param mouseX The mouse x
      * @param mouseY The mouse y
-     * @param partialTicks The render partial ticks
      */
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta)
     {
-        super.drawScreen(mouseX, mouseY, partialTicks);
-        main.draw(0xe5000000);
+        super.render(matrices, mouseX, mouseY, delta);
     }
 
     /**
@@ -41,33 +49,29 @@ public class ClickGuiScreen extends GuiScreen
      * @throws IOException if button is not valid
      */
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton)
-            throws IOException
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton)
     {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-        main.onClick(mouseX, mouseY, mouseButton);
+        return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     /**
      * Called when a key is typed (except F11 which toggles fullscreen).
      *
-     * @param typedChar The keyboard character
      * @param keyCode The LWJGL keycode
      */
     @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
-        super.keyTyped(typedChar, keyCode);
-        main.onType(typedChar, keyCode);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     /**
      * Called when the screen is unloaded
      */
     @Override
-    public void onGuiClosed()
+    public void close()
     {
-        super.onGuiClosed();
+        super.close();
         Modules.CLICKGUI.disable();
     }
 }

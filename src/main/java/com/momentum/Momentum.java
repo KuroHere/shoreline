@@ -20,8 +20,7 @@ public class Momentum
     public static EventHandler EVENT_HANDLER;
 
     /**
-     * Runs
-     * during {@link net.minecraftforge.fml.common.event.FMLPreInitializationEvent}
+     * Runs before the {@link MomentumMod#onInitialize()}
      */
     public static void preInit()
     {
@@ -32,8 +31,7 @@ public class Momentum
     }
 
     /**
-     * Runs during
-     * {@link net.minecraftforge.fml.common.event.FMLInitializationEvent}
+     * Runs during the {@link MomentumMod#onInitialize()}
      */
     public static void init()
     {
@@ -42,8 +40,7 @@ public class Momentum
     }
 
     /**
-     * Runs
-     * during {@link net.minecraftforge.fml.common.event.FMLPostInitializationEvent}
+     * Runs after the {@link MomentumMod#onInitialize()}
      */
     public static void postInit()
     {

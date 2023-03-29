@@ -2,7 +2,8 @@ package com.momentum.impl.ui.click.frame;
 
 import com.momentum.api.module.ModuleCategory;
 import com.momentum.impl.ui.shape.Rect;
-import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.util.Window;
+import net.minecraft.client.util.math.MatrixStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,13 +44,14 @@ public class Frame extends Rect
      * Draws the frame using
      * {@link org.lwjgl.opengl.GL11#glVertex2f(float, float)} at x and y
      *
+     * @param stack The render stack
      * @param c The color
      */
     @Override
-    public void draw(int c)
+    public void draw(MatrixStack stack, int c)
     {
         // window resolution
-        ScaledResolution res = new ScaledResolution(mc);
+        Window res = mc.getWindow();
 
         // center of screen
         cx = res.getScaledWidth() / 2.0f;
@@ -60,21 +62,21 @@ public class Frame extends Rect
         y = cy - height / 2.0f;
 
         // draw rect
-        super.draw(c);
+        super.draw(stack, c);
 
         // render tabs section
         if (!tabs.isEmpty())
         {
             // separators
-            super.draw(x + (width / 3.0f) - 1, y, x + (width / 3.0f),
+            super.draw(stack, x + (width / 3.0f) - 1, y, x + (width / 3.0f),
                     y + height, 0xff2b2b2b);
-            super.draw(x, y + (height / 15.0f) -1, x + width,
+            super.draw(stack, x, y + (height / 15.0f) -1, x + width,
                     y + (height / 15.0f), 0xff2b2b2b);
 
             // draw tabs
             for (FrameTab tab : tabs)
             {
-                tab.draw(tab == curr ? 0xe5141414 : 0x00000000);
+                tab.draw(stack, tab == curr ? 0xe5141414 : 0x00000000);
             }
         }
     }

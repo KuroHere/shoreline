@@ -22,8 +22,9 @@ public interface IClickable
     /**
      * Called when a key is typed (except F11 which toggles fullscreen).
      *
-     * @param typedChar The keyboard character
      * @param keyCode The LWJGL keycode
+     * @param scanCode The LWJGL key scancode
+     * @param modifiers The key press modifiers
      */
-    void onType(char typedChar, int keyCode);
+    void onType(int keyCode, int scanCode, int modifiers);
 }

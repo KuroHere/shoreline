@@ -1,6 +1,6 @@
 package com.momentum.api.config;
 
-import org.lwjgl.input.Keyboard;
+import org.lwjgl.glfw.GLFW;
 
 /**
  * Macro general implementation associated with a LWJL keycode
@@ -57,7 +57,8 @@ public class Macro
     public String getKeyName()
     {
         // keyboard key name
-        return Keyboard.getKeyName(keycode);
+        int scancode = GLFW.glfwGetKeyScancode(keycode);
+        return GLFW.glfwGetKeyName(keycode, scancode);
     }
 
     /**

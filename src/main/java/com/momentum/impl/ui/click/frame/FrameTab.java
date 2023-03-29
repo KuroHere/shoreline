@@ -2,9 +2,7 @@ package com.momentum.impl.ui.click.frame;
 
 import com.momentum.api.module.ModuleCategory;
 import com.momentum.impl.ui.shape.Rect;
-import net.minecraft.util.ResourceLocation;
-
-import static org.lwjgl.opengl.GL11.*;
+import net.minecraft.client.util.math.MatrixStack;
 
 /**
  * Tab in a {@link Frame}.
@@ -38,29 +36,28 @@ public class FrameTab extends Rect
      * Draws the tab using
      * {@link org.lwjgl.opengl.GL11#glVertex2f(float, float)} at x and y
      *
+     * @param stack The render stack
      * @param c The color
      */
     @Override
-    public void draw(int c)
+    public void draw(MatrixStack stack, int c)
     {
         // center of tab
         cx = x + width / 2.0f;
         cy = y + height / 2.0f;
 
         // icon .png img
-        ResourceLocation icon = new ResourceLocation("momentum",
-                "icon/" + category.name().toLowerCase() + ".png");
-
+        // ResourceLocation icon = new ResourceLocation("momentum",
+        //        "icon/" + category.name().toLowerCase() + ".png");
 
         // draw tab
-        super.draw(c);
-        mc.fontRenderer.drawStringWithShadow(category.name(), x + 6, y,
+        super.draw(stack, c);
+        mc.textRenderer.draw(stack, category.name(), x + 6, y,
                 0xffffff);
     }
 
-    /**
+    /*
      *
-     */
     private void drawSvg()
     {
         glPushMatrix();
@@ -69,4 +66,5 @@ public class FrameTab extends Rect
         glDisable(GL_BLEND);
         glPopMatrix();
     }
+     */
 }

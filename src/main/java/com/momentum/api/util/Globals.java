@@ -1,6 +1,6 @@
 package com.momentum.api.util;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 
 /**
  * Global variables
@@ -11,5 +11,5 @@ import net.minecraft.client.Minecraft;
 public interface Globals
 {
     // game instance
-    Minecraft mc = Minecraft.getMinecraft();
+    MinecraftClient mc = MinecraftClient.getInstance();
 }

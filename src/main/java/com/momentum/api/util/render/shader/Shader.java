@@ -1,31 +1,26 @@
 package com.momentum.api.util.render.shader;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.momentum.Momentum;
-import net.minecraft.client.renderer.OpenGlHelper;
 import org.apache.commons.io.IOUtils;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL32C;
 
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * GLSL Shader implementation for {@link ARBShaderObjects} and
- * {@link org.lwjgl.opengl.GL20}
+ * GLSL Shader implementation for {@link GL32C}
  *
  * @author linus
  * @since 03/27/2023
  */
 public class Shader
 {
-    // shaders impl state
-    private final boolean gl21;
-    private final boolean arb;
-
     // program shader which vert and frag are attached to
     private int program;
 
-    // vertex and fragment shader GL20 ids
+    // vertex and fragment shader GL32C ids
     private int vert;
     private int frag;
 
@@ -56,27 +51,27 @@ public class Shader
             if (vertStream != null && fragStream != null)
             {
                 // create ids
-                program = OpenGlHelper.glCreateProgram();
-                vert = OpenGlHelper.glCreateShader(GL20.GL_VERTEX_SHADER);
-                frag = OpenGlHelper.glCreateShader(GL20.GL_FRAGMENT_SHADER);
+                program = GL32C.glCreateProgram();
+                vert = GlStateManager.glCreateShader(GL32C.GL_VERTEX_SHADER);
+                frag = GlStateManager.glCreateShader(GL32C.GL_FRAGMENT_SHADER);
 
                 // check null, 0 equates to null state
-                if (vert != GL11.GL_FALSE && frag != GL11.GL_FALSE)
+                if (vert != GL32C.GL_FALSE && frag != GL32C.GL_FALSE)
                 {
                     // compile exception
                     try
                     {
                         // compile shaders
-                        GL20.glShaderSource(vert, resource + vertex);
-                        GL20.glShaderSource(frag, resource + fragment);
-                        OpenGlHelper.glCompileShader(vert);
-                        OpenGlHelper.glCompileShader(frag);
+                        GL32C.glShaderSource(vert, resource + vertex);
+                        GL32C.glShaderSource(frag, resource + fragment);
+                        GlStateManager.glCompileShader(vert);
+                        GlStateManager.glCompileShader(frag);
 
                         // check compile status
-                        if (OpenGlHelper.glGetShaderi(vert,
-                                GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE
-                                || OpenGlHelper.glGetShaderi(frag,
-                                GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE)
+                        if (GlStateManager.glGetShaderi(vert,
+                                GL32C.GL_COMPILE_STATUS) == GL32C.GL_FALSE
+                                || GlStateManager.glGetShaderi(frag,
+                                GL32C.GL_COMPILE_STATUS) == GL32C.GL_FALSE)
                         {
                             throw new RuntimeException("Could not compile shader!");
                         }
@@ -86,8 +81,8 @@ public class Shader
                     catch (Exception e)
                     {
                         // delete shaders
-                        OpenGlHelper.glDeleteShader(vert);
-                        OpenGlHelper.glDeleteShader(frag);
+                        GlStateManager.glDeleteShader(vert);
+                        GlStateManager.glDeleteShader(frag);
                         e.printStackTrace();
                     }
                 }
@@ -105,28 +100,21 @@ public class Shader
         }
 
         // check null, 0 equates to null state
-        if (program != GL11.GL_FALSE && vert != GL11.GL_FALSE
-                && frag != GL11.GL_FALSE)
+        if (program != GL32C.GL_FALSE && vert != GL32C.GL_FALSE
+                && frag != GL32C.GL_FALSE)
         {
-            OpenGlHelper.glAttachShader(program, vert);
-            OpenGlHelper.glAttachShader(program, frag);
-            OpenGlHelper.glLinkProgram(program);
+            GlStateManager.glAttachShader(program, vert);
+            GlStateManager.glAttachShader(program, frag);
+            GlStateManager.glLinkProgram(program);
 
             // check program link status
-            if (OpenGlHelper.glGetProgrami(program, GL20.GL_LINK_STATUS) == GL11.GL_FALSE)
+            if (GlStateManager.glGetProgrami(program, GL32C.GL_LINK_STATUS) == GL32C.GL_FALSE)
             {
                 throw new RuntimeException("Could not link shader!");
             }
 
-            glValidateProgram(program);
+            GL32C.glValidateProgram(program);
         }
-
-        // OpenGL context
-        ContextCapabilities context = GLContext.getCapabilities();
-        gl21 = OpenGlHelper.openGL21;
-        arb = context.GL_ARB_vertex_shader
-            && context.GL_ARB_fragment_shader
-            && context.GL_ARB_shader_objects;
     }
 
     /**
@@ -141,7 +129,7 @@ public class Shader
         }
 
         // use program id
-        GL20.glUseProgram(program);
+        GL32C.glUseProgram(program);
     }
 
     /**
@@ -150,28 +138,7 @@ public class Shader
     public void unbind()
     {
         // use no program
-        GL20.glUseProgram(0);
-    }
-
-    /**
-     * {@link ARBShaderObjects#glValidateProgramARB(int)} override with
-     * implementation for {@link org.lwjgl.opengl.GL20}
-     *
-     * @param program The program id
-     */
-    private void glValidateProgram(int program)
-    {
-        // arb shaders
-        if (arb)
-        {
-            ARBShaderObjects.glValidateProgramARB(program);
-        }
-
-        // GL20
-        else if (gl21)
-        {
-            GL20.glValidateProgram(program);
-        }
+        GL32C.glUseProgram(0);
     }
 
     /**

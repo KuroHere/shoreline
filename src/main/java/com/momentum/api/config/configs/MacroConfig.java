@@ -6,6 +6,7 @@ import com.momentum.api.config.Config;
 import com.momentum.api.config.Macro;
 import com.momentum.api.config.file.ConfigFile;
 import com.momentum.impl.ui.click.ClickGuiScreen;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.input.Keyboard;
 
 /**
@@ -78,11 +79,8 @@ public class MacroConfig extends Config<Macro>
     @Override
     public void fromJson(JsonElement e)
     {
-        // value of json element
-        String sval = e.getAsString();
-
         // update key index based on LWJGL mappings
-        int val = Keyboard.getKeyIndex(sval);
+        int val = e.getAsInt();
         setValue(val);
     }
 
@@ -96,6 +94,6 @@ public class MacroConfig extends Config<Macro>
     public JsonElement toJson()
     {
         // keybinding key name
-        return new JsonPrimitive(value.getKeyName());
+        return new JsonPrimitive(value.getKeycode());
     }
 }

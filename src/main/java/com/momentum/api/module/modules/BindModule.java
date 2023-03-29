@@ -6,7 +6,7 @@ import com.momentum.api.config.configs.MacroConfig;
 import com.momentum.api.module.ModuleCategory;
 import com.momentum.api.module.exceptions.IncompatibleInterfaceException;
 import com.momentum.api.module.property.IBindable;
-import org.lwjgl.input.Keyboard;
+import org.lwjgl.glfw.GLFW;
 
 /**
  *
@@ -22,7 +22,7 @@ public class BindModule extends ToggleModule implements IBindable
     final MacroConfig keybind = new MacroConfig("Bind",
             "Bind state. Global config in toggleable modules. Currently " +
                     "supports LWJGL keyboard and mouse keybindings",
-            Keyboard.KEY_NONE, this::toggle);
+            GLFW.GLFW_KEY_UNKNOWN, this::toggle);
 
     /**
      * Default module constructor. Name must be unique for all modules.

@@ -1,27 +1,12 @@
 package com.momentum;
 
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.fabricmc.api.ModInitializer;
 
 /**
  * @author linus
  * @since 01/09/2023
  */
-@Mod(
-        modid = MomentumMod.MOD_ID,
-        name = MomentumMod.MOD_NAME,
-        version = MomentumMod.MOD_VER,
-        acceptedMinecraftVersions = "[" + MomentumMod.MOD_MC_VER + "]"
-)
-public class MomentumMod
-{
-    // mod instance
-    @Instance
-    public static MomentumMod INSTANCE;
+public class MomentumMod implements ModInitializer {
 
     // mod identifier
     public static final String MOD_ID = "momentum";
@@ -38,31 +23,12 @@ public class MomentumMod
 
     /**
      *
-     * @param event
      */
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event)
+    @Override
+    public void onInitialize()
     {
         Momentum.preInit();
-    }
-
-    /**
-     *
-     * @param event
-     */
-    @EventHandler
-    public void init(FMLInitializationEvent event)
-    {
         Momentum.init();
-    }
-
-    /**
-     *
-     * @param event
-     */
-    @EventHandler
-    public void postInit(FMLPostInitializationEvent event)
-    {
         Momentum.postInit();
     }
 }

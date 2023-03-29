@@ -1,10 +1,12 @@
 {
   "required": true,
   "package": "com.momentum.asm.mixin",
-  "refmap": "mixins.momentum.refmap.json",
-  "minVersion": "0.7.3",
-  "compatibilityLevel": "JAVA_8",
-  "mixins": [
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "c": [
     "MixinMinecraft"
-  ]
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

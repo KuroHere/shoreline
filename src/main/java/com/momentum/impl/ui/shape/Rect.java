@@ -1,5 +1,6 @@
 package com.momentum.impl.ui.shape;
 
+import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
@@ -8,9 +9,9 @@ import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Drawable rectangle which can be drawn to the screen by calling
- * {@link IDrawable#draw(int)} and interacted with through
+ * {@link IDrawable#draw(MatrixStack, int)} and interacted with through
  * {@link IClickable#onClick(int, int, int)} and
- * {@link IClickable#onType(char, int)} methods
+ * {@link IClickable#onType(int, int, int)} methods
  *
  * @author linus
  * @since 03/24/2023
@@ -27,10 +28,11 @@ public class Rect extends SimpleShape implements IDrawable, IClickable
      * Draws the shape using
      * {@link org.lwjgl.opengl.GL11#glVertex2f(float, float)} at x and y
      *
+     * @param stack The render stack
      * @param c The color
      */
     @Override
-    public void draw(int c)
+    public void draw(MatrixStack stack, int c)
     {
         // draw rect
         draw(x, y, width, height, c);
@@ -41,15 +43,16 @@ public class Rect extends SimpleShape implements IDrawable, IClickable
      * {@link GL11#glVertex2f(float, float)} at the
      * parameter x and y
      *
+     * @param stack The render stack
      * @param x The x position
      * @param y The y position
      * @param c The color
      */
     @Override
-    public void draw(float x, float y, int c)
+    public void draw(MatrixStack stack, float x, float y, int c)
     {
         // draw rect
-        draw(x, y, width, height, c);
+        draw(stack, x, y, width, height, c);
     }
 
     /**
@@ -57,13 +60,15 @@ public class Rect extends SimpleShape implements IDrawable, IClickable
      * {@link GL11#glVertex2f(float, float)} at the
      * parameter x and y with size parameter width and height
      *
+     * @param stack The render stack
      * @param x The x position
      * @param y The y position
      * @param width The width
      * @param height The height
      * @param c The color
      */
-    public void draw(float x, float y, float width, float height, int c)
+    public void draw(MatrixStack stack, float x, float y, float width,
+                     float height, int c)
     {
         // color
         Color color = new Color(c, true);
@@ -140,11 +145,12 @@ public class Rect extends SimpleShape implements IDrawable, IClickable
     /**
      * Called when a key is typed (except F11 which toggles fullscreen).
      *
-     * @param typedChar The keyboard character
-     * @param keyCode   The LWJGL keycode
+     * @param keyCode The LWJGL keycode
+     * @param scanCode The LWJGL key scancode
+     * @param modifiers The key press modifiers
      */
     @Override
-    public void onType(char typedChar, int keyCode)
+    public void onType(int keyCode, int scanCode, int modifiers)
     {
         // impl
     }

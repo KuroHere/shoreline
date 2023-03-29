@@ -1,5 +1,7 @@
 package com.momentum.impl.ui.shape;
 
+import net.minecraft.client.util.math.MatrixStack;
+
 /**
  * Shape which can be drawn to the screen
  *
@@ -11,16 +13,18 @@ public interface IDrawable
     /**
      * Draws the object
      *
+     * @param stack The render stack
      * @param c The color
      */
-    void draw(int c);
+    void draw(MatrixStack stack, int c);
 
     /**
      * Draws the object at the given position
      *
+     * @param stack The render stack
      * @param x The x position
      * @param y The y position
      * @param c The color
      */
-    void draw(float x, float y, int c);
+    void draw(MatrixStack stack, float x, float y, int c);
 }
