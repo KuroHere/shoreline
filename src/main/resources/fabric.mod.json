@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "momentum",
   "version": "${version}",
-
   "name": "Momentum",
   "description": "1.19.4",
   "authors": [
@@ -11,23 +10,20 @@
   "contact": {
     "homepage": "https://fabricmc.net/"
   },
-
   "license": "None",
   "icon": "assets/momentum/icon.png",
-
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.momentum.Momentum"
+      "com.momentum.MomentumMod"
     ]
   },
   "mixins": [
     "mixins.momentum.json"
   ],
-
   "depends": {
-    "fabricloader": ">=0.12.12",
-    "minecraft": "1.18.x",
-    "java": ">=17"
+    "java": ">=17",
+    "fabricloader": ">=0.14.17",
+    "minecraft": "1.19.4"
   }
 }

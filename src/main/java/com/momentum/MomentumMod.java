@@ -19,7 +19,7 @@ public class MomentumMod implements ModInitializer {
     public static final String MOD_VER = "1.0";
 
     // mod mc version
-    public static final String MOD_MC_VER = "1.12.2";
+    public static final String MOD_MC_VER = "1.19.4";
 
     /**
      * Called when the fabric mod initializes
