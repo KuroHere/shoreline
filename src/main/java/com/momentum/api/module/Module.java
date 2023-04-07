@@ -18,7 +18,7 @@ import com.momentum.api.module.property.IHideable;
 import com.momentum.api.module.property.IToggleable;
 import com.momentum.api.registry.ILabeled;
 import com.momentum.api.util.Globals;
-import com.momentum.impl.ui.click.ClickGuiScreen;
+import com.momentum.impl.gui.click.ClickGuiScreen;
 
 import java.util.Map.Entry;
 

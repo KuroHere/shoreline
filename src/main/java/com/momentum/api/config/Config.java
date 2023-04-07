@@ -5,7 +5,7 @@ import com.momentum.api.config.factory.ConfigContainer;
 import com.momentum.api.config.file.ConfigFile;
 import com.momentum.api.config.file.IConfigurable;
 import com.momentum.api.registry.ILabeled;
-import com.momentum.impl.ui.click.ClickGuiScreen;
+import com.momentum.impl.gui.click.ClickGuiScreen;
 
 /**
  * Config implementation which will be saved locally in a <tt>.json</tt> file

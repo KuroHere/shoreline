@@ -1,6 +1,5 @@
 package com.momentum.api.util.render.shader;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.momentum.Momentum;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.GL32C;
@@ -52,8 +51,8 @@ public class Shader
             {
                 // create ids
                 program = GL32C.glCreateProgram();
-                vert = GlStateManager.glCreateShader(GL32C.GL_VERTEX_SHADER);
-                frag = GlStateManager.glCreateShader(GL32C.GL_FRAGMENT_SHADER);
+                vert = GL32C.glCreateShader(GL32C.GL_VERTEX_SHADER);
+                frag = GL32C.glCreateShader(GL32C.GL_FRAGMENT_SHADER);
 
                 // check null, 0 equates to null state
                 if (vert != GL32C.GL_FALSE && frag != GL32C.GL_FALSE)
@@ -64,14 +63,12 @@ public class Shader
                         // compile shaders
                         GL32C.glShaderSource(vert, resource + vertex);
                         GL32C.glShaderSource(frag, resource + fragment);
-                        GlStateManager.glCompileShader(vert);
-                        GlStateManager.glCompileShader(frag);
+                        GL32C.glCompileShader(vert);
+                        GL32C.glCompileShader(frag);
 
                         // check compile status
-                        if (GlStateManager.glGetShaderi(vert,
-                                GL32C.GL_COMPILE_STATUS) == GL32C.GL_FALSE
-                                || GlStateManager.glGetShaderi(frag,
-                                GL32C.GL_COMPILE_STATUS) == GL32C.GL_FALSE)
+                        if (GL32C.glGetShaderi(vert, GL32C.GL_COMPILE_STATUS) == GL32C.GL_FALSE
+                                || GL32C.glGetShaderi(frag, GL32C.GL_COMPILE_STATUS) == GL32C.GL_FALSE)
                         {
                             throw new RuntimeException("Could not compile shader!");
                         }
@@ -81,8 +78,8 @@ public class Shader
                     catch (Exception e)
                     {
                         // delete shaders
-                        GlStateManager.glDeleteShader(vert);
-                        GlStateManager.glDeleteShader(frag);
+                        GL32C.glDeleteShader(vert);
+                        GL32C.glDeleteShader(frag);
                         e.printStackTrace();
                     }
                 }
@@ -100,15 +97,14 @@ public class Shader
         }
 
         // check null, 0 equates to null state
-        if (program != GL32C.GL_FALSE && vert != GL32C.GL_FALSE
-                && frag != GL32C.GL_FALSE)
+        if (program != GL32C.GL_FALSE && vert != GL32C.GL_FALSE && frag != GL32C.GL_FALSE)
         {
-            GlStateManager.glAttachShader(program, vert);
-            GlStateManager.glAttachShader(program, frag);
-            GlStateManager.glLinkProgram(program);
+            GL32C.glAttachShader(program, vert);
+            GL32C.glAttachShader(program, frag);
+            GL32C.glLinkProgram(program);
 
             // check program link status
-            if (GlStateManager.glGetProgrami(program, GL32C.GL_LINK_STATUS) == GL32C.GL_FALSE)
+            if (GL32C.glGetProgrami(program, GL32C.GL_LINK_STATUS) == GL32C.GL_FALSE)
             {
                 throw new RuntimeException("Could not link shader!");
             }

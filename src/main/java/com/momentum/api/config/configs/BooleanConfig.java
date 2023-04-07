@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.momentum.api.config.Config;
 import com.momentum.api.config.file.ConfigFile;
-import com.momentum.impl.ui.click.ClickGuiScreen;
+import com.momentum.impl.gui.click.ClickGuiScreen;
 
 /**
  * Boolean configuration associated with {@link } in

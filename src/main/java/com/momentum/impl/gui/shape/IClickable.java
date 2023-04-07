@@ -1,4 +1,4 @@
-package com.momentum.impl.ui.shape;
+package com.momentum.impl.gui.shape;
 
 /**
  * Shape that can be interacted with via the LWJGL keyboard and mouse

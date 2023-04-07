@@ -1,4 +1,4 @@
-package com.momentum.impl.ui.shape;
+package com.momentum.impl.gui.shape;
 
 import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.opengl.GL11;
@@ -16,8 +16,8 @@ import static org.lwjgl.opengl.GL11.*;
  * @author linus
  * @since 03/24/2023
  *
- * @see com.momentum.impl.ui.click.frame.Frame
- * @see com.momentum.impl.ui.click.frame.FrameTab
+ * @see com.momentum.impl.gui.click.frame.Frame
+ * @see com.momentum.impl.gui.click.frame.FrameTab
  */
 public class Rect extends SimpleShape implements IDrawable, IClickable
 {

@@ -1,7 +1,7 @@
-package com.momentum.impl.ui.click;
+package com.momentum.impl.gui.click;
 
 import com.momentum.impl.module.client.ClickGuiModule;
-import com.momentum.impl.ui.click.frame.Frame;
+import com.momentum.impl.gui.click.frame.Frame;
 import com.momentum.init.Modules;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;

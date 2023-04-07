@@ -1,4 +1,4 @@
-package com.momentum.impl.ui.shape;
+package com.momentum.impl.gui.shape;
 
 import net.minecraft.client.util.math.MatrixStack;
 

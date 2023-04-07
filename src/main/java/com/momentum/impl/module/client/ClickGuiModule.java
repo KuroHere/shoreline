@@ -2,7 +2,7 @@ package com.momentum.impl.module.client;
 
 import com.momentum.api.module.ModuleCategory;
 import com.momentum.api.module.modules.BindModule;
-import com.momentum.impl.ui.click.ClickGuiScreen;
+import com.momentum.impl.gui.click.ClickGuiScreen;
 import org.lwjgl.glfw.GLFW;
 
 /**

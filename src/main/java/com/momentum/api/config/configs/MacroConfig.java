@@ -5,7 +5,7 @@ import com.google.gson.JsonPrimitive;
 import com.momentum.api.config.Config;
 import com.momentum.api.config.Macro;
 import com.momentum.api.config.file.ConfigFile;
-import com.momentum.impl.ui.click.ClickGuiScreen;
+import com.momentum.impl.gui.click.ClickGuiScreen;
 
 /**
  * Macro configuration associated with {@link } in
