@@ -10,8 +10,8 @@ import static org.lwjgl.opengl.GL11.*;
 /**
  * Drawable rectangle which can be drawn to the screen by calling
  * {@link IDrawable#draw(MatrixStack, int)} and interacted with through
- * {@link IClickable#onClick(int, int, int)} and
- * {@link IClickable#onType(int, int, int)} methods
+ * {@link IClickable#onMouseClicked(double, double, int)} and
+ * {@link IClickable#onKeyPressed(int, int, int)} methods
  *
  * @author linus
  * @since 03/24/2023
@@ -35,7 +35,7 @@ public class Rect extends SimpleShape implements IDrawable, IClickable
     public void draw(MatrixStack stack, int c)
     {
         // draw rect
-        draw(x, y, width, height, c);
+        draw(stack, x, y, width, height, c);
     }
 
     /**
@@ -137,7 +137,7 @@ public class Rect extends SimpleShape implements IDrawable, IClickable
      * @param mouseButton The clicked button code
      */
     @Override
-    public void onClick(int mouseX, int mouseY, int mouseButton)
+    public void onMouseClicked(double mouseX, double mouseY, int mouseButton)
     {
         // impl
     }
@@ -150,7 +150,7 @@ public class Rect extends SimpleShape implements IDrawable, IClickable
      * @param modifiers The key press modifiers
      */
     @Override
-    public void onType(int keyCode, int scanCode, int modifiers)
+    public void onKeyPressed(int keyCode, int scanCode, int modifiers)
     {
         // impl
     }
@@ -163,7 +163,7 @@ public class Rect extends SimpleShape implements IDrawable, IClickable
      * @return Falls within bounds
      */
     @Override
-    public boolean isWithin(float xv, float yv)
+    public boolean isWithin(double xv, double yv)
     {
         // call helper
         return isWithin(xv, yv, x, y, width, height);
@@ -180,8 +180,8 @@ public class Rect extends SimpleShape implements IDrawable, IClickable
      * @param ymax The y position of the maximum bound
      * @return Whether the given value is between the min and the mix
      */
-    public boolean isWithin(float xval, float yval, float xmin, float ymin,
-                            float xmax, float ymax)
+    public boolean isWithin(double xval, double yval, double xmin, double ymin,
+                            double xmax, double ymax)
     {
         return xval >= xmin
                 && xval <= xmin + xmax

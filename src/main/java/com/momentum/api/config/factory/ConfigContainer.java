@@ -2,7 +2,7 @@ package com.momentum.api.config.factory;
 
 import com.momentum.api.config.Config;
 import com.momentum.api.registry.ILabeled;
-import com.momentum.api.registry.IRegistry;
+import com.momentum.api.registry.IRegister;
 import com.momentum.api.registry.Registry;
 
 import java.lang.reflect.Field;
@@ -33,7 +33,7 @@ public class ConfigContainer extends Registry<Config<?>>
         // declaring class
         Class<?> declaring = getClass().getDeclaringClass();
 
-        // config factory t
+        // config factory
         if (declaring != null)
         {
             // build all configuration field
@@ -47,7 +47,7 @@ public class ConfigContainer extends Registry<Config<?>>
 
     /**
      * Registers the given data to a register, which can later be retrieved
-     * using {@link IRegistry#retrieve(String)}
+     * using {@link IRegister#retrieve(String)}
      *
      * @param l The data label
      * @param data The data
@@ -71,7 +71,7 @@ public class ConfigContainer extends Registry<Config<?>>
 
     /**
      * Registers the given data to a register, which can later be retrieved
-     * using {@link IRegistry#retrieve(String)}
+     * using {@link IRegister#retrieve(String)}
      *
      * @param data The data
      * @return The registered data

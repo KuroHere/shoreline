@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * ConfigFile implementation used to save {@link com.momentum.api.config.Config}
@@ -22,9 +20,6 @@ public abstract class ConfigFile<T extends IConfigurable<?>>
 {
     // curr working directory
     protected Path dir;
-
-    // profiles
-    protected final Set<Path> profiles = new HashSet<>();
 
     /**
      * Creates a new config file with properties based on the

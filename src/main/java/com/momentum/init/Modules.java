@@ -2,7 +2,7 @@ package com.momentum.init;
 
 import com.momentum.api.module.Module;
 import com.momentum.impl.handler.ModuleHandler;
-import com.momentum.impl.module.ClickGuiModule;
+import com.momentum.impl.module.client.ClickGuiModule;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -88,5 +88,5 @@ public abstract class SimpleShape implements Globals, IShape
      * @return Falls within bounds
      */
     @Override
-    public abstract boolean isWithin(float x, float y);
+    public abstract boolean isWithin(double x, double y);
 }

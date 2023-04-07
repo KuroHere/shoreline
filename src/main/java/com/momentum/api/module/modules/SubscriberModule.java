@@ -1,6 +1,6 @@
 package com.momentum.api.module.modules;
 
-import com.momentum.api.event.Listener;
+import com.momentum.api.event.listener.Listener;
 import com.momentum.api.module.Module;
 import com.momentum.api.module.ModuleCategory;
 import com.momentum.api.module.property.ISubscriber;
@@ -38,48 +38,7 @@ public class SubscriberModule extends Module implements ISubscriber
         super(name, desc, category);
     }
 
-    /**
-     * Registers the given data to a register, which can later be subscribed to an
-     * event bus
-     *
-     * @param data The data
-     * @return The registered data
-     * @throws NullPointerException if data is <tt>null</tt>
-     */
-    @Override
-    public <L, C extends Listener> C register(C data)
-    {
-        // null check
-        if (data == null)
-        {
-            throw new NullPointerException("Null data not supported in registry");
-        }
 
-        // add to register
-        listenerRegister.put(data.getLabel(), data);
-        return data;
-    }
-
-    /**
-     * Unregisters the given data to a register, which removes its mapping from
-     * the register. Unregistering data also frees its {@link ILabeled} label.
-     * Unsubscribes from the event bus.
-     *
-     * @param data The data
-     * @return The unregistered data
-     * @throws NullPointerException if data is <tt>null</tt>
-     */
-    public Listener<?> unregister(Listener data)
-    {
-        // null check
-        if (data == null)
-        {
-            throw new NullPointerException("Null data not supported in registry");
-        }
-
-        // remove from register
-        return listenerRegister.remove(data.getLabel());
-    }
 
     /**
      * Gets list of all active {@link Listener} listeners

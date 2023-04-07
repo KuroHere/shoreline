@@ -1,48 +1,29 @@
 package com.momentum.impl.handler;
 
-import com.momentum.Momentum;
 import com.momentum.api.config.Macro;
-import com.momentum.api.event.Event;
-import com.momentum.api.event.Listener;
 import com.momentum.api.module.Module;
 import com.momentum.api.module.modules.BindModule;
-import com.momentum.impl.event.TickKeyboardEvent;
+import com.momentum.impl.event.KeyboardInputEvent;
 import com.momentum.init.Handlers;
-import org.lwjgl.input.Keyboard;
+import org.lwjgl.glfw.GLFW;
 
 /**
- * Handles {@link Macro} keybinding implementation
+ * Handles {@link Macro} keybinding implementation.
  *
  * @author linus
- * @since 03/25/2023
+ * @since 1.0
+ *
+ * @see Macro
  */
 public class MacroHandler
 {
-
-    // TODO: This is temporary until I figure out how I want to do managers
-    public MacroHandler()
-    {
-        Momentum.EVENT_HANDLER.subscribe(new Listener<TickKeyboardEvent>()
-        {
-            /**
-             * Calls the listener for the {@link Event}
-             * event
-             *
-             * @param event The event
-             */
-            @Override
-            public void invoke(TickKeyboardEvent event)
-            {
-                runTickKeyboard();
-            }
-        });
-    }
-
     /**
-     * Runs on the {@link TickKeyboardEvent}
+     *
+     *
+     * @param event
      */
     @Deprecated
-    public void runTickKeyboard()
+    public void onKeyboardInput(KeyboardInputEvent event)
     {
         // run on all module keybinding
         for (Module mod : Handlers.MODULE.getModules())
@@ -52,8 +33,8 @@ public class MacroHandler
             {
                 // check keybinding pressed
                 Macro keybinding = ((BindModule) mod).getKeybinding();
-                if (Keyboard.isKeyDown(keybinding.getKeycode())
-                        && !Keyboard.isKeyDown(Keyboard.KEY_NONE))
+                if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
+                        && event.getKeycode() == keybinding.getKeycode())
                 {
                     // toggle module
                     keybinding.invoke();

@@ -1,5 +1,7 @@
-package com.momentum.api.event;
+package com.momentum.api.event.listener;
 
+import com.momentum.api.event.Event;
+import com.momentum.api.event.listener.IListener;
 import com.momentum.api.registry.ILabeled;
 
 import java.lang.reflect.ParameterizedType;

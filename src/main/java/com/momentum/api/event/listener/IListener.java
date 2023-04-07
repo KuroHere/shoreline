@@ -1,4 +1,7 @@
-package com.momentum.api.event;
+package com.momentum.api.event.listener;
+
+import com.momentum.api.IInvoker;
+import com.momentum.api.event.Event;
 
 /**
  * Listener for {@link Event} event. Invokes when event occurs.

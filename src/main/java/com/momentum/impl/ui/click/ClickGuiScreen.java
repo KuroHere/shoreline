@@ -1,13 +1,11 @@
 package com.momentum.impl.ui.click;
 
-import com.momentum.impl.module.ClickGuiModule;
+import com.momentum.impl.module.client.ClickGuiModule;
 import com.momentum.impl.ui.click.frame.Frame;
 import com.momentum.init.Modules;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-
-import java.io.IOException;
 
 /**
  * ClickGui screen which is displayed during {@link ClickGuiModule#toggle()}
@@ -31,13 +29,16 @@ public class ClickGuiScreen extends Screen
     /**
      * Draws the screen and all components
      *
+     * @param matrices The stack of render matrices
      * @param mouseX The mouse x
      * @param mouseY The mouse y
+     * @param delta
      */
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta)
     {
         super.render(matrices, mouseX, mouseY, delta);
+        main.draw(matrices, 0xe5000000);
     }
 
     /**
@@ -46,11 +47,11 @@ public class ClickGuiScreen extends Screen
      * @param mouseX The mouse x
      * @param mouseY The mouse y
      * @param mouseButton The clicked button code
-     * @throws IOException if button is not valid
      */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton)
     {
+        main.onMouseClicked(mouseX, mouseY, mouseButton);
         return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
@@ -58,10 +59,13 @@ public class ClickGuiScreen extends Screen
      * Called when a key is typed (except F11 which toggles fullscreen).
      *
      * @param keyCode The LWJGL keycode
+     * @param scanCode The LWJGL key scancode
+     * @param modifiers The key press modifiers
      */
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
+        main.onKeyPressed(keyCode, scanCode, modifiers);
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 

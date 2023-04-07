@@ -1,32 +1,20 @@
 package com.momentum.api.registry;
 
-import com.momentum.api.config.factory.ConfigContainer;
-
-import java.util.Map;
-
 /**
- * Registry with labeled {@link ILabeled} data. Supports registering,
- * unregistering, and retrieving data to/from the register.
+ * Register with {@link ILabeled} data.
  *
  * @author linus
  * @since 03/21/2023
- * @param <T> The data type which must implement {@link ILabeled}
  *
- * @see ConfigContainer
- * @see ILabeled
+ * @param <T> The data type
+ *
+ * @see Registry
  */
-public interface IRegistry<T extends ILabeled>
+public interface IRegister<T extends ILabeled>
 {
     /**
-     * Replaces the current register
-     *
-     * @param reg The new register
-     */
-    void replace(Map<String, T> reg);
-
-    /**
      * Registers the given data to a register, which can later be retrieved
-     * using {@link IRegistry#retrieve(String)}
+     * using {@link #retrieve(String)}
      *
      * @param l The data label
      * @param data The data
@@ -37,7 +25,7 @@ public interface IRegistry<T extends ILabeled>
 
     /**
      * Registers the given data to a register, which can later be retrieved
-     * using {@link IRegistry#retrieve(String)}
+     * using {@link #retrieve(String)}
      *
      * @param data The data
      * @return The registered data

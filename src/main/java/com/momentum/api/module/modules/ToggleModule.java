@@ -3,7 +3,7 @@ package com.momentum.api.module.modules;
 import com.momentum.Momentum;
 import com.momentum.api.config.Configuration;
 import com.momentum.api.config.configs.BooleanConfig;
-import com.momentum.api.event.Listener;
+import com.momentum.api.event.listener.Listener;
 import com.momentum.api.module.ModuleCategory;
 import com.momentum.api.module.exceptions.IncompatibleInterfaceException;
 import com.momentum.api.module.property.IToggleable;
@@ -96,7 +96,7 @@ public class ToggleModule extends SubscriberModule implements IToggleable
     public void onEnable()
     {
         // subscribe all active listeners
-        for (Listener l : getListeners())
+        for (Listener<?> l : getListeners())
         {
             Momentum.EVENT_HANDLER.subscribe(l);
         }
@@ -109,7 +109,7 @@ public class ToggleModule extends SubscriberModule implements IToggleable
     public void onDisable()
     {
         // unsubscribe all active listeners
-        for (Listener l : getListeners())
+        for (Listener<?> l : getListeners())
         {
             Momentum.EVENT_HANDLER.unsubscribe(l);
         }

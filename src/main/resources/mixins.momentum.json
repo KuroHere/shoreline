@@ -3,10 +3,18 @@
   "package": "com.momentum.asm.mixin",
   "minVersion": "0.8",
   "compatibilityLevel": "JAVA_17",
-  "c": [
-    "MixinMinecraft"
+  "client": [
+    "MixinKeyboard",
+    "MixinMinecraftClient",
+    "accessor.AccessorChatScreen",
+    "accessor.AccessorTextFieldWidget",
+    "gui.screen.MixinChatScreen",
+    "network.MixinClientPlayNetworkHandler"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "MixinJndiLookup"
+  ]
 }

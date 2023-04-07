@@ -1,7 +1,7 @@
 package com.momentum.api.module.modules;
 
 import com.momentum.Momentum;
-import com.momentum.api.event.Listener;
+import com.momentum.api.event.listener.Listener;
 import com.momentum.api.module.ModuleCategory;
 import com.momentum.api.module.property.IConcurrent;
 import com.momentum.api.module.exceptions.IncompatibleInterfaceException;
@@ -29,7 +29,7 @@ public class ConcurrentModule extends SubscriberModule implements IConcurrent
         super(name, desc, category);
 
         // subscribe all listeners
-        for (Listener l : getListeners())
+        for (Listener<?> l : getListeners())
         {
             Momentum.EVENT_HANDLER.subscribe(l);
         }

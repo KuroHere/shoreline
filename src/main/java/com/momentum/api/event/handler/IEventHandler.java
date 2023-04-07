@@ -1,7 +1,7 @@
 package com.momentum.api.event.handler;
 
 import com.momentum.api.event.Event;
-import com.momentum.api.event.Listener;
+import com.momentum.api.event.listener.Listener;
 
 /**
  * Handler for {@link Event} events (also known as an <i>EventBus</i>). Manages all {@link Listener}

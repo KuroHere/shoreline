@@ -1,7 +1,5 @@
 package com.momentum.impl.ui.shape;
 
-import java.io.IOException;
-
 /**
  * Shape that can be interacted with via the LWJGL keyboard and mouse
  *
@@ -17,7 +15,7 @@ public interface IClickable
      * @param mouseY The mouse y
      * @param mouseButton The clicked button code
      */
-    void onClick(int mouseX, int mouseY, int mouseButton);
+    void onMouseClicked(double mouseX, double mouseY, int mouseButton);
 
     /**
      * Called when a key is typed (except F11 which toggles fullscreen).
@@ -26,5 +24,5 @@ public interface IClickable
      * @param scanCode The LWJGL key scancode
      * @param modifiers The key press modifiers
      */
-    void onType(int keyCode, int scanCode, int modifiers);
+    void onKeyPressed(int keyCode, int scanCode, int modifiers);
 }

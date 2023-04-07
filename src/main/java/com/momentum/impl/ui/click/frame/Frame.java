@@ -89,7 +89,7 @@ public class Frame extends Rect
      * @param mouseButton The clicked button code
      */
     @Override
-    public void onClick(int mouseX, int mouseY, int mouseButton)
+    public void onMouseClicked(double mouseX, double mouseY, int mouseButton)
     {
         // check click tabs
         for (FrameTab tab : tabs)
@@ -99,7 +99,7 @@ public class Frame extends Rect
             {
                 // mark current tab
                 curr = tab;
-                tab.onClick(mouseX, mouseY, mouseButton);
+                tab.onMouseClicked(mouseX, mouseY, mouseButton);
             }
         }
     }

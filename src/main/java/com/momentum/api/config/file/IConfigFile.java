@@ -1,5 +1,9 @@
 package com.momentum.api.config.file;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
+
 import java.io.File;
 import java.nio.file.Path;
 
@@ -14,6 +18,18 @@ import java.nio.file.Path;
  */
 public interface IConfigFile
 {
+    // client shutdown hooks
+    ShutdownHook shutdown = new ShutdownHook();
+
+    // json writer
+    Gson gson = new GsonBuilder()
+            .setLenient() // leniency to allow reading of .cfg files
+            .setPrettyPrinting()
+            .create();
+
+    // json parser
+    JsonParser parser = new JsonParser();
+
     /**
      * Saves all configurations to current file
      */

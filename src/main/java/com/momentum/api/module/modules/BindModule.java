@@ -39,6 +39,22 @@ public class BindModule extends ToggleModule implements IBindable
     }
 
     /**
+     * Initializes the module with a keybind
+     *
+     * @param name The module name
+     * @param desc     The module description
+     * @param category The module category
+     * @throws IncompatibleInterfaceException if module implements incompatible
+     *                                        interfaces
+     */
+    public BindModule(String name, String desc, ModuleCategory category,
+                      Integer keybind)
+    {
+        super(name, desc, category);
+        bind(keybind);
+    }
+
+    /**
      * Binds the module to a keycode
      *
      * @param key The bind keycode

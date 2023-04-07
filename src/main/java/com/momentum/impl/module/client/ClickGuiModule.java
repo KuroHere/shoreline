@@ -1,4 +1,4 @@
-package com.momentum.impl.module;
+package com.momentum.impl.module.client;
 
 import com.momentum.api.module.ModuleCategory;
 import com.momentum.api.module.modules.BindModule;
@@ -7,19 +7,22 @@ import org.lwjgl.glfw.GLFW;
 
 /**
  *
+ *
+ * @author linus
+ * @since 1.0
  */
 public class ClickGuiModule extends BindModule
 {
     // client clickgui instance
-    public static final ClickGuiScreen INSTANCE = new ClickGuiScreen();
+    public static final ClickGuiScreen SCREEN_INSTANCE = new ClickGuiScreen();
 
     /**
      *
      */
     public ClickGuiModule()
     {
-        super("ClickGui", "Opens the clickgui screen", ModuleCategory.CLIENT);
-        bind(GLFW.GLFW_KEY_RIGHT_SHIFT);
+        super("ClickGui", "Opens the clickgui screen", ModuleCategory.CLIENT,
+                GLFW.GLFW_KEY_RIGHT_SHIFT);
     }
 
     /**
@@ -29,6 +32,6 @@ public class ClickGuiModule extends BindModule
     public void onEnable()
     {
         // display client clickgui instance
-        mc.setScreen(INSTANCE);
+        mc.setScreen(SCREEN_INSTANCE);
     }
 }

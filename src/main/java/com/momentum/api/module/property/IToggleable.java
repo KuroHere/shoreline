@@ -9,7 +9,6 @@ package com.momentum.api.module.property;
  */
 public interface IToggleable
 {
-
     /**
      * Toggles the enable state
      */

@@ -1,5 +1,6 @@
 package com.momentum;
 
+import com.momentum.api.command.CommandDispatcher;
 import com.momentum.api.event.handler.EventHandler;
 import com.momentum.init.Bootstrap;
 import org.apache.logging.log4j.LogManager;
@@ -19,6 +20,9 @@ public class Momentum
     // event bus
     public static EventHandler EVENT_HANDLER;
 
+    // command dispatcher
+    public static CommandDispatcher CMD_DISPATCHER;
+
     /**
      * Runs before the {@link MomentumMod#onInitialize()}
      */
@@ -37,6 +41,7 @@ public class Momentum
     {
         LOGGER.info("Starting init ...");
         Bootstrap.init();
+        CMD_DISPATCHER = new CommandDispatcher();
     }
 
     /**

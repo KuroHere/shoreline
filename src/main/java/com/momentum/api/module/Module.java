@@ -10,6 +10,9 @@ import com.momentum.api.config.factory.ConfigContainer;
 import com.momentum.api.config.file.ConfigFile;
 import com.momentum.api.config.file.IConfigurable;
 import com.momentum.api.module.exceptions.IncompatibleInterfaceException;
+import com.momentum.api.module.modules.ConcurrentModule;
+import com.momentum.api.module.modules.SubscriberModule;
+import com.momentum.api.module.modules.ToggleModule;
 import com.momentum.api.module.property.IConcurrent;
 import com.momentum.api.module.property.IHideable;
 import com.momentum.api.module.property.IToggleable;
@@ -27,9 +30,9 @@ import java.util.Map.Entry;
  * @author linus
  * @since 03/20/2023
  *
- * @see com.momentum.api.module.modules.SubscriberModule
- * @see com.momentum.api.module.modules.ConcurrentModule
- * @see com.momentum.api.module.modules.ToggleModule
+ * @see SubscriberModule
+ * @see ConcurrentModule
+ * @see ToggleModule
  */
 public class Module extends ConfigContainer
         implements Globals, IConfigurable<JsonObject>, IHideable, ILabeled

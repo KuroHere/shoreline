@@ -6,8 +6,6 @@ import com.momentum.api.config.Config;
 import com.momentum.api.config.Macro;
 import com.momentum.api.config.file.ConfigFile;
 import com.momentum.impl.ui.click.ClickGuiScreen;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.input.Keyboard;
 
 /**
  * Macro configuration associated with {@link } in

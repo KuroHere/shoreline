@@ -2,13 +2,17 @@ package com.momentum.impl.handler;
 
 import com.momentum.api.module.Module;
 import com.momentum.api.registry.Registry;
-import com.momentum.impl.module.ClickGuiModule;
+import com.momentum.impl.module.client.ClickGuiModule;
 
 import java.util.Collection;
 
 /**
+ * Handles registration of {@link Module}
+ *
  * @author linus
- * @since 03/27/2023
+ * @since 1.0
+ *
+ * @see Module
  */
 public class ModuleHandler extends Registry<Module>
 {
@@ -31,7 +35,6 @@ public class ModuleHandler extends Registry<Module>
      */
     public Collection<Module> getModules()
     {
-        // register value set
         return register.values();
     }
 }

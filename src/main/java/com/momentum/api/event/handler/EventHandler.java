@@ -1,7 +1,7 @@
 package com.momentum.api.event.handler;
 
 import com.momentum.api.event.Event;
-import com.momentum.api.event.Listener;
+import com.momentum.api.event.listener.Listener;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EventHandler implements IEventHandler
 {
-
     // set of listeners
     // concurrent for thread safety
     private final Map<Class<Event>, Set<Listener>> listeners =

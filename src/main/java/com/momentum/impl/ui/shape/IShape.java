@@ -15,7 +15,7 @@ public interface IShape
      * @param y The param y value
      * @return Falls within bounds
      */
-    boolean isWithin(float x, float y);
+    boolean isWithin(double x, double y);
 
     /**
      * Sets the x position

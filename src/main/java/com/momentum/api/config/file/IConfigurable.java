@@ -15,12 +15,6 @@ import com.google.gson.JsonElement;
  */
 public interface IConfigurable<T extends JsonElement>
 {
-    // json writer
-    Gson gson = new GsonBuilder()
-            .setLenient() // leniency to allow reading of .cfg files
-            .setPrettyPrinting()
-            .create();
-
     /**
      * Parses the values from a {@link JsonElement} and updates all
      * {@link com.momentum.api.config.Config} values in the objects

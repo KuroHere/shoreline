@@ -1,38 +1,32 @@
 package com.momentum.api.registry;
 
-import com.momentum.api.config.Config;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Registry implementation backed by a {@link LinkedHashMap}
+ * Registry implementation backed by a {@link LinkedHashMap}. Registries are
+ * a sub-implementation of {@link java.util.List} with {@link ILabeled}
+ * elements to allow for faster get/search methods. The registry will throw a
+ * {@link NullPointerException} if any elements in the map are provided with
+ * a <tt>null</tt> label/data. NULL ELEMENTS ARE NOT SUPPORTED!
+ *
+ * <p>The following methods can now run in O(n): {@link #retrieve(String)},
+ * {@link #retrieve(String, Class)} {@link #unregister(ILabeled)}</p>
  *
  * @author linus
  * @since 03/23/2023
+ *
  * @param <T> The registry data type
  */
-public class Registry<T extends ILabeled> implements IRegistry<T>
+public class Registry<T extends ILabeled> implements IRegister<T>
 {
     // register
     // underlying hash map with String keys
     protected Map<String, T> register = new LinkedHashMap<>();
 
     /**
-     * Replaces the current register
-     *
-     * @param reg The new register
-     */
-    @Override
-    public void replace(Map<String, T> reg)
-    {
-        // replace old register
-        register = reg;
-    }
-
-    /**
      * Registers the given data to a register, which can later be retrieved
-     * using {@link IRegistry#retrieve(String)}
+     * using {@link IRegister#retrieve(String)}
      *
      * @param l    The data label
      * @param data The data
@@ -49,13 +43,13 @@ public class Registry<T extends ILabeled> implements IRegistry<T>
                     "Null data not supported in registry");
         }
 
-        // add to register
+        // put in hashmap with param label
         return register.put(l, data);
     }
 
     /**
      * Registers the given data to a register, which can later be retrieved
-     * using {@link IRegistry#retrieve(String)}
+     * using {@link IRegister#retrieve(String)}
      *
      * @param data The data
      * @return The registered data
@@ -71,7 +65,7 @@ public class Registry<T extends ILabeled> implements IRegistry<T>
                     "Null data not supported in registry");
         }
 
-        // add to register
+        // put in hashmap with data label
         register.put(data.getLabel(), data);
         return data;
     }
@@ -114,7 +108,7 @@ public class Registry<T extends ILabeled> implements IRegistry<T>
                     "Null label not supported in registry");
         }
 
-        // retrieve by label
+        // retrieve by label String
         return register.get(l);
     }
 
@@ -137,7 +131,7 @@ public class Registry<T extends ILabeled> implements IRegistry<T>
                     "Null label not supported in registry");
         }
 
-        // retrieved data
+        // data class matches param class
         T data = register.get(l);
         if (clazz.isInstance(data))
         {

@@ -6,8 +6,8 @@ import net.fabricmc.api.ModInitializer;
  * @author linus
  * @since 01/09/2023
  */
-public class MomentumMod implements ModInitializer {
-
+public class MomentumMod implements ModInitializer
+{
     // mod identifier
     public static final String MOD_ID = "momentum";
 

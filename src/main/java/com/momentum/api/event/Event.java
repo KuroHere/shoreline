@@ -1,6 +1,7 @@
 package com.momentum.api.event;
 
 import com.momentum.api.event.handler.EventHandler;
+import com.momentum.api.event.listener.Listener;
 
 /**
  * Event that can be listened to by a {@link Listener}. Processed by
