@@ -11,30 +11,36 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Container for {@link Config} backed by a {@link ConcurrentMap}.
+ * Container for {@link Config} backed by a {@link ConcurrentMap}. Manages
+ * all declared configurations for the container class.
  *
  * @author linus
  * @since 1.0
  *
  * @see Config
+ * @see ConfigFactory
  */
 public class ConfigContainer implements Configurable
 {
-    // Container name is its UNIQUE identifier
+    // Container name is its UNIQUE identifier.
     private final String name;
 
-    //
+    // List of all configurations in the container. The configs are managed
+    // by a Map with references to their data tags.
     private final ConcurrentMap<String, Config<?>> configurations =
             new ConcurrentHashMap<>();
 
     /**
+     * Uses the reflection {@link ConfigFactory} to add all declared configurations
+     * to the config {@link ConcurrentMap}. Declared {@link Config}s will not
+     * be registered if this process does not complete.
      *
+     * @param name The container name
      *
-     * @param name
+     * @see ConfigFactory
      */
     public ConfigContainer(String name)
     {
-        this.name = name;
         // populate container using reflection
         ConfigFactory factory = new ConfigFactory();
         for (Field field : getClass().getDeclaringClass().getDeclaredFields())
@@ -46,17 +52,20 @@ public class ConfigContainer implements Configurable
                 configurations.put(product.getRef(), product);
             }
         }
+        this.name = name;
     }
 
     /**
+     * Returns the container as a {@link JsonObject} containing a list of the
+     * registered {@link Config}
      *
+     * @return The container as a json object
      *
-     * @return
+     * @see Config#toJson()
      */
     @Override
     public JsonObject toJson()
     {
-        // write all configurations
         JsonObject out = new JsonObject();
         for (Config<?> config : getConfigs())
         {
@@ -67,9 +76,12 @@ public class ConfigContainer implements Configurable
     }
 
     /**
+     * Reads the configuration values from a {@link JsonObject} and updates
+     * the {@link Config} values.
      *
+     * @param jsonObj The container as a json object
      *
-     * @param jsonObj
+     * @see Config#fromJson(JsonObject)
      */
     @Override
     public void fromJson(JsonObject jsonObj)
@@ -96,9 +108,10 @@ public class ConfigContainer implements Configurable
     }
 
     /**
+     * Returns the container unique name identifier. This name will be
+     * displayed to the users when representing this container.
      *
-     *
-     * @return
+     * @return The unique name
      */
     public String getName()
     {
@@ -106,10 +119,13 @@ public class ConfigContainer implements Configurable
     }
 
     /**
+     * Returns the {@link Config} from the reference {@link Config#getRef()}
+     * data tag in the registry.
      *
+     * @param ref The config data tag
+     * @return The config from the reference data tag
      *
-     * @param ref
-     * @return
+     * @see Config#getRef()
      */
     public Config<?> getConfig(String ref)
     {

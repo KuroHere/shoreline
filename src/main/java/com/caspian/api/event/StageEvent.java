@@ -16,16 +16,6 @@ public class StageEvent extends Event
     private EventStage stage;
 
     /**
-     *
-     *
-     * @param stg
-     */
-    public void setStage(EventStage stg)
-    {
-        stage = stg;
-    }
-
-    /**
      * Returns the current {@link EventStage} of the {@link Event}.
      *
      * @return The current event stage
@@ -33,5 +23,15 @@ public class StageEvent extends Event
     public EventStage getStage()
     {
         return stage;
+    }
+
+    /**
+     *
+     *
+     * @param stage
+     */
+    public void setStage(EventStage stage)
+    {
+        this.stage = stage;
     }
 }

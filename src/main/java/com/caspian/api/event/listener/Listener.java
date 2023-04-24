@@ -61,8 +61,7 @@ public class Listener implements Invoker<Event>
         {
             MethodHandles.Lookup lookup = MethodHandles.lookup();
             CallSite callSite = LambdaMetafactory.metafactory(lookup,
-                    "invoke",
-                    MethodType.methodType(Invoker.class)
+                    "invoke", MethodType.methodType(Invoker.class)
                             .appendParameterTypes(subscriber),
                     MethodType.methodType(Void.TYPE, Event.class),
                     lookup.unreflect(method),
@@ -75,6 +74,19 @@ public class Listener implements Invoker<Event>
             Caspian.error("Failed to build invoker for " + method.getName());
             e.printStackTrace();
         }
+    }
+
+    /**
+     *
+     *
+     * @param event
+     *
+     * @see Invoker#invoke(Object)
+     */
+    @Override
+    public void invoke(Event event)
+    {
+        invoker.invoke(event);
     }
 
     /**
@@ -95,18 +107,5 @@ public class Listener implements Invoker<Event>
     public Class<?> getSubscriber()
     {
         return subscriber;
-    }
-
-    /**
-     *
-     *
-     * @param event
-     *
-     * @see Invoker#invoke(Object)
-     */
-    @Override
-    public void invoke(Event event)
-    {
-        invoker.invoke(event);
     }
 }
