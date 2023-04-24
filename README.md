@@ -16,8 +16,9 @@ are listed in the `CommandManager`.
 
 ## `Config<T>`
 Client configuration that holds a modifiable value that can be updated via 
-the `ClickGui` or in the chat via `Command`. Configs must be declared in a 
-class that extends `ConfigContainer`. The config value cannot be `null`. Ex:
+the `ClickGui` or in the chat via `Command`. Configs are registered using
+reflection, so declaration of configs must be in a class that extends 
+`ConfigContainer`. The config value cannot be `null`. Ex:
 ```java
 // registered via reflection
 final Config<Boolean> booleanConfig = new BooleanConfig("ExampleBoolean", 
