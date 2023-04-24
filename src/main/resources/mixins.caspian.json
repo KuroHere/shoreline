@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "package": "com.caspian.asm",
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MixinJndiLookup",
+    "MixinKeyboard",
+    "MixinMinecraftClient",
+    "accessor.AccessorChatScreen",
+    "accessor.AccessorMinecraftClient",
+    "accessor.AccessorPlayerSkinProvider",
+    "accessor.AccessorTextFieldWidget",
+    "gui.screen.MixinChatScreen",
+    "network.MixinClientConnection",
+    "network.MixinClientPlayNetworkHandler"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

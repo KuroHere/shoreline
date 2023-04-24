@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "momentum",
+  "id": "caspian",
   "version": "${version}",
-  "name": "Momentum",
+  "name": "Caspian",
   "description": "1.19.4",
   "authors": [
     "linus"
@@ -11,15 +11,15 @@
     "homepage": "https://fabricmc.net/"
   },
   "license": "None",
-  "icon": "assets/momentum/icon.png",
+  "icon": "assets/caspian/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.momentum.MomentumMod"
+      "com.caspian.CaspianMod"
     ]
   },
   "mixins": [
-    "mixins.momentum.json"
+    "mixins.caspian.json"
   ],
   "depends": {
     "java": ">=17",
