@@ -11,7 +11,7 @@
     "homepage": "https://fabricmc.net/"
   },
   "license": "None",
-  "icon": "assets/caspian/icon.png",
+  "icon": "assets/caspian/client_icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
