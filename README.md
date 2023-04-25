@@ -14,35 +14,32 @@ is currently functioning and whether the `Module` is currently subscribed
 to the `EventHandler`.
 Ex:
 ``` java
-public class ExampleModule extends ToggleModule
+public ExampleModule()
 {
-    public ExampleModule()
-    {
-        super("ExampleModule", "Example of module implementation",
-                ModuleCategory.TEST);
-    }
-
-    // declared with default keybind
-    public ExampleModule()
-    {
-        super("ExampleModule", "Example of module implementation",
-                ModuleCategory.TEST, GLFW.GLFW_KEY_TAB);
-    }
-
-    @Override
-    public void onEnable()
-    {
-        // onEnable callback
-    }
-
-    @Override
-    public void onDisable()
-    {
-        // onDisable callback 
-    }
-    
-    // module implementation ...
+     super("ExampleModule", "Example of module implementation",
+             ModuleCategory.TEST);
 }
+
+// declared with default keybind
+public ExampleModule()
+{
+     super("ExampleModule", "Example of module implementation",
+             ModuleCategory.TEST, GLFW.GLFW_KEY_TAB);
+}
+
+@Override
+public void onEnable()
+{
+     // onEnable callback
+}
+
+@Override
+public void onDisable()
+{
+     // onDisable callback 
+ }
+
+// module implementation ...
 ```
 
 ## `Command`
@@ -56,16 +53,13 @@ Commands are essentially made up of an array of `Argument`. This holds a value
 which has been converted from the user input in the chat. The value is `null` 
 if the input was not given or the input was invalid. Ex:
 ```java
-public class ExampleCommand extends Command
-{ 
-    public ExampleCommand()
-    {
-        super("example", "<arg>", new StringArgument().addSuggestions("foo",
-                "bar", "example-suggestion"));
-    }
-
-    // your implementation
+public ExampleCommand()
+{
+     super("example", "<arg>", new StringArgument().addSuggestions("foo",
+             "bar", "example-suggestion"));
 }
+
+// your implementation
 ```
 
 ## `Config<T>`
