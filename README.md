@@ -1,4 +1,5 @@
-# Caspian
+![client_icon](https://user-images.githubusercontent.com/68214996/234265902-66670530-e680-4147-9e69-bae2029986c3.png)
+---
 ## Named after the ***Caspian Sea***.
 ![caspian_sea](https://user-images.githubusercontent.com/68214996/233989780-8754884f-f678-4260-83fd-59fcf294edd2.png)
 ## PRE-ALPHA NOTES 1.0-a1
