@@ -1,18 +1,72 @@
 # Caspian
 ## Named after the ***Caspian Sea***.
 ![caspian_sea](https://user-images.githubusercontent.com/68214996/233989780-8754884f-f678-4260-83fd-59fcf294edd2.png)
-## PRE-ALPHA NOTES
-- ver-1.0-a1
-- Lightweight, documented.
+## PRE-ALPHA NOTES 1.0-a1
+- Lightweight and documented
 - API still UNTESTED and UNFINISHED
 - Needs Loader
 
 # Documentation
+## `ToggleModule`
+Client `Module` that provides the implementation of a toggleable feature.
+The `Module` tracks an enabled state which determines whether the `Module`
+is currently functioning and whether the `Module` is currently subscribed
+to the `EventHandler`.
+Ex:
+``` java
+public class ExampleModule extends ToggleModule
+{
+    public ExampleModule()
+    {
+        super("ExampleModule", "Example of module implementation",
+                ModuleCategory.TEST);
+    }
+
+    // declared with default keybind
+    public ExampleModule()
+    {
+        super("ExampleModule", "Example of module implementation",
+                ModuleCategory.TEST, GLFW.GLFW_KEY_TAB);
+    }
+
+    @Override
+    public void onEnable()
+    {
+        // onEnable callback
+    }
+
+    @Override
+    public void onDisable()
+    {
+        // onDisable callback 
+    }
+    
+    // module implementation ...
+}
+```
+
 ## `Command`
 Client command that runs an executable command based on an `Argument` 
 structure with inputs from the chat. Command suggestion and execution is 
 managed by the `CommandHandler`. The collection of available client commands 
 are listed in the `CommandManager`.
+
+## `Argument`
+Commands are essentially made up of an array of `Argument`. This holds a value
+which has been converted from the user input in the chat. The value is `null` 
+if the input was not given or the input was invalid. Ex:
+```java
+public class ExampleCommand extends Command
+{ 
+    public ExampleCommand()
+    {
+        super("example", "<arg>", new StringArgument().addSuggestions("foo",
+                "bar", "example-suggestion"));
+    }
+
+    // your implementation
+}
+```
 
 ## `Config<T>`
 Client configuration that holds a modifiable value that can be updated via 
@@ -26,11 +80,13 @@ final Config<Boolean> booleanConfig = new BooleanConfig("ExampleBoolean",
 ```
 
 ## `Configurable`
-Property for configurable data that specifies how it will read/write a `.json` file. 
+Property for configurable data that specifies how it will read/write a `.json` 
+file. 
 
 ## `ConfigFile`
 Representation of a local configuration file which holds data for a specific 
-`Configurable` data. The `ClientConfiguration` manages the list of client config files to save/load.
+`Configurable` data. The `ClientConfiguration` manages the list of client 
+config files to save/load.
 
 ## `Event`
 Client event that represents event implementations. Events are handled by 
