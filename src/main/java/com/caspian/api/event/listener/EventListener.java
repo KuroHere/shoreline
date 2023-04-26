@@ -12,15 +12,20 @@ import java.lang.annotation.Target;
  *
  * @author linus
  * @since 1.0
+ *
+ *
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EventListener
 {
     /**
+     * Returns the {@link EventPriority} of the listener. This values is
+     * default set to {@link EventPriority#NORMAL}
      *
+     * @return The priority of the listener
      *
-     * @return
+     * @see EventPriority
      */
     EventPriority priority() default EventPriority.NORMAL;
 }

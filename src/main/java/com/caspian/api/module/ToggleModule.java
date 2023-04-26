@@ -1,5 +1,6 @@
 package com.caspian.api.module;
 
+import com.caspian.Caspian;
 import com.caspian.api.config.Config;
 import com.caspian.api.config.setting.BooleanConfig;
 import com.caspian.api.config.setting.MacroConfig;
@@ -94,6 +95,7 @@ public class ToggleModule extends Module
     public void enable()
     {
         enabledConfig.setValue(true);
+        Caspian.EVENT_HANDLER.subscribe(this);
         onEnable();
     }
 
@@ -106,11 +108,15 @@ public class ToggleModule extends Module
     public void disable()
     {
         enabledConfig.setValue(false);
+        Caspian.EVENT_HANDLER.unsubscribe(this);
         onDisable();
     }
 
     /**
+     * Runs callback after {@link #enable()}. Part of the module
+     * implementation specifications.
      *
+     * @see #enable()
      */
     protected void onEnable()
     {
@@ -118,7 +124,10 @@ public class ToggleModule extends Module
     }
 
     /**
+     * Runs callback after {@link #disable()}. Part of the module
+     * implementation specifications.
      *
+     * @see #disable()
      */
     protected void onDisable()
     {

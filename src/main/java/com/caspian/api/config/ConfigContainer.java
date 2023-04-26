@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -27,8 +29,8 @@ public class ConfigContainer implements Configurable
 
     // List of all configurations in the container. The configs are managed
     // by a Map with references to their data tags.
-    private final ConcurrentMap<String, Config<?>> configurations =
-            new ConcurrentHashMap<>();
+    private final Map<String, Config<?>> configurations =
+            Collections.synchronizedMap(new HashMap<>());
 
     /**
      * Uses the reflection {@link ConfigFactory} to add all declared configurations

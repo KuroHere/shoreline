@@ -23,7 +23,8 @@ public class MixinClientPlayNetworkHandler
      * @param content
      * @param ci
      */
-    @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "sendChatMessage", at = @At(value = "HEAD"),
+            cancellable = true)
     private void hookSendChatMessage(String content, CallbackInfo ci)
     {
         ChatInputEvent chatInputEvent = new ChatInputEvent(content);

@@ -2,8 +2,13 @@ package com.caspian.api.config.setting;
 
 import com.caspian.api.config.Config;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 /**
+ *
+ *
+ * @author linus
+ * @since 1.0
  *
  *
  */
@@ -32,7 +37,7 @@ public class StringConfig extends Config<String>
     @Override
     public JsonObject toJson()
     {
-        return null;
+        return new JsonPrimitive(getValue()).getAsJsonObject();
     }
 
     /**
@@ -41,6 +46,6 @@ public class StringConfig extends Config<String>
     @Override
     public void fromJson(JsonObject jsonObj)
     {
-
+        setValue(jsonObj.getAsString());
     }
 }

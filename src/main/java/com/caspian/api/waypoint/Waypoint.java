@@ -66,7 +66,7 @@ public class Waypoint extends ConfigContainer
      */
     public String getRef()
     {
-        return ip + "_" + getName().toLowerCase() + "_waypoint";
+        return String.format("%s_%s_waypoint", ip, getName().toLowerCase());
     }
 
     public String getIp()

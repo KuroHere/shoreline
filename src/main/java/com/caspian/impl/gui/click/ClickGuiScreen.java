@@ -1,7 +1,10 @@
 package com.caspian.impl.gui.click;
 
+import com.caspian.impl.gui.click.component.Button;
 import com.caspian.impl.gui.click.component.Frame;
-import com.caspian.impl.gui.click.impl.ConfigFrame;
+import com.caspian.impl.gui.click.impl.config.ConfigFrame;
+import com.caspian.impl.gui.click.impl.config.ModuleButton;
+import com.caspian.impl.gui.click.impl.config.setting.ConfigComponent;
 import com.caspian.impl.module.client.ClickGuiModule;
 import com.caspian.init.Modules;
 import com.caspian.util.Globals;
@@ -33,8 +36,8 @@ public class ClickGuiScreen extends Screen implements Globals
     {
         super(Text.literal("ClickGui"));
         Window res = mc.getWindow();
-        frames.add(new ConfigFrame(res.getScaledWidth() / 2.0f - 250,
-                res.getScaledHeight() / 2.0f - 150, 500, 300));
+        frames.add(new ConfigFrame(res.getScaledWidth() / 2.0 - 250.0,
+                res.getScaledHeight() / 2.0 - 150.0, 500.0, 300.0));
     }
 
     /**
@@ -52,6 +55,27 @@ public class ClickGuiScreen extends Screen implements Globals
         for (Frame frame : frames)
         {
             frame.render(matrices, mouseX, mouseY, delta);
+            float scale = Modules.CLICKGUI.getConfigValue(
+                    "clickgui_scale_config");
+            if (scale != 1.0f)
+            {
+                frame.setDimensions(frame.getWidth() * scale,
+                        frame.getHeight() * scale);
+                for (Button button : frame.getButtons())
+                {
+                    button.setDimensions(button.getWidth() * scale,
+                            button.getHeight() * scale);
+                    if (button instanceof ModuleButton)
+                    {
+                        for (ConfigComponent<?> component :
+                                ((ModuleButton) button).getConfigComponents())
+                        {
+                            component.setDimensions(component.getWidth() * scale,
+                                    component.getHeight() * scale);
+                        }
+                    }
+                }
+            }
         }
     }
 

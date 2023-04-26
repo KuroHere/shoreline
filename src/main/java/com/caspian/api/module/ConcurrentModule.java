@@ -1,5 +1,7 @@
 package com.caspian.api.module;
 
+import com.caspian.Caspian;
+
 /**
  * {@link Module} implementation that runs concurrently and cannot be disabled
  * without the use of Commands. Unlike {@link ToggleModule},
@@ -20,5 +22,6 @@ public class ConcurrentModule extends Module
     public ConcurrentModule(String name, String desc, ModuleCategory category)
     {
         super(name, desc, category);
+        Caspian.EVENT_HANDLER.subscribe(this);
     }
 }

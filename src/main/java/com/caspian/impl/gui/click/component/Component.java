@@ -2,6 +2,7 @@ package com.caspian.impl.gui.click.component;
 
 import com.caspian.api.render.RenderManager;
 import com.caspian.api.render.shader.Shader;
+import com.caspian.util.Globals;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
@@ -30,7 +31,7 @@ import java.util.function.BiConsumer;
  * @see Drawable
  * @see Interactable
  */
-public abstract class Component implements Interactable
+public abstract class Component implements Interactable, Globals
 {
     //
     private final ScissorStack scissorStack = new ScissorStack();
@@ -490,6 +491,12 @@ public abstract class Component implements Interactable
         return width;
     }
 
+    public boolean isMouseOver(double mx, double my, double x1, double y1,
+                               double x2, double y2)
+    {
+        return mx >= x1 && mx <= x1 + x2 && my >= y1 && my <= y1 + y2;
+    }
+
     /**
      *
      *
@@ -502,10 +509,16 @@ public abstract class Component implements Interactable
         this.y = y;
     }
 
-    public boolean isMouseOver(double mx, double my, double x1, double y1,
-                            double x2, double y2)
+    /**
+     *
+     *
+     * @param width
+     * @param height
+     */
+    public void setDimensions(double width, double height)
     {
-        return mx >= x1 && mx <= x1 + x2 && my >= y1 && my <= y1 + y2;
+        setWidth(width);
+        setHeight(height);
     }
 
     public void setHeight(double height)

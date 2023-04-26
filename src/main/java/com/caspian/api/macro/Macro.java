@@ -44,7 +44,7 @@ public record Macro(String name, int keycode, Runnable macro)
      */
     public String getRef()
     {
-        return name + "_macro";
+        return String.format("%s_macro", name.toLowerCase());
     }
 
     /**

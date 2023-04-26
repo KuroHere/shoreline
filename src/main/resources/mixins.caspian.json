@@ -11,6 +11,7 @@
     "accessor.AccessorMinecraftClient",
     "accessor.AccessorPlayerSkinProvider",
     "accessor.AccessorTextFieldWidget",
+    "gui.hud.MixinInGameHud",
     "gui.screen.MixinChatScreen",
     "network.MixinClientConnection",
     "network.MixinClientPlayNetworkHandler"

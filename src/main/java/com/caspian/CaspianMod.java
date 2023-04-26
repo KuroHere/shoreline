@@ -18,7 +18,7 @@ public class CaspianMod implements ModInitializer
 
     // mod version
     // UPDATE BEFORE RELEASE
-    public static final String MOD_VER = "1.0";
+    public static final String MOD_VER = "1.0-a1";
 
     // mod mc version
     public static final String MOD_MC_VER = "1.19.4";

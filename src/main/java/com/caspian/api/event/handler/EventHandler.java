@@ -5,7 +5,9 @@ import com.caspian.api.event.listener.EventListener;
 import com.caspian.api.event.listener.Listener;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -24,16 +26,27 @@ public class EventHandler
 {
     // Active subscriber cache. Used to check if a class is already
     // subscribed to this EventHandler.
-    private final Set<Class<?>> subscribers = new HashSet<>();
+    private final Set<Class<?>> subscribers =
+            Collections.synchronizedSet(new HashSet<>());
 
     // Map of events and their associated listeners. All listeners in a class
     // will be added when the class is subscribed to this EventHandler.
-    private final ConcurrentMap<Class<?>, Set<Listener>> listeners =
-            new ConcurrentHashMap<>();
+    private final Map<Class<?>, Set<Listener>> listeners =
+            Collections.synchronizedMap(new ConcurrentHashMap<>());
+
+    /**
+     *
+     *
+     * @param obj
+     */
+    public void subscribe(Object obj)
+    {
+        subscribe(obj.getClass());
+    }
 
     /**
      * Subscribes a {@link Class} to the EventHandler and adds all
-     * {@link Listener} in the class to the active listener map.
+     * {@link EventListener} in the class to the active listener map.
      *
      * @param clazz The subscriber class
      */
@@ -59,6 +72,22 @@ public class EventHandler
         }
     }
 
+    /**
+     *
+     *
+     * @param obj
+     */
+    public void unsubscribe(Object obj)
+    {
+        unsubscribe(obj.getClass());
+    }
+
+    /**
+     * Unsubscribes the subscriber {@link Class} and all associated
+     * {@link EventListener} from the listener map.
+     *
+     * @param clazz The subscriber class
+     */
     public void unsubscribe(Class<?> clazz)
     {
         if (subscribers.remove(clazz))
@@ -70,10 +99,11 @@ public class EventHandler
     }
 
     /**
+     * Runs {@link Listener#invoke(Event)} on all active {@link Listener} for
+     * the param {@link Event}
      *
-     *
-     * @param event
-     * @return
+     * @param event The event to dispatch listeners
+     * @return <tt>true</tt> if the {@link Event#isCanceled()}
      */
     public boolean dispatch(Event event)
     {

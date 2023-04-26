@@ -4,8 +4,9 @@ import com.caspian.impl.module.client.ClickGuiModule;
 import com.caspian.impl.module.movement.SprintModule;
 
 import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -16,8 +17,8 @@ import java.util.concurrent.ConcurrentMap;
 public class ModuleManager
 {
     //
-    private final ConcurrentMap<String, Module> modules =
-            new ConcurrentHashMap<>();
+    private final Map<String, Module> modules =
+            Collections.synchronizedMap(new HashMap<>());
 
     /**
      * Initializes the module register.

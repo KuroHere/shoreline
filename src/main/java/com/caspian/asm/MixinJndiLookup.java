@@ -28,7 +28,7 @@ public class MixinJndiLookup
      * @param cir
      */
     @Inject(method = "lookup(Lorg/apache/logging/log4j/core/LogEvent;" +
-            "Ljava/lang/String;)Ljava/lang/String;", at = @At("HEAD"),
+            "Ljava/lang/String;)Ljava/lang/String;", at = @At(value = "HEAD"),
             cancellable = true, remap = false)
     private void hookLookup(LogEvent event, String key,
                             CallbackInfoReturnable<String> cir)

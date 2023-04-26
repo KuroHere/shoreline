@@ -1,7 +1,10 @@
 package com.caspian.impl.gui.click.component;
 
-import com.caspian.util.Globals;
+import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -9,8 +12,17 @@ import net.minecraft.client.util.math.MatrixStack;
  * @author linus
  * @since 1.0
  */
-public class Frame extends Component implements Globals
+public class Frame extends Component
 {
+    //
+    private final List<Button> buttons = new ArrayList<>();
+
+    //
+    private double prevX, prevY, prevWidth, prevHeight;
+    private boolean maximized;
+
+
+
     /**
      *
      *
@@ -24,6 +36,37 @@ public class Frame extends Component implements Globals
         setPos(x, y);
         setWidth(width);
         setHeight(height);
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public List<Button> getButtons()
+    {
+        return buttons;
+    }
+
+    /**
+     *
+     *
+     * @param idx
+     * @return
+     */
+    public Button getButton(int idx)
+    {
+        return buttons.get(idx);
+    }
+
+    /**
+     *
+     *
+     * @param button
+     */
+    public void addButton(Button button)
+    {
+        buttons.add(button);
     }
 
     /**
@@ -43,7 +86,7 @@ public class Frame extends Component implements Globals
         drawCircle(matrices, getX() + 4.0, getY() + 5.0, 2,
                 0xffff294d);
         drawCircle(matrices, getX() + 8.0, getY() + 5.0, 2,
-                0xed60ab6b);
+                maximized ? 0xfffcbc3c : 0xff60ab6b);
     }
 
     /**
@@ -60,10 +103,16 @@ public class Frame extends Component implements Globals
         {
             closeFrame();
         }
-
         if (isMouseOver(mouseX, mouseY, getX() + 6.0, getY() + 3.0, 4.0, 4.0))
         {
-            maximizeFrame();
+            if (maximized)
+            {
+                minimizeFrame();
+            }
+            else
+            {
+                maximizeFrame();
+            }
         }
     }
 
@@ -106,6 +155,23 @@ public class Frame extends Component implements Globals
      */
     public void maximizeFrame()
     {
+        prevX = getX();
+        prevY = getY();
+        prevWidth = getWidth();
+        prevHeight = getHeight();
+        setPos(0, 0);
+        Window window = mc.getWindow();
+        setDimensions(window.getScaledWidth(), window.getScaledHeight());
+        maximized = true;
+    }
 
+    /**
+     *
+     */
+    public void minimizeFrame()
+    {
+        setPos(prevX, prevY);
+        setDimensions(prevWidth, prevHeight);
+        maximized = false;
     }
 }

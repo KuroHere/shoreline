@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
  * @see EventHandler
  * @see EventListener
  */
-public class Listener implements Invoker<Event>
+public class Listener
 {
     // The EventListener method which contains the code to invoke when the
     // listener is invoked.
@@ -43,7 +43,7 @@ public class Listener implements Invoker<Event>
 
     // The Listener invoker created by the LambdaMetaFactory which invokes the
     // code from the Listener method.
-    private Invoker invoker;
+    private Invoker<Event> invoker;
 
     /**
      *
@@ -61,12 +61,13 @@ public class Listener implements Invoker<Event>
         {
             MethodHandles.Lookup lookup = MethodHandles.lookup();
             CallSite callSite = LambdaMetafactory.metafactory(lookup,
-                    "invoke", MethodType.methodType(Invoker.class)
-                            .appendParameterTypes(subscriber),
+                    "invoke",
+                    MethodType.methodType(Invoker.class).appendParameterTypes(subscriber),
                     MethodType.methodType(Void.TYPE, Event.class),
                     lookup.unreflect(method),
-                    MethodType.methodType(Void.TYPE, method.getParameterTypes()[0]));
-            invoker = (Invoker) callSite.getTarget().invoke(subscriber);
+                    MethodType.methodType(Void.TYPE,
+                            method.getParameterTypes()[0]));
+            invoker = (Invoker<Event>) callSite.getTarget().invoke(subscriber);
         }
 
         catch (Throwable e)
@@ -83,7 +84,6 @@ public class Listener implements Invoker<Event>
      *
      * @see Invoker#invoke(Object)
      */
-    @Override
     public void invoke(Event event)
     {
         invoker.invoke(event);
