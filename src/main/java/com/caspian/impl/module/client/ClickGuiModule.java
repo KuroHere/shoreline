@@ -45,18 +45,4 @@ public class ClickGuiModule extends ToggleModule
     {
         mc.setScreen(CLICK_GUI_SCREEN);
     }
-
-    /**
-     *
-     *
-     * @param event
-     */
-    @EventListener
-    public void onConfigUpdate(ConfigUpdateEvent event)
-    {
-        if (event.getConfig() == scaleConfig)
-        {
-            CLICK_GUI_SCREEN.setScale(scaleConfig.getValue());
-        }
-    }
 }
