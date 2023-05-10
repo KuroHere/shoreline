@@ -6,10 +6,22 @@ import com.caspian.init.Managers;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ *
+ *
+ * @author linus
+ * @since 1.0
+ *
+ * @see Command
+ */
 public class CommandArgument extends Argument<Command>
 {
+    //
     Collection<String> commandIds = new ArrayList<>();
 
+    /**
+     *
+     */
     public CommandArgument()
     {
         for (Command command : Managers.COMMAND.getCommands())

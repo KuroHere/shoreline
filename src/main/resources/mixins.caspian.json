@@ -18,5 +18,8 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "accessor.AccessorPlayerInteractEntityC2SPacket"
+  ]
 }

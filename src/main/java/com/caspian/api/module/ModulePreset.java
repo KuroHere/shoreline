@@ -2,7 +2,6 @@ package com.caspian.api.module;
 
 import com.caspian.Caspian;
 import com.caspian.api.file.ConfigFile;
-import com.caspian.api.module.Module;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -35,7 +34,7 @@ public class ModulePreset extends ConfigFile
      */
     public ModulePreset(Path dir, Module module)
     {
-        super(dir, module.getRef() + ".json");
+        super(dir, module.getId() + ".json");
         this.module = module;
     }
 

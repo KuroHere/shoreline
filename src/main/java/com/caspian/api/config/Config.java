@@ -79,7 +79,7 @@ public abstract class Config<T> implements Configurable
      *
      * @see ConfigContainer#getName()
      */
-    public String getRef()
+    public String getId()
     {
         return String.format("%s_%s_config",
                 container.getName().toLowerCase(), name.toLowerCase());

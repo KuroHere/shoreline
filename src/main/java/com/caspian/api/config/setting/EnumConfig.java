@@ -3,6 +3,14 @@ package com.caspian.api.config.setting;
 import com.caspian.api.config.Config;
 import com.google.gson.JsonObject;
 
+/**
+ *
+ *
+ * @author linus
+ * @since 1.0
+ *
+ * @param <T>
+ */
 public class EnumConfig<T extends Enum<?>> extends Config<T>
 {
     // Array containing all values of the Enum type.

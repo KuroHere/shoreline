@@ -25,8 +25,14 @@ public enum EventPriority
      */
     LOW(-1);
 
+    //
     private final int priority;
 
+    /**
+     *
+     *
+     * @param priority
+     */
     EventPriority(int priority)
     {
         this.priority = priority;

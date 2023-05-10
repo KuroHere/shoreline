@@ -24,7 +24,8 @@ public class ModuleButton extends Button
     private final Module module;
 
     //
-    private final List<ConfigComponent<?>> configComponents = new ArrayList<>();
+    private final List<ConfigComponent<?>> configComponents =
+            new ArrayList<>();
 
     /**
      *

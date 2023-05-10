@@ -115,12 +115,10 @@ public class Account extends ConfigContainer implements Globals
                     Optional.empty(), Session.AccountType.LEGACY));
         }
     }
-
     protected void xboxLiveLogin()
     {
 
     }
-
     protected void xstsLogin()
     {
 

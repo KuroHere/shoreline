@@ -5,6 +5,7 @@ import com.caspian.api.account.AccountManager;
 import com.caspian.api.command.CommandManager;
 import com.caspian.api.macro.MacroManager;
 import com.caspian.api.module.ModuleManager;
+import com.caspian.api.network.NetworkManager;
 import com.caspian.api.social.SocialManager;
 import com.caspian.api.waypoint.WaypointManager;
 
@@ -25,6 +26,7 @@ public class Managers
 
     // Manager instances. Managers can be statically referenced after
     // initialized. Managers will be initialized in this order.
+    public static NetworkManager NETWORK;
     public static ModuleManager MODULE;
     public static MacroManager MACRO;
     public static CommandManager COMMAND;
@@ -42,6 +44,7 @@ public class Managers
     {
         if (!isInitialized())
         {
+            NETWORK = new NetworkManager();
             MODULE = new ModuleManager();
             COMMAND = new CommandManager();
             MACRO = new MacroManager();

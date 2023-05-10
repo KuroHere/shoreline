@@ -53,7 +53,7 @@ public class Module extends ConfigContainer implements Globals
      * @see ModuleManager#getModule(String)
      * @see ModulePreset#save()
      */
-    public String getRef()
+    public String getId()
     {
         return String.format("%s_module", getName().toLowerCase());
     }

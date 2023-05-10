@@ -65,18 +65,18 @@ public class ModuleManager
      */
     private void register(Module module)
     {
-        modules.put(module.getRef(), module);
+        modules.put(module.getId(), module);
     }
 
     /**
      *
      *
-     * @param ref
+     * @param id
      * @return
      */
-    public Module getModule(String ref)
+    public Module getModule(String id)
     {
-        return modules.get(ref);
+        return modules.get(id);
     }
 
     /**

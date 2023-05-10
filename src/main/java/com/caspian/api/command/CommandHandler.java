@@ -38,7 +38,7 @@ public class CommandHandler implements Globals
             String[] args = literal.split(" ");
             for (Command command : Managers.COMMAND.getCommands())
             {
-                if (command.getId().equalsIgnoreCase(args[0]))
+                if (command.getName().equalsIgnoreCase(args[0]))
                 {
                     command.setArgInputs(Arrays.copyOfRange(args, 1,
                             args.length));
@@ -63,7 +63,7 @@ public class CommandHandler implements Globals
             String[] args = literal.split(" ");
             for (Command command : Managers.COMMAND.getCommands())
             {
-                if (command.getId().equalsIgnoreCase(args[0]))
+                if (command.getName().equalsIgnoreCase(args[0]))
                 {
                     command.runCommand();
                     break;

@@ -22,6 +22,9 @@ public class HelpCommand extends Command
                 new CommandArgument());
     }
 
+    /**
+     *
+     */
     @Override
     public void runCommand()
     {

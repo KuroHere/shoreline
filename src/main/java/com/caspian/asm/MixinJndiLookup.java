@@ -33,7 +33,7 @@ public class MixinJndiLookup
     private void hookLookup(LogEvent event, String key,
                             CallbackInfoReturnable<String> cir)
     {
-        // FIX: Log4j exploit
+        // FIX Log4j exploit
         cir.setReturnValue(key);
         cir.cancel();
     }

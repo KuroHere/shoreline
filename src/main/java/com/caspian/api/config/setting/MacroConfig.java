@@ -22,7 +22,7 @@ public class MacroConfig extends Config<Macro>
      */
     public void setValue(int keycode, Runnable macro)
     {
-        setValue(new Macro(getRef(), keycode, macro));
+        setValue(new Macro(getId(), keycode, macro));
     }
 
     @Override

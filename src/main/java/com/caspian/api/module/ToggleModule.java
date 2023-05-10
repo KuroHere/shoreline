@@ -35,7 +35,7 @@ public class ToggleModule extends Module
     // interact with the #enabledConfig.
     private final Config<Macro> keybindingConfig = new MacroConfig("Keybind",
             "The module keybinding. Pressing this key will toggle the " +
-                    "module enabled state.", new Macro(getRef(),
+                    "module enabled state.", new Macro(getId(),
                     GLFW.GLFW_KEY_UNKNOWN, this::toggle));
 
     /**

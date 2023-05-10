@@ -16,7 +16,7 @@ import java.util.Collection;
 public class ModuleArgument extends Argument<Module>
 {
     //
-    private final Collection<String> moduleNames = new ArrayList<>();
+    private final ArrayList<String> moduleNames = new ArrayList<>();
 
     /**
      *

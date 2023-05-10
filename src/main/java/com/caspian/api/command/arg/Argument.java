@@ -70,21 +70,20 @@ public abstract class Argument<T>
                 return suggestion;
             }
         }
-
         return null;
     }
 
     /**
      *
      *
-     * @param ltrl
+     * @param literal
      *
      * @see Command#setArgInputs(String[])
      * @see CommandHandler#onChatInput(ChatInputEvent)
      */
-    public void setLiteral(String ltrl)
+    public void setLiteral(String literal)
     {
-        literal = ltrl;
+        this.literal = literal;
     }
 
     /**

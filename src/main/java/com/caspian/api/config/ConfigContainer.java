@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -51,7 +50,7 @@ public class ConfigContainer implements Configurable
             {
                 Config<?> product = factory.build(field);
                 product.setContainer(this);
-                configurations.put(product.getRef(), product);
+                configurations.put(product.getId(), product);
             }
         }
         this.name = name;
@@ -71,7 +70,7 @@ public class ConfigContainer implements Configurable
         JsonObject out = new JsonObject();
         for (Config<?> config : getConfigs())
         {
-            out.add(config.getRef(), config.toJson());
+            out.add(config.getId(), config.toJson());
         }
 
         return out;
@@ -90,7 +89,7 @@ public class ConfigContainer implements Configurable
     {
         for (Map.Entry<String, JsonElement> entry : jsonObj.entrySet())
         {
-            // config from ref
+            // config from id
             Config<?> config = getConfig(entry.getKey());
             if (config != null)
             {
@@ -121,17 +120,17 @@ public class ConfigContainer implements Configurable
     }
 
     /**
-     * Returns the {@link Config} from the reference {@link Config#getRef()}
+     * Returns the {@link Config} from the reference {@link Config#getId()}
      * data tag in the registry.
      *
-     * @param ref The config data tag
-     * @return The config from the reference data tag
+     * @param id The config data tag
+     * @return The config from the id
      *
-     * @see Config#getRef()
+     * @see Config#getId()
      */
-    public Config<?> getConfig(String ref)
+    public Config<?> getConfig(String id)
     {
-        return configurations.get(ref);
+        return configurations.get(id);
     }
 
     /**

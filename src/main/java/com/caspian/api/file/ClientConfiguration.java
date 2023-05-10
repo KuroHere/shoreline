@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,7 +36,7 @@ public class ClientConfiguration implements Globals
 
     // Set of configuration files that must be saved and loaded. This can be
     // modified after init.
-    private final Set<ConfigFile> files = new HashSet<>();
+    private final Set<ConfigFile> files = Collections.emptySet();
 
     /**
      * 

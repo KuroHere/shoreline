@@ -16,7 +16,7 @@ public class Command implements Globals
 {
     // the unique command identifier, used to identify the command in the chat.
     // Ex: help, prefix, openfolder, etc.
-    private final String id;
+    private final String name;
 
     //
     private final String usage;
@@ -32,14 +32,14 @@ public class Command implements Globals
     /**
      *
      *
-     * @param id
+     * @param name
      * @param usage
      * @param desc
      * @param struct
      */
-    public Command(String id, String usage, String desc, Argument<?>... struct)
+    public Command(String name, String usage, String desc, Argument<?>... struct)
     {
-        this.id = id;
+        this.name = name;
         this.usage = usage;
         this.desc = desc;
         this.struct = new ArrayList<>(Arrays.asList(struct));
@@ -63,24 +63,41 @@ public class Command implements Globals
      *
      * @return
      */
-    public String getId()
+    public String getName()
     {
-        return id;
+        return name;
     }
 
+    /**
+     * 
+     * 
+     * @return
+     */
     public String getUsage()
     {
         return usage;
     }
 
+    /**
+     * 
+     * 
+     * @return
+     */
     public String getDescription()
     {
         return desc;
     }
 
-    public Argument<?> getArg(int idx)
+    /**
+     * Returns the {@link Argument} at the param index in the command 
+     * argument structure.
+     * 
+     * @param i The index of the arg
+     * @return Returns the arg at the param index
+     */
+    public Argument<?> getArg(int i)
     {
-        return struct.get(idx);
+        return struct.get(i);
     }
 
     /**

@@ -42,7 +42,7 @@ public record Macro(String name, int keycode, Runnable macro)
      *
      * @return
      */
-    public String getRef()
+    public String getId()
     {
         return String.format("%s_macro", name.toLowerCase());
     }
