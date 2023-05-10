@@ -5,6 +5,7 @@ import com.caspian.api.config.Config;
 import com.caspian.api.config.setting.BooleanConfig;
 import com.caspian.api.config.setting.EnumConfig;
 import com.caspian.api.config.setting.NumberConfig;
+import com.caspian.api.config.setting.NumberDisplay;
 import com.caspian.api.event.EventStage;
 import com.caspian.api.event.listener.EventListener;
 import com.caspian.api.module.ModuleCategory;
@@ -17,7 +18,6 @@ import com.caspian.init.Managers;
 import com.caspian.util.player.RotationUtil;
 import com.caspian.util.time.Timer;
 import com.caspian.util.world.EntityUtil;
-import com.caspian.util.world.RangeUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -28,12 +28,12 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.EndCrystalItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
@@ -41,10 +41,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
 
 import java.util.*;
@@ -68,8 +65,6 @@ public class AutoCrystalModule extends ToggleModule
             false);
     final Config<Float> targetRangeConfig = new NumberConfig<>("EnemyRange",
             "Range to search for potential enemies", 1.0f, 6.0f, 10.0f);
-    final Config<Boolean> rangeEyeConfig = new BooleanConfig("RangeEye", "",
-            false);
     final Config<Boolean> awaitConfig = new BooleanConfig("Await", "",
             false);
     // final Config<Boolean> raytraceConfig = new BooleanConfig("Raytrace", "",
@@ -113,23 +108,34 @@ public class AutoCrystalModule extends ToggleModule
     final Config<Float> placeWallRangeConfig = new NumberConfig<>(
             "PlaceWallRange", "Range to place crystals through walls", 0.1f,
             4.0f, 5.0f);
+    final Config<Boolean> placeRangeEyeConfig = new BooleanConfig(
+            "PlaceRangeEye", "", false);
+    final Config<Boolean> placeRangeCenterConfig = new BooleanConfig(
+            "PlaceRangeCenter", "", true);
     final Config<Boolean> strictDirectionConfig = new BooleanConfig(
             "StrictDirection", "", false);
 
     // DAMAGE SETTINGS
     final Config<Float> minDamageConfig = new NumberConfig<>("MinDamage",
             "", 1.0f, 4.0f, 10.0f);
+    final Config<Float> armorScaleConfig = new NumberConfig<>("ArmorScale",
+            "", 0.0f, 5.0f, 20.0f, NumberDisplay.PERCENT);
     final Config<Float> lethalMultiplier = new NumberConfig<>(
             "LethalMultiplier", "", 0.0f, 0.5f, 4.0f);
+    final Config<Boolean> safetyConfig = new BooleanConfig("Safety",  "",
+            true);
+    final Config<Float> safetyBalanceConfig = new NumberConfig<>(
+            "SafetyBalance", "", 1.0f, 3.0f, 5.0f);
     final Config<Float> maxLocalDamageConfig = new NumberConfig<>(
             "MaxLocalDamage", "", 4.0f, 12.0f, 20.0f);
+
 
 
     //
     private DamageData<BlockPos> place;
     private DamageData<EndCrystalEntity> attack;
 
-    //
+    // AutoCrystal dedicated thread service. Takes in the
     private int calls;
     final ExecutorCompletionService<DamageData<?>> service =
             new ExecutorCompletionService<>(executor);
@@ -162,6 +168,25 @@ public class AutoCrystalModule extends ToggleModule
     {
         super("AutoCrystal", "Attacks entities with end crystals",
                 ModuleCategory.COMBAT);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onEnable()
+    {
+        calls = 0;
+        attack = null;
+        place = null;
+        facing = null;
+        lastBreak.reset();
+        lastPlace.reset();
+        attacks.clear();
+        placements.clear();
+        attackStack.clear();
+        placementStack.clear();
+        submit();
     }
 
     /**
@@ -248,6 +273,28 @@ public class AutoCrystalModule extends ToggleModule
     }
 
     /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onTickEvent(TickEvent event)
+    {
+        if (event.getStage() == EventStage.PRE)
+        {
+            try
+            {
+                calc();
+            }
+            catch (InterruptedException | ExecutionException e)
+            {
+                Caspian.error("Failed calculation!");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
      * Returns <tt>true</tt> if the {@link DamageData} is no longer valid.
      * There are few reasons why data can be invalid, for example:
      * <p><ul>
@@ -280,39 +327,33 @@ public class AutoCrystalModule extends ToggleModule
      *
      *
      * @return
+     * @throws InterruptedException
+     * @throws ExecutionException
      *
      * @see ExecutorCompletionService
      */
     @SuppressWarnings("unchecked")
-    private void calc()
+    private void calc() throws InterruptedException, ExecutionException
     {
-        try
+        int i;
+        for (i = 0; i < calls; i++)
         {
-            int r = 0;
-            for (int i = 0; i < calls; i++)
+            Future<DamageData<?>> result = service.take();
+            if (result != null && result.get() != null)
             {
-                Future<DamageData<?>> result = service.take();
-                if (result != null && result.get() != null)
+                DamageData<?> data = result.get();
+                if (data.src() instanceof BlockPos)
                 {
-                    DamageData<?> data = result.get();
-                    if (data.src() instanceof BlockPos)
-                    {
-                        placementStack.add((DamageData<BlockPos>) data);
-                    }
-                    else if (data.src() instanceof EndCrystalEntity)
-                    {
-                        attackStack.add((DamageData<EndCrystalEntity>) data);
-                    }
-                    r++;
+                    placementStack.add((DamageData<BlockPos>) data);
+                }
+                else if (data.src() instanceof EndCrystalEntity)
+                {
+                    attackStack.add((DamageData<EndCrystalEntity>) data);
                 }
             }
-            calls -= r;
         }
-        catch (InterruptedException | ExecutionException e)
-        {
-            Caspian.error("Failed calculation!");
-            e.printStackTrace();
-        }
+        calls -= i;
+        submit();
     }
 
     /**
@@ -322,8 +363,11 @@ public class AutoCrystalModule extends ToggleModule
      */
     private void submit()
     {
-        service.submit(this::getPlace);
-        service.submit(this::getCrystal);
+        service.submit(() -> getCrystal(getCrystalSphere(mc.player.getEyePos(),
+                        breakRangeConfig.getValue() + 0.5)));
+        service.submit(() -> getPlace(getSphere(placeRangeEyeConfig.getValue() ?
+                                mc.player.getEyePos() : mc.player.getPos(),
+                        placeRangeConfig.getValue() + 0.5)));
     }
 
     private void setAttackHard(DamageData<EndCrystalEntity> attack)
@@ -429,12 +473,12 @@ public class AutoCrystalModule extends ToggleModule
      *
      * @return
      */
-    private DamageData<EndCrystalEntity> getCrystal()
+    private DamageData<EndCrystalEntity> getCrystal(Iterable<EndCrystalEntity> src)
     {
         if (mc.world != null && mc.player != null)
         {
             TreeMap<Double, DamageData<EndCrystalEntity>> min = new TreeMap<>();
-            for (Entity c : mc.world.getEntities())
+            for (Entity c : src)
             {
                 if (c instanceof EndCrystalEntity)
                 {
@@ -457,7 +501,7 @@ public class AutoCrystalModule extends ToggleModule
                     }
                     double local = getDamage(mc.player, c.getPos());
                     // player safety
-                    if (!mc.player.isCreative())
+                    if (safetyConfig.getValue() && !mc.player.isCreative())
                     {
                         if (local + 0.5 > mc.player.getHealth() + mc.player.getAbsorptionAmount())
                         {
@@ -486,13 +530,25 @@ public class AutoCrystalModule extends ToggleModule
                                 continue;
                             }
                             double target = getDamage(e, c.getPos());
-                            float ehealth = 36.0f;
+                            float ehealth = 144.0f;
+                            float earmor = 100.0f;
                             if (e instanceof LivingEntity)
                             {
                                 ehealth = ((LivingEntity) e).getHealth() + ((LivingEntity) e).getAbsorptionAmount();
+                                if (armorScaleConfig.getValue() != 0.0f)
+                                {
+                                    float dmg = 0.0f, t = 0.0f;
+                                    for (ItemStack a : e.getArmorItems())
+                                    {
+                                        dmg += a.getDamage();
+                                        t += a.getMaxDamage();
+                                    }
+                                    earmor = dmg / t;
+                                }
                             }
                             double lethal = lethalMultiplier.getValue() * target;
-                            min.put(target, new DamageData<>(lethal + 0.5 > ehealth ? 999.0 : target,
+                            min.put(target, new DamageData<>(lethal + 0.5 > ehealth ||
+                                    earmor < armorScaleConfig.getValue() ? 999.0 : target,
                                     local, e, (EndCrystalEntity) c));
                         }
                     }
@@ -516,17 +572,20 @@ public class AutoCrystalModule extends ToggleModule
      *
      * @return
      */
-    private DamageData<BlockPos> getPlace()
+    private DamageData<BlockPos> getPlace(Iterable<BlockPos> src)
     {
         if (mc.world != null && mc.player != null)
         {
             TreeMap<Double, DamageData<BlockPos>> min = new TreeMap<>();
             // placement processing
-            for (BlockPos p : getSphere(mc.player.getBlockPos(),
-                    placeRangeConfig.getValue() + 0.5))
+            for (BlockPos p : src)
             {
-                double dist = RangeUtil.distToCenter(mc.player.getEyePos(), p);
-                if (dist > placeRangeConfig.getValue())
+                Vec3d pos = placeRangeEyeConfig.getValue() ?
+                        mc.player.getEyePos() : mc.player.getPos();
+                double dist = placeRangeCenterConfig.getValue() ?
+                        p.getSquaredDistanceFromCenter(pos.getX(), pos.getY(),
+                                pos.getZ()) : p.getSquaredDistance(pos);
+                if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue())
                 {
                     continue;
                 }
@@ -541,7 +600,7 @@ public class AutoCrystalModule extends ToggleModule
                 }
                 double local = getDamage(mc.player, toSource(p));
                 // player safety
-                if (!mc.player.isCreative())
+                if (safetyConfig.getValue() && !mc.player.isCreative())
                 {
                     if (local + 0.5 > mc.player.getHealth() + mc.player.getAbsorptionAmount())
                     {
@@ -571,12 +630,24 @@ public class AutoCrystalModule extends ToggleModule
                             }
                             double target = getDamage(e, toSource(p));
                             float ehealth = 144.0f;
+                            float earmor = 100.0f;
                             if (e instanceof LivingEntity)
                             {
                                 ehealth = ((LivingEntity) e).getHealth() + ((LivingEntity) e).getAbsorptionAmount();
+                                if (armorScaleConfig.getValue() != 0.0f)
+                                {
+                                    float dmg = 0.0f, t = 0.0f;
+                                    for (ItemStack a : e.getArmorItems())
+                                    {
+                                        dmg += a.getDamage();
+                                        t += a.getMaxDamage();
+                                    }
+                                    earmor = dmg / t;
+                                }
                             }
                             double lethal = lethalMultiplier.getValue() * target;
-                            min.put(target, new DamageData<>(lethal + 0.5 > ehealth ? 999.0 : target,
+                            min.put(target, new DamageData<>(lethal + 0.5 > ehealth ||
+                                            earmor <armorScaleConfig.getValue() ? 999.0 : target,
                                             local, e, p));
                         }
                     }
@@ -594,6 +665,11 @@ public class AutoCrystalModule extends ToggleModule
         return null; // no valid placements
     }
 
+    public List<EndCrystalEntity> getCrystalSphere(Vec3d o, double radius)
+    {
+        return null;
+    }
+
     /**
      *
      *
@@ -601,7 +677,7 @@ public class AutoCrystalModule extends ToggleModule
      * @param radius
      * @return
      */
-    public List<BlockPos> getSphere(BlockPos o, double radius)
+    public List<BlockPos> getSphere(Vec3d o, double radius)
     {
         List<BlockPos> sphere = new ArrayList<>();
         double rad = Math.ceil(radius);
@@ -611,11 +687,14 @@ public class AutoCrystalModule extends ToggleModule
             {
                 for (double z = -rad; z <= rad; ++z)
                 {
-                    BlockPos p = o.add((int) x, (int) y, (int) z);
-                    if (o.getSquaredDistanceFromCenter(p.getX(), p.getY(),
-                            p.getZ()) <= radius * radius)
+                    Vec3i p = new Vec3i((int) (o.getX() + x),
+                            (int) (o.getY() + y), (int) (o.getZ() + z));
+                    double dist = placeRangeCenterConfig.getValue() ?
+                            p.getSquaredDistanceFromCenter(o.getX(), o.getY(),
+                                    o.getZ()) : p.getSquaredDistance(o);
+                    if (dist <= radius * radius)
                     {
-                        sphere.add(p);
+                        sphere.add(new BlockPos(p));
                     }
                 }
             }
@@ -654,9 +733,10 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean attack(int e)
     {
-        if (mc.player.isHolding(ItemStack::isFood) && mc.player.isUsingItem())
+        if (multitaskConfig.getValue())
         {
-            if (multitaskConfig.getValue() && getCrystalHand() != Hand.OFF_HAND)
+            if (mc.player.isHolding(ItemStack::isFood) && mc.player.isUsingItem()
+                    && getCrystalHand() != Hand.OFF_HAND)
             {
                 return false;
             }
