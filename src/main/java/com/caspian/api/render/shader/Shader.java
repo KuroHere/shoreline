@@ -41,7 +41,7 @@ public class Shader
     {
         try
         {
-            String resourcePath = "/assets/shader/";
+            String resourcePath = "/assets/caspian/shader/";
             InputStream vertStream =
                     getClass().getResourceAsStream(resourcePath + vertex);
             InputStream fragStream =

@@ -21,7 +21,6 @@ public abstract class Argument<T>
     // The literal string input of the user which will be updated every key
     // press. If the input is null, the argument is left blank.
     private String literal;
-
     // The value of the argument. This value is only calculated when the
     // command is run.
     private T value;
@@ -44,11 +43,21 @@ public abstract class Argument<T>
         }
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     public String getLiteral()
     {
         return literal;
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     public T getValue()
     {
         return value;

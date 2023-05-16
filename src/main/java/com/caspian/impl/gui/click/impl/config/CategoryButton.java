@@ -72,12 +72,10 @@ public class CategoryButton extends Button
             drawRoundedRect(matrices, getX(), getY(), getWidth(), getHeight(),
                     0x872c2e30);
         }
-
         // mc.getTextureManager().bindTexture();
         // drawTexture(matrices, getX(), getY());
         drawTextWithShadow(matrices, mc.textRenderer, category.name(),
                 getX() + 6.0, getY(), 0xffffff);
-
         for (ModuleButton moduleButton : moduleButtons)
         {
             moduleButton.render(matrices, mouseX, mouseY, delta);

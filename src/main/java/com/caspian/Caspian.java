@@ -19,15 +19,12 @@ public class Caspian
 {
     // Client logger.
     public static Logger LOGGER;
-
     // Client Event handler (aka Event bus) which handles event dispatching
     // and listening for client events.
     public static EventHandler EVENT_HANDLER;
-
     // Client configuration handler. This master saves/loads the client
     // configuration files which have been saved locally.
     public static ClientConfiguration CONFIG;
-
     // Client shutdown hooks which will run once when the MinecraftClient
     // game instance is shutdown.
     public static ShutdownHook SHUTDOWN;

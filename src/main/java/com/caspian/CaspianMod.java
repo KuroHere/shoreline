@@ -10,27 +10,26 @@ import net.fabricmc.api.ModInitializer;
  */
 public class CaspianMod implements ModInitializer
 {
-    // mod identifier
+    // Mod identifier
     public static final String MOD_ID = "caspian";
-
-    // mod name
+    // Mod name
     public static final String MOD_NAME = "Caspian";
-
-    // mod version
+    // Mod version
     // UPDATE BEFORE RELEASE
     public static final String MOD_VER = "1.0-a1";
-
-    // mod mc version
+    // Mod mc version
     public static final String MOD_MC_VER = "1.19.4";
 
     /**
-     * Called when the fabric mod initializes
+     * This code runs as soon as Minecraft is in a mod-load-ready state.
+     * However, some things (like resources) may still be uninitialized.
+     * Proceed with mild caution.
      */
     @Override
     public void onInitialize()
     {
-        Caspian.preInit();
-        Caspian.init();
-        Caspian.postInit();
+        // Caspian.preInit();
+        // Caspian.init();
+        // Caspian.postInit();
     }
 }

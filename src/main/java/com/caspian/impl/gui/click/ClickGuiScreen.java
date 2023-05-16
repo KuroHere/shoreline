@@ -94,7 +94,6 @@ public class ClickGuiScreen extends Screen implements Globals
         {
             frame.mouseClicked(mouseX, mouseY, mouseButton);
         }
-
         return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
@@ -113,7 +112,6 @@ public class ClickGuiScreen extends Screen implements Globals
         {
             frame.keyPressed(keyCode, scanCode, modifiers);
         }
-
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 

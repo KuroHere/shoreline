@@ -9,19 +9,22 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
-repositories {
+loom {
+    accessWidenerPath = file("src/main/resources/caspian.accesswidener")
+}
 
+repositories {
+    maven {
+        url "https://jitpack.io"
+    }
 }
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_version}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-}
-
-loom {
-    accessWidenerPath = file("src/main/resources/caspian.accesswidener")
+    // modImplementation "net.fabricmc.fabric-api:fabric-api:${project.
+    //       fabric_version}"
 }
 
 processResources {
@@ -32,6 +35,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
+    // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
     it.options.release = 17
 }
 
@@ -41,7 +45,7 @@ java {
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}"}
+        rename { "${it}-${project.archivesBaseName}"}
     }
 }
 
@@ -51,7 +55,6 @@ publishing {
             from components.java
         }
     }
-
     // https://docs.gradle.org/current/userguide/publishing_maven.html
     repositories {
 

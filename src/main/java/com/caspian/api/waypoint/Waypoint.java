@@ -15,7 +15,6 @@ public class Waypoint extends ConfigContainer
 {
     //
     private final String ip;
-
     //
     private final Config<Double> xConfig = new NumberConfig<>("X", "X " +
             "position of waypoint.", 0.0D, 0.0D, Double.MAX_VALUE);
@@ -23,7 +22,6 @@ public class Waypoint extends ConfigContainer
             "position of waypoint.", 0.0D, 0.0D, Double.MAX_VALUE);
     private final Config<Double> zConfig = new NumberConfig<>("Z", "Z " +
             "position of waypoint.", 0.0D, 0.0D, Double.MAX_VALUE);
-
     //
     private final Timer timer;
 

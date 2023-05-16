@@ -15,7 +15,6 @@ public class NumberConfig<T extends Number> extends Config<T>
     // Value min and max bounds. If the current value exceeds these bounds,
     // then {@link #setValue(Number)} will clamp the value to the bounds.
     private final T min, max;
-
     // Number display format. Used to determine the format of the number in
     // the ClickGui when displaying the value.
     private final NumberDisplay format;
@@ -85,11 +84,21 @@ public class NumberConfig<T extends Number> extends Config<T>
         return strValue.substring(strValue.indexOf(".") + 1).length();
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     public NumberDisplay getFormat()
     {
         return format;
     }
 
+    /**
+     *
+     *
+     * @param val The param value
+     */
     @Override
     public void setValue(T val)
     {
@@ -98,12 +107,10 @@ public class NumberConfig<T extends Number> extends Config<T>
         {
             super.setValue(min);
         }
-
         else if (val.doubleValue() > max.doubleValue())
         {
             super.setValue(min);
         }
-
         // inbounds
         else
         {
@@ -111,28 +118,36 @@ public class NumberConfig<T extends Number> extends Config<T>
         }
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     @Override
     public JsonObject toJson()
     {
         return new JsonPrimitive(getValue()).getAsJsonObject();
     }
 
+    /**
+     *
+     *
+     * @param jsonObj The data as a json object
+     */
     @Override
     public void fromJson(JsonObject jsonObj)
     {
         // get config as number
         if (getValue() instanceof Integer)
         {
-            Integer val = jsonObj.getAsInt();
+            Integer val = (Integer) jsonObj.getAsInt();
             setValue((T) val);
         }
-
         else if (getValue() instanceof Float)
         {
-            Float val = jsonObj.getAsFloat();
+            Float val = (Float) jsonObj.getAsFloat();
             setValue((T) val);
         }
-
         else if (getValue() instanceof Double)
         {
             Double val = (Double) jsonObj.getAsDouble();

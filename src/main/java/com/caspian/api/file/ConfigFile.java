@@ -69,12 +69,13 @@ public abstract class ConfigFile
     }
 
     /**
-     *
+     * Saves the configuration to a <tt>.json</tt> file in the local
+     * <tt>Caspian</tt> directory
      */
     public abstract void save();
 
     /**
-     *
+     * Loads the configuration from the associated <tt>.json</tt> file
      */
     public abstract void load();
 }
