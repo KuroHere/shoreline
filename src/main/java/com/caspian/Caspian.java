@@ -77,6 +77,17 @@ public class Caspian
     }
 
     /**
+     *
+     *
+     * @param message
+     * @param params
+     */
+    public static void info(String message, Object... params)
+    {
+        LOGGER.info(message, params);
+    }
+
+    /**
      * Wrapper method for {@link Logger#error(String)} which logs an error to
      * the client {@link Logger}.
      *
@@ -87,5 +98,15 @@ public class Caspian
     public static void error(String message)
     {
         LOGGER.error(message);
+    }
+
+    /**
+     *
+     *
+     * @param message
+     */
+    public static void error(String message, Object... params)
+    {
+        LOGGER.error(message, params);
     }
 }

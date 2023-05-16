@@ -72,7 +72,7 @@ public class Shader
 
                     catch (Exception e)
                     {
-                        Caspian.error("Could not compile shader " + fragment);
+                        Caspian.error("Could not compile shader %s", fragment);
                         e.printStackTrace();
                         GL32C.glDeleteShader(vert);
                         GL32C.glDeleteShader(frag);
@@ -84,7 +84,7 @@ public class Shader
         // creation error
         catch (Exception e)
         {
-            Caspian.error("Could not load shader " + fragment);
+            Caspian.error("Could not load shader %s", fragment);
             e.printStackTrace();
         }
 

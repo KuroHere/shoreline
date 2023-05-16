@@ -36,7 +36,8 @@ public class ConfigFactory
             // field getter error
             catch (IllegalArgumentException | IllegalAccessException e)
             {
-                Caspian.error("Failed to build config from field " + f.getName());
+                Caspian.error("Failed to build config from field %s",
+                        f.getName());
                 e.printStackTrace();
             }
         }

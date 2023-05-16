@@ -20,6 +20,16 @@ public class NumberConfig<T extends Number> extends Config<T>
     // the ClickGui when displaying the value.
     private final NumberDisplay format;
 
+    /**
+     *
+     *
+     * @param name
+     * @param desc
+     * @param min
+     * @param value
+     * @param max
+     * @param format
+     */
     public NumberConfig(String name, String desc, T min, T value, T max,
                         NumberDisplay format)
     {
@@ -29,21 +39,45 @@ public class NumberConfig<T extends Number> extends Config<T>
         this.format = format;
     }
 
+    /**
+     *
+     *
+     * @param name
+     * @param desc
+     * @param min
+     * @param value
+     * @param max
+     */
     public NumberConfig(String name, String desc, T min, T value, T max)
     {
         this(name, desc, min, value, max, NumberDisplay.DEFAULT);
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     public T getMin()
     {
         return min;
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     public T getMax()
     {
         return max;
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     public int getRoundingScale()
     {
         // equal to number of decimal places in value
@@ -101,7 +135,7 @@ public class NumberConfig<T extends Number> extends Config<T>
 
         else if (getValue() instanceof Double)
         {
-            Double val = jsonObj.getAsDouble();
+            Double val = (Double) jsonObj.getAsDouble();
             setValue((T) val);
         }
     }

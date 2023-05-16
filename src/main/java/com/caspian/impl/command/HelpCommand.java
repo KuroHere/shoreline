@@ -32,7 +32,7 @@ public class HelpCommand extends Command
         Command commandArg = (Command) getArg(0).getValue();
         if (commandArg != null)
         {
-            ChatUtil.clientSendMessage(commandArg.getId() + " - " +
+            ChatUtil.clientSendMessage(commandArg.getName() + " - " +
                     commandArg.getDescription());
         }
 
@@ -40,7 +40,7 @@ public class HelpCommand extends Command
         {
             for (Command command : Managers.COMMAND.getCommands())
             {
-                ChatUtil.clientSendMessage(command.getId() + " - " +
+                ChatUtil.clientSendMessage(command.getName() + " - " +
                         command.getDescription());
             }
         }

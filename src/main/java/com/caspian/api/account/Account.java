@@ -40,11 +40,9 @@ public class Account extends ConfigContainer implements Globals
 {
     //
     private final AccountType type;
-
     //
     private final Config<String> password = new StringConfig("Password",
             "Password login field of the account.", "");
-
     //
     private Session session;
 
@@ -72,7 +70,6 @@ public class Account extends ConfigContainer implements Globals
                 setSession(new Session("", "", "", Optional.empty(),
                         Optional.empty(), Session.AccountType.MSA));
             }
-
             case MOJANG ->
             {
                 YggdrasilAuthenticationService authService =
@@ -98,7 +95,6 @@ public class Account extends ConfigContainer implements Globals
                         e.printStackTrace();
                     }
                 }
-
                 MinecraftSessionService sessionService =
                         authService.createMinecraftSessionService();
                 ((AccessorMinecraftClient) mc).setAuthenticationService(authService);
@@ -109,7 +105,6 @@ public class Account extends ConfigContainer implements Globals
                         ((AccessorPlayerSkinProvider) mc.getSkinProvider()).getSkinCacheDir(),
                         sessionService));
             }
-
             case CRACKED -> setSession(new Session(getName(),
                     UUID.randomUUID().toString(), "",  Optional.empty(),
                     Optional.empty(), Session.AccountType.LEGACY));
@@ -160,13 +155,11 @@ public class Account extends ConfigContainer implements Globals
             apiService = ((AccessorMinecraftClient) mc).getAuthenticationService()
                     .createUserApiService(session.getAccessToken());
         }
-
         catch (AuthenticationException e)
         {
             Caspian.error("Authentication api service is offline");
             apiService = UserApiService.OFFLINE;
         }
-
         ((AccessorMinecraftClient) mc).setUserApiService(apiService);
         ((AccessorMinecraftClient) mc).setSocialInteractionsManager(new SocialInteractionsManager(mc,
                 apiService));

@@ -26,7 +26,7 @@ public class CommandArgument extends Argument<Command>
     {
         for (Command command : Managers.COMMAND.getCommands())
         {
-            commandIds.add(command.getId());
+            commandIds.add(command.getName());
         }
     }
 
@@ -38,7 +38,7 @@ public class CommandArgument extends Argument<Command>
     {
         for (Command command : Managers.COMMAND.getCommands())
         {
-            if (command.getId().equalsIgnoreCase(getLiteral()))
+            if (command.getName().equalsIgnoreCase(getLiteral()))
             {
                 setValue(command);
                 break;

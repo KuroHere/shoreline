@@ -36,11 +36,11 @@ public class Listener
     // The EventListener method which contains the code to invoke when the
     // listener is invoked.
     private final Method method;
-
+    // Static instance of method "privateLookupIn"
+    private static Method privateLookup;
     // The class that contains the EventListener. This class must be
     // subscribed to the EventHandler in order for this Listener to be invoked.
     private final Class<?> subscriber;
-
     // The Listener invoker created by the LambdaMetaFactory which invokes the
     // code from the Listener method.
     private Invoker<Event> invoker;
@@ -55,38 +55,28 @@ public class Listener
     {
         this.method = method;
         this.subscriber = subscriber;
-
-        // creates a method handler using LambdaMetaFactory
+        // lambda at runtime to call the method
         try
         {
-            MethodHandles.Lookup lookup = MethodHandles.lookup();
-            CallSite callSite = LambdaMetafactory.metafactory(lookup,
-                    "invoke",
-                    MethodType.methodType(Invoker.class).appendParameterTypes(subscriber),
-                    MethodType.methodType(Void.TYPE, Event.class),
-                    lookup.unreflect(method),
-                    MethodType.methodType(Void.TYPE,
-                            method.getParameterTypes()[0]));
-            invoker = (Invoker<Event>) callSite.getTarget().invoke(subscriber);
+            MethodHandles.Lookup lookup =
+                    (MethodHandles.Lookup) privateLookup.invoke(null,
+                    subscriber, MethodHandles.lookup());
+            MethodType type = MethodType.methodType(void.class,
+                    method.getParameters()[0].getType());
+            MethodHandle handle = lookup.findVirtual(subscriber,
+                    method.getName(), type);
+            MethodType invokeType = MethodType.methodType(Invoker.class,
+                    subscriber);
+            CallSite factory = LambdaMetafactory.metafactory(lookup,
+                    "accept", invokeType, MethodType.methodType(void.class,
+                            Object.class), handle, type);
+            invoker = (Invoker<Event>) factory.getTarget().invoke(subscriber);
         }
-
         catch (Throwable e)
         {
-            Caspian.error("Failed to build invoker for " + method.getName());
+            Caspian.error("Failed to build invoker for %s", method.getName());
             e.printStackTrace();
         }
-    }
-
-    /**
-     *
-     *
-     * @param event
-     *
-     * @see Invoker#invoke(Object)
-     */
-    public void invoke(Event event)
-    {
-        invoker.invoke(event);
     }
 
     /**
@@ -107,5 +97,31 @@ public class Listener
     public Class<?> getSubscriber()
     {
         return subscriber;
+    }
+
+    /**
+     *
+     *
+     * @param event
+     *
+     * @see Invoker#invoke(Object)
+     */
+    public void invoke(Event event)
+    {
+        invoker.invoke(event);
+    }
+
+    static
+    {
+        try
+        {
+            privateLookup = MethodHandles.class.getDeclaredMethod(
+                    "privateLookupIn", Class.class, MethodHandles.Lookup.class);
+        }
+        catch (NoSuchMethodException e)
+        {
+            Caspian.error("Could not find method privateLookupIn!");
+            e.printStackTrace();
+        }
     }
 }

@@ -62,7 +62,7 @@ public class ModulePreset extends ConfigFile
         // error writing file
         catch (IOException e)
         {
-            Caspian.error("Could not save file for " + module.getName());
+            Caspian.error("Could not save file for %s", module.getName());
             e.printStackTrace();
         }
     }
@@ -87,7 +87,7 @@ public class ModulePreset extends ConfigFile
             // error writing file
             catch (IOException e)
             {
-                Caspian.error("Could not read file for " + module.getName());
+                Caspian.error("Could not read file for %s", module.getName());
                 e.printStackTrace();
             }
         }

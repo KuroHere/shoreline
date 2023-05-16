@@ -20,4 +20,12 @@ public interface AccessorPlayerInteractEntityC2SPacket
      */
     @Accessor("entityId")
     void hookSetEntityId(int entityId);
+
+    /**
+     *
+     *
+     * @return
+     */
+    @Accessor("type")
+    PlayerInteractEntityC2SPacket.InteractTypeHandler hookGetTypeHandler();
 }

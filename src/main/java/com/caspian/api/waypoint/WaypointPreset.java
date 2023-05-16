@@ -72,7 +72,7 @@ public class WaypointPreset extends ConfigFile
         // error writing file
         catch (IOException e)
         {
-            Caspian.error("Could not save file for " + ip + ".json");
+            Caspian.error("Could not save file for %s.json", ip);
             e.printStackTrace();
         }
     }
@@ -103,7 +103,7 @@ public class WaypointPreset extends ConfigFile
             // error writing file
             catch (IOException e)
             {
-                Caspian.error("Could not read file for " + ip + ".json");
+                Caspian.error("Could not read file for %s.json", ip);
                 e.printStackTrace();
             }
         }

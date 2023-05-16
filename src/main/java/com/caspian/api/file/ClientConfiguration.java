@@ -33,7 +33,6 @@ public class ClientConfiguration implements Globals
     // Main client directory. This folder will contain all locally saved 
     // configurations for the client.
     private Path clientDir;
-
     // Set of configuration files that must be saved and loaded. This can be
     // modified after init.
     private final Set<ConfigFile> files = Collections.emptySet();
@@ -49,7 +48,6 @@ public class ClientConfiguration implements Globals
             File homeDir = new File(System.getProperty("user.home"));
             clientDir = homeDir.toPath();
         }
-
         // will resort to running dir if client does not have access to the 
         // user home dir
         catch (Exception e)
@@ -58,7 +56,6 @@ public class ClientConfiguration implements Globals
             e.printStackTrace();
             clientDir = runningDir;
         }
-
         finally
         {
             // cannot write, minecraft always has access to the running dir
@@ -67,9 +64,7 @@ public class ClientConfiguration implements Globals
             {
                 clientDir = runningDir;
             }
-
             clientDir = clientDir.resolve("Caspian");
-
             // create client directory
             if (!Files.exists(clientDir))
             {
@@ -77,7 +72,6 @@ public class ClientConfiguration implements Globals
                 {
                     Files.createDirectory(clientDir);
                 }
-
                 // write error
                 catch (IOException e)
                 {
@@ -86,7 +80,6 @@ public class ClientConfiguration implements Globals
                 }
             }
         }
-
         for (Module module : Managers.MODULE.getModules())
         {
             // files.add(new ModulePreset(clientDir.resolve("Defaults"), module));

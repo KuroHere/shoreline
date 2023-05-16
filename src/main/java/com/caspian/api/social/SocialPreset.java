@@ -52,13 +52,11 @@ public class SocialPreset extends ConfigFile
             {
                 Files.createFile(filepath);
             }
-
             JsonArray array = new JsonArray();
             for (UUID socials : Managers.SOCIAL.getRelations(relation))
             {
                 array.add(socials.toString());
             }
-
             JsonObject object = new JsonObject();
             object.add(relation.name(), array);
             String jsonString = GSON.toJson(PARSER.parse(object.toString()));
@@ -66,12 +64,11 @@ public class SocialPreset extends ConfigFile
             out.write(jsonString.getBytes(StandardCharsets.UTF_8), 0,
                     jsonString.length());
         }
-
         // error writing file
         catch (IOException e)
         {
-            Caspian.error("Could not save file for " + relation.name().toLowerCase()
-                    + ".json");
+            Caspian.error("Could not save file for %s.json",
+                    relation.name().toLowerCase());
             e.printStackTrace();
         }
     }
@@ -96,12 +93,11 @@ public class SocialPreset extends ConfigFile
                             relation);
                 }
             }
-
             // error writing file
             catch (IOException e)
             {
-                Caspian.error("Could not read file for " + relation.name().toLowerCase()
-                        + ".json");
+                Caspian.error("Could not read file for %s.json",
+                        relation.name().toLowerCase());
                 e.printStackTrace();
             }
         }

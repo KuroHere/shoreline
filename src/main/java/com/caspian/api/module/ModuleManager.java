@@ -1,6 +1,7 @@
 package com.caspian.api.module;
 
 import com.caspian.impl.module.client.ClickGuiModule;
+import com.caspian.impl.module.combat.AutoCrystalModule;
 import com.caspian.impl.module.movement.SprintModule;
 
 import java.util.Collection;
@@ -31,6 +32,7 @@ public class ModuleManager
                 new ClickGuiModule(),
 
                 // Combat
+                new AutoCrystalModule(),
 
                 // Exploit
 

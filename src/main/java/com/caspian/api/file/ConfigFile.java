@@ -25,10 +25,8 @@ public abstract class ConfigFile
             .setLenient() // leniency to allow for .cfg files
             .setPrettyPrinting()
             .create();
-
     //
     protected static final JsonParser PARSER = new JsonParser();
-
     // The UNIX filepath to configuration file. This filepath is always
     // within the client directory.
     private final Path filepath;
@@ -47,15 +45,13 @@ public abstract class ConfigFile
             {
                 Files.createDirectory(dir);
             }
-
             // create dir error
             catch (IOException e)
             {
-                Caspian.error("Could not create " + dir + " dir");
+                Caspian.error("Could not create %s dir", dir);
                 e.printStackTrace();
             }
         }
-
         filepath = dir.resolve(path);
     }
 

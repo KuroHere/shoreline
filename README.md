@@ -15,32 +15,35 @@ is currently functioning and whether the `Module` is currently subscribed
 to the `EventHandler`.
 Ex:
 ``` java
-public ExampleModule()
+public class ExampleModule extends ToggleModule
 {
-     super("ExampleModule", "Example of module implementation",
-             ModuleCategory.TEST);
+    public ExampleModule()
+    {
+        super("ExampleModule", "Example of module implementation",
+                ModuleCategory.TEST);
+    }
+
+    // declared with default keybind
+    public ExampleModule()
+    {
+        super("ExampleModule", "Example of module implementation",
+                ModuleCategory.TEST, GLFW.GLFW_KEY_TAB);
+    }
+
+    @Override
+    public void onEnable()
+    {
+        // onEnable callback
+    }
+
+    @Override
+    public void onDisable()
+    {
+        // onDisable callback 
+    }
+
+    // module implementation ...
 }
-
-// declared with default keybind
-public ExampleModule()
-{
-     super("ExampleModule", "Example of module implementation",
-             ModuleCategory.TEST, GLFW.GLFW_KEY_TAB);
-}
-
-@Override
-public void onEnable()
-{
-     // onEnable callback
-}
-
-@Override
-public void onDisable()
-{
-     // onDisable callback 
- }
-
-// module implementation ...
 ```
 
 ## `Command`
@@ -54,13 +57,20 @@ Commands are essentially made up of an array of `Argument`. This holds a value
 which has been converted from the user input in the chat. The value is `null` 
 if the input was not given or the input was invalid. Ex:
 ```java
-public ExampleCommand()
+public class ExampleCommand extends Command
 {
-     super("example", "<arg>", new StringArgument().addSuggestions("foo",
-             "bar", "example-suggestion"));
-}
+    public ExampleCommand()
+    {
+        super("example", "<arg>", new StringArgument().addSuggestions("foo",
+                "bar", "example-suggestion"));
+    }
 
-// your implementation
+    @Override
+    public void runCommand()
+    {
+        // command implementation ...
+    }
+}
 ```
 
 ## `Config<T>`
@@ -70,8 +80,12 @@ reflection, so declaration of configs must be in a class that extends
 `ConfigContainer`. The config value cannot be `null`. Ex:
 ```java
 // registered via reflection
-final Config<Boolean> booleanConfig = new BooleanConfig("ExampleBoolean", 
-            "Example for boolean", false);
+Config<Boolean> booleanConfig = new BooleanConfig("ExampleCheckbox", 
+        "Example for boolean", false);
+Config<Integer> integerConfig = new NumberConfig<>("ExampleIntegerSlider",
+        "Example for integer slider", 0, 1, 3);
+Config<Float> floatConfig = new NumberConfig<>("ExampleFloatSlider",
+        "Example for float slider", 0.0f, 1.0f, 3.0f);
 ```
 
 ## `Configurable`

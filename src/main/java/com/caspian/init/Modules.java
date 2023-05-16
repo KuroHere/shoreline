@@ -5,6 +5,7 @@ import com.caspian.api.module.ModuleManager;
 import com.caspian.impl.module.client.ClickGuiModule;
 import com.caspian.impl.module.client.ColorsModule;
 import com.caspian.impl.module.client.HudModule;
+import com.caspian.impl.module.combat.AutoCrystalModule;
 import com.caspian.impl.module.movement.SprintModule;
 
 import java.util.HashSet;
@@ -25,9 +26,10 @@ public class Modules
     private static final Set<Module> CACHE;
 
     // module instances.
-    public static final ClickGuiModule CLICKGUI;
+    public static final ClickGuiModule CLICK_GUI;
     public static final ColorsModule COLORS;
     public static final HudModule HUD;
+    public static final AutoCrystalModule AUTO_CRYSTAL;
     public static final SprintModule SPRINT;
 
     /**
@@ -61,10 +63,12 @@ public class Modules
         if (Managers.isInitialized())
         {
             CACHE = new HashSet<>();
-            CLICKGUI = (ClickGuiModule) getRegisteredModule(
+            CLICK_GUI = (ClickGuiModule) getRegisteredModule(
                     "clickgui_module");
             COLORS = (ColorsModule) getRegisteredModule("colors_module");
             HUD = (HudModule) getRegisteredModule("hud_module");
+            AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
+                    "autocrystal_module");
             SPRINT = (SprintModule) getRegisteredModule("sprint_module");
             CACHE.clear();
         }

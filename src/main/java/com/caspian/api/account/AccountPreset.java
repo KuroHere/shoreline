@@ -53,7 +53,6 @@ public class AccountPreset extends ConfigFile
             {
                 Files.createFile(filepath);
             }
-
             JsonObject json = new JsonObject();
             for (Account account : Managers.ACCOUNT.getAccounts())
             {
@@ -62,17 +61,16 @@ public class AccountPreset extends ConfigFile
                     json.add(account.getName(), account.toJson());
                 }
             }
-
             String jsonString = GSON.toJson(PARSER.parse(json.toString()));
             OutputStream out = Files.newOutputStream(filepath);
             out.write(jsonString.getBytes(StandardCharsets.UTF_8), 0,
                     jsonString.length());
         }
-
         // error writing file
         catch (IOException e)
         {
-            Caspian.error("Could not save file for " + type.name().toLowerCase() + ".json");
+            Caspian.error("Could not save file for %s.json", type.name()
+                    .toLowerCase());
             e.printStackTrace();
         }
     }
@@ -97,12 +95,11 @@ public class AccountPreset extends ConfigFile
                             entry.getValue().getAsString()));
                 }
             }
-
             // error writing file
             catch (IOException e)
             {
-                Caspian.error("Could not read file for " + type.name().toLowerCase() +
-                        ".json");
+                Caspian.error("Could not read file for %s.json", type.name()
+                        .toLowerCase());
                 e.printStackTrace();
             }
         }

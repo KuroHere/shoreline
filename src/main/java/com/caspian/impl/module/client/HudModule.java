@@ -68,7 +68,6 @@ public class HudModule extends ToggleModule
                         topLeft, Modules.COLORS.getColorRGB());
                 topLeft += 10;
             }
-
             if (coordsConfig.getValue())
             {
                 String x = Double.toString(mc.player.getX());
@@ -92,7 +91,6 @@ public class HudModule extends ToggleModule
                         bottomLeft, Modules.COLORS.getColorRGB());
                 bottomLeft -= 10;
             }
-
             if (directionConfig.getValue())
             {
                 Direction direction = mc.player.getHorizontalFacing();
