@@ -1,6 +1,8 @@
-package com.caspian.api.command;
+package com.caspian.api.handler;
 
+import com.caspian.api.command.Command;
 import com.caspian.api.event.listener.EventListener;
+import com.caspian.api.manager.CommandManager;
 import com.caspian.impl.event.chat.ChatInputEvent;
 import com.caspian.impl.event.chat.ChatMessageEvent;
 import com.caspian.impl.event.chat.ChatRenderEvent;

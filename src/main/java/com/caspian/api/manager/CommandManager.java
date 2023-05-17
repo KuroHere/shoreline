@@ -1,8 +1,8 @@
-package com.caspian.api.command;
+package com.caspian.api.manager;
 
 import com.caspian.Caspian;
 import com.caspian.api.command.Command;
-import com.caspian.api.command.CommandHandler;
+import com.caspian.api.handler.CommandHandler;
 import com.caspian.impl.command.HelpCommand;
 
 import java.util.ArrayList;

@@ -22,9 +22,8 @@ public class ClickGuiModule extends ToggleModule
 {
     //
     private static final ClickGuiScreen CLICK_GUI_SCREEN = new ClickGuiScreen();
-
     //
-    final Config<Float> scaleConfig = new NumberConfig<>("Scale", "ClickGui " +
+    Config<Float> scaleConfig = new NumberConfig<>("Scale", "ClickGui " +
             "component scaling factor.", 0.1f, 1.0f, 3.0f,
             NumberDisplay.PERCENT);
 
@@ -44,5 +43,15 @@ public class ClickGuiModule extends ToggleModule
     public void onEnable()
     {
         mc.setScreen(CLICK_GUI_SCREEN);
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public Float getScale()
+    {
+        return scaleConfig.getValue();
     }
 }

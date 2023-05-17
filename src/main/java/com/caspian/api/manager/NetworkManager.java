@@ -1,4 +1,4 @@
-package com.caspian.api.network;
+package com.caspian.api.manager;
 
 import com.caspian.asm.accessor.AccessorClientWorld;
 import com.caspian.util.Globals;

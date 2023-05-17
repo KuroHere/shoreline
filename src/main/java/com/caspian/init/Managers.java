@@ -1,13 +1,7 @@
 package com.caspian.init;
 
 import com.caspian.Caspian;
-import com.caspian.api.account.AccountManager;
-import com.caspian.api.command.CommandManager;
-import com.caspian.api.macro.MacroManager;
-import com.caspian.api.module.ModuleManager;
-import com.caspian.api.network.NetworkManager;
-import com.caspian.api.social.SocialManager;
-import com.caspian.api.waypoint.WaypointManager;
+import com.caspian.api.manager.*;
 
 /**
  *
@@ -33,6 +27,7 @@ public class Managers
     public static SocialManager SOCIAL;
     public static WaypointManager WAYPOINT;
     public static AccountManager ACCOUNT;
+    public static TickManager TICK;
 
     /**
      * Initializes the manager instances. Should not be used if the
@@ -51,6 +46,7 @@ public class Managers
             SOCIAL = new SocialManager();
             WAYPOINT = new WaypointManager();
             ACCOUNT = new AccountManager();
+            TICK = new TickManager();
             initialized = true;
         }
     }

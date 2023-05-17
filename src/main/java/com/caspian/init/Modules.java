@@ -1,7 +1,7 @@
 package com.caspian.init;
 
 import com.caspian.api.module.Module;
-import com.caspian.api.module.ModuleManager;
+import com.caspian.api.manager.ModuleManager;
 import com.caspian.impl.module.client.ClickGuiModule;
 import com.caspian.impl.module.client.ColorsModule;
 import com.caspian.impl.module.client.HudModule;

@@ -1,5 +1,6 @@
-package com.caspian.api.module;
+package com.caspian.api.manager;
 
+import com.caspian.api.module.Module;
 import com.caspian.impl.module.client.ClickGuiModule;
 import com.caspian.impl.module.combat.AutoCrystalModule;
 import com.caspian.impl.module.movement.SprintModule;

@@ -1,6 +1,7 @@
-package com.caspian.api.macro;
+package com.caspian.api.handler;
 
 import com.caspian.api.event.listener.EventListener;
+import com.caspian.api.macro.Macro;
 import com.caspian.api.module.ToggleModule;
 import com.caspian.api.module.Module;
 import com.caspian.impl.event.keyboard.KeyboardInputEvent;

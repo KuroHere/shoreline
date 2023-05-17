@@ -1,9 +1,10 @@
-package com.caspian.api.macro;
+package com.caspian.api.manager;
 
 import com.caspian.Caspian;
+import com.caspian.api.macro.Macro;
+import com.caspian.api.handler.MacroHandler;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 

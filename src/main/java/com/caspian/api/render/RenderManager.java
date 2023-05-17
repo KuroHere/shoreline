@@ -56,4 +56,15 @@ public class RenderManager implements Globals
     {
         mc.textRenderer.drawWithShadow(matrices, text, x, y, color);
     }
+
+    /**
+     *
+     *
+     * @param text
+     * @return
+     */
+    public static int textWidth(String text)
+    {
+        return mc.textRenderer.getWidth(text);
+    }
 }

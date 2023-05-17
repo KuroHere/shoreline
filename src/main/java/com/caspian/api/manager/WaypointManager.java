@@ -1,4 +1,6 @@
-package com.caspian.api.waypoint;
+package com.caspian.api.manager;
+
+import com.caspian.api.waypoint.Waypoint;
 
 import java.util.Collection;
 import java.util.HashSet;

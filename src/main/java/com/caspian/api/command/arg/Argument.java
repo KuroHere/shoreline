@@ -1,7 +1,7 @@
 package com.caspian.api.command.arg;
 
 import com.caspian.api.command.Command;
-import com.caspian.api.command.CommandHandler;
+import com.caspian.api.handler.CommandHandler;
 import com.caspian.impl.event.chat.ChatInputEvent;
 
 /**

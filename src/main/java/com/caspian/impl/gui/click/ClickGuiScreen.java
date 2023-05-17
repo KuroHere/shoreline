@@ -55,8 +55,7 @@ public class ClickGuiScreen extends Screen implements Globals
         for (Frame frame : frames)
         {
             frame.render(matrices, mouseX, mouseY, delta);
-            float scale = Modules.CLICK_GUI.getConfigValue(
-                    "clickgui_scale_config");
+            float scale = Modules.CLICK_GUI.getScale();
             if (scale != 1.0f)
             {
                 frame.setDimensions(frame.getWidth() * scale,

@@ -3,6 +3,7 @@ package com.caspian.api.module;
 import com.caspian.api.config.Config;
 import com.caspian.api.config.ConfigContainer;
 import com.caspian.api.config.Configurable;
+import com.caspian.api.manager.ModuleManager;
 import com.caspian.util.Globals;
 
 /**
@@ -81,20 +82,12 @@ public class Module extends ConfigContainer implements Globals
     }
 
     /**
-     * Returns the value of the {@link Config} associated with the param
-     * reference.
      *
-     * @param ref The configuration reference
-     * @return The config value of the configuration associated with the
-     * param reference
-     * @param <T> The config value type
      *
-     * @see #getConfig(String)
-     * @see Config#getValue()
+     * @return
      */
-    @SuppressWarnings("unchecked")
-    public <T> T getConfigValue(String ref)
+    public String getMetaData()
     {
-        return ((Config<T>) getConfig(ref)).getValue();
+        return "";
     }
 }

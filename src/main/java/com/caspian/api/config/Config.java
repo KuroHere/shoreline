@@ -27,15 +27,12 @@ public abstract class Config<T> implements Configurable
 {
     // Config name is its UNIQUE identifier
     private final String name;
-
     // Concise config description, displayed in the ClickGui to help users
     // understand the properties that the config modifies.
     private final String desc;
-
     // Config value which modifies some property. This value is configured by
     // the user and saved to a local JSON file.
     private T value;
-
     // Parent container. All configs should be added to a config container,
     // otherwise they will not be saved locally.
     private ConfigContainer container;
@@ -56,7 +53,6 @@ public abstract class Config<T> implements Configurable
         {
             throw new NullPointerException("Null values not supported");
         }
-
         this.name = name;
         this.desc = desc;
         this.value = value;
@@ -129,7 +125,6 @@ public abstract class Config<T> implements Configurable
         {
             throw new NullPointerException("Null values not supported");
         }
-
         value = val;
     }
 

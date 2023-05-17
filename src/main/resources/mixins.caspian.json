@@ -7,14 +7,15 @@
     "MixinKeyboard",
     "MixinMinecraftClient",
     "accessor.AccessorChatScreen",
-    "accessor.AccessorMinecraftClient",
     "accessor.AccessorClientWorld",
+    "accessor.AccessorMinecraftClient",
+    "accessor.AccessorPlayerInteractEntityC2SPacket",
     "accessor.AccessorPlayerSkinProvider",
     "accessor.AccessorTextFieldWidget",
-    "accessor.AccessorPlayerInteractEntityC2SPacket",
     "gui.hud.MixinInGameHud",
     "gui.screen.MixinChatScreen",
     "network.MixinClientConnection",
+    "network.MixinClientPlayerEntity",
     "network.MixinClientPlayNetworkHandler"
   ],
   "injectors": {

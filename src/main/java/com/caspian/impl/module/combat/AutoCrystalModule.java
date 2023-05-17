@@ -48,6 +48,7 @@ import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -65,8 +66,8 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> multitaskConfig = new BooleanConfig("Multitask",
             "Allows attacking while using items", false);
     Config<Float> targetRangeConfig = new NumberConfig<>("EnemyRange",
-            "Range to search for potential enemies", 1.0f, 6.0f, 10.0f);
-    Config<Boolean> awaitConfig = new BooleanConfig("Await",
+            "Range to search for potential enemies", 1.0f, 10.0f, 13.0f);
+    Config<Boolean> awaitConfig = new BooleanConfig("Instant",
             "Instantly attacks crystals when they spawn", false);
     // Config<Boolean> raytraceConfig = new BooleanConfig("Raytrace", "",
     //        false);
@@ -75,6 +76,8 @@ public class AutoCrystalModule extends ToggleModule
     // ROTATE SETTINGS
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
             "before placing and breaking", false);
+    Config<Boolean> ignoreExpectedTickConfig = new BooleanConfig(
+            "IgnoreExpectedTick", "", false);
     Config<YawStep> yawStepConfig = new EnumConfig<>("YawStep", "",
             YawStep.OFF, YawStep.values());
     Config<Integer> yawStepThresholdConfig = new NumberConfig<>(
@@ -92,14 +95,16 @@ public class AutoCrystalModule extends ToggleModule
             "Target animals", false);
     // BREAK SETTINGS
     Config<Float> breakSpeedConfig = new NumberConfig<>("BreakSpeed",
-            "Speed to break crystals", 1.0f, 20.0f, 20.0f);
+            "Speed to break crystals", 0.1f, 20.0f, 20.0f);
+    Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed",
+            "Randomized delay for breaking crystals", 0.0f, 0.0f, 10.0f);
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted",
             "Minimum ticks alive to consider crystals for attack", 0, 0, 10);
     Config<Float> breakRangeConfig = new NumberConfig<>("BreakRange",
-            "Range to break crystals", 0.1f, 4.5f, 5.0f);
+            "Range to break crystals", 0.1f, 4.0f, 5.0f);
     Config<Float> breakWallRangeConfig = new NumberConfig<>(
             "BreakWallRange", "Range to break crystals through walls", 0.1f,
-            4.5f, 5.0f);
+            4.0f, 5.0f);
     Config<Swap> antiWeaknessConfig = new EnumConfig<>("AntiWeakness",
             "Swap to tools before attacking crystals", Swap.OFF,
             Swap.values());
@@ -121,10 +126,13 @@ public class AutoCrystalModule extends ToggleModule
     // Config<Boolean> manualConfig = new BooleanConfig("Manual",
     //        "Always breaks manually placed crystals", false);
     // PLACE SETTINGS
+    Config<Boolean> placeConfig = new BooleanConfig("Place", "Places crystals" +
+            " to damage enemies. Place settings will only function if this " +
+            "setting is enabled.", true);
     Config<Float> placeSpeedConfig = new NumberConfig<>("PlaceSpeed",
-            "Speed to place crystals", 1.0f, 20.0f, 20.0f);
+            "Speed to place crystals", 0.1f, 20.0f, 20.0f);
     Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange",
-            "Range to place crystals", 0.1f, 4.5f, 5.0f);
+            "Range to place crystals", 0.1f, 4.0f, 5.0f);
     Config<Float> placeWallRangeConfig = new NumberConfig<>(
             "PlaceWallRange", "Range to place crystals through walls", 0.1f,
             4.0f, 5.0f);
@@ -180,7 +188,12 @@ public class AutoCrystalModule extends ToggleModule
             Collections.synchronizedSet(new ConcurrentSet<>());
     private final Set<Integer> attacks =
             Collections.synchronizedSet(new ConcurrentSet<>());
-    private final Timer timeInterval = new Timer();
+    // RANDOM
+    private final Timer randomTime = new Timer();
+    private final Random random = new SecureRandom();
+    private long currRandom;
+    //
+    private final Timer freqInterval = new Timer();
     private int attackFreq;
     //
     private final Timer lastPlace = new Timer();
@@ -190,6 +203,12 @@ public class AutoCrystalModule extends ToggleModule
     // ROTATIONS
     //
     private Vec3d facing;
+    //
+    private float[] yaws;
+    private float pitch;
+    //
+    private float end;
+    private int rotating;
 
     /**
      *
@@ -213,7 +232,7 @@ public class AutoCrystalModule extends ToggleModule
         attackFreq = 0;
         lastBreak.reset();
         lastPlace.reset();
-        timeInterval.reset();
+        freqInterval.reset();
         attacks.clear();
         placements.clear();
         calc = factory.build(getCrystalSphere(mc.player.getEyePos(),
@@ -268,7 +287,7 @@ public class AutoCrystalModule extends ToggleModule
         {
             if (event.getStage() == EventStage.PRE)
             {
-                if (timeInterval.passed(1, TimeUnit.SECONDS))
+                if (freqInterval.passed(1, TimeUnit.SECONDS))
                 {
                     attackFreq = 0;
                 }
@@ -303,16 +322,12 @@ public class AutoCrystalModule extends ToggleModule
                                 - breakSpeedConfig.getValue()) * 50);
                         if (lastBreak.passed(delay))
                         {
-                            facing = attack.src().getEyePos();
-                            setRotation(facing, () ->
+                            if (attack(attack.src()))
                             {
-                                if (attack(attack.src()))
-                                {
-                                    lastBreak.reset();
-                                    attack = null;
-                                    attackFreq++;
-                                }
-                            });
+                                lastBreak.reset();
+                                attack = null;
+                                attackFreq++;
+                            }
                         }
                     }
                     if (place != null)
@@ -322,14 +337,11 @@ public class AutoCrystalModule extends ToggleModule
                         if (lastPlace.passed(delay))
                         {
                             facing = place.src().toCenterPos();
-                            setRotation(facing, () ->
+                            if (place(place.src()))
                             {
-                                if (place(place.src()))
-                                {
-                                    lastPlace.reset();
-                                    place = null;
-                                }
-                            });
+                                lastPlace.reset();
+                                place = null;
+                            }
                         }
                     }
                     calc = factory.build(getCrystalSphere(mc.player.getEyePos(),
@@ -471,15 +483,11 @@ public class AutoCrystalModule extends ToggleModule
                         {
                             facing = base.toCenterPos()
                                     .add(0.0, 0.5, 0.0);
-                            setRotation(facing, () ->
+                            if (attack(packet.getId()))
                             {
-                                if (attack(packet.getId()))
-                                {
-                                    // Caspian.info("Attacked spawned crystal")
-                                    lastBreak.reset();
-                                    attackFreq++;
-                                }
-                            });
+                                lastBreak.reset();
+                                attackFreq++;
+                            }
                         }
                     }
                 }
@@ -620,7 +628,18 @@ public class AutoCrystalModule extends ToggleModule
         long swapDelay = (long) (swapDelayConfig.getValue() * 25);
         if (lastSwap.passed(swapDelay))
         {
-            return attackFreq <= attackFrequencyConfig.getValue();
+            if (currRandom <= 0)
+            {
+                currRandom = random.nextLong((long)
+                        (randomSpeedConfig.getValue() * 10.0f + 1.0f));
+            }
+            if (randomSpeedConfig.getValue() > ((NumberConfig<Float>) randomSpeedConfig).getMin()
+                    && randomTime.passed(currRandom))
+            {
+                randomTime.reset();
+                currRandom = -1;
+                return attackFreq <= attackFrequencyConfig.getValue();
+            }
         }
         return false;
     }
@@ -999,21 +1018,73 @@ public class AutoCrystalModule extends ToggleModule
     /**
      *
      *
-     * @param to
+     * @param dest
+     * @param callback
      */
-    private void setRotation(Vec3d to, Runnable callback)
+    private int setRotation(Vec3d dest)
     {
-        float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(), to);
-        float diff = rots[0] - mc.player.getYaw(); // yaw diff
-        if (Math.abs(diff) > 180)
+        float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(), dest);
+        if (isNearlyEqual(facing, dest, 0.05f))
         {
-            diff += diff > 0 ? -360 : 360;
+            return rotating;
         }
-        int dir = diff > 0 ? 1 : -1;
+        else
+        {
+            facing = dest;
+            if (yawStepConfig.getValue() != YawStep.OFF)
+            {
+                float diff = rots[0] - mc.player.getYaw(); // yaw diff
+                if (Math.abs(diff) > 180.0f)
+                {
+                    diff += diff > 0.0f ? -360.0f : 360.0f;
+                }
+                int dir = diff > 0.0f ? 1 : -1;
+                // partition yaw
+                int tick = yawStepTicksConfig.getValue();
+                float step = Math.abs(diff) / tick;
+                if (step > yawStepThresholdConfig.getValue())
+                {
+                    tick = (int) Math.ceil(Math.abs(diff) / yawStepThresholdConfig.getValue());
+                    step = Math.abs(diff) / tick;
+                }
+                yaws = new float[tick];
+                float total = 0;
+                for (int i = 0; i < tick; ++i)
+                {
+                    float curr = step * dir;
+                    if (Math.abs(curr) > 0.05f)
+                    {
+                        total += curr;
+                        yaws[i] = total;
+                    }
+                }
+                pitch = rots[0];
+                return yaws.length;
+            }
+            else
+            {
+                yaws = new float[1];
+                yaws[0] = rots[0];
+                pitch = rots[1];
+                return 1;
+            }
+        }
+    }
 
-
-        // TODO: callbacks ...
-        callback.run();
+    /**
+     *
+     *
+     * @param v1
+     * @param v2
+     * @param allowed Allowed error range
+     * @return
+     */
+    public boolean isNearlyEqual(Vec3d v1, Vec3d v2, float allowed)
+    {
+        double x = Math.abs(v1.x - v2.x);
+        double y = Math.abs(v1.y - v2.y);
+        double z = Math.abs(v1.z - v2.z);
+        return x <= allowed && y <= allowed && z <= allowed;
     }
 
     public enum Swap

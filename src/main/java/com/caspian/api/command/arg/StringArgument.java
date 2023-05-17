@@ -12,19 +12,32 @@ import java.util.*;
  */
 public class StringArgument extends Argument<String>
 {
+    //
     private final Set<String> suggestions;
 
+    /**
+     *
+     *
+     * @param suggestions
+     */
     public StringArgument(String... suggestions)
     {
         this.suggestions = new HashSet<>(Arrays.asList(suggestions));
     }
 
+    /**
+     *
+     *
+     * @param suggestions
+     */
     public StringArgument(Collection<String> suggestions)
     {
         this.suggestions = new HashSet<>(suggestions);
     }
 
     /**
+     *
+     *
      * @see Command#runCommand()
      */
     @Override

@@ -1,4 +1,6 @@
-package com.caspian.api.account;
+package com.caspian.api.manager;
+
+import com.caspian.api.account.Account;
 
 import java.util.ArrayList;
 import java.util.Collection;

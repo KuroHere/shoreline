@@ -1,4 +1,6 @@
-package com.caspian.api.social;
+package com.caspian.api.manager;
+
+import com.caspian.api.social.Relation;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

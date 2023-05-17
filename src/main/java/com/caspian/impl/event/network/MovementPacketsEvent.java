@@ -1,5 +1,6 @@
 package com.caspian.impl.event.network;
 
+import com.caspian.api.event.Cancelable;
 import com.caspian.api.event.StageEvent;
 
 /**
@@ -10,11 +11,23 @@ import com.caspian.api.event.StageEvent;
  *
  *
  */
+@Cancelable
 public class MovementPacketsEvent extends StageEvent
 {
     private double x, y, z;
     private float yaw, pitch;
     private boolean onGround;
+
+    public MovementPacketsEvent(double x, double y, double z, float yaw,
+                                float pitch, boolean onGround)
+    {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.yaw = yaw;
+        this.pitch = pitch;
+        this.onGround = onGround;
+    }
 
     public double getX()
     {
