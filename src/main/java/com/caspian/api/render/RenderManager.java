@@ -7,13 +7,34 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
+/**
+ *
+ *
+ */
 public class RenderManager implements Globals
 {
     //
-    public static final Tessellator TESSELLATOR = Tessellator.getInstance();
-    public static final BufferBuilder BUFFER = TESSELLATOR.getBuffer();
+    private static final Tessellator TESSELLATOR = Tessellator.getInstance();
+    private static final BufferBuilder BUFFER = TESSELLATOR.getBuffer();
 
+    /**
+     *
+     *
+     * @param p
+     * @param color
+     */
     public static void renderBox(BlockPos p, int color)
+    {
+        renderBox(new Box(p), color);
+    }
+
+    /**
+     *
+     *
+     * @param box
+     * @param color
+     */
+    public static void renderBox(Box box, int color)
     {
 
     }

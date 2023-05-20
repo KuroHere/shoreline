@@ -16,9 +16,13 @@
     "gui.screen.MixinChatScreen",
     "network.MixinClientConnection",
     "network.MixinClientPlayerEntity",
+    "network.MixinClientPlayerInteractionManager",
     "network.MixinClientPlayNetworkHandler"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "accessor.AccessorPlayerMoveC2SPacket"
+  ]
 }

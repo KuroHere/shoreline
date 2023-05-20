@@ -77,7 +77,7 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
             "before placing and breaking", false);
     Config<Boolean> ignoreExpectedTickConfig = new BooleanConfig(
-            "IgnoreExpectedTick", "", false);
+            "RotateHold", "", false);
     Config<YawStep> yawStepConfig = new EnumConfig<>("YawStep", "",
             YawStep.OFF, YawStep.values());
     Config<Integer> yawStepThresholdConfig = new NumberConfig<>(
@@ -140,6 +140,8 @@ public class AutoCrystalModule extends ToggleModule
             "PlaceRangeEye", "", false);
     Config<Boolean> placeRangeCenterConfig = new BooleanConfig(
             "PlaceRangeCenter", "", true);
+    Config<Boolean> placeLowConfig = new BooleanConfig("PlaceLow", "Allow " +
+            "placements at a lower bounding", false);
     Config<Swap> swapConfig = new EnumConfig<>("Swap", "", Swap.OFF,
             Swap.values());
     Config<Boolean> breakValidateConfig = new BooleanConfig(
@@ -252,11 +254,18 @@ public class AutoCrystalModule extends ToggleModule
         try
         {
             pool.shutdown();
-            pool.awaitTermination(100, TimeUnit.MILLISECONDS);
+            boolean timeout = !pool.awaitTermination(100,
+                TimeUnit.MILLISECONDS);
+            if (timeout)
+            {
+                Caspian.error("Process timed out! Shutting down pool!");
+                // pool.shutdownNow();
+            }
         }
         catch (InterruptedException e)
         {
-            Caspian.error("Failed to shutdown pool!");
+            Caspian.error("Failed to shutdown pool! Maintained interrupt " +
+                    "state!");
             Thread.currentThread().interrupt();
         }
         finally
@@ -265,15 +274,21 @@ public class AutoCrystalModule extends ToggleModule
         }
     }
 
-    // public void clean(long time)
-    // {
-    //    if (lastClean.passed(time))
-    //    {
-    //        attacks.clear();
-    //        placements.clear();
-    //        lastClean.reset();
-    //    }
-    // }
+    /*
+    public void clean()
+    {
+        attacks.removeIf(e ->
+        {
+            Entity c = mc.world.getEntityById(e);
+            if (c != null)
+            {
+                return !c.isAlive();
+            }
+            return false;
+        });
+        placements.clear();
+    }
+     */
 
     /**
      *
@@ -318,6 +333,19 @@ public class AutoCrystalModule extends ToggleModule
                     }
                     if (attack != null)
                     {
+                        Vec3d dest = attack.src().getEyePos();
+                        if (rotateConfig.getValue())
+                        {
+                            if (facing != null && isNearlyEqual(facing, dest,
+                                    0.05f))
+                            {
+                                rotating--;
+                            }
+                            else
+                            {
+                                rotating = setRotation(dest);
+                            }
+                        }
                         long delay = (long) ((((NumberConfig<Float>) breakSpeedConfig).getMax()
                                 - breakSpeedConfig.getValue()) * 50);
                         if (lastBreak.passed(delay))
@@ -601,6 +629,7 @@ public class AutoCrystalModule extends ToggleModule
      */
     private void attackDirect(int e) 
     {
+        // retarded hack to set entity id
         PlayerInteractEntityC2SPacket packet =
                 PlayerInteractEntityC2SPacket.attack(null,
                         mc.player.isSneaking());
@@ -760,7 +789,8 @@ public class AutoCrystalModule extends ToggleModule
                 double e = p2.getY();
                 double f = p2.getZ();
                 List<Entity> list = getCollisionList(p, new Box(d, e, f,
-                        d + 1.0, e + 2.0, f + 1.0));
+                        d + 1.0, e + (placeLowConfig.getValue() ? 1.0 : 2.0),
+                        f + 1.0));
                 return list.isEmpty();
             }
         }
@@ -1019,11 +1049,11 @@ public class AutoCrystalModule extends ToggleModule
      *
      *
      * @param dest
-     * @param callback
      */
     private int setRotation(Vec3d dest)
     {
         float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(), dest);
+        // PLEASE GOD LET THIS BE THE LAST HACK
         if (isNearlyEqual(facing, dest, 0.05f))
         {
             return rotating;
@@ -1072,12 +1102,13 @@ public class AutoCrystalModule extends ToggleModule
     }
 
     /**
+     * Returns <tt>true</tt> if the two {@link Vec3d} positions are close and
+     * within the allowed error range
      *
-     *
-     * @param v1
-     * @param v2
+     * @param v1 The first vector
+     * @param v2 The second vector
      * @param allowed Allowed error range
-     * @return
+     * @return Returns <tt>true</tt> if the two positions are the same
      */
     public boolean isNearlyEqual(Vec3d v1, Vec3d v2, float allowed)
     {
@@ -1143,21 +1174,17 @@ public class AutoCrystalModule extends ToggleModule
     {
         // Calculation unique id
         private final UUID id;
-
         // AutoCrystal calculation dedicated thread service. Takes in the src
         // list of damage sources and returns the best damage source's data.
         private final ExecutorCompletionService<Process> service =
                 new ExecutorCompletionService<>(pool);
-
         // Src
         private final Iterable<EndCrystalEntity> crystalSrc;
         private final Iterable<BlockPos> placeSrc;
-
         // Calculated
         private DamageData<EndCrystalEntity> attackCalc;
         private DamageData<BlockPos> placeCalc;
-
-        // Calculation information
+        // Calculation time information
         private long start, done;
 
         /**
@@ -1339,25 +1366,8 @@ public class AutoCrystalModule extends ToggleModule
                                     continue;
                                 }
                                 double target = getDamage(e, c.getPos());
-                                float ehealth = 144.0f;
-                                float earmor = 100.0f;
-                                if (e instanceof LivingEntity) {
-                                    ehealth = ((LivingEntity) e).getHealth() + ((LivingEntity) e).getAbsorptionAmount();
-                                    if (armorScaleConfig.getValue() != 0.0f)
-                                    {
-                                        float dmg = 0.0f, t = 0.0f;
-                                        for (ItemStack a : e.getArmorItems())
-                                        {
-                                            dmg += a.getDamage();
-                                            t += a.getMaxDamage();
-                                        }
-                                        earmor = dmg / t;
-                                    }
-                                }
-                                double lethal = lethalMultiplier.getValue() * target;
-                                min.put(target, new DamageData<>(lethal + 0.5 > ehealth ||
-                                        earmor < armorScaleConfig.getValue() ? 999.0 : target,
-                                        local, e, c));
+                                min.put(target, new DamageData<>(isLethal(e,
+                                        target) ? 999.0 : target, local, e, c)); // BIG UGLY HACK
                             }
                         }
                     }
@@ -1455,26 +1465,8 @@ public class AutoCrystalModule extends ToggleModule
                                     continue;
                                 }
                                 double target = getDamage(e, toSource(p));
-                                float ehealth = 144.0f;
-                                float earmor = 100.0f;
-                                if (e instanceof LivingEntity)
-                                {
-                                    ehealth = ((LivingEntity) e).getHealth() + ((LivingEntity) e).getAbsorptionAmount();
-                                    if (armorScaleConfig.getValue() != 0.0f)
-                                    {
-                                        float dmg = 0.0f, t = 0.0f;
-                                        for (ItemStack a : e.getArmorItems())
-                                        {
-                                            dmg += a.getDamage();
-                                            t += a.getMaxDamage();
-                                        }
-                                        earmor = dmg / t;
-                                    }
-                                }
-                                double lethal = lethalMultiplier.getValue() * target;
-                                min.put(target, new DamageData<>(lethal + 0.5 > ehealth ||
-                                        earmor <armorScaleConfig.getValue() ? 999.0 : target,
-                                        local, e, p));
+                                min.put(target, new DamageData<>(isLethal(e,
+                                        target) ? 999.0 : target, local, e, p)); // BIG UGLY HACK
                             }
                         }
                     }
@@ -1489,6 +1481,36 @@ public class AutoCrystalModule extends ToggleModule
                 }
             }
             return null; // no valid placements
+        }
+
+        /**
+         *
+         *
+         * @param e
+         * @param damage
+         * @return
+         */
+        public boolean isLethal(Entity e, double damage)
+        {
+            float ehealth = 144.0f;
+            float earmor = 100.0f;
+            if (e instanceof LivingEntity)
+            {
+                ehealth = ((LivingEntity) e).getHealth() + ((LivingEntity) e).getAbsorptionAmount();
+                if (armorScaleConfig.getValue() != 0.0f)
+                {
+                    float dmg = 0.0f, t = 0.0f;
+                    for (ItemStack a : e.getArmorItems())
+                    {
+                        dmg += a.getDamage();
+                        t += a.getMaxDamage();
+                    }
+                    earmor = dmg / t;
+                }
+            }
+            double lethal = lethalMultiplier.getValue() * damage;
+            return lethal + 0.5 > ehealth
+                    || earmor < armorScaleConfig.getValue();
         }
 
         /**

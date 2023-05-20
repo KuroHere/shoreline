@@ -14,10 +14,21 @@ import com.caspian.api.event.StageEvent;
 @Cancelable
 public class MovementPacketsEvent extends StageEvent
 {
+    //
     private double x, y, z;
     private float yaw, pitch;
     private boolean onGround;
 
+    /**
+     *
+     *
+     * @param x
+     * @param y
+     * @param z
+     * @param yaw
+     * @param pitch
+     * @param onGround
+     */
     public MovementPacketsEvent(double x, double y, double z, float yaw,
                                 float pitch, boolean onGround)
     {

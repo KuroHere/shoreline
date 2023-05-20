@@ -35,7 +35,7 @@ public class TickHandler implements Globals
             if (event.getPacket() instanceof WorldTimeUpdateS2CPacket)
             {
                 float last = 20000.0f / (System.currentTimeMillis() - time);
-                ticks.add(last);
+                ticks.offer(last);
                 time = System.currentTimeMillis();
             }
         }

@@ -102,4 +102,12 @@ public interface AccessorMinecraftClient
      */
     @Accessor("abuseReportContext")
     void setAbuseReportContext(AbuseReportContext abuseReportContext);
+
+    /**
+     *
+     *
+     * @param itemUseCooldown
+     */
+    @Accessor("itemUseCooldown")
+    void setItemUseCooldown(int itemUseCooldown);
 }
