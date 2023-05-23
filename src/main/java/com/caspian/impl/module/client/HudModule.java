@@ -75,9 +75,10 @@ public class HudModule extends ToggleModule
     }
 
     /**
+     * Called directly after the screen overlay is rendered in
+     * {@link net.minecraft.client.gui.hud.InGameHud}.
      *
-     *
-     * @param event
+     * @param event The render overlay event
      */
     @EventListener
     public void onRenderOverlay(RenderOverlayEvent event)
@@ -108,8 +109,8 @@ public class HudModule extends ToggleModule
                 RenderManager.renderText(event.getMatrices(), String.format("%s %s",
                                 CaspianMod.MOD_NAME,
                                 Formatting.WHITE + CaspianMod.MOD_VER), 2.0f,
-                        topLeft, Modules.COLORS.getColorRGB());
-                topLeft += 10.0f;
+                        topLeft, Modules.COLORS.getRGB());
+                // topLeft += 10.0f;
             }
             if (arraylistConfig.getValue())
             {
@@ -131,7 +132,7 @@ public class HudModule extends ToggleModule
                     int width = RenderManager.textWidth(text);
                     RenderManager.renderText(event.getMatrices(), text,
                             res.getScaledWidth() - width - 1.0f, topRight,
-                            Modules.COLORS.getColorRGB());
+                            Modules.COLORS.getRGB());
                     topRight += 10.0f;
                 }
             }
@@ -157,7 +158,7 @@ public class HudModule extends ToggleModule
                 int width = RenderManager.textWidth(brand);
                 RenderManager.renderText(event.getMatrices(), brand,
                         res.getScaledWidth() - width - 1.0f, bottomRight,
-                        Modules.COLORS.getColorRGB());
+                        Modules.COLORS.getRGB());
                 bottomRight -= 10.0f;
             }
             if (speedConfig.getValue())
@@ -173,7 +174,7 @@ public class HudModule extends ToggleModule
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, bottomRight,
-                        Modules.COLORS.getColorRGB());
+                        Modules.COLORS.getRGB());
                 bottomRight -= 10.0f;
             }
             if (pingConfig.getValue())
@@ -203,7 +204,7 @@ public class HudModule extends ToggleModule
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, bottomRight,
-                        Modules.COLORS.getColorRGB());
+                        Modules.COLORS.getRGB());
                 bottomRight -= 10.0f;
             }
             if (tpsConfig.getValue())
@@ -216,7 +217,7 @@ public class HudModule extends ToggleModule
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, bottomRight,
-                        Modules.COLORS.getColorRGB());
+                        Modules.COLORS.getRGB());
                 bottomRight -= 10.0f;
             }
             if (fpsConfig.getValue())
@@ -225,7 +226,7 @@ public class HudModule extends ToggleModule
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, bottomRight,
-                        Modules.COLORS.getColorRGB());
+                        Modules.COLORS.getRGB());
                 bottomRight -= 10.0f;
             }
             if (coordsConfig.getValue())
@@ -248,7 +249,7 @@ public class HudModule extends ToggleModule
                                 Formatting.WHITE + nx.substring(0,
                                         nx.indexOf("." + 2)), nz.substring(0,
                                         nz.indexOf("." + 2)) + Formatting.RESET), 2,
-                        bottomLeft, Modules.COLORS.getColorRGB());
+                        bottomLeft, Modules.COLORS.getRGB());
                 bottomLeft -= 10.0f;
             }
             if (directionConfig.getValue())
@@ -260,7 +261,7 @@ public class HudModule extends ToggleModule
                                         direction.getAxis() +
                                         (axis == Direction.AxisDirection.POSITIVE ? "+" : "-")
                                         + Formatting.RESET),
-                        2, bottomLeft, Modules.COLORS.getColorRGB());
+                        2, bottomLeft, Modules.COLORS.getRGB());
                 // bottomLeft -= 10.0f;
             }
             if (armorConfig.getValue())

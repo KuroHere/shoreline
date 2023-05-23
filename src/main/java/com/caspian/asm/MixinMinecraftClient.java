@@ -22,12 +22,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MinecraftClient.class)
 public class MixinMinecraftClient
 {
+    //
     @Shadow
     private Profiler profiler;
-
     @Shadow
     public ClientWorld world;
-
     @Shadow
     public ClientPlayerEntity player;
 

@@ -10,6 +10,7 @@
     "accessor.AccessorClientWorld",
     "accessor.AccessorMinecraftClient",
     "accessor.AccessorPlayerInteractEntityC2SPacket",
+    "accessor.AccessorPlayerMoveC2SPacket",
     "accessor.AccessorPlayerSkinProvider",
     "accessor.AccessorTextFieldWidget",
     "gui.hud.MixinInGameHud",
@@ -22,7 +23,4 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "mixins": [
-    "accessor.AccessorPlayerMoveC2SPacket"
-  ]
 }

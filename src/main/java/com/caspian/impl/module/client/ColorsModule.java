@@ -17,7 +17,7 @@ public class ColorsModule extends ConcurrentModule
 {
     //
     final Config<Color> colorConfig = new ColorConfig("Color", "Global" +
-            " client color", new Color(255, 0, 80));
+            " client color", new Color(0xffff0050));
     /**
      *
      */
@@ -26,6 +26,11 @@ public class ColorsModule extends ConcurrentModule
         super("Colors", "Client color scheme", ModuleCategory.CLIENT);
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     public Color getColor()
     {
         return colorConfig.getValue();
@@ -34,24 +39,37 @@ public class ColorsModule extends ConcurrentModule
     /**
      *
      *
-     * @param alpha
+     * @param a The alpha mask
      * @return
      *
      * @see #getColor()
      */
-    public Color getColor(int alpha)
+    public Color getColor(int a)
     {
-        Color c = getColor();
-        return new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
+        int r = ((ColorConfig) colorConfig).getRed();
+        int g = ((ColorConfig) colorConfig).getGreen();
+        int b = ((ColorConfig) colorConfig).getBlue();
+        return new Color(r, g, b, a);
     }
 
-    public Integer getColorRGB()
+    /**
+     *
+     *
+     * @return
+     */
+    public Integer getRGB()
     {
         return getColor().getRGB();
     }
 
-    public int getColorRGB(int alpha)
+    /**
+     *
+     *
+     * @param a The alpha mask
+     * @return
+     */
+    public int getRGB(int a)
     {
-        return getColor(alpha).getRGB();
+        return getColor(a).getRGB();
     }
 }

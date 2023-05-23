@@ -29,7 +29,6 @@ public class MixinClientPlayNetworkHandler
     {
         ChatInputEvent chatInputEvent = new ChatInputEvent(content);
         Caspian.EVENT_HANDLER.dispatch(chatInputEvent);
-
         // prevent chat packet from sending
         if (chatInputEvent.isCanceled())
         {

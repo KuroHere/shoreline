@@ -45,7 +45,6 @@ public class MixinKeyboard
         {
             KeyboardInputEvent keyboardInputEvent = new KeyboardInputEvent(key);
             Caspian.EVENT_HANDLER.dispatch(keyboardInputEvent);
-
             // prevent keyboard input
             if (keyboardInputEvent.isCanceled())
             {

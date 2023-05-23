@@ -346,8 +346,8 @@ public class AutoCrystalModule extends ToggleModule
                                 rotating = setRotation(dest);
                             }
                         }
-                        long delay = (long) ((((NumberConfig<Float>) breakSpeedConfig).getMax()
-                                - breakSpeedConfig.getValue()) * 50);
+                        float delay = (((NumberConfig<Float>) breakSpeedConfig).getMax()
+                                - breakSpeedConfig.getValue()) * 50;
                         if (lastBreak.passed(delay))
                         {
                             if (attack(attack.src()))
@@ -360,8 +360,8 @@ public class AutoCrystalModule extends ToggleModule
                     }
                     if (place != null)
                     {
-                        long delay = (long) ((((NumberConfig<Float>) placeSpeedConfig).getMax()
-                                - placeSpeedConfig.getValue()) * 50);
+                        float delay = (((NumberConfig<Float>) placeSpeedConfig).getMax()
+                                - placeSpeedConfig.getValue()) * 50;
                         if (lastPlace.passed(delay))
                         {
                             facing = place.src().toCenterPos();
@@ -392,7 +392,7 @@ public class AutoCrystalModule extends ToggleModule
     {
         if (renderConfig.getValue())
         {
-            int color = Modules.COLORS.getColorRGB();
+            int color = Modules.COLORS.getRGB();
             if (renderAttackConfig.getValue())
             {
                 if (attack != null)

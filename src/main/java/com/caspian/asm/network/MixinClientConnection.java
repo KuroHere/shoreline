@@ -31,7 +31,6 @@ public class MixinClientConnection
         PacketEvent.Outbound packetOutboundEvent =
                 new PacketEvent.Outbound(packet);
         Caspian.EVENT_HANDLER.dispatch(packetOutboundEvent);
-
         // prevent client from sending packet to server
         if (packetOutboundEvent.isCanceled())
         {
@@ -53,7 +52,6 @@ public class MixinClientConnection
         PacketEvent.Inbound packetInboundEvent =
                 new PacketEvent.Inbound(packet);
         Caspian.EVENT_HANDLER.dispatch(packetInboundEvent);
-
         // prevent client from receiving packet from server
         if (packetInboundEvent.isCanceled())
         {

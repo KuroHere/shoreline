@@ -12,12 +12,15 @@ import com.caspian.api.module.ToggleModule;
 import com.caspian.asm.accessor.AccessorMinecraftClient;
 import com.caspian.impl.event.TickEvent;
 import com.caspian.impl.event.network.PacketEvent;
+import com.caspian.init.Managers;
+import com.caspian.util.time.Timer;
 import com.caspian.util.world.SneakBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 
 import java.util.List;
 
@@ -35,7 +38,9 @@ public class FastPlaceModule extends ToggleModule
     Config<Selection> selectionConfig = new EnumConfig<>("Selection", "",
             Selection.WHITELIST, Selection.values());
     Config<Integer> delayConfig = new NumberConfig<>("Delay", "Fast place " +
-            "delay", 0, 0, 4);
+            "delay", 0, 1, 4);
+    Config<Float> startDelayConfig = new NumberConfig<>("StartDelay", "Fast" +
+            " place start delay", 0.0f, 0.0f, 1.0f);
     Config<Boolean> ghostFixConfig = new BooleanConfig("GhostFix", "Fixes " +
             "item ghosting issue on some servers", false);
     Config<List<Item>> whitelistConfig = new ListConfig<>("Whitelist",
@@ -43,6 +48,9 @@ public class FastPlaceModule extends ToggleModule
             Items.SNOWBALL, Items.EGG);
     Config<List<Item>> blacklistConfig = new ListConfig<>("Blacklist",
             "Valid item blacklist", Items.ENDER_PEARL, Items.ENDER_EYE);
+
+    //
+    private final Timer startTimer = new Timer();
 
     /**
      *
@@ -63,9 +71,19 @@ public class FastPlaceModule extends ToggleModule
     {
         if (event.getStage() == EventStage.PRE)
         {
-            if (placeCheck(mc.player.getMainHandStack()))
+            if (mc.options.useKey.isPressed() && placeCheck(mc.player.getActiveItem()))
             {
-                ((AccessorMinecraftClient) mc).setItemUseCooldown(delayConfig.getValue());
+                if (startTimer.passed(startDelayConfig.getValue())
+                        && ((AccessorMinecraftClient) mc).hookGetItemUseCooldown() > delayConfig.getValue())
+                {
+                    startTimer.reset();
+                    if (ghostFixConfig.getValue())
+                    {
+                        Managers.NETWORK.sendSequencedPacket(id ->
+                                new PlayerInteractItemC2SPacket(mc.player.getActiveHand(), id));
+                    }
+                    ((AccessorMinecraftClient) mc).hookSetItemUseCooldown(delayConfig.getValue());
+                }
             }
         }
     }
@@ -89,7 +107,7 @@ public class FastPlaceModule extends ToggleModule
                             packet.getBlockHitResult().getBlockPos());
                     if (!SneakBlocks.isSneakBlock(state))
                     {
-                        event.setCanceled(true);
+                        event.cancel();
                     }
                 }
             }

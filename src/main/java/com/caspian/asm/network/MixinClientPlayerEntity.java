@@ -37,7 +37,6 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     //
     @Shadow
     public abstract boolean isSneaking();
-
     @Shadow
     protected abstract boolean isCamera();
     //
@@ -74,6 +73,8 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
      */
     public MixinClientPlayerEntity() 
     {
+        // Treating this class as ClientPlayerEntity with mc.player info works
+        // Need a better solution with less bullshit
         super(MinecraftClient.getInstance().world,
                 MinecraftClient.getInstance().player.getGameProfile());
     }

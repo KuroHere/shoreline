@@ -16,7 +16,7 @@ public class Timer
 
     /**
      * Default constructor which will initialize the time to the current time
-     * which means {@link #passed(long)} and {@link #passed(long, TimeUnit)}
+     * which means {@link #passed(Number)} and {@link #passed(Number, TimeUnit)}
      * will always return <tt>true</tt> initially
      */
     public Timer()
@@ -32,9 +32,9 @@ public class Timer
      * @return <tt>true</tt> if the time since the last reset has exceeded
      * the param time
      */
-    public boolean passed(long time)
+    public boolean passed(Number time)
     {
-        return System.currentTimeMillis() - this.time > time;
+        return System.currentTimeMillis() - this.time > (Long) time;
     }
 
     /**
@@ -46,11 +46,11 @@ public class Timer
      * @return <tt>true</tt> if the time since the last reset has exceeded
      * the param time
      *
-     * @see #passed(long)
+     * @see #passed(Number)
      */
-    public boolean passed(long time, TimeUnit unit)
+    public boolean passed(Number time, TimeUnit unit)
     {
-        return passed(unit.toMillis(time));
+        return passed(unit.toMillis((Long) time));
     }
 
     /**

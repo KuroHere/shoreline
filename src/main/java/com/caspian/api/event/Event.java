@@ -44,6 +44,17 @@ public class Event
     }
 
     /**
+     * Sets the canceled state of the event to <tt>true</tt> (i.e. cancels the 
+     * event) and prevents the callbacks from running
+     * 
+     * @see #setCanceled(boolean) 
+     */
+    public void cancel() 
+    {
+        setCanceled(true);
+    }
+
+    /**
      * Sets the canceled state of the event. This method can only function
      * if {@link #cancelable} is <tt>true</tt>.
      *
