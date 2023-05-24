@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "com.caspian.asm",
+  "package": "com.caspian.client.asm",
   "minVersion": "0.8",
   "compatibilityLevel": "JAVA_17",
   "client": [
@@ -23,4 +23,9 @@
   "injectors": {
     "defaultRequire": 1
   },
+  "mixins": [
+    "block.MixinBlock",
+    "block.MixinSlimeBlock",
+    "entity.MixinEntity"
+  ]
 }

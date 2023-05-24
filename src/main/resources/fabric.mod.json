@@ -15,7 +15,7 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.caspian.CaspianMod"
+      "com.caspian.client.CaspianMod"
     ]
   },
   "mixins": [
