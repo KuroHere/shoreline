@@ -338,16 +338,18 @@ public class AutoTotemModule extends ToggleModule
      */
     private void preClickSlot()
     {
-        sneaking = mc.player.isSneaking();
-        sprinting = mc.player.isSprinting();
+        sneaking = Managers.POSITION.isSneaking();
+        sprinting = Managers.POSITION.isSprinting();
         // INV_MOVE checks
         if (strictMoveConfig.getValue())
         {
-            if (mc.player.isOnGround())
+            if (Managers.POSITION.isOnGround())
             {
+                double x = Managers.POSITION.getX();
+                double y = Managers.POSITION.getY();
+                double z = Managers.POSITION.getZ();
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        mc.player.getX(), mc.player.getY(), mc.player.getZ(),
-                        true));
+                        x, y, z, true));
             }
         }
         if (strictActionsConfig.getValue())

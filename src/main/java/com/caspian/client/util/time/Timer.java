@@ -34,7 +34,7 @@ public class Timer
      */
     public boolean passed(Number time)
     {
-        return System.currentTimeMillis() - this.time > (Long) time;
+        return getElapsedTime() > (Long) time;
     }
 
     /**
@@ -51,6 +51,16 @@ public class Timer
     public boolean passed(Number time, TimeUnit unit)
     {
         return passed(unit.toMillis((Long) time));
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public long getElapsedTime()
+    {
+        return System.currentTimeMillis() - this.time;
     }
 
     /**

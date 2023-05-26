@@ -4,8 +4,6 @@
   "minVersion": "0.8",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "MixinKeyboard",
-    "MixinMinecraftClient",
     "accessor.AccessorChatScreen",
     "accessor.AccessorClientWorld",
     "accessor.AccessorMinecraftClient",
@@ -15,17 +13,17 @@
     "accessor.AccessorTextFieldWidget",
     "gui.hud.MixinInGameHud",
     "gui.screen.MixinChatScreen",
+    "block.MixinBlock",
+    "block.MixinSlimeBlock",
+    "entity.MixinEntity",
     "network.MixinClientConnection",
     "network.MixinClientPlayerEntity",
     "network.MixinClientPlayerInteractionManager",
-    "network.MixinClientPlayNetworkHandler"
+    "network.MixinClientPlayNetworkHandler",
+    "MixinKeyboard",
+    "MixinMinecraftClient"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "block.MixinBlock",
-    "block.MixinSlimeBlock",
-    "entity.MixinEntity"
-  ]
+  }
 }

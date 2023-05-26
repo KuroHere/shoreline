@@ -29,6 +29,9 @@ public class Managers
     public static AccountManager ACCOUNT;
     public static TickManager TICK;
     public static InventoryManager INVENTORY;
+    public static PositionManager POSITION;
+    public static RotationManager ROTATION;
+    public static TotemManager TOTEM;
 
     /**
      * Initializes the manager instances. Should not be used if the
@@ -49,6 +52,9 @@ public class Managers
             ACCOUNT = new AccountManager();
             TICK = new TickManager();
             INVENTORY = new InventoryManager();
+            POSITION = new PositionManager();
+            ROTATION = new RotationManager();
+            TOTEM = new TotemManager();
             initialized = true;
         }
     }

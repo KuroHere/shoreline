@@ -1,11 +1,14 @@
 package com.caspian.client.asm.network;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -17,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @since 1.0
  */
 @Mixin(ClientConnection.class)
-public class MixinClientConnection
+public abstract class MixinClientConnection
 {
     /**
      *
@@ -57,5 +60,18 @@ public class MixinClientConnection
         {
             ci.cancel();
         }
+    }
+
+    /**
+     *
+     *
+     * @param disconnectReason
+     * @param ci
+     */
+    @Inject(method = "disconnect", at = @At(value = "HEAD"))
+    private void hookDisconnect(Text disconnectReason, CallbackInfo ci)
+    {
+        DisconnectEvent disconnectEvent = new DisconnectEvent();
+        Caspian.EVENT_HANDLER.dispatch(disconnectEvent);
     }
 }

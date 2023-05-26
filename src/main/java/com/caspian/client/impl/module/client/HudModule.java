@@ -211,7 +211,7 @@ public class HudModule extends ToggleModule
             {
                 String curr = Float.toString(Managers.TICK.getTpsCurrent());
                 String avg = Float.toString(Managers.TICK.getTpsAverage());
-                String text = String.format("TPS §f%s §7[%s§7]",
+                String text = String.format("TPS §f%s §7[§f%s§7]",
                         curr.substring(0, curr.indexOf(".") + 2),
                         avg.substring(0, avg.indexOf(".") + 2));
                 int width = RenderManager.textWidth(text);
