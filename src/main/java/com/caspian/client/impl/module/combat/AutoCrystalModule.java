@@ -78,13 +78,15 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
             "before placing and breaking", false);
     Config<Boolean> ignoreExpectedTickConfig = new BooleanConfig(
-            "RotateHold", "", false);
+            "IgnoreLastTick", "", false);
     Config<YawStep> yawStepConfig = new EnumConfig<>("YawStep", "",
             YawStep.OFF, YawStep.values());
     Config<Integer> yawStepThresholdConfig = new NumberConfig<>(
             "YawStepThreshold", "", 1, 180, 180, NumberDisplay.DEGREES);
     Config<Integer> yawStepTicksConfig = new NumberConfig<>("YawStepTicks",
             "", 0, 0, 5);
+    Config<Integer> yawHoldTicksConfig = new NumberConfig<>(
+            "YawHoldTicks", "", 0, 0, 5);
     // ENEMY SETTINGS
     Config<Boolean> playersConfig = new BooleanConfig("Players",
             "Target players", true);
@@ -203,7 +205,9 @@ public class AutoCrystalModule extends ToggleModule
     // private final Timer lastClean = new Timer();
     // ROTATIONS
     //
+    private Vec3d dest;
     private int rotating;
+    private boolean semi;
     //
     private float[] yaws;
     private float pitch;
@@ -225,9 +229,12 @@ public class AutoCrystalModule extends ToggleModule
     {
         attack = null;
         place = null;
+        dest = null;
         attacking = false;
         placing = false;
+        semi = false;
         attackFreq = 0;
+        rotating = 0;
         currRandom = -1;
         lastBreak.reset();
         lastPlace.reset();
@@ -297,13 +304,6 @@ public class AutoCrystalModule extends ToggleModule
                             .getMostSignificantBits());
                     e.printStackTrace();
                 }
-                if (rotating > 0)
-                {
-                    event.setYaw(yaws[rotating - 1]);
-                    event.setPitch(pitch);
-                    --rotating;
-                    return;
-                }
                 if (calc.isDone())
                 {
                     Caspian.info("Calc done in %dms!", calc.getCalcTime());
@@ -329,33 +329,72 @@ public class AutoCrystalModule extends ToggleModule
                                     Managers.POSITION.getEyePos() : Managers.POSITION.getPos(),
                             placeRangeConfig.getValue() + 0.5);
                     calc = factory.runCalc(crystalSrc, placeSrc);
+                    // found new data, stop rotation
+                    if (rotating > 0)
+                    {
+                        Vec3d cdest = null;
+                        if (semi && attack != null)
+                        {
+                            cdest = attack.getRotatePos();
+                        }
+                        else if (place != null)
+                        {
+                            cdest = place.getRotatePos();
+                        }
+                        if (cdest != null
+                                && !isNearlyEqual(dest, cdest, 0.5f))
+                        {
+                            rotating = 0;
+                        }
+                    }
+                }
+                if (rotating > 0)
+                {
+                    event.setYaw(yaws[--rotating]);
+                    event.setPitch(pitch);
+                    if (rotating > 0 || !ignoreExpectedTickConfig.getValue())
+                    {
+                        return;
+                    }
                 }
                 if (attack != null)
                 {
-                    Vec3d dest = attack.src().getPos();
+                    dest = attack.src().getPos();
                     if (rotateConfig.getValue() && !isFacing(dest))
                     {
-                        rotating = setRotation(dest);
+                        semi = true;
+                        rotating = setRotation(dest,
+                                yawStepConfig.getValue() != YawStep.OFF);
                         return;
+                    }
+                    if (currRandom < 0)
+                    {
+                        currRandom = random.nextLong((long)
+                                (randomSpeedConfig.getValue() * 10.0f + 1.0f));
                     }
                     float delay = (((NumberConfig<Float>) breakSpeedConfig).getMax()
                             - breakSpeedConfig.getValue()) * 50;
-                    if (lastBreak.passed(delay))
+                    if (lastBreak.passed(delay) 
+                            && randomTime.passed(currRandom))
                     {
                         if (attack(attack.src()))
                         {
                             lastBreak.reset();
+                            randomTime.reset();
                             attack = null;
+                            currRandom = -1;
                             ++attackFreq;
                         }
                     }
                 }
                 if (place != null)
                 {
-                    Vec3d dest = place.src().toCenterPos();
+                    dest = place.src().toCenterPos();
                     if (rotateConfig.getValue() && !isFacing(dest))
                     {
-                        rotating = setRotation(dest);
+                        semi = false;
+                        rotating = setRotation(dest,
+                                yawStepConfig.getValue() == YawStep.FULL);
                         return;
                     }
                     float delay = (((NumberConfig<Float>) placeSpeedConfig).getMax()
@@ -666,18 +705,7 @@ public class AutoCrystalModule extends ToggleModule
         long swapDelay = (long) (swapDelayConfig.getValue() * 25);
         if (lastSwap.passed(swapDelay))
         {
-            if (currRandom < 0)
-            {
-                currRandom = random.nextLong((long)
-                        (randomSpeedConfig.getValue() * 10.0f + 1.0f));
-            }
-            if (randomSpeedConfig.getValue() > ((NumberConfig<Float>) randomSpeedConfig).getMin()
-                    && randomTime.passed(currRandom))
-            {
-                randomTime.reset();
-                currRandom = -1;
-                return attackFreq <= attackFrequencyConfig.getValue();
-            }
+            return attackFreq <= attackFrequencyConfig.getValue();
         }
         return false;
     }
@@ -1074,11 +1102,11 @@ public class AutoCrystalModule extends ToggleModule
      *
      * @param dest
      */
-    private int setRotation(Vec3d dest)
+    private int setRotation(Vec3d dest, boolean yawstep)
     {
         float[] rots = RotationUtil.getRotationsTo(Managers.POSITION.getEyePos(),
                 dest);
-        if (yawStepConfig.getValue() != YawStep.OFF)
+        if (yawstep)
         {
             float diff = rots[0] - Managers.ROTATION.getYaw(); // yaw diff
             if (Math.abs(diff) > 180.0f)
@@ -1087,34 +1115,42 @@ public class AutoCrystalModule extends ToggleModule
             }
             int dir = diff > 0.0f ? 1 : -1;
             // partition yaw
-            int tick = yawStepTicksConfig.getValue();
-            float step = Math.abs(diff) / tick;
-            if (step > yawStepThresholdConfig.getValue())
+            int tick = Math.max(yawStepTicksConfig.getValue(), 1);
+            float yaw = Math.abs(diff) / tick;
+            if (yaw > yawStepThresholdConfig.getValue())
             {
                 tick = (int) Math.ceil(Math.abs(diff) / yawStepThresholdConfig.getValue());
-                step = Math.abs(diff) / tick;
+                yaw = Math.abs(diff) / tick;
             }
+            tick += yawHoldTicksConfig.getValue();
             yaws = new float[tick];
-            float total = 0;
+            float rel = 0;
             for (int i = 0; i < tick; ++i)
             {
-                float curr = step * dir;
-                if (Math.abs(curr) > 0.05f)
+                if (i < yawHoldTicksConfig.getValue())
                 {
-                    total += curr;
-                    yaws[i] = total;
+                    rel += yaw * dir;
+                    yaws[i] = rel;
+                }
+                else
+                {
+                    yaws[i] = 0.0f;
                 }
             }
             pitch = rots[0];
-            return yaws.length;
         }
         else
         {
-            yaws = new float[1];
+            int tick = yawHoldTicksConfig.getValue() + 1;
+            yaws = new float[tick];
             yaws[0] = rots[0];
+            for (int i = 1; i < tick; ++i)
+            {
+                yaws[i] = 0.0f;
+            }
             pitch = rots[1];
-            return 1;
         }
+        return yaws.length;
     }
 
     /**
@@ -1128,9 +1164,9 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean isNearlyEqual(Vec3d v1, Vec3d v2, float allowed)
     {
-        double x = Math.abs(v1.x - v2.x);
-        double y = Math.abs(v1.y - v2.y);
-        double z = Math.abs(v1.z - v2.z);
+        double x = Math.abs(v1.getX() - v2.getX());
+        double y = Math.abs(v1.getY() - v2.getY());
+        double z = Math.abs(v1.getZ() - v2.getZ());
         return x <= allowed && y <= allowed && z <= allowed;
     }
 
@@ -1619,9 +1655,25 @@ public class AutoCrystalModule extends ToggleModule
      *
      * @param <T> The damage source type
      */
-    public record DamageData<T>(double target, double local, Entity damaged,
+    private record DamageData<T>(double target, double local, Entity damaged,
                                 T src)
     {
-
+        /**
+         *
+         *
+         * @return
+         */
+        public Vec3d getRotatePos()
+        {
+            if (src instanceof EndCrystalEntity)
+            {
+                return ((EndCrystalEntity) src).getPos();
+            }
+            else if (src instanceof BlockPos)
+            {
+                return ((BlockPos) src).toCenterPos();
+            }
+            return null;
+        }
     }
 }
