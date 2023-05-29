@@ -30,7 +30,7 @@ public class Caspian
     public static ShutdownHook SHUTDOWN;
 
     /**
-     * Called before {@link CaspianMod#onInitialize()}
+     * Called before {@link CaspianMod#onInitializeClient()}
      */
     public static void preInit()
     {
@@ -41,7 +41,7 @@ public class Caspian
     }
 
     /**
-     * Called during {@link CaspianMod#onInitialize()}
+     * Called during {@link CaspianMod#onInitializeClient()}
      */
     public static void init()
     {
@@ -51,11 +51,12 @@ public class Caspian
     }
 
     /**
-     * Called after {@link CaspianMod#onInitialize()}
+     * Called after {@link CaspianMod#onInitializeClient()}
      */
     public static void postInit()
     {
         info("Starting postInit ...");
+        Managers.postInit();
         SHUTDOWN = new ShutdownHook();
         Runtime.getRuntime().addShutdownHook(SHUTDOWN);
     }

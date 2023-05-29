@@ -55,9 +55,20 @@ public class Managers
             POSITION = new PositionManager();
             ROTATION = new RotationManager();
             TOTEM = new TotemManager();
-            // post initialization tasks
-            COMMAND.postInit();
             initialized = true;
+        }
+    }
+
+    /**
+     * Initializes final manager properties. Only does anything is {@link Managers#isInitialized()} is <b>true</b>
+     *
+     * @see #init()
+     * @see #isInitialized()
+     */
+    public static void postInit() {
+        if (isInitialized())
+        {
+            COMMAND.postInit();
         }
     }
 
