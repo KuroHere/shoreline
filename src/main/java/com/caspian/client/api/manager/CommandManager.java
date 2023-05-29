@@ -37,6 +37,8 @@ public class CommandManager
         register(
                 new HelpCommand()
         );
+
+        Caspian.info("Registered {} commands", commands.size());
     }
 
     /**

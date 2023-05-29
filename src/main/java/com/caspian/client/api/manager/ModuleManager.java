@@ -1,5 +1,6 @@
 package com.caspian.client.api.manager;
 
+import com.caspian.client.Caspian;
 import com.caspian.client.api.module.Module;
 import com.caspian.client.impl.module.client.ClickGuiModule;
 import com.caspian.client.impl.module.combat.AutoCrystalModule;
@@ -44,6 +45,8 @@ public class ModuleManager
 
                 // World
         );
+
+        Caspian.info("Registered {} modules", modules.size());
     }
 
     /**
