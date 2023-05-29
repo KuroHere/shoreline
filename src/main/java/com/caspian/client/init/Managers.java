@@ -68,7 +68,9 @@ public class Managers
     public static void postInit() {
         if (isInitialized())
         {
+            MODULE.postInit();
             COMMAND.postInit();
+            MACRO.postInit();
         }
     }
 

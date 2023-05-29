@@ -2,9 +2,11 @@ package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.module.Module;
+import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.module.client.ClickGuiModule;
 import com.caspian.client.impl.module.combat.AutoCrystalModule;
 import com.caspian.client.impl.module.movement.SprintModule;
+import com.caspian.client.init.Managers;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -47,6 +49,22 @@ public class ModuleManager
         );
 
         Caspian.info("Registered {} modules", modules.size());
+    }
+
+    /**
+     * Registers extra module information
+     */
+    public void postInit()
+    {
+        for (Module module : modules.values())
+        {
+            if (!(module instanceof ToggleModule toggleModule))
+            {
+                continue;
+            }
+
+            Managers.MACRO.register(toggleModule.getKeybinding());
+        }
     }
 
     /**

@@ -18,6 +18,9 @@ import java.util.Set;
  */
 public class MacroManager
 {
+    // The handler for handling macros
+    private final MacroHandler macroHandler;
+
     //
     private final Set<Macro> macros = new HashSet<>();
 
@@ -27,7 +30,16 @@ public class MacroManager
      */
     public MacroManager()
     {
-        Caspian.EVENT_HANDLER.subscribe(this);
+        macroHandler = new MacroHandler();
+        Caspian.EVENT_HANDLER.subscribe(macroHandler);
+    }
+
+    /**
+     * Loads macros from the file system
+     */
+    public void postInit()
+    {
+        // TODO
     }
 
     /**

@@ -37,7 +37,6 @@ public class Caspian
         LOGGER = LogManager.getLogger("Caspian");
         info("Starting preInit ...");
         EVENT_HANDLER = new EventHandler();
-        Managers.init();
     }
 
     /**
@@ -46,8 +45,7 @@ public class Caspian
     public static void init()
     {
         info("Starting init ...");
-        CONFIG = new ClientConfiguration();
-        CONFIG.loadClient();
+        Managers.init();
     }
 
     /**
@@ -56,9 +54,15 @@ public class Caspian
     public static void postInit()
     {
         info("Starting postInit ...");
+
         Managers.postInit();
         SHUTDOWN = new ShutdownHook();
         Runtime.getRuntime().addShutdownHook(SHUTDOWN);
+
+        // load configs AFTER everything has been initialized
+        // this is to prevent configs loading before certain aspects of managers are available
+        CONFIG = new ClientConfiguration();
+        CONFIG.loadClient();
     }
 
     /**
