@@ -2,7 +2,7 @@ package com.caspian.client.impl.event.keyboard;
 
 import com.caspian.client.api.event.Cancelable;
 import com.caspian.client.api.event.Event;
-import com.caspian.client.asm.MixinKeyboard;
+import com.caspian.client.mixin.MixinKeyboard;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**

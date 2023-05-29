@@ -1,4 +1,4 @@
-package com.caspian.client.asm.accessor;
+package com.caspian.client.mixin.accessor;
 
 import net.minecraft.client.network.PendingUpdateManager;
 import net.minecraft.client.world.ClientWorld;

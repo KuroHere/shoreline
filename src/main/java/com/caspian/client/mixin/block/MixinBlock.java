@@ -1,4 +1,4 @@
-package com.caspian.client.asm.block;
+package com.caspian.client.mixin.block;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.block.BlockSlipperinessEvent;

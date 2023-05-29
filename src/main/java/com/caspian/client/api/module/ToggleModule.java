@@ -79,7 +79,6 @@ public class ToggleModule extends Module
         {
             disable();
         }
-
         else
         {
             enable();
@@ -146,8 +145,6 @@ public class ToggleModule extends Module
      */
     public void keybind(int keycode)
     {
-
-        // set the config container for the keybind to this local object
         keybindingConfig.setContainer(this);
         ((MacroConfig) keybindingConfig).setValue(keycode, this::toggle);
     }

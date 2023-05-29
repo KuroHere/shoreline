@@ -1,4 +1,4 @@
-package com.caspian.client.asm.accessor;
+package com.caspian.client.mixin.accessor;
 
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.UserApiService;

@@ -1,4 +1,4 @@
-package com.caspian.client.asm.network;
+package com.caspian.client.mixin.network;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.network.AttackBlockEvent;

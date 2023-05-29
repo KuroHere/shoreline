@@ -33,7 +33,7 @@ public class CommandManager
     /**
      * Registers commands to the CommandManager
      */
-    public void postInitialization() {
+    public void postInit() {
         register(
                 new HelpCommand()
         );

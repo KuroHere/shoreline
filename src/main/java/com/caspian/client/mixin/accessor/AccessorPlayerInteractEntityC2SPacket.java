@@ -1,4 +1,4 @@
-package com.caspian.client.asm.accessor;
+package com.caspian.client.mixin.accessor;
 
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import org.spongepowered.asm.mixin.Mixin;
