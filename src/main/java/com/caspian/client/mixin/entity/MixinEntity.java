@@ -1,4 +1,4 @@
-package com.caspian.client.asm.entity;
+package com.caspian.client.mixin.entity;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.entity.VelocityMultiplierEvent;

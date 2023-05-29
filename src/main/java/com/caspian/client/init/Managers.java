@@ -55,10 +55,8 @@ public class Managers
             POSITION = new PositionManager();
             ROTATION = new RotationManager();
             TOTEM = new TotemManager();
-
-            // do post initialization tasks
-            COMMAND.postInitialization();
-
+            // post initialization tasks
+            COMMAND.postInit();
             initialized = true;
         }
     }

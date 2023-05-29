@@ -9,7 +9,7 @@ import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
-import com.caspian.client.asm.accessor.AccessorMinecraftClient;
+import com.caspian.client.mixin.accessor.AccessorMinecraftClient;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;

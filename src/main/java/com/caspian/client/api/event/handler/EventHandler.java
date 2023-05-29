@@ -97,18 +97,15 @@ public class EventHandler
     public boolean dispatch(Event event)
     {
         Set<Listener> active = listeners.get(event.getClass());
-
         // if there are no items to dispatch to, just early return
         if (active == null || active.isEmpty())
         {
             return false;
         }
-
         for (Listener listener : active)
         {
             listener.invoke(event);
         }
-
         return event.isCanceled();
     }
 }

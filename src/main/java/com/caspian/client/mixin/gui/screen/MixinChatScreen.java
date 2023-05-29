@@ -1,8 +1,8 @@
-package com.caspian.client.asm.gui.screen;
+package com.caspian.client.mixin.gui.screen;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.asm.accessor.AccessorChatScreen;
-import com.caspian.client.asm.accessor.AccessorTextFieldWidget;
+import com.caspian.client.mixin.accessor.AccessorChatScreen;
+import com.caspian.client.mixin.accessor.AccessorTextFieldWidget;
 import com.caspian.client.impl.event.chat.ChatInputEvent;
 import com.caspian.client.impl.event.chat.ChatRenderEvent;
 import com.caspian.client.util.Globals;

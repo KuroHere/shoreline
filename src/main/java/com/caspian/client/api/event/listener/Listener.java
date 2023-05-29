@@ -36,13 +36,6 @@ import java.util.Map;
  */
 public class Listener
 {
-
-    // subscriber invoker cache for each listener method
-    private static final Map<Method, Invoker<Object>> invokableCache = new HashMap<>();
-
-    // the MethodHandler lookup
-    private static final Lookup LOOKUP = MethodHandles.lookup();
-
     // The EventListener method which contains the code to invoke when the
     // listener is invoked.
     private final Method method;
@@ -52,6 +45,11 @@ public class Listener
     // The Listener invoker created by the LambdaMetaFactory which invokes the
     // code from the Listener method.
     private Invoker<Object> invoker;
+    // subscriber invoker cache for each listener method
+    private static final Map<Method, Invoker<Object>> invokableCache =
+            new HashMap<>();
+    // the MethodHandler lookup
+    private static final Lookup LOOKUP = MethodHandles.lookup();
 
     /**
      *
@@ -59,6 +57,7 @@ public class Listener
      * @param method
      * @param subscriber
      */
+    @SuppressWarnings("unchecked")
     public Listener(Method method, Object subscriber)
     {
         this.method = method;
@@ -68,17 +67,17 @@ public class Listener
         {
             if (!invokableCache.containsKey(method))
             {
-                // i love bush bus
                 MethodType methodType = MethodType.methodType(Invoker.class);
                 CallSite callSite = LambdaMetafactory.metafactory(
-                        LOOKUP,
-                        "invoke",
+                        LOOKUP, "invoke",
                         methodType.appendParameterTypes(subscriber.getClass()),
                         MethodType.methodType(void.class, Object.class),
                         LOOKUP.unreflect(method),
-                        MethodType.methodType(void.class, method.getParameterTypes()[0])
+                        MethodType.methodType(void.class,
+                                method.getParameterTypes()[0])
                 );
-                invoker = (Invoker<Object>) callSite.getTarget().invoke(subscriber);
+                invoker = (Invoker<Object>) callSite.getTarget()
+                        .invoke(subscriber);
                 invokableCache.put(method, invoker);
             }
             else

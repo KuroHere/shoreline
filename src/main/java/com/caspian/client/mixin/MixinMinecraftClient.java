@@ -1,4 +1,4 @@
-package com.caspian.client.asm;
+package com.caspian.client.mixin;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.EventStage;

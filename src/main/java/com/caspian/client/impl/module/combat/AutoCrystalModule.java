@@ -11,7 +11,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
-import com.caspian.client.asm.accessor.AccessorPlayerInteractEntityC2SPacket;
+import com.caspian.client.mixin.accessor.AccessorPlayerInteractEntityC2SPacket;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
@@ -21,7 +21,6 @@ import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.time.Timer;
 import com.caspian.client.util.world.EntityUtil;
 import io.netty.util.internal.ConcurrentSet;
-import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -62,6 +61,7 @@ import java.util.concurrent.*;
  * <li> Timing
  * <li> Sequential expectation system
  * <li> StrictDirection
+ * <li> Speedmine Compatability
  * </p>
  *
  * @author linus
@@ -76,6 +76,8 @@ public class AutoCrystalModule extends ToggleModule
     // GENERAL SETTINGS
     Config<Boolean> multitaskConfig = new BooleanConfig("Multitask",
             "Allows attacking while using items", false);
+    Config<Boolean> whileMiningConfig = new BooleanConfig("WhileMining",
+            "Allows attacking while mining blocks", false);
     Config<Float> targetRangeConfig = new NumberConfig<>("EnemyRange",
             "Range to search for potential enemies", 1.0f, 10.0f, 13.0f);
     Config<Boolean> awaitConfig = new BooleanConfig("Instant",
@@ -83,20 +85,26 @@ public class AutoCrystalModule extends ToggleModule
     // Config<Boolean> raytraceConfig = new BooleanConfig("Raytrace", "",
     //        false);
     Config<Sequential> sequentialConfig = new EnumConfig<>("Sequential",
-            "", Sequential.NORMAL, Sequential.values());
+            "Calculates sequentially, so placements occur once the " +
+                    "expected crystal is broken", Sequential.NORMAL,
+            Sequential.values());
     // ROTATE SETTINGS
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
             "before placing and breaking", false);
     Config<Boolean> ignoreExpectedTickConfig = new BooleanConfig(
-            "IgnoreLastTick", "", false);
-    Config<YawStep> yawStepConfig = new EnumConfig<>("YawStep", "",
+            "IgnoreLastTick", "Allow actions on tick before reaching rotation",
+            false);
+    Config<YawStep> yawStepConfig = new EnumConfig<>("YawStep", "Rotates yaw " +
+            "over multiple ticks to prevent certain rotation flags in NCP",
             YawStep.OFF, YawStep.values());
     Config<Integer> yawStepThresholdConfig = new NumberConfig<>(
-            "YawStepThreshold", "", 1, 180, 180, NumberDisplay.DEGREES);
+            "YawStepThreshold", "Maximum yaw rotation in degrees for one tick",
+            1, 180, 180, NumberDisplay.DEGREES);
     Config<Integer> yawStepTicksConfig = new NumberConfig<>("YawStepTicks",
-            "", 0, 0, 5);
+            "Minimum ticks to rotate yaw", 1, 1, 5);
     Config<Integer> yawHoldTicksConfig = new NumberConfig<>(
-            "YawHoldTicks", "", 0, 0, 5);
+            "YawHoldTicks", "Minimum ticks to hold the rotation yaw after " +
+            "reaching the rotation", 0, 0, 5);
     // ENEMY SETTINGS
     Config<Boolean> playersConfig = new BooleanConfig("Players",
             "Target players", true);
@@ -124,7 +132,8 @@ public class AutoCrystalModule extends ToggleModule
     Config<Swap> antiWeaknessConfig = new EnumConfig<>("AntiWeakness",
             "Swap to tools before attacking crystals", Swap.OFF,
             Swap.values());
-    Config<Float> swapDelayConfig = new NumberConfig<>("SwapDelay", "", 0.0f,
+    Config<Float> swapDelayConfig = new NumberConfig<>("SwapDelay", "Delay " +
+            "for attacking after swapping items which prevents NCP flags", 0.0f,
             0.0f, 10.0f);
     //
     Config<Boolean> inhibitConfig = new BooleanConfig("Inhibit",
@@ -156,23 +165,30 @@ public class AutoCrystalModule extends ToggleModule
             "PlaceWallRange", "Range to place crystals through walls", 0.1f,
             4.0f, 5.0f);
     Config<Boolean> placeRangeEyeConfig = new BooleanConfig(
-            "PlaceRangeEye", "", false);
+            "PlaceRangeEye", "Calculates place ranges starting from the eye " +
+            "position of the player, which is how NCP calculates ranges",
+            false);
     Config<Boolean> placeRangeCenterConfig = new BooleanConfig(
-            "PlaceRangeCenter", "", true);
+            "PlaceRangeCenter", "Calculates place ranges to the center of the" +
+            " block, which is how NCP calculates ranges", true);
     Config<Boolean> placeLowConfig = new BooleanConfig("PlaceLow", "Allow " +
             "placements at a lower bounding", false);
-    Config<Swap> swapConfig = new EnumConfig<>("Swap", "", Swap.OFF,
+    Config<Swap> swapConfig = new EnumConfig<>("Swap", "Swaps to an end " +
+            "crystal before placing if the player is not holding one", Swap.OFF,
             Swap.values());
     Config<Boolean> breakValidateConfig = new BooleanConfig(
             "BreakValidate", "Only places crystals that can be attacked",
             false);
     Config<Boolean> strictDirectionConfig = new BooleanConfig(
-            "StrictDirection", "", false);
+            "StrictDirection", "Interacts with only visible directions when " +
+            "placing crystals", false);
     Config<Placements> placementsConfig = new EnumConfig<>("Placements",
-            "", Placements.NATIVE, Placements.values());
+            "Version standard for placing end crystals", Placements.NATIVE,
+            Placements.values());
     // DAMAGE SETTINGS
     Config<Float> minDamageConfig = new NumberConfig<>("MinDamage",
-            "", 1.0f, 4.0f, 10.0f);
+            "Minimum damage required to consider attacking or placing an end " +
+                    "crystal", 1.0f, 4.0f, 10.0f);
     Config<Float> armorScaleConfig = new NumberConfig<>("ArmorScale",
             "", 0.0f, 5.0f, 20.0f, NumberDisplay.PERCENT);
     Config<Float> lethalMultiplier = new NumberConfig<>(
@@ -197,6 +213,10 @@ public class AutoCrystalModule extends ToggleModule
     //
     private DamageData<BlockPos> place;
     private DamageData<EndCrystalEntity> attack;
+    //
+    private BlockPos sequence;
+    private Vec3d preSequence;
+    private final Timer startSequence = new Timer();
     // Calculated placements and attacks will be added to their respective
     // stacks. When the main loop requires a placement/attack, simply pop the
     // last calculated from the stack.
@@ -206,8 +226,8 @@ public class AutoCrystalModule extends ToggleModule
     // Set of attempted placements and attacks
     private final Set<BlockPos> placements =
             Collections.synchronizedSet(new ConcurrentSet<>());
-    private final Set<Integer> attacks =
-            Collections.synchronizedSet(new ConcurrentSet<>());
+    private final Map<Integer, Long> attacks =
+            Collections.synchronizedMap(new ConcurrentHashMap<>());
     // RANDOM
     private final Timer randomTime = new Timer();
     private final Random random = new SecureRandom();
@@ -219,6 +239,7 @@ public class AutoCrystalModule extends ToggleModule
     private boolean attacking, placing;
     private final Timer lastPlace = new Timer();
     private final Timer lastBreak = new Timer();
+    private final Deque<Long> breakTimes = new ArrayDeque<>(20);
     private final Timer lastSwap = new Timer();
     private final Timer lastAutoSwap = new Timer();
     // private final Timer lastClean = new Timer();
@@ -262,6 +283,7 @@ public class AutoCrystalModule extends ToggleModule
         freqInterval.reset();
         attacks.clear();
         placements.clear();
+        breakTimes.clear();
         // run calc
         Iterable<EndCrystalEntity> crystalSrc = getCrystalSphere(
                 Managers.POSITION.getCameraPosVec(1.0f),
@@ -396,6 +418,10 @@ public class AutoCrystalModule extends ToggleModule
                     }
                     float delay = (((NumberConfig<Float>) breakSpeedConfig).getMax()
                             - breakSpeedConfig.getValue()) * 50;
+                    if (awaitConfig.getValue())
+                    {
+                        delay = Math.max(getCrystalLatency() + 150.0f, 250.0f);
+                    }
                     if (lastBreak.passed(delay) 
                             && randomTime.passed(currRandom))
                     {
@@ -524,6 +550,35 @@ public class AutoCrystalModule extends ToggleModule
     }
 
     /**
+     * Returns the average time in ms of the last 20 break attempts. Logs the
+     * time between the time of the sending of
+     * {@link PlayerInteractEntityC2SPacket} and receiving of
+     * {@link ExplosionS2CPacket}.
+     *
+     * @return The average crystal latency time in ms
+     */
+    private float getCrystalLatency()
+    {
+        int size = breakTimes.size();
+        //
+        float avg = 0.0f;
+        for (long time : breakTimes)
+        {
+            if (time > 1000)
+            {
+                size--;
+                continue;
+            }
+            avg += time;
+        }
+        if (size > 0)
+        {
+            return avg / size;
+        }
+        return 0.0f;
+    }
+
+    /**
      *
      *
      * @param event
@@ -543,9 +598,22 @@ public class AutoCrystalModule extends ToggleModule
                     {
                         RegistryKey<World> world = mc.world.getRegistryKey();
                         Entity e = packet.getEntity(server.getWorld(world));
-                        if (e != null && e.isAlive() && e instanceof EndCrystalEntity)
+                        if (e != null && e.isAlive()
+                                && e instanceof EndCrystalEntity)
                         {
-
+                            // sequence has technically been completed
+                            if (sequence != null
+                                    && e.squaredDistanceTo(toSource(sequence)) < 0.5f)
+                            {
+                                if (sequentialConfig.getValue() == Sequential.STRICT)
+                                {
+                                    preSequence = e.getPos();
+                                }
+                                else if (sequentialConfig.getValue() == Sequential.NORMAL)
+                                {
+                                    sequence = null;
+                                }
+                            }
                         }
                     }
                 }
@@ -605,6 +673,8 @@ public class AutoCrystalModule extends ToggleModule
                             if (attack(packet.getId()))
                             {
                                 lastBreak.reset();
+                                attacks.put(packet.getId(),
+                                        System.currentTimeMillis());
                                 ++attackFreq;
                             }
                         }
@@ -613,6 +683,15 @@ public class AutoCrystalModule extends ToggleModule
             }
             else if (event.getPacket() instanceof ExplosionS2CPacket packet)
             {
+                if (sequentialConfig.getValue() == Sequential.STRICT
+                        && preSequence != null)
+                {
+                    if (preSequence.squaredDistanceTo(packet.getX(),
+                            packet.getY(), packet.getZ()) < packet.getRadius() * packet.getRadius())
+                    {
+                        sequence = null;
+                    }
+                }
                 for (Entity e : mc.world.getEntities())
                 {
                     if (e != null && e.isAlive() && e instanceof EndCrystalEntity)
@@ -621,9 +700,11 @@ public class AutoCrystalModule extends ToggleModule
                                 packet.getZ()) < packet.getRadius() * packet.getRadius())
                         {
                             // only set dead our crystals
-                            if (attacks.remove(e.getId())) 
+                            Long breakTime = attacks.remove(e.getId());
+                            if (breakTime != null)
                             {
                                 e.kill();
+                                breakTimes.push(System.currentTimeMillis() - breakTime);
                             }
                         }
                     }
@@ -633,6 +714,15 @@ public class AutoCrystalModule extends ToggleModule
             {
                 if (packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE)
                 {
+                    if (sequentialConfig.getValue() == Sequential.STRICT
+                            && preSequence != null)
+                    {
+                        if (preSequence.squaredDistanceTo(packet.getX(),
+                                packet.getY(), packet.getZ()) < 144.0)
+                        {
+                            sequence = null;
+                        }
+                    }
                     for (Entity e : mc.world.getEntities())
                     {
                         if (e != null && e.isAlive() && e instanceof EndCrystalEntity)
@@ -640,9 +730,11 @@ public class AutoCrystalModule extends ToggleModule
                             if (e.squaredDistanceTo(packet.getX(),
                                     packet.getY(), packet.getZ()) < 144.0)
                             {
-                                if (attacks.remove(e.getId()))
+                                Long breakTime = attacks.remove(e.getId());
+                                if (breakTime != null)
                                 {
                                     e.kill();
+                                    breakTimes.push(System.currentTimeMillis() - breakTime);
                                 }
                             }
                         }
@@ -695,19 +787,28 @@ public class AutoCrystalModule extends ToggleModule
                 if (slot != -1)
                 {
                     int prev = mc.player.getInventory().selectedSlot;
-                    swap(slot);
+                    if (swapConfig.getValue() == Swap.SILENT_ALT)
+                    {
+                        swapAlt(slot + 36);
+                    }
+                    else
+                    {
+                        swap(slot);
+                    }
                     attackDirect(e);
-                    if (swapConfig.getValue() == Swap.SILENT)
+                    if (antiWeaknessConfig.getValue() == Swap.SILENT)
                     {
                         swap(prev);
                     }
+                    else if (antiWeaknessConfig.getValue() == Swap.SILENT_ALT)
+                    {
+                        swapAlt(prev + 36);
+                    }
                 }
+                return false;
             }
-            else
-            {
-                attackDirect(e);
-            }
-            attacks.add(e);
+            attackDirect(e);
+            attacks.put(e, System.currentTimeMillis());
             return true;
         }
         return false;
@@ -739,11 +840,20 @@ public class AutoCrystalModule extends ToggleModule
     {
         if (inhibitConfig.getValue())
         {
-            return !attacks.contains(e);
+            Long time = attacks.get(e);
+            if (time != null)
+            {
+                return System.currentTimeMillis() - time > Math.max(getCrystalLatency() + 150, 250);
+            }
         }
-        if (multitaskConfig.getValue())
+        if (!multitaskConfig.getValue())
         {
             return !mc.player.isUsingItem() || getCrystalHand() == Hand.OFF_HAND;
+        }
+        if (!whileMiningConfig.getValue())
+        {
+            return !mc.interactionManager.isBreakingBlock()
+                    || getCrystalHand() == Hand.OFF_HAND;
         }
         long swapDelay = (long) (swapDelayConfig.getValue() * 25);
         if (lastSwap.passed(swapDelay))
@@ -813,6 +923,9 @@ public class AutoCrystalModule extends ToggleModule
             if (hand != null)
             {
                 placeDirect(p, hand, result);
+                preSequence = null;
+                sequence = p;
+                startSequence.reset();
             }
             else
             {
@@ -832,6 +945,9 @@ public class AutoCrystalModule extends ToggleModule
                         }
                     }
                     placeDirect(p, Hand.MAIN_HAND, result);
+                    preSequence = null;
+                    sequence = p;
+                    startSequence.reset();
                     if (swapConfig.getValue() == Swap.SILENT)
                     {
                         swap(prev);
@@ -869,7 +985,16 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean prePlaceCheck()
     {
-        // TODO: CHECKS
+        if (sequentialConfig.getValue() != Sequential.NONE)
+        {
+            float timeout = Math.max(getCrystalLatency() + 150.0f, 250.0f);
+            if (startSequence.passed(timeout))
+            {
+                Caspian.error("Latest sequence timed out!");
+                return true;
+            }
+            return sequence == null;
+        }
         return true;
     }
 
@@ -1212,7 +1337,7 @@ public class AutoCrystalModule extends ToggleModule
             }
             int dir = diff > 0.0f ? 1 : -1;
             // partition yaw
-            int tick = Math.max(yawStepTicksConfig.getValue(), 1);
+            int tick = yawStepTicksConfig.getValue();
             float yaw = Math.abs(diff) / tick;
             if (yaw > yawStepThresholdConfig.getValue())
             {

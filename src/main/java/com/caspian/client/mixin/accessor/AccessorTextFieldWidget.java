@@ -1,4 +1,4 @@
-package com.caspian.client.asm.accessor;
+package com.caspian.client.mixin.accessor;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.spongepowered.asm.mixin.Mixin;

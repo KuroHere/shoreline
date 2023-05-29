@@ -1,4 +1,4 @@
-package com.caspian.client.asm.gui.hud;
+package com.caspian.client.mixin.gui.hud;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.render.RenderOverlayEvent;

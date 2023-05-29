@@ -1,6 +1,6 @@
 package com.caspian.client.api.manager;
 
-import com.caspian.client.asm.accessor.AccessorClientWorld;
+import com.caspian.client.mixin.accessor.AccessorClientWorld;
 import com.caspian.client.util.Globals;
 import net.minecraft.client.network.PendingUpdateManager;
 import net.minecraft.client.network.SequencedPacketCreator;

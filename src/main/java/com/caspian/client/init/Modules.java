@@ -70,13 +70,11 @@ public class Modules
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
                     "autocrystal_module");
             SPRINT = (SprintModule) getRegisteredModule("sprint_module");
-
             // reflect configuration properties for each cached module
             for (Module cachedModule : CACHE)
             {
-                cachedModule.reflectConfigurations();
+                cachedModule.reflectConfigs();
             }
-
             CACHE.clear();
         }
 

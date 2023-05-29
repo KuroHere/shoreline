@@ -41,19 +41,16 @@ public class ClickGuiModule extends ToggleModule
     @Override
     public void onEnable()
     {
-        // if the player is null or we're not in a world, turn off module and return
         if (mc.player == null || mc.world == null)
         {
             toggle();
             return;
         }
-
         // initialize the null gui screen instance
         if (CLICK_GUI_SCREEN == null)
         {
             CLICK_GUI_SCREEN = new ClickGuiScreen();
         }
-
         mc.setScreen(CLICK_GUI_SCREEN);
     }
 
