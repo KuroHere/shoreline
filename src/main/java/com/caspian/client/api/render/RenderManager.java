@@ -14,8 +14,8 @@ import net.minecraft.util.math.Box;
 public class RenderManager implements Globals
 {
     //
-    private static final Tessellator TESSELLATOR = Tessellator.getInstance();
-    private static final BufferBuilder BUFFER = TESSELLATOR.getBuffer();
+    public static final Tessellator TESSELLATOR = Tessellator.getInstance();
+    public static final BufferBuilder BUFFER = TESSELLATOR.getBuffer();
 
     /**
      *

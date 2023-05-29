@@ -16,6 +16,7 @@ import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import com.caspian.client.util.ncp.DirectionChecks;
 import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.time.Timer;
 import com.caspian.client.util.world.EntityUtil;
@@ -54,12 +55,21 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- *
+ * Threaded AutoCrystal implementation.
+ * <p>
+ * TODO:
+ * <li> Manual crystals
+ * <li> Timing
+ * <li> Sequential expectation system
+ * <li> StrictDirection
+ * </p>
  *
  * @author linus
  * @since 1.0
  *
- *
+ * @see TickCalculation
+ * @see PoolCalcProcessor
+ * @see DamageData
  */
 public class AutoCrystalModule extends ToggleModule
 {
@@ -105,6 +115,9 @@ public class AutoCrystalModule extends ToggleModule
             "Minimum ticks alive to consider crystals for attack", 0, 0, 10);
     Config<Float> breakRangeConfig = new NumberConfig<>("BreakRange",
             "Range to break crystals", 0.1f, 4.0f, 5.0f);
+    Config<Float> strictBreakRangeConfig = new NumberConfig<>(
+            "StrictBreakRange", "NCP range to break crystals", 0.1f, 4.0f,
+            5.0f);
     Config<Float> breakWallRangeConfig = new NumberConfig<>(
             "BreakWallRange", "Range to break crystals through walls", 0.1f,
             4.0f, 5.0f);
@@ -136,6 +149,9 @@ public class AutoCrystalModule extends ToggleModule
             "Speed to place crystals", 0.1f, 20.0f, 20.0f);
     Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange",
             "Range to place crystals", 0.1f, 4.0f, 5.0f);
+    Config<Float> strictPlaceRangeConfig = new NumberConfig<>(
+            "StrictPlaceRange", "NCP range to place crystals", 0.1f, 4.0f,
+            5.0f);
     Config<Float> placeWallRangeConfig = new NumberConfig<>(
             "PlaceWallRange", "Range to place crystals through walls", 0.1f,
             4.0f, 5.0f);
@@ -160,7 +176,8 @@ public class AutoCrystalModule extends ToggleModule
     Config<Float> armorScaleConfig = new NumberConfig<>("ArmorScale",
             "", 0.0f, 5.0f, 20.0f, NumberDisplay.PERCENT);
     Config<Float> lethalMultiplier = new NumberConfig<>(
-            "LethalMultiplier", "", 0.0f, 0.5f, 4.0f);
+            "LethalMultiplier", "If we can kill an enemy with this many " +
+            "crystals, disregard damage values", 0.0f, 1.5f, 4.0f);
     Config<Boolean> safetyConfig = new BooleanConfig("Safety",  "",
             true);
     Config<Float> safetyBalanceConfig = new NumberConfig<>(
@@ -183,8 +200,9 @@ public class AutoCrystalModule extends ToggleModule
     // Calculated placements and attacks will be added to their respective
     // stacks. When the main loop requires a placement/attack, simply pop the
     // last calculated from the stack.
-    private final CalcFactory factory = new CalcFactory();
+    private final PoolCalcProcessor processor = new PoolCalcProcessor();
     private TickCalculation calc;
+    private boolean pauseCalcAttack, pauseCalcPlace;
     // Set of attempted placements and attacks
     private final Set<BlockPos> placements =
             Collections.synchronizedSet(new ConcurrentSet<>());
@@ -202,14 +220,15 @@ public class AutoCrystalModule extends ToggleModule
     private final Timer lastPlace = new Timer();
     private final Timer lastBreak = new Timer();
     private final Timer lastSwap = new Timer();
+    private final Timer lastAutoSwap = new Timer();
     // private final Timer lastClean = new Timer();
     // ROTATIONS
     //
     private Vec3d dest;
     private int rotating;
-    private boolean semi;
     //
     private float[] yaws;
+    private boolean semi;
     private float pitch;
 
     /**
@@ -230,6 +249,8 @@ public class AutoCrystalModule extends ToggleModule
         attack = null;
         place = null;
         dest = null;
+        pauseCalcAttack = false;
+        pauseCalcPlace = false;
         attacking = false;
         placing = false;
         semi = false;
@@ -243,12 +264,12 @@ public class AutoCrystalModule extends ToggleModule
         placements.clear();
         // run calc
         Iterable<EndCrystalEntity> crystalSrc = getCrystalSphere(
-                Managers.POSITION.getEyePos(),
+                Managers.POSITION.getCameraPosVec(1.0f),
                 breakRangeConfig.getValue() + 0.5);
         Iterable<BlockPos> placeSrc = getSphere(placeRangeEyeConfig.getValue() ?
                         Managers.POSITION.getEyePos() : Managers.POSITION.getPos(),
                 placeRangeConfig.getValue() + 0.5);
-        calc = factory.runCalc(crystalSrc, placeSrc);
+        calc = processor.runCalc(crystalSrc, placeSrc);
     }
 
     /**
@@ -258,7 +279,7 @@ public class AutoCrystalModule extends ToggleModule
     public void onDisable()
     {
         calc = null;
-        factory.shutdownNow();
+        processor.shutdownNow();
     }
 
     /*
@@ -300,8 +321,7 @@ public class AutoCrystalModule extends ToggleModule
                 }
                 catch (InterruptedException | ExecutionException e)
                 {
-                    Caspian.error("Failed calculation %x!", calc.getId()
-                            .getMostSignificantBits());
+                    Caspian.error("Failed calculation %s!", calc.getId());
                     e.printStackTrace();
                 }
                 if (calc.isDone())
@@ -309,26 +329,20 @@ public class AutoCrystalModule extends ToggleModule
                     Caspian.info("Calc done in %dms!", calc.getCalcTime());
                     DamageData<EndCrystalEntity> attackData =
                             calc.getCalcAttack();
-                    attacking = attackData != null && evaluate(attackData);
+                    attacking = attackData != null && evaluate(attackData)
+                            && !(pauseCalcAttack && attack != null);
                     if (attacking)
                     {
                         attack = attackData;
                     }
                     DamageData<BlockPos> placeData =
                             calc.getCalcPlace();
-                    placing = placeData != null && evaluate(placeData);
+                    placing = placeData != null && evaluate(placeData)
+                            && !(pauseCalcPlace && place != null);
                     if (placing)
                     {
                         place = placeData;
                     }
-                    // run calc
-                    Iterable<EndCrystalEntity> crystalSrc = getCrystalSphere(
-                            Managers.POSITION.getEyePos(),
-                            breakRangeConfig.getValue() + 0.5);
-                    Iterable<BlockPos> placeSrc = getSphere(placeRangeEyeConfig.getValue() ?
-                                    Managers.POSITION.getEyePos() : Managers.POSITION.getPos(),
-                            placeRangeConfig.getValue() + 0.5);
-                    calc = factory.runCalc(crystalSrc, placeSrc);
                     // found new data, stop rotation
                     if (rotating > 0)
                     {
@@ -347,6 +361,14 @@ public class AutoCrystalModule extends ToggleModule
                             rotating = 0;
                         }
                     }
+                    // run calc
+                    Iterable<EndCrystalEntity> crystalSrc = getCrystalSphere(
+                            Managers.POSITION.getCameraPosVec(1.0f),
+                            breakRangeConfig.getValue() + 0.5);
+                    Iterable<BlockPos> placeSrc = getSphere(placeRangeEyeConfig.getValue() ?
+                                    Managers.POSITION.getEyePos() : Managers.POSITION.getPos(),
+                            placeRangeConfig.getValue() + 0.5);
+                    calc = processor.runCalc(crystalSrc, placeSrc);
                 }
                 if (rotating > 0)
                 {
@@ -360,7 +382,7 @@ public class AutoCrystalModule extends ToggleModule
                 if (attack != null)
                 {
                     dest = attack.src().getPos();
-                    if (rotateConfig.getValue() && !isFacing(dest))
+                    if (rotateConfig.getValue() && checkFacing(dest, 0.5f))
                     {
                         semi = true;
                         rotating = setRotation(dest,
@@ -381,16 +403,17 @@ public class AutoCrystalModule extends ToggleModule
                         {
                             lastBreak.reset();
                             randomTime.reset();
-                            attack = null;
                             currRandom = -1;
                             ++attackFreq;
                         }
+                        attack = null;
+                        pauseCalcAttack = false;
                     }
                 }
                 if (place != null)
                 {
                     dest = place.src().toCenterPos();
-                    if (rotateConfig.getValue() && !isFacing(dest))
+                    if (rotateConfig.getValue() && checkFacing(dest, 0.5f))
                     {
                         semi = false;
                         rotating = setRotation(dest,
@@ -404,8 +427,9 @@ public class AutoCrystalModule extends ToggleModule
                         if (place(place.src()))
                         {
                             lastPlace.reset();
-                            place = null;
                         }
+                        place = null;
+                        pauseCalcPlace = false;
                     }
                 }
             }
@@ -469,12 +493,14 @@ public class AutoCrystalModule extends ToggleModule
 
     private void setAttackHard(DamageData<EndCrystalEntity> attack)
     {
-
+        pauseCalcAttack = true;
+        this.attack = attack;
     }
 
     private void setPlaceHard(DamageData<BlockPos> place)
     {
-
+        pauseCalcPlace = true;
+        this.place = place;
     }
     
     /**
@@ -534,6 +560,7 @@ public class AutoCrystalModule extends ToggleModule
             else if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket)
             {
                 lastSwap.reset();
+                lastAutoSwap.reset();
             }
         }
     }
@@ -559,10 +586,26 @@ public class AutoCrystalModule extends ToggleModule
                     {
                         if (placements.remove(base))
                         {
+                            dest = new Vec3d(packet.getX(), packet.getY(),
+                                    packet.getZ());
+                            if (rotateConfig.getValue() && checkFacing(dest,
+                                    0.5f))
+                            {
+                                semi = true;
+                                rotating = setRotation(dest,
+                                        yawStepConfig.getValue() != YawStep.OFF);
+                                if (yawStepConfig.getValue() != YawStep.OFF
+                                        || !ignoreExpectedTickConfig.getValue())
+                                {
+                                    setAttackHard(DamageData.fromPacket(packet.getId(),
+                                            dest));
+                                    return;
+                                }
+                            }
                             if (attack(packet.getId()))
                             {
                                 lastBreak.reset();
-                                attackFreq++;
+                                ++attackFreq;
                             }
                         }
                     }
@@ -721,14 +764,31 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean place(BlockPos p)
     {
-        if (canUseOnBlock(p))
+        if (mc.options.useKey.isPressed() || mc.options.attackKey.isPressed())
+        {
+            lastAutoSwap.reset();
+        }
+        if (prePlaceCheck())
         {
             Direction dir = Direction.UP;
             if (strictDirectionConfig.getValue())
             {
-                if (p.getY() > mc.player.getY() + mc.player.getStandingEyeHeight())
+                BlockPos blockPos = Managers.POSITION.getBlockPos();
+                int x = blockPos.getX();
+                int y = (int) Math.floor(Managers.POSITION.getY()
+                        + Managers.POSITION.getActiveEyeHeight());
+                int z = blockPos.getZ();
+                int dx = p.getX();
+                int dy = p.getY();
+                int dz = p.getZ();
+                if (x != dx && y != dy && z != dz)
                 {
-
+                    List<Direction> dirs = DirectionChecks.getInteractableDirections(
+                            x - dx, y - dy, z - dz);
+                    if (!dirs.isEmpty())
+                    {
+                        dir = dirs.get(0);
+                    }
                 }
             }
             else
@@ -756,15 +816,30 @@ public class AutoCrystalModule extends ToggleModule
             }
             else
             {
+                int slot = getCrystalSlot();
                 int prev = mc.player.getInventory().selectedSlot;
-                if (swapConfig.getValue() != Swap.OFF)
+                if (slot != -1)
                 {
-                    swap(EndCrystalItem.class);
-                }
-                placeDirect(p, Hand.MAIN_HAND, result);
-                if (swapConfig.getValue() == Swap.SILENT)
-                {
-                    swap(prev);
+                    if (swapConfig.getValue() != Swap.OFF && preSwapCheck())
+                    {
+                        if (swapConfig.getValue() == Swap.SILENT_ALT)
+                        {
+                            swapAlt(slot + 36);
+                        }
+                        else
+                        {
+                            swap(slot);
+                        }
+                    }
+                    placeDirect(p, Hand.MAIN_HAND, result);
+                    if (swapConfig.getValue() == Swap.SILENT)
+                    {
+                        swap(prev);
+                    }
+                    else if (swapConfig.getValue() == Swap.SILENT_ALT)
+                    {
+                        swapAlt(prev + 36);
+                    }
                 }
             }
             return true; // success
@@ -785,6 +860,31 @@ public class AutoCrystalModule extends ToggleModule
                 new PlayerInteractBlockC2SPacket(hand, result, id));
         Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
         placements.add(p);
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public boolean prePlaceCheck()
+    {
+        // TODO: CHECKS
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public boolean preSwapCheck()
+    {
+        if (swapConfig.getValue() == Swap.NORMAL)
+        {
+            return lastAutoSwap.passed(500);
+        }
+        return true;
     }
 
     /**
@@ -854,20 +954,21 @@ public class AutoCrystalModule extends ToggleModule
             }
             else if (e instanceof EndCrystalEntity)
             {
-                double dist = mc.player.distanceTo(e);
-                if (dist > breakRangeConfig.getValue())
+                double dist = Managers.POSITION.squaredDistanceTo(e);
+                if (dist > breakRangeConfig.getValue() * breakRangeConfig.getValue())
                 {
                     continue;
                 }
                 BlockHitResult result = mc.world.raycast(new RaycastContext(
-                        mc.player.getEyePos(), e.getPos(),
+                        Managers.POSITION.getCameraPosVec(1.0f), e.getPos(),
                         RaycastContext.ShapeType.COLLIDER,
                         RaycastContext.FluidHandling.NONE, mc.player));
                 if (result != null && dist > breakWallRangeConfig.getValue())
                 {
                     continue;
                 }
-                if (e.age < ticksExistedConfig.getValue() && !inhibitConfig.getValue())
+                if (e.age < ticksExistedConfig.getValue()
+                        && !inhibitConfig.getValue())
                 {
                     continue;
                 }
@@ -919,26 +1020,20 @@ public class AutoCrystalModule extends ToggleModule
     /**
      *
      *
-     * @param clazz
      */
-    public int swap(Class<? extends Item> clazz)
+    private int getCrystalSlot()
     {
         int slot = -1;
         for (int i = 0; i < 9; ++i)
         {
             ItemStack stack = mc.player.getInventory().getStack(i);
-            if (!stack.isEmpty() && clazz.isInstance(stack.getItem()))
+            if (!stack.isEmpty() && stack.getItem() instanceof EndCrystalItem)
             {
                 slot = i;
                 break;
             }
         }
-        if (slot != -1)
-        {
-            swap(slot);
-            return slot;
-        }
-        return -1;
+        return slot;
     }
 
     /**
@@ -1086,15 +1181,17 @@ public class AutoCrystalModule extends ToggleModule
      *
      *
      * @param dest
+     * @param allowed
      * @return
      */
-    private boolean isFacing(Vec3d dest)
+    private boolean checkFacing(Vec3d dest, float allowed)
     {
         float[] rots = RotationUtil.getRotationsTo(Managers.POSITION.getEyePos(),
                 dest);
         float yaw = Managers.ROTATION.getYaw();
         float pitch = Managers.ROTATION.getPitch();
-        return Math.abs(yaw - rots[0]) < 0.5f && Math.abs(pitch - rots[1]) < 0.5f;
+        return !(Math.abs(yaw - rots[0]) <= allowed)
+                || !(Math.abs(pitch - rots[1]) <= allowed);
     }
 
     /**
@@ -1201,8 +1298,10 @@ public class AutoCrystalModule extends ToggleModule
     /**
      *
      */
-    private class CalcFactory
+    private class PoolCalcProcessor
     {
+        // Current calculation.
+        private TickCalculation calc;
         //
         private final ThreadPoolExecutor pool = (ThreadPoolExecutor)
                 Executors.newCachedThreadPool();
@@ -1210,7 +1309,7 @@ public class AutoCrystalModule extends ToggleModule
         /**
          *
          */
-        public CalcFactory()
+        public PoolCalcProcessor()
         {
             pool.setCorePoolSize(Runtime.getRuntime().availableProcessors() / 2);
         }
@@ -1225,9 +1324,8 @@ public class AutoCrystalModule extends ToggleModule
         public TickCalculation runCalc(Iterable<EndCrystalEntity> crystalSrc,
                                      Iterable<BlockPos> placeSrc)
         {
-            TickCalculation calc = new TickCalculation(crystalSrc, placeSrc,
-                    pool);
-            calc.submit();
+            calc = new TickCalculation(crystalSrc, placeSrc, pool);
+            calc.startCalc();
             return calc;
         }
 
@@ -1304,20 +1402,11 @@ public class AutoCrystalModule extends ToggleModule
          * @see #getCrystal(Iterable)
          * @see #getPlace(Iterable)
          */
-        public void submit()
+        public void startCalc()
         {
-            service.submit(() -> toCalcPair());
+            service.submit(() -> new CalcPair(getCrystal(crystalSrc),
+                    placeConfig.getValue() ? getPlace(placeSrc) : null));
             start = System.currentTimeMillis();
-        }
-
-        /**
-         *
-         *
-         * @return
-         */
-        private CalcPair toCalcPair()
-        {
-            return new CalcPair(getCrystal(crystalSrc), getPlace(placeSrc));
         }
 
         /**
@@ -1338,11 +1427,14 @@ public class AutoCrystalModule extends ToggleModule
                 if (result != null)
                 {
                     CalcPair data = result.get();
-                    if (data != null)
+                    if (data == null)
                     {
-                        placeCalc = data.place();
-                        attackCalc = data.attack();
+                        Caspian.error("Failed to get data for calc %s!",
+                                getId());
+                        return;
                     }
+                    placeCalc = data.place();
+                    attackCalc = data.attack();
                     done = System.currentTimeMillis();
                 }
             }
@@ -1414,20 +1506,27 @@ public class AutoCrystalModule extends ToggleModule
                 TreeMap<Double, DamageData<EndCrystalEntity>> min = new TreeMap<>();
                 for (EndCrystalEntity c : src)
                 {
-                    double dist = mc.player.distanceTo(c);
-                    if (dist > breakRangeConfig.getValue())
+                    double dist = Managers.POSITION.squaredReachDistanceTo(c);
+                    Vec3d motion = mc.player.getVelocity();
+                    double x = Managers.POSITION.getX() + motion.getX();
+                    double y = Managers.POSITION.getY() + motion.getY();
+                    double z = Managers.POSITION.getZ() + motion.getZ();
+                    if (dist > breakRangeConfig.getValue() * breakRangeConfig.getValue()
+                            || !isWithinStrictRange(new Vec3d(x, y, z), c.getPos(),
+                        strictBreakRangeConfig.getValue()))
                     {
                         continue;
                     }
                     BlockHitResult result = mc.world.raycast(new RaycastContext(
-                            mc.player.getEyePos(), c.getPos(),
-                            RaycastContext.ShapeType.COLLIDER,
+                            Managers.POSITION.getCameraPosVec(1.0f),
+                            c.getPos(), RaycastContext.ShapeType.COLLIDER,
                             RaycastContext.FluidHandling.NONE, mc.player));
                     if (result != null && dist > breakWallRangeConfig.getValue())
                     {
                         continue;
                     }
-                    if (c.age < ticksExistedConfig.getValue() && !inhibitConfig.getValue())
+                    if (c.age < ticksExistedConfig.getValue()
+                            && !inhibitConfig.getValue())
                     {
                         continue;
                     }
@@ -1456,8 +1555,8 @@ public class AutoCrystalModule extends ToggleModule
                             }
                             if (isEnemy(e))
                             {
-                                double pdist = mc.player.distanceTo(e);
-                                if (pdist > targetRangeConfig.getValue())
+                                double pdist = Managers.POSITION.squaredDistanceTo(e);
+                                if (pdist > targetRangeConfig.getValue() * targetRangeConfig.getValue())
                                 {
                                     continue;
                                 }
@@ -1508,84 +1607,95 @@ public class AutoCrystalModule extends ToggleModule
                 // placement processing
                 for (BlockPos p : src)
                 {
-                    Vec3d pos = placeRangeEyeConfig.getValue() ?
-                            Managers.POSITION.getEyePos() : Managers.POSITION.getPos();
-                    double dist = placeRangeCenterConfig.getValue() ?
-                            p.getSquaredDistanceFromCenter(pos.getX(), pos.getY(),
-                                    pos.getZ()) : p.getSquaredDistance(pos);
-                    if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue())
+                    if (canUseOnBlock(p))
                     {
-                        continue;
-                    }
-                    Vec3d expected = new Vec3d(p.getX() + 0.5,
-                            p.getY() + 2.70000004768372, p.getZ() + 0.5);
-                    BlockHitResult result = mc.world.raycast(new RaycastContext(
-                            mc.player.getEyePos(), expected,
-                            RaycastContext.ShapeType.COLLIDER,
-                            RaycastContext.FluidHandling.NONE, mc.player));
-                    float maxDist = 36.0f;
-                    if (result != null && result.getType() == HitResult.Type.BLOCK
-                            && result.getBlockPos() != p)
-                    {
-                        maxDist = 9.0f;
-                        if (dist > placeWallRangeConfig.getValue() * placeWallRangeConfig.getValue())
+                        Vec3d pos = placeRangeEyeConfig.getValue() ?
+                                Managers.POSITION.getEyePos() : Managers.POSITION.getPos();
+                        double dist = placeRangeCenterConfig.getValue() ?
+                                p.getSquaredDistanceFromCenter(pos.getX(), pos.getY(),
+                                        pos.getZ()) : p.getSquaredDistance(pos);
+                        Vec3d motion = mc.player.getVelocity();
+                        double x = Managers.POSITION.getX() + motion.getX();
+                        double y = Managers.POSITION.getY() + motion.getY();
+                        double z = Managers.POSITION.getZ() + motion.getZ();
+                        if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue()
+                                || !isWithinStrictRange(new Vec3d(x, y, z),
+                                toSource(p),
+                                strictPlaceRangeConfig.getValue()))
                         {
                             continue;
                         }
-                    }
-                    if (breakValidateConfig.getValue() && dist > maxDist)
-                    {
-                        continue;
-                    }
-                    double local = getDamage(mc.player, toSource(p));
-                    // player safety
-                    if (safetyConfig.getValue() && !mc.player.isCreative())
-                    {
-                        float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
-                        if (local + 0.5 > health)
+                        Vec3d expected = new Vec3d(p.getX() + 0.5,
+                                p.getY() + 2.70000004768372, p.getZ() + 0.5);
+                        BlockHitResult result = mc.world.raycast(new RaycastContext(
+                                Managers.POSITION.getCameraPosVec(1.0f),
+                                expected, RaycastContext.ShapeType.COLLIDER,
+                                RaycastContext.FluidHandling.NONE, mc.player));
+                        float maxDist = 36.0f;
+                        if (result != null && result.getType() == HitResult.Type.BLOCK
+                                && result.getBlockPos() != p)
                         {
-                            continue;
-                        }
-                        if (local > maxLocalDamageConfig.getValue())
-                        {
-                            continue;
-                        }
-                    }
-                    for (Entity e : mc.world.getEntities())
-                    {
-                        if (e != null && e != mc.player && e.isAlive()
-                                && !Managers.SOCIAL.isFriend(e.getUuid()))
-                        {
-                            if (e instanceof EndCrystalEntity)
+                            maxDist = 9.0f;
+                            if (dist > placeWallRangeConfig.getValue() * placeWallRangeConfig.getValue())
                             {
                                 continue;
                             }
-                            if (p.getSquaredDistance(e.getPos()) > 144.0f)
+                        }
+                        if (breakValidateConfig.getValue() && dist > maxDist)
+                        {
+                            continue;
+                        }
+                        double local = getDamage(mc.player, toSource(p));
+                        // player safety
+                        if (safetyConfig.getValue() && !mc.player.isCreative())
+                        {
+                            float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+                            if (local + 0.5 > health)
                             {
                                 continue;
                             }
-                            if (isEnemy(e))
+                            if (local > maxLocalDamageConfig.getValue())
                             {
-                                double pdist = mc.player.distanceTo(e);
-                                // double edist = e.squaredDistanceTo(p.toCenterPos());
-                                if (pdist > targetRangeConfig.getValue())
+                                continue;
+                            }
+                        }
+                        for (Entity e : mc.world.getEntities())
+                        {
+                            if (e != null && e != mc.player && e.isAlive()
+                                    && !Managers.SOCIAL.isFriend(e.getUuid()))
+                            {
+                                if (e instanceof EndCrystalEntity)
                                 {
                                     continue;
                                 }
-                                double dmg = getDamage(e, toSource(p));
-                                if (checkLethal(e, dmg))
+                                if (p.getSquaredDistance(e.getPos()) > 144.0f)
                                 {
-                                    // BIG UGLY HACK
-                                    float ehealth = 0.0f;
-                                    if (e instanceof LivingEntity)
-                                    {
-                                        ehealth = ((LivingEntity) e).getHealth()
-                                                + ((LivingEntity) e).getAbsorptionAmount();
-                                    }
-                                    dmg += 999.0 + Managers.TOTEM.getTotems(e)
-                                            - ehealth;
+                                    continue;
                                 }
-                                min.put(dmg, new DamageData<>(dmg, local, e, p));
+                                if (isEnemy(e))
+                                {
+                                    double pdist = Managers.POSITION.squaredDistanceTo(e);
+                                    // double edist = e.squaredDistanceTo(p.toCenterPos());
+                                    if (pdist > targetRangeConfig.getValue()
+                                            * targetRangeConfig.getValue())
+                                    {
+                                        continue;
+                                    }
+                                    double dmg = getDamage(e, toSource(p));
+                                    if (checkLethal(e, dmg))
+                                    {
+                                        // BIG UGLY HACK
+                                        float ehealth = 0.0f;
+                                        if (e instanceof LivingEntity)
+                                        {
+                                            ehealth = ((LivingEntity) e).getHealth()
+                                                    + ((LivingEntity) e).getAbsorptionAmount();
+                                        }
+                                        dmg += 999.0 + Managers.TOTEM.getTotems(e)
+                                                - ehealth;
+                                    }
+                                    min.put(dmg, new DamageData<>(dmg, local, e, p));
+                                }
                             }
                         }
                     }
@@ -1609,7 +1719,7 @@ public class AutoCrystalModule extends ToggleModule
          * @param damage
          * @return
          */
-        public boolean checkLethal(Entity e, double damage)
+        private boolean checkLethal(Entity e, double damage)
         {
             float ehealth = 144.0f;
             float earmor = 100.0f;
@@ -1630,6 +1740,30 @@ public class AutoCrystalModule extends ToggleModule
             double lethal = lethalMultiplier.getValue() * damage;
             return lethal + 0.5 > ehealth
                     || earmor < armorScaleConfig.getValue();
+        }
+
+        /**
+         *
+         * @return
+         */
+        private boolean isWithinStrictRange(Vec3d src, Vec3d dest, double range)
+        {
+            // directly from NCP src
+            double y1 = src.getY() + Managers.POSITION.getActiveEyeHeight();
+            double y2 = dest.getY();
+            if (y1 <= y2); // Keep the foot level y
+            else if (y1 >= y2 + 2.0)
+            {
+                y2 += 2.0;
+            }
+            else
+            {
+                y2 = y1;
+            }
+            double x = dest.getX() - src.getX();
+            double y = y2 - y1;
+            double z = dest.getZ() - src.getZ();
+            return MathHelper.squaredMagnitude(x, y, z) <= range * range;
         }
 
         /**
@@ -1674,6 +1808,21 @@ public class AutoCrystalModule extends ToggleModule
                 return ((BlockPos) src).toCenterPos();
             }
             return null;
+        }
+
+        /**
+         *
+         *
+         * @param id
+         * @return
+         */
+        public static DamageData<EndCrystalEntity> fromPacket(int id, Vec3d pos)
+        {
+            EndCrystalEntity copy = new EndCrystalEntity(mc.world, pos.getX(),
+                pos.getY(), pos.getZ());
+            copy.setId(id);
+            // -1 is special value, we will account for it when reading data
+            return new DamageData<>(-1.0f, id, null, copy);
         }
     }
 }

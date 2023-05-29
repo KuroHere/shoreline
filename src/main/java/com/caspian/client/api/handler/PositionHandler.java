@@ -5,6 +5,8 @@ import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.util.Globals;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 
 /**
  *
@@ -16,6 +18,7 @@ public class PositionHandler implements Globals
 {
     //
     private double x, y, z;
+    private BlockPos blockPos;
     //
     private boolean sneaking, sprinting;
     //
@@ -39,6 +42,10 @@ public class PositionHandler implements Globals
                     x = packet.getX(x);
                     y = packet.getY(y);
                     z = packet.getZ(z);
+                    int i = MathHelper.floor(x);
+                    int j = MathHelper.floor(y);
+                    int k = MathHelper.floor(z);
+                    blockPos = new BlockPos(i, j, k);
                 }
             }
             else if (event.getPacket() instanceof ClientCommandC2SPacket packet)
@@ -67,6 +74,16 @@ public class PositionHandler implements Globals
     public double getZ()
     {
         return z;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public BlockPos getBlockPos()
+    {
+        return blockPos;
     }
 
     /**

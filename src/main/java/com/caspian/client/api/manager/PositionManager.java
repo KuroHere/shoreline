@@ -4,8 +4,11 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.handler.PositionHandler;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 /**
@@ -73,11 +76,75 @@ public class PositionManager implements Globals
      *
      * @return
      */
+    public BlockPos getBlockPos()
+    {
+        return handler.getBlockPos();
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
     public Vec3d getEyePos()
     {
+        return getPos().add(0.0, getActiveEyeHeight(), 0.0);
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public float getActiveEyeHeight()
+    {
         EntityPose pose = mc.player.getPose();
-        return getPos().add(0.0, mc.player.getActiveEyeHeight(pose,
-                mc.player.getDimensions(pose)), 0.0);
+        return mc.player.getActiveEyeHeight(pose,
+                mc.player.getDimensions(pose));
+    }
+
+    /**
+     *
+     *
+     * @param tickDelta
+     * @return
+     */
+    public final Vec3d getCameraPosVec(float tickDelta)
+    {
+        double d = MathHelper.lerp(tickDelta, mc.player.prevX, getX());
+        double e = MathHelper.lerp(tickDelta, mc.player.prevY, getY())
+                + (double) mc.player.getStandingEyeHeight();
+        double f = MathHelper.lerp(tickDelta, mc.player.prevZ, getZ());
+        return new Vec3d(d, e, f);
+    }
+
+    /**
+     *
+     *
+     * @param entity
+     * @return
+     */
+    public double squaredDistanceTo(Entity entity)
+    {
+        float f = (float) (getX() - entity.getX());
+        float g = (float) (getY() - entity.getY());
+        float h = (float) (getZ() - entity.getZ());
+        return MathHelper.squaredMagnitude(f, g, h);
+    }
+
+    /**
+     *
+     *
+     * @param e
+     * @return
+     */
+    public double squaredReachDistanceTo(Entity entity)
+    {
+        Vec3d cam = getCameraPosVec(1.0f);
+        float f = (float) (cam.getX() - entity.getX());
+        float g = (float) (cam.getY() - entity.getY());
+        float h = (float) (cam.getZ() - entity.getZ());
+        return MathHelper.squaredMagnitude(f, g, h);
     }
 
     public double getX()
