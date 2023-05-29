@@ -19,7 +19,8 @@ import org.lwjgl.glfw.GLFW;
 public class ClickGuiModule extends ToggleModule
 {
     //
-    private static final ClickGuiScreen CLICK_GUI_SCREEN = new ClickGuiScreen();
+    private static ClickGuiScreen CLICK_GUI_SCREEN;
+
     //
     Config<Float> scaleConfig = new NumberConfig<>("Scale", "ClickGui " +
             "component scaling factor.", 0.1f, 1.0f, 3.0f,
@@ -40,6 +41,19 @@ public class ClickGuiModule extends ToggleModule
     @Override
     public void onEnable()
     {
+        // if the player is null or we're not in a world, turn off module and return
+        if (mc.player == null || mc.world == null)
+        {
+            toggle();
+            return;
+        }
+
+        // initialize the null gui screen instance
+        if (CLICK_GUI_SCREEN == null)
+        {
+            CLICK_GUI_SCREEN = new ClickGuiScreen();
+        }
+
         mc.setScreen(CLICK_GUI_SCREEN);
     }
 

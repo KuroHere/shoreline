@@ -28,7 +28,7 @@ public class MixinBlock
     {
         Block block = (Block) (Object) this;
         BlockSlipperinessEvent blockSlipperinessEvent =
-                new BlockSlipperinessEvent(block, block.getSlipperiness());
+                new BlockSlipperinessEvent(block, cir.getReturnValueF());
         Caspian.EVENT_HANDLER.dispatch(blockSlipperinessEvent);
         if (blockSlipperinessEvent.isCanceled())
         {

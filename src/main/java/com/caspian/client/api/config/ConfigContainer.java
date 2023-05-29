@@ -42,18 +42,37 @@ public class ConfigContainer implements Configurable
      */
     public ConfigContainer(String name)
     {
+
+        // set name of this container early
+        // DO NOT MOVE THIS BACK TO THE BOTTOM - aesthetical
+        this.name = name;
+    }
+
+    /**
+     * Reflect configuration fields
+     */
+    public void reflectConfigurations() {
         // populate container using reflection
-        ConfigFactory factory = new ConfigFactory();
-        for (Field field : getClass().getDeclaringClass().getDeclaredFields())
+        ConfigFactory factory = new ConfigFactory(this);
+        for (Field field : getClass().getDeclaredFields())
         {
             if (Config.class.isAssignableFrom(field.getType()))
             {
                 Config<?> product = factory.build(field);
+
+                // null-check "product" to prevent accessing properties from a null object
+                if (product == null)
+                {
+
+                    // failsafe for debugging purposes
+                    Caspian.error("Value for field {} is null", field);
+                    continue;
+                }
+
                 product.setContainer(this);
                 configurations.put(product.getId(), product);
             }
         }
-        this.name = name;
     }
 
     /**

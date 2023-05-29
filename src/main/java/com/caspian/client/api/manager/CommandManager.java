@@ -27,7 +27,13 @@ public class CommandManager
      */
     public CommandManager()
     {
-        Caspian.EVENT_HANDLER.subscribe(CommandHandler.class);
+        Caspian.EVENT_HANDLER.subscribe(this);
+    }
+
+    /**
+     * Registers commands to the CommandManager
+     */
+    public void postInitialization() {
         register(
                 new HelpCommand()
         );

@@ -25,34 +25,24 @@ public class EventHandler
 {
     // Active subscriber cache. Used to check if a class is already
     // subscribed to this EventHandler.
-    private final Set<Class<?>> subscribers =
+    private final Set<Object> subscribers =
             Collections.synchronizedSet(new HashSet<>());
 
     // Map of events and their associated listeners. All listeners in a class
     // will be added when the class is subscribed to this EventHandler.
-    private final Map<Class<?>, Set<Listener>> listeners =
+    private final Map<Object, Set<Listener>> listeners =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
 
     /**
+     * Subscribes a {@link Object} to the EventHandler and adds all
+     * {@link EventListener} in the class to the active listener map.
      *
-     *
-     * @param obj
+     * @param obj The subscriber object
      */
     public void subscribe(Object obj)
     {
-        subscribe(obj.getClass());
-    }
-
-    /**
-     * Subscribes a {@link Class} to the EventHandler and adds all
-     * {@link EventListener} in the class to the active listener map.
-     *
-     * @param clazz The subscriber class
-     */
-    public void subscribe(Class<?> clazz)
-    {
-        subscribers.add(clazz);
-        for (Method method : clazz.getMethods())
+        subscribers.add(obj);
+        for (Method method : obj.getClass().getMethods())
         {
             method.trySetAccessible();
             if (method.isAnnotationPresent(EventListener.class))
@@ -64,7 +54,7 @@ public class EventHandler
                     {
                         Set<Listener> active = listeners.computeIfAbsent(params[0],
                                 v -> new HashSet<>());
-                        active.add(new Listener(method, clazz));
+                        active.add(new Listener(method, obj));
                     }
                 }
             }
@@ -102,11 +92,18 @@ public class EventHandler
      * the param {@link Event}
      *
      * @param event The event to dispatch listeners
-     * @return <tt>true</tt> if the {@link Event#isCanceled()}
+     * @return <tt>true</tt> if {@link Event#isCanceled()} is <tt>true</tt>
      */
     public boolean dispatch(Event event)
     {
         Set<Listener> active = listeners.get(event.getClass());
+
+        // if there are no items to dispatch to, just early return
+        if (active == null || active.isEmpty())
+        {
+            return false;
+        }
+
         for (Listener listener : active)
         {
             listener.invoke(event);

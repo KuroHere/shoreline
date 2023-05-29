@@ -14,6 +14,19 @@ import java.lang.reflect.Field;
  */
 public class ConfigFactory
 {
+
+    // The object to grab from
+    private final Object configObject;
+
+    /**
+     *
+     *
+     * @param configObject
+     */
+    public ConfigFactory(Object configObject) {
+        this.configObject = configObject;
+    }
+
     /**
      * Creates and returns a new {@link Config} instance from a {@link Field}
      * using Java reflection lib.
@@ -25,21 +38,20 @@ public class ConfigFactory
      */
     public Config<?> build(Field f)
     {
-        // attempt to extract object from field
-        if (f.trySetAccessible())
-        {
-            try
-            {
-                return (Config<?>) f.get(this);
-            }
+        f.setAccessible(true);
 
-            // field getter error
-            catch (IllegalArgumentException | IllegalAccessException e)
-            {
-                Caspian.error("Failed to build config from field %s",
-                        f.getName());
-                e.printStackTrace();
-            }
+        // attempt to extract object from field
+        try
+        {
+            return (Config<?>) f.get(configObject);
+        }
+
+        // field getter error
+        catch (IllegalArgumentException | IllegalAccessException e)
+        {
+            Caspian.error("Failed to build config from field %s",
+                    f.getName());
+            e.printStackTrace();
         }
 
         // failed config creation

@@ -6,7 +6,10 @@ import com.caspian.client.api.event.Event;
 import com.caspian.client.api.event.handler.EventHandler;
 
 import java.lang.invoke.*;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * {@link Event} Listener that creates an {@link Invoker} and runs {@link #invoke(Event)}
@@ -33,17 +36,22 @@ import java.lang.reflect.Method;
  */
 public class Listener
 {
+
+    // subscriber invoker cache for each listener method
+    private static final Map<Method, Invoker<Object>> invokableCache = new HashMap<>();
+
+    // the MethodHandler lookup
+    private static final Lookup LOOKUP = MethodHandles.lookup();
+
     // The EventListener method which contains the code to invoke when the
     // listener is invoked.
     private final Method method;
-    // Static instance of method "privateLookupIn"
-    private static Method privateLookup;
-    // The class that contains the EventListener. This class must be
+    // The object that contains the EventListener. This object must be
     // subscribed to the EventHandler in order for this Listener to be invoked.
-    private final Class<?> subscriber;
+    private final Object subscriber;
     // The Listener invoker created by the LambdaMetaFactory which invokes the
     // code from the Listener method.
-    private Invoker<Event> invoker;
+    private Invoker<Object> invoker;
 
     /**
      *
@@ -51,26 +59,32 @@ public class Listener
      * @param method
      * @param subscriber
      */
-    public Listener(Method method, Class<?> subscriber)
+    public Listener(Method method, Object subscriber)
     {
         this.method = method;
         this.subscriber = subscriber;
         // lambda at runtime to call the method
         try
         {
-            MethodHandles.Lookup lookup =
-                    (MethodHandles.Lookup) privateLookup.invoke(null,
-                    subscriber, MethodHandles.lookup());
-            MethodType type = MethodType.methodType(void.class,
-                    method.getParameters()[0].getType());
-            MethodHandle handle = lookup.findVirtual(subscriber,
-                    method.getName(), type);
-            MethodType invokeType = MethodType.methodType(Invoker.class,
-                    subscriber);
-            CallSite factory = LambdaMetafactory.metafactory(lookup,
-                    "accept", invokeType, MethodType.methodType(void.class,
-                            Object.class), handle, type);
-            invoker = (Invoker<Event>) factory.getTarget().invoke(subscriber);
+            if (!invokableCache.containsKey(method))
+            {
+                // i love bush bus
+                MethodType methodType = MethodType.methodType(Invoker.class);
+                CallSite callSite = LambdaMetafactory.metafactory(
+                        LOOKUP,
+                        "invoke",
+                        methodType.appendParameterTypes(subscriber.getClass()),
+                        MethodType.methodType(void.class, Object.class),
+                        LOOKUP.unreflect(method),
+                        MethodType.methodType(void.class, method.getParameterTypes()[0])
+                );
+                invoker = (Invoker<Object>) callSite.getTarget().invoke(subscriber);
+                invokableCache.put(method, invoker);
+            }
+            else
+            {
+                invoker = invokableCache.get(method);
+            }
         }
         catch (Throwable e)
         {
@@ -94,7 +108,7 @@ public class Listener
      *
      * @return
      */
-    public Class<?> getSubscriber()
+    public Object getSubscriber()
     {
         return subscriber;
     }
@@ -109,19 +123,5 @@ public class Listener
     public void invoke(Event event)
     {
         invoker.invoke(event);
-    }
-
-    static
-    {
-        try
-        {
-            privateLookup = MethodHandles.class.getDeclaredMethod(
-                    "privateLookupIn", Class.class, MethodHandles.Lookup.class);
-        }
-        catch (NoSuchMethodException e)
-        {
-            Caspian.error("Could not find method privateLookupIn!");
-            e.printStackTrace();
-        }
     }
 }

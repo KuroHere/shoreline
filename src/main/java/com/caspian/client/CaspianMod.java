@@ -1,5 +1,6 @@
 package com.caspian.client;
 
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 
 /**
@@ -8,7 +9,7 @@ import net.fabricmc.api.ModInitializer;
  * @author linus
  * @since 1.0
  */
-public class CaspianMod implements ModInitializer
+public class CaspianMod implements ClientModInitializer
 {
     // Mod identifier
     public static final String MOD_ID = "caspian";
@@ -26,10 +27,10 @@ public class CaspianMod implements ModInitializer
      * Proceed with mild caution.
      */
     @Override
-    public void onInitialize()
+    public void onInitializeClient()
     {
-        // Caspian.preInit();
-        // Caspian.init();
-        // Caspian.postInit();
+         Caspian.preInit();
+         Caspian.init();
+         Caspian.postInit();
     }
 }

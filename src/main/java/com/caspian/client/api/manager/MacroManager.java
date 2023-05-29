@@ -27,7 +27,7 @@ public class MacroManager
      */
     public MacroManager()
     {
-        Caspian.EVENT_HANDLER.subscribe(MacroHandler.class);
+        Caspian.EVENT_HANDLER.subscribe(this);
     }
 
     /**
