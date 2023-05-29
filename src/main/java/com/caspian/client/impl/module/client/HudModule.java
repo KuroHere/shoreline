@@ -106,9 +106,10 @@ public class HudModule extends ToggleModule
             }
             if (watermarkConfig.getValue())
             {
-                RenderManager.renderText(event.getMatrices(), String.format("%s %s",
+                RenderManager.renderText(event.getMatrices(), String.format("%s %s.%s",
                                 CaspianMod.MOD_NAME,
-                                Formatting.WHITE + CaspianMod.MOD_VER), 2.0f,
+                                Formatting.WHITE + CaspianMod.MOD_VER,
+                                CaspianMod.BUILD_NUMBER), 2.0f,
                         topLeft, Modules.COLORS.getRGB());
                 // topLeft += 10.0f;
             }
