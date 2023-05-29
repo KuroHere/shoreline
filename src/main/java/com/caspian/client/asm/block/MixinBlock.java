@@ -26,9 +26,8 @@ public class MixinBlock
             cancellable = true)
     private void hookGetSlipperiness(CallbackInfoReturnable<Float> cir)
     {
-        Block block = (Block) (Object) this;
         BlockSlipperinessEvent blockSlipperinessEvent =
-                new BlockSlipperinessEvent(block, cir.getReturnValueF());
+                new BlockSlipperinessEvent((Block) (Object) this, cir.getReturnValueF());
         Caspian.EVENT_HANDLER.dispatch(blockSlipperinessEvent);
         if (blockSlipperinessEvent.isCanceled())
         {
