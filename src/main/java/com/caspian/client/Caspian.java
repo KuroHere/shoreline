@@ -54,11 +54,9 @@ public class Caspian
     public static void postInit()
     {
         info("Starting postInit ...");
-
         Managers.postInit();
         SHUTDOWN = new ShutdownHook();
         Runtime.getRuntime().addShutdownHook(SHUTDOWN);
-
         // load configs AFTER everything has been initialized
         // this is to prevent configs loading before certain aspects of managers are available
         CONFIG = new ClientConfiguration();

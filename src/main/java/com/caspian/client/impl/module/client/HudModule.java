@@ -109,7 +109,7 @@ public class HudModule extends ToggleModule
                 RenderManager.renderText(event.getMatrices(), String.format("%s %s.%s",
                                 CaspianMod.MOD_NAME,
                                 Formatting.WHITE + CaspianMod.MOD_VER,
-                                CaspianMod.BUILD_NUMBER), 2.0f,
+                                CaspianMod.MOD_BUILD_NUMBER), 2.0f,
                         topLeft, Modules.COLORS.getRGB());
                 // topLeft += 10.0f;
             }

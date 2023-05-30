@@ -5,8 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -16,13 +15,16 @@ import java.util.List;
  */
 public class SneakBlocks implements Globals
 {
-    //
-    private static final List<Block> sneakBlocks;
+    // Constant set containing the blocks that can only be placed on if the
+    // player is holding shift
+    private static final Set<Block> SNEAK_BLOCKS;
 
     /**
+     * Returns <tt>true</tt> if the block state can only be placed on if the
+     * player is holding shift
      *
-     *
-     * @return
+     * @return <tt>true</tt> if the block state requires sneaking to be
+     * placed on
      */
     public static boolean isSneakBlock(BlockState state)
     {
@@ -30,21 +32,35 @@ public class SneakBlocks implements Globals
     }
 
     /**
+     * Returns <tt>true</tt> if the block can only be placed on if the player
+     * is holding shift
      *
-     *
-     * @return
+     * @return <tt>true</tt> if the block requires sneaking to be placed on
      */
     public static boolean isSneakBlock(Block block)
     {
-        return sneakBlocks.contains(block);
+        return SNEAK_BLOCKS.contains(block);
     }
 
     static
     {
-        sneakBlocks = Arrays.asList(
+        SNEAK_BLOCKS = Set.of(
                 Blocks.CHEST,
                 Blocks.ENDER_CHEST,
-                Blocks.TRAPPED_CHEST
+                Blocks.TRAPPED_CHEST,
+                Blocks.CRAFTING_TABLE,
+                Blocks.FURNACE,
+                Blocks.BLAST_FURNACE,
+                Blocks.FLETCHING_TABLE,
+                Blocks.CARTOGRAPHY_TABLE,
+                Blocks.ENCHANTING_TABLE,
+                Blocks.SMITHING_TABLE,
+                Blocks.STONECUTTER,
+                Blocks.ANVIL,
+                Blocks.CHIPPED_ANVIL,
+                Blocks.DAMAGED_ANVIL,
+                Blocks.JUKEBOX,
+                Blocks.NOTE_BLOCK
         );
     }
 }
