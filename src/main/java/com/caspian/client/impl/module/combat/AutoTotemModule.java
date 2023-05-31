@@ -73,7 +73,7 @@ public class AutoTotemModule extends ToggleModule
             "Attempts to take an advantage of a glitch in older versions to " +
                     "fully restore absorption hearts", false);
     Config<Boolean> crystalCheckConfig = new BooleanConfig("CrystalCheck",
-            "", false);
+            "Checks if a crystal is needed in the offhand", false);
     Config<Boolean> hotbarTotemConfig = new BooleanConfig("HotbarTotem",
             "", false);
     //
@@ -151,12 +151,9 @@ public class AutoTotemModule extends ToggleModule
             {
                 if (!critical)
                 {
-                    offhand = offhandConfig.getValue();
-                    if (crystalCheckConfig.getValue()
-                            && Modules.AUTO_CRYSTAL.isPlacing())
-                    {
-                        offhand = Items.END_CRYSTAL;
-                    }
+                    offhand = crystalCheckConfig.getValue()
+                            && Modules.AUTO_CRYSTAL.isPlacing() ?
+                            Items.END_CRYSTAL : offhandConfig.getValue();
                     //
                     ItemStack mainhand = mc.player.getMainHandStack();
                     if (mainhand.getItem() instanceof SwordItem

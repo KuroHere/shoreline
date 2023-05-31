@@ -12,7 +12,7 @@ import java.util.List;
  * @author linus
  * @since 1.0
  */
-public class Frame extends Component
+public class Frame extends Component implements Interactable
 {
     //
     private final List<Button> buttons = new ArrayList<>();
@@ -20,8 +20,6 @@ public class Frame extends Component
     //
     private double prevX, prevY, prevWidth, prevHeight;
     private boolean maximized;
-
-
 
     /**
      *

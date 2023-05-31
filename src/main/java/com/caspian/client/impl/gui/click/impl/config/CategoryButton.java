@@ -20,7 +20,6 @@ public class CategoryButton extends Button
 {
     //
     private final ModuleCategory category;
-
     //
     private final List<ModuleButton> moduleButtons = new ArrayList<>();
 

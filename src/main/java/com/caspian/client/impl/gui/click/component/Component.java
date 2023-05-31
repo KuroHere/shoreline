@@ -31,7 +31,7 @@ import java.util.function.BiConsumer;
  * @see Drawable
  * @see Interactable
  */
-public abstract class Component implements Interactable, Globals
+public abstract class Component implements Drawable, Globals
 {
     //
     private final ScissorStack scissorStack = new ScissorStack();
@@ -51,36 +51,6 @@ public abstract class Component implements Interactable, Globals
     public abstract void render(MatrixStack matrices, float mouseX, float mouseY,
                         float delta);
 
-    /**
-     *
-     *
-     * @param mouseX
-     * @param mouseY
-     * @param button
-     */
-    @Override
-    public abstract void mouseClicked(double mouseX, double mouseY, int button);
-
-    /**
-     *
-     *
-     * @param mouseX
-     * @param mouseY
-     * @param button
-     */
-    @Override
-    public abstract void mouseReleased(double mouseX, double mouseY, int button);
-
-    /**
-     *
-     *
-     * @param keyCode
-     * @param scanCode
-     * @param modifiers
-     */
-    @Override
-    public abstract void keyPressed(int keyCode, int scanCode, int modifiers);
-
     protected void drawRoundedRect(MatrixStack matrices, double x1, double y1,
                                    double x2, double y2, int color)
     {
@@ -90,6 +60,8 @@ public abstract class Component implements Interactable, Globals
     protected void drawRoundedRect(MatrixStack matrices, double x1, double y1,
                                    double x2, double y2, double z, int color)
     {
+        fill(matrices, x1, y1, x2, y2, z, color);
+        /*
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
         Shader shader = new Shader("rect.vert", "roundedrect.frag");
         shader.bind();
@@ -113,6 +85,7 @@ public abstract class Component implements Interactable, Globals
         BufferRenderer.drawWithGlobalProgram(buffer.end());
         RenderSystem.disableBlend();
         shader.unbind();
+         */
     }
 
     protected void drawCircle(MatrixStack matrices, double x, double y,
@@ -124,6 +97,7 @@ public abstract class Component implements Interactable, Globals
     protected void drawCircle(MatrixStack matrices, double x, double y,
                               double z, double radius, int color)
     {
+        /*
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
         Shader shader = new Shader("rect.vert", "circle.frag");
         shader.bind();
@@ -147,6 +121,7 @@ public abstract class Component implements Interactable, Globals
         BufferRenderer.drawWithGlobalProgram(buffer.end());
         RenderSystem.disableBlend();
         shader.unbind();
+         */
     }
 
     protected void drawHorizontalLine(MatrixStack matrices, double x1, double x2,
@@ -224,14 +199,12 @@ public abstract class Component implements Interactable, Globals
             x1 = x2;
             x2 = i;
         }
-
         if (y1 < y2) 
         {
             i = y1;
             y1 = y2;
             y2 = i;
         }
-
         float f = (float) ColorHelper.Argb.getAlpha(color) / 255.0f;
         float g = (float) ColorHelper.Argb.getRed(color) / 255.0f;
         float h = (float) ColorHelper.Argb.getGreen(color) / 255.0f;
@@ -435,7 +408,10 @@ public abstract class Component implements Interactable, Globals
                 (v + (float)regionHeight) / (float)textureHeight);
     }
 
-    private void drawTexturedQuad(Matrix4f matrix, int x0, int x1, int y0, int y1, int z, float u0, float u1, float v0, float v1) {
+    private void drawTexturedQuad(Matrix4f matrix, int x0, int x1, int y0,
+                                  int y1, int z, float u0, float u1,
+                                  float v0, float v1)
+    {
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         BufferBuilder buffer = Tessellator.getInstance().getBuffer();
         buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);

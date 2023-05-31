@@ -47,10 +47,15 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 
 /**
  * Threaded AutoCrystal implementation.
@@ -114,6 +119,8 @@ public class AutoCrystalModule extends ToggleModule
     // BREAK SETTINGS
     Config<Float> breakSpeedConfig = new NumberConfig<>("BreakSpeed",
             "Speed to break crystals", 0.1f, 20.0f, 20.0f);
+    Config<Float> attackDelayConfig = new NumberConfig<>("AttackDelay",
+            "Added delays", 0.0f, 0.5f, 10.0f);
     Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed",
             "Randomized delay for breaking crystals", 0.0f, 0.0f, 10.0f);
     Config<Float> breakTimeoutConfig = new NumberConfig<>("BreakTimeout",
@@ -135,7 +142,7 @@ public class AutoCrystalModule extends ToggleModule
     Config<Swap> antiWeaknessConfig = new EnumConfig<>("AntiWeakness",
             "Swap to tools before attacking crystals", Swap.OFF,
             Swap.values());
-    Config<Float> swapDelayConfig = new NumberConfig<>("SwapDelay", "Delay " +
+    Config<Float> swapDelayConfig = new NumberConfig<>("SwapPenalty", "Delay " +
             "for attacking after swapping items which prevents NCP flags", 0.0f,
             0.0f, 10.0f);
     //
@@ -200,10 +207,13 @@ public class AutoCrystalModule extends ToggleModule
     Config<Float> lethalMultiplier = new NumberConfig<>(
             "LethalMultiplier", "If we can kill an enemy with this many " +
             "crystals, disregard damage values", 0.0f, 1.5f, 4.0f);
-    Config<Boolean> safetyConfig = new BooleanConfig("Safety",  "",
-            true);
+    Config<Boolean> safetyConfig = new BooleanConfig("Safety",  "Accounts for" +
+            " total player safety when attacking and placing crystals", true);
     Config<Float> safetyBalanceConfig = new NumberConfig<>(
             "SafetyBalance", "", 1.0f, 3.0f, 5.0f);
+    Config<Boolean> safetyOverride = new BooleanConfig("SafetyOverride",
+            "Overrides the safety checks if the crystal will kill an enemy",
+            false);
     Config<Float> maxLocalDamageConfig = new NumberConfig<>(
             "MaxLocalDamage", "", 4.0f, 12.0f, 20.0f);
     Config<Boolean> blockDestructionConfig = new BooleanConfig(
@@ -227,7 +237,6 @@ public class AutoCrystalModule extends ToggleModule
     // stacks. When the main loop requires a placement/attack, simply pop the
     // last calculated from the stack.
     private final PoolCalcProcessor processor = new PoolCalcProcessor();
-    private TickCalculation calc;
     private boolean pauseCalcAttack, pauseCalcPlace;
     // Set of attempted placements and attacks
     private final Set<BlockPos> placements =
@@ -300,7 +309,7 @@ public class AutoCrystalModule extends ToggleModule
         Iterable<BlockPos> placeSrc = getSphere(placeRangeEyeConfig.getValue() ?
                         Managers.POSITION.getEyePos() : Managers.POSITION.getPos(),
                 placeRangeConfig.getValue() + 0.5);
-        calc = processor.runCalc(crystalSrc, placeSrc);
+        processor.runCalc(crystalSrc, placeSrc);
     }
 
     /**
@@ -309,7 +318,6 @@ public class AutoCrystalModule extends ToggleModule
     @Override
     public void onDisable()
     {
-        calc = null;
         processor.shutdownNow();
     }
 
@@ -342,58 +350,62 @@ public class AutoCrystalModule extends ToggleModule
             if (event.getStage() == EventStage.PRE)
             {
                 // MAIN LOOP
-                try
+                TickCalculation calc = processor.getCurrentCalc();
+                if (calc != null)
                 {
-                    calc.checkDone();
-                }
-                catch (InterruptedException | ExecutionException e)
-                {
-                    Caspian.error("Failed calculation %s!", calc.getId());
-                    e.printStackTrace();
-                }
-                if (calc.isDone())
-                {
-                    Caspian.info("Calc done in %dms!", calc.getCalcTime());
-                    DamageData<EndCrystalEntity> attackData =
-                            calc.getCalcAttack();
-                    attacking = attackData != null && evaluate(attackData)
-                            && !(pauseCalcAttack && attack != null);
-                    if (attacking)
+                    try
                     {
-                        attack = attackData;
+                        calc.checkDone();
                     }
-                    DamageData<BlockPos> placeData =
-                            calc.getCalcPlace();
-                    placing = placeData != null && evaluate(placeData)
-                            && !(pauseCalcPlace && place != null);
-                    if (placing)
+                    catch (InterruptedException | ExecutionException e)
                     {
-                        place = placeData;
+                        Caspian.error("Failed calculation %s!", calc.getId());
+                        e.printStackTrace();
                     }
-                    // found new data, stop rotation
-                    float[] rots = null;
-                    if (semi && attack != null)
+                    if (calc.isDone())
                     {
-                        rots = attack.getRotationsTo(Managers.POSITION.getEyePos());
+                        Caspian.info("Calc done in %dms!", calc.getCalcTime());
+                        DamageData<EndCrystalEntity> attackData =
+                                calc.getCalcAttack();
+                        attacking = attackData != null && evaluate(attackData)
+                                && !(pauseCalcAttack && attack != null);
+                        if (attacking)
+                        {
+                            attack = attackData;
+                        }
+                        DamageData<BlockPos> placeData =
+                                calc.getCalcPlace();
+                        placing = placeData != null && evaluate(placeData)
+                                && !(pauseCalcPlace && place != null);
+                        if (placing)
+                        {
+                            place = placeData;
+                        }
+                        // found new data, stop rotation
+                        float[] rots = null;
+                        if (semi && attack != null)
+                        {
+                            rots = attack.getRotationsTo(Managers.POSITION.getEyePos());
+                        }
+                        else if (place != null)
+                        {
+                            rots = place.getRotationsTo(Managers.POSITION.getEyePos());
+                        }
+                        if (rotating > 0
+                                && rots != null
+                                && !isNearlyEqual(dest, rots, 0.5f))
+                        {
+                            rotating = 0;
+                        }
+                        // run calc
+                        Iterable<EndCrystalEntity> crystalSrc = getCrystalSphere(
+                                Managers.POSITION.getCameraPosVec(1.0f),
+                                breakRangeConfig.getValue() + 0.5);
+                        Iterable<BlockPos> placeSrc = getSphere(placeRangeEyeConfig.getValue() ?
+                                        Managers.POSITION.getEyePos() : Managers.POSITION.getPos(),
+                                placeRangeConfig.getValue() + 0.5);
+                        processor.runCalc(crystalSrc, placeSrc);
                     }
-                    else if (place != null)
-                    {
-                        rots = place.getRotationsTo(Managers.POSITION.getEyePos());
-                    }
-                    if (rotating > 0
-                            && rots != null
-                            && !isNearlyEqual(dest, rots, 0.5f))
-                    {
-                        rotating = 0;
-                    }
-                    // run calc
-                    Iterable<EndCrystalEntity> crystalSrc = getCrystalSphere(
-                            Managers.POSITION.getCameraPosVec(1.0f),
-                            breakRangeConfig.getValue() + 0.5);
-                    Iterable<BlockPos> placeSrc = getSphere(placeRangeEyeConfig.getValue() ?
-                                    Managers.POSITION.getEyePos() : Managers.POSITION.getPos(),
-                            placeRangeConfig.getValue() + 0.5);
-                    calc = processor.runCalc(crystalSrc, placeSrc);
                 }
                 if (rotating > 0)
                 {
@@ -430,7 +442,7 @@ public class AutoCrystalModule extends ToggleModule
                     if (lastBreak.passed(delay) 
                             && randomTime.passed(currRandom))
                     {
-                        if (attack(attack.src()))
+                        if (attack(attack.getSrc()))
                         {
                             lastBreak.reset();
                             randomTime.reset();
@@ -455,7 +467,7 @@ public class AutoCrystalModule extends ToggleModule
                             - placeSpeedConfig.getValue()) * 50;
                     if (lastPlace.passed(delay))
                     {
-                        if (place(place.src()))
+                        if (place(place.getSrc()))
                         {
                             lastPlace.reset();
                         }
@@ -482,14 +494,14 @@ public class AutoCrystalModule extends ToggleModule
             {
                 if (attack != null)
                 {
-                    RenderManager.renderBoundingBox(attack.src().getBoundingBox(),
+                    RenderManager.renderBoundingBox(attack.getSrc().getBoundingBox(),
                             1.5f, color);
                 }
             }
             if (place != null)
             {
-                RenderManager.renderBox(place.src(), color);
-                RenderManager.renderBoundingBox(place.src(), 1.5f, color);
+                RenderManager.renderBox(place.getSrc(), color);
+                RenderManager.renderBoundingBox(place.getSrc(), 1.5f, color);
             }
         }
     }
@@ -507,14 +519,14 @@ public class AutoCrystalModule extends ToggleModule
      */
     private boolean evaluate(DamageData<?> d)
     {
-        Entity damaged = d.damaged();
+        Entity damaged = d.getTarget();
         if (damaged != null && damaged.isAlive())
         {
             // if (d.src() instanceof BlockPos src)
             // {
 
             // }
-            if (d.src() instanceof EndCrystalEntity src)
+            if (d.getSrc() instanceof EndCrystalEntity src)
             {
                 return src.isAlive();
             }
@@ -522,16 +534,26 @@ public class AutoCrystalModule extends ToggleModule
         return false;
     }
 
+    /**
+     *
+     *
+     * @param attack
+     */
     private void setAttackHard(DamageData<EndCrystalEntity> attack)
     {
-        pauseCalcAttack = true;
         this.attack = attack;
+        pauseCalcAttack = true;
     }
 
+    /**
+     *
+     *
+     * @param place
+     */
     private void setPlaceHard(DamageData<BlockPos> place)
     {
-        pauseCalcPlace = true;
         this.place = place;
+        pauseCalcPlace = true;
     }
     
     /**
@@ -665,14 +687,34 @@ public class AutoCrystalModule extends ToggleModule
                 // crystal spawned
                 if (packet.getEntityType() == EntityType.END_CRYSTAL)
                 {
-                    BlockPos base = BlockPos.ofFloored(packet.getX() - 0.5,
-                            packet.getY() - 1.0, packet.getZ() - 0.5);
                     if (awaitConfig.getValue())
                     {
-                        if (placements.remove(base))
+                        Vec3d spawn = new Vec3d(packet.getX(), packet.getY(),
+                                packet.getZ());
+                        Vec3d base = new Vec3d(packet.getX() - 0.5,
+                                packet.getY() - 1.0, packet.getZ() - 0.5);
+                        double dist = Managers.POSITION.getCameraPosVec(1.0f)
+                                .squaredDistanceTo(spawn);
+                        Vec3d motion = mc.player.getVelocity();
+                        double x = Managers.POSITION.getX() + motion.getX();
+                        double y = Managers.POSITION.getY() + motion.getY();
+                        double z = Managers.POSITION.getZ() + motion.getZ();
+                        if (dist > breakRangeConfig.getValue() * breakRangeConfig.getValue()
+                                && !isWithinStrictRange(new Vec3d(x, y, z), spawn,
+                                strictBreakRangeConfig.getValue()))
                         {
-                            Vec3d spawn = new Vec3d(packet.getX(), packet.getY(),
-                                    packet.getZ());
+                            return;
+                        }
+                        BlockHitResult result = mc.world.raycast(new RaycastContext(
+                                Managers.POSITION.getCameraPosVec(1.0f),
+                                spawn, RaycastContext.ShapeType.COLLIDER,
+                                RaycastContext.FluidHandling.NONE, mc.player));
+                        if (result != null && dist > breakWallRangeConfig.getValue())
+                        {
+                            return;
+                        }
+                        if (placements.remove(BlockPos.ofFloored(base)))
+                        {
                             dest = RotationUtil.getRotationsTo(Managers.POSITION.getEyePos(),
                                     spawn);
                             if (rotateConfig.getValue() && checkFacing(dest,
@@ -684,7 +726,7 @@ public class AutoCrystalModule extends ToggleModule
                                 if (yawStepConfig.getValue() != YawStep.OFF
                                         || !ignoreExpectedTickConfig.getValue())
                                 {
-                                    setAttackHard(DamageData.fromPacket(packet.getId(),
+                                    setAttackHard(getDataFromId(packet.getId(),
                                             spawn));
                                     return;
                                 }
@@ -695,6 +737,77 @@ public class AutoCrystalModule extends ToggleModule
                                 attacks.put(packet.getId(),
                                         System.currentTimeMillis());
                                 ++attackFreq;
+                            }
+                        }
+                        else
+                        {
+                            double local = getDamage(mc.player, spawn);
+                            // player safety
+                            if (safetyConfig.getValue() && !mc.player.isCreative())
+                            {
+                                float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+                                if (local + 0.5 > health)
+                                {
+                                    return;
+                                }
+                                if (local > maxLocalDamageConfig.getValue())
+                                {
+                                    return;
+                                }
+                            }
+                            for (Entity e : mc.world.getEntities())
+                            {
+                                if (e != null && e != mc.player && e.isAlive()
+                                        && !Managers.SOCIAL.isFriend(e.getUuid()))
+                                {
+                                    if (e instanceof EndCrystalEntity)
+                                    {
+                                        continue;
+                                    }
+                                    if (isEnemy(e))
+                                    {
+                                        double pdist = Managers.POSITION.squaredDistanceTo(e);
+                                        if (pdist > targetRangeConfig.getValue()
+                                                * targetRangeConfig.getValue())
+                                        {
+                                            continue;
+                                        }
+                                        float ehealth = 0.0f;
+                                        if (e instanceof LivingEntity)
+                                        {
+                                            ehealth = ((LivingEntity) e).getHealth()
+                                                    + ((LivingEntity) e).getAbsorptionAmount();
+                                        }
+                                        double dmg = getDamage(e, spawn);
+                                        if (dmg > minDamageConfig.getValue()
+                                                || checkLethal(e, ehealth, dmg))
+                                        {
+                                            dest = RotationUtil.getRotationsTo(Managers.POSITION.getEyePos(),
+                                                    spawn);
+                                            if (rotateConfig.getValue() && checkFacing(dest,
+                                                    0.5f))
+                                            {
+                                                semi = true;
+                                                rotating = setRotation(dest,
+                                                        yawStepConfig.getValue() != YawStep.OFF);
+                                                if (yawStepConfig.getValue() != YawStep.OFF
+                                                        || !ignoreExpectedTickConfig.getValue())
+                                                {
+                                                    setAttackHard(getDataFromId(packet.getId(),
+                                                            spawn));
+                                                    return;
+                                                }
+                                            }
+                                            if (attack(packet.getId()))
+                                            {
+                                                lastBreak.reset();
+                                                attacks.put(packet.getId(),
+                                                        System.currentTimeMillis());
+                                                ++attackFreq;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -761,6 +874,21 @@ public class AutoCrystalModule extends ToggleModule
                 }
             }
         }
+    }
+
+    /**
+     *
+     *
+     * @param id
+     * @return
+     */
+    public DamageData<EndCrystalEntity> getDataFromId(int id, Vec3d pos)
+    {
+        EndCrystalEntity deepcopy = new EndCrystalEntity(mc.world,
+                pos.getX(), pos.getY(), pos.getZ());
+        deepcopy.setId(id);
+        // -1 is special value, we will account for it when reading data
+        return new DamageData<>(null, deepcopy, -1.0f, id);
     }
 
     /**
@@ -1315,6 +1443,347 @@ public class AutoCrystalModule extends ToggleModule
     /**
      *
      *
+     * @return
+     *
+     * @see #getDamage(Entity, Vec3d)
+     * @see #getCrystalSphere(Vec3d, double)
+     */
+    private DamageData<EndCrystalEntity> getCrystal(Iterable<EndCrystalEntity> src,
+                                                    DamageDataComparator comparator)
+    {
+        if (mc.world != null && mc.player != null)
+        {
+            Set<DamageData<EndCrystalEntity>> min = new HashSet<>();
+            for (EndCrystalEntity c : src)
+            {
+                double dist = Managers.POSITION.squaredReachDistanceTo(c);
+                Vec3d motion = mc.player.getVelocity();
+                double x = Managers.POSITION.getX() + motion.getX();
+                double y = Managers.POSITION.getY() + motion.getY();
+                double z = Managers.POSITION.getZ() + motion.getZ();
+                if (dist > breakRangeConfig.getValue() * breakRangeConfig.getValue()
+                        && !isWithinStrictRange(new Vec3d(x, y, z), c.getPos(),
+                        strictBreakRangeConfig.getValue()))
+                {
+                    continue;
+                }
+                BlockHitResult result = mc.world.raycast(new RaycastContext(
+                        Managers.POSITION.getCameraPosVec(1.0f),
+                        c.getPos(), RaycastContext.ShapeType.COLLIDER,
+                        RaycastContext.FluidHandling.NONE, mc.player));
+                if (result != null && dist > breakWallRangeConfig.getValue())
+                {
+                    continue;
+                }
+                if (c.age < ticksExistedConfig.getValue()
+                        && !inhibitConfig.getValue())
+                {
+                    continue;
+                }
+                double local = getDamage(mc.player, c.getPos());
+                // player safety
+                boolean unsafe = false;
+                if (safetyConfig.getValue() && !mc.player.isCreative())
+                {
+                    float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+                    unsafe = local + 0.5 > health
+                            || local > maxLocalDamageConfig.getValue();
+                }
+                for (Entity e : mc.world.getEntities())
+                {
+                    if (e != null && e != mc.player && e.isAlive()
+                            && !Managers.SOCIAL.isFriend(e.getUuid()))
+                    {
+                        if (e instanceof EndCrystalEntity)
+                        {
+                            continue;
+                        }
+                        if (isEnemy(e))
+                        {
+                            double pdist = Managers.POSITION.squaredDistanceTo(e);
+                            if (pdist > targetRangeConfig.getValue() * targetRangeConfig.getValue())
+                            {
+                                continue;
+                            }
+                            float ehealth = 0.0f;
+                            if (e instanceof LivingEntity)
+                            {
+                                ehealth = ((LivingEntity) e).getHealth()
+                                        + ((LivingEntity) e).getAbsorptionAmount();
+                            }
+                            double dmg = getDamage(e, c.getPos());
+                            DamageData<EndCrystalEntity> data =
+                                    new DamageData<>(e, c, dmg, local);
+                            if (checkAntiTotem(e, ehealth, dmg))
+                            {
+                                data.setAntiTotem(true);
+                                return data;
+                            }
+                            if (checkLethal(e, ehealth, dmg))
+                            {
+                                data.setLethal(true);
+                                if (unsafe && safetyOverride.getValue())
+                                {
+                                    min.add(data);
+                                    continue;
+                                }
+                            }
+                            if (checkArmor(e))
+                            {
+                                data.setArmor(true);
+                            }
+                            if (!unsafe)
+                            {
+                                min.add(data);
+                            }
+                        }
+                    }
+                }
+            }
+            if (!min.isEmpty())
+            {
+                List<DamageData<EndCrystalEntity>> sort =
+                        min.stream().sorted(comparator).toList();
+                DamageData<EndCrystalEntity> f = sort.get(0);
+                if (f.getDamage() > minDamageConfig.getValue())
+                {
+                    return f;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     *
+     *
+     * @return
+     *
+     * @see #getDamage(Entity, Vec3d)
+     * @see #getSphere(Vec3d, double)
+     */
+    private DamageData<BlockPos> getPlace(Iterable<BlockPos> src,
+                                          DamageDataComparator comparator)
+    {
+        if (mc.world != null && mc.player != null)
+        {
+            Set<DamageData<BlockPos>> min = new HashSet<>();
+            // placement processing
+            for (BlockPos p : src)
+            {
+                if (canUseOnBlock(p))
+                {
+                    Vec3d pos = placeRangeEyeConfig.getValue() ?
+                            Managers.POSITION.getEyePos() : Managers.POSITION.getPos();
+                    double dist = placeRangeCenterConfig.getValue() ?
+                            p.getSquaredDistanceFromCenter(pos.getX(), pos.getY(),
+                                    pos.getZ()) : p.getSquaredDistance(pos);
+                    Vec3d motion = mc.player.getVelocity();
+                    double x = Managers.POSITION.getX() + motion.getX();
+                    double y = Managers.POSITION.getY() + motion.getY();
+                    double z = Managers.POSITION.getZ() + motion.getZ();
+                    if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue()
+                            && !isWithinStrictRange(new Vec3d(x, y, z),
+                            toSource(p),
+                            strictPlaceRangeConfig.getValue()))
+                    {
+                        continue;
+                    }
+                    Vec3d expected = new Vec3d(p.getX() + 0.5,
+                            p.getY() + 2.70000004768372, p.getZ() + 0.5);
+                    BlockHitResult result = mc.world.raycast(new RaycastContext(
+                            Managers.POSITION.getCameraPosVec(1.0f),
+                            expected, RaycastContext.ShapeType.COLLIDER,
+                            RaycastContext.FluidHandling.NONE, mc.player));
+                    float maxDist = 36.0f;
+                    if (result != null && result.getType() == HitResult.Type.BLOCK
+                            && result.getBlockPos() != p)
+                    {
+                        maxDist = 9.0f;
+                        if (dist > placeWallRangeConfig.getValue() * placeWallRangeConfig.getValue())
+                        {
+                            continue;
+                        }
+                    }
+                    if (breakValidateConfig.getValue() && dist > maxDist)
+                    {
+                        continue;
+                    }
+                    double local = getDamage(mc.player, toSource(p));
+                    // player safety
+                    boolean unsafe = false;
+                    if (safetyConfig.getValue() && !mc.player.isCreative())
+                    {
+                        float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+                        unsafe = local + 0.5 > health
+                                || local > maxLocalDamageConfig.getValue();
+                    }
+                    for (Entity e : mc.world.getEntities())
+                    {
+                        if (e != null && e != mc.player && e.isAlive()
+                                && !Managers.SOCIAL.isFriend(e.getUuid()))
+                        {
+                            if (e instanceof EndCrystalEntity)
+                            {
+                                continue;
+                            }
+                            double pdist = Managers.POSITION.squaredDistanceTo(e);
+                            // double edist = e.squaredDistanceTo(p.toCenterPos());
+                            if (pdist > targetRangeConfig.getValue()
+                                    * targetRangeConfig.getValue())
+                            {
+                                continue;
+                            }
+                            if (isEnemy(e))
+                            {
+                                double dmg = getDamage(e, toSource(p));
+                                float ehealth = 0.0f;
+                                if (e instanceof LivingEntity)
+                                {
+                                    ehealth = ((LivingEntity) e).getHealth()
+                                            + ((LivingEntity) e).getAbsorptionAmount();
+                                }
+                                DamageData<BlockPos> data =
+                                        new DamageData<>(e, p, dmg, local);
+                                if (checkAntiTotem(e, ehealth, dmg))
+                                {
+                                    data.setAntiTotem(true);
+                                    return data;
+                                }
+                                if (checkLethal(e, ehealth, dmg))
+                                {
+                                    data.setLethal(true);
+                                    if (unsafe && safetyOverride.getValue())
+                                    {
+                                        min.add(data);
+                                        continue;
+                                    }
+                                }
+                                if (checkArmor(e))
+                                {
+                                    data.setArmor(true);
+                                }
+                                if (!unsafe)
+                                {
+                                    min.add(data);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!min.isEmpty())
+            {
+                List<DamageData<BlockPos>> sort =
+                        min.stream().sorted(comparator).toList();
+                DamageData<BlockPos> f = sort.get(0);
+                if (f.getDamage() > minDamageConfig.getValue())
+                {
+                    return f;
+                }
+            }
+        }
+        return null; // no valid placements
+    }
+
+    /**
+     *
+     *
+     * @param e
+     * @param damage
+     * @return
+     */
+    private boolean checkLethal(final Entity e, final float ehealth,
+                                final double damage)
+    {
+        if (e instanceof LivingEntity)
+        {
+            double lethal = lethalMultiplier.getValue() * damage;
+            return ehealth - lethal > 0.5;
+        }
+        return false;
+    }
+
+    /**
+     *
+     *
+     * @param e
+     * @return
+     */
+    private boolean checkArmor(final Entity e)
+    {
+        if (e instanceof LivingEntity)
+        {
+            float earmor = 100.0f;
+            if (armorScaleConfig.getValue() != 0.0f)
+            {
+                float dmg = 0.0f;
+                float t = 0.0f;
+                for (ItemStack a : e.getArmorItems())
+                {
+                    dmg += a.getDamage();
+                    t += a.getMaxDamage();
+                }
+                earmor = dmg / t;
+            }
+            return earmor < armorScaleConfig.getValue();
+        }
+        return false;
+    }
+
+    /**
+     *
+     *
+     * @param e
+     * @param phealth
+     * @param damage
+     * @return
+     */
+    private boolean checkAntiTotem(final Entity e, final float phealth,
+                                   final double damage)
+    {
+        if (antiTotemConfig.getValue() && e instanceof PlayerEntity p)
+        {
+            if (phealth <= 2.0f && phealth - damage < 0.5f)
+            {
+                Long time = pops.get(p);
+                if (time != null)
+                {
+                    return System.currentTimeMillis() - time <= 500;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @return
+     */
+    private boolean isWithinStrictRange(final Vec3d src, final Vec3d dest,
+                                        final double range)
+    {
+        // directly from NCP src
+        double y1 = src.getY() + Managers.POSITION.getActiveEyeHeight();
+        double y2 = dest.getY();
+        if (y1 <= y2); // Keep the foot level y
+        else if (y1 >= y2 + 2.0)
+        {
+            y2 += 2.0;
+        }
+        else
+        {
+            y2 = y1;
+        }
+        double x = dest.getX() - src.getX();
+        double y = y2 - y1;
+        double z = dest.getZ() - src.getZ();
+        return MathHelper.squaredMagnitude(x, y, z) <= range * range;
+    }
+
+    /**
+     *
+     *
      * @param e
      * @param src
      * @return
@@ -1448,7 +1917,10 @@ public class AutoCrystalModule extends ToggleModule
     {
         // Current calculation.
         private TickCalculation calc;
+        private final DamageDataComparator comparator =
+                new DamageDataComparator();
         //
+        private final ExecutorCompletionService<CalcPair> service;
         private final ThreadPoolExecutor pool = (ThreadPoolExecutor)
                 Executors.newCachedThreadPool();
 
@@ -1458,6 +1930,7 @@ public class AutoCrystalModule extends ToggleModule
         public PoolCalcProcessor()
         {
             pool.setCorePoolSize(Runtime.getRuntime().availableProcessors() / 2);
+            service = new ExecutorCompletionService<>(pool);
         }
 
         /**
@@ -1467,11 +1940,21 @@ public class AutoCrystalModule extends ToggleModule
          * @param placeSrc
          * @return
          */
-        public TickCalculation runCalc(Iterable<EndCrystalEntity> crystalSrc,
+        public void runCalc(Iterable<EndCrystalEntity> crystalSrc,
                                      Iterable<BlockPos> placeSrc)
         {
-            calc = new TickCalculation(crystalSrc, placeSrc, pool);
+            calc = new TickCalculation(crystalSrc, placeSrc, comparator,
+                    service);
             calc.startCalc();
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public TickCalculation getCurrentCalc()
+        {
             return calc;
         }
 
@@ -1501,6 +1984,7 @@ public class AutoCrystalModule extends ToggleModule
             finally
             {
                 pool.shutdownNow();
+                calc = null;
             }
         }
     }
@@ -1519,6 +2003,7 @@ public class AutoCrystalModule extends ToggleModule
         private final Iterable<EndCrystalEntity> crystalSrc;
         private final Iterable<BlockPos> placeSrc;
         // Calculated
+        private final DamageDataComparator comparator;
         private DamageData<EndCrystalEntity> attackCalc;
         private DamageData<BlockPos> placeCalc;
         // Calculation time information
@@ -1532,12 +2017,14 @@ public class AutoCrystalModule extends ToggleModule
          */
         public TickCalculation(Iterable<EndCrystalEntity> crystalSrc,
                                Iterable<BlockPos> placeSrc,
-                               ExecutorService service)
+                               DamageDataComparator comparator,
+                               ExecutorCompletionService<CalcPair> service)
         {
             this.id = UUID.randomUUID();
             this.crystalSrc = crystalSrc;
             this.placeSrc = placeSrc;
-            this.service = new ExecutorCompletionService<>(service);
+            this.comparator = comparator;
+            this.service = service;
         }
 
         /**
@@ -1545,13 +2032,13 @@ public class AutoCrystalModule extends ToggleModule
          *
          * @see ExecutorCompletionService
          *
-         * @see #getCrystal(Iterable)
-         * @see #getPlace(Iterable)
+         * @see #getCrystal(Iterable, DamageDataComparator)
+         * @see #getPlace(Iterable, DamageDataComparator)
          */
         public void startCalc()
         {
-            service.submit(() -> new CalcPair(getCrystal(crystalSrc),
-                    placeConfig.getValue() ? getPlace(placeSrc) : null));
+            service.submit(() -> new CalcPair(getCrystal(crystalSrc, comparator),
+                    placeConfig.getValue() ? getPlace(placeSrc, comparator) : null));
             start = System.currentTimeMillis();
         }
 
@@ -1636,339 +2123,280 @@ public class AutoCrystalModule extends ToggleModule
         {
             return placeCalc;
         }
+    }
 
+    /**
+     *
+     *
+     * @param attack
+     * @param place
+     */
+    private record CalcPair(DamageData<EndCrystalEntity> attack,
+                            DamageData<BlockPos> place)
+    {
+
+    }
+
+    /**
+     *
+     */
+    private class DamageDataComparator implements Comparator<DamageData<?>>
+    {
         /**
-         *
-         *
-         * @return
-         *
-         * @see #getDamage(Entity, Vec3d)
-         * @see #getCrystalSphere(Vec3d, double)
+         * Compares its two arguments for order. Returns a negative integer,
+         * zero, or a positive integer as the first argument is less than, equal
+         * to, or greater than the second.<p>
          */
-        private DamageData<EndCrystalEntity> getCrystal(Iterable<EndCrystalEntity> src)
+        @Override
+        public int compare(DamageData<?> o1, DamageData<?> o2)
         {
-            if (mc.world != null && mc.player != null)
-            {
-                TreeMap<Double, DamageData<EndCrystalEntity>> min = new TreeMap<>();
-                for (EndCrystalEntity c : src)
-                {
-                    double dist = Managers.POSITION.squaredReachDistanceTo(c);
-                    Vec3d motion = mc.player.getVelocity();
-                    double x = Managers.POSITION.getX() + motion.getX();
-                    double y = Managers.POSITION.getY() + motion.getY();
-                    double z = Managers.POSITION.getZ() + motion.getZ();
-                    if (dist > breakRangeConfig.getValue() * breakRangeConfig.getValue()
-                            || !isWithinStrictRange(new Vec3d(x, y, z), c.getPos(),
-                        strictBreakRangeConfig.getValue()))
-                    {
-                        continue;
-                    }
-                    BlockHitResult result = mc.world.raycast(new RaycastContext(
-                            Managers.POSITION.getCameraPosVec(1.0f),
-                            c.getPos(), RaycastContext.ShapeType.COLLIDER,
-                            RaycastContext.FluidHandling.NONE, mc.player));
-                    if (result != null && dist > breakWallRangeConfig.getValue())
-                    {
-                        continue;
-                    }
-                    if (c.age < ticksExistedConfig.getValue()
-                            && !inhibitConfig.getValue())
-                    {
-                        continue;
-                    }
-                    double local = getDamage(mc.player, c.getPos());
-                    // player safety
-                    if (safetyConfig.getValue() && !mc.player.isCreative())
-                    {
-                        float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
-                        if (local + 0.5 > health)
-                        {
-                            continue;
-                        }
-                        if (local > maxLocalDamageConfig.getValue())
-                        {
-                            continue;
-                        }
-                    }
-                    for (Entity e : mc.world.getEntities())
-                    {
-                        if (e != null && e != mc.player && e.isAlive()
-                                && !Managers.SOCIAL.isFriend(e.getUuid()))
-                        {
-                            if (e instanceof EndCrystalEntity)
-                            {
-                                continue;
-                            }
-                            if (isEnemy(e))
-                            {
-                                double pdist = Managers.POSITION.squaredDistanceTo(e);
-                                if (pdist > targetRangeConfig.getValue() * targetRangeConfig.getValue())
-                                {
-                                    continue;
-                                }
-                                float ehealth = 0.0f;
-                                if (e instanceof LivingEntity)
-                                {
-                                    ehealth = ((LivingEntity) e).getHealth()
-                                            + ((LivingEntity) e).getAbsorptionAmount();
-                                }
-                                double dmg = getDamage(e, c.getPos());
-                                if (checkLethal(e, ehealth, dmg))
-                                {
-                                    // BIG UGLY HACK
-                                    float off = Managers.TOTEM.getTotems(e)
-                                            + ehealth;
-                                    dmg += 999.0 + off;
-                                }
-                                min.put(dmg, new DamageData<>(dmg, local, e, c));
-                            }
-                        }
-                    }
-                }
-                if (!min.isEmpty())
-                {
-                    Map.Entry<Double, DamageData<EndCrystalEntity>> f =
-                            min.lastEntry();
-                    if (f.getKey() > minDamageConfig.getValue())
-                    {
-                        return f.getValue();
-                    }
-                }
-            }
-            return null;
+            return o1.compareTo(o2);
         }
 
         /**
+         * Returns a comparator that imposes the reverse ordering of this
+         * comparator.
          *
-         *
-         * @return
-         *
-         * @see #getDamage(Entity, Vec3d)
-         * @see #getSphere(Vec3d, double)
+         * @return a comparator that imposes the reverse ordering of this
+         * comparator.
+         * @since 1.8
          */
-        private DamageData<BlockPos> getPlace(Iterable<BlockPos> src)
+        @Override
+        public Comparator<DamageData<?>> reversed()
         {
-            if (mc.world != null && mc.player != null)
-            {
-                TreeMap<Double, DamageData<BlockPos>> min = new TreeMap<>();
-                // placement processing
-                for (BlockPos p : src)
-                {
-                    if (canUseOnBlock(p))
-                    {
-                        Vec3d pos = placeRangeEyeConfig.getValue() ?
-                                Managers.POSITION.getEyePos() : Managers.POSITION.getPos();
-                        double dist = placeRangeCenterConfig.getValue() ?
-                                p.getSquaredDistanceFromCenter(pos.getX(), pos.getY(),
-                                        pos.getZ()) : p.getSquaredDistance(pos);
-                        Vec3d motion = mc.player.getVelocity();
-                        double x = Managers.POSITION.getX() + motion.getX();
-                        double y = Managers.POSITION.getY() + motion.getY();
-                        double z = Managers.POSITION.getZ() + motion.getZ();
-                        if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue()
-                                || !isWithinStrictRange(new Vec3d(x, y, z),
-                                toSource(p),
-                                strictPlaceRangeConfig.getValue()))
-                        {
-                            continue;
-                        }
-                        Vec3d expected = new Vec3d(p.getX() + 0.5,
-                                p.getY() + 2.70000004768372, p.getZ() + 0.5);
-                        BlockHitResult result = mc.world.raycast(new RaycastContext(
-                                Managers.POSITION.getCameraPosVec(1.0f),
-                                expected, RaycastContext.ShapeType.COLLIDER,
-                                RaycastContext.FluidHandling.NONE, mc.player));
-                        float maxDist = 36.0f;
-                        if (result != null && result.getType() == HitResult.Type.BLOCK
-                                && result.getBlockPos() != p)
-                        {
-                            maxDist = 9.0f;
-                            if (dist > placeWallRangeConfig.getValue() * placeWallRangeConfig.getValue())
-                            {
-                                continue;
-                            }
-                        }
-                        if (breakValidateConfig.getValue() && dist > maxDist)
-                        {
-                            continue;
-                        }
-                        double local = getDamage(mc.player, toSource(p));
-                        // player safety
-                        if (safetyConfig.getValue() && !mc.player.isCreative())
-                        {
-                            float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
-                            if (local + 0.5 > health)
-                            {
-                                continue;
-                            }
-                            if (local > maxLocalDamageConfig.getValue())
-                            {
-                                continue;
-                            }
-                        }
-                        for (Entity e : mc.world.getEntities())
-                        {
-                            if (e != null && e != mc.player && e.isAlive()
-                                    && !Managers.SOCIAL.isFriend(e.getUuid()))
-                            {
-                                if (e instanceof EndCrystalEntity)
-                                {
-                                    continue;
-                                }
-                                double pdist = Managers.POSITION.squaredDistanceTo(e);
-                                // double edist = e.squaredDistanceTo(p.toCenterPos());
-                                if (pdist > targetRangeConfig.getValue()
-                                        * targetRangeConfig.getValue())
-                                {
-                                    continue;
-                                }
-                                if (isEnemy(e))
-                                {
-                                    double dmg = getDamage(e, toSource(p));
-                                    float ehealth = 0.0f;
-                                    if (e instanceof LivingEntity)
-                                    {
-                                        ehealth = ((LivingEntity) e).getHealth()
-                                                + ((LivingEntity) e).getAbsorptionAmount();
-                                    }
-                                    DamageData<BlockPos> data =
-                                            new DamageData<>(dmg, local, e, p);
-                                    if (checkAntiTotem(e, ehealth, dmg))
-                                    {
-                                        return data;
-                                    }
-                                    // BIG UGLY HACK
-                                    if (checkLethal(e, ehealth, dmg))
-                                    {
-                                        float off = Managers.TOTEM.getTotems(e)
-                                                + ehealth;
-                                        dmg += 999.0 - off;
-                                    }
-                                    min.put(dmg, data);
-                                }
-                            }
-                        }
-                    }
-                }
-                if (!min.isEmpty())
-                {
-                    Map.Entry<Double, DamageData<BlockPos>> f = min.lastEntry();
-                    if (f.getKey() > minDamageConfig.getValue())
-                    {
-                        return f.getValue();
-                    }
-                }
-            }
-            return null; // no valid placements
+            return Comparator.super.reversed();
         }
 
         /**
+         * Returns a lexicographic-order comparator with another comparator.
+         * If this {@code Comparator} considers two elements equal, i.e.
+         * {@code compare(a, b) == 0}, {@code other} is used to determine the order.
          *
+         * <p>The returned comparator is serializable if the specified comparator
+         * is also serializable.
          *
-         * @param e
-         * @param damage
-         * @return
+         * @param other the other comparator to be used when this comparator
+         *              compares two objects that are equal.
+         * @return a lexicographic-order comparator composed of this and then the
+         * other comparator
+         * @throws NullPointerException if the argument is null.
+         * @apiNote For example, to sort a collection of {@code String} based on the length
+         * and then case-insensitive natural ordering, the comparator can be
+         * composed using following code,
+         *
+         * <pre>{@code
+         *     Comparator<String> cmp = Comparator.comparingInt(String::length)
+         *             .thenComparing(String.CASE_INSENSITIVE_ORDER);
+         * }</pre>
+         * @since 1.8
          */
-        private boolean checkLethal(final Entity e, final float ehealth,
-                                    final double damage)
+        @Override
+        public Comparator<DamageData<?>> thenComparing(
+                Comparator<? super DamageData<?>> other)
         {
-            float earmor = 100.0f;
-            if (e instanceof LivingEntity)
-            {
-                if (armorScaleConfig.getValue() != 0.0f)
-                {
-                    float dmg = 0.0f;
-                    float t = 0.0f;
-                    for (ItemStack a : e.getArmorItems())
-                    {
-                        dmg += a.getDamage();
-                        t += a.getMaxDamage();
-                    }
-                    earmor = dmg / t;
-                }
-                double lethal = lethalMultiplier.getValue() * damage;
-                return ehealth - lethal > 0.5
-                        || earmor < armorScaleConfig.getValue();
-            }
-            return false;
+            return Comparator.super.thenComparing(other);
         }
 
         /**
+         * Returns a lexicographic-order comparator with a function that
+         * extracts a key to be compared with the given {@code Comparator}.
          *
-         *
-         * @param e
-         * @param phealth
-         * @param damage
-         * @return
+         * @param keyExtractor  the function used to extract the sort key
+         * @param keyComparator the {@code Comparator} used to compare the sort key
+         * @return a lexicographic-order comparator composed of this comparator
+         * and then comparing on the key extracted by the keyExtractor function
+         * @throws NullPointerException if either argument is null.
+         * @implSpec This default implementation behaves as if {@code
+         * thenComparing(comparing(keyExtractor, cmp))}.
+         * @see #comparing(Function, Comparator)
+         * @see #thenComparing(Comparator)
+         * @since 1.8
          */
-        private boolean checkAntiTotem(final Entity e, final float phealth,
-                                       final double damage)
+        @Override
+        public <U> Comparator<DamageData<?>> thenComparing(
+                Function<? super DamageData<?>, ? extends U> keyExtractor,
+                Comparator<? super U> keyComparator)
         {
-            if (antiTotemConfig.getValue() && e instanceof PlayerEntity p)
-            {
-                if (phealth <= 2.0f && phealth - damage < 0.5f)
-                {
-                    Long time = pops.get(p);
-                    if (time != null)
-                    {
-                        return System.currentTimeMillis() - time <= 500;
-                    }
-                }
-            }
-            return false;
+            return Comparator.super.thenComparing(keyExtractor, keyComparator);
         }
 
         /**
+         * Returns a lexicographic-order comparator with a function that
+         * extracts a {@code Comparable} sort key.
          *
-         * @return
+         * @param keyExtractor the function used to extract the {@link
+         *                     Comparable} sort key
+         * @return a lexicographic-order comparator composed of this and then the
+         * {@link Comparable} sort key.
+         * @throws NullPointerException if the argument is null.
+         * @implSpec This default implementation behaves as if {@code
+         * thenComparing(comparing(keyExtractor))}.
+         * @see #comparing(Function)
+         * @see #thenComparing(Comparator)
+         * @since 1.8
          */
-        private boolean isWithinStrictRange(final Vec3d src, final Vec3d dest,
-                                            final double range)
+        @Override
+        public <U extends Comparable<? super U>> Comparator<DamageData<?>> thenComparing(
+                Function<? super DamageData<?>, ? extends U> keyExtractor)
         {
-            // directly from NCP src
-            double y1 = src.getY() + Managers.POSITION.getActiveEyeHeight();
-            double y2 = dest.getY();
-            if (y1 <= y2); // Keep the foot level y
-            else if (y1 >= y2 + 2.0)
-            {
-                y2 += 2.0;
-            }
-            else
-            {
-                y2 = y1;
-            }
-            double x = dest.getX() - src.getX();
-            double y = y2 - y1;
-            double z = dest.getZ() - src.getZ();
-            return MathHelper.squaredMagnitude(x, y, z) <= range * range;
+            return Comparator.super.thenComparing(keyExtractor);
         }
 
         /**
+         * Returns a lexicographic-order comparator with a function that
+         * extracts an {@code int} sort key.
          *
-         *
-         * @param attack
-         * @param place
+         * @param keyExtractor the function used to extract the integer sort key
+         * @return a lexicographic-order comparator composed of this and then the
+         * {@code int} sort key
+         * @throws NullPointerException if the argument is null.
+         * @implSpec This default implementation behaves as if {@code
+         * thenComparing(comparingInt(keyExtractor))}.
+         * @see #comparingInt(ToIntFunction)
+         * @see #thenComparing(Comparator)
+         * @since 1.8
          */
-        private record CalcPair(DamageData<EndCrystalEntity> attack,
-                                DamageData<BlockPos> place)
+        @Override
+        public Comparator<DamageData<?>> thenComparingInt(
+                ToIntFunction<? super DamageData<?>> keyExtractor)
         {
+            return Comparator.super.thenComparingInt(keyExtractor);
+        }
 
+        /**
+         * Returns a lexicographic-order comparator with a function that
+         * extracts a {@code long} sort key.
+         *
+         * @param keyExtractor the function used to extract the long sort key
+         * @return a lexicographic-order comparator composed of this and then the
+         * {@code long} sort key
+         * @throws NullPointerException if the argument is null.
+         * @implSpec This default implementation behaves as if {@code
+         * thenComparing(comparingLong(keyExtractor))}.
+         * @see #comparingLong(ToLongFunction)
+         * @see #thenComparing(Comparator)
+         * @since 1.8
+         */
+        @Override
+        public Comparator<DamageData<?>> thenComparingLong(
+                ToLongFunction<? super DamageData<?>> keyExtractor)
+        {
+            return Comparator.super.thenComparingLong(keyExtractor);
+        }
+
+        /**
+         * Returns a lexicographic-order comparator with a function that
+         * extracts a {@code double} sort key.
+         *
+         * @param keyExtractor the function used to extract the double sort key
+         * @return a lexicographic-order comparator composed of this and then the
+         * {@code double} sort key
+         * @throws NullPointerException if the argument is null.
+         * @implSpec This default implementation behaves as if {@code
+         * thenComparing(comparingDouble(keyExtractor))}.
+         * @see #comparingDouble(ToDoubleFunction)
+         * @see #thenComparing(Comparator)
+         * @since 1.8
+         */
+        @Override
+        public Comparator<DamageData<?>> thenComparingDouble(
+                ToDoubleFunction<? super DamageData<?>> keyExtractor)
+        {
+            return Comparator.super.thenComparingDouble(keyExtractor);
         }
     }
 
     /**
      *
      *
-     * @param target
-     * @param local
-     * @param damaged
-     * @param src
-     *
      * @param <T> The damage source type
      */
-    private record DamageData<T>(double target, double local, Entity damaged,
-                                T src)
+    private class DamageData<T> implements Comparable<DamageData<?>>
     {
+        //
+        private final Entity target;
+        private final T src;
+        private final double damage;
+        private final double local;
+        //
+        private boolean antitotem;
+        private boolean lethal;
+        private boolean armor;
+
+        /**
+         *
+         *
+         * @param target
+         * @param src
+         * @param damage
+         * @param local
+         */
+        public DamageData(Entity target, T src, double damage, double local)
+        {
+            this.target = target;
+            this.src = src;
+            this.damage = damage;
+            this.local = local;
+        }
+
+        /**
+         *
+         *
+         * @param o
+         */
+        @Override
+        public int compareTo(DamageData<?> o)
+        {
+            // Net compare score
+            int net = 0;
+            if (antitotem)
+            {
+                net += 2;
+            }
+            if (lethal)
+            {
+                net++;
+            }
+            if (o.isAntiTotem())
+            {
+                net -= 2;
+            }
+            if (o.isLethal())
+            {
+                net--;
+            }
+            if (net != 0)
+            {
+                return net < 0 ? -1 : 1;
+            }
+            double diff = damage - o.getDamage();
+            if (diff > 0.2f)
+            {
+                return 1;
+            }
+            else if (diff < -0.2f)
+            {
+                return -1;
+            }
+            double ldiff = local - o.getLocal();
+            if (ldiff > 0.2f)
+            {
+                return 1;
+            }
+            else if (ldiff < -0.2f)
+            {
+                return -1;
+            }
+            if (armor)
+            {
+                return o.isArmorBreaker() ? 0 : 1;
+            }
+            else
+            {
+                return o.isArmorBreaker() ? -1 : 0;
+            }
+        }
+
         /**
          *
          *
@@ -1995,16 +2423,71 @@ public class AutoCrystalModule extends ToggleModule
         /**
          *
          *
-         * @param id
          * @return
          */
-        public static DamageData<EndCrystalEntity> fromPacket(int id, Vec3d pos)
+        public Entity getTarget()
         {
-            EndCrystalEntity copy = new EndCrystalEntity(mc.world, pos.getX(),
-                pos.getY(), pos.getZ());
-            copy.setId(id);
-            // -1 is special value, we will account for it when reading data
-            return new DamageData<>(-1.0f, id, null, copy);
+            return target;
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public T getSrc()
+        {
+            return src;
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public double getDamage()
+        {
+            return damage;
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public double getLocal()
+        {
+            return local;
+        }
+
+        public boolean isAntiTotem()
+        {
+            return lethal;
+        }
+
+        public boolean isLethal()
+        {
+            return lethal;
+        }
+
+        public boolean isArmorBreaker()
+        {
+            return lethal;
+        }
+
+        public void setAntiTotem(boolean antitotem)
+        {
+            this.antitotem = antitotem;
+        }
+
+        public void setLethal(boolean lethal)
+        {
+            this.lethal = lethal;
+        }
+
+        public void setArmor(boolean armor)
+        {
+            this.armor = armor;
         }
     }
 }

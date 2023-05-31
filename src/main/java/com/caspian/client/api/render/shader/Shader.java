@@ -17,11 +17,9 @@ public class Shader
 {
     // program which vert and frag are attached to
     private int program;
-
     // vertex and fragment shader GL32C ids
     private int vert;
     private int frag;
-
     // map of all samplers
     private final Map<String, Integer> samplers = new HashMap<>();
 
@@ -46,13 +44,11 @@ public class Shader
                     getClass().getResourceAsStream(resourcePath + vertex);
             InputStream fragStream =
                     getClass().getResourceAsStream(resourcePath + fragment);
-
             if (vertStream != null && fragStream != null)
             {
                 program = GL32C.glCreateProgram();
                 vert = GL32C.glCreateShader(GL32C.GL_VERTEX_SHADER);
                 frag = GL32C.glCreateShader(GL32C.GL_FRAGMENT_SHADER);
-
                 // 0 equates to null state
                 if (vert != GL32C.GL_FALSE && frag != GL32C.GL_FALSE)
                 {
@@ -69,7 +65,6 @@ public class Shader
                             throw new RuntimeException("Could not compile shader");
                         }
                     }
-
                     catch (Exception e)
                     {
                         Caspian.error("Could not compile shader %s", fragment);
@@ -80,27 +75,23 @@ public class Shader
                 }
             }
         }
-
         // creation error
         catch (Exception e)
         {
             Caspian.error("Could not load shader %s", fragment);
             e.printStackTrace();
         }
-
         // check null, 0 equates to null state
         if (program != GL32C.GL_FALSE && vert != GL32C.GL_FALSE && frag != GL32C.GL_FALSE)
         {
             GL32C.glAttachShader(program, vert);
             GL32C.glAttachShader(program, frag);
             GL32C.glLinkProgram(program);
-
             // program link status
             if (GL32C.glGetProgrami(program, GL32C.GL_LINK_STATUS) == GL32C.GL_FALSE)
             {
                 throw new RuntimeException("Could not link shader!");
             }
-
             GL32C.glValidateProgram(program);
         }
     }
