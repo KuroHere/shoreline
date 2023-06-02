@@ -11,6 +11,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
+import com.caspian.client.mixin.accessor.AccessorLivingEntity;
 import com.caspian.client.mixin.accessor.AccessorPlayerInteractEntityC2SPacket;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
@@ -34,12 +35,11 @@ import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
-import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerChunkManager;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -62,7 +62,6 @@ import java.util.function.ToLongFunction;
  * <p>
  * TODO:
  * <li> Manual crystals
- * <li> StrictDirection
  * <li> Speedmine Compatability
  * </p>
  *
@@ -90,6 +89,8 @@ public class AutoCrystalModule extends ToggleModule
             "Calculates sequentially, so placements occur once the " +
                     "expected crystal is broken", Sequential.NORMAL,
             Sequential.values());
+    Config<Boolean> swingConfig = new BooleanConfig("Swing",
+            "Swing hand when placing and attacking crystals", true);
     // ROTATE SETTINGS
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
             "before placing and breaking", false);
@@ -107,6 +108,9 @@ public class AutoCrystalModule extends ToggleModule
     Config<Integer> yawHoldTicksConfig = new NumberConfig<>(
             "YawHoldTicks", "Minimum ticks to hold the rotation yaw after " +
             "reaching the rotation", 0, 0, 5);
+    Config<Float> rotatePreserveTicksConfig = new NumberConfig<>(
+            "PreserveTicks", "Time to preserve rotations before switching " +
+            "back", 0.0f, 20.0f, 20.0f);
     // ENEMY SETTINGS
     Config<Boolean> playersConfig = new BooleanConfig("Players",
             "Target players", true);
@@ -264,11 +268,12 @@ public class AutoCrystalModule extends ToggleModule
     // ROTATIONS
     //
     private float[] dest;
+    private final Timer rotateTimer = new Timer();
     private int rotating;
     //
     private float[] yaws;
     private boolean semi;
-    private float pitch;
+    private float yaw, pitch;
 
     /**
      *
@@ -409,12 +414,18 @@ public class AutoCrystalModule extends ToggleModule
                 }
                 if (rotating > 0)
                 {
-                    event.setYaw(yaws[--rotating]);
-                    event.setPitch(pitch);
+                    rotateTimer.reset();
+                    yaw = yaws[--rotating];
                     if (rotating > 0 || !ignoreExpectedTickConfig.getValue())
                     {
                         return;
                     }
+                }
+                float preserve = rotatePreserveTicksConfig.getValue() * 50;
+                if (!rotateTimer.passed(preserve))
+                {
+                    event.setYaw(yaw);
+                    event.setPitch(pitch);
                 }
                 if (attack != null)
                 {
@@ -424,6 +435,7 @@ public class AutoCrystalModule extends ToggleModule
                         semi = true;
                         rotating = setRotation(dest,
                                 yawStepConfig.getValue() != YawStep.OFF);
+                        rotateTimer.reset();
                         return;
                     }
                     if (currRandom < 0)
@@ -461,6 +473,7 @@ public class AutoCrystalModule extends ToggleModule
                         semi = false;
                         rotating = setRotation(dest,
                                 yawStepConfig.getValue() == YawStep.FULL);
+                        rotateTimer.reset();
                         return;
                     }
                     float delay = (((NumberConfig<Float>) placeSpeedConfig).getMax()
@@ -723,6 +736,7 @@ public class AutoCrystalModule extends ToggleModule
                                 semi = true;
                                 rotating = setRotation(dest,
                                         yawStepConfig.getValue() != YawStep.OFF);
+                                rotateTimer.reset();
                                 if (yawStepConfig.getValue() != YawStep.OFF
                                         || !ignoreExpectedTickConfig.getValue())
                                 {
@@ -790,6 +804,7 @@ public class AutoCrystalModule extends ToggleModule
                                                 semi = true;
                                                 rotating = setRotation(dest,
                                                         yawStepConfig.getValue() != YawStep.OFF);
+                                                rotateTimer.reset();
                                                 if (yawStepConfig.getValue() != YawStep.OFF
                                                         || !ignoreExpectedTickConfig.getValue())
                                                 {
@@ -907,6 +922,9 @@ public class AutoCrystalModule extends ToggleModule
      *
      * @param e
      * @return
+     * 
+     * @see #attackDirect(int) 
+     * @see #preAttackCheck(int) 
      */
     public boolean attack(int e)
     {
@@ -965,6 +983,8 @@ public class AutoCrystalModule extends ToggleModule
      * 
      * 
      * @param e
+     *
+     * @see PlayerInteractEntityC2SPacket
      */
     private void attackDirect(int e) 
     {
@@ -974,7 +994,8 @@ public class AutoCrystalModule extends ToggleModule
                         mc.player.isSneaking());
         ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(e);
         Managers.NETWORK.sendPacket(packet);
-        Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        Hand hand = getCrystalHand();
+        swingDirect(hand == null ? Hand.MAIN_HAND : hand);
     }
 
     /**
@@ -1023,17 +1044,17 @@ public class AutoCrystalModule extends ToggleModule
      * @param p The position to place the crystal
      * @return <tt>true</tt> if the placement was successful
      *
-     * @see PlayerInteractBlockC2SPacket
+     * @see #placeDirect(BlockPos, Hand, BlockHitResult)
+     * @see #prePlaceCheck()
      */
     public boolean place(BlockPos p)
     {
-        if (mc.options.useKey.isPressed() || mc.options.attackKey.isPressed())
-        {
-            lastAutoSwap.reset();
-        }
         if (prePlaceCheck())
         {
             Direction dir = Direction.UP;
+            int dx = p.getX();
+            int dy = p.getY();
+            int dz = p.getZ();
             if (strictDirectionConfig.getValue())
             {
                 BlockPos blockPos = Managers.POSITION.getBlockPos();
@@ -1041,9 +1062,6 @@ public class AutoCrystalModule extends ToggleModule
                 int y = (int) Math.floor(Managers.POSITION.getY()
                         + Managers.POSITION.getActiveEyeHeight());
                 int z = blockPos.getZ();
-                int dx = p.getX();
-                int dy = p.getY();
-                int dz = p.getZ();
                 if (x != dx && y != dy && z != dz)
                 {
                     List<Direction> dirs = DirectionChecks.getInteractableDirections(
@@ -1057,8 +1075,8 @@ public class AutoCrystalModule extends ToggleModule
             else
             {
                 BlockHitResult result = mc.world.raycast(new RaycastContext(
-                        mc.player.getEyePos(), new Vec3d(p.getX() + 0.5,
-                        p.getY() + 0.5, p.getZ() + 0.5),
+                        mc.player.getEyePos(), new Vec3d(dx + 0.5,
+                        dy + 0.5, dz + 0.5),
                         RaycastContext.ShapeType.COLLIDER,
                         RaycastContext.FluidHandling.NONE, mc.player));
                 if (result != null && result.getType() == HitResult.Type.BLOCK)
@@ -1080,13 +1098,14 @@ public class AutoCrystalModule extends ToggleModule
                 sequence = p;
                 startSequence.reset();
             }
-            else
+            else if (swapConfig.getValue() != Swap.OFF)
             {
                 int slot = getCrystalSlot();
                 int prev = mc.player.getInventory().selectedSlot;
                 if (slot != -1)
                 {
-                    if (swapConfig.getValue() != Swap.OFF && preSwapCheck())
+                    boolean swap = preSwapCheck();
+                    if (swap)
                     {
                         if (swapConfig.getValue() == Swap.SILENT_ALT)
                         {
@@ -1101,13 +1120,16 @@ public class AutoCrystalModule extends ToggleModule
                     preSequence = null;
                     sequence = p;
                     startSequence.reset();
-                    if (swapConfig.getValue() == Swap.SILENT)
+                    if (swap)
                     {
-                        swap(prev);
-                    }
-                    else if (swapConfig.getValue() == Swap.SILENT_ALT)
-                    {
-                        swapAlt(prev + 36);
+                        if (swapConfig.getValue() == Swap.SILENT)
+                        {
+                            swap(prev);
+                        }
+                        else if (swapConfig.getValue() == Swap.SILENT_ALT)
+                        {
+                            swapAlt(prev + 36);
+                        }
                     }
                 }
             }
@@ -1122,12 +1144,14 @@ public class AutoCrystalModule extends ToggleModule
      * @param p
      * @param hand
      * @param result
+     *
+     * @see PlayerInteractBlockC2SPacket
      */
     private void placeDirect(BlockPos p, Hand hand, BlockHitResult result)
     {
         Managers.NETWORK.sendSequencedPacket(id ->
                 new PlayerInteractBlockC2SPacket(hand, result, id));
-        Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
+        swingDirect(hand);
         placements.add(p);
     }
 
@@ -1138,6 +1162,10 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean prePlaceCheck()
     {
+        if (mc.options.useKey.isPressed() || mc.options.attackKey.isPressed())
+        {
+            lastAutoSwap.reset();
+        }
         if (sequentialConfig.getValue() != Sequential.NONE)
         {
             float timeout = Math.max(getCrystalLatency() + (50.0f * breakTimeoutConfig.getValue()),
@@ -1164,6 +1192,24 @@ public class AutoCrystalModule extends ToggleModule
             return lastAutoSwap.passed(500);
         }
         return true;
+    }
+
+    /**
+     *
+     *
+     * @param hand
+     */
+    public void swingDirect(Hand hand)
+    {
+        if (swingConfig.getValue() && !mc.player.handSwinging
+                || mc.player.handSwingTicks >= ((AccessorLivingEntity) mc.player).hookGetHandSwingDuration() / 2
+                || mc.player.handSwingTicks < 0)
+        {
+            mc.player.handSwingTicks = -1;
+            mc.player.handSwinging = true;
+            mc.player.preferredHand = hand;
+        }
+        Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
     }
 
     /**
@@ -1320,13 +1366,21 @@ public class AutoCrystalModule extends ToggleModule
      * 
      * @param slot
      */
-    public void swap(int slot) 
+    private void swap(int slot)
     {
-        mc.player.getInventory().selectedSlot = slot;
-        mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+        if (slot < 9)
+        {
+            mc.player.getInventory().selectedSlot = slot;
+            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+        }
     }
 
-    public void swapAlt(int slot)
+    /**
+     *
+     *
+     * @param slot
+     */
+    private void swapAlt(int slot)
     {
 
     }
@@ -1448,12 +1502,11 @@ public class AutoCrystalModule extends ToggleModule
      * @see #getDamage(Entity, Vec3d)
      * @see #getCrystalSphere(Vec3d, double)
      */
-    private DamageData<EndCrystalEntity> getCrystal(Iterable<EndCrystalEntity> src,
-                                                    DamageDataComparator comparator)
+    private DamageData<EndCrystalEntity> getCrystal(Iterable<EndCrystalEntity> src)
     {
         if (mc.world != null && mc.player != null)
         {
-            Set<DamageData<EndCrystalEntity>> min = new HashSet<>();
+            TreeSet<DamageData<EndCrystalEntity>> min = new TreeSet<>();
             for (EndCrystalEntity c : src)
             {
                 double dist = Managers.POSITION.squaredReachDistanceTo(c);
@@ -1522,10 +1575,9 @@ public class AutoCrystalModule extends ToggleModule
                             if (checkLethal(e, ehealth, dmg))
                             {
                                 data.setLethal(true);
-                                if (unsafe && safetyOverride.getValue())
+                                if (safetyOverride.getValue())
                                 {
-                                    min.add(data);
-                                    continue;
+                                    unsafe = false;
                                 }
                             }
                             if (checkArmor(e))
@@ -1542,9 +1594,7 @@ public class AutoCrystalModule extends ToggleModule
             }
             if (!min.isEmpty())
             {
-                List<DamageData<EndCrystalEntity>> sort =
-                        min.stream().sorted(comparator).toList();
-                DamageData<EndCrystalEntity> f = sort.get(0);
+                DamageData<EndCrystalEntity> f = min.last();
                 if (f.getDamage() > minDamageConfig.getValue())
                 {
                     return f;
@@ -1562,12 +1612,11 @@ public class AutoCrystalModule extends ToggleModule
      * @see #getDamage(Entity, Vec3d)
      * @see #getSphere(Vec3d, double)
      */
-    private DamageData<BlockPos> getPlace(Iterable<BlockPos> src,
-                                          DamageDataComparator comparator)
+    private DamageData<BlockPos> getPlace(Iterable<BlockPos> src)
     {
         if (mc.world != null && mc.player != null)
         {
-            Set<DamageData<BlockPos>> min = new HashSet<>();
+            TreeSet<DamageData<BlockPos>> min = new TreeSet<>();
             // placement processing
             for (BlockPos p : src)
             {
@@ -1653,10 +1702,9 @@ public class AutoCrystalModule extends ToggleModule
                                 if (checkLethal(e, ehealth, dmg))
                                 {
                                     data.setLethal(true);
-                                    if (unsafe && safetyOverride.getValue())
+                                    if (safetyOverride.getValue())
                                     {
-                                        min.add(data);
-                                        continue;
+                                        unsafe = false;
                                     }
                                 }
                                 if (checkArmor(e))
@@ -1674,9 +1722,7 @@ public class AutoCrystalModule extends ToggleModule
             }
             if (!min.isEmpty())
             {
-                List<DamageData<BlockPos>> sort =
-                        min.stream().sorted(comparator).toList();
-                DamageData<BlockPos> f = sort.get(0);
+                DamageData<BlockPos> f = min.last();
                 if (f.getDamage() > minDamageConfig.getValue())
                 {
                     return f;
@@ -1917,8 +1963,6 @@ public class AutoCrystalModule extends ToggleModule
     {
         // Current calculation.
         private TickCalculation calc;
-        private final DamageDataComparator comparator =
-                new DamageDataComparator();
         //
         private final ExecutorCompletionService<CalcPair> service;
         private final ThreadPoolExecutor pool = (ThreadPoolExecutor)
@@ -1943,8 +1987,7 @@ public class AutoCrystalModule extends ToggleModule
         public void runCalc(Iterable<EndCrystalEntity> crystalSrc,
                                      Iterable<BlockPos> placeSrc)
         {
-            calc = new TickCalculation(crystalSrc, placeSrc, comparator,
-                    service);
+            calc = new TickCalculation(crystalSrc, placeSrc, service);
             calc.startCalc();
         }
 
@@ -1967,7 +2010,7 @@ public class AutoCrystalModule extends ToggleModule
             try
             {
                 pool.shutdown();
-                boolean timeout = !pool.awaitTermination(100,
+                boolean timeout = !pool.awaitTermination(50,
                         TimeUnit.MILLISECONDS);
                 if (timeout)
                 {
@@ -2003,7 +2046,6 @@ public class AutoCrystalModule extends ToggleModule
         private final Iterable<EndCrystalEntity> crystalSrc;
         private final Iterable<BlockPos> placeSrc;
         // Calculated
-        private final DamageDataComparator comparator;
         private DamageData<EndCrystalEntity> attackCalc;
         private DamageData<BlockPos> placeCalc;
         // Calculation time information
@@ -2017,13 +2059,11 @@ public class AutoCrystalModule extends ToggleModule
          */
         public TickCalculation(Iterable<EndCrystalEntity> crystalSrc,
                                Iterable<BlockPos> placeSrc,
-                               DamageDataComparator comparator,
                                ExecutorCompletionService<CalcPair> service)
         {
             this.id = UUID.randomUUID();
             this.crystalSrc = crystalSrc;
             this.placeSrc = placeSrc;
-            this.comparator = comparator;
             this.service = service;
         }
 
@@ -2032,13 +2072,13 @@ public class AutoCrystalModule extends ToggleModule
          *
          * @see ExecutorCompletionService
          *
-         * @see #getCrystal(Iterable, DamageDataComparator)
-         * @see #getPlace(Iterable, DamageDataComparator)
+         * @see #getCrystal(Iterable)
+         * @see #getPlace(Iterable)
          */
         public void startCalc()
         {
-            service.submit(() -> new CalcPair(getCrystal(crystalSrc, comparator),
-                    placeConfig.getValue() ? getPlace(placeSrc, comparator) : null));
+            service.submit(() -> new CalcPair(getCrystal(crystalSrc),
+                    placeConfig.getValue() ? getPlace(placeSrc) : null));
             start = System.currentTimeMillis();
         }
 
@@ -2090,7 +2130,11 @@ public class AutoCrystalModule extends ToggleModule
          */
         public long getCalcTime()
         {
-            return done - start;
+            if (isDone())
+            {
+                return done - start;
+            }
+            return System.currentTimeMillis() - start;
         }
 
         /**
@@ -2139,179 +2183,10 @@ public class AutoCrystalModule extends ToggleModule
 
     /**
      *
-     */
-    private class DamageDataComparator implements Comparator<DamageData<?>>
-    {
-        /**
-         * Compares its two arguments for order. Returns a negative integer,
-         * zero, or a positive integer as the first argument is less than, equal
-         * to, or greater than the second.<p>
-         */
-        @Override
-        public int compare(DamageData<?> o1, DamageData<?> o2)
-        {
-            return o1.compareTo(o2);
-        }
-
-        /**
-         * Returns a comparator that imposes the reverse ordering of this
-         * comparator.
-         *
-         * @return a comparator that imposes the reverse ordering of this
-         * comparator.
-         * @since 1.8
-         */
-        @Override
-        public Comparator<DamageData<?>> reversed()
-        {
-            return Comparator.super.reversed();
-        }
-
-        /**
-         * Returns a lexicographic-order comparator with another comparator.
-         * If this {@code Comparator} considers two elements equal, i.e.
-         * {@code compare(a, b) == 0}, {@code other} is used to determine the order.
-         *
-         * <p>The returned comparator is serializable if the specified comparator
-         * is also serializable.
-         *
-         * @param other the other comparator to be used when this comparator
-         *              compares two objects that are equal.
-         * @return a lexicographic-order comparator composed of this and then the
-         * other comparator
-         * @throws NullPointerException if the argument is null.
-         * @apiNote For example, to sort a collection of {@code String} based on the length
-         * and then case-insensitive natural ordering, the comparator can be
-         * composed using following code,
-         *
-         * <pre>{@code
-         *     Comparator<String> cmp = Comparator.comparingInt(String::length)
-         *             .thenComparing(String.CASE_INSENSITIVE_ORDER);
-         * }</pre>
-         * @since 1.8
-         */
-        @Override
-        public Comparator<DamageData<?>> thenComparing(
-                Comparator<? super DamageData<?>> other)
-        {
-            return Comparator.super.thenComparing(other);
-        }
-
-        /**
-         * Returns a lexicographic-order comparator with a function that
-         * extracts a key to be compared with the given {@code Comparator}.
-         *
-         * @param keyExtractor  the function used to extract the sort key
-         * @param keyComparator the {@code Comparator} used to compare the sort key
-         * @return a lexicographic-order comparator composed of this comparator
-         * and then comparing on the key extracted by the keyExtractor function
-         * @throws NullPointerException if either argument is null.
-         * @implSpec This default implementation behaves as if {@code
-         * thenComparing(comparing(keyExtractor, cmp))}.
-         * @see #comparing(Function, Comparator)
-         * @see #thenComparing(Comparator)
-         * @since 1.8
-         */
-        @Override
-        public <U> Comparator<DamageData<?>> thenComparing(
-                Function<? super DamageData<?>, ? extends U> keyExtractor,
-                Comparator<? super U> keyComparator)
-        {
-            return Comparator.super.thenComparing(keyExtractor, keyComparator);
-        }
-
-        /**
-         * Returns a lexicographic-order comparator with a function that
-         * extracts a {@code Comparable} sort key.
-         *
-         * @param keyExtractor the function used to extract the {@link
-         *                     Comparable} sort key
-         * @return a lexicographic-order comparator composed of this and then the
-         * {@link Comparable} sort key.
-         * @throws NullPointerException if the argument is null.
-         * @implSpec This default implementation behaves as if {@code
-         * thenComparing(comparing(keyExtractor))}.
-         * @see #comparing(Function)
-         * @see #thenComparing(Comparator)
-         * @since 1.8
-         */
-        @Override
-        public <U extends Comparable<? super U>> Comparator<DamageData<?>> thenComparing(
-                Function<? super DamageData<?>, ? extends U> keyExtractor)
-        {
-            return Comparator.super.thenComparing(keyExtractor);
-        }
-
-        /**
-         * Returns a lexicographic-order comparator with a function that
-         * extracts an {@code int} sort key.
-         *
-         * @param keyExtractor the function used to extract the integer sort key
-         * @return a lexicographic-order comparator composed of this and then the
-         * {@code int} sort key
-         * @throws NullPointerException if the argument is null.
-         * @implSpec This default implementation behaves as if {@code
-         * thenComparing(comparingInt(keyExtractor))}.
-         * @see #comparingInt(ToIntFunction)
-         * @see #thenComparing(Comparator)
-         * @since 1.8
-         */
-        @Override
-        public Comparator<DamageData<?>> thenComparingInt(
-                ToIntFunction<? super DamageData<?>> keyExtractor)
-        {
-            return Comparator.super.thenComparingInt(keyExtractor);
-        }
-
-        /**
-         * Returns a lexicographic-order comparator with a function that
-         * extracts a {@code long} sort key.
-         *
-         * @param keyExtractor the function used to extract the long sort key
-         * @return a lexicographic-order comparator composed of this and then the
-         * {@code long} sort key
-         * @throws NullPointerException if the argument is null.
-         * @implSpec This default implementation behaves as if {@code
-         * thenComparing(comparingLong(keyExtractor))}.
-         * @see #comparingLong(ToLongFunction)
-         * @see #thenComparing(Comparator)
-         * @since 1.8
-         */
-        @Override
-        public Comparator<DamageData<?>> thenComparingLong(
-                ToLongFunction<? super DamageData<?>> keyExtractor)
-        {
-            return Comparator.super.thenComparingLong(keyExtractor);
-        }
-
-        /**
-         * Returns a lexicographic-order comparator with a function that
-         * extracts a {@code double} sort key.
-         *
-         * @param keyExtractor the function used to extract the double sort key
-         * @return a lexicographic-order comparator composed of this and then the
-         * {@code double} sort key
-         * @throws NullPointerException if the argument is null.
-         * @implSpec This default implementation behaves as if {@code
-         * thenComparing(comparingDouble(keyExtractor))}.
-         * @see #comparingDouble(ToDoubleFunction)
-         * @see #thenComparing(Comparator)
-         * @since 1.8
-         */
-        @Override
-        public Comparator<DamageData<?>> thenComparingDouble(
-                ToDoubleFunction<? super DamageData<?>> keyExtractor)
-        {
-            return Comparator.super.thenComparingDouble(keyExtractor);
-        }
-    }
-
-    /**
-     *
      *
      * @param <T> The damage source type
      */
-    private class DamageData<T> implements Comparable<DamageData<?>>
+    private static class DamageData<T> implements Comparable<DamageData<?>>
     {
         //
         private final Entity target;
@@ -2342,59 +2217,40 @@ public class AutoCrystalModule extends ToggleModule
         /**
          *
          *
-         * @param o
+         * @param other
          */
         @Override
-        public int compareTo(DamageData<?> o)
+        public int compareTo(DamageData<?> other)
         {
-            // Net compare score
-            int net = 0;
-            if (antitotem)
+            if (other.isAntiTotem())
             {
-                net += 2;
+                return isAntiTotem() ? 0 : -1;
             }
-            if (lethal)
-            {
-                net++;
-            }
-            if (o.isAntiTotem())
-            {
-                net -= 2;
-            }
-            if (o.isLethal())
-            {
-                net--;
-            }
-            if (net != 0)
-            {
-                return net < 0 ? -1 : 1;
-            }
-            double diff = damage - o.getDamage();
-            if (diff > 0.2f)
+            if (isAntiTotem())
             {
                 return 1;
             }
-            else if (diff < -0.2f)
+            if (other.isLethal())
             {
-                return -1;
+                return isLethal() ? 0 : -1;
             }
-            double ldiff = local - o.getLocal();
-            if (ldiff > 0.2f)
+            if (isLethal())
             {
                 return 1;
             }
-            else if (ldiff < -0.2f)
+            // Diffs
+            double d = getDamage() - other.getDamage();
+            if (Math.abs(d) > 0.2)
             {
-                return -1;
+                return Double.compare(getDamage(), other.getDamage());
             }
-            if (armor)
+            double l = getLocal() - other.getLocal();
+            if (Math.abs(l) > 0.2)
             {
-                return o.isArmorBreaker() ? 0 : 1;
+                return Double.compare(getLocal(), other.getLocal());
             }
-            else
-            {
-                return o.isArmorBreaker() ? -1 : 0;
-            }
+            return Double.compare(squaredDistanceFrom(getTargetEyePos()),
+                    other.squaredDistanceFrom(other.getTargetEyePos()));
         }
 
         /**
@@ -2404,20 +2260,52 @@ public class AutoCrystalModule extends ToggleModule
          */
         public float[] getRotationsTo(Vec3d pos)
         {
-            Vec3d rpos = null;
-            if (src instanceof EndCrystalEntity)
-            {
-                rpos = ((EndCrystalEntity) src).getPos();
-            }
-            else if (src instanceof BlockPos)
-            {
-                rpos = ((BlockPos) src).toCenterPos();
-            }
+            Vec3d rpos = getPos();
             if (rpos != null)
             {
                 return RotationUtil.getRotationsTo(pos, rpos);
             }
             return null;
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public Vec3d getPos()
+        {
+            Vec3d pos = null;
+            if (src instanceof EndCrystalEntity)
+            {
+                pos = ((EndCrystalEntity) src).getPos();
+            }
+            else if (src instanceof BlockPos)
+            {
+                pos = ((BlockPos) src).toCenterPos();
+            }
+            return pos;
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public Vec3d getTargetEyePos()
+        {
+            return target.getEyePos();
+        }
+
+        /**
+         *
+         *
+         * @param src
+         * @return
+         */
+        public double squaredDistanceFrom(Vec3d src)
+        {
+            return src.squaredDistanceTo(getPos());
         }
 
         /**
@@ -2462,7 +2350,7 @@ public class AutoCrystalModule extends ToggleModule
 
         public boolean isAntiTotem()
         {
-            return lethal;
+            return antitotem;
         }
 
         public boolean isLethal()
@@ -2472,7 +2360,7 @@ public class AutoCrystalModule extends ToggleModule
 
         public boolean isArmorBreaker()
         {
-            return lethal;
+            return armor;
         }
 
         public void setAntiTotem(boolean antitotem)
