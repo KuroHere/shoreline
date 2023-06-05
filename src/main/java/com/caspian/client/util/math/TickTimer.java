@@ -60,7 +60,7 @@ public class TickTimer implements Timer
     @Override
     public void reset()
     {
-        ticks = 0;
+        setElapsedTime(0);
     }
 
     /**
@@ -70,5 +70,16 @@ public class TickTimer implements Timer
     public long getElapsedTime()
     {
         return ticks;
+    }
+
+    /**
+     *
+     *
+     * @param time
+     */
+    @Override
+    public void setElapsedTime(Number time)
+    {
+        ticks = time.longValue();
     }
 }

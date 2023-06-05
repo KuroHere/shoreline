@@ -44,14 +44,16 @@ public class EventHandler
             method.trySetAccessible();
             if (method.isAnnotationPresent(EventListener.class))
             {
+                EventListener a = method.getAnnotation(EventListener.class);
                 if (method.getReturnType() == Void.TYPE)
                 {
                     Class<?>[] params = method.getParameterTypes();
                     if (params.length == 1 && Event.class.isAssignableFrom(params[0]))
                     {
-                        Set<Listener> active = listeners.computeIfAbsent(params[0],
+                        Set<Listener> active =
+                                listeners.computeIfAbsent(params[0],
                                 v -> new TreeSet<>());
-                        active.add(new Listener(method, obj));
+                        active.add(new Listener(method, obj, a.priority()));
                     }
                 }
             }

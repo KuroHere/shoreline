@@ -28,14 +28,14 @@ public class NanoTimer implements Timer
      * Returns <tt>true</tt> if the time since the last reset has exceeded
      * the param time.
      *
-     * @param time The param time
+     * @param time The param time in ms
      * @return <tt>true</tt> if the time since the last reset has exceeded
      * the param time
      */
     @Override
     public boolean passed(Number time)
     {
-        return getElapsedTime() > time.longValue();
+        return getElapsedTime() > TimeUnit.NANOSECONDS.toMillis(time.longValue());
     }
 
     /**
@@ -62,7 +62,7 @@ public class NanoTimer implements Timer
     @Override
     public long getElapsedTime()
     {
-        return System.nanoTime() - this.time;
+        return TimeUnit.NANOSECONDS.toMillis( System.nanoTime() - this.time);
     }
 
     /**
@@ -80,9 +80,11 @@ public class NanoTimer implements Timer
      *
      * @param time
      */
-    public void setElapsedTime(long time)
+    @Override
+    public void setElapsedTime(Number time)
     {
-        this.time = System.nanoTime() - time;
+        this.time = time.longValue() == MAX_TIME ? 0 :
+                System.nanoTime() - time.longValue();
     }
 
     /**
@@ -91,6 +93,6 @@ public class NanoTimer implements Timer
     @Override
     public void reset()
     {
-        time = System.currentTimeMillis();
+        this.time = System.nanoTime();
     }
 }

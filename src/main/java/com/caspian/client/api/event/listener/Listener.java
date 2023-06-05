@@ -49,7 +49,7 @@ public class Listener implements Comparable<Listener>
     // code from the Listener method.
     private Invoker<Object> invoker;
     // subscriber invoker cache for each listener method
-    private static final Map<Method, Invoker<Object>> invokableCache =
+    private static final Map<Method, Invoker<Object>> INVOKE_CACHE =
             new HashMap<>();
     // the MethodHandler lookup
     private static final Lookup LOOKUP = MethodHandles.lookup();
@@ -70,7 +70,7 @@ public class Listener implements Comparable<Listener>
         // lambda at runtime to call the method
         try
         {
-            if (!invokableCache.containsKey(method))
+            if (!INVOKE_CACHE.containsKey(method))
             {
                 MethodType methodType = MethodType.methodType(Invoker.class);
                 CallSite callSite = LambdaMetafactory.metafactory(
@@ -83,11 +83,11 @@ public class Listener implements Comparable<Listener>
                 );
                 invoker = (Invoker<Object>) callSite.getTarget()
                         .invoke(subscriber);
-                invokableCache.put(method, invoker);
+                INVOKE_CACHE.put(method, invoker);
             }
             else
             {
-                invoker = invokableCache.get(method);
+                invoker = INVOKE_CACHE.get(method);
             }
         }
         catch (Throwable e)
@@ -95,16 +95,6 @@ public class Listener implements Comparable<Listener>
             Caspian.error("Failed to build invoker for %s", method.getName());
             e.printStackTrace();
         }
-    }
-
-    /**
-     *
-     * @param method
-     * @param subscriber
-     */
-    public Listener(Method method, Object subscriber)
-    {
-        this(method, subscriber, 0);
     }
 
     /**

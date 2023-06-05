@@ -8,6 +8,9 @@ package com.caspian.client.util.math;
  */
 public interface Timer
 {
+    //
+    long MAX_TIME = -0xff;
+
     /**
      * Returns <tt>true</tt> if the time since the last reset has exceeded
      * the param time.
@@ -19,13 +22,22 @@ public interface Timer
     boolean passed(Number time);
 
     /**
-     *
+     * Resets the current elapsed time state of the timer and restarts the
+     * timer from 0.
      */
     void reset();
 
     /**
+     * Returns the elapsed time since the last reset of the timer.
      *
-     * @return
+     * @return The elapsed time since the last reset
      */
     long getElapsedTime();
+
+    /**
+     *
+     *
+     * @param time
+     */
+    void setElapsedTime(Number time);
 }
