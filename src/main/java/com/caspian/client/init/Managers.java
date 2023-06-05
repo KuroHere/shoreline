@@ -8,8 +8,6 @@ import com.caspian.client.api.manager.*;
  *
  * @author linus
  * @since 1.0
- *
- *
  */
 public class Managers
 {
@@ -60,12 +58,14 @@ public class Managers
     }
 
     /**
-     * Initializes final manager properties. Only does anything is {@link Managers#isInitialized()} is <b>true</b>
+     * Initializes final manager properties. Only does anything if
+     * {@link #isInitialized()}.
      *
      * @see #init()
      * @see #isInitialized()
      */
-    public static void postInit() {
+    public static void postInit()
+    {
         if (isInitialized())
         {
             MODULE.postInit();

@@ -4,6 +4,7 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.Invoker;
 import com.caspian.client.api.event.Event;
 import com.caspian.client.api.event.handler.EventHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -34,7 +35,7 @@ import java.util.Map;
  * @see EventHandler
  * @see EventListener
  */
-public class Listener
+public class Listener implements Comparable<Listener>
 {
     // The EventListener method which contains the code to invoke when the
     // listener is invoked.
@@ -42,6 +43,8 @@ public class Listener
     // The object that contains the EventListener. This object must be
     // subscribed to the EventHandler in order for this Listener to be invoked.
     private final Object subscriber;
+    //
+    private final int priority;
     // The Listener invoker created by the LambdaMetaFactory which invokes the
     // code from the Listener method.
     private Invoker<Object> invoker;
@@ -56,12 +59,14 @@ public class Listener
      *
      * @param method
      * @param subscriber
+     * @param priority
      */
     @SuppressWarnings("unchecked")
-    public Listener(Method method, Object subscriber)
+    public Listener(Method method, Object subscriber, int priority)
     {
         this.method = method;
         this.subscriber = subscriber;
+        this.priority = priority;
         // lambda at runtime to call the method
         try
         {
@@ -94,6 +99,43 @@ public class Listener
 
     /**
      *
+     * @param method
+     * @param subscriber
+     */
+    public Listener(Method method, Object subscriber)
+    {
+        this(method, subscriber, 0);
+    }
+
+    /**
+     *
+     *
+     * @param event
+     *
+     * @see Invoker#invoke(Object)
+     */
+    public void invoke(Event event)
+    {
+        invoker.invoke(event);
+    }
+
+    /**
+     * Returns a negative integer, zero, or a positive integer as this
+     * {@link Listener} has less than, equal to, or greater priority than the
+     * specified listener.
+     *
+     * @param other The comparing listener
+     *
+     * @see #getPriority()
+     */
+    @Override
+    public int compareTo(Listener other)
+    {
+        return priority - other.getPriority();
+    }
+
+    /**
+     *
      *
      * @return
      */
@@ -115,12 +157,10 @@ public class Listener
     /**
      *
      *
-     * @param event
-     *
-     * @see Invoker#invoke(Object)
+     * @return
      */
-    public void invoke(Event event)
+    public int getPriority()
     {
-        invoker.invoke(event);
+        return priority;
     }
 }

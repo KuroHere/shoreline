@@ -117,7 +117,8 @@ public class SpeedmineModule extends ToggleModule
                     }
                     else if (damage > 1.0f)
                     {
-                        if (!Modules.AUTO_CRYSTAL.isEnabled())
+                        if (!Modules.AUTO_CRYSTAL.isAttacking()
+                                && !Modules.AUTO_CRYSTAL.isPlacing())
                         {
                             if (swapConfig.getValue() == Swap.NORMAL)
                             {

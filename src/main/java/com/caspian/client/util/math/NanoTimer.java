@@ -1,4 +1,4 @@
-package com.caspian.client.util.time;
+package com.caspian.client.util.math;
 
 import java.util.concurrent.TimeUnit;
 
@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
  * @author linus
  * @since 1.0
  */
-public class Timer
+public class NanoTimer implements Timer
 {
     // The cached time since last reset which indicates the time passed since
     // the last timer reset
@@ -19,9 +19,9 @@ public class Timer
      * which means {@link #passed(Number)} and {@link #passed(Number, TimeUnit)}
      * will always return <tt>true</tt> initially
      */
-    public Timer()
+    public NanoTimer()
     {
-        this.time = System.currentTimeMillis();
+        this.time = System.nanoTime();
     }
 
     /**
@@ -32,9 +32,10 @@ public class Timer
      * @return <tt>true</tt> if the time since the last reset has exceeded
      * the param time
      */
+    @Override
     public boolean passed(Number time)
     {
-        return getElapsedTime() > (Long) time;
+        return getElapsedTime() > time.longValue();
     }
 
     /**
@@ -50,7 +51,7 @@ public class Timer
      */
     public boolean passed(Number time, TimeUnit unit)
     {
-        return passed(unit.toMillis((Long) time));
+        return passed(unit.toNanos(time.longValue()));
     }
 
     /**
@@ -58,14 +59,36 @@ public class Timer
      *
      * @return
      */
+    @Override
     public long getElapsedTime()
     {
-        return System.currentTimeMillis() - this.time;
+        return System.nanoTime() - this.time;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public long getElapsedTime(TimeUnit unit)
+    {
+        return unit.convert(getElapsedTime(), TimeUnit.NANOSECONDS);
+    }
+
+    /**
+     *
+     *
+     * @param time
+     */
+    public void setElapsedTime(long time)
+    {
+        this.time = System.nanoTime() - time;
     }
 
     /**
      * Sets the cached time since the last reset to the current time
      */
+    @Override
     public void reset()
     {
         time = System.currentTimeMillis();

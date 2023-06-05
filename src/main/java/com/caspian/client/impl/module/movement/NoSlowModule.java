@@ -39,28 +39,30 @@ import org.lwjgl.glfw.GLFW;
 public class NoSlowModule extends ToggleModule
 {
     // ANTICHEAT SETTINGS
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "",
-            false);
-    Config<Boolean> airStrictConfig = new BooleanConfig("AirStrict",  "",
-            false);
-    Config<Boolean> inventoryMoveConfig = new BooleanConfig("InventoryMove", "",
-            false);
-    Config<Boolean> arrowMoveConfig = new BooleanConfig("ArrowMove", "",
-            false);
-    Config<Boolean> itemsConfig = new BooleanConfig("Items", "",
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Strict NCP " +
+            "bypass for ground slowdowns", false);
+    Config<Boolean> airStrictConfig = new BooleanConfig("AirStrict",  "Strict" +
+            " NCP bypass for air slowdowns", false);
+    Config<Boolean> inventoryMoveConfig = new BooleanConfig("InventoryMove",
+            "Allows the player to move while in inventories or screens", false);
+    Config<Boolean> arrowMoveConfig = new BooleanConfig("ArrowMove", "Allows " +
+            "the player to look while in inventories or screens by using the " +
+            "arrow keys", false);
+    Config<Boolean> itemsConfig = new BooleanConfig("Items", "Removes " +
+            "the slowdown effect caused by using items",
             true);
-    Config<Boolean> shieldsConfig = new BooleanConfig("Shields", "",
-            true);
-    Config<Boolean> websConfig = new BooleanConfig("Webs", "",
-            false);
-    Config<Float> webSpeedConfig = new NumberConfig<>("WebSpeed", "", 0.0f,
-            3.5f, 20.0f);
-    Config<Boolean> soulsandConfig = new BooleanConfig("SoulSand", "",
-            false);
-    Config<Boolean> honeyblockConfig = new BooleanConfig("HoneyBlock", "",
-            false);
-    Config<Boolean> slimeblockConfig = new BooleanConfig("SlimeBlock",  "",
-            false);
+    Config<Boolean> shieldsConfig = new BooleanConfig("Shields", "Removes the" +
+            " slowdown effect caused by shields", true);
+    Config<Boolean> websConfig = new BooleanConfig("Webs", "Removes the " +
+            "slowdown caused when moving through webs", false);
+    Config<Float> webSpeedConfig = new NumberConfig<>("WebSpeed", "Speed to " +
+            "fall through webs", 0.0f, 3.5f, 20.0f);
+    Config<Boolean> soulsandConfig = new BooleanConfig("SoulSand", "Removes " +
+            "the slowdown effect caused by walking over SoulSand blocks", false);
+    Config<Boolean> honeyblockConfig = new BooleanConfig("HoneyBlock", "Removes " +
+            "the slowdown effect caused by walking over Honey blocks", false);
+    Config<Boolean> slimeblockConfig = new BooleanConfig("SlimeBlock",  "Removes " +
+            "the slowdown effect caused by walking over Slime blocks", false);
     
     //
     private boolean sneaking;
