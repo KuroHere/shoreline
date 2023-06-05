@@ -5,10 +5,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.event.listener.Listener;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -30,7 +27,7 @@ public class EventHandler
 
     // Map of events and their associated listeners. All listeners in a class
     // will be added when the class is subscribed to this EventHandler.
-    private final Map<Object, Set<Listener>> listeners =
+    private final Map<Object, TreeSet<Listener>> listeners =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
 
     /**
@@ -53,7 +50,7 @@ public class EventHandler
                     if (params.length == 1 && Event.class.isAssignableFrom(params[0]))
                     {
                         Set<Listener> active = listeners.computeIfAbsent(params[0],
-                                v -> new HashSet<>());
+                                v -> new TreeSet<>());
                         active.add(new Listener(method, obj));
                     }
                 }

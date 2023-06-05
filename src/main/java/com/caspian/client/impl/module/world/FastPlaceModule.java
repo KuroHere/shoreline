@@ -13,7 +13,7 @@ import com.caspian.client.mixin.accessor.AccessorMinecraftClient;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
-import com.caspian.client.util.time.Timer;
+import com.caspian.client.util.math.Timer;
 import com.caspian.client.util.world.SneakBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;

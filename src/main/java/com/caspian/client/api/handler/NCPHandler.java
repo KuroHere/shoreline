@@ -3,7 +3,7 @@ package com.caspian.client.api.handler;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.util.Globals;
-import com.caspian.client.util.time.Timer;
+import com.caspian.client.util.math.Timer;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Vec3d;
 

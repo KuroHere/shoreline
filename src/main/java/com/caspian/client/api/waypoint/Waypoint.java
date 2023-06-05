@@ -3,7 +3,7 @@ package com.caspian.client.api.waypoint;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.setting.NumberConfig;
-import com.caspian.client.util.time.Timer;
+import com.caspian.client.util.math.Timer;
 
 /**
  *
