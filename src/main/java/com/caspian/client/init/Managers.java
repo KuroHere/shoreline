@@ -30,6 +30,7 @@ public class Managers
     public static PositionManager POSITION;
     public static RotationManager ROTATION;
     public static TotemManager TOTEM;
+    public static InteractionManager INTERACT;
 
     /**
      * Initializes the manager instances. Should not be used if the
@@ -53,6 +54,7 @@ public class Managers
             POSITION = new PositionManager();
             ROTATION = new RotationManager();
             TOTEM = new TotemManager();
+            INTERACT = new InteractionManager();
             initialized = true;
         }
     }

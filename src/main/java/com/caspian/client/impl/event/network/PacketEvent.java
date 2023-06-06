@@ -55,6 +55,20 @@ public class PacketEvent extends Event
      */
     public static class Outbound extends PacketEvent
     {
+        //
+        private final boolean cached;
+
+        /**
+         *
+         *
+         * @param packet
+         */
+        public Outbound(Packet<?> packet, boolean cached)
+        {
+            super(packet);
+            this.cached = cached;
+        }
+
         /**
          *
          *
@@ -62,7 +76,16 @@ public class PacketEvent extends Event
          */
         public Outbound(Packet<?> packet)
         {
-            super(packet);
+            this(packet, false);
+        }
+
+        /**
+         *
+         * @return
+         */
+        public boolean isCached()
+        {
+            return cached;
         }
     }
 }

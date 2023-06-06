@@ -16,16 +16,22 @@ import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.BlockView;
 
 /**
  *
@@ -40,8 +46,8 @@ public class SpeedmineModule extends ToggleModule
             "Instantly removes the mining block", false);
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range for mine",
             1.0f, 4.5f, 5.0f);
-    Config<Swap> swapConfig = new EnumConfig<>("Swap", "", Swap.SILENT,
-            Swap.values());
+    Config<Swap> swapConfig = new EnumConfig<>("Swap", "Swaps to the best " +
+            "tool once the mining is complete", Swap.SILENT, Swap.values());
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool" +
             " using alternative packets", false);
     Config<Boolean> remineConfig = new BooleanConfig("Remine",
@@ -99,6 +105,7 @@ public class SpeedmineModule extends ToggleModule
             {
                 if (mining != null)
                 {
+                    state = mc.world.getBlockState(mining);
                     int prev = mc.player.getInventory().selectedSlot;
                     int slot = getBestTool(state);
                     //
@@ -118,7 +125,8 @@ public class SpeedmineModule extends ToggleModule
                     else if (damage > 1.0f)
                     {
                         if (!Modules.AUTO_CRYSTAL.isAttacking()
-                                && !Modules.AUTO_CRYSTAL.isPlacing())
+                                && !Modules.AUTO_CRYSTAL.isPlacing()
+                                && !Modules.AUTO_CRYSTAL.isRotating())
                         {
                             if (swapConfig.getValue() == Swap.NORMAL)
                             {
@@ -179,9 +187,8 @@ public class SpeedmineModule extends ToggleModule
                     }
                     else
                     {
-                        mc.player.getInventory().selectedSlot = slot;
-                        damage += state.getHardness(mc.world, mining);
-                        mc.player.getInventory().selectedSlot = prev;
+                        damage += calcBlockBreakingDelta(state, mc.world,
+                                mining);
                     }
                 }
                 else
@@ -211,10 +218,13 @@ public class SpeedmineModule extends ToggleModule
     @EventListener
     public void onAttackBlock(AttackBlockEvent event)
     {
-        if (mc.player != null && mc.world != null)
+        ClientWorld world = mc.world;
+        if (mc.player != null && world != null)
         {
             state = mc.world.getBlockState(event.getPos());
-            if (!mc.player.isCreative() && isBreakable(state))
+            if (!mc.player.isCreative() && isBreakable(state)
+                    && !world.getWorldBorder().contains(event.getPos())
+                    && !state.isAir())
             {
                 if (mining != event.getPos())
                 {
@@ -271,6 +281,99 @@ public class SpeedmineModule extends ToggleModule
             }
         }
         return slot;
+    }
+
+    /**
+     *
+     *
+     * @param state
+     * @param world
+     * @param pos
+     * @return
+     */
+    private float calcBlockBreakingDelta(BlockState state, BlockView world,
+                                         BlockPos pos)
+    {
+        if (swapConfig.getValue() == Swap.OFF)
+        {
+            return state.calcBlockBreakingDelta(mc.player, mc.world, pos);
+        }
+        float f = state.getHardness(world, pos);
+        if (f == -1.0f)
+        {
+            return 0.0f;
+        }
+        else
+        {
+            int i = canHarvest(state) ? 30 : 100;
+            return getBlockBreakingSpeed(state) / f / (float) i;
+        }
+    }
+
+    /**
+     *
+     *
+     * @param block
+     * @return
+     */
+    private float getBlockBreakingSpeed(BlockState block)
+    {
+        int tool = getBestTool(block);
+        float f = mc.player.getInventory().getStack(tool).getMiningSpeedMultiplier(block);
+        if (f > 1.0F)
+        {
+            int i = EnchantmentHelper.getEfficiency(mc.player);
+            ItemStack stack = mc.player.getInventory().getStack(tool);
+            if (i > 0 && !stack.isEmpty())
+            {
+                f += (float) (i * i + 1);
+            }
+        }
+        if (StatusEffectUtil.hasHaste(mc.player))
+        {
+            f *= 1.0f + (float) (StatusEffectUtil.getHasteAmplifier(mc.player) + 1) * 0.2f;
+        }
+        if (mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE))
+        {
+            float g = switch (mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier())
+            {
+                case 0 -> 0.3f;
+                case 1 -> 0.09f;
+                case 2 -> 0.0027f;
+                default -> 8.1e-4f;
+            };
+            f *= g;
+        }
+        if (mc.player.isSubmergedIn(FluidTags.WATER)
+                && !EnchantmentHelper.hasAquaAffinity(mc.player))
+        {
+            f /= 5.0f;
+        }
+        if (!Managers.POSITION.isOnGround())
+        {
+            f /= 5.0f;
+        }
+        return f;
+    }
+
+    /**
+     * Determines whether the player is able to harvest drops from the specified block state.
+     * If a block requires a special tool, it will check
+     * whether the held item is effective for that block, otherwise
+     * it returns {@code true}.
+     *
+     * @param state
+     *
+     * @see net.minecraft.item.Item#isSuitableFor(BlockState)
+     */
+    private boolean canHarvest(BlockState state)
+    {
+        if (state.isToolRequired())
+        {
+            int tool = getBestTool(state);
+            return mc.player.getInventory().getStack(tool).isSuitableFor(state);
+        }
+        return true;
     }
 
     /**

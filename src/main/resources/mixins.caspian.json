@@ -13,6 +13,7 @@
     "accessor.AccessorPlayerMoveC2SPacket",
     "accessor.AccessorPlayerSkinProvider",
     "accessor.AccessorTextFieldWidget",
+    "accessor.AccessorLivingEntity",
     "block.MixinBlock",
     "block.MixinSlimeBlock",
     "entity.MixinEntity",
@@ -25,8 +26,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "accessor.AccessorLivingEntity"
-  ]
+  }
 }

@@ -12,7 +12,6 @@ public class Event
     // event cannot be canceled.
     private final boolean cancelable =
             getClass().isAnnotationPresent(Cancelable.class);
-
     // Event canceled state. If the event is canceled, then the event
     // callbacks will not run, essentially preventing the code from running.
     private boolean canceled;

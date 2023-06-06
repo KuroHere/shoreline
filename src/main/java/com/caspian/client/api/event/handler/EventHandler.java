@@ -24,7 +24,6 @@ public class EventHandler
     // subscribed to this EventHandler.
     private final Set<Object> subscribers =
             Collections.synchronizedSet(new HashSet<>());
-
     // Map of events and their associated listeners. All listeners in a class
     // will be added when the class is subscribed to this EventHandler.
     private final Map<Object, TreeSet<Listener>> listeners =

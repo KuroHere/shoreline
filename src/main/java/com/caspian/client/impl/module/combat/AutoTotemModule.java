@@ -24,8 +24,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
+import net.minecraft.util.math.Direction;
 
 /**
  *
@@ -36,8 +38,6 @@ import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 public class AutoTotemModule extends ToggleModule
 {
     //
-    Config<Boolean> deathVerboseConfig = new BooleanConfig("DeathVerbose",
-            "", false);
     Config<Item> offhandConfig = new ItemConfig("Offhand", "Item to keep" +
             " in offhand when in a safe environment", Items.TOTEM_OF_UNDYING,
             new Item[]
@@ -75,7 +75,10 @@ public class AutoTotemModule extends ToggleModule
     Config<Boolean> crystalCheckConfig = new BooleanConfig("CrystalCheck",
             "Checks if a crystal is needed in the offhand", false);
     Config<Boolean> hotbarTotemConfig = new BooleanConfig("HotbarTotem",
-            "", false);
+            "Attempts to swap totems into the offhand from the hotbar", false);
+    Config<Integer> totemSlotConfig = new NumberConfig<>("TotemSlot", "Slot " +
+            "in the hotbar that is dedicated for hotbar totem swaps", 0,
+            8, 8);
     //
     private Item offhand;
     //
@@ -101,7 +104,7 @@ public class AutoTotemModule extends ToggleModule
      *
      */
     @Override
-    public void onEnable()
+    public void onDisable()
     {
         offhand = null;
         sneaking = false;
@@ -137,14 +140,27 @@ public class AutoTotemModule extends ToggleModule
             {
                 totems++;
             }
-            for (int i = 9; i < 45; i++)
+            if (hotbarTotemConfig.getValue())
             {
-                ItemStack slot = mc.player.getInventory().getStack(i);
+                int idx = totemSlotConfig.getValue() + 36;
+                ItemStack slot = mc.player.getInventory().getStack(idx);
                 if (slot.getItem() == Items.TOTEM_OF_UNDYING)
                 {
                     totems++;
-                    calcTotem = i;
-                    break;
+                    calcTotem = totemSlotConfig.getValue();
+                }
+            }
+            else
+            {
+                for (int i = 9; i < 45; i++)
+                {
+                    ItemStack slot = mc.player.getInventory().getStack(i);
+                    if (slot.getItem() == Items.TOTEM_OF_UNDYING)
+                    {
+                        totems++;
+                        calcTotem = i;
+                        break;
+                    }
                 }
             }
             if (mc.currentScreen == null)
@@ -220,15 +236,28 @@ public class AutoTotemModule extends ToggleModule
                     else if (off.isEmpty()
                             || off.getItem() != Items.TOTEM_OF_UNDYING)
                     {
-                        preClickSlot();
-                        Managers.INVENTORY.pickupSlot(calcTotem);
-                        boolean rt = !off.isEmpty();
-                        Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
-                        if (rt)
+                        if (hotbarTotemConfig.getValue())
                         {
-                            Managers.INVENTORY.pickupSlot(calcTotem);
+                            int prev = mc.player.getInventory().selectedSlot;
+                            mc.player.getInventory().selectedSlot = calcTotem;
+                            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                                    PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND,
+                                    mc.player.getBlockPos(), Direction.UP));
+                            mc.player.getInventory().selectedSlot = prev;
                         }
-                        postClickSlot();
+                        else
+                        {
+                            preClickSlot();
+                            Managers.INVENTORY.pickupSlot(calcTotem);
+                            boolean rt = !off.isEmpty();
+                            Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
+                            if (rt)
+                            {
+                                Managers.INVENTORY.pickupSlot(calcTotem);
+                            }
+                            postClickSlot();
+                        }
+                        calcTotem = -1;
                     }
                     if (!fallbackCrystalConfig.getValue())
                     {

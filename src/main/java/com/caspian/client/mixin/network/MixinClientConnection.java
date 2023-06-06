@@ -3,6 +3,7 @@ package com.caspian.client.mixin.network;
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.init.Managers;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.Packet;
@@ -31,7 +32,7 @@ public abstract class MixinClientConnection
     private void hookSend(Packet<?> packet, CallbackInfo ci)
     {
         PacketEvent.Outbound packetOutboundEvent =
-                new PacketEvent.Outbound(packet);
+                new PacketEvent.Outbound(packet, Managers.NETWORK.isCached(packet));
         Caspian.EVENT_HANDLER.dispatch(packetOutboundEvent);
         // prevent client from sending packet to server
         if (packetOutboundEvent.isCanceled())

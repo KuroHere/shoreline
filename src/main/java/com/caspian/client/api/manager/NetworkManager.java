@@ -7,8 +7,20 @@ import net.minecraft.client.network.SequencedPacketCreator;
 import net.minecraft.network.listener.ServerPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ *
+ *
+ * @author linus
+ * @since 1.0
+ */
 public class NetworkManager implements Globals
 {
+    //
+    private final Set<Packet<?>> cache = new HashSet<>();
+
     /**
      * 
      * 
@@ -16,9 +28,14 @@ public class NetworkManager implements Globals
      */
     public void sendPacket(Packet<?> p) 
     {
-        
+        cache.add(p);
     }
-    
+
+    /**
+     *
+     *
+     * @param p
+     */
     public void sendSequencedPacket(SequencedPacketCreator p) 
     {
         if (mc.world != null)
@@ -54,5 +71,16 @@ public class NetworkManager implements Globals
                 updater.close();
             }
         }
+    }
+
+    /**
+     *
+     *
+     * @param p
+     * @return
+     */
+    public boolean isCached(Packet<?> p)
+    {
+        return cache.remove(p);
     }
 }
