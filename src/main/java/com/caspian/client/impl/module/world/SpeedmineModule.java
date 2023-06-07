@@ -244,6 +244,7 @@ public class SpeedmineModule extends ToggleModule
                     remines = 0;
                     if (mining != null && direction != null)
                     {
+                        event.cancel();
                         Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                                 PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
                                 mining, direction));

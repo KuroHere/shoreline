@@ -57,7 +57,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>
  * TODO:
  * <li> Manual crystals
- * <li> Speedmine Compatability
  * </p>
  *
  * @author linus
@@ -84,7 +83,7 @@ public class AutoCrystalModule extends ToggleModule
                     "crystal attacks", false);
     Config<Float> calcSleepConfig = new NumberConfig<>("CalcSleep", "Time to " +
             "sleep and pause calculation directly after completing a " +
-            "calculation", 0.0f, 0.05f, 1.0f);
+            "calculation", 0.0f, 0.05f, 0.1f);
     // Config<Boolean> raytraceConfig = new BooleanConfig("Raytrace", "",
     //        false);
     Config<Sequential> sequentialConfig = new EnumConfig<>("Sequential",
@@ -199,6 +198,10 @@ public class AutoCrystalModule extends ToggleModule
     Config<Float> placeWallRangeConfig = new NumberConfig<>(
             "PlaceWallRange", "Range to place crystals through walls", 0.1f,
             4.0f, 5.0f);
+    Config<Boolean> minePlaceConfig = new BooleanConfig("MinePlace",
+            "Places on mining blocks that when broken, can be placed on to " +
+                    "damage enemies. Instantly destroys items spawned from " +
+                    "breaking block and allows faster placing", false);
     Config<Boolean> placeRangeEyeConfig = new BooleanConfig(
             "PlaceRangeEye", "Calculates place ranges starting from the eye " +
             "position of the player, which is how NCP calculates ranges",
@@ -256,6 +259,7 @@ public class AutoCrystalModule extends ToggleModule
     //
     private DamageData<BlockPos> place, lastTickPlace;
     private DamageData<EndCrystalEntity> attack, lastTickAttack;
+    private BlockPos mining;
     //
     private BlockPos sequence;
     private Vec3d preSequence;
@@ -379,6 +383,8 @@ public class AutoCrystalModule extends ToggleModule
                         calc.getCalcPlace();
                 if (!pauseCalcPlace)
                 {
+                    mining = placeData.isMineDamage() ? placeData.getSrc() :
+                            null;
                     place = placeData;
                 }
                 // IMPORTANT NOTE FOR ROTATIONS:
@@ -416,6 +422,7 @@ public class AutoCrystalModule extends ToggleModule
     {
         attack = null;
         place = null;
+        mining = null;
         lastTickAttack = null;
         lastTickPlace = null;
         dest = null;
@@ -812,9 +819,14 @@ public class AutoCrystalModule extends ToggleModule
                             return;
                         }
                         cleanCrystals();
-                        Long placeTime = placements.remove(BlockPos.ofFloored(base));
+                        final BlockPos pos = BlockPos.ofFloored(base);
+                        Long placeTime = placements.remove(pos);
                         if (placeTime != null)
                         {
+                            if (mining != null && pos == mining)
+                            {
+                                return;
+                            }
                             placeTimes.push(System.currentTimeMillis() - placeTime);
                             if (rotateConfig.getValue() && checkFacing(dest,
                                     0.5f))
@@ -888,11 +900,11 @@ public class AutoCrystalModule extends ToggleModule
                                                 getSrcData(packet.getId(), pdata);
                                         if (checkAntiTotem(e, ehealth, dmg))
                                         {
-                                            data.setAntiTotem(true);
+                                            data.addTag("antitotem");
                                         }
                                         if (checkLethal(e, ehealth, dmg))
                                         {
-                                            data.setLethal(true);
+                                            data.addTag("lethal");
                                             if (safetyOverride.getValue())
                                             {
                                                 unsafe = false;
@@ -900,7 +912,7 @@ public class AutoCrystalModule extends ToggleModule
                                         }
                                         if (checkArmor(e))
                                         {
-                                            data.setArmor(true);
+                                            data.addTag("armorbreak");
                                         }
                                         if ((data.getDamage() > minDamageConfig.getValue()
                                                 || data.isAntiTotem()
@@ -1072,7 +1084,8 @@ public class AutoCrystalModule extends ToggleModule
                             double y = Managers.POSITION.getY() + motion.getY();
                             double z = Managers.POSITION.getZ() + motion.getZ();
                             if (dist > breakRangeConfig.getValue() * breakRangeConfig.getValue()
-                                    && !isWithinStrictRange(new Vec3d(x, y, z), c.getPos(),
+                                    && !isWithinStrictRange(new Vec3d(x, y, z),
+                                    c.getPos(),
                                     strictBreakRangeConfig.getValue()))
                             {
                                 continue;
@@ -1249,39 +1262,39 @@ public class AutoCrystalModule extends ToggleModule
                 freq = 0;
             }
         }
-        attackFreq[freq] = attackFreq[freq] + 1;
-        int sum = 0;
-        for (int i = 0; i < freq; i++)
-        {
-            sum += attackFreq[i];
-        }
-        int limit = attackFreqConfig.getValue();
-        // May need configs in the future for TWO and FOUR but afaik
-        // the times can be usually be derived from ONE
-        int attackFreqTwo = attackFreqFullConfig.getValue() * 2;
-        int attackFreqFour = attackFreqTwo * 2;
-        if (freq == 1)
-        {
-            limit = attackFreqFullConfig.getValue();
-        }
-        else if (freq < 4)
-        {
-            limit = attackFreqTwo;
-        }
-        else if (freq < 8)
-        {
-            limit = attackFreqFour;
-        }
-        else if (freq < 16)
-        {
-            limit = attackFreqMaxConfig.getValue();
-        }
-        if (sum - limit > 0)
-        {
-            return false;
-        }
         if (inhibitConfig.getValue())
         {
+            attackFreq[freq] = attackFreq[freq] + 1;
+            int sum = 0;
+            for (int i = 0; i < freq; i++)
+            {
+                sum += attackFreq[i];
+            }
+            int limit = attackFreqConfig.getValue();
+            // May need configs in the future for TWO and FOUR but afaik
+            // the times can be usually be derived from ONE
+            int attackFreqTwo = attackFreqFullConfig.getValue() * 2;
+            int attackFreqFour = attackFreqTwo * 2;
+            if (freq == 1)
+            {
+                limit = attackFreqFullConfig.getValue();
+            }
+            else if (freq < 4)
+            {
+                limit = attackFreqTwo;
+            }
+            else if (freq < 8)
+            {
+                limit = attackFreqFour;
+            }
+            else if (freq < 16)
+            {
+                limit = attackFreqMaxConfig.getValue();
+            }
+            if (sum - limit > 0)
+            {
+                return false;
+            }
             Long time = attacks.get(e);
             if (time != null)
             {
@@ -1865,12 +1878,12 @@ public class AutoCrystalModule extends ToggleModule
                                     new DamageData<>(e, c, dmg, local);
                             if (checkAntiTotem(e, ehealth, dmg))
                             {
-                                data.setAntiTotem(true);
+                                data.addTag("antitotem");
                                 return data;
                             }
                             if (checkLethal(e, ehealth, dmg))
                             {
-                                data.setLethal(true);
+                                data.addTag("lethal");
                                 if (safetyOverride.getValue())
                                 {
                                     unsafe = false;
@@ -1878,7 +1891,7 @@ public class AutoCrystalModule extends ToggleModule
                             }
                             if (checkArmor(e))
                             {
-                                data.setArmor(true);
+                                data.addTag("armorbreak");
                             }
                             if (!unsafe)
                             {
@@ -1954,7 +1967,14 @@ public class AutoCrystalModule extends ToggleModule
                     {
                         continue;
                     }
-                    double local = getDamage(mc.player, toSource(p));
+                    BlockPos dpos = p;
+                    BlockPos mine = Modules.SPEEDMINE.getBlockTarget();
+                    if (minePlaceConfig.getValue() && mine != null
+                            && p == mine)
+                    {
+                        dpos = p.down();
+                    }
+                    double local = getDamage(mc.player, toSource(dpos));
                     // player safety
                     boolean unsafe = false;
                     if (safetyConfig.getValue() && !mc.player.isCreative())
@@ -1981,7 +2001,7 @@ public class AutoCrystalModule extends ToggleModule
                             }
                             if (isEnemy(e))
                             {
-                                double dmg = getDamage(e, toSource(p));
+                                double dmg = getDamage(e, toSource(dpos));
                                 float ehealth = 0.0f;
                                 if (e instanceof LivingEntity)
                                 {
@@ -1990,14 +2010,19 @@ public class AutoCrystalModule extends ToggleModule
                                 }
                                 DamageData<BlockPos> data =
                                         new DamageData<>(e, p, dmg, local);
+                                if (minePlaceConfig.getValue() &&
+                                        mine != null && p == mine)
+                                {
+                                    data.addTag("minedmg");
+                                }
                                 if (checkAntiTotem(e, ehealth, dmg))
                                 {
-                                    data.setAntiTotem(true);
+                                    data.addTag("antitotem");
                                     return data;
                                 }
                                 if (checkLethal(e, ehealth, dmg))
                                 {
-                                    data.setLethal(true);
+                                    data.addTag("lethal");
                                     if (safetyOverride.getValue())
                                     {
                                         unsafe = false;
@@ -2005,7 +2030,7 @@ public class AutoCrystalModule extends ToggleModule
                                 }
                                 if (checkArmor(e))
                                 {
-                                    data.setArmor(true);
+                                    data.addTag("armorbreak");
                                 }
                                 if (!unsafe)
                                 {
@@ -2023,115 +2048,6 @@ public class AutoCrystalModule extends ToggleModule
                 {
                     renderPlace.set(f.getSrc());
                     return f;
-                }
-            }
-            BlockPos mine = Modules.SPEEDMINE.getBlockTarget();
-            if (mine != null)
-            {
-                BlockState state = mc.world.getBlockState(mine);
-                BlockPos pmine = mine.down();
-                if (!state.isAir())
-                {
-                    Vec3d pos = placeRangeEyeConfig.getValue() ?
-                            Managers.POSITION.getEyePos() : Managers.POSITION.getPos();
-                    double dist = placeRangeCenterConfig.getValue() ?
-                            pmine.getSquaredDistanceFromCenter(pos.getX(),
-                                    pos.getY(),
-                                    pos.getZ()) : pmine.getSquaredDistance(pos);
-                    Vec3d motion = mc.player.getVelocity();
-                    double x = Managers.POSITION.getX() + motion.getX();
-                    double y = Managers.POSITION.getY() + motion.getY();
-                    double z = Managers.POSITION.getZ() + motion.getZ();
-                    if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue()
-                            && !isWithinStrictRange(new Vec3d(x, y, z),
-                            toSource(pmine),
-                            strictPlaceRangeConfig.getValue()))
-                    {
-                        return null;
-                    }
-                    Vec3d expected = new Vec3d(pmine.getX() + 0.5,
-                            pmine.getY() + 2.70000004768372,
-                            pmine.getZ() + 0.5);
-                    BlockHitResult result = mc.world.raycast(new RaycastContext(
-                            Managers.POSITION.getCameraPosVec(1.0f),
-                            expected, RaycastContext.ShapeType.COLLIDER,
-                            RaycastContext.FluidHandling.NONE, mc.player));
-                    float maxDist = 36.0f;
-                    if (result != null && result.getType() == HitResult.Type.BLOCK
-                            && result.getBlockPos() != pmine)
-                    {
-                        maxDist = 9.0f;
-                        if (dist > placeWallRangeConfig.getValue() * placeWallRangeConfig.getValue())
-                        {
-                            return null;
-                        }
-                    }
-                    if (breakValidateConfig.getValue() && dist > maxDist)
-                    {
-                        return null;
-                    }
-                    double local = getDamage(mc.player, toSource(pmine));
-                    // player safety
-                    boolean unsafe = false;
-                    if (safetyConfig.getValue() && !mc.player.isCreative())
-                    {
-                        float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
-                        unsafe = local + 0.5 > health
-                                || local > maxLocalDamageConfig.getValue();
-                    }
-                    for (Entity e : mc.world.getEntities())
-                    {
-                        if (e != null && e != mc.player && e.isAlive()
-                                && !Managers.SOCIAL.isFriend(e.getUuid()))
-                        {
-                            if (e instanceof EndCrystalEntity)
-                            {
-                                continue;
-                            }
-                            double pdist = Managers.POSITION.squaredDistanceTo(e);
-                            // double edist = e.squaredDistanceTo(p.toCenterPos());
-                            if (pdist > targetRangeConfig.getValue()
-                                    * targetRangeConfig.getValue())
-                            {
-                                continue;
-                            }
-                            if (isEnemy(e))
-                            {
-                                double dmg = getDamage(e, toSource(pmine));
-                                float ehealth = 0.0f;
-                                if (e instanceof LivingEntity)
-                                {
-                                    ehealth = ((LivingEntity) e).getHealth()
-                                            + ((LivingEntity) e).getAbsorptionAmount();
-                                }
-                                DamageData<BlockPos> data =
-                                        new DamageData<>(e, mine, dmg, local);
-                                if (checkAntiTotem(e, ehealth, dmg))
-                                {
-                                    data.setAntiTotem(true);
-                                    renderPlace.set(data.getSrc());
-                                    return data;
-                                }
-                                if (checkLethal(e, ehealth, dmg))
-                                {
-                                    data.setLethal(true);
-                                    if (safetyOverride.getValue())
-                                    {
-                                        unsafe = false;
-                                    }
-                                }
-                                if (checkArmor(e))
-                                {
-                                    data.setArmor(true);
-                                }
-                                if (!unsafe)
-                                {
-                                    renderPlace.set(data.getSrc());
-                                    return data;
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -2359,7 +2275,7 @@ public class AutoCrystalModule extends ToggleModule
      * <p>
      * Calculations can be run immediately by calling
      * {@link #runCalc(Iterable, Iterable)} or scheduled by calling
-     * {@link #scheduleCalc(Iterable, Iterable, float)} (Remember that these
+     * {@link #scheduleCalc(Iterable, Iterable, Number)} (Remember that these
      * actions will also <b>TERMINATE</b> the current calculation if not
      * {@link TickCalculation#isDone()}!).
      * </p>
@@ -2415,8 +2331,8 @@ public class AutoCrystalModule extends ToggleModule
          * @return
          */
         public void scheduleCalc(final Iterable<EndCrystalEntity> crystalSrc,
-                            final Iterable<BlockPos> placeSrc,
-                            final float time)
+                                 final Iterable<BlockPos> placeSrc,
+                                 final Number time)
         {
             calc = new TickCalculation(this);
             calc.startCalc(crystalSrc, placeSrc, time);
@@ -2553,17 +2469,19 @@ public class AutoCrystalModule extends ToggleModule
          */
         public void startCalc(final Iterable<EndCrystalEntity> crystalSrc,
                               final Iterable<BlockPos> placeSrc,
-                              final float time)
+                              final Number time)
         {
             start = System.currentTimeMillis();
             processor.submitCalc(() ->
             {
                 try
                 {
-                    Thread.sleep((long) (time * 1000L));
+                    Thread.sleep(time.longValue() * 1000L);
                 }
                 catch (InterruptedException ignore)
-                {}
+                {
+                    Thread.currentThread().interrupt();
+                }
                 return calc(crystalSrc, placeSrc);
             });
         }
@@ -2693,7 +2611,7 @@ public class AutoCrystalModule extends ToggleModule
         private final double damage;
         private final double local;
         //
-        private boolean antitotem, lethal, armor;
+        private final Set<String> tags = new HashSet<>();
 
         /**
          *
@@ -2703,7 +2621,10 @@ public class AutoCrystalModule extends ToggleModule
          * @param damage
          * @param local
          */
-        public DamageData(Entity target, T src, double damage, double local)
+        public DamageData(final Entity target, 
+                          final T src, 
+                          final double damage,
+                          final double local)
         {
             this.target = target;
             this.src = src;
@@ -2724,22 +2645,30 @@ public class AutoCrystalModule extends ToggleModule
         {
             if (other.isAntiTotem())
             {
-                return antitotem ? 0 : -1;
+                return isAntiTotem() ? 0 : -1;
             }
-            if (antitotem)
+            if (isAntiTotem())
             {
                 return 1;
             }
             if (other.isLethal())
             {
-                return lethal ? 0 : -1;
+                return isLethal() ? 0 : -1;
             }
-            if (lethal)
+            if (isLethal())
             {
                 return 1;
             }
             // Diffs
             double d = getDamage() - other.getDamage();
+            if (other.isMineDamage())
+            {
+                return isMineDamage() ? Double.compare(getDamage(), other.getDamage()) : 1;
+            }
+            if (isMineDamage())
+            {
+                return -1;
+            }
             if (Math.abs(d) > 0.2)
             {
                 return Double.compare(getDamage(), other.getDamage());
@@ -2795,7 +2724,6 @@ public class AutoCrystalModule extends ToggleModule
             }
             return null;
         }
-
 
         /**
          * Returns the difference in yaw between this data' damage source
@@ -2954,32 +2882,32 @@ public class AutoCrystalModule extends ToggleModule
 
         public boolean isAntiTotem()
         {
-            return antitotem;
+            return tags.contains("antitotem");
         }
 
         public boolean isLethal()
         {
-            return lethal;
+            return tags.contains("lethal");
         }
 
         public boolean isArmorBreaker()
         {
-            return armor;
+            return tags.contains("armorbreak");
         }
 
-        public void setAntiTotem(boolean antitotem)
+        public boolean isMineDamage()
         {
-            this.antitotem = antitotem;
+            return tags.contains("minedmg");
         }
 
-        public void setLethal(boolean lethal)
+        /**
+         * 
+         * 
+         * @param tag
+         */
+        public void addTag(String tag)
         {
-            this.lethal = lethal;
-        }
-
-        public void setArmor(boolean armor)
-        {
-            this.armor = armor;
+            tags.add(tag);
         }
     }
 }
