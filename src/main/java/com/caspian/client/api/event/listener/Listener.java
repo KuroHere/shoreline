@@ -37,6 +37,9 @@ import java.util.Map;
  */
 public class Listener implements Comparable<Listener>
 {
+    // The Listener invoker created by the LambdaMetaFactory which invokes the
+    // code from the Listener method.
+    private Invoker<Object> invoker;
     // The EventListener method which contains the code to invoke when the
     // listener is invoked.
     private final Method method;
@@ -45,9 +48,6 @@ public class Listener implements Comparable<Listener>
     private final Object subscriber;
     //
     private final int priority;
-    // The Listener invoker created by the LambdaMetaFactory which invokes the
-    // code from the Listener method.
-    private Invoker<Object> invoker;
     // subscriber invoker cache for each listener method
     private static final Map<Method, Invoker<Object>> INVOKE_CACHE =
             new HashMap<>();

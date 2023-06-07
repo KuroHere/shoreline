@@ -111,7 +111,7 @@ public class SpeedmineModule extends ToggleModule
                     //
                     double dist = mc.player.squaredDistanceTo(mining.toCenterPos());
                     if (dist > rangeConfig.getValue() * rangeConfig.getValue()
-                            || mc.world.isAir(mining) || damage > 3.0f
+                            || state.isAir() || damage > 3.0f
                             || !remineConfig.getValue()
                             || !infiniteRemineConfig.getValue()
                             && remines > maxRemineConfig.getValue())

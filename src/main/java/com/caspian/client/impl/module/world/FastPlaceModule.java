@@ -13,6 +13,7 @@ import com.caspian.client.mixin.accessor.AccessorMinecraftClient;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.util.math.NanoTimer;
 import com.caspian.client.util.math.Timer;
 import com.caspian.client.util.world.SneakBlocks;
 import net.minecraft.block.BlockState;
@@ -23,6 +24,7 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -50,7 +52,7 @@ public class FastPlaceModule extends ToggleModule
             "Valid item blacklist", Items.ENDER_PEARL, Items.ENDER_EYE);
 
     //
-    private final Timer startTimer = new Timer();
+    private final Timer startTimer = new NanoTimer();
 
     /**
      *
@@ -77,7 +79,7 @@ public class FastPlaceModule extends ToggleModule
             }
             else if (placeCheck(mc.player.getActiveItem()))
             {
-                if (startTimer.passed(startDelayConfig.getValue())
+                if (((NanoTimer) startTimer).passed(startDelayConfig.getValue(), TimeUnit.SECONDS)
                         && ((AccessorMinecraftClient) mc).hookGetItemUseCooldown() > delayConfig.getValue())
                 {
                     if (ghostFixConfig.getValue())

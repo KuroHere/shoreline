@@ -35,6 +35,10 @@ public class NanoTimer implements Timer
     @Override
     public boolean passed(Number time)
     {
+        if (time.longValue() <= 0)
+        {
+            return true;
+        }
         return getElapsedTime() > TimeUnit.NANOSECONDS.toMillis(time.longValue());
     }
 

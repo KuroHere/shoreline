@@ -154,19 +154,35 @@ public class AutoCrystalModule extends ToggleModule
     Config<Float> swapDelayConfig = new NumberConfig<>("SwapPenalty", "Delay " +
             "for attacking after swapping items which prevents NCP flags", 0.0f,
             0.0f, 10.0f);
-    //
+    // fight.speed:
+    //        limit: 13
+    // shortterm:
+    //        ticks: 8
     Config<Boolean> inhibitConfig = new BooleanConfig("Inhibit",
-            "Prevents unnecessary attacks", true);
+            "Prevents excessive attacks", true);
+    Config<Integer> inhibitTicksConfig = new NumberConfig<>("InhibitTicks",
+            "Counts crystals for x amount of ticks before determining that " +
+                    "the attack won't violate NCP attack speeds (aka " +
+                    "shortterm ticks)", 5, 8, 15);
+    Config<Integer> inhibitLimitConfig = new NumberConfig<>("CrystalLimit",
+            "Limits crystal attacks that would flag NCP attack limits",
+            1, 13, 20);
     // default NCP config
     // limitforseconds:
-    //        half: 9
-    //        one: 14
-    //        two: 39
-    //        four: 55
+    //        half: 8
+    //        one: 15
+    //        two: 30
+    //        four: 60
     //        eight: 100
-    Config<Integer> attackFrequencyConfig = new NumberConfig<>(
-            "AttackFrequency", "Limit of attack packets sent for each time " +
-            "interval", 1, 14, 20);
+    Config<Integer> attackFreqConfig = new NumberConfig<>(
+            "AttackFreqHalf", "Limit of attack packets sent for each " +
+            "half-second interval", 1, 8, 20);
+    Config<Integer> attackFreqFullConfig = new NumberConfig<>(
+            "AttackFreqFull", "Limit of attack packets sent for each " +
+            "one-second interval", 10, 15, 30);
+    Config<Integer> attackFreqMaxConfig = new NumberConfig<>(
+            "AttackFreqMax", "Limit of attack packets sent for each " +
+            "eight-second interval", 80, 100, 150);
     // Config<Boolean> manualConfig = new BooleanConfig("Manual",
     //        "Always breaks manually placed crystals", false);
     // PLACE SETTINGS
@@ -239,6 +255,8 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> renderSpawnConfig = new BooleanConfig("RenderSpawn",
             "Indicates if the current placement was spawned", false);
     //
+    private int tick;
+    //
     private DamageData<BlockPos> place;
     private DamageData<EndCrystalEntity> attack;
     //
@@ -255,6 +273,8 @@ public class AutoCrystalModule extends ToggleModule
             Collections.synchronizedMap(new ConcurrentHashMap<>());
     private final Map<Integer, Long> attacks =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
+    private int shortTermCount;
+    private int shortTermTick;
     // RANDOM
     private final Timer randomTime = new NanoTimer();
     private final Random random = new SecureRandom();
@@ -264,7 +284,8 @@ public class AutoCrystalModule extends ToggleModule
             Collections.synchronizedMap(new ConcurrentHashMap<>());
     //
     private final Timer freqInterval = new NanoTimer();
-    private int attackFreq;
+    private final int[] attackFreq = new int[16];
+    private int freq;
     //
     private boolean attacking, placing;
     private final Timer lastPlace = new NanoTimer();
@@ -410,7 +431,9 @@ public class AutoCrystalModule extends ToggleModule
         attacking = false;
         placing = false;
         semi = false;
-        attackFreq = 0;
+        tick = 0;
+        shortTermTick = 0;
+        shortTermCount = 0;
         rotating = 0;
         currRandom = -1;
         lastBreak.reset();
@@ -460,6 +483,7 @@ public class AutoCrystalModule extends ToggleModule
         {
             if (event.getStage() == EventStage.PRE)
             {
+                ++tick;
                 // MAIN LOOP
                 cleanCrystals();
                 tickCalc();
@@ -511,7 +535,6 @@ public class AutoCrystalModule extends ToggleModule
                             lastBreak.reset();
                             randomTime.reset();
                             currRandom = -1;
-                            ++attackFreq;
                         }
                         attack = null;
                         pauseCalcAttack = false;
@@ -553,23 +576,26 @@ public class AutoCrystalModule extends ToggleModule
     @EventListener
     public void onRenderWorld()
     {
-        if (renderConfig.getValue())
+        if (mc.player != null && mc.world != null)
         {
-            int color = Modules.COLORS.getRGB();
-            if (renderAttackConfig.getValue())
+            if (renderConfig.getValue())
             {
-                Box rb = renderBreak.get();
-                if (rb != null)
+                int color = Modules.COLORS.getRGB();
+                if (renderAttackConfig.getValue())
                 {
-                    RenderManager.renderBoundingBox(rb,
-                            1.5f, color);
+                    Box rb = renderBreak.get();
+                    if (rb != null)
+                    {
+                        RenderManager.renderBoundingBox(rb,
+                                1.5f, color);
+                    }
                 }
-            }
-            BlockPos rp = renderPlace.get();
-            if (rp != null)
-            {
-                RenderManager.renderBox(rp, color);
-                RenderManager.renderBoundingBox(rp, 1.5f, color);
+                BlockPos rp = renderPlace.get();
+                if (rp != null)
+                {
+                    RenderManager.renderBox(rp, color);
+                    RenderManager.renderBoundingBox(rp, 1.5f, color);
+                }
             }
         }
     }
@@ -821,7 +847,6 @@ public class AutoCrystalModule extends ToggleModule
                                 lastBreak.reset();
                                 attacks.put(packet.getId(),
                                         System.currentTimeMillis());
-                                ++attackFreq;
                             }
                         }
                         else if (instantCalcConfig.getValue())
@@ -912,7 +937,6 @@ public class AutoCrystalModule extends ToggleModule
                                                 lastBreak.reset();
                                                 attacks.put(packet.getId(),
                                                         System.currentTimeMillis());
-                                                ++attackFreq;
                                             }
                                         }
                                     }
@@ -1155,29 +1179,79 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean preAttackCheck(int e)
     {
-        if (((NanoTimer) freqInterval).passed(1, TimeUnit.SECONDS))
+        if (((NanoTimer) freqInterval).passed(0.5f, TimeUnit.SECONDS))
         {
-            attackFreq = 0;
+            freq++;
+            if (freq > 15)
+            {
+                for (int i = 0; i < 16; i++)
+                {
+                    attackFreq[i] = 0;
+                }
+                freq = 0;
+            }
+        }
+        attackFreq[freq] = attackFreq[freq] + 1;
+        int sum = 0;
+        for (int i = 0; i < freq; i++)
+        {
+            sum += attackFreq[i];
+        }
+        int limit = switch (freq)
+                {
+                    case 0 -> attackFreqConfig.getValue();
+                    case 1 -> attackFreqFullConfig.getValue();
+                    // May need configs in the future for TWO and FOUR but afaik
+                    // the times can be usually be derived from ONE
+                    case 2, 3 -> attackFreqFullConfig.getValue() * 2;
+                    case 4, 5, 6, 7 -> attackFreqFullConfig.getValue() * 4;
+                    case 8, 9, 10, 11, 12, 13, 14, 15 -> attackFreqMaxConfig.getValue();
+                    default -> 0;
+                };
+        if (sum - limit > 0)
+        {
+            return false;
         }
         if (inhibitConfig.getValue())
         {
-            return attacks.containsKey(e);
+            Long time = attacks.get(e);
+            if (time != null)
+            {
+                float total = attacks.size() * 1000.0f / 2000.0f;
+                // Short term
+                if (tick < shortTermTick)
+                {
+                    shortTermTick = tick;
+                    shortTermCount = 1;
+                }
+                else if (tick - shortTermTick < inhibitTicksConfig.getValue())
+                {
+                    shortTermCount++;
+                }
+                else
+                {
+                    shortTermTick = tick;
+                    shortTermCount = 1;
+                }
+                float shortTerm = (float) shortTermCount * 1000f
+                        / (50.0f * inhibitTicksConfig.getValue());
+                float max = Math.max(shortTerm, total);
+                return max > inhibitLimitConfig.getValue();
+            }
         }
-        if (!multitaskConfig.getValue())
+        if (getCrystalHand() != Hand.OFF_HAND)
         {
-            return !mc.player.isUsingItem() || getCrystalHand() == Hand.OFF_HAND;
+            if (multitaskConfig.getValue())
+            {
+                return !mc.player.isUsingItem();
+            }
+            if (whileMiningConfig.getValue())
+            {
+                return !Managers.INTERACT.isBreakingBlock();
+            }
         }
-        if (!whileMiningConfig.getValue())
-        {
-            return !Managers.INTERACT.isBreakingBlock()
-                    || getCrystalHand() == Hand.OFF_HAND;
-        }
-        long swapDelay = (long) (swapDelayConfig.getValue() * 25);
-        if (lastSwap.passed(swapDelay))
-        {
-            return attackFreq <= attackFrequencyConfig.getValue();
-        }
-        return false;
+        float swapDelay = swapDelayConfig.getValue() * 25.0f;
+        return lastSwap.passed(swapDelay);
     }
 
     /**
