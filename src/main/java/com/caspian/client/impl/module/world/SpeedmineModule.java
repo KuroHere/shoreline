@@ -202,6 +202,16 @@ public class SpeedmineModule extends ToggleModule
     /**
      *
      *
+     * @return
+     */
+    public BlockPos getBlockTarget()
+    {
+        return mining;
+    }
+
+    /**
+     *
+     *
      * @param slot
      */
     private void swap(int slot)
