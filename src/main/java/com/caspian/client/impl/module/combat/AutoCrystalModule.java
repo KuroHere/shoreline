@@ -15,7 +15,6 @@ import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
-import com.caspian.client.mixin.accessor.AccessorLivingEntity;
 import com.caspian.client.mixin.accessor.AccessorPlayerInteractEntityC2SPacket;
 import com.caspian.client.util.math.NanoTimer;
 import com.caspian.client.util.math.TickTimer;
@@ -23,24 +22,30 @@ import com.caspian.client.util.math.Timer;
 import com.caspian.client.util.ncp.DirectionChecks;
 import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.world.EntityUtil;
+import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
@@ -123,7 +128,7 @@ public class AutoCrystalModule extends ToggleModule
             "Target animals", false);
     // BREAK SETTINGS
     Config<Float> breakSpeedConfig = new NumberConfig<>("BreakSpeed",
-            "Speed to break crystals", 0.1f, 20.0f, 20.0f);
+            "Speed to break crystals", 0.1f, 18.0f, 20.0f);
     Config<Float> attackDelayConfig = new NumberConfig<>("AttackDelay",
             "Added delays", 0.0f, 0.5f, 10.0f);
     Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed",
@@ -186,7 +191,7 @@ public class AutoCrystalModule extends ToggleModule
             " to damage enemies. Place settings will only function if this " +
             "setting is enabled.", true);
     Config<Float> placeSpeedConfig = new NumberConfig<>("PlaceSpeed",
-            "Speed to place crystals", 0.1f, 20.0f, 20.0f);
+            "Speed to place crystals", 0.1f, 18.0f, 20.0f);
     Config<Float> placeTimeoutConfig = new NumberConfig<>("PlaceTimeout",
             "Time after waiting for the average place time before considering" +
                     " a crystal placement failed", 0.0f, 3.0f, 10.0f);
@@ -217,6 +222,10 @@ public class AutoCrystalModule extends ToggleModule
     Config<Swap> swapConfig = new EnumConfig<>("Swap", "Swaps to an end " +
             "crystal before placing if the player is not holding one", Swap.OFF,
             Swap.values());
+    Config<Boolean> swapSyncConfig = new BooleanConfig("SwapSync",
+            "", false);
+    Config<Float> alternateSpeedConfig = new NumberConfig<>("AlternateSpeed",
+            "Speed for alternative swapping crystals", 1.0f, 18.0f, 20.0f);
     Config<Boolean> breakValidateConfig = new BooleanConfig(
             "BreakValidate", "Only places crystals that can be attacked",
             false);
@@ -257,12 +266,13 @@ public class AutoCrystalModule extends ToggleModule
     //
     private int tick;
     //
-    private DamageData<BlockPos> place, lastTickPlace;
-    private DamageData<EndCrystalEntity> attack, lastTickAttack;
+    private DamageData<BlockPos> place, lastPlaceCalc;
+    private DamageData<EndCrystalEntity> attack, lastAttackCalc;
     private BlockPos mining;
     //
-    private BlockPos sequence;
-    private Vec3d preSequence;
+    private BlockPos preSequence, postSequence;
+    private Vec3d sequence;
+    private final Timer tickSequence = new TickTimer();
     private final Timer startSequence = new NanoTimer();
     // Calculated placements and attacks will be added to their respective
     // stacks. When the main loop requires a placement/attack, simply pop the
@@ -295,6 +305,7 @@ public class AutoCrystalModule extends ToggleModule
     private final Deque<Long> breakTimes = new ArrayDeque<>(20);
     private final Deque<Long> placeTimes = new ArrayDeque<>(20);
     private final Timer lastSwap = new NanoTimer();
+    private final Timer lastSwapAlt = new NanoTimer();
     private final Timer lastAutoSwap = new NanoTimer();
     // private final Timer lastClean = new Timer();
     // ROTATIONS
@@ -394,15 +405,15 @@ public class AutoCrystalModule extends ToggleModule
                 // then there is a possibility that the current rotation may
                 // fallthrough and never actually complete.
                 if (rotating > 0
-                        && (semi && lastTickAttack.getYawDiff(attack) > 30.0f
-                        && !lastTickAttack.isSrcEqual(attack)
-                        || lastTickPlace.getYawDiff(place) > 30.0f
-                        && !lastTickPlace.isSrcEqual(place)))
+                        && (semi && lastAttackCalc.getYawDiff(attack) > 30.0f
+                        && !lastAttackCalc.isSrcEqual(attack)
+                        || lastPlaceCalc.getYawDiff(place) > 30.0f
+                        && !lastPlaceCalc.isSrcEqual(place)))
                 {
                     rotating = 0;
                 }
-                lastTickAttack = attack;
-                lastTickPlace = place;
+                lastAttackCalc = attack;
+                lastPlaceCalc = place;
                 // run calc
                 Iterable<EndCrystalEntity> crystalSrc = getCrystalSphere(
                         Managers.POSITION.getCameraPosVec(1.0f),
@@ -423,8 +434,11 @@ public class AutoCrystalModule extends ToggleModule
         attack = null;
         place = null;
         mining = null;
-        lastTickAttack = null;
-        lastTickPlace = null;
+        preSequence = null;
+        postSequence = null;
+        sequence = null;
+        lastAttackCalc = null;
+        lastPlaceCalc = null;
         dest = null;
         renderBreak.set(null);
         renderPlace.set(null);
@@ -440,6 +454,7 @@ public class AutoCrystalModule extends ToggleModule
         currRandom = -1;
         lastBreak.reset();
         lastPlace.reset();
+        startSequence.reset();
         freqInterval.reset();
         attacks.clear();
         placements.clear();
@@ -723,30 +738,34 @@ public class AutoCrystalModule extends ToggleModule
     {
         if (mc.world != null && mc.player != null)
         {
-            if (event.getPacket() instanceof PlayerInteractEntityC2SPacket packet)
+            if (event.getPacket() instanceof PlayerInteractEntityC2SPacket packet
+                    && event.isCached())
             {
                 if (((AccessorPlayerInteractEntityC2SPacket) packet).hookGetTypeHandler().getType()
                         == PlayerInteractEntityC2SPacket.InteractType.ATTACK)
                 {
-                    MinecraftServer server = mc.player.getServer();
-                    if (server != null)
+                    MinecraftServer server = mc.world.getServer();
+                    RegistryKey<World> world = mc.world.getRegistryKey();
+                    Entity e = packet.getEntity(server.getWorld(world));
+                    if (e != null && e.isAlive()
+                            && e instanceof EndCrystalEntity)
                     {
-                        RegistryKey<World> world = mc.world.getRegistryKey();
-                        Entity e = packet.getEntity(server.getWorld(world));
-                        if (e != null && e.isAlive()
-                                && e instanceof EndCrystalEntity)
+                        if (sequence != null)
                         {
-                            // sequence has technically been completed
-                            if (sequence != null
-                                    && e.squaredDistanceTo(toSource(sequence)) < 0.5f)
+                            float timeout = Math.max(getLatency(breakTimes) + (50.0f * breakTimeoutConfig.getValue()),
+                                    50.0f * minTimeoutConfig.getValue());
+                            if (startSequence.passed(timeout))
                             {
-                                preSequence = e.getPos();
-                                if (sequentialConfig.getValue() == Sequential.NORMAL)
-                                {
-                                    sequence = null;
-                                }
+                                Caspian.error("Latest sequence timed out!");
+                                sequence = null;
+                            }
+                            else
+                            {
+                                return;
                             }
                         }
+                        sequence = e.getPos();
+                        startSequence.reset();
                     }
                 }
             }
@@ -773,14 +792,13 @@ public class AutoCrystalModule extends ToggleModule
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
-        ClientWorld world = mc.world;
-        if (world != null && mc.player != null)
+        if (mc.world != null && mc.player != null)
         {
             if (event.getPacket() instanceof EntityStatusS2CPacket packet)
             {
                 if (packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING)
                 {
-                    Entity e = packet.getEntity(world);
+                    Entity e = packet.getEntity(mc.world);
                     if (e instanceof PlayerEntity p)
                     {
                         pops.put(p, System.currentTimeMillis());
@@ -955,9 +973,9 @@ public class AutoCrystalModule extends ToggleModule
             }
             else if (event.getPacket() instanceof ExplosionS2CPacket packet)
             {
-                if (preSequence != null)
+                if (sequence != null)
                 {
-                    if (preSequence.squaredDistanceTo(packet.getX(),
+                    if (sequence.squaredDistanceTo(packet.getX(),
                             packet.getY(), packet.getZ()) < packet.getRadius() * packet.getRadius())
                     {
                         sequence = null;
@@ -1013,9 +1031,9 @@ public class AutoCrystalModule extends ToggleModule
             {
                 if (packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE)
                 {
-                    if (preSequence != null)
+                    if (sequence != null)
                     {
-                        if (preSequence.squaredDistanceTo(packet.getX(),
+                        if (sequence.squaredDistanceTo(packet.getX(),
                                 packet.getY(), packet.getZ()) < 144.0)
                         {
                             sequence = null;
@@ -1196,22 +1214,24 @@ public class AutoCrystalModule extends ToggleModule
                 if (slot != -1)
                 {
                     int prev = mc.player.getInventory().selectedSlot;
-                    if (swapConfig.getValue() == Swap.SILENT_ALT)
+                    boolean swapped = false;
+                    if (preSwapCheck())
                     {
-                        swapAlt(slot + 36);
+                        swapped = swapConfig.getValue() != Swap.SILENT_ALT ?
+                            swap(slot) : swapAlt(slot + 36);
                     }
-                    else
+                    if (swapped)
                     {
-                        swap(slot);
-                    }
-                    attackDirect(e);
-                    if (antiWeaknessConfig.getValue() == Swap.SILENT)
-                    {
-                        swap(prev);
-                    }
-                    else if (antiWeaknessConfig.getValue() == Swap.SILENT_ALT)
-                    {
-                        swapAlt(prev + 36);
+                        attackDirect(e);
+                        if (antiWeaknessConfig.getValue() == Swap.SILENT)
+                        {
+                            swap(prev);
+                        }
+                        else if (antiWeaknessConfig.getValue() == Swap.SILENT_ALT)
+                        {
+                            swapAlt(prev + 36);
+                            lastSwapAlt.reset();
+                        }
                     }
                 }
                 return false;
@@ -1239,7 +1259,7 @@ public class AutoCrystalModule extends ToggleModule
         ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(e);
         Managers.NETWORK.sendPacket(packet);
         Hand hand = getCrystalHand();
-        swingDirect(hand == null ? Hand.MAIN_HAND : hand);
+        swingDirect(hand != null ? hand : Hand.MAIN_HAND);
     }
 
     /**
@@ -1392,9 +1412,9 @@ public class AutoCrystalModule extends ToggleModule
             if (hand != null)
             {
                 placeDirect(p, hand, result);
-                preSequence = null;
-                sequence = p;
-                startSequence.reset();
+                postSequence = null;
+                preSequence = p;
+                tickSequence.reset();
             }
             else if (swapConfig.getValue() != Swap.OFF)
             {
@@ -1402,24 +1422,18 @@ public class AutoCrystalModule extends ToggleModule
                 int prev = mc.player.getInventory().selectedSlot;
                 if (slot != -1)
                 {
-                    boolean swap = preSwapCheck();
-                    if (swap)
+                    boolean swapped = false;
+                    if (preSwapCheck())
                     {
-                        if (swapConfig.getValue() == Swap.SILENT_ALT)
-                        {
-                            swapAlt(slot + 36);
-                        }
-                        else
-                        {
-                            swap(slot);
-                        }
+                        swapped = swapConfig.getValue() != Swap.SILENT_ALT ?
+                                swap(slot) : swapAlt(slot + 36);
                     }
-                    placeDirect(p, Hand.MAIN_HAND, result);
-                    preSequence = null;
-                    sequence = p;
-                    startSequence.reset();
-                    if (swap)
+                    if (swapped)
                     {
+                        placeDirect(p, Hand.MAIN_HAND, result);
+                        postSequence = null;
+                        preSequence = p;
+                        tickSequence.reset();
                         if (swapConfig.getValue() == Swap.SILENT)
                         {
                             swap(prev);
@@ -1427,6 +1441,7 @@ public class AutoCrystalModule extends ToggleModule
                         else if (swapConfig.getValue() == Swap.SILENT_ALT)
                         {
                             swapAlt(prev + 36);
+                            lastSwapAlt.reset();
                         }
                     }
                 }
@@ -1471,7 +1486,7 @@ public class AutoCrystalModule extends ToggleModule
             if (startSequence.passed(timeout))
             {
                 Caspian.error("Latest sequence timed out!");
-                return true;
+                sequence = null;
             }
             return sequence == null;
         }
@@ -1500,7 +1515,7 @@ public class AutoCrystalModule extends ToggleModule
     private void swingDirect(Hand hand)
     {
         if (swingConfig.getValue() && !mc.player.handSwinging
-                || mc.player.handSwingTicks >= ((AccessorLivingEntity) mc.player).hookGetHandSwingDuration() / 2
+                || mc.player.handSwingTicks >= getHandSwingDuration() / 2
                 || mc.player.handSwingTicks < 0)
         {
             mc.player.handSwinging = true;
@@ -1508,6 +1523,20 @@ public class AutoCrystalModule extends ToggleModule
             mc.player.preferredHand = hand;
         }
         Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
+    }
+
+    /**
+     *
+     * @return
+     */
+    private int getHandSwingDuration()
+    {
+        if (StatusEffectUtil.hasHaste(mc.player))
+        {
+            return 6 - (1 + StatusEffectUtil.getHasteAmplifier(mc.player));
+        }
+        return mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE) ?
+                6 + (1 + mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) * 2 : 6;
     }
 
     /**
@@ -1664,13 +1693,15 @@ public class AutoCrystalModule extends ToggleModule
      * 
      * @param slot
      */
-    private void swap(int slot)
+    private boolean swap(int slot)
     {
         if (slot < 9)
         {
             mc.player.getInventory().selectedSlot = slot;
             mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+            return true;
         }
+        return false;
     }
 
     /**
@@ -1678,9 +1709,42 @@ public class AutoCrystalModule extends ToggleModule
      *
      * @param slot
      */
-    private void swapAlt(int slot)
+    private boolean swapAlt(int slot)
     {
-
+        float delay = 1000.0f - alternateSpeedConfig.getValue() * 50.0f;
+        if (slot > 35 && slot < 45 && lastSwapAlt.passed(delay))
+        {
+            ScreenHandler screenHandler = mc.player.currentScreenHandler;
+            DefaultedList<Slot> slots = screenHandler.slots;
+            List<ItemStack> list = Lists.newArrayListWithCapacity(slots.size());
+            for (Slot s : slots)
+            {
+                list.add(s.getStack().copy());
+            }
+            // screenHandler.onSlotClick(slotId, button, actionType, player);
+            Int2ObjectMap<ItemStack> diffs =
+                    new Int2ObjectOpenHashMap<>();
+            for (int i = 0; i < slots.size(); ++i)
+            {
+                ItemStack i1 = list.get(i);
+                ItemStack i2 = slots.get(i).getStack();
+                if (!ItemStack.areEqual(i1, i2))
+                {
+                    diffs.put(i, i2.copy());
+                }
+            }
+            Managers.NETWORK.sendPacket(new ClickSlotC2SPacket(0,
+                    screenHandler.getRevision(), slot,
+                    0, SlotActionType.SWAP,
+                    screenHandler.getCursorStack().copy(), diffs));
+            // lastSwapAlt.reset();
+            if (swapSyncConfig.getValue())
+            {
+                Managers.INVENTORY.syncSelectedSlot();
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -2608,10 +2672,11 @@ public class AutoCrystalModule extends ToggleModule
         //
         private final Entity target;
         private final T src;
+        private final Position pos, rotpos;
         private final double damage;
         private final double local;
         //
-        private final Set<String> tags = new HashSet<>();
+        private final Set<String> tags;
 
         /**
          *
@@ -2630,6 +2695,22 @@ public class AutoCrystalModule extends ToggleModule
             this.src = src;
             this.damage = damage;
             this.local = local;
+            Position p1 = null;
+            if (src instanceof EndCrystalEntity crystal)
+            {
+                p1 = crystal.getPos();
+            }
+            else if (src instanceof BlockPos cpos)
+            {
+                p1 = new Vec3d(cpos.getX(), cpos.getY(), cpos.getZ());
+            }
+            this.pos = p1;
+            if (src instanceof BlockPos cpos)
+            {
+                p1 = cpos.toCenterPos();
+            }
+            this.rotpos = p1;
+            this.tags = new HashSet<>(10);
         }
 
         /**
@@ -2754,16 +2835,7 @@ public class AutoCrystalModule extends ToggleModule
          */
         public Vec3d getRotPos()
         {
-            Vec3d pos = null;
-            if (src instanceof EndCrystalEntity crystal)
-            {
-                pos = crystal.getPos();
-            }
-            else if (src instanceof BlockPos cpos)
-            {
-                pos = cpos.toCenterPos();
-            }
-            return pos;
+            return (Vec3d) rotpos;
         }
 
         /**
@@ -2773,16 +2845,7 @@ public class AutoCrystalModule extends ToggleModule
          */
         public Vec3d getPos()
         {
-            Vec3d pos = null;
-            if (src instanceof EndCrystalEntity crystal)
-            {
-                pos = crystal.getPos();
-            }
-            else if (src instanceof BlockPos cpos)
-            {
-                pos = new Vec3d(cpos.getX(), cpos.getY(), cpos.getZ());
-            }
-            return pos;
+            return (Vec3d) pos;
         }
 
         /**
@@ -2793,7 +2856,7 @@ public class AutoCrystalModule extends ToggleModule
         @Override
         public double getX()
         {
-            return getPos().getX();
+            return pos.getX();
         }
 
         /**
@@ -2804,7 +2867,7 @@ public class AutoCrystalModule extends ToggleModule
         @Override
         public double getY()
         {
-            return getPos().getY();
+            return pos.getY();
         }
 
         /**
@@ -2815,7 +2878,7 @@ public class AutoCrystalModule extends ToggleModule
         @Override
         public double getZ()
         {
-            return getPos().getZ();
+            return pos.getZ();
         }
 
         /**

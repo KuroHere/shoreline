@@ -13,7 +13,7 @@
     "accessor.AccessorPlayerMoveC2SPacket",
     "accessor.AccessorPlayerSkinProvider",
     "accessor.AccessorTextFieldWidget",
-    "accessor.AccessorLivingEntity",
+    "accessor.AccessorClientPlayerInteractionManager",
     "block.MixinBlock",
     "block.MixinSlimeBlock",
     "entity.MixinEntity",

@@ -2,6 +2,7 @@ package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.handler.InventoryHandler;
+import com.caspian.client.mixin.accessor.AccessorClientPlayerInteractionManager;
 import com.caspian.client.util.Globals;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
@@ -33,9 +34,19 @@ public class InventoryManager implements Globals
      *
      * @param slot
      */
-    public void pickupSlot(int slot)
+    public void pickupSlot(final int slot)
     {
         click(slot, SlotActionType.PICKUP, false);
+    }
+
+    /**
+     *
+     *
+     * @param slot
+     */
+    public void throwSlot(final int slot)
+    {
+        click(slot, SlotActionType.THROW, false);
     }
     
     /**
@@ -45,13 +56,24 @@ public class InventoryManager implements Globals
      * @param type
      * @param tick
      */
-    private void click(int slot, SlotActionType type, boolean tick)
+    private void click(final int slot,
+                       final SlotActionType type,
+                       final boolean tick)
     {
         mc.interactionManager.clickSlot(0, slot, 0, type, mc.player);
         if (tick)
         {
-            mc.interactionManager.tick();
+            syncSelectedSlot();
         }
+    }
+
+    /**
+     *
+     */
+    public void syncSelectedSlot()
+    {
+        ((AccessorClientPlayerInteractionManager) mc.interactionManager)
+                .hookSyncSelectedSlot();
     }
     
     /**
