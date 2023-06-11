@@ -1,9 +1,13 @@
 package com.caspian.client.util.ncp;
 
+import com.caspian.client.util.Globals;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -11,37 +15,72 @@ import java.util.List;
  * @author linus
  * @since 1.0
  */
-public class DirectionChecks
+public class DirectionChecks implements Globals
 {
     /**
      *
      *
-     * @param xdiff
-     * @param ydiff
+     * @param x
+     * @param y
+     * @param z
+     * @param dx
+     * @param dy
+     * @param dz
      * @return
      */
-    public static List<Direction> getInteractableDirections(final int xdiff,
-                                                            final int ydiff,
-                                                            final int zdiff)
+    public static Set<Direction> getInteractableDirections(final int x,
+                                                           final int y,
+                                                           final int z,
+                                                           final int dx,
+                                                           final int dy,
+                                                           final int dz)
     {
         // directly from NCP src
-        final List<Direction> dirs = new ArrayList<>(6);
-        if (ydiff == 0) 
+        final BlockPos pos = new BlockPos(dx, dy, dz);
+        final Vec3d center = pos.toCenterPos();
+        final BlockState state = mc.world.getBlockState(pos);
+        final double xdiff = x - center.getX();
+        final double ydiff = y - center.getY();
+        final double zdiff = z - center.getZ();
+        final Set<Direction> dirs = new HashSet<>(6);
+        if (xdiff < -0.5)
         {
-            dirs.add(Direction.UP);
+            dirs.add(Direction.WEST);
+        }
+        else if (xdiff > 0.5)
+        {
+            dirs.add(Direction.EAST);
+        }
+        else if (state.isFullCube(mc.world, pos))
+        {
+            dirs.add(Direction.WEST);
+            dirs.add(Direction.EAST);
+        }
+        if (ydiff < -0.5)
+        {
             dirs.add(Direction.DOWN);
         }
-        else 
+        else if (ydiff > 0.5)
         {
-            dirs.add(ydiff > 0 ? Direction.UP : Direction.DOWN);
+            dirs.add(Direction.UP);
         }
-        if (xdiff != 0) 
+        else
         {
-            dirs.add(xdiff > 0 ? Direction.EAST : Direction.WEST);
+            dirs.add(Direction.DOWN);
+            dirs.add(Direction.UP);
         }
-        if (zdiff != 0)
+        if (zdiff < -0.5)
         {
-            dirs.add(zdiff > 0 ? Direction.SOUTH : Direction.NORTH);
+            dirs.add(Direction.NORTH);
+        }
+        else if (zdiff > 0.5)
+        {
+            dirs.add(Direction.SOUTH);
+        }
+        else if (state.isFullCube(mc.world, pos))
+        {
+            dirs.add(Direction.NORTH);
+            dirs.add(Direction.SOUTH);
         }
         return dirs;
     }
