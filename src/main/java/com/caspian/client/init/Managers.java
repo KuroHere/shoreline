@@ -31,6 +31,7 @@ public class Managers
     public static RotationManager ROTATION;
     public static TotemManager TOTEM;
     public static InteractionManager INTERACT;
+    public static LatencyPositionManager LATENCY_POS;
 
     /**
      * Initializes the manager instances. Should not be used if the
@@ -55,6 +56,7 @@ public class Managers
             ROTATION = new RotationManager();
             TOTEM = new TotemManager();
             INTERACT = new InteractionManager();
+            LATENCY_POS = new LatencyPositionManager();
             initialized = true;
         }
     }

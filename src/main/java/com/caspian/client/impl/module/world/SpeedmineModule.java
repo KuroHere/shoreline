@@ -51,7 +51,7 @@ public class SpeedmineModule extends ToggleModule
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool" +
             " using alternative packets", false);
     Config<Boolean> remineConfig = new BooleanConfig("Remine",
-            "Attempts to remine blocks", false);
+            "Attempts to remine blocks", true);
     Config<Boolean> fastConfig = new BooleanConfig("Fast", "Attempts to " +
             "instantly remine blocks", false);
     Config<Boolean> remineFullConfig = new BooleanConfig("RemineFull",
