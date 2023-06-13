@@ -20,9 +20,9 @@ public class NoWeatherModule extends ToggleModule
     /**
      *
      */
-    public NoWeatherModule(String name, String desc, ModuleCategory category)
+    public NoWeatherModule()
     {
-        super(name, desc, category);
+        super("NoWeather", "Prevents weather rendering", ModuleCategory.RENDER);
     }
 
     // WHY THE FUCK DOES THIS NEED A HACK

@@ -34,14 +34,16 @@ public class LatencyPositionHandler implements Globals
     /**
      *
      *
+     * @param floor
      * @param player
      * @param time
      * @return
      */
-    public TrackedData getTrackedData(final PlayerEntity player,
+    public TrackedData getTrackedData(final Vec3d floor,
+                                      final PlayerEntity player,
                                       final long time)
     {
-        return tracker.getTrackedData(player, time);
+        return tracker.getTrackedData(floor, player, time);
     }
 
     /**

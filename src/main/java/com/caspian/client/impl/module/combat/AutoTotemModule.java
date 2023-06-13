@@ -26,6 +26,7 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.util.math.Direction;
 
@@ -168,7 +169,8 @@ public class AutoTotemModule extends ToggleModule
                 if (!critical)
                 {
                     offhand = crystalCheckConfig.getValue()
-                            && Modules.AUTO_CRYSTAL.isPlacing() ?
+                                    && (Modules.AUTO_CRYSTAL.isPlacing()
+                                    || Modules.AUTO_CRYSTAL.isPlaceRotating()) ?
                             Items.END_CRYSTAL : offhandConfig.getValue();
                     //
                     ItemStack mainhand = mc.player.getMainHandStack();
@@ -240,10 +242,12 @@ public class AutoTotemModule extends ToggleModule
                         {
                             int prev = mc.player.getInventory().selectedSlot;
                             mc.player.getInventory().selectedSlot = calcTotem;
+                            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(calcTotem));
                             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                                     PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND,
                                     mc.player.getBlockPos(), Direction.UP));
                             mc.player.getInventory().selectedSlot = prev;
+                            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
                         }
                         else
                         {
@@ -325,15 +329,14 @@ public class AutoTotemModule extends ToggleModule
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
-        ClientWorld world = mc.world;
-        if (mc.player != null && world != null)
+        if (mc.player != null && mc.world != null)
         {
             if (instantConfig.getValue())
             {
                 if (event.getPacket() instanceof EntityStatusS2CPacket packet)
                 {
                     // PLAYER POPPED TOTEM! attempt to instantly replace
-                    if (packet.getEntity(world) == mc.player
+                    if (packet.getEntity(mc.world) == mc.player
                             && packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING)
                     {
                         critical = true;

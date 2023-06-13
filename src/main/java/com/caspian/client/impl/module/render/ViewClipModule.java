@@ -23,7 +23,7 @@ public class ViewClipModule extends ToggleModule
      */
     public ViewClipModule()
     {
-        super("ViewClip", "Clips your third person camera through blocks",
+        super("ViewClip", "Clips your third-person camera through blocks",
                 ModuleCategory.MISCELLANEOUS);
     }
 }

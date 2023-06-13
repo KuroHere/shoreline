@@ -1,17 +1,12 @@
 package com.caspian.client.api.handler.latency;
 
 import com.caspian.client.util.Globals;
-import com.mojang.authlib.GameProfile;
-import net.minecraft.client.network.OtherClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.Vec3d;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *
@@ -22,142 +17,75 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class PosTracker implements Globals
 {
     // BACKTRACK MANAGER
-    private final Map<Entity, TrackEntity> trackedData =
+    private final Map<Entity, List<TrackedData>> trackedData =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
 
     /**
      *
      *
+     * @param player
      * @param data
      */
     public void addTrackedData(final PlayerEntity player,
-                                final TrackedData data)
+                               final TrackedData data)
     {
-        TrackEntity tracked = trackedData.computeIfAbsent(player,
-                        d -> {
-                            final TrackEntity tracker = new TrackEntity(mc.world,
-                                player.getGameProfile());
-                            tracker.refreshPositionAndAngles(data.getX(),
-                                    data.getY(), data.getZ(), player.getYaw(), player.getPitch());
-                            tracker.getInventory().clone(player.getInventory());
-                            tracker.setId(player.getId());
-                            mc.world.spawnEntity(tracker);
-                            mc.world.addEntity(player.getId(), tracker);
-                            return tracker;
-                        });
-        tracked.cleanCache();
+        cleanCache();
+        List<TrackedData> tracked = trackedData.computeIfAbsent(player,
+                d -> new ArrayList<>());
         tracked.add(data);
     }
 
     /**
      *
      *
-     * @param player
-     * @param time
-     * @return
      */
-    public TrackedData getTrackedData(final PlayerEntity player,
-                                      final long time)
+    public void cleanCache()
     {
-        TrackedData backtrack = null;
-        TrackEntity tracked = trackedData.get(player);
-        if (!tracked.isDataEmpty())
+        final Collection<List<TrackedData>> data = trackedData.values();
+        for (List<TrackedData> tracked : data)
         {
-            long minDiff = Long.MAX_VALUE;
-            for (TrackedData d : tracked.getData())
+            for (TrackedData d : tracked)
             {
-                long diff = Math.abs(d.getTime() - time);
-                if (diff < minDiff)
+                if (d.getTime() > 1000L)
                 {
-                    minDiff = diff;
-                    backtrack = d;
+                    trackedData.remove(d.getTrack());
                 }
             }
         }
-        if (backtrack != null)
-        {
-            tracked.setPos(backtrack.getX(), backtrack.getY(), backtrack.getZ());
-        }
-        return backtrack;
     }
 
     /**
      *
      *
-     * @author linus
-     * @since 1.0
+     * @param floor
+     * @param player
+     * @param time
+     * @return
      */
-    private class TrackEntity extends OtherClientPlayerEntity
+    public TrackedData getTrackedData(final Vec3d floor,
+                                      final PlayerEntity player,
+                                      final long time)
     {
-        //
-        private final List<TrackedData> posdata = new CopyOnWriteArrayList<>();
-
-        /**
-         *
-         *
-         * @param clientWorld
-         * @param gameProfile
-         */
-        public TrackEntity(ClientWorld clientWorld, GameProfile gameProfile)
+        TrackedData backtrack = null;
+        final List<TrackedData> tracked = trackedData.get(player);
+        if (!tracked.isEmpty())
         {
-            super(clientWorld, gameProfile);
-        }
-
-        /**
-         *
-         *
-         * @param data
-         * @return
-         */
-        public boolean add(final TrackedData data)
-        {
-            return posdata.add(data);
-        }
-
-        /**
-         *
-         *
-         * @return
-         */
-        public boolean isDataEmpty()
-        {
-            return posdata.isEmpty();
-        }
-
-        /**
-         *
-         *
-         * @return
-         */
-        public List<TrackedData> getData()
-        {
-            return posdata;
-        }
-
-        /**
-         *
-         *
-         */
-        public void cleanCache()
-        {
-            for (TrackedData data : posdata)
+            double min = Double.MAX_VALUE;
+            for (TrackedData d : tracked)
             {
-                if (data.getTime() > 1000L)
+                if (d.getTime() > time)
                 {
-                    trackedData.remove(data.getTrack());
+                    continue;
+                }
+                double dist = floor.squaredDistanceTo(d.getX(), d.getY(),
+                        d.getZ());
+                if (dist < min)
+                {
+                    min = dist;
+                    backtrack = d;
                 }
             }
         }
-
-        /**
-         *
-         *
-         * @return
-         */
-        @Override
-        public boolean isDead()
-        {
-            return false;
-        }
+        return backtrack;
     }
 }

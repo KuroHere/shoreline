@@ -44,7 +44,8 @@ public class ViewModelModule extends ToggleModule
      */
     public ViewModelModule()
     {
-        super("ViewModel", "", ModuleCategory.RENDER);
+        super("ViewModel", "Renders for the first-person viewmodel",
+                ModuleCategory.RENDER);
     }
 
     public enum AspectRatio
