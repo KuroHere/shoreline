@@ -27,16 +27,13 @@ public class ToggleModule extends Module
 {
     // Config representing the module enabled state. Cannot interact with
     // this configuration unless using #toggle() #enable() or #disable().
-    private final Config<Boolean> enabledConfig = new BooleanConfig(
-            "Enabled", "The module enabled state. This state is true when " +
-            "the module is running.", false);
-
+    Config<Boolean> enabledConfig = new BooleanConfig("Enabled", "The module" +
+            " enabled state. This state is true when the module is running.", false);
     // Config for keybinding implementation. Module keybind is used to
     // interact with the #enabledConfig.
-    private final Config<Macro> keybindingConfig = new MacroConfig("Keybind",
-            "The module keybinding. Pressing this key will toggle the " +
-                    "module enabled state.", new Macro(getId(),
-                    GLFW.GLFW_KEY_UNKNOWN, this::toggle));
+    Config<Macro> keybindingConfig = new MacroConfig("Keybind", "The module " +
+            "keybinding. Pressing this key will toggle the module enabled " +
+            "state.", new Macro(getId(), GLFW.GLFW_KEY_UNKNOWN, this::toggle));
 
     /**
      *

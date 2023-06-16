@@ -50,7 +50,7 @@ public class TrackedData implements Position, Globals
      */
     public OtherClientPlayerEntity toTrackedEntity()
     {
-        OtherClientPlayerEntity tracked =
+        final OtherClientPlayerEntity tracked =
                 new OtherClientPlayerEntity(mc.world, track.getGameProfile())
                 {
                     /**

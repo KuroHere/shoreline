@@ -426,7 +426,7 @@ public class AutoTotemModule extends ToggleModule
     /**
      *
      *
-     * @param s
+     * @param stack
      * @return
      */
     private boolean isStackInOffhand(final ItemStack stack)
