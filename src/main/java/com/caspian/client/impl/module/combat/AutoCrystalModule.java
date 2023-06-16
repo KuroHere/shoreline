@@ -814,8 +814,8 @@ public class AutoCrystalModule extends ToggleModule
             }
             else if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket)
             {
-                lastSwap.reset();
                 lastAutoSwap.reset();
+                lastSwap.reset();
             }
         }
     }
@@ -932,10 +932,16 @@ public class AutoCrystalModule extends ToggleModule
                                         tpos = Managers.LATENCY_POS.getTrackedData(pos,
                                                 player, maxLatencyConfig.getValue());
                                     }
-                                    double pdist = pos.squaredDistanceTo(tpos.getX(),
+                                    double dist = cpos.squaredDistanceTo(tpos.getX(),
+                                            tpos.getY(), tpos.getZ());
+                                    if (dist > 144.0f)
+                                    {
+                                        continue;
+                                    }
+                                    double tdist = pos.squaredDistanceTo(tpos.getX(),
                                             tpos.getY(), tpos.getZ());
                                     // double edist = e.squaredDistanceTo(p.toCenterPos());
-                                    if (pdist > targetRangeConfig.getValue()
+                                    if (tdist > targetRangeConfig.getValue()
                                             * targetRangeConfig.getValue())
                                     {
                                         continue;
@@ -953,11 +959,11 @@ public class AutoCrystalModule extends ToggleModule
                                             ehealth = ((LivingEntity) e).getHealth()
                                                     + ((LivingEntity) e).getAbsorptionAmount();
                                         }
-                                        DamageData<BlockPos> pdata =
+                                        final DamageData<BlockPos> pdata =
                                                 new DamageData<>(e,
                                                         BlockPos.ofFloored(cpos),
                                                         dmg, local);
-                                        DamageData<EndCrystalEntity> data =
+                                        final DamageData<EndCrystalEntity> data =
                                                 getSrcData(pdata, packet.getId());
                                         if (checkAntiTotem(e, ehealth, dmg))
                                         {
@@ -1833,9 +1839,9 @@ public class AutoCrystalModule extends ToggleModule
             {
                 for (double z = -rad; z <= rad; ++z)
                 {
-                    Vec3i pos = new Vec3i((int) (origin.getX() + x),
+                    final Vec3i pos = new Vec3i((int) (origin.getX() + x),
                             (int) (origin.getY() + y), (int) (origin.getZ() + z));
-                    BlockPos p = new BlockPos(pos);
+                    final BlockPos p = new BlockPos(pos);
                     if (canUseOnBlock(p))
                     {
                         double dist = placeRangeCenterConfig.getValue() ?
@@ -1876,7 +1882,7 @@ public class AutoCrystalModule extends ToggleModule
         {
             return true;
         }
-        BlockHitResult result = mc.world.raycast(new RaycastContext(
+        final BlockHitResult result = mc.world.raycast(new RaycastContext(
                 Managers.POSITION.getCameraPosVec(1.0f),
                 cpos, RaycastContext.ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE, mc.player));
@@ -2039,9 +2045,9 @@ public class AutoCrystalModule extends ToggleModule
         {
             return true;
         }
-        Vec3d expected = new Vec3d(p.getX() + 0.5,
+        final Vec3d expected = new Vec3d(p.getX() + 0.5,
                 p.getY() + 2.70000004768372, p.getZ() + 0.5);
-        BlockHitResult result = mc.world.raycast(new RaycastContext(
+        final BlockHitResult result = mc.world.raycast(new RaycastContext(
                 Managers.POSITION.getCameraPosVec(1.0f),
                 expected, RaycastContext.ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE, mc.player));
@@ -2097,7 +2103,8 @@ public class AutoCrystalModule extends ToggleModule
                 {
                     dpos = p.down();
                 }
-                final double local = getDamage(mc.player, toSource(dpos));
+                final Vec3d src = toSource(dpos);
+                final double local = getDamage(mc.player, src);
                 // player safety
                 boolean unsafe = false;
                 if (safetyConfig.getValue() && !mc.player.isCreative())
@@ -2124,7 +2131,6 @@ public class AutoCrystalModule extends ToggleModule
                                 tpos = Managers.LATENCY_POS.getTrackedData(pos,
                                         player, maxLatencyConfig.getValue());
                             }
-                            final Vec3d src = toSource(dpos);
                             double dist = src.squaredDistanceTo(tpos.getX(),
                                     tpos.getY(), tpos.getZ());
                             if (dist > 144.0f)
