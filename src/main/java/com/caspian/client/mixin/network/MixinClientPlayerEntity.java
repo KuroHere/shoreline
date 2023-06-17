@@ -100,77 +100,74 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                         mc.player.getPitch(), mc.player.isOnGround());
         movementPacketsEvent.setStage(EventStage.PRE);
         Caspian.EVENT_HANDLER.dispatch(movementPacketsEvent);
-        if (movementPacketsEvent.isCanceled())
+        ci.cancel();
+        sendSprintingPacket();
+        boolean bl = isSneaking();
+        if (bl != lastSneaking)
         {
-            ci.cancel();
-            sendSprintingPacket();
-            boolean bl = isSneaking();
-            if (bl != lastSneaking)
-            {
-                ClientCommandC2SPacket.Mode mode = bl ? ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY :
-                                ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY;
-                networkHandler.sendPacket(new ClientCommandC2SPacket(this,
-                        mode));
-                lastSneaking = bl;
-            }
-            if (isCamera()) 
-            {
-                double d = getX() - lastX;
-                double e = getY() - lastBaseY;
-                double f = getZ() - lastZ;
-                double g = getYaw() - lastYaw;
-                double h = getPitch() - lastPitch;
-                ++ticksSinceLastPositionPacketSent;
-                boolean bl2 = MathHelper.squaredMagnitude(d, e, f) > MathHelper.square(2.0e-4) 
-                        || ticksSinceLastPositionPacketSent >= 20;
-                boolean bl3 = g != 0.0 || h != 0.0;
-                if (hasVehicle()) 
-                {
-                    Vec3d vec3d = getVelocity();
-                    networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(
-                            vec3d.x, -999.0, vec3d.z, getYaw(),
-                            getPitch(), onGround));
-                    bl2 = false;
-                } 
-                else if (bl2 && bl3) 
-                {
-                    networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(
-                            getX(), getY(), getZ(), getYaw(), getPitch(),
-                            onGround));
-                } 
-                else if (bl2) 
-                {
-                    networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                            getX(), getY(), getZ(), onGround));
-                } 
-                else if (bl3) 
-                {
-                    networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-                            getYaw(), getPitch(), onGround));
-                } 
-                else if (lastOnGround != onGround) 
-                {
-                    networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(
-                            onGround));
-                }
-                if (bl2)
-                {
-                    lastX = getX();
-                    lastBaseY = getY();
-                    lastZ = getZ();
-                    ticksSinceLastPositionPacketSent = 0;
-                }
-                if (bl3)
-                {
-                    lastYaw = getYaw();
-                    lastPitch = getPitch();
-                }
-                lastOnGround = onGround;
-                autoJumpEnabled = client.options.getAutoJump().getValue();
-            }
-            movementPacketsEvent.setStage(EventStage.POST);
-            Caspian.EVENT_HANDLER.dispatch(movementPacketsEvent);
+            ClientCommandC2SPacket.Mode mode = bl ? ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY :
+                    ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY;
+            networkHandler.sendPacket(new ClientCommandC2SPacket(this,
+                    mode));
+            lastSneaking = bl;
         }
+        if (isCamera())
+        {
+            double d = getX() - lastX;
+            double e = getY() - lastBaseY;
+            double f = getZ() - lastZ;
+            double g = getYaw() - lastYaw;
+            double h = getPitch() - lastPitch;
+            ++ticksSinceLastPositionPacketSent;
+            boolean bl2 = MathHelper.squaredMagnitude(d, e, f) > MathHelper.square(2.0e-4)
+                    || ticksSinceLastPositionPacketSent >= 20;
+            boolean bl3 = g != 0.0 || h != 0.0;
+            if (hasVehicle())
+            {
+                Vec3d vec3d = getVelocity();
+                networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(
+                        vec3d.x, -999.0, vec3d.z, getYaw(),
+                        getPitch(), onGround));
+                bl2 = false;
+            }
+            else if (bl2 && bl3)
+            {
+                networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(
+                        getX(), getY(), getZ(), getYaw(), getPitch(),
+                        onGround));
+            }
+            else if (bl2)
+            {
+                networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        getX(), getY(), getZ(), onGround));
+            }
+            else if (bl3)
+            {
+                networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
+                        getYaw(), getPitch(), onGround));
+            }
+            else if (lastOnGround != onGround)
+            {
+                networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(
+                        onGround));
+            }
+            if (bl2)
+            {
+                lastX = getX();
+                lastBaseY = getY();
+                lastZ = getZ();
+                ticksSinceLastPositionPacketSent = 0;
+            }
+            if (bl3)
+            {
+                lastYaw = getYaw();
+                lastPitch = getPitch();
+            }
+            lastOnGround = onGround;
+            autoJumpEnabled = client.options.getAutoJump().getValue();
+        }
+        movementPacketsEvent.setStage(EventStage.POST);
+        Caspian.EVENT_HANDLER.dispatch(movementPacketsEvent);
     }
     
     /**

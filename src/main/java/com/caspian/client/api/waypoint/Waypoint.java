@@ -3,6 +3,7 @@ package com.caspian.client.api.waypoint;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.setting.NumberConfig;
+import com.caspian.client.util.math.NanoTimer;
 import com.caspian.client.util.math.Timer;
 
 /**
@@ -41,7 +42,7 @@ public class Waypoint extends ConfigContainer
         xConfig.setValue(x);
         yConfig.setValue(y);
         zConfig.setValue(z);
-        this.timer = new Timer();
+        this.timer = new NanoTimer();
     }
 
     /**

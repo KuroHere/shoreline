@@ -158,6 +158,8 @@ public class AutoCrystalModule extends ToggleModule
     Config<Float> strictBreakRangeConfig = new NumberConfig<>(
             "StrictBreakRange", "NCP range to break crystals", 0.1f, 4.0f,
             5.0f);
+    Config<Float> maxYOffsetConfig = new NumberConfig<>("MaxYOffset",
+            "Maximum crystal y-offset difference", 1.0f, 5.0f, 10.0f);
     Config<Float> breakWallRangeConfig = new NumberConfig<>(
             "BreakWallRange", "Range to break crystals through walls", 0.1f,
             4.0f, 5.0f);
@@ -494,6 +496,18 @@ public class AutoCrystalModule extends ToggleModule
     }
 
     /**
+     * Returns the latency between the time of the last attack and the time of
+     * the corresponding crystal explosion, i.e. the crystal latency.
+     *
+     * @return The crystal latency in ms
+     */
+    @Override
+    public String getMetaData()
+    {
+        return String.format("%fms", getLatency(breakTimes));
+    }
+
+    /**
      *
      */
     private void cleanCrystals()
@@ -562,7 +576,7 @@ public class AutoCrystalModule extends ToggleModule
                     event.setPitch(pitch);
                     event.cancel();
                 }
-                if (rotating > 0 && !ignoreExpectedTickConfig.getValue())
+                if (rotating != 0 || !ignoreExpectedTickConfig.getValue())
                 {
                     return;
                 }
@@ -599,7 +613,7 @@ public class AutoCrystalModule extends ToggleModule
                                 50.0f * minTimeoutConfig.getValue());
                         delay = timeout;
                     }
-                    if (lastBreak.passed(delay) 
+                    if (lastBreak.passed(delay)
                             && randomTime.passed(currRandom))
                     {
                         if (attack(attackData))
@@ -1860,14 +1874,15 @@ public class AutoCrystalModule extends ToggleModule
     }
 
     /**
+     * Returns <tt>true</tt> if the crystals {@link Vec3d} position is
+     * outside of the player's maximum break range.
      *
-     *
-     * @param pos
-     * @param cpos
+     * @param pos The player position
+     * @param cpos The crystal position
      * @param dx
      * @param dy
      * @param dz
-     * @return
+     * @return <tt>true</tt> if the crystal is outside of the break range
      */
     private boolean postCheckBreakRange(final Vec3d pos,
                                         final Vec3d cpos,
@@ -1879,6 +1894,11 @@ public class AutoCrystalModule extends ToggleModule
         if (dist > breakRangeConfig.getValue() * breakRangeConfig.getValue()
                 && !isWithinStrictRange(new Vec3d(dx, dy, dz), cpos,
                 strictBreakRangeConfig.getValue()))
+        {
+            return true;
+        }
+        final double yoff = Math.abs(cpos.getY() - pos.getY());
+        if (yoff > maxYOffsetConfig.getValue())
         {
             return true;
         }
@@ -2270,10 +2290,16 @@ public class AutoCrystalModule extends ToggleModule
     }
 
     /**
+     * Returns <tt>true</tt> if the dest {@link Vec3d} is within the NCP
+     * range of the src {@link Vec3d}.
      *
-     * @return
+     * @param src The vector source
+     * @param dest The vector destination
+     * @param range The maximum range
+     * @return <tt>true</tt> if the vector is within NCP ranges
      */
-    private boolean isWithinStrictRange(final Vec3d src, final Vec3d dest,
+    private boolean isWithinStrictRange(final Vec3d src,
+                                        final Vec3d dest,
                                         final double range)
     {
         // directly from NCP src
@@ -2318,10 +2344,11 @@ public class AutoCrystalModule extends ToggleModule
     }
 
     /**
+     * Returns <tt>true</tt> if the player rotation vector is facing the param
+     * bounding {@link Box} of the target.
      *
-     *
-     * @param dest
-     * @return
+     * @param dest The bounding box of the target
+     * @return <tt>true</tt> if the player is facing the target
      */
     private boolean checkFacing(final Box dest)
     {
