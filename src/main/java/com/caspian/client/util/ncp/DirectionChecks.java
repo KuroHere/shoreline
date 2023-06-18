@@ -26,6 +26,7 @@ public class DirectionChecks implements Globals
      * @param dx
      * @param dy
      * @param dz
+     * @param exposed
      * @return
      */
     public static Set<Direction> getInteractableDirections(final int x,
@@ -33,7 +34,8 @@ public class DirectionChecks implements Globals
                                                            final int z,
                                                            final int dx,
                                                            final int dy,
-                                                           final int dz)
+                                                           final int dz,
+                                                           final boolean exposed)
     {
         // directly from NCP src
         final BlockPos pos = new BlockPos(dx, dy, dz);
@@ -81,6 +83,21 @@ public class DirectionChecks implements Globals
         {
             dirs.add(Direction.NORTH);
             dirs.add(Direction.SOUTH);
+        }
+        if (exposed)
+        {
+            // deepcopy
+            final Set<Direction> interacts = new HashSet<>(dirs);
+            dirs.clear();
+            for (Direction d : interacts)
+            {
+                final BlockPos off = pos.offset(d);
+                final BlockState state1 = mc.world.getBlockState(off);
+                if (!state1.isFullCube(mc.world, off))
+                {
+                    dirs.add(d);
+                }
+            }
         }
         return dirs;
     }

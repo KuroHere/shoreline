@@ -50,7 +50,9 @@ import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 
+import java.awt.*;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -78,17 +80,23 @@ public class AutoCrystalModule extends ToggleModule
             "Allows attacking while mining blocks", false);
     Config<Float> targetRangeConfig = new NumberConfig<>("EnemyRange",
             "Range to search for potential enemies", 1.0f, 10.0f, 13.0f);
-    Config<Boolean> instantConfig = new BooleanConfig("Instant",
-            "Instantly attacks crystals when they spawn", false);
     Config<Boolean> multithreadConfig = new BooleanConfig("Concurrent",
             "Attempts to run calculations in the background of the main " +
                     "minecraft ticks on a seperate thread pool", false);
-    Config<Boolean> instantCalcConfig = new BooleanConfig("Real-TimeCalc",
+    Config<Boolean> instantConfig = new BooleanConfig("Instant",
+            "Instantly attacks crystals when they spawn", false);
+    Config<Boolean> instantCalcConfig = new BooleanConfig("SpawnTime-Calc",
             "Calculates a crystal when it spawns and attacks if it meets " +
                     "MINIMUM requirements, this will result in non-ideal " +
                     "crystal attacks", false);
-    Config<Float> calcSleepConfig = new NumberConfig<>("CalcSleep", "Time to " +
-            "sleep and pause calculation directly after completing a " +
+    Config<Boolean> instantMaxConfig = new BooleanConfig("InstantMax",
+            "Attacks crystals instantly if they exceed the previous max " +
+                    "attack damage (Note: This is still not a perfect check " +
+                    "because the next tick could have better damages", true);
+    Config<Float> instantDamageConfig = new NumberConfig<>("InstantDamage",
+            "Minimum damage to attack crystals instantly", 1.0f, 6.0f, 10.0f);
+    Config<Float> calcSleepConfig = new NumberConfig<>("Calc-Sleep", "Time to" +
+            " sleep and pause calculation directly after completing a " +
             "calculation", 0.0f, 0.05f, 0.1f);
     Config<Boolean> latencyPositionConfig = new BooleanConfig(
             "LatencyPosition", "Targets the latency positions of enemies", false);
@@ -246,6 +254,9 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> strictDirectionConfig = new BooleanConfig(
             "StrictDirection", "Interacts with only visible directions when " +
             "placing crystals", false);
+    Config<Boolean> exposedDirectionConfig = new BooleanConfig(
+            "ExposedDirection", "Interacts with only exposed directions when " +
+            "placing crystals", false);
     Config<Placements> placementsConfig = new EnumConfig<>("Placements",
             "Version standard for placing end crystals", Placements.NATIVE,
             Placements.values());
@@ -253,8 +264,11 @@ public class AutoCrystalModule extends ToggleModule
     Config<Float> minDamageConfig = new NumberConfig<>("MinDamage",
             "Minimum damage required to consider attacking or placing an end " +
                     "crystal", 1.0f, 4.0f, 10.0f);
+    Config<Boolean> armorBreakerConfig = new BooleanConfig("ArmorBreaker",
+            "Attempts to break enemy armor with crystals", true);
     Config<Float> armorScaleConfig = new NumberConfig<>("ArmorScale",
-            "", 0.0f, 5.0f, 20.0f, NumberDisplay.PERCENT);
+            "Armor damage scale before attempting to break enemy armor with " +
+                    "crystals", 1.0f, 5.0f, 20.0f, NumberDisplay.PERCENT);
     Config<Float> lethalMultiplier = new NumberConfig<>(
             "LethalMultiplier", "If we can kill an enemy with this many " +
             "crystals, disregard damage values", 0.0f, 1.5f, 4.0f);
@@ -342,6 +356,7 @@ public class AutoCrystalModule extends ToggleModule
             new AtomicReference<>();
     private final AtomicReference<BlockPos> renderPlace =
             new AtomicReference<>();
+    private BlockPos renderSpawn;
 
     /**
      *
@@ -677,7 +692,8 @@ public class AutoCrystalModule extends ToggleModule
         {
             if (renderConfig.getValue())
             {
-                int color = Modules.COLORS.getRGB();
+                final Color c = Modules.COLORS.getColor();
+                int color = c.getRGB();
                 if (renderAttackConfig.getValue())
                 {
                     final Box rb = renderBreak.get();
@@ -690,6 +706,12 @@ public class AutoCrystalModule extends ToggleModule
                 final BlockPos rp = renderPlace.get();
                 if (rp != null)
                 {
+                    if (renderSpawn != null && renderSpawn.equals(rp)
+                            && renderSpawnConfig.getValue())
+                    {
+                        int alpha = c.getAlpha() + 55;
+                        color = (color & 0x00ffffff) | (alpha << 24);
+                    }
                     RenderManager.renderBox(rp, color);
                     RenderManager.renderBoundingBox(rp, 1.5f, color);
                 }
@@ -867,11 +889,13 @@ public class AutoCrystalModule extends ToggleModule
                     double dx = Managers.POSITION.getX() + motion.getX();
                     double dy = Managers.POSITION.getY() + motion.getY();
                     double dz = Managers.POSITION.getZ() + motion.getZ();
+                    //
+                    final Vec3d cpos = new Vec3d(packet.getX(), packet.getY(),
+                            packet.getZ());
+                    final BlockPos sblock = BlockPos.ofFloored(cpos);
+                    renderSpawn = sblock;
                     if (instantConfig.getValue())
                     {
-                        final Vec3d cpos = new Vec3d(packet.getX(), packet.getY(),
-                                packet.getZ());
-                        final BlockPos sblock = BlockPos.ofFloored(cpos);
                         final Vec3d base = new Vec3d(packet.getX() - 0.5,
                                 packet.getY() - 1.0, packet.getZ() - 0.5);
                         if (postCheckBreakRange(eyepos, cpos, dx, dy, dz))
@@ -995,8 +1019,9 @@ public class AutoCrystalModule extends ToggleModule
                                         {
                                             data.addTag("armorbreak");
                                         }
-                                        if (data.isDamageValid(minDamageConfig.getValue())
-                                                && !unsafe)
+                                        if (!unsafe && (instantMaxConfig.getValue()
+                                                && data.getDamage() > attackData.getDamage()
+                                                || data.isDamageValid(instantDamageConfig.getValue())))
                                         {
                                             if (rotateConfig.getValue()
                                                     && checkFacing(new Box(sblock)))
@@ -2234,7 +2259,7 @@ public class AutoCrystalModule extends ToggleModule
     {
         if (e instanceof LivingEntity)
         {
-            double lethal = lethalMultiplier.getValue() * damage;
+            double lethal = (1.0f + lethalMultiplier.getValue()) * damage;
             return health - lethal > 0.5;
         }
         return false;
@@ -2248,7 +2273,7 @@ public class AutoCrystalModule extends ToggleModule
      */
     private boolean checkArmor(final Entity e)
     {
-        if (e instanceof LivingEntity && armorScaleConfig.getValue() != 0.0f)
+        if (e instanceof LivingEntity && armorBreakerConfig.getValue())
         {
             float dmg = 0.0f;
             float max = 0.0f;
@@ -2385,7 +2410,7 @@ public class AutoCrystalModule extends ToggleModule
             {
                 diff += diff > 0.0f ? -360.0f : 360.0f;
             }
-            int dir = diff > 0.0f ? 1 : -1;
+            final int dir = diff > 0.0f ? 1 : -1;
             tick = yawTicksConfig.getValue();
             // partition yaw
             float deltaYaw = magnitude / tick;
@@ -2410,7 +2435,6 @@ public class AutoCrystalModule extends ToggleModule
                 yawT += deltaYaw;
                 yaws[off - i] = yawT;
             }
-            pitch = dest[1];
         }
         else
         {
@@ -2422,8 +2446,8 @@ public class AutoCrystalModule extends ToggleModule
             {
                 yaws[off - i] = 0.0f;
             }
-            pitch = dest[1];
         }
+        pitch = dest[1];
         return yaws.length;
     }
 
@@ -2990,7 +3014,7 @@ public class AutoCrystalModule extends ToggleModule
          *
          * @return A valid interact direction
          *
-         * @see DirectionChecks#getInteractableDirections(int, int, int, int, int, int)
+         * @see DirectionChecks#getInteractableDirections(int, int, int, int, int, int, boolean)
          */
         public Direction getInteractDirection()
         {
@@ -3017,7 +3041,7 @@ public class AutoCrystalModule extends ToggleModule
                     if (x != dx && y != dy && z != dz)
                     {
                         Set<Direction> dirs = DirectionChecks.getInteractableDirections(
-                                x, y, z, dx, dy, dz);
+                                x, y, z, dx, dy, dz, exposedDirectionConfig.getValue());
                         if (!dirs.isEmpty())
                         {
                             dir = dirs.stream()
