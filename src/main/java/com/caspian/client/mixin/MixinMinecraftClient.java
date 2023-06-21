@@ -2,6 +2,7 @@ package com.caspian.client.mixin;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.EventStage;
+import com.caspian.client.impl.event.RunTickEvent;
 import com.caspian.client.impl.event.TickEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -29,6 +30,20 @@ public class MixinMinecraftClient
     public ClientWorld world;
     @Shadow
     public ClientPlayerEntity player;
+
+    /**
+     *
+     *
+     * @param ci
+     */
+    @Inject(method = "run", at = @At(value = "INVOKE", target = "Lnet" +
+            "/minecraft/client/MinecraftClient;render(Z)V", shift =
+            At.Shift.BEFORE))
+    private void hookRun(CallbackInfo ci)
+    {
+        final RunTickEvent runTickEvent = new RunTickEvent();
+        Caspian.EVENT_HANDLER.dispatch(runTickEvent);
+    }
 
     /**
      *

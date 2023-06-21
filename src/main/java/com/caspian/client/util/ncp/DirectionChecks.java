@@ -86,18 +86,12 @@ public class DirectionChecks implements Globals
         }
         if (exposed)
         {
-            // deepcopy
-            final Set<Direction> interacts = new HashSet<>(dirs);
-            dirs.clear();
-            for (Direction d : interacts)
+            dirs.removeIf(d ->
             {
                 final BlockPos off = pos.offset(d);
                 final BlockState state1 = mc.world.getBlockState(off);
-                if (!state1.isFullCube(mc.world, off))
-                {
-                    dirs.add(d);
-                }
-            }
+                return state1.isFullCube(mc.world, off);
+            });
         }
         return dirs;
     }

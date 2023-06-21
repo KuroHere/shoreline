@@ -11,6 +11,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
+import com.caspian.client.impl.event.RunTickEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
@@ -145,7 +146,7 @@ public class AutoCrystalModule extends ToggleModule
     Config<Float> breakSpeedConfig = new NumberConfig<>("BreakSpeed",
             "Speed to break crystals", 0.1f, 18.0f, 20.0f);
     Config<Float> attackDelayConfig = new NumberConfig<>("AttackDelay",
-            "Added delays", 0.0f, 0.5f, 10.0f);
+            "Added delays", 0.0f, 0.0f, 5.0f);
     Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed",
             "Randomized delay for breaking crystals", 0.0f, 0.0f, 10.0f);
     Config<Float> breakTimeoutConfig = new NumberConfig<>("BreakTimeout",
@@ -566,6 +567,47 @@ public class AutoCrystalModule extends ToggleModule
      * @param event
      */
     @EventListener
+    public void onRunTick(RunTickEvent event)
+    {
+        if (mc.player != null && mc.world != null)
+        {
+            if (attackDelayConfig.getValue() > 0.0f && attackData != null
+                    && attackData.isValid())
+            {
+                attacking = true;
+                if (rotateConfig.getValue()
+                        && checkFacing(attackData.getBoundingBox()))
+                {
+                    semi = true;
+                    float[] dest = attackData.getRotationsTo(Managers.POSITION.getEyePos());
+                    rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
+                    rotateTimer.reset();
+                    return;
+                }
+                // This delay is accurate to ms
+                float delay = attackDelayConfig.getValue() * 50.0f;
+                if (lastBreak.passed(delay))
+                {
+                    if (attack(attackData))
+                    {
+                        attackFreq[freq] = attackFreq[freq] + 1;
+                        lastBreak.reset();
+                        addCrystalsInRange(attackData.getId(),
+                                attackData.getPos());
+                    }
+                    attackData = null;
+                    pauseCalcAttack = false;
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
     public void onMovementPackets(MovementPacketsEvent event)
     {
         if (mc.player != null && mc.world != null)
@@ -591,7 +633,8 @@ public class AutoCrystalModule extends ToggleModule
                 {
                     return;
                 }
-                if (attackData != null && attackData.isValid())
+                if (attackDelayConfig.getValue() <= 0.0f &&
+                        attackData != null && attackData.isValid())
                 {
                     attacking = true;
                     if (rotateConfig.getValue()
