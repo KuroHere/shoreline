@@ -22,7 +22,8 @@
     "network.MixinClientConnection",
     "network.MixinClientPlayerEntity",
     "network.MixinClientPlayerInteractionManager",
-    "network.MixinClientPlayNetworkHandler"
+    "network.MixinClientPlayNetworkHandler",
+    "render.entity.MixinPlayerEntityRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

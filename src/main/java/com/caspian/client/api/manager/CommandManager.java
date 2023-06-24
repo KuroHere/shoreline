@@ -69,7 +69,7 @@ public class CommandManager
      *
      * @return
      */
-    public Collection<Command> getCommands()
+    public List<Command> getCommands()
     {
         return commands;
     }

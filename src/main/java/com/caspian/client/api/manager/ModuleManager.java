@@ -4,14 +4,10 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.module.Module;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.module.client.ClickGuiModule;
-import com.caspian.client.impl.module.combat.AutoCrystalModule;
 import com.caspian.client.impl.module.movement.SprintModule;
 import com.caspian.client.init.Managers;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -23,7 +19,7 @@ public class ModuleManager
 {
     //
     private final Map<String, Module> modules =
-            Collections.synchronizedMap(new HashMap<>());
+            Collections.synchronizedMap(new LinkedHashMap<>());
 
     /**
      * Initializes the module register.
@@ -34,36 +30,29 @@ public class ModuleManager
         register(
                 // Client
                 new ClickGuiModule(),
-
                 // Combat
-                new AutoCrystalModule(),
-
+                // new AutoCrystalModule(),
                 // Exploit
-
                 // Movement
                 new SprintModule()
-
                 // Render
-
                 // World
         );
-
-        Caspian.info("Registered {} modules", modules.size());
+        Caspian.info("Registered {} modules!", modules.size());
     }
 
     /**
-     * Registers extra module information
+     * Post initialization stage for all modules, used to initialize additional
+     * info that may not have been initialized in {@link Caspian#init()}
      */
     public void postInit()
     {
         for (Module module : modules.values())
         {
-            if (!(module instanceof ToggleModule toggleModule))
+            if (module instanceof ToggleModule toggle)
             {
-                continue;
+                Managers.MACRO.register(toggle.getKeybinding());
             }
-
-            Managers.MACRO.register(toggleModule.getKeybinding());
         }
     }
 
@@ -108,8 +97,8 @@ public class ModuleManager
      *
      * @return
      */
-    public Collection<Module> getModules()
+    public List<Module> getModules()
     {
-        return modules.values();
+        return new ArrayList<>(modules.values());
     }
 }

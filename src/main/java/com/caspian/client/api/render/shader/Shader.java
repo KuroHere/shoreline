@@ -15,12 +15,12 @@ import java.util.Map;
  */
 public class Shader
 {
-    // program which vert and frag are attached to
+    // Program which vert and frag are attached to
     private int program;
-    // vertex and fragment shader GL32C ids
+    // Vertex and fragment shader GL32C ids
     private int vert;
     private int frag;
-    // map of all samplers
+    // Map of all samplers
     private final Map<String, Integer> samplers = new HashMap<>();
 
     /**
@@ -49,7 +49,7 @@ public class Shader
                 program = GL32C.glCreateProgram();
                 vert = GL32C.glCreateShader(GL32C.GL_VERTEX_SHADER);
                 frag = GL32C.glCreateShader(GL32C.GL_FRAGMENT_SHADER);
-                // 0 equates to null state
+                // 0 is null state
                 if (vert != GL32C.GL_FALSE && frag != GL32C.GL_FALSE)
                 {
                     try (vertStream; fragStream)

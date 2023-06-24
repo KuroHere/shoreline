@@ -347,7 +347,6 @@ public class AutoCrystalModule extends ToggleModule
     private int rotating;
     //
     private float[] yaws;
-    private boolean semi;
     private float yaw, pitch;
     // RENDER
     private final AtomicReference<Box> renderBreak =
@@ -441,11 +440,10 @@ public class AutoCrystalModule extends ToggleModule
                 // This means that if the rotations steps >= 1,
                 // then there is a possibility that the current rotation may
                 // "fall through" and never actually complete.
-                if (rotating > 0
-                        && (semi && lastAttackData.getYawDiff(attackData) > 30.0f
-                        && !lastAttackData.isSrcEqual(attackData)
-                        || lastPlaceData.getYawDiff(placeData) > 30.0f
-                        && !lastPlaceData.isSrcEqual(placeData)))
+                if (rotating > 0 && (!lastAttackData.isSrcEqual(attackData)
+                        && lastAttackData.getYawDiff(attackData) > 30.0f
+                        || !lastPlaceData.isSrcEqual(placeData)
+                        && lastPlaceData.getYawDiff(placeData) > 30.0f))
                 {
                     rotating = 0;
                     rotateTimer.setElapsedTime(Timer.MAX_TIME);
@@ -489,7 +487,6 @@ public class AutoCrystalModule extends ToggleModule
         pauseCalcPlace = false;
         attacking = false;
         placing = false;
-        semi = false;
         tick = 0;
         shortTermTick = 0;
         shortTermCount = 0;
@@ -571,15 +568,21 @@ public class AutoCrystalModule extends ToggleModule
     {
         if (mc.player != null && mc.world != null)
         {
-            if (attackDelayConfig.getValue() > 0.0f && attackData != null
-                    && attackData.isValid())
+            if (rotating != 0)
             {
-                attacking = true;
+                return;
+            }
+            if (attackDelayConfig.getValue() <= 0.0f)
+            {
+                return;
+            }
+            attacking = attackData != null && attackData.isValid();
+            if (attacking)
+            {
                 if (rotateConfig.getValue()
                         && checkFacing(attackData.getBoundingBox()))
                 {
-                    semi = true;
-                    float[] dest = attackData.getRotationsTo(Managers.POSITION.getEyePos());
+                    float[] dest = attackData.getRotations(Managers.POSITION.getEyePos());
                     rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
                     rotateTimer.reset();
                     return;
@@ -633,64 +636,64 @@ public class AutoCrystalModule extends ToggleModule
                 {
                     return;
                 }
-                if (attackDelayConfig.getValue() <= 0.0f &&
-                        attackData != null && attackData.isValid())
+                if (attackDelayConfig.getValue() <= 0.0f)
                 {
-                    attacking = true;
-                    if (rotateConfig.getValue()
-                            && checkFacing(attackData.getBoundingBox()))
+                    attacking = attackData != null && attackData.isValid();
+                    if (attacking)
                     {
-                        semi = true;
-                        float[] dest = attackData.getRotationsTo(Managers.POSITION.getEyePos());
-                        rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
-                        rotateTimer.reset();
-                        // rotate instantly
-                        if (!event.isCanceled())
+                        if (rotateConfig.getValue()
+                                && checkFacing(attackData.getBoundingBox()))
                         {
-                            yaw = yaws[--rotating];
-                            event.setYaw(yaw);
-                            event.setPitch(pitch);
-                            event.cancel();
+                            float[] dest = attackData.getRotations(Managers.POSITION.getEyePos());
+                            rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
+                            rotateTimer.reset();
+                            // rotate instantly
+                            if (!event.isCanceled())
+                            {
+                                yaw = yaws[--rotating];
+                                event.setYaw(yaw);
+                                event.setPitch(pitch);
+                                event.cancel();
+                            }
+                            return;
                         }
-                        return;
-                    }
-                    if (currRandom < 0)
-                    {
-                        currRandom = random.nextLong((long)
-                                (randomSpeedConfig.getValue() * 10.0f + 1.0f));
-                    }
-                    float delay = (((NumberConfig<Float>) breakSpeedConfig).getMax()
-                            - breakSpeedConfig.getValue()) * 50.0f;
-                    if (instantConfig.getValue())
-                    {
-                        float timeout = Math.max(getLatency(breakTimes) + (50.0f * breakTimeoutConfig.getValue()),
-                                50.0f * minTimeoutConfig.getValue());
-                        delay = timeout;
-                    }
-                    if (lastBreak.passed(delay)
-                            && randomTime.passed(currRandom))
-                    {
-                        if (attack(attackData))
+                        if (currRandom < 0)
                         {
-                            attackFreq[freq] = attackFreq[freq] + 1;
-                            lastBreak.reset();
-                            randomTime.reset();
-                            currRandom = -1;
-                            addCrystalsInRange(attackData.getId(),
-                                    attackData.getPos());
+                            currRandom = random.nextLong((long)
+                                    (randomSpeedConfig.getValue() * 10.0f + 1.0f));
                         }
-                        attackData = null;
-                        pauseCalcAttack = false;
+                        float delay = (((NumberConfig<Float>) breakSpeedConfig).getMax()
+                                - breakSpeedConfig.getValue()) * 50.0f;
+                        if (instantConfig.getValue())
+                        {
+                            float timeout = Math.max(getLatency(breakTimes) + (50.0f * breakTimeoutConfig.getValue()),
+                                    50.0f * minTimeoutConfig.getValue());
+                            delay = timeout;
+                        }
+                        if (lastBreak.passed(delay)
+                                && randomTime.passed(currRandom))
+                        {
+                            if (attack(attackData))
+                            {
+                                attackFreq[freq] = attackFreq[freq] + 1;
+                                lastBreak.reset();
+                                randomTime.reset();
+                                currRandom = -1;
+                                addCrystalsInRange(attackData.getId(),
+                                        attackData.getPos());
+                            }
+                            attackData = null;
+                            pauseCalcAttack = false;
+                        }
                     }
                 }
-                if (placeData != null && placeData.isValid())
+                placing = placeData != null && placeData.isValid();
+                if (placing)
                 {
-                    placing = true;
                     if (rotateConfig.getValue()
                             && checkFacing(placeData.getBoundingBox()))
                     {
-                        semi = false;
-                        float[] dest = placeData.getRotationsTo(Managers.POSITION.getEyePos());
+                        float[] dest = placeData.getRotations(Managers.POSITION.getEyePos());
                         rotating = setRotation(dest, strictRotateConfig.getValue() == Rotate.FULL);
                         rotateTimer.reset();
                         // rotate instantly
@@ -820,7 +823,7 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean isPlaceRotating()
     {
-        return !semi && isRotating();
+        return placing && isRotating();
     }
 
     /**
@@ -885,7 +888,8 @@ public class AutoCrystalModule extends ToggleModule
                 ItemStack stack = mc.player.getStackInHand(packet.getHand());
                 if (stack.getItem() == Items.END_CRYSTAL)
                 {
-                    manuals.put(packet.getBlockHitResult().getBlockPos(),
+                    final BlockHitResult result = packet.getBlockHitResult();
+                    manuals.put(result.getBlockPos(),
                             System.currentTimeMillis());
                 }
             }
@@ -975,7 +979,6 @@ public class AutoCrystalModule extends ToggleModule
                                 attacking = true;
                                 float[] dest = RotationUtil.getRotationsTo(Managers.POSITION.getEyePos(),
                                         cpos);
-                                semi = true;
                                 rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
                                 rotateTimer.reset();
                             }
@@ -1079,7 +1082,6 @@ public class AutoCrystalModule extends ToggleModule
                                                 float[] dest = RotationUtil.getRotationsTo(
                                                         Managers.POSITION.getEyePos(),
                                                         cpos);
-                                                semi = true;
                                                 rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
                                                 rotateTimer.reset();
                                             }
@@ -1104,9 +1106,9 @@ public class AutoCrystalModule extends ToggleModule
                 final Vec3d eyepos = placeRangeEyeConfig.getValue() ?
                         Managers.POSITION.getEyePos() : pos;
                 final Vec3d motion = mc.player.getVelocity();
-                double dx = Managers.POSITION.getX() + motion.getX();
-                double dy = Managers.POSITION.getY() + motion.getY();
-                double dz = Managers.POSITION.getZ() + motion.getZ();
+                double dx = pos.getX() + motion.getX();
+                double dy = pos.getY() + motion.getY();
+                double dz = pos.getZ() + motion.getZ();
                 //
                 final BlockPos block = packet.getPos();
                 final BlockState state = packet.getState();
@@ -1126,7 +1128,6 @@ public class AutoCrystalModule extends ToggleModule
                                 if (rotateConfig.getValue()
                                         && checkFacing(c.getBoundingBox()))
                                 {
-                                    semi = true;
                                     float[] dest = RotationUtil.getRotationsTo(
                                             Managers.POSITION.getEyePos(), c.getPos());
                                     rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
@@ -1138,8 +1139,8 @@ public class AutoCrystalModule extends ToggleModule
                                                 c, -1.0, -1.0));
                                         return;
                                     }
-                                    attacking = true;
                                 }
+                                attacking = true;
                                 if (attack(c.getId()))
                                 {
                                     attackFreq[freq] = attackFreq[freq] + 1;
@@ -1203,9 +1204,9 @@ public class AutoCrystalModule extends ToggleModule
                 if (sequential)
                 {
                     tickCalc();
-                    if (placeData != null && placeData.isValid())
+                    placing = placeData != null && placeData.isValid();
+                    if (placing)
                     {
-                        placing = true;
                         if (rotateConfig.getValue()
                                 && checkFacing(placeData.getBoundingBox()))
                         {
@@ -1214,8 +1215,7 @@ public class AutoCrystalModule extends ToggleModule
                                 lastPlace.setElapsedTime(Timer.MAX_TIME);
                                 return;
                             }
-                            semi = false;
-                            float[] dest = placeData.getRotationsTo(Managers.POSITION.getEyePos());
+                            float[] dest = placeData.getRotations(Managers.POSITION.getEyePos());
                             rotating = setRotation(dest, strictRotateConfig.getValue() == Rotate.FULL);
                             rotateTimer.reset();
                         }
@@ -1276,7 +1276,7 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean attack(DamageData<EndCrystalEntity> data)
     {
-        return attack(data.getSrc().getId());
+        return attack(data.getId());
     }
 
     /**
@@ -2998,9 +2998,9 @@ public class AutoCrystalModule extends ToggleModule
                 final Vec3d pos = Managers.POSITION.getPos();
                 Vec3d eyepos = Managers.POSITION.getEyePos();
                 final Vec3d motion = mc.player.getVelocity();
-                double dx = Managers.POSITION.getX() + motion.getX();
-                double dy = Managers.POSITION.getY() + motion.getY();
-                double dz = Managers.POSITION.getZ() + motion.getZ();
+                double dx = pos.getX() + motion.getX();
+                double dy = pos.getY() + motion.getY();
+                double dz = pos.getZ() + motion.getZ();
                 if (src instanceof BlockPos cpos)
                 {
                     if (!placeRangeEyeConfig.getValue())
@@ -3149,7 +3149,7 @@ public class AutoCrystalModule extends ToggleModule
          * @return
          */
         @Override
-        public int compareTo(DamageData<?> other)
+        public int compareTo(final DamageData<?> other)
         {
             if (other.isAntiTotem())
             {
@@ -3171,7 +3171,8 @@ public class AutoCrystalModule extends ToggleModule
             double d = getDamage() - other.getDamage();
             if (other.isMineDamage())
             {
-                return isMineDamage() ? Double.compare(getDamage(), other.getDamage()) : 1;
+                return isMineDamage() ? Double.compare(getDamage(),
+                        other.getDamage()) : 1;
             }
             if (isMineDamage())
             {
@@ -3237,9 +3238,9 @@ public class AutoCrystalModule extends ToggleModule
          *
          * @see #getRotPos()
          */
-        public float[] getRotationsTo(Vec3d src)
+        public float[] getRotations(final Vec3d src)
         {
-            Vec3d rpos = getRotPos();
+            final Vec3d rpos = getRotPos();
             if (rpos != null)
             {
                 return RotationUtil.getRotationsTo(src, rpos);
@@ -3249,19 +3250,19 @@ public class AutoCrystalModule extends ToggleModule
 
         /**
          * Returns the difference in yaw between this data' damage source
-         * {@link #getRotationsTo(Vec3d)} and the specified data's damage
+         * {@link #getRotations(Vec3d)} and the specified data's damage
          * source rotations. Note that this value can be <b>negative</b>.
          *
          * @param other The data to be compared
          * @return The difference in yaw between the two damage sources
          *
-         * @see #getRotationsTo(Vec3d)
+         * @see #getRotations(Vec3d)
          */
         public float getYawDiff(DamageData<?> other)
         {
             Vec3d eye = Managers.POSITION.getEyePos();
-            float[] rots1 = getRotationsTo(eye);
-            float[] rots2 = other.getRotationsTo(eye);
+            float[] rots1 = getRotations(eye);
+            float[] rots2 = other.getRotations(eye);
             if (rots1 != null && rots2 != null)
             {
                 return rots1[0] - rots2[0];

@@ -2,6 +2,7 @@ package com.caspian.client.api.handler;
 
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.render.RenderPlayerEvent;
 import com.caspian.client.util.Globals;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
@@ -34,6 +35,22 @@ public class RotationHandler implements Globals
                     pitch = packet.getPitch(pitch);
                 }
             }
+        }
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onRenderPlayer(RenderPlayerEvent event)
+    {
+        if (event.getEntity() == mc.player)
+        {
+            event.setYaw(yaw);
+            event.setPitch(pitch);
+            event.cancel();
         }
     }
 

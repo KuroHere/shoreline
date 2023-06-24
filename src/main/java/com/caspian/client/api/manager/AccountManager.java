@@ -49,7 +49,7 @@ public class AccountManager
      *
      * @return
      */
-    public Collection<Account> getAccounts()
+    public List<Account> getAccounts()
     {
         return accounts;
     }
