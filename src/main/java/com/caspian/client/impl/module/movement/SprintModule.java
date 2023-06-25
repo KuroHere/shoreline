@@ -7,6 +7,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.init.Managers;
 
 /**
  *
@@ -34,9 +35,12 @@ public class SprintModule extends ToggleModule
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (event.getStage() == EventStage.POST)
+        if (event.getStage() == EventStage.PRE)
         {
+            if (!Managers.POSITION.isSprinting())
+            {
 
+            }
         }
     }
 

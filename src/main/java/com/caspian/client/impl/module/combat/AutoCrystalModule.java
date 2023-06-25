@@ -283,6 +283,10 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> blockDestructionConfig = new BooleanConfig(
             "BlockDestruction", "Accounts for explosion block destruction " +
             "when calculating damages", false);
+    // EXTRAPOLATION
+    Config<Boolean> extrapolateRangeConfig = new BooleanConfig(
+            "ExtrapolateRange", "Accounts for motion when calculating ranges",
+            false);
     // RENDER SETTINGS
     Config<Boolean> renderConfig = new BooleanConfig("Render",
             "Renders the current placement", true);
@@ -933,10 +937,12 @@ public class AutoCrystalModule extends ToggleModule
                     // Position data of the player
                     final Vec3d pos = Managers.POSITION.getPos();
                     final Vec3d eyepos = Managers.POSITION.getEyePos();
-                    final Vec3d motion = mc.player.getVelocity();
-                    double dx = Managers.POSITION.getX() + motion.getX();
-                    double dy = Managers.POSITION.getY() + motion.getY();
-                    double dz = Managers.POSITION.getZ() + motion.getZ();
+                    if (extrapolateRangeConfig.getValue())
+                    {
+                        final Vec3d motion = mc.player.getVelocity();
+                        pos.add(motion);
+                        eyepos.add(motion);
+                    }
                     //
                     final Vec3d cpos = new Vec3d(packet.getX(), packet.getY(),
                             packet.getZ());
@@ -946,7 +952,7 @@ public class AutoCrystalModule extends ToggleModule
                     {
                         final Vec3d base = new Vec3d(packet.getX() - 0.5,
                                 packet.getY() - 1.0, packet.getZ() - 0.5);
-                        if (postCheckBreakRange(eyepos, cpos, dx, dy, dz))
+                        if (postBreakRangeCheck(eyepos, cpos))
                         {
                             return;
                         }
@@ -1105,10 +1111,12 @@ public class AutoCrystalModule extends ToggleModule
                 final Vec3d pos = Managers.POSITION.getPos();
                 final Vec3d eyepos = placeRangeEyeConfig.getValue() ?
                         Managers.POSITION.getEyePos() : pos;
-                final Vec3d motion = mc.player.getVelocity();
-                double dx = pos.getX() + motion.getX();
-                double dy = pos.getY() + motion.getY();
-                double dz = pos.getZ() + motion.getZ();
+                if (extrapolateRangeConfig.getValue())
+                {
+                    final Vec3d motion = mc.player.getVelocity();
+                    pos.add(motion);
+                    eyepos.add(motion);
+                }
                 //
                 final BlockPos block = packet.getPos();
                 final BlockState state = packet.getState();
@@ -1119,7 +1127,7 @@ public class AutoCrystalModule extends ToggleModule
                     {
                         if (e != null && e.isAlive() && e instanceof EndCrystalEntity c)
                         {
-                            if (postCheckBreakRange(eyepos, c.getPos(), dx, dy, dz))
+                            if (postBreakRangeCheck(eyepos, c.getPos()))
                             {
                                 continue;
                             }
@@ -1940,24 +1948,18 @@ public class AutoCrystalModule extends ToggleModule
 
     /**
      * Returns <tt>true</tt> if the crystals {@link Vec3d} position is
-     * outside of the player's maximum break range.
+     * outside the player's maximum break range.
      *
      * @param pos The player position
      * @param cpos The crystal position
-     * @param dx
-     * @param dy
-     * @param dz
-     * @return <tt>true</tt> if the crystal is outside of the break range
+     * @return <tt>true</tt> if the crystal is outside the break range
      */
-    private boolean postCheckBreakRange(final Vec3d pos,
-                                        final Vec3d cpos,
-                                        final double dx,
-                                        final double dy,
-                                        final double dz)
+    private boolean postBreakRangeCheck(final Vec3d pos,
+                                        final Vec3d cpos)
     {
         double dist = pos.distanceTo(cpos);
         if (dist > breakRangeConfig.getValue() * breakRangeConfig.getValue()
-                && !isWithinStrictRange(new Vec3d(dx, dy, dz), cpos,
+                && !isWithinStrictRange(pos, cpos,
                 strictBreakRangeConfig.getValue()))
         {
             return true;
@@ -1993,10 +1995,12 @@ public class AutoCrystalModule extends ToggleModule
         if (mc.world != null && mc.player != null)
         {
             // Position data of the player
-            final Vec3d motion = mc.player.getVelocity();
-            double dx = pos.getX() + motion.getX();
-            double dy = pos.getY() + motion.getY();
-            double dz = pos.getZ() + motion.getZ();
+            if (extrapolateRangeConfig.getValue())
+            {
+                final Vec3d motion = mc.player.getVelocity();
+                pos.add(motion);
+                eyepos.add(motion);
+            }
             //
             final TreeSet<DamageData<EndCrystalEntity>> min = new TreeSet<>();
             for (EndCrystalEntity c : crystals)
@@ -2008,7 +2012,7 @@ public class AutoCrystalModule extends ToggleModule
                     data.addTag("manual");
                     return data;
                 }
-                if (postCheckBreakRange(eyepos, c.getPos(), dx, dy, dz))
+                if (postBreakRangeCheck(eyepos, c.getPos()))
                 {
                     continue;
                 }
@@ -2111,23 +2115,17 @@ public class AutoCrystalModule extends ToggleModule
      *
      * @param pos
      * @param p
-     * @param dx
-     * @param dy
-     * @param dz
      * @return
      */
-    private boolean postCheckPlaceRange(final Vec3d pos,
-                                        final BlockPos p,
-                                        final double dx,
-                                        final double dy,
-                                        final double dz)
+    private boolean postPlaceRangeCheck(final Vec3d pos,
+                                        final BlockPos p)
     {
         double dist = placeRangeCenterConfig.getValue() ?
                 p.getSquaredDistanceFromCenter(pos.getX(), pos.getY(),
                         pos.getZ()) : p.getSquaredDistance(pos);
         if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue()
-                && !isWithinStrictRange(new Vec3d(dx, dy, dz),
-                toSource(p), strictPlaceRangeConfig.getValue()))
+                && !isWithinStrictRange(pos, toSource(p),
+                strictPlaceRangeConfig.getValue()))
         {
             return true;
         }
@@ -2170,10 +2168,12 @@ public class AutoCrystalModule extends ToggleModule
         if (mc.world != null && mc.player != null)
         {
             // Player position data
-            final Vec3d motion = mc.player.getVelocity();
-            double dx = pos.getX() + motion.getX();
-            double dy = pos.getY() + motion.getY();
-            double dz = pos.getZ() + motion.getZ();
+            if (extrapolateRangeConfig.getValue())
+            {
+                final Vec3d motion = mc.player.getVelocity();
+                pos.add(motion);
+                eyepos.add(motion);
+            }
             //
             final BlockPos mine = Modules.SPEEDMINE.getBlockTarget();
             //
@@ -2181,7 +2181,7 @@ public class AutoCrystalModule extends ToggleModule
             // placement processing
             for (BlockPos p : blocks)
             {
-                if (postCheckPlaceRange(eyepos, p, dx, dy, dz))
+                if (postPlaceRangeCheck(eyepos, p))
                 {
                     continue;
                 }
@@ -2997,18 +2997,16 @@ public class AutoCrystalModule extends ToggleModule
                 // Player position data
                 final Vec3d pos = Managers.POSITION.getPos();
                 Vec3d eyepos = Managers.POSITION.getEyePos();
-                final Vec3d motion = mc.player.getVelocity();
-                double dx = pos.getX() + motion.getX();
-                double dy = pos.getY() + motion.getY();
-                double dz = pos.getZ() + motion.getZ();
+                if (extrapolateRangeConfig.getValue())
+                {
+                    final Vec3d motion = mc.player.getVelocity();
+                    pos.add(motion);
+                    eyepos.add(motion);
+                }
                 if (src instanceof BlockPos cpos)
                 {
-                    if (!placeRangeEyeConfig.getValue())
-                    {
-                        eyepos = pos;
-                    }
                     if (postRangeConfig.getValue()
-                            && postCheckPlaceRange(eyepos, cpos, dx, dy, dz))
+                            && postPlaceRangeCheck(placeRangeEyeConfig.getValue() ? eyepos : pos, cpos))
                     {
                         return false;
                     }
@@ -3016,7 +3014,7 @@ public class AutoCrystalModule extends ToggleModule
                 if (src instanceof EndCrystalEntity crystal)
                 {
                     if (postRangeConfig.getValue()
-                            && postCheckBreakRange(eyepos, crystal.getPos(), dx, dy, dz))
+                            && postBreakRangeCheck(eyepos, crystal.getPos()))
                     {
                         return false;
                     }

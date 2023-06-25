@@ -38,7 +38,7 @@ import org.lwjgl.glfw.GLFW;
  */
 public class NoSlowModule extends ToggleModule
 {
-    // ANTICHEAT SETTINGS
+    //
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Strict NCP " +
             "bypass for ground slowdowns", false);
     Config<Boolean> airStrictConfig = new BooleanConfig("AirStrict",  "Strict" +
@@ -142,7 +142,7 @@ public class NoSlowModule extends ToggleModule
             }
             if (checkScreen() && inventoryMoveConfig.getValue())
             {
-                long handle = mc.getWindow().getHandle();
+                final long handle = mc.getWindow().getHandle();
                 for (KeyBinding binding : MOVE_KEYBINDS)
                 {
                     binding.setPressed(InputUtil.isKeyPressed(handle,
@@ -172,10 +172,10 @@ public class NoSlowModule extends ToggleModule
                     mc.player.setPitch(MathHelper.clamp(pitch, -90.0f, 90.0f));
                 }
             }
-            BlockPos pos = mc.player.getBlockPos();
-            BlockState state = mc.world.getBlockState(pos);
+            final BlockPos pos = Managers.POSITION.getBlockPos();
+            final BlockState state = mc.world.getBlockState(pos);
             if (state.getBlock() == Blocks.COBWEB && websConfig.getValue()
-                    && !mc.player.isOnGround())
+                    && !Managers.POSITION.isOnGround())
             {
         
             }
@@ -270,12 +270,12 @@ public class NoSlowModule extends ToggleModule
                     {
                         mc.player.stopUsingItem();
                     }
-                    if (sneaking || mc.player.isSneaking())
+                    if (sneaking || Managers.POSITION.isSneaking())
                     {
                         Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                                 ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
                     }
-                    if (mc.player.isSprinting())
+                    if (Managers.POSITION.isSprinting())
                     {
                         Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                                 ClientCommandC2SPacket.Mode.STOP_SPRINTING));

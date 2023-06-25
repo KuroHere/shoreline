@@ -31,8 +31,6 @@ import java.util.concurrent.TimeUnit;
  *
  * @author linus
  * @since 1.0
- *
- * 
  */
 public class FastPlaceModule extends ToggleModule
 {
@@ -108,7 +106,7 @@ public class FastPlaceModule extends ToggleModule
                 if (ghostFixConfig.getValue()
                         && placeCheck(mc.player.getStackInHand(packet.getHand())))
                 {
-                    BlockState state = mc.world.getBlockState(
+                    final BlockState state = mc.world.getBlockState(
                             packet.getBlockHitResult().getBlockPos());
                     if (!SneakBlocks.isSneakBlock(state))
                     {

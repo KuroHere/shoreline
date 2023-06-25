@@ -216,8 +216,11 @@ public class SpeedmineModule extends ToggleModule
      */
     private void swap(int slot)
     {
-        mc.player.getInventory().selectedSlot = slot;
-        Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+        if (slot < 9)
+        {
+            mc.player.getInventory().selectedSlot = slot;
+            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+        }
     }
 
     /**
