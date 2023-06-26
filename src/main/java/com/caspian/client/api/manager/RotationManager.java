@@ -2,6 +2,7 @@ package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.handler.RotationHandler;
+import net.minecraft.util.math.MathHelper;
 
 /**
  *
@@ -37,6 +38,16 @@ public class RotationManager
     public float getYaw()
     {
         return handler.getYaw();
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public float getWrappedYaw()
+    {
+        return MathHelper.wrapDegrees(handler.getYaw());
     }
 
     /**
