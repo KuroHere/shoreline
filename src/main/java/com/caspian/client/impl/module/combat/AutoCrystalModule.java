@@ -109,8 +109,8 @@ public class AutoCrystalModule extends ToggleModule
             "Calculates sequentially, so placements occur once the " +
                     "expected crystal is broken", Sequential.NORMAL,
             Sequential.values());
-    Config<Boolean> sequentialCalcConfig = new BooleanConfig("Sequential-Calc",
-            "", false);
+    Config<Boolean> preSequentialCalcConfig = new BooleanConfig(
+            "PreSequential-Calc", "", false);
     Config<Boolean> swingConfig = new BooleanConfig("Swing",
             "Swing hand when placing and attacking crystals", true);
     // ROTATE SETTINGS
@@ -1216,7 +1216,7 @@ public class AutoCrystalModule extends ToggleModule
                 if (sequential)
                 {
                     sequence = null;
-                    if (sequentialCalcConfig.getValue() && preSequence != null)
+                    if (preSequentialCalcConfig.getValue() && preSequence != null)
                     {
                         final Vec3d pos = Managers.POSITION.getPos();
                         //
