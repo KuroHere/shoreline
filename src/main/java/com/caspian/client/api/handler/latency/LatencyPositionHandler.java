@@ -39,9 +39,9 @@ public class LatencyPositionHandler implements Globals
      * @param time
      * @return
      */
-    public TrackedData getTrackedData(final Vec3d floor,
-                                      final PlayerEntity player,
-                                      final long time)
+    public LatencyPlayer getTrackedData(final Vec3d floor,
+                                        final PlayerEntity player,
+                                        final long time)
     {
         return tracker.getTrackedData(floor, player, time);
     }
@@ -61,7 +61,7 @@ public class LatencyPositionHandler implements Globals
                 Entity e = mc.world.getEntityById(packet.getId());
                 if (e instanceof PlayerEntity player)
                 {
-                    tracker.addTrackedData(player, new TrackedData(player,
+                    tracker.addTrackedData(player, new LatencyPlayer(player,
                             new Vec3d(packet.getX(), packet.getY(),
                             packet.getZ()), System.currentTimeMillis()));
                 }
@@ -72,7 +72,7 @@ public class LatencyPositionHandler implements Globals
                 if (packet.getEntityType() == EntityType.PLAYER)
                 {
                     PlayerEntity player = (PlayerEntity) e;
-                    tracker.addTrackedData(player, new TrackedData(player,
+                    tracker.addTrackedData(player, new LatencyPlayer(player,
                             new Vec3d(packet.getX(), packet.getY(),
                                     packet.getZ()), System.currentTimeMillis()));
                 }

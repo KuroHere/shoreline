@@ -1,7 +1,7 @@
 package com.caspian.client.api.handler.latency;
 
 import com.caspian.client.util.Globals;
-import net.minecraft.client.network.OtherClientPlayerEntity;
+import com.caspian.client.util.world.FakePlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3d;
@@ -12,7 +12,7 @@ import net.minecraft.util.math.Vec3d;
  * @author linus
  * @since 1.0
  */
-public class TrackedData implements Position, Globals
+public class LatencyPlayer implements Position, Globals
 {
     // The tracking entity
     private final PlayerEntity track;
@@ -27,7 +27,7 @@ public class TrackedData implements Position, Globals
      * @param pos
      * @param time
      */
-    public TrackedData(PlayerEntity track, Vec3d pos, long time)
+    public LatencyPlayer(PlayerEntity track, Vec3d pos, long time)
     {
         this.track = track;
         this.pos = pos;
@@ -48,27 +48,11 @@ public class TrackedData implements Position, Globals
      *
      * @return
      */
-    public OtherClientPlayerEntity toTrackedEntity()
+    public FakePlayerEntity getLatencyPlayer()
     {
-        final OtherClientPlayerEntity tracked =
-                new OtherClientPlayerEntity(mc.world, track.getGameProfile())
-                {
-                    /**
-                     *
-                     * @return
-                     */
-                    @Override
-                    public boolean isDead()
-                    {
-                        return false;
-                    }
-                };
-        tracked.copyPositionAndRotation(track);
-        tracked.getInventory().clone(track.getInventory());
-        tracked.setId(track.getId());
-        mc.world.spawnEntity(tracked);
-        mc.world.addEntity(track.getId(), tracked);
-        return tracked;
+        final FakePlayerEntity p = new FakePlayerEntity(track);
+        p.setPosition(pos);
+        return p;
     }
 
     /**

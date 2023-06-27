@@ -3,7 +3,7 @@ package com.caspian.client.api.manager;
 import com.caspian.client.Caspian;
 import com.caspian.client.api.handler.latency.LatencyPositionHandler;
 import com.caspian.client.api.handler.latency.PosTracker;
-import com.caspian.client.api.handler.latency.TrackedData;
+import com.caspian.client.api.handler.latency.LatencyPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 
@@ -34,9 +34,9 @@ public class LatencyPositionManager
      * @param time
      * @return
      */
-    public TrackedData getTrackedData(final Vec3d floor,
-                                      final PlayerEntity player,
-                                      final long time)
+    public LatencyPlayer getTrackedData(final Vec3d floor,
+                                        final PlayerEntity player,
+                                        final long time)
     {
         return handler.getTrackedData(floor, player, time);
     }

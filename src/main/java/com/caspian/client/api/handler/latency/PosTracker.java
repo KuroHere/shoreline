@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PosTracker implements Globals
 {
     // BACKTRACK MANAGER
-    private final Map<Entity, List<TrackedData>> trackedData =
+    private final Map<Entity, List<LatencyPlayer>> trackedData =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
 
     /**
@@ -27,10 +27,10 @@ public class PosTracker implements Globals
      * @param data
      */
     public void addTrackedData(final PlayerEntity player,
-                               final TrackedData data)
+                               final LatencyPlayer data)
     {
         cleanCache();
-        List<TrackedData> tracked = trackedData.computeIfAbsent(player,
+        List<LatencyPlayer> tracked = trackedData.computeIfAbsent(player,
                 d -> new ArrayList<>());
         tracked.add(data);
     }
@@ -41,10 +41,10 @@ public class PosTracker implements Globals
      */
     public void cleanCache()
     {
-        final Collection<List<TrackedData>> data = trackedData.values();
-        for (List<TrackedData> tracked : data)
+        final Collection<List<LatencyPlayer>> data = trackedData.values();
+        for (List<LatencyPlayer> tracked : data)
         {
-            for (TrackedData d : tracked)
+            for (LatencyPlayer d : tracked)
             {
                 if (d.getTime() > 1000L)
                 {
@@ -62,16 +62,16 @@ public class PosTracker implements Globals
      * @param time
      * @return
      */
-    public TrackedData getTrackedData(final Vec3d floor,
-                                      final PlayerEntity player,
-                                      final long time)
+    public LatencyPlayer getTrackedData(final Vec3d floor,
+                                        final PlayerEntity player,
+                                        final long time)
     {
-        TrackedData backtrack = null;
-        final List<TrackedData> tracked = trackedData.get(player);
+        LatencyPlayer backtrack = null;
+        final List<LatencyPlayer> tracked = trackedData.get(player);
         if (!tracked.isEmpty())
         {
             double min = Double.MAX_VALUE;
-            for (TrackedData d : tracked)
+            for (LatencyPlayer d : tracked)
             {
                 if (d.getTime() > time)
                 {
