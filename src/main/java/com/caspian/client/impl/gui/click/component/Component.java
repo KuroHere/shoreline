@@ -1,7 +1,6 @@
 package com.caspian.client.impl.gui.click.component;
 
 import com.caspian.client.api.render.RenderManager;
-import com.caspian.client.api.render.shader.Shader;
 import com.caspian.client.util.Globals;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -34,10 +33,9 @@ import java.util.function.BiConsumer;
 public abstract class Component implements Drawable, Globals
 {
     //
-    private final ScissorStack scissorStack = new ScissorStack();
-    
-    //
     private double x, y, width, height;
+    //
+    private static final ScissorStack SCISSOR_STACK = new ScissorStack();
 
     /**
      *
@@ -133,7 +131,6 @@ public abstract class Component implements Drawable, Globals
             x1 = x2;
             x2 = i;
         }
-
         fill(matrices, x1, y, x1 + x2 + 1, y + 1, color);
     }
 
@@ -146,19 +143,18 @@ public abstract class Component implements Drawable, Globals
             y1 = y2;
             y2 = i;
         }
-
         fill(matrices, x, y1 + 1, x + 1, y1 + y2, color);
     }
 
     public void enableScissor(int x1, int y1, int x2, int y2)
     {
-        setScissor(scissorStack.push(new ScreenRect(x1, y1, x2 - x1,
+        setScissor(SCISSOR_STACK.push(new ScreenRect(x1, y1, x2 - x1,
                 y2 - y1)));
     }
 
     public void disableScissor() 
     {
-        setScissor(scissorStack.pop());
+        setScissor(SCISSOR_STACK.pop());
     }
 
     private void setScissor(ScreenRect rect) 
@@ -174,8 +170,7 @@ public abstract class Component implements Drawable, Globals
             double h = (double) rect.height() * d;
             RenderSystem.enableScissor((int) e, (int) f, Math.max(0, (int) g),
                     Math.max(0, (int) h));
-        } 
-        
+        }
         else 
         {
             RenderSystem.disableScissor();
@@ -530,8 +525,7 @@ public abstract class Component implements Drawable, Globals
                         rect.intersection(screenRect), ScreenRect.empty());
                 stack.addLast(screenRect2);
                 return screenRect2;
-            } 
-            
+            }
             else 
             {
                 stack.addLast(rect);
@@ -549,8 +543,7 @@ public abstract class Component implements Drawable, Globals
             if (stack.isEmpty()) 
             {
                 throw new IllegalStateException("Scissor stack underflow");
-            } 
-            
+            }
             else 
             {
                 stack.removeLast();

@@ -52,7 +52,7 @@ public abstract class ConfigFile
                 e.printStackTrace();
             }
         }
-        filepath = dir.resolve(path);
+        filepath = dir.resolve(toJsonPath(path));
     }
 
     /**
@@ -78,4 +78,15 @@ public abstract class ConfigFile
      * Loads the configuration from the associated <tt>.json</tt> file
      */
     public abstract void load();
+
+    /**
+     *
+     *
+     * @param path
+     * @return
+     */
+    private String toJsonPath(final String path)
+    {
+        return String.format("%s.json", path).toLowerCase();
+    }
 }

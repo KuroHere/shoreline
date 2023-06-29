@@ -34,7 +34,7 @@ public class ModulePreset extends ConfigFile
      */
     public ModulePreset(Path dir, Module module)
     {
-        super(dir, module.getId() + ".json");
+        super(dir, module.getId());
         this.module = module;
     }
 
@@ -51,14 +51,12 @@ public class ModulePreset extends ConfigFile
             {
                 Files.createFile(filepath);
             }
-
             JsonObject json = module.toJson();
             String jsonString = GSON.toJson(PARSER.parse(json.toString()));
             OutputStream out = Files.newOutputStream(filepath);
             out.write(jsonString.getBytes(StandardCharsets.UTF_8), 0,
                     jsonString.length());
         }
-
         // error writing file
         catch (IOException e)
         {
@@ -83,7 +81,6 @@ public class ModulePreset extends ConfigFile
                         PARSER.parse(new InputStreamReader(inputStream)).getAsJsonObject();
                 module.fromJson(json);
             }
-
             // error writing file
             catch (IOException e)
             {

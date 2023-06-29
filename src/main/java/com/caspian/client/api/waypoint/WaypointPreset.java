@@ -36,7 +36,7 @@ public class WaypointPreset extends ConfigFile
      */
     public WaypointPreset(Path dir, String ip)
     {
-        super(dir, ip + ".json");
+        super(dir, ip);
         this.ip = ip;
     }
 
@@ -53,7 +53,6 @@ public class WaypointPreset extends ConfigFile
             {
                 Files.createFile(filepath);
             }
-
             JsonObject json = new JsonObject();
             for (Waypoint waypoint : Managers.WAYPOINT.getWaypoints())
             {
@@ -62,13 +61,11 @@ public class WaypointPreset extends ConfigFile
                     json.add(waypoint.getName(), waypoint.toJson());
                 }
             }
-
             String jsonString = GSON.toJson(PARSER.parse(json.toString()));
             OutputStream out = Files.newOutputStream(filepath);
             out.write(jsonString.getBytes(StandardCharsets.UTF_8), 0,
                     jsonString.length());
         }
-
         // error writing file
         catch (IOException e)
         {
@@ -99,7 +96,6 @@ public class WaypointPreset extends ConfigFile
                     }
                 }
             }
-
             // error writing file
             catch (IOException e)
             {

@@ -16,7 +16,6 @@ public class Frame extends Component implements Interactable
 {
     //
     private final List<Button> buttons = new ArrayList<>();
-
     //
     private double prevX, prevY, prevWidth, prevHeight;
     private boolean maximized;

@@ -36,7 +36,7 @@ public class AccountPreset extends ConfigFile
      */
     public AccountPreset(Path dir, AccountType type)
     {
-        super(dir, type.name().toLowerCase() + ".json");
+        super(dir, type.name());
         this.type = type;
     }
 

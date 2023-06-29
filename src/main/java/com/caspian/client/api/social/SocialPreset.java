@@ -35,7 +35,7 @@ public class SocialPreset extends ConfigFile
      */
     public SocialPreset(Path dir, Relation relation)
     {
-        super(dir, relation.name().toLowerCase() + ".json");
+        super(dir, relation.name());
         this.relation = relation;
     }
 
