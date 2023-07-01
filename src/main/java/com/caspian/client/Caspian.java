@@ -1,10 +1,15 @@
 package com.caspian.client;
 
+import com.caspian.client.api.account.Account;
+import com.caspian.client.api.account.AccountType;
 import com.caspian.client.api.event.handler.EventHandler;
 import com.caspian.client.api.file.ClientConfiguration;
 import com.caspian.client.init.Managers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Client main class. Handles main client mod initializing of static service
@@ -29,6 +34,8 @@ public class Caspian
     // game instance is shutdown.
     public static ShutdownHook SHUTDOWN;
 
+    public static Executor EXECUTOR;
+
     /**
      * Called before {@link CaspianMod#onInitializeClient()}
      */
@@ -36,6 +43,7 @@ public class Caspian
     {
         LOGGER = LogManager.getLogger("Caspian");
         info("Starting preInit ...");
+        EXECUTOR = Executors.newFixedThreadPool(1);
         EVENT_HANDLER = new EventHandler();
     }
 
@@ -61,6 +69,9 @@ public class Caspian
         // this is to prevent configs loading before certain aspects of managers are available
         CONFIG = new ClientConfiguration();
         CONFIG.loadClient();
+
+        // DEBUG LINE IS BELOW UNTIL ALT MANAGER IS MADE!
+        // new Account(AccountType.MICROSOFT, "<email here>", "<password here>").login();
     }
 
     /**

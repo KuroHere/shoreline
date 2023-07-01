@@ -26,7 +26,7 @@ public abstract class ConfigFile
             .setPrettyPrinting()
             .create();
     //
-    protected static final JsonParser PARSER = new JsonParser();
+    public static final JsonParser PARSER = new JsonParser();
     // The UNIX filepath to configuration file. This filepath is always
     // within the client directory.
     private final Path filepath;

@@ -1,9 +1,9 @@
 package com.caspian.client.api.manager;
 
 import com.caspian.client.api.account.Account;
+import com.caspian.client.api.account.microsoft.MicroshitAuthenticator;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -16,6 +16,9 @@ import java.util.List;
  */
 public class AccountManager
 {
+    // The Microsoft authenticator
+    public static final MicroshitAuthenticator MICROSOFT_AUTH = new MicroshitAuthenticator();
+
     //
     private final List<Account> accounts = new ArrayList<>();
 

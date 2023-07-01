@@ -29,12 +29,17 @@ public class ClickGuiScreen extends Screen implements Globals
     //
     private final List<Frame> frames = new ArrayList<>();
 
+    private final ClickGuiModule module;
+
     /**
      *
      */
-    public ClickGuiScreen()
+    public ClickGuiScreen(ClickGuiModule module)
     {
         super(Text.literal("ClickGui"));
+
+        this.module = module;
+
         Window res = mc.getWindow();
         frames.add(new ConfigFrame(res.getScaledWidth() / 2.0 - 250.0,
                 res.getScaledHeight() / 2.0 - 150.0, 500.0, 300.0));
@@ -55,7 +60,7 @@ public class ClickGuiScreen extends Screen implements Globals
         for (Frame frame : frames)
         {
             frame.render(matrices, mouseX, mouseY, delta);
-            float scale = Modules.CLICK_GUI.getScale();
+            float scale = module.getScale();
             if (scale != 1.0f)
             {
                 frame.setDimensions(frame.getWidth() * scale,
@@ -121,6 +126,6 @@ public class ClickGuiScreen extends Screen implements Globals
     public void close()
     {
         super.close();
-        Modules.CLICK_GUI.disable();
+        module.disable();
     }
 }

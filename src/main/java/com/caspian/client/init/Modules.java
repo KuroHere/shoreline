@@ -7,6 +7,7 @@ import com.caspian.client.impl.module.client.ColorsModule;
 import com.caspian.client.impl.module.client.HudModule;
 import com.caspian.client.impl.module.combat.AutoCrystalModule;
 import com.caspian.client.impl.module.combat.AutoTotemModule;
+import com.caspian.client.impl.module.combat.VelocityModule;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
 import com.caspian.client.impl.module.movement.NoSlowModule;
 import com.caspian.client.impl.module.movement.SprintModule;
@@ -38,6 +39,7 @@ public class Modules
     public static final HudModule HUD;
     public static final AutoCrystalModule AUTO_CRYSTAL;
     public static final AutoTotemModule AUTO_TOTEM;
+    public static final VelocityModule VELOCITY;
     public static final AntiHungerModule ANTI_HUNGER;
     public static final NoSlowModule NO_SLOW;
     public static final SprintModule SPRINT;
@@ -85,6 +87,7 @@ public class Modules
                     "autocrystal_module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(
                     "autototem_module");
+            VELOCITY = (VelocityModule) getRegisteredModule("velocity");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
                     "antihunger_module");
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow_module");

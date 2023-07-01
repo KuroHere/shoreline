@@ -1,9 +1,11 @@
 package com.caspian.client.api.account;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.api.account.microsoft.exception.MicroshitException;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.setting.StringConfig;
+import com.caspian.client.api.manager.AccountManager;
 import com.caspian.client.mixin.accessor.AccessorMinecraftClient;
 import com.caspian.client.mixin.accessor.AccessorPlayerSkinProvider;
 import com.caspian.client.util.Globals;
@@ -22,6 +24,7 @@ import net.minecraft.client.util.ProfileKeys;
 import net.minecraft.client.util.Session;
 import net.minecraft.network.encryption.SignatureVerifier;
 
+import java.io.IOException;
 import java.net.Proxy;
 import java.util.Optional;
 import java.util.UUID;
@@ -63,11 +66,16 @@ public class Account extends ConfigContainer implements Globals
     {
         switch (type)
         {
-            case MICROSOFT ->
-            {
-                setSession(new Session("", "", "", Optional.empty(),
-                        Optional.empty(), Session.AccountType.MSA));
-            }
+            case MICROSOFT -> Caspian.EXECUTOR.execute(() -> {
+                try {
+                    setSession(AccountManager.MICROSOFT_AUTH.login(
+                            getName(), password.getValue()));
+                    Caspian.info("Logged into MSA account {} named {}", getName(), session.getUsername());
+                } catch (MicroshitException | IOException e) {
+                    Caspian.error("Failed to login to account {}", getName());
+                    e.printStackTrace();
+                }
+            });
             case MOJANG ->
             {
                 YggdrasilAuthenticationService authService =

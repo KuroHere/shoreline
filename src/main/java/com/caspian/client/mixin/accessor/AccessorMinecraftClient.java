@@ -10,7 +10,9 @@ import net.minecraft.client.texture.PlayerSkinProvider;
 import net.minecraft.client.util.ProfileKeys;
 import net.minecraft.client.util.Session;
 import net.minecraft.network.encryption.SignatureVerifier;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 /**
@@ -30,6 +32,7 @@ public interface AccessorMinecraftClient
      * @return
      */
     @Accessor("authenticationService")
+    @Mutable
     YggdrasilAuthenticationService getAuthenticationService();
 
     /**
@@ -38,6 +41,7 @@ public interface AccessorMinecraftClient
      * @param apiService
      */
     @Accessor
+    @Mutable
     void setUserApiService(UserApiService apiService);
 
     /**
@@ -46,6 +50,7 @@ public interface AccessorMinecraftClient
      * @param session
      */
     @Accessor("session")
+    @Mutable
     void setSession(Session session);
 
     /**
@@ -54,6 +59,7 @@ public interface AccessorMinecraftClient
      * @param profileKeys
      */
     @Accessor("profileKeys")
+    @Mutable
     void setProfileKeys(ProfileKeys profileKeys);
 
     /**
@@ -62,6 +68,7 @@ public interface AccessorMinecraftClient
      * @param socialInteractionsManager
      */
     @Accessor("socialInteractionsManager")
+    @Mutable
     void setSocialInteractionsManager(SocialInteractionsManager socialInteractionsManager);
 
     /**
@@ -70,6 +77,7 @@ public interface AccessorMinecraftClient
      * @param authenticationService
      */
     @Accessor("authenticationService")
+    @Mutable
     void setAuthenticationService(YggdrasilAuthenticationService authenticationService);
 
     /**
@@ -78,6 +86,7 @@ public interface AccessorMinecraftClient
      * @param servicesSignatureVerifier
      */
     @Accessor("servicesSignatureVerifier")
+    @Mutable
     void setServicesSignatureVerifier(SignatureVerifier servicesSignatureVerifier);
 
     /**
@@ -85,6 +94,7 @@ public interface AccessorMinecraftClient
      * @param skinProvider
      */
     @Accessor("skinProvider")
+    @Mutable
     void setSkinProvider(PlayerSkinProvider skinProvider);
 
     /**
@@ -93,6 +103,7 @@ public interface AccessorMinecraftClient
      * @param sessionService
      */
     @Accessor("sessionService")
+    @Mutable
     void setSessionService(MinecraftSessionService sessionService);
 
     /**

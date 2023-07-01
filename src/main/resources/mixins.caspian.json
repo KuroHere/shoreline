@@ -8,6 +8,7 @@
     "MixinMinecraftClient",
     "accessor.AccessorChatScreen",
     "accessor.AccessorClientWorld",
+    "accessor.AccessorEntityVelocityUpdateS2CPacket",
     "accessor.AccessorMinecraftClient",
     "accessor.AccessorPlayerInteractEntityC2SPacket",
     "accessor.AccessorPlayerMoveC2SPacket",

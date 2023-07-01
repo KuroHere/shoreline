@@ -49,7 +49,7 @@ public class ClickGuiModule extends ToggleModule
         // initialize the null gui screen instance
         if (CLICK_GUI_SCREEN == null)
         {
-            CLICK_GUI_SCREEN = new ClickGuiScreen();
+            CLICK_GUI_SCREEN = new ClickGuiScreen(this);
         }
         mc.setScreen(CLICK_GUI_SCREEN);
     }
