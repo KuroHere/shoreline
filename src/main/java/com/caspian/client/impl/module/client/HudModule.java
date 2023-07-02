@@ -15,6 +15,8 @@ import com.caspian.client.init.Modules;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.util.Window;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
@@ -267,15 +269,29 @@ public class HudModule extends ToggleModule
             }
             if (armorConfig.getValue())
             {
-                int x = (res.getScaledWidth() / 2) - 78;
-                int y = res.getScaledHeight() - 55;
-                if (mc.player.isCreative())
+                final Entity riding = mc.player.getVehicle();
+                //
+                int x = res.getScaledWidth() / 2 + 15;
+                int y = res.getScaledHeight();
+                if (!mc.player.isCreative())
                 {
-                    y -= 15;
-                }
-                else if (mc.player.isInsideWaterOrBubbleColumn())
-                {
-                    y -= 10;
+                    if (mc.player.isSubmergedInWater() && mc.player.getAir() > 0)
+                    {
+                        y -= 65;
+                    }
+                    else if (riding instanceof LivingEntity entity)
+                    {
+                        y -= 45 + (int) Math.ceil((entity.getMaxHealth() - 1.0f) / 20.0f) * 10;
+                    }
+                    else if (riding != null)
+                    {
+                        y -= 45;
+                    }
+                    else
+                    {
+                        y -= mc.player.isCreative() ?
+                                (mc.player.isRiding() ? 45 : 38) : 5;
+                    }
                 }
                 for (int i = 3; i >= 0; --i)
                 {
@@ -284,7 +300,7 @@ public class HudModule extends ToggleModule
                             armor, x, y);
                     mc.getItemRenderer().renderGuiItemOverlay(event.getMatrices(),
                             mc.textRenderer, armor, x, y);
-                    x += 16;
+                    x += 18;
                 }
             }
         }

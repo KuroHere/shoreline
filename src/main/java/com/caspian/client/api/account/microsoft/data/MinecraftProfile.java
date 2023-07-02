@@ -2,16 +2,18 @@
 package com.caspian.client.api.account.microsoft.data;
 
 /**
- * @param username     the username of the minecraft user
- * @param id           the UUID of the minecraft user
- * @param accessToken  the access token for the microsoft account
- * @param refreshToken the refresh token for the microsoft account
+ *
+ *
+ * @param username     The username of the minecraft user
+ * @param id           The UUID of the minecraft user
+ * @param accessToken  The access token for the microsoft account
+ * @param refreshToken The refresh token for the microsoft account
+ *
  * @author Gavin
- * @since 2.0.0
+ * @since 1.0
  */
-public record MinecraftProfile(
-  String username,
-  String id,
-  String accessToken,
-  String refreshToken
-) {}
+public record MinecraftProfile(String username, String id,
+                               String accessToken, String refreshToken)
+{
+
+}

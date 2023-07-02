@@ -62,10 +62,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Threaded AutoCrystal implementation.
- * <p>
- * TODO:
- * <li> Manual crystals
- * </p>
  *
  * @author linus
  * @since 1.0
@@ -596,7 +592,6 @@ public class AutoCrystalModule extends ToggleModule
                         addCrystalsInRange(attackData);
                     }
                     attackData = null;
-                    pauseCalcAttack = false;
                 }
             }
         }
@@ -680,7 +675,6 @@ public class AutoCrystalModule extends ToggleModule
                                         attackData.getPos());
                             }
                             attackData = null;
-                            pauseCalcAttack = false;
                         }
                     }
                 }
@@ -715,7 +709,6 @@ public class AutoCrystalModule extends ToggleModule
                             lastPlace.reset();
                         }
                         placeData = null;
-                        pauseCalcPlace = false;
                     }
                 }
             }
@@ -814,16 +807,6 @@ public class AutoCrystalModule extends ToggleModule
     public boolean isRotating()
     {
         return rotating > 0;
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    public boolean isPlaceRotating()
-    {
-        return placing && isRotating();
     }
 
     /**
@@ -1170,7 +1153,8 @@ public class AutoCrystalModule extends ToggleModule
                     }
                 }
             }
-            if (sequentialConfig.getValue() != Sequential.NONE)
+            if (sequentialConfig.getValue() != Sequential.NONE
+                    && sequentialConfig.getValue() != Sequential.FAST)
             {
                 boolean sequential = false;
                 double dx = 0.0;
@@ -1335,7 +1319,6 @@ public class AutoCrystalModule extends ToggleModule
                             lastPlace.reset();
                         }
                         placeData = null;
-                        pauseCalcPlace = false;
                     }
                 }
             }
@@ -1477,6 +1460,34 @@ public class AutoCrystalModule extends ToggleModule
         Managers.NETWORK.sendPacket(packet);
         Hand hand = getCrystalHand();
         swingDirect(hand != null ? hand : Hand.MAIN_HAND);
+        if (sequentialConfig.getValue() == Sequential.FAST)
+        {
+            tickCalc();
+            placing = placeData != null && placeData.isValid();
+            if (placing)
+            {
+                final Direction dir = placeData.getInteractDirection();
+                if (rotateConfig.getValue()
+                        && checkFacing(placeData.getBoundingBox()))
+                {
+                    if (strictRotateConfig.getValue() != Rotate.OFF)
+                    {
+                        lastPlace.setElapsedTime(Timer.MAX_TIME);
+                        return true;
+                    }
+                    float[] dest = offsetFacingConfig.getValue() ?
+                            placeData.getRotations(Managers.POSITION.getEyePos(), dir) :
+                            placeData.getRotations(Managers.POSITION.getEyePos());
+                    rotating = setRotation(dest, strictRotateConfig.getValue() == Rotate.FULL);
+                    rotateTimer.reset();
+                }
+                if (place(placeData, dir))
+                {
+                    lastPlace.reset();
+                }
+                placeData = null;
+            }
+        }
         return true;
     }
 
@@ -2101,6 +2112,7 @@ public class AutoCrystalModule extends ToggleModule
         {
             if (pauseCalcAttack && attackData != null)
             {
+                pauseCalcAttack = false;
                 return attackData;
             }
             // Position data of the player
@@ -2278,6 +2290,7 @@ public class AutoCrystalModule extends ToggleModule
         {
             if (pauseCalcPlace && placeData != null)
             {
+                pauseCalcPlace = false;
                 return placeData;
             }
             // Player position data
@@ -2621,6 +2634,7 @@ public class AutoCrystalModule extends ToggleModule
     {
         NORMAL,
         STRICT,
+        FAST,
         NONE
     }
 

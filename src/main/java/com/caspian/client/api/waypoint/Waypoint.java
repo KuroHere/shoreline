@@ -5,6 +5,7 @@ import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.util.math.NanoTimer;
 import com.caspian.client.util.math.Timer;
+import net.minecraft.util.math.Position;
 
 /**
  *
@@ -12,7 +13,7 @@ import com.caspian.client.util.math.Timer;
  * @author linus
  * @since 1.0
  */
-public class Waypoint extends ConfigContainer
+public class Waypoint extends ConfigContainer implements Position
 {
     //
     private final String ip;
@@ -56,33 +57,24 @@ public class Waypoint extends ConfigContainer
         return timer.passed(time);
     }
 
-    /**
-     *
-     *
-     * @return
-     *
-     *
-     */
-    public String getRef()
-    {
-        return String.format("%s_%s_waypoint", ip, getName().toLowerCase());
-    }
-
     public String getIp()
     {
         return ip;
     }
 
+    @Override
     public double getX()
     {
         return xConfig.getValue();
     }
 
+    @Override
     public double getY()
     {
         return yConfig.getValue();
     }
 
+    @Override
     public double getZ()
     {
         return zConfig.getValue();

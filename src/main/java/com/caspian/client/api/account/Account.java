@@ -1,7 +1,7 @@
 package com.caspian.client.api.account;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.account.microsoft.exception.MicroshitException;
+import com.caspian.client.api.account.microsoft.exception.MicrosoftAuthException;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.setting.StringConfig;
@@ -66,12 +66,15 @@ public class Account extends ConfigContainer implements Globals
     {
         switch (type)
         {
-            case MICROSOFT -> Caspian.EXECUTOR.execute(() -> {
-                try {
+            case MICROSOFT -> Caspian.EXECUTOR.execute(() ->
+            {
+                try
+                {
                     setSession(AccountManager.MICROSOFT_AUTH.login(
                             getName(), password.getValue()));
                     Caspian.info("Logged into MSA account {} named {}", getName(), session.getUsername());
-                } catch (MicroshitException | IOException e) {
+                } catch (MicrosoftAuthException | IOException e)
+                {
                     Caspian.error("Failed to login to account {}", getName());
                     e.printStackTrace();
                 }
