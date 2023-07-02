@@ -66,7 +66,7 @@ public class NanoTimer implements Timer
     @Override
     public long getElapsedTime()
     {
-        return TimeUnit.NANOSECONDS.toMillis( System.nanoTime() - this.time);
+        return TimeUnit.NANOSECONDS.toMillis( System.nanoTime() - time);
     }
 
     /**

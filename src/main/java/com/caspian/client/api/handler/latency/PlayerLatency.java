@@ -12,7 +12,7 @@ import net.minecraft.util.math.Vec3d;
  * @author linus
  * @since 1.0
  */
-public class LatencyPlayer implements Position, Globals
+public class PlayerLatency implements Position, Globals
 {
     // The tracking entity
     private final PlayerEntity track;
@@ -27,7 +27,7 @@ public class LatencyPlayer implements Position, Globals
      * @param pos
      * @param time
      */
-    public LatencyPlayer(PlayerEntity track, Vec3d pos, long time)
+    public PlayerLatency(PlayerEntity track, Vec3d pos, long time)
     {
         this.track = track;
         this.pos = pos;

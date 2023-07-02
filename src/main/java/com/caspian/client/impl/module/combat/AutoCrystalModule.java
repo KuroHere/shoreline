@@ -8,7 +8,7 @@ import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.config.setting.NumberDisplay;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
-import com.caspian.client.api.handler.latency.LatencyPlayer;
+import com.caspian.client.api.handler.latency.PlayerLatency;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
@@ -333,7 +333,7 @@ public class AutoCrystalModule extends ToggleModule
     private final Map<PlayerEntity, Long> pops =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
     //
-    private final Timer freqInterval = new NanoTimer();
+    private final NanoTimer freqInterval = new NanoTimer();
     private final int[] attackFreq = new int[16];
     private int freq;
     //
@@ -1003,7 +1003,7 @@ public class AutoCrystalModule extends ToggleModule
                                     if (e instanceof PlayerEntity player
                                             && latencyPositionConfig.getValue())
                                     {
-                                        LatencyPlayer t = Managers.LATENCY_POS.getTrackedData(pos,
+                                        PlayerLatency t = Managers.LATENCY_POS.getTrackedData(pos,
                                                 player, maxLatencyConfig.getValue());
                                         if (t != null)
                                         {
@@ -1060,7 +1060,7 @@ public class AutoCrystalModule extends ToggleModule
                                             data.addTag("armorbreak");
                                         }
                                         if (!unsafe && (instantMaxConfig.getValue()
-                                                && data.getDamage() > attackData.getDamage()
+                                                && data.getDamage() >= attackData.getDamage()
                                                 || data.isDamageValid(instantDamageConfig.getValue())))
                                         {
                                             if (rotateConfig.getValue()
@@ -1231,7 +1231,7 @@ public class AutoCrystalModule extends ToggleModule
                                     if (e instanceof PlayerEntity player
                                             && latencyPositionConfig.getValue())
                                     {
-                                        LatencyPlayer t = Managers.LATENCY_POS.getTrackedData(pos,
+                                        PlayerLatency t = Managers.LATENCY_POS.getTrackedData(pos,
                                                 player, maxLatencyConfig.getValue());
                                         if (t != null)
                                         {
@@ -1499,17 +1499,11 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean preAttackCheck(int e)
     {
-        if (((NanoTimer) freqInterval).passed(0.5f, TimeUnit.SECONDS))
+        freq += freqInterval.getElapsedTime() / 500;
+        if (freq > 15)
         {
-            freq++;
-            if (freq > 15)
-            {
-                for (int i = 0; i < 16; i++)
-                {
-                    attackFreq[i] = 0;
-                }
-                freq = 0;
-            }
+            Arrays.fill(attackFreq, 0);
+            freq = 0;
         }
         if (inhibitConfig.getValue() != Inhibit.NONE)
         {
@@ -2162,7 +2156,7 @@ public class AutoCrystalModule extends ToggleModule
                             if (e instanceof PlayerEntity player
                                     && latencyPositionConfig.getValue())
                             {
-                                LatencyPlayer t = Managers.LATENCY_POS.getTrackedData(pos,
+                                PlayerLatency t = Managers.LATENCY_POS.getTrackedData(pos,
                                         player, maxLatencyConfig.getValue());
                                 if (t != null)
                                 {
@@ -2337,7 +2331,7 @@ public class AutoCrystalModule extends ToggleModule
                             if (e instanceof PlayerEntity player
                                     && latencyPositionConfig.getValue())
                             {
-                                LatencyPlayer t = Managers.LATENCY_POS.getTrackedData(pos,
+                                PlayerLatency t = Managers.LATENCY_POS.getTrackedData(pos,
                                         player, maxLatencyConfig.getValue());
                                 if (t != null)
                                 {
@@ -2528,7 +2522,7 @@ public class AutoCrystalModule extends ToggleModule
         Entity recieve = entity;
         if (entity instanceof PlayerEntity player && latencyPositionConfig.getValue())
         {
-            LatencyPlayer t = Managers.LATENCY_POS.getTrackedData(pos, player,
+            PlayerLatency t = Managers.LATENCY_POS.getTrackedData(pos, player,
                 maxLatencyConfig.getValue());
             if (t != null)
             {

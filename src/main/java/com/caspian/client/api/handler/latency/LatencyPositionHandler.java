@@ -19,14 +19,14 @@ import net.minecraft.util.math.Vec3d;
 public class LatencyPositionHandler implements Globals
 {
     //
-    private final PosTracker tracker;
+    private final LatencyTracker tracker;
 
     /**
      *
      *
      * @param tracker
      */
-    public LatencyPositionHandler(PosTracker tracker)
+    public LatencyPositionHandler(LatencyTracker tracker)
     {
         this.tracker = tracker;
     }
@@ -39,7 +39,7 @@ public class LatencyPositionHandler implements Globals
      * @param time
      * @return
      */
-    public LatencyPlayer getTrackedData(final Vec3d floor,
+    public PlayerLatency getTrackedData(final Vec3d floor,
                                         final PlayerEntity player,
                                         final long time)
     {
@@ -61,7 +61,7 @@ public class LatencyPositionHandler implements Globals
                 Entity e = mc.world.getEntityById(packet.getId());
                 if (e instanceof PlayerEntity player)
                 {
-                    tracker.addTrackedData(player, new LatencyPlayer(player,
+                    tracker.addTrackedData(player, new PlayerLatency(player,
                             new Vec3d(packet.getX(), packet.getY(),
                             packet.getZ()), System.currentTimeMillis()));
                 }
@@ -72,7 +72,7 @@ public class LatencyPositionHandler implements Globals
                 if (packet.getEntityType() == EntityType.PLAYER)
                 {
                     PlayerEntity player = (PlayerEntity) e;
-                    tracker.addTrackedData(player, new LatencyPlayer(player,
+                    tracker.addTrackedData(player, new PlayerLatency(player,
                             new Vec3d(packet.getX(), packet.getY(),
                                     packet.getZ()), System.currentTimeMillis()));
                 }
