@@ -10,18 +10,7 @@ package com.caspian.client.api.account;
  */
 public enum AccountType
 {
-    /**
-     *
-     */
     MOJANG,
-
-    /**
-     *
-     */
     MICROSOFT,
-
-    /**
-     *
-     */
     CRACKED
 }

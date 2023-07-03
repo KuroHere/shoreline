@@ -15,7 +15,6 @@ public class Managers
     // have been initialized and the init process is complete. As a general
     // rule, it is good practice to check this state before accessing instances.
     private static boolean initialized;
-
     // Manager instances. Managers can be statically referenced after
     // initialized. Managers will be initialized in this order.
     public static NetworkManager NETWORK;
@@ -72,9 +71,9 @@ public class Managers
     {
         if (isInitialized())
         {
+            MACRO.postInit();
             MODULE.postInit();
             COMMAND.postInit();
-            MACRO.postInit();
         }
     }
 

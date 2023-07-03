@@ -24,19 +24,20 @@ public class FakePlayerEntity extends OtherClientPlayerEntity
     {
         super(MinecraftClient.getInstance().world, player.getGameProfile());
         this.player = player;
+        copyPositionAndRotation(player);
+        // setBoundingBox(player.getBoundingBox());
+        getInventory().clone(player.getInventory());
+        setId(player.getId());
     }
 
     /**
      *
      *
-     * @param player
+     * @return
      */
-    public void copy(final PlayerEntity player)
+    public PlayerEntity getPlayer()
     {
-        copyPositionAndRotation(player);
-        // setBoundingBox(player.getBoundingBox());
-        getInventory().clone(player.getInventory());
-        setId(player.getId());
+        return player;
     }
 
     /**

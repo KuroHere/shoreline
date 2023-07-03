@@ -25,6 +25,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
+import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.List;
 
@@ -171,9 +172,9 @@ public class HudModule extends ToggleModule
                 double z = mc.player.getZ() - mc.player.prevZ;
                 double dist = Math.sqrt(x * x + z * z) / 1000.0;
                 double div = 0.05 / 3600.0;
-                String speed = Double.toString(dist / div);
+                final double speed = dist / div;
                 String text = String.format("Speed §f%skm/h",
-                        speed.substring(0, speed.indexOf(".") + 2));
+                        new DecimalFormat("#.0").format(speed));
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, bottomRight,
@@ -234,6 +235,7 @@ public class HudModule extends ToggleModule
             }
             if (coordsConfig.getValue())
             {
+                final DecimalFormat decimal = new DecimalFormat("#.0");
                 String x = Double.toString(mc.player.getX());
                 String y = Double.toString(mc.player.getY());
                 String z = Double.toString(mc.player.getZ());
@@ -245,13 +247,11 @@ public class HudModule extends ToggleModule
                 RenderManager.renderText(event.getMatrices(), String.format(
                                 "XYZ %s, %s, %s" + (netherCoordsConfig.getValue() ?
                                         "[%s, %s]" : ""),
-                                Formatting.WHITE + x.substring(0,
-                                        x.indexOf(".") + 2), y.substring(0,
-                                        x.indexOf(".") + 2), z.substring(0,
-                                        x.indexOf(".") + 2) + Formatting.RESET,
-                                Formatting.WHITE + nx.substring(0,
-                                        nx.indexOf("." + 2)), nz.substring(0,
-                                        nz.indexOf("." + 2)) + Formatting.RESET), 2,
+                                Formatting.WHITE + decimal.format(x),
+                                decimal.format(y),
+                                decimal.format(z) + Formatting.RESET,
+                                Formatting.WHITE + decimal.format(nx),
+                                decimal.format(nz) + Formatting.RESET), 2,
                         bottomLeft, Modules.COLORS.getRGB());
                 bottomLeft -= 10.0f;
             }

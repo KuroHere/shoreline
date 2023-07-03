@@ -333,7 +333,7 @@ public class AutoCrystalModule extends ToggleModule
     private final Map<PlayerEntity, Long> pops =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
     //
-    private final NanoTimer freqInterval = new NanoTimer();
+    private final Timer freqInterval = new NanoTimer();
     private final int[] attackFreq = new int[16];
     private int freq;
     //
@@ -378,6 +378,7 @@ public class AutoCrystalModule extends ToggleModule
     {
         if (mc.player != null && mc.world != null)
         {
+            freqInterval.reset();
             // run calc
             final Iterable<Entity> worldEntities = mc.world.getEntities();
             final Iterable<EndCrystalEntity> crystals = getCrystalSphere(
@@ -490,7 +491,6 @@ public class AutoCrystalModule extends ToggleModule
         lastBreak.reset();
         lastPlace.reset();
         startSequence.reset();
-        freqInterval.reset();
         attacks.clear();
         explosions.clear();
         placements.clear();
@@ -562,6 +562,10 @@ public class AutoCrystalModule extends ToggleModule
     {
         if (mc.player != null && mc.world != null)
         {
+            if (isRotationBlocked())
+            {
+                return;
+            }
             if (attackDelayConfig.getValue() <= 0.0f)
             {
                 return;
@@ -613,6 +617,10 @@ public class AutoCrystalModule extends ToggleModule
                 // MAIN LOOP
                 cleanCrystals();
                 tickCalc();
+                if (isRotationBlocked())
+                {
+                    return;
+                }
                 if (rotating > 0)
                 {
                     yaw = yaws[--rotating];
@@ -620,8 +628,7 @@ public class AutoCrystalModule extends ToggleModule
                 }
                 if (!rotateTimer.passed(rotatePreserveTicksConfig.getValue()))
                 {
-                    event.setYaw(yaw);
-                    event.setPitch(pitch);
+                    Managers.ROTATION.setRotation(this, yaw, pitch);
                     event.cancel();
                 }
                 if (rotating != 0)
@@ -643,8 +650,7 @@ public class AutoCrystalModule extends ToggleModule
                             if (!event.isCanceled())
                             {
                                 yaw = yaws[--rotating];
-                                event.setYaw(yaw);
-                                event.setPitch(pitch);
+                                Managers.ROTATION.setRotation(this, yaw, pitch);
                                 event.cancel();
                             }
                             return;
@@ -694,8 +700,7 @@ public class AutoCrystalModule extends ToggleModule
                         if (!event.isCanceled())
                         {
                             yaw = yaws[--rotating];
-                            event.setYaw(yaw);
-                            event.setPitch(pitch);
+                            Managers.ROTATION.setRotation(this, yaw, pitch);
                             event.cancel();
                         }
                         return;
@@ -1499,7 +1504,12 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean preAttackCheck(int e)
     {
-        freq += freqInterval.getElapsedTime() / 500;
+        long interval = freqInterval.getElapsedTime() / 500;
+        if (interval > 0)
+        {
+            freq += interval;
+            freqInterval.reset();
+        }
         if (freq > 15)
         {
             Arrays.fill(attackFreq, 0);
@@ -1848,11 +1858,13 @@ public class AutoCrystalModule extends ToggleModule
      */
     private Hand getCrystalHand()
     {
-        if (mc.player.getOffHandStack().getItem() instanceof EndCrystalItem)
+        final ItemStack offhand = mc.player.getOffHandStack();
+        final ItemStack mainhand = mc.player.getMainHandStack();
+        if (offhand.getItem() instanceof EndCrystalItem)
         {
             return Hand.OFF_HAND;
         }
-        else if (mc.player.getMainHandStack().getItem() instanceof EndCrystalItem)
+        else if (mainhand.getItem() instanceof EndCrystalItem)
         {
             return Hand.MAIN_HAND;
         }

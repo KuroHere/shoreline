@@ -1,7 +1,7 @@
 package com.caspian.client.api.account;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.account.microsoft.exception.MicrosoftAuthException;
+import com.caspian.client.api.account.microsoft.MicrosoftAuthException;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.setting.StringConfig;

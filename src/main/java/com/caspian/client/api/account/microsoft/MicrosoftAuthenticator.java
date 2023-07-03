@@ -3,7 +3,6 @@ package com.caspian.client.api.account.microsoft;
 import com.caspian.client.api.account.microsoft.data.MinecraftProfile;
 import com.caspian.client.api.account.microsoft.data.OAuthData;
 import com.caspian.client.api.account.microsoft.data.XboxLoginData;
-import com.caspian.client.api.account.microsoft.exception.MicrosoftAuthException;
 import com.caspian.client.util.request.RequestUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

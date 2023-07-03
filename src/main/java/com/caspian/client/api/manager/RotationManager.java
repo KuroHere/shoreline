@@ -6,8 +6,6 @@ import com.caspian.client.api.handler.rotation.RotationRequest;
 import com.caspian.client.api.module.Module;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.PriorityQueue;
-
 /**
  *
  *
@@ -18,10 +16,6 @@ public class RotationManager
 {
     //
     private final RotationHandler handler;
-    //
-    private final PriorityQueue<RotationRequest> requests =
-            new PriorityQueue<>();
-    private Module rotation;
 
     /**
      *
@@ -43,19 +37,33 @@ public class RotationManager
      */
     public void setRotation(final Module requester,
                             final int priority,
-                            float yaw,
-                            float pitch)
+                            final float yaw,
+                            final float pitch)
     {
-        for (RotationRequest r : requests)
-        {
-            if (requester == r.getRequester())
-            {
-                r.setYaw(yaw);
-                r.setPitch(pitch);
-                return;
-            }
-        }
-        requests.add(new RotationRequest(requester, priority, yaw, pitch));
+        handler.request(requester, priority, yaw, pitch);
+    }
+    /**
+     *
+     *
+     * @param requester
+     * @param yaw
+     * @param pitch
+     */
+    public void setRotation(final Module requester,
+                            final float yaw,
+                            final float pitch)
+    {
+        handler.request(requester, yaw, pitch);
+    }
+
+    /**
+     *
+     *
+     * @param request
+     */
+    public void removeRotation(final RotationRequest request)
+    {
+        handler.remove(request);
     }
 
     /**
@@ -65,7 +73,7 @@ public class RotationManager
      */
     public void removeRotation(final Module requester)
     {
-        requests.removeIf(r -> requester == r.getRequester());
+        handler.remove(requester);
     }
 
     public void setRotationClient(float yaw, float pitch)
@@ -108,8 +116,18 @@ public class RotationManager
      *
      * @return
      */
-    public Module getCurrentRotation()
+    public RotationRequest getCurrentRotation()
     {
-        return rotation;
+        return handler.getLatestRequest();
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public Module getRotatingModule()
+    {
+        return handler.getRotatingModule();
     }
 }

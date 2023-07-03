@@ -151,9 +151,9 @@ public class ToggleModule extends Module
      *
      * @return
      */
-    public boolean isRotationModule()
+    public boolean isRotationBlocked()
     {
-        return this == Managers.ROTATION.getCurrentRotation();
+        return this != Managers.ROTATION.getRotatingModule();
     }
 
     /**

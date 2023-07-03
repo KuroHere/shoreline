@@ -1,5 +1,5 @@
 /* November.lol © 2023 */
-package com.caspian.client.api.account.microsoft.exception;
+package com.caspian.client.api.account.microsoft;
 
 /**
  * @author Gavin

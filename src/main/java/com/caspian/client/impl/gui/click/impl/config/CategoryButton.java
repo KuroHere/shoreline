@@ -65,7 +65,7 @@ public class CategoryButton extends Button
     public void render(MatrixStack matrices, float mouseX, float mouseY,
                        float delta)
     {
-        setPos(getFrame().getX() + 10.0, getFrame().getY() + 45.0);
+        setPos(getFrame().getX() + 10.0, getFrame().getY() + 45.0 );
         if (((ConfigFrame) getFrame()).isCurr(this))
         {
             drawRoundedRect(matrices, getX(), getY(), getWidth(), getHeight(),
@@ -96,7 +96,6 @@ public class CategoryButton extends Button
         {
             ((ConfigFrame) getFrame()).setCurr(this);
         }
-
         for (ModuleButton moduleButton : moduleButtons)
         {
             moduleButton.mouseClicked(mouseX, mouseY, button);

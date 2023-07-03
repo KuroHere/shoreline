@@ -5,9 +5,10 @@ import com.caspian.client.api.manager.ModuleManager;
 import com.caspian.client.impl.module.client.ClickGuiModule;
 import com.caspian.client.impl.module.client.ColorsModule;
 import com.caspian.client.impl.module.client.HudModule;
+import com.caspian.client.impl.module.client.RotationsModule;
 import com.caspian.client.impl.module.combat.AutoCrystalModule;
 import com.caspian.client.impl.module.combat.AutoTotemModule;
-import com.caspian.client.impl.module.combat.VelocityModule;
+import com.caspian.client.impl.module.movement.VelocityModule;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
 import com.caspian.client.impl.module.movement.NoSlowModule;
 import com.caspian.client.impl.module.movement.SprintModule;
@@ -37,6 +38,7 @@ public class Modules
     public static final ClickGuiModule CLICK_GUI;
     public static final ColorsModule COLORS;
     public static final HudModule HUD;
+    public static final RotationsModule ROTATIONS;
     public static final AutoCrystalModule AUTO_CRYSTAL;
     public static final AutoTotemModule AUTO_TOTEM;
     public static final VelocityModule VELOCITY;
@@ -83,6 +85,8 @@ public class Modules
                     "clickgui_module");
             COLORS = (ColorsModule) getRegisteredModule("colors_module");
             HUD = (HudModule) getRegisteredModule("hud_module");
+            ROTATIONS = (RotationsModule) getRegisteredModule(
+                    "rotations_module");
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
                     "autocrystal_module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(

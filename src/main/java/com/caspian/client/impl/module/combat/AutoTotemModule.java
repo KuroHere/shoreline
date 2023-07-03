@@ -169,8 +169,7 @@ public class AutoTotemModule extends ToggleModule
                 if (!critical)
                 {
                     offhand = crystalCheckConfig.getValue()
-                                    && (Modules.AUTO_CRYSTAL.isPlacing()
-                                    || Modules.AUTO_CRYSTAL.isPlaceRotating()) ?
+                            && Modules.AUTO_CRYSTAL.isPlacing() ?
                             Items.END_CRYSTAL : offhandConfig.getValue();
                     //
                     final ItemStack mainhand = mc.player.getMainHandStack();
