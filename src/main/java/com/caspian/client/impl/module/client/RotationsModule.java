@@ -29,6 +29,7 @@ public class RotationsModule extends ConcurrentModule
 
     /**
      *
+     *
      * @return
      */
     public float getPreserveTicks()

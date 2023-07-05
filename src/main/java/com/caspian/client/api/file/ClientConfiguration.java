@@ -5,7 +5,7 @@ import com.caspian.client.api.account.AccountPreset;
 import com.caspian.client.api.account.AccountType;
 import com.caspian.client.api.module.Module;
 import com.caspian.client.api.module.ModulePreset;
-import com.caspian.client.api.social.Relation;
+import com.caspian.client.api.social.SocialRelation;
 import com.caspian.client.api.social.SocialPreset;
 import com.caspian.client.api.waypoint.WaypointPreset;
 import com.caspian.client.init.Managers;
@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -84,7 +83,7 @@ public class ClientConfiguration implements Globals
             // files.add(new ModulePreset(clientDir.resolve("Defaults"), module));
             files.add(new ModulePreset(clientDir.resolve("Modules"), module));
         }
-        for (Relation relation : Relation.values())
+        for (SocialRelation relation : SocialRelation.values())
         {
             files.add(new SocialPreset(clientDir, relation));
         }

@@ -6,6 +6,7 @@ import com.caspian.client.api.config.setting.EnumConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.api.handler.rotation.RotationPriority;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
@@ -14,6 +15,7 @@ import com.caspian.client.impl.event.network.AttackBlockEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import com.caspian.client.util.player.RotationUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.world.ClientWorld;
@@ -48,6 +50,8 @@ public class SpeedmineModule extends ToggleModule
             1.0f, 4.5f, 5.0f);
     Config<Swap> swapConfig = new EnumConfig<>("Swap", "Swaps to the best " +
             "tool once the mining is complete", Swap.SILENT, Swap.values());
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates" +
+            " when mining the block", true);
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool" +
             " using alternative packets", false);
     Config<Boolean> remineConfig = new BooleanConfig("Remine",
@@ -147,6 +151,13 @@ public class SpeedmineModule extends ToggleModule
                                     swap(slot);
                                 }
                             }
+                            if (rotateConfig.getValue())
+                            {
+                                float[] rots = RotationUtil.getRotationsTo(Managers.POSITION.getCameraPosVec(1.0f),
+                                                mining.toCenterPos());
+                                Managers.ROTATION.setRotation(this,
+                                        RotationPriority.HIGH, rots[0], rots[1]);
+                            }
                             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                                     PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
                                     mining, direction));
@@ -231,12 +242,11 @@ public class SpeedmineModule extends ToggleModule
     @EventListener
     public void onAttackBlock(AttackBlockEvent event)
     {
-        ClientWorld world = mc.world;
-        if (mc.player != null && world != null)
+        if (mc.player != null && mc.world != null)
         {
             state = mc.world.getBlockState(event.getPos());
             if (!mc.player.isCreative() && isBreakable(state)
-                    && !world.getWorldBorder().contains(event.getPos())
+                    && !mc.world.getWorldBorder().contains(event.getPos())
                     && !state.isAir())
             {
                 if (mining != event.getPos())

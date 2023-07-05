@@ -2,6 +2,7 @@ package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.handler.rotation.RotationHandler;
+import com.caspian.client.api.handler.rotation.RotationPriority;
 import com.caspian.client.api.handler.rotation.RotationRequest;
 import com.caspian.client.api.module.Module;
 import net.minecraft.util.math.MathHelper;
@@ -36,7 +37,7 @@ public class RotationManager
      * @param pitch
      */
     public void setRotation(final Module requester,
-                            final int priority,
+                            final RotationPriority priority,
                             final float yaw,
                             final float pitch)
     {

@@ -31,6 +31,7 @@ public class Managers
     public static TotemManager TOTEM;
     public static InteractionManager INTERACT;
     public static LatencyPositionManager LATENCY_POS;
+    public static SoundManager SOUND;
 
     /**
      * Initializes the manager instances. Should not be used if the
@@ -56,6 +57,7 @@ public class Managers
             TOTEM = new TotemManager();
             INTERACT = new InteractionManager();
             LATENCY_POS = new LatencyPositionManager();
+            SOUND = new SoundManager();
             initialized = true;
         }
     }

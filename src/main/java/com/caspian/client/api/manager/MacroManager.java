@@ -20,7 +20,6 @@ public class MacroManager
 {
     // The handler for handling macros
     private final MacroHandler macroHandler;
-
     //
     private final Set<Macro> macros = new HashSet<>();
 
@@ -35,7 +34,8 @@ public class MacroManager
     }
 
     /**
-     * Loads macros from the file system
+     * Loads custom macros from the
+     * {@link com.caspian.client.api.file.ConfigFile} system
      */
     public void postInit()
     {

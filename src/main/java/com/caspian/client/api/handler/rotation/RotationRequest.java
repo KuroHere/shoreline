@@ -26,13 +26,13 @@ public class RotationRequest implements Comparable<RotationRequest>
      * @param pitch
      */
     public RotationRequest(Module requester,
-                           int priority,
+                           RotationPriority priority,
                            float yaw,
                            float pitch)
     {
         this.requester = requester;
         this.time = System.currentTimeMillis();
-        this.priority = priority;
+        this.priority = priority.getPriority();
         this.yaw = yaw;
         this.pitch = pitch;
     }
@@ -48,7 +48,7 @@ public class RotationRequest implements Comparable<RotationRequest>
                            float yaw,
                            float pitch)
     {
-        this(requester, 100, yaw, pitch);
+        this(requester, RotationPriority.NORMAL, yaw, pitch);
     }
 
 
@@ -65,8 +65,11 @@ public class RotationRequest implements Comparable<RotationRequest>
     @Override
     public int compareTo(RotationRequest other)
     {
-        int prio = Double.compare(priority, other.getPriority());
-        return prio != 0 ? prio : Long.compare(getTime(), other.getTime()) * -1;
+        if (priority == other.getPriority())
+        {
+            return Long.compare(time, other.getTime());
+        }
+        return Integer.compare(priority, other.getPriority());
     }
 
     public Module getRequester()

@@ -36,21 +36,23 @@ import java.util.UUID;
  * @since 1.0
  *
  * @see AccountType
+ * @see com.caspian.client.api.account.microsoft.MicrosoftAuthenticator
  */
 public class Account extends ConfigContainer implements Globals
 {
     //
+    Config<String> password = new StringConfig("Password", "Password login " +
+            "field of the account.", "");
+    //
     private final AccountType type;
-    //
-    private final Config<String> password = new StringConfig("Password",
-            "Password login field of the account.", "");
-    //
     private Session session;
 
     /**
      *
      *
      * @param type
+     * @param username
+     * @param password
      */
     public Account(AccountType type, String username, String password)
     {

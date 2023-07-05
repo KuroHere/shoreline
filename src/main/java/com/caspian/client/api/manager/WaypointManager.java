@@ -58,12 +58,11 @@ public class WaypointManager
      */
     public Collection<String> getIps()
     {
-        Set<String> ips = new HashSet<>();
+        final Set<String> ips = new HashSet<>();
         for (Waypoint waypoint : getWaypoints())
         {
             ips.add(waypoint.getIp());
         }
-
         return ips;
     }
 }

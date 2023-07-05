@@ -1,6 +1,6 @@
 package com.caspian.client.api.manager;
 
-import com.caspian.client.api.social.Relation;
+import com.caspian.client.api.social.SocialRelation;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,19 +8,19 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * Manages client social relationships by storing the associated player
- * {@link UUID}'s with a {@link Relation} value to the user. Backed by a
+ * {@link UUID}'s with a {@link SocialRelation} value to the user. Backed by a
  * {@link ConcurrentMap} so getting/setting runs in O(1).
  *
  * @author linus
  * @since 1.0
  *
  * @see UUID
- * @see Relation
+ * @see SocialRelation
  */
 public class SocialManager
 {
     //
-    private final ConcurrentMap<UUID, Relation> relationships =
+    private final ConcurrentMap<UUID, SocialRelation> relationships =
             new ConcurrentHashMap<>();
 
     /**
@@ -30,7 +30,7 @@ public class SocialManager
      * @param relation
      * @return
      */
-    public boolean isRelation(UUID uuid, Relation relation)
+    public boolean isRelation(UUID uuid, SocialRelation relation)
     {
         return relationships.get(uuid) == relation;
     }
@@ -41,11 +41,11 @@ public class SocialManager
      * @param uuid
      * @return
      *
-     * @see #isRelation(UUID, Relation)
+     * @see #isRelation(UUID, SocialRelation)
      */
     public boolean isFriend(UUID uuid)
     {
-        return isRelation(uuid, Relation.FRIEND);
+        return isRelation(uuid, SocialRelation.FRIEND);
     }
 
     /**
@@ -54,15 +54,14 @@ public class SocialManager
      * @param uuid
      * @param relation
      */
-    public void addRelation(UUID uuid, Relation relation)
+    public void addRelation(UUID uuid, SocialRelation relation)
     {
-        Relation relationship = relationships.get(uuid);
+        final SocialRelation relationship = relationships.get(uuid);
         if (relationship != null)
         {
             relationships.replace(uuid, relation);
             return;
         }
-
         relationships.put(uuid, relation);
     }
 
@@ -71,11 +70,11 @@ public class SocialManager
      *
      * @param uuid
      *
-     * @see #addRelation(UUID, Relation)
+     * @see #addRelation(UUID, SocialRelation)
      */
     public void addFriend(UUID uuid)
     {
-        addRelation(uuid, Relation.FRIEND);
+        addRelation(uuid, SocialRelation.FRIEND);
     }
 
     /**
@@ -84,17 +83,17 @@ public class SocialManager
      * @param relation
      * @return
      */
-    public Collection<UUID> getRelations(Relation relation)
+    public Collection<UUID> getRelations(SocialRelation relation)
     {
-        List<UUID> friends = new ArrayList<>();
-        for (Map.Entry<UUID, Relation> relationship : relationships.entrySet())
+        final List<UUID> friends = new ArrayList<>();
+        for (Map.Entry<UUID, SocialRelation> relationship :
+                relationships.entrySet())
         {
             if (relationship.getValue() == relation)
             {
                 friends.add(relationship.getKey());
             }
         }
-
         return friends;
     }
 
@@ -103,10 +102,10 @@ public class SocialManager
      *
      * @return
      *
-     * @see #getRelations(Relation)
+     * @see #getRelations(SocialRelation)
      */
     public Collection<UUID> getFriends()
     {
-        return getRelations(Relation.FRIEND);
+        return getRelations(SocialRelation.FRIEND);
     }
 }

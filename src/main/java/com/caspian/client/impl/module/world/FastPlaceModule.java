@@ -9,12 +9,11 @@ import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
-import com.caspian.client.mixin.accessor.AccessorMinecraftClient;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.mixin.accessor.AccessorMinecraftClient;
 import com.caspian.client.util.math.NanoTimer;
-import com.caspian.client.util.math.Timer;
 import com.caspian.client.util.world.SneakBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
@@ -48,9 +47,8 @@ public class FastPlaceModule extends ToggleModule
             Items.SNOWBALL, Items.EGG);
     Config<List<Item>> blacklistConfig = new ListConfig<>("Blacklist",
             "Valid item blacklist", Items.ENDER_PEARL, Items.ENDER_EYE);
-
     //
-    private final Timer startTimer = new NanoTimer();
+    private final NanoTimer startTimer = new NanoTimer();
 
     /**
      *
@@ -77,7 +75,7 @@ public class FastPlaceModule extends ToggleModule
             }
             else if (placeCheck(mc.player.getActiveItem()))
             {
-                if (((NanoTimer) startTimer).passed(startDelayConfig.getValue(), TimeUnit.SECONDS)
+                if (startTimer.passed(startDelayConfig.getValue(), TimeUnit.SECONDS)
                         && ((AccessorMinecraftClient) mc).hookGetItemUseCooldown() > delayConfig.getValue())
                 {
                     if (ghostFixConfig.getValue())
@@ -103,7 +101,7 @@ public class FastPlaceModule extends ToggleModule
         {
             if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet)
             {
-                if (ghostFixConfig.getValue()
+                if (ghostFixConfig.getValue() && !event.isCached()
                         && placeCheck(mc.player.getStackInHand(packet.getHand())))
                 {
                     final BlockState state = mc.world.getBlockState(

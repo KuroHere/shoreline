@@ -57,7 +57,10 @@ public class RotationHandler implements Globals
      * @param yaw
      * @param pitch
      */
-    public void request(Module requester, int priority, float yaw, float pitch)
+    public void request(final Module requester,
+                        final RotationPriority priority,
+                        final float yaw,
+                        final float pitch)
     {
         for (RotationRequest r : requests)
         {
@@ -80,7 +83,7 @@ public class RotationHandler implements Globals
      */
     public void request(Module requester, float yaw, float pitch)
     {
-        request(requester, 100, yaw, pitch);
+        request(requester, RotationPriority.NORMAL, yaw, pitch);
     }
 
     /**

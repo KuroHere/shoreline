@@ -1788,7 +1788,7 @@ public class AutoCrystalModule extends ToggleModule
                 double d = p2.getX();
                 double e = p2.getY();
                 double f = p2.getZ();
-                List<Entity> list = getCollisionList(p, new Box(d, e, f,
+                List<Entity> list = getCollisions(new Box(d, e, f,
                         d + bb.maxX, e + bb.maxY, f + bb.maxZ));
                 return list.isEmpty();
             }
@@ -1798,12 +1798,11 @@ public class AutoCrystalModule extends ToggleModule
     /**
      * The {@link EndCrystalItem} cannot be placed on a {@link Box} with
      * other end crystals. However, we can predict
-     *
-     * @param p
+
      * @param box
      * @return
      */
-    public List<Entity> getCollisionList(BlockPos p, Box box)
+    public List<Entity> getCollisions(Box box)
     {
         final List<Entity> collisions = new CopyOnWriteArrayList<>(
                 mc.world.getOtherEntities(null, box));
@@ -2601,7 +2600,7 @@ public class AutoCrystalModule extends ToggleModule
             tick += rotateSuspendConfig.getValue();
             yaws = new float[tick];
             int off = tick - 1;
-            float yawT = 0.0f;
+            float yawTotal = 0.0f;
             for (int i = 0; i < tick; ++i)
             {
                 if (i > yawCount)
@@ -2609,8 +2608,8 @@ public class AutoCrystalModule extends ToggleModule
                     yaws[off - i] = 0.0f;
                     continue;
                 }
-                yawT += deltaYaw;
-                yaws[off - i] = yawT;
+                yawTotal += deltaYaw;
+                yaws[off - i] = yawTotal;
             }
         }
         else

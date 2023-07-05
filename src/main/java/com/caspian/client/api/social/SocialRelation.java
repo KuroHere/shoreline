@@ -1,6 +1,6 @@
 package com.caspian.client.api.social;
 
-public enum Relation
+public enum SocialRelation
 {
     FRIEND
 }

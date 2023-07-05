@@ -25,7 +25,7 @@ import java.util.UUID;
 public class SocialPreset extends ConfigFile
 {
     //
-    private final Relation relation;
+    private final SocialRelation relation;
 
     /**
      *
@@ -33,7 +33,7 @@ public class SocialPreset extends ConfigFile
      * @param dir
      * @param relation
      */
-    public SocialPreset(Path dir, Relation relation)
+    public SocialPreset(Path dir, SocialRelation relation)
     {
         super(dir, relation.name());
         this.relation = relation;
