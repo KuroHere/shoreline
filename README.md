@@ -2,10 +2,6 @@
 ---
 ## Named after the ***Caspian Sea***.
 ![caspian_sea](https://user-images.githubusercontent.com/68214996/233989780-8754884f-f678-4260-83fd-59fcf294edd2.png)
-## PRE-ALPHA NOTES 1.0-a1
-- Lightweight and documented
-- API still UNTESTED and UNFINISHED
-- Needs Loader
 
 # Documentation
 ## `ToggleModule`
