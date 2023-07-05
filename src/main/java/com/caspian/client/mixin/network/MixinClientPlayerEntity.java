@@ -107,11 +107,12 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         {
             final RotationRequest request =
                     Managers.ROTATION.getCurrentRotation();
-            if (request != null)
+            if (request == null)
             {
-                movementPacketsEvent.setYaw(request.getYaw());
-                movementPacketsEvent.setPitch(request.getPitch());
+                return;
             }
+            movementPacketsEvent.setYaw(request.getYaw());
+            movementPacketsEvent.setPitch(request.getPitch());
             ci.cancel();
             sendSprintingPacket();
             boolean bl = isSneaking();
