@@ -5,6 +5,7 @@ import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.Configurable;
 import com.caspian.client.api.manager.ModuleManager;
 import com.caspian.client.util.Globals;
+import com.caspian.client.util.string.StringUtil;
 
 /**
  * General client feature that will appear in the ClickGui. Module have a
@@ -88,6 +89,6 @@ public class Module extends ConfigContainer implements Globals
      */
     public String getMetaData()
     {
-        return "";
+        return StringUtil.EMPTY_STRING;
     }
 }

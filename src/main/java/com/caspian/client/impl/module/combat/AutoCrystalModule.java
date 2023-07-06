@@ -47,9 +47,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 
@@ -287,8 +289,9 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> extrapolateRangeConfig = new BooleanConfig(
             "ExtrapolateRange", "Accounts for motion when calculating ranges",
             false);
-    Config<Boolean> extrapolateSelfConfig = new BooleanConfig(
-            "Extrapolate-Self", "", false);
+    Config<Integer> extrapolateTicksConfig = new NumberConfig<>(
+            "ExtrapolationTicks", "Accounts for motion when calculating " +
+            "enemy positions, not fully accurate.", 0, 0, 10);
     // RENDER SETTINGS
     Config<Boolean> renderConfig = new BooleanConfig("Render",
             "Renders the current placement", true);
@@ -1382,7 +1385,7 @@ public class AutoCrystalModule extends ToggleModule
      * @param data
      * @return
      */
-    public boolean attack(DamageData<EndCrystalEntity> data)
+    private boolean attack(DamageData<EndCrystalEntity> data)
     {
         return attack(data.getId());
     }
@@ -1396,7 +1399,7 @@ public class AutoCrystalModule extends ToggleModule
      * @see #attackDirect(int) 
      * @see #preAttackCheck(int) 
      */
-    public boolean attack(int e)
+    private boolean attack(int e)
     {
         if (preAttackCheck(e))
         {
@@ -1502,7 +1505,7 @@ public class AutoCrystalModule extends ToggleModule
      * @param e
      * @return
      */
-    public boolean preAttackCheck(int e)
+    private boolean preAttackCheck(int e)
     {
         long interval = freqInterval.getElapsedTime() / 500;
         if (interval > 0)
@@ -1602,7 +1605,7 @@ public class AutoCrystalModule extends ToggleModule
      * @see #placeDirect(BlockPos, Hand, BlockHitResult)
      * @see #prePlaceCheck()
      */
-    public boolean place(final DamageData<BlockPos> data,
+    private boolean place(final DamageData<BlockPos> data,
                          final Direction dir)
     {
         final BlockPos p = data.getSrc();
@@ -1802,7 +1805,7 @@ public class AutoCrystalModule extends ToggleModule
      * @param box
      * @return
      */
-    public List<Entity> getCollisions(Box box)
+    private List<Entity> getCollisions(Box box)
     {
         final List<Entity> collisions = new CopyOnWriteArrayList<>(
                 mc.world.getOtherEntities(null, box));
@@ -2065,6 +2068,44 @@ public class AutoCrystalModule extends ToggleModule
             }
         }
         return sphere;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    private Vec3d extrapolatePosition(final Entity entity)
+    {
+        final Vec3d motion = entity.getVelocity();
+        //
+        Vec3d pos = entity.getPos();
+        Box bb = entity.getBoundingBox();
+        for (int i = 0; i < extrapolateTicksConfig.getValue(); i++)
+        {
+            bb = bb.offset(motion);
+            if (isInsideBlock(bb))
+            {
+                return pos;
+            }
+            pos = pos.add(motion);
+        }
+        return pos;
+    }
+
+    /**
+     *
+     *
+     * @param bb
+     * @return
+     */
+    private boolean isInsideBlock(final Box bb)
+    {
+        return BlockPos.stream(bb).anyMatch((pos) ->
+        {
+            BlockState state = mc.world.getBlockState(pos);
+            return !state.isAir();
+        });
     }
 
     /**
@@ -2745,7 +2786,13 @@ public class AutoCrystalModule extends ToggleModule
                 offset = calc.getSleepTime();
             }
             calc = new TickCalculation(this);
-            calc.runDelayedCalc(entities, crystals, blocks, time.longValue() - offset);
+            long delay = time.longValue() - offset;
+            if (delay > 0)
+            {
+                calc.runDelayedCalc(entities, crystals, blocks, delay);
+                return;
+            }
+            calc.runCalc(entities, crystals, blocks);
         }
 
         /**

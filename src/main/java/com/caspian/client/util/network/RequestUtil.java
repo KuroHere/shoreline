@@ -1,4 +1,4 @@
-package com.caspian.client.util.request;
+package com.caspian.client.util.network;
 
 import java.io.IOException;
 import java.io.InputStream;

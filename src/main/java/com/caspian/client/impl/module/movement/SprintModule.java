@@ -8,6 +8,9 @@ import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.util.player.InputUtil;
+import com.caspian.client.util.string.EnumFormatter;
+import net.minecraft.entity.effect.StatusEffects;
 
 /**
  *
@@ -31,15 +34,42 @@ public class SprintModule extends ToggleModule
 
     /**
      *
+     *
+     * @return
+     */
+    @Override
+    public String getMetaData()
+    {
+        return EnumFormatter.formatEnum(modeConfig.getValue());
+    }
+
+    /**
+     *
      */
     @EventListener
     public void onTick(TickEvent event)
     {
         if (event.getStage() == EventStage.PRE)
         {
-            if (!Managers.POSITION.isSprinting())
+            if (!Managers.POSITION.isSprinting()
+                    && !Managers.POSITION.isSneaking()
+                    && InputUtil.isInputtingMovement()
+                    && mc.player.getHungerManager().getFoodLevel() > 6.0F
+                    && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS))
             {
-
+                switch (modeConfig.getValue())
+                {
+                    case LEGIT ->
+                    {
+                        if (mc.player.input.hasForwardMovement()
+                                && (!mc.player.horizontalCollision
+                                || mc.player.collidedSoftly))
+                        {
+                            mc.player.setSprinting(true);
+                        }
+                    }
+                    case RAGE -> mc.player.setSprinting(true);
+                }
             }
         }
     }

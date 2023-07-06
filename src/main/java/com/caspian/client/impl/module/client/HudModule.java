@@ -12,6 +12,7 @@ import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.render.RenderOverlayEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import com.caspian.client.util.string.StringUtil;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.util.Window;
@@ -121,18 +122,16 @@ public class HudModule extends ToggleModule
                 List<Module> modules = (List<Module>) Managers.MODULE.getModules();
                 modules = switch (orderingConfig.getValue())
                         {
-                            case LENGTH -> modules.stream()
+                            case ALPHABETICAL -> modules.stream()
                                     .sorted(Comparator.comparing(m -> m.getName()))
                                     .toList();
-                            case ALPHABETICAL -> modules.stream()
-                                    .sorted(Comparator.comparing(m -> RenderManager.textWidth(String.format(
-                                            "%s [%s]", m.getName(), m.getMetaData()))))
+                            case LENGTH -> modules.stream()
+                                    .sorted(Comparator.comparing(m -> RenderManager.textWidth(getFormattedModule(m))))
                                     .toList();
                         };
                 for (Module m : modules)
                 {
-                    String text = String.format("%s §7[§f%s§7]", m.getName(),
-                            m.getMetaData());
+                    String text = getFormattedModule(m);
                     int width = RenderManager.textWidth(text);
                     RenderManager.renderText(event.getMatrices(), text,
                             res.getScaledWidth() - width - 1.0f, topRight,
@@ -304,6 +303,23 @@ public class HudModule extends ToggleModule
                 }
             }
         }
+    }
+
+    /**
+     *
+     *
+     * @param module
+     * @return
+     */
+    private String getFormattedModule(final Module module)
+    {
+        final String metadata = module.getMetaData();
+        if (metadata != StringUtil.EMPTY_STRING)
+        {
+            return String.format("%s §7[§f%s§7]", module.getName(),
+                    module.getMetaData());
+        }
+        return module.getName();
     }
 
     public enum PotionHud

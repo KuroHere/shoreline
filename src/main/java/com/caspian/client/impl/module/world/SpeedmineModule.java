@@ -64,7 +64,6 @@ public class SpeedmineModule extends ToggleModule
             "Attempts to remine blocks infinitely", false);
     Config<Integer> maxRemineConfig = new NumberConfig<>("MaxRemines",
             "Maximum remines of a block before reset", 0, 2, 10);
-
     // Mining block info
     private BlockPos mining;
     private BlockState state;
@@ -107,6 +106,10 @@ public class SpeedmineModule extends ToggleModule
         {
             if (!mc.player.isCreative())
             {
+                if (isRotationBlocked())
+                {
+                    return;
+                }
                 if (mining != null)
                 {
                     state = mc.world.getBlockState(mining);
@@ -283,7 +286,7 @@ public class SpeedmineModule extends ToggleModule
      */
     public int getBestTool(BlockState state)
     {
-        int slot = 0;
+        int slot = mc.player.getInventory().selectedSlot;
         float best = 0.0f;
         for (int i = 0; i < 9; i++)
         {

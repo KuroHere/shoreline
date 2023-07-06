@@ -5,7 +5,7 @@ import com.caspian.client.api.module.Module;
 /**
  *
  *
- * @author linus
+ * @author linus, bon55
  * @since 1.0
  */
 public class RotationRequest implements Comparable<RotationRequest>
