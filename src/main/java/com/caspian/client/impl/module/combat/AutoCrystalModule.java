@@ -18,9 +18,9 @@ import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.mixin.accessor.AccessorPlayerInteractEntityC2SPacket;
-import com.caspian.client.util.math.NanoTimer;
-import com.caspian.client.util.math.TickTimer;
-import com.caspian.client.util.math.Timer;
+import com.caspian.client.util.math.timer.CacheTimer;
+import com.caspian.client.util.math.timer.TickTimer;
+import com.caspian.client.util.math.timer.Timer;
 import com.caspian.client.util.ncp.DirectionChecks;
 import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.world.EndCrystalUtil;
@@ -47,11 +47,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
-import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 
@@ -311,7 +309,7 @@ public class AutoCrystalModule extends ToggleModule
     private BlockPos preSequence, postSequence;
     private Vec3d sequence;
     private final Timer tickSequence = new TickTimer();
-    private final Timer startSequence = new NanoTimer();
+    private final Timer startSequence = new CacheTimer();
     // Calculated placements and attacks will be added to their respective
     // stacks. When the main loop requires a placement/attack, simply pop the
     // last calculated from the stack.
@@ -329,26 +327,26 @@ public class AutoCrystalModule extends ToggleModule
     private int shortTermCount;
     private int shortTermTick;
     // RANDOM
-    private final Timer randomTime = new NanoTimer();
+    private final Timer randomTime = new CacheTimer();
     private final Random random = new SecureRandom();
     private long currRandom;
     //
     private final Map<PlayerEntity, Long> pops =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
     //
-    private final Timer freqInterval = new NanoTimer();
+    private final Timer freqInterval = new CacheTimer();
     private final int[] attackFreq = new int[16];
     private int freq;
     //
     private boolean attacking, placing;
-    private final Timer lastPlace = new NanoTimer();
-    private final Timer lastBreak = new NanoTimer();
+    private final Timer lastPlace = new CacheTimer();
+    private final Timer lastBreak = new CacheTimer();
     //
     private final Deque<Long> breakTimes = new ArrayDeque<>(20);
     private final Deque<Long> placeTimes = new ArrayDeque<>(20);
-    private final Timer lastSwap = new NanoTimer();
-    private final Timer lastSwapAlt = new NanoTimer();
-    private final Timer lastAutoSwap = new NanoTimer();
+    private final Timer lastSwap = new CacheTimer();
+    private final Timer lastSwapAlt = new CacheTimer();
+    private final Timer lastAutoSwap = new CacheTimer();
     // private final Timer lastClean = new Timer();
     // ROTATIONS
     //

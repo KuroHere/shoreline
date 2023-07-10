@@ -1,4 +1,4 @@
-package com.caspian.client.util.math;
+package com.caspian.client.util.math.timer;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.EventStage;

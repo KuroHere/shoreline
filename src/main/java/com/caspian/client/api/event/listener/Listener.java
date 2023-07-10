@@ -4,7 +4,6 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.Invoker;
 import com.caspian.client.api.event.Event;
 import com.caspian.client.api.event.handler.EventHandler;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -81,8 +80,7 @@ public class Listener implements Comparable<Listener>
                         MethodType.methodType(void.class,
                                 method.getParameterTypes()[0])
                 );
-                invoker = (Invoker<Object>) callSite.getTarget()
-                        .invoke(subscriber);
+                invoker = (Invoker<Object>) callSite.getTarget().invoke(subscriber);
                 INVOKE_CACHE.put(method, invoker);
             }
             else
@@ -121,7 +119,7 @@ public class Listener implements Comparable<Listener>
     @Override
     public int compareTo(Listener other)
     {
-        return priority - other.getPriority();
+        return Integer.compare(getPriority(), other.getPriority());
     }
 
     /**

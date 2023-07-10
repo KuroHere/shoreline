@@ -6,15 +6,6 @@
   "client": [
     "MixinKeyboard",
     "MixinMinecraftClient",
-    "accessor.AccessorChatScreen",
-    "accessor.AccessorClientWorld",
-    "accessor.AccessorEntityVelocityUpdateS2CPacket",
-    "accessor.AccessorMinecraftClient",
-    "accessor.AccessorPlayerInteractEntityC2SPacket",
-    "accessor.AccessorPlayerMoveC2SPacket",
-    "accessor.AccessorPlayerSkinProvider",
-    "accessor.AccessorTextFieldWidget",
-    "accessor.AccessorClientPlayerInteractionManager",
     "block.MixinBlock",
     "block.MixinSlimeBlock",
     "entity.MixinEntity",
@@ -24,7 +15,17 @@
     "network.MixinClientPlayerEntity",
     "network.MixinClientPlayerInteractionManager",
     "network.MixinClientPlayNetworkHandler",
-    "render.entity.MixinPlayerEntityRenderer"
+    "render.MixinLightmapTextureManager",
+    "render.entity.MixinPlayerEntityRenderer",
+    "accessor.AccessorChatScreen",
+    "accessor.AccessorClientWorld",
+    "accessor.AccessorEntityVelocityUpdateS2CPacket",
+    "accessor.AccessorMinecraftClient",
+    "accessor.AccessorPlayerInteractEntityC2SPacket",
+    "accessor.AccessorPlayerMoveC2SPacket",
+    "accessor.AccessorPlayerSkinProvider",
+    "accessor.AccessorTextFieldWidget",
+    "accessor.AccessorClientPlayerInteractionManager"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -58,7 +58,7 @@ public class VelocityModule extends ToggleModule
      */
     public VelocityModule()
     {
-        super("Velocity", "Reduces the amount of velocity you take",
+        super("Velocity", "Reduces the amount of player knockback velocity",
                 ModuleCategory.COMBAT);
     }
 

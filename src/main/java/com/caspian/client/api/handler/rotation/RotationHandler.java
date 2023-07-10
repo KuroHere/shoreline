@@ -6,8 +6,8 @@ import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.render.RenderPlayerEvent;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.Globals;
-import com.caspian.client.util.math.TickTimer;
-import com.caspian.client.util.math.Timer;
+import com.caspian.client.util.math.timer.TickTimer;
+import com.caspian.client.util.math.timer.Timer;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 import java.util.PriorityQueue;

@@ -58,10 +58,10 @@ public class Shader
                         GL32C.glShaderSource(frag, resourcePath + fragment);
                         GL32C.glCompileShader(vert);
                         GL32C.glCompileShader(frag);
-
                         // Shader compile status
                         if (GL32C.glGetShaderi(vert, GL32C.GL_COMPILE_STATUS) == GL32C.GL_FALSE
-                                || GL32C.glGetShaderi(frag, GL32C.GL_COMPILE_STATUS) == GL32C.GL_FALSE) {
+                                || GL32C.glGetShaderi(frag, GL32C.GL_COMPILE_STATUS) == GL32C.GL_FALSE)
+                        {
                             throw new RuntimeException("Could not compile shader");
                         }
                     }

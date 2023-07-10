@@ -12,6 +12,7 @@ import com.caspian.client.impl.module.movement.VelocityModule;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
 import com.caspian.client.impl.module.movement.NoSlowModule;
 import com.caspian.client.impl.module.movement.SprintModule;
+import com.caspian.client.impl.module.render.FullbrightModule;
 import com.caspian.client.impl.module.render.NoWeatherModule;
 import com.caspian.client.impl.module.render.ViewClipModule;
 import com.caspian.client.impl.module.render.ViewModelModule;
@@ -45,6 +46,7 @@ public class Modules
     public static final AntiHungerModule ANTI_HUNGER;
     public static final NoSlowModule NO_SLOW;
     public static final SprintModule SPRINT;
+    public static final FullbrightModule FULLBRIGHT;
     public static final NoWeatherModule NO_WEATHER;
     public static final ViewClipModule VIEW_CLIP;
     public static final ViewModelModule VIEW_MODEL;
@@ -96,6 +98,8 @@ public class Modules
                     "antihunger_module");
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow_module");
             SPRINT = (SprintModule) getRegisteredModule("sprint_module");
+            FULLBRIGHT = (FullbrightModule) getRegisteredModule(
+                    "fullbright_module");
             NO_WEATHER = (NoWeatherModule) getRegisteredModule(
                     "noweather_module");
             VIEW_CLIP = (ViewClipModule) getRegisteredModule(
@@ -107,9 +111,9 @@ public class Modules
             SPEEDMINE = (SpeedmineModule) getRegisteredModule(
                     "speedmine_module");
             // reflect configuration properties for each cached module
-            for (Module cachedModule : CACHE)
+            for (Module module : CACHE)
             {
-                cachedModule.reflectConfigs();
+                module.reflectConfigs();
             }
             CACHE.clear();
         }

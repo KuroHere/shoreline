@@ -47,9 +47,9 @@ public class ModuleManager
      */
     public void postInit()
     {
-        for (Module module : modules.values())
+        for (Module mod : getModules())
         {
-            if (module instanceof ToggleModule toggle)
+            if (mod instanceof ToggleModule toggle)
             {
                 Managers.MACRO.register(toggle.getKeybinding());
             }

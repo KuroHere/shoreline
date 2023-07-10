@@ -13,7 +13,7 @@ import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.mixin.accessor.AccessorMinecraftClient;
-import com.caspian.client.util.math.NanoTimer;
+import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.world.SneakBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
@@ -48,7 +48,7 @@ public class FastPlaceModule extends ToggleModule
     Config<List<Item>> blacklistConfig = new ListConfig<>("Blacklist",
             "Valid item blacklist", Items.ENDER_PEARL, Items.ENDER_EYE);
     //
-    private final NanoTimer startTimer = new NanoTimer();
+    private final CacheTimer startTimer = new CacheTimer();
 
     /**
      *

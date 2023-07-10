@@ -24,20 +24,7 @@ public class MacroHandler
     @EventListener
     public void onKeyboardInput(KeyboardInputEvent event)
     {
-        // module keybinding impl
-        for (Module mod : Managers.MODULE.getModules())
-        {
-            if (mod instanceof ToggleModule)
-            {
-                Macro keybinding = ((ToggleModule) mod).getKeybinding();
-                if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
-                        && event.getKeycode() == keybinding.keycode())
-                {
-                    keybinding.runMacro();
-                }
-            }
-        }
-
+        // keybinding impl
         for (Macro macro : Managers.MACRO.getMacros())
         {
             if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN

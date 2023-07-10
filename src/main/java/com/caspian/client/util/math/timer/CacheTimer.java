@@ -1,4 +1,4 @@
-package com.caspian.client.util.math;
+package com.caspian.client.util.math.timer;
 
 import java.util.concurrent.TimeUnit;
 
@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
  * @author linus
  * @since 1.0
  */
-public class NanoTimer implements Timer
+public class CacheTimer implements Timer
 {
     // The cached time since last reset which indicates the time passed since
     // the last timer reset
@@ -19,7 +19,7 @@ public class NanoTimer implements Timer
      * which means {@link #passed(Number)} and {@link #passed(Number, TimeUnit)}
      * will always return <tt>true</tt> initially
      */
-    public NanoTimer()
+    public CacheTimer()
     {
         this.time = System.nanoTime();
     }
