@@ -26,9 +26,10 @@ public class NetworkManager implements Globals
      * 
      * @param p
      */
-    public void sendPacket(Packet<?> p) 
+    public void sendPacket(final Packet<?> p)
     {
         cache.add(p);
+        mc.player.networkHandler.sendPacket(p);
     }
 
     /**
@@ -36,7 +37,7 @@ public class NetworkManager implements Globals
      *
      * @param p
      */
-    public void sendSequencedPacket(SequencedPacketCreator p) 
+    public void sendSequencedPacket(final SequencedPacketCreator p)
     {
         if (mc.world != null)
         {

@@ -68,6 +68,54 @@ public class EndCrystalUtil implements Globals
     /**
      *
      *
+     * @param pos
+     * @param entity
+     * @param crystal
+     * @return
+     */
+    public static double getDamageToPos(final Vec3d pos,
+                                        final Entity entity,
+                                        final Vec3d crystal)
+    {
+        return getDamageToPos(pos, entity, crystal, false);
+    }
+
+    /**
+     *
+     *
+     * @param pos The actual position of the damage
+     * @param entity
+     * @param crystal
+     * @param ignoreTerrain
+     * @return
+     */
+    public static double getDamageToPos(final Vec3d pos,
+                                        final Entity entity,
+                                        final Vec3d crystal,
+                                        final boolean ignoreTerrain)
+    {
+        if (!entity.isImmuneToExplosion())
+        {
+            final Box bb = entity.getBoundingBox();
+            double dx = pos.getX() - bb.minX;
+            double dy = pos.getY() - bb.minY;
+            double dz = pos.getZ() - bb.minZ;
+            final Box box = bb.offset(dx, dy, dz);
+            //
+            double ab = getExposure(crystal, entity, box, ignoreTerrain);
+            double w = Math.sqrt(pos.squaredDistanceTo(crystal)) / 12.0;
+            double ac = (1.0 - w) * ab;
+            double dmg = (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * 12.0 + 1.0));
+            dmg = getDamageForDifficulty(dmg);
+            dmg = getReduction(entity, dmg);
+            return Math.max(0.0, dmg);
+        }
+        return 0.0;
+    }
+
+    /**
+     *
+     *
      * @param damage
      * @return
      */
@@ -89,8 +137,7 @@ public class EndCrystalUtil implements Globals
      * @param damage
      * @return
      */
-    private static double getReduction(Entity entity,
-                                       double damage)
+    private static double getReduction(Entity entity, double damage)
     {
         if (entity instanceof LivingEntity e)
         {
@@ -124,6 +171,23 @@ public class EndCrystalUtil implements Globals
                                      final boolean ignoreTerrain)
     {
         final Box box = entity.getBoundingBox();
+        return getExposure(source, entity, box, ignoreTerrain);
+    }
+
+    /**
+     *
+     *
+     * @param source
+     * @param entity
+     * @param box
+     * @param ignoreTerrain
+     * @return
+     */
+    private static float getExposure(final Vec3d source,
+                                     final Entity entity,
+                                     final Box box,
+                                     final boolean ignoreTerrain)
+    {
         double d = 1.0 / ((box.maxX - box.minX) * 2.0 + 1.0);
         double e = 1.0 / ((box.maxY - box.minY) * 2.0 + 1.0);
         double f = 1.0 / ((box.maxZ - box.minZ) * 2.0 + 1.0);

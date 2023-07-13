@@ -287,8 +287,14 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> extrapolateRangeConfig = new BooleanConfig(
             "ExtrapolateRange", "Accounts for motion when calculating ranges",
             false);
+    Config<Boolean> extrapolateGravityConfig = new BooleanConfig(
+            "Gravity-Extrapolation", "Accounts for gravity when extrapolating" +
+            " positions", false);
     Config<Integer> extrapolateTicksConfig = new NumberConfig<>(
             "ExtrapolationTicks", "Accounts for motion when calculating " +
+            "enemy positions, not fully accurate.", 0, 0, 10);
+    Config<Integer> selfExtrapolateTicksConfig = new NumberConfig<>(
+            "Self-ExtrapolationTicks", "Accounts for motion when calculating " +
             "enemy positions, not fully accurate.", 0, 0, 10);
     // RENDER SETTINGS
     Config<Boolean> renderConfig = new BooleanConfig("Render",
@@ -381,15 +387,19 @@ public class AutoCrystalModule extends ToggleModule
         {
             freqInterval.reset();
             // run calc
-            final Iterable<Entity> worldEntities = mc.world.getEntities();
-            final Iterable<EndCrystalEntity> crystals = getCrystalSphere(
-                    Managers.POSITION.getCameraPosVec(1.0f));
+            final ArrayList<Entity> entities =
+                    Lists.newArrayList(mc.world.getEntities());
+            Vec3d pos = Managers.POSITION.getPos();
+            Vec3d eyepos = Managers.POSITION.getEyePos();
+            if (extrapolateRangeConfig.getValue())
+            {
+                pos = extrapolatePosition(mc.player, pos,
+                        mc.player.getBoundingBox(), selfExtrapolateTicksConfig.getValue());
+                eyepos = pos.add(0.0, mc.player.getStandingEyeHeight(), 0.0);
+            }
+            final Iterable<EndCrystalEntity> crystals = getCrystalSphere(eyepos);
             final Iterable<BlockPos> blocks =
-                    getSphere(placeRangeEyeConfig.getValue() ?
-                                    Managers.POSITION.getEyePos() :
-                                    Managers.POSITION.getPos());
-            final ArrayList<Entity> entities = new ArrayList<>();
-            worldEntities.forEach(e -> entities.add(e));
+                    getSphere(placeRangeEyeConfig.getValue() ? eyepos : pos);
             processor.runCalc(entities, crystals, blocks);
         }
     }
@@ -449,15 +459,19 @@ public class AutoCrystalModule extends ToggleModule
                 lastAttackData = attackData;
                 lastPlaceData = placeData;
                 // run calc
-                final Iterable<Entity> worldEntities = mc.world.getEntities();
-                final Iterable<EndCrystalEntity> crystals = getCrystalSphere(
-                        Managers.POSITION.getCameraPosVec(1.0f));
+                final ArrayList<Entity> entities =
+                        Lists.newArrayList(mc.world.getEntities());
+                Vec3d pos = Managers.POSITION.getPos();
+                Vec3d eyepos = Managers.POSITION.getEyePos();
+                if (extrapolateRangeConfig.getValue())
+                {
+                    pos = extrapolatePosition(mc.player, pos,
+                            mc.player.getBoundingBox(), selfExtrapolateTicksConfig.getValue());
+                    eyepos = pos.add(0.0, mc.player.getStandingEyeHeight(), 0.0);
+                }
+                final Iterable<EndCrystalEntity> crystals = getCrystalSphere(eyepos);
                 final Iterable<BlockPos> blocks =
-                        getSphere(placeRangeEyeConfig.getValue() ?
-                                Managers.POSITION.getEyePos() :
-                                Managers.POSITION.getPos());
-                final ArrayList<Entity> entities = new ArrayList<>();
-                worldEntities.forEach(e -> entities.add(e));
+                        getSphere(placeRangeEyeConfig.getValue() ? eyepos : pos);
                 processor.scheduleCalc(entities, crystals, blocks,
                         calcSleepConfig.getValue() * 1000L);
             }
@@ -925,13 +939,13 @@ public class AutoCrystalModule extends ToggleModule
                 if (packet.getEntityType() == EntityType.END_CRYSTAL)
                 {
                     // Position data of the player
-                    final Vec3d pos = Managers.POSITION.getPos();
-                    final Vec3d eyepos = Managers.POSITION.getEyePos();
+                    Vec3d pos = Managers.POSITION.getPos();
+                    Vec3d eyepos = Managers.POSITION.getEyePos();
                     if (extrapolateRangeConfig.getValue())
                     {
-                        final Vec3d motion = mc.player.getVelocity();
-                        pos.add(motion);
-                        eyepos.add(motion);
+                        pos = extrapolatePosition(mc.player, pos,
+                                mc.player.getBoundingBox(), selfExtrapolateTicksConfig.getValue());
+                        eyepos = pos.add(0.0, mc.player.getStandingEyeHeight(), 0.0);
                     }
                     //
                     final Vec3d cpos = new Vec3d(packet.getX(), packet.getY(),
@@ -1103,14 +1117,15 @@ public class AutoCrystalModule extends ToggleModule
             else if (event.getPacket() instanceof BlockUpdateS2CPacket packet)
             {
                 // Player position data
-                final Vec3d pos = Managers.POSITION.getPos();
-                final Vec3d eyepos = placeRangeEyeConfig.getValue() ?
+                Vec3d pos = Managers.POSITION.getPos();
+                Vec3d eyepos = placeRangeEyeConfig.getValue() ?
                         Managers.POSITION.getEyePos() : pos;
+                // Position data of the player
                 if (extrapolateRangeConfig.getValue())
                 {
-                    final Vec3d motion = mc.player.getVelocity();
-                    pos.add(motion);
-                    eyepos.add(motion);
+                    pos = extrapolatePosition(mc.player, pos,
+                            mc.player.getBoundingBox(), selfExtrapolateTicksConfig.getValue());
+                    eyepos = pos.add(0.0, mc.player.getStandingEyeHeight(), 0.0);
                 }
                 //
                 final BlockPos block = packet.getPos();
@@ -2071,24 +2086,83 @@ public class AutoCrystalModule extends ToggleModule
     /**
      *
      *
+     * @param entity
+     * @param pos
+     * @param bb
+     * @param ticks
      * @return
      */
-    private Vec3d extrapolatePosition(final Entity entity)
+    private Vec3d extrapolatePosition(LivingEntity entity, Vec3d pos, Box bb, int ticks)
     {
-        final Vec3d motion = entity.getVelocity();
+        Vec3d motion = getMovementVelocity(entity);
         //
-        Vec3d pos = entity.getPos();
-        Box bb = entity.getBoundingBox();
-        for (int i = 0; i < extrapolateTicksConfig.getValue(); i++)
+        boolean flag1 = false;
+        boolean flag2 = false;
+        boolean flag3 = false;
+        for (int i = 0; i < ticks; i++)
         {
-            bb = bb.offset(motion);
-            if (isInsideBlock(bb))
+            // Motion vector comp
+            double x = motion.x;
+            double y = motion.y;
+            double z = motion.z;
+            final Box xoff = bb.offset(x, 0.0, 0.0);
+            if (!flag1 && !isInsideBlock(xoff))
             {
-                return pos;
+                bb = xoff;
+                flag1 = true;
             }
-            pos = pos.add(motion);
+            final Box yoff = bb.offset(0.0, y, 0.0);
+            if (!flag2 && !isInsideBlock(yoff))
+            {
+                bb = yoff;
+                flag2 = true;
+            }
+            final Box zoff = bb.offset(0.0, 0.0, z);
+            if (!flag3 && !isInsideBlock(zoff))
+            {
+                bb = zoff;
+                flag3 = true;
+            }
+            pos = pos.add(x, y, z);
+            if (extrapolateGravityConfig.getValue())
+            {
+                y -= 0.08;
+            }
+            // x *= 0.91;
+            y *= 0.9800000190734863;
+            // z *= 0.91;
+            motion = new Vec3d(x, y, z);
         }
         return pos;
+    }
+
+    /**
+     *
+     *
+     * @param entity
+     * @return
+     */
+    private Vec3d getMovementVelocity(final LivingEntity entity)
+    {
+        final Vec3d input = new Vec3d(entity.sidewaysSpeed, entity.upwardSpeed,
+                entity.forwardSpeed);
+        double d = input.lengthSquared();
+        if (d < 1.0e-7)
+        {
+            return Vec3d.ZERO;
+        }
+        else
+        {
+            float yaw = entity.getYaw();
+            float slipperiness = Blocks.DIRT.getSlipperiness();
+            float speed = entity.isOnGround() ? entity.getMovementSpeed()
+                    * (0.21600002f / (slipperiness * slipperiness * slipperiness)) : 0.02f;
+            final Vec3d vec3d = (d > 1.0 ? input.normalize() : input).multiply(speed);
+            float f = MathHelper.sin(yaw * 0.017453292f);
+            float g = MathHelper.cos(yaw * 0.017453292f);
+            return new Vec3d(vec3d.x * (double) g - vec3d.z * (double) f,
+                    vec3d.y, vec3d.z * (double) g + vec3d.x * (double) f);
+        }
     }
 
     /**
@@ -2138,19 +2212,17 @@ public class AutoCrystalModule extends ToggleModule
 
     /**
      *
-     * @param pos,
-     * @param eyepos
      * @param entities
      * @param crystals
+     * @param pos
      * @return
      *
      * @see #getDamage(Entity, Vec3d)
      * @see #getCrystalSphere(Vec3d)
      */
-    private DamageData<EndCrystalEntity> getCrystal(final Vec3d pos,
-                                                    final Vec3d eyepos,
-                                                    final Iterable<Entity> entities,
-                                                    final Iterable<EndCrystalEntity> crystals)
+    private DamageData<EndCrystalEntity> getCrystal(Iterable<Entity> entities,
+                                                    Iterable<EndCrystalEntity> crystals,
+                                                    Vec3d pos)
     {
         if (mc.world != null && mc.player != null)
         {
@@ -2158,13 +2230,6 @@ public class AutoCrystalModule extends ToggleModule
             {
                 pauseCalcAttack = false;
                 return attackData;
-            }
-            // Position data of the player
-            if (extrapolateRangeConfig.getValue())
-            {
-                final Vec3d motion = mc.player.getVelocity();
-                pos.add(motion);
-                eyepos.add(motion);
             }
             //
             final TreeSet<DamageData<EndCrystalEntity>> min = new TreeSet<>();
@@ -2316,19 +2381,17 @@ public class AutoCrystalModule extends ToggleModule
     /**
      *
      *
-     * @param pos
-     * @param eyepos
      * @param entities
      * @param blocks
+     * @param pos
      * @return
      *
      * @see #getDamage(Entity, Vec3d)
      * @see #getSphere(Vec3d)
      */
-    private DamageData<BlockPos> getPlace(final Vec3d pos,
-                                          final Vec3d eyepos,
-                                          final Iterable<Entity> entities,
-                                          final Iterable<BlockPos> blocks)
+    private DamageData<BlockPos> getPlace(Iterable<Entity> entities,
+                                          Iterable<BlockPos> blocks,
+                                          Vec3d pos)
     {
         if (mc.world != null && mc.player != null)
         {
@@ -2337,12 +2400,11 @@ public class AutoCrystalModule extends ToggleModule
                 pauseCalcPlace = false;
                 return placeData;
             }
-            // Player position data
+            // Position data of the player
             if (extrapolateRangeConfig.getValue())
             {
-                final Vec3d motion = mc.player.getVelocity();
-                pos.add(motion);
-                eyepos.add(motion);
+                pos = extrapolatePosition(mc.player, pos,
+                        mc.player.getBoundingBox(), selfExtrapolateTicksConfig.getValue());
             }
             //
             final BlockPos mine = Modules.SPEEDMINE.getBlockTarget();
@@ -2570,13 +2632,23 @@ public class AutoCrystalModule extends ToggleModule
         final Vec3d pos = Managers.POSITION.getPos();
         //
         Entity recieve = entity;
-        if (entity instanceof PlayerEntity player && latencyPositionConfig.getValue())
+        if (recieve instanceof LivingEntity e)
         {
-            PlayerLatency t = Managers.LATENCY_POS.getTrackedData(pos, player,
-                maxLatencyConfig.getValue());
-            if (t != null)
+            if (entity instanceof PlayerEntity player && latencyPositionConfig.getValue())
             {
-                recieve = t.getLatencyPlayer();
+                PlayerLatency t = Managers.LATENCY_POS.getTrackedData(pos, player,
+                        maxLatencyConfig.getValue());
+                if (t != null)
+                {
+                    recieve = t.getLatencyPlayer();
+                }
+            }
+            else if (extrapolateTicksConfig.getValue() > 0)
+            {
+                final Vec3d tpos = extrapolatePosition(e, entity.getPos(),
+                        entity.getBoundingBox(), extrapolateTicksConfig.getValue());
+                return EndCrystalUtil.getDamageToPos(tpos, entity, src,
+                        blockDestructionConfig.getValue());
             }
         }
         return EndCrystalUtil.getDamageTo(recieve, src,
@@ -2905,33 +2977,35 @@ public class AutoCrystalModule extends ToggleModule
          * @param crystals
          * @param blocks
          *
-         * @see #getCrystal(Vec3d, Vec3d, Iterable, Iterable)
-         * @see #getPlace(Vec3d, Vec3d, Iterable, Iterable)
+         * @see #getCrystal(Iterable, Iterable, Vec3d)
+         * @see #getPlace(Iterable, Iterable, Vec3d)
          */
         public void runCalc(final Iterable<Entity> entities,
                             final Iterable<EndCrystalEntity> crystals,
                             final Iterable<BlockPos> blocks)
         {
             start = System.currentTimeMillis();
-            final Vec3d pos = Managers.POSITION.getPos();
+            Vec3d pos = Managers.POSITION.getPos();
+            // Position data of the player
+            if (extrapolateRangeConfig.getValue())
+            {
+                pos = extrapolatePosition(mc.player, pos,
+                        mc.player.getBoundingBox(), selfExtrapolateTicksConfig.getValue());
+            }
             if (multithreadConfig.getValue())
             {
-                processor.submitCalc(() -> getCrystal(pos,
-                        Managers.POSITION.getEyePos(), entities, crystals));
+                final Vec3d finalPos = pos;
+                processor.submitCalc(() -> getCrystal(entities, crystals, finalPos));
                 if (placeConfig.getValue())
                 {
-                    processor.submitCalc(() -> getPlace(pos,
-                            placeRangeEyeConfig.getValue() ? Managers.POSITION.getEyePos() : pos,
-                            entities, blocks));
+                    processor.submitCalc(() -> getPlace(entities, blocks, finalPos));
                 }
                 return;
             }
-            attackCalc = getCrystal(pos, Managers.POSITION.getEyePos(),
-                    entities, crystals);
+            attackCalc = getCrystal(entities, crystals, pos);
             if (placeConfig.getValue())
             {
-                placeCalc = getPlace(pos, placeRangeEyeConfig.getValue() ?
-                        Managers.POSITION.getEyePos() : pos, entities, blocks);
+                placeCalc = getPlace(entities, blocks, pos);
             }
             //
             done = System.currentTimeMillis();
@@ -2945,8 +3019,8 @@ public class AutoCrystalModule extends ToggleModule
          * @param blocks
          * @param delay
          *
-         * @see #getCrystal(Vec3d, Vec3d, Iterable, Iterable)
-         * @see #getPlace(Vec3d, Vec3d, Iterable, Iterable)
+         * @see #getCrystal(Iterable, Iterable, Vec3d)
+         * @see #getPlace(Iterable, Iterable, Vec3d)
          */
         public void runDelayedCalc(final Iterable<Entity> entities,
                                    final Iterable<EndCrystalEntity> crystals,
@@ -2954,9 +3028,16 @@ public class AutoCrystalModule extends ToggleModule
                                    final Number delay)
         {
             start = System.currentTimeMillis();
-            final Vec3d pos = Managers.POSITION.getPos();
+            Vec3d pos = Managers.POSITION.getPos();
+            // Position data of the player
+            if (extrapolateRangeConfig.getValue())
+            {
+                pos = extrapolatePosition(mc.player, pos,
+                        mc.player.getBoundingBox(), selfExtrapolateTicksConfig.getValue());
+            }
             if (multithreadConfig.getValue())
             {
+                final Vec3d finalPos = pos;
                 processor.submitCalc(() ->
                 {
                     try
@@ -2968,24 +3049,19 @@ public class AutoCrystalModule extends ToggleModule
                         Caspian.error("Thread interrupted for calc %s", id);
                         Thread.currentThread().interrupt();
                     }
-                    return getCrystal(pos, Managers.POSITION.getEyePos(),
-                            entities, crystals);
+                    return getCrystal(entities, crystals, finalPos);
                 });
                 if (placeConfig.getValue())
                 {
-                    processor.submitCalc(() -> getPlace(pos,
-                            placeRangeEyeConfig.getValue() ? Managers.POSITION.getEyePos() : pos,
-                            entities, blocks));
+                    processor.submitCalc(() -> getPlace(entities, blocks, finalPos));
                 }
                 return;
             }
             // TODO: calc delays for main threading
-            attackCalc = getCrystal(pos, Managers.POSITION.getEyePos(), entities, crystals);
+            attackCalc = getCrystal(entities, crystals, pos);
             if (placeConfig.getValue())
             {
-                placeCalc = getPlace(pos,
-                        placeRangeEyeConfig.getValue() ? Managers.POSITION.getEyePos() : pos,
-                        entities, blocks);
+                placeCalc = getPlace(entities, blocks, pos);
             }
             done = System.currentTimeMillis();
         }
@@ -3178,13 +3254,14 @@ public class AutoCrystalModule extends ToggleModule
             if (damaged != null && damaged.isAlive())
             {
                 // Player position data
-                final Vec3d pos = Managers.POSITION.getPos();
-                final Vec3d eyepos = Managers.POSITION.getEyePos();
+                Vec3d pos = Managers.POSITION.getPos();
+                Vec3d eyepos = Managers.POSITION.getEyePos();
                 if (extrapolateRangeConfig.getValue())
                 {
                     final Vec3d motion = mc.player.getVelocity();
-                    pos.add(motion);
-                    eyepos.add(motion);
+                    pos = extrapolatePosition(pos, mc.player.getBoundingBox(),
+                            motion, selfExtrapolateTicksConfig.getValue());
+                    eyepos = pos.add(0.0, mc.player.getStandingEyeHeight(), 0.0);
                 }
                 if (src instanceof BlockPos cpos)
                 {

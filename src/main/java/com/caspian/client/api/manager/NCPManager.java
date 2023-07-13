@@ -2,6 +2,7 @@ package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.handler.NCPHandler;
+import com.caspian.client.util.math.timer.Timer;
 
 import java.util.concurrent.TimeUnit;
 
@@ -11,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  * @author linus
  * @since 1.0
  */
-public class NCPManager
+public class NCPManager implements Timer
 {
     //
     private final NCPHandler handler;
@@ -50,43 +51,58 @@ public class NCPManager
     /**
      *
      *
-     * @param time
      * @return
      */
-    public boolean passedSinceRubberband(long time)
+    public boolean isInRubberband()
     {
-        return handler.passedSinceRubberband(time);
+        return handler.isInRubberband();
+    }
+
+    /**
+     * Returns <tt>true</tt> if the time since the last reset has exceeded
+     * the param time.
+     *
+     * @param time The param time
+     * @return <tt>true</tt> if the time since the last reset has exceeded
+     * the param time
+     */
+    @Override
+    public boolean passed(Number time)
+    {
+        return handler.passedSinceRubberband(time.longValue());
+    }
+
+    /**
+     * Resets the current elapsed time state of the timer and restarts the
+     * timer from 0.
+     */
+    @Deprecated
+    @Override
+    public void reset()
+    {
+        // DEPRECATED
+    }
+
+    /**
+     * Returns the elapsed time since the last reset of the timer.
+     *
+     * @return The elapsed time since the last reset
+     */
+    @Override
+    public long getElapsedTime()
+    {
+        return handler.timeSinceRubberband();
     }
 
     /**
      *
      *
      * @param time
-     * @param unit
-     * @return
      */
-    public boolean passedSinceRubberband(long time, TimeUnit unit)
+    @Deprecated
+    @Override
+    public void setElapsedTime(Number time)
     {
-        return handler.passedSinceRubberband(time, unit);
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    public long timeSinceLastRubberband()
-    {
-        return handler.timeSinceLastRubberband();
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    public boolean isStuckInRubberband()
-    {
-        return handler.isStuckInRubberband();
+        // DEPRECATED
     }
 }

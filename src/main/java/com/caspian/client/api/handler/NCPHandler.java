@@ -56,24 +56,13 @@ public class NCPHandler implements Globals
         return lastRubberband.passed(time);
     }
 
-    /**
-     *
-     *
-     * @param time
-     * @param unit
-     * @return
-     */
-    public boolean passedSinceRubberband(long time, TimeUnit unit)
-    {
-        return ((CacheTimer) lastRubberband).passed(time, unit);
-    }
 
     /**
      *
      *
      * @return
      */
-    public long timeSinceLastRubberband()
+    public long timeSinceRubberband()
     {
         return lastRubberband.getElapsedTime();
     }
@@ -83,7 +72,7 @@ public class NCPHandler implements Globals
      *
      * @return
      */
-    public boolean isStuckInRubberband()
+    public boolean isInRubberband()
     {
         return lag;
     }
