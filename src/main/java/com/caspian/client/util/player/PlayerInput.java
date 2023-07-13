@@ -8,7 +8,7 @@ import com.caspian.client.util.Globals;
  * @author linus
  * @since 1.0
  */
-public class InputUtil implements Globals
+public class PlayerInput implements Globals
 {
     /**
      *

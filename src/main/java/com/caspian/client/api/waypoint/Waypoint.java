@@ -24,7 +24,6 @@ public class Waypoint extends ConfigContainer implements Position
             "position of waypoint.", 0.0D, 0.0D, Double.MAX_VALUE);
     private final Config<Double> zConfig = new NumberConfig<>("Z", "Z " +
             "position of waypoint.", 0.0D, 0.0D, Double.MAX_VALUE);
-    //
     private final Timer timer;
 
     /**

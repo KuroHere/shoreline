@@ -1,6 +1,5 @@
 package com.caspian.client.util.world;
 
-import com.caspian.client.util.Globals;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -13,7 +12,7 @@ import java.util.Set;
  * @author linus
  * @since 1.0
  */
-public class SneakBlocks implements Globals
+public class SneakBlocks
 {
     // Constant set containing the blocks that can only be placed on if the
     // player is holding shift

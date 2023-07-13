@@ -57,7 +57,7 @@ public class Module extends ConfigContainer implements Globals
      */
     public String getId()
     {
-        return String.format("%s_module", getName().toLowerCase());
+        return String.format("%s-module", getName().toLowerCase());
     }
 
     /**

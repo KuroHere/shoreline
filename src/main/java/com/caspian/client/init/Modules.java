@@ -8,6 +8,7 @@ import com.caspian.client.impl.module.client.HudModule;
 import com.caspian.client.impl.module.client.RotationsModule;
 import com.caspian.client.impl.module.combat.AutoCrystalModule;
 import com.caspian.client.impl.module.combat.AutoTotemModule;
+import com.caspian.client.impl.module.exploit.SwingModule;
 import com.caspian.client.impl.module.movement.VelocityModule;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
 import com.caspian.client.impl.module.movement.NoSlowModule;
@@ -44,6 +45,7 @@ public class Modules
     public static final AutoTotemModule AUTO_TOTEM;
     public static final VelocityModule VELOCITY;
     public static final AntiHungerModule ANTI_HUNGER;
+    public static final SwingModule SWING;
     public static final NoSlowModule NO_SLOW;
     public static final SprintModule SPRINT;
     public static final FullbrightModule FULLBRIGHT;
@@ -84,32 +86,33 @@ public class Modules
         {
             CACHE = new HashSet<>();
             CLICK_GUI = (ClickGuiModule) getRegisteredModule(
-                    "clickgui_module");
-            COLORS = (ColorsModule) getRegisteredModule("colors_module");
-            HUD = (HudModule) getRegisteredModule("hud_module");
+                    "clickgui-module");
+            COLORS = (ColorsModule) getRegisteredModule("colors-module");
+            HUD = (HudModule) getRegisteredModule("hud-module");
             ROTATIONS = (RotationsModule) getRegisteredModule(
-                    "rotations_module");
+                    "rotations-module");
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
-                    "autocrystal_module");
+                    "autocrystal-module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(
-                    "autototem_module");
+                    "autototem-module");
             VELOCITY = (VelocityModule) getRegisteredModule("velocity");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
-                    "antihunger_module");
-            NO_SLOW = (NoSlowModule) getRegisteredModule("noslow_module");
-            SPRINT = (SprintModule) getRegisteredModule("sprint_module");
+                    "antihunger-module");
+            SWING = (SwingModule) getRegisteredModule("swing-module");
+            NO_SLOW = (NoSlowModule) getRegisteredModule("noslow-module");
+            SPRINT = (SprintModule) getRegisteredModule("sprint-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
-                    "fullbright_module");
+                    "fullbright-module");
             NO_WEATHER = (NoWeatherModule) getRegisteredModule(
-                    "noweather_module");
+                    "noweather-module");
             VIEW_CLIP = (ViewClipModule) getRegisteredModule(
-                    "viewclip_module");
+                    "viewclip-module");
             VIEW_MODEL = (ViewModelModule) getRegisteredModule(
-                    "viewmodel_module");
+                    "viewmodel-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule(
-                    "fastplace_module");
+                    "fastplace-module");
             SPEEDMINE = (SpeedmineModule) getRegisteredModule(
-                    "speedmine_module");
+                    "speedmine-module");
             // reflect configuration properties for each cached module
             for (Module module : CACHE)
             {

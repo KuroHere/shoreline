@@ -15,8 +15,6 @@ public class ChatRenderEvent extends Event
 {
     //
     private final MatrixStack matrices;
-
-    //
     private final float x, y;
 
     public ChatRenderEvent(MatrixStack matrices, float x, float y)

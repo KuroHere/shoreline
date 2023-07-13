@@ -1,6 +1,9 @@
 package com.caspian.client.api.config;
 
+import com.caspian.client.Caspian;
 import com.caspian.client.api.config.setting.*;
+import com.caspian.client.api.event.EventStage;
+import com.caspian.client.impl.event.config.ConfigUpdateEvent;
 
 /**
  * Client Configuration which is saved to a local <tt>.json</tt> file. All
@@ -77,8 +80,8 @@ public abstract class Config<T> implements Configurable
      */
     public String getId()
     {
-        return String.format("%s_%s_config",
-                container.getName().toLowerCase(), name.toLowerCase());
+        return String.format("%s-%s-config", container.getName().toLowerCase(),
+                name.toLowerCase());
     }
 
     /**
@@ -119,13 +122,20 @@ public abstract class Config<T> implements Configurable
      * @param val The param value
      * @throws NullPointerException if value is <tt>null</tt>
      */
-    public void setValue(T val)
+    public void setValue(final T val)
     {
         if (val == null)
         {
             throw new NullPointerException("Null values not supported");
         }
+        final ConfigUpdateEvent event = new ConfigUpdateEvent(this);
+        // PRE
+        event.setStage(EventStage.PRE);
+        Caspian.EVENT_HANDLER.dispatch(event);
         value = val;
+        // POST
+        event.setStage(EventStage.POST);
+        Caspian.EVENT_HANDLER.dispatch(event);
     }
 
     /**
@@ -136,7 +146,7 @@ public abstract class Config<T> implements Configurable
      *
      * @param cont The parent container
      */
-    public void setContainer(ConfigContainer cont)
+    public void setContainer(final ConfigContainer cont)
     {
         container = cont;
     }

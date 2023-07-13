@@ -32,7 +32,7 @@ public abstract class MixinClientConnection
     private void hookSend(Packet<?> packet, CallbackInfo ci)
     {
         PacketEvent.Outbound packetOutboundEvent =
-                new PacketEvent.Outbound(packet, Managers.NETWORK.isCached(packet));
+                new PacketEvent.Outbound(packet);
         Caspian.EVENT_HANDLER.dispatch(packetOutboundEvent);
         // prevent client from sending packet to server
         if (packetOutboundEvent.isCanceled())

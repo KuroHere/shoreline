@@ -22,6 +22,7 @@ import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.TickTimer;
 import com.caspian.client.util.math.timer.Timer;
 import com.caspian.client.util.ncp.DirectionChecks;
+import com.caspian.client.util.player.PlayerUtil;
 import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.world.EndCrystalUtil;
 import com.caspian.client.util.world.EntityUtil;
@@ -295,7 +296,7 @@ public class AutoCrystalModule extends ToggleModule
             "enemy positions, not fully accurate.", 0, 0, 10);
     Config<Integer> selfExtrapolateTicksConfig = new NumberConfig<>(
             "Self-ExtrapolationTicks", "Accounts for motion when calculating " +
-            "enemy positions, not fully accurate.", 0, 0, 10);
+            "player positions, not fully accurate.", 0, 0, 10);
     // RENDER SETTINGS
     Config<Boolean> renderConfig = new BooleanConfig("Render",
             "Renders the current placement", true);
@@ -1734,28 +1735,15 @@ public class AutoCrystalModule extends ToggleModule
     private void swingDirect(Hand hand)
     {
         if (swingConfig.getValue() && !mc.player.handSwinging
-                || mc.player.handSwingTicks >= getHandSwingDuration() / 2
+                || mc.player.handSwingTicks >= PlayerUtil.getHandSwingDuration() / 2
                 || mc.player.handSwingTicks < 0)
         {
             mc.player.handSwinging = true;
             mc.player.handSwingTicks = -1;
-            mc.player.preferredHand = hand;
+            mc.player.preferredHand = Modules.SWING.isEnabled() ?
+                    Modules.SWING.getSwingHand() : hand;
         }
         Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
-    }
-
-    /**
-     *
-     * @return
-     */
-    private int getHandSwingDuration()
-    {
-        if (StatusEffectUtil.hasHaste(mc.player))
-        {
-            return 6 - (1 + StatusEffectUtil.getHasteAmplifier(mc.player));
-        }
-        return mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE) ?
-                6 + (1 + mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) * 2 : 6;
     }
 
     //
@@ -2096,9 +2084,9 @@ public class AutoCrystalModule extends ToggleModule
     {
         Vec3d motion = getMovementVelocity(entity);
         //
-        boolean flag1 = false;
-        boolean flag2 = false;
-        boolean flag3 = false;
+        boolean xcoll = false;
+        boolean ycoll = false;
+        boolean zcoll = false;
         for (int i = 0; i < ticks; i++)
         {
             // Motion vector comp
@@ -2106,22 +2094,22 @@ public class AutoCrystalModule extends ToggleModule
             double y = motion.y;
             double z = motion.z;
             final Box xoff = bb.offset(x, 0.0, 0.0);
-            if (!flag1 && !isInsideBlock(xoff))
+            if (!xcoll && !isInsideBlock(xoff))
             {
                 bb = xoff;
-                flag1 = true;
+                xcoll = true;
             }
             final Box yoff = bb.offset(0.0, y, 0.0);
-            if (!flag2 && !isInsideBlock(yoff))
+            if (!ycoll && !isInsideBlock(yoff))
             {
                 bb = yoff;
-                flag2 = true;
+                ycoll = true;
             }
             final Box zoff = bb.offset(0.0, 0.0, z);
-            if (!flag3 && !isInsideBlock(zoff))
+            if (!zcoll && !isInsideBlock(zoff))
             {
                 bb = zoff;
-                flag3 = true;
+                zcoll = true;
             }
             pos = pos.add(x, y, z);
             if (extrapolateGravityConfig.getValue())
@@ -3258,9 +3246,8 @@ public class AutoCrystalModule extends ToggleModule
                 Vec3d eyepos = Managers.POSITION.getEyePos();
                 if (extrapolateRangeConfig.getValue())
                 {
-                    final Vec3d motion = mc.player.getVelocity();
-                    pos = extrapolatePosition(pos, mc.player.getBoundingBox(),
-                            motion, selfExtrapolateTicksConfig.getValue());
+                    pos = extrapolatePosition(mc.player, pos,
+                            mc.player.getBoundingBox(), selfExtrapolateTicksConfig.getValue());
                     eyepos = pos.add(0.0, mc.player.getStandingEyeHeight(), 0.0);
                 }
                 if (src instanceof BlockPos cpos)

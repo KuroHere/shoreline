@@ -1,6 +1,7 @@
 package com.caspian.client.impl.event.network;
 
 import com.caspian.client.api.event.Event;
+import com.caspian.client.init.Managers;
 import net.minecraft.network.packet.Packet;
 
 /**
@@ -56,18 +57,7 @@ public class PacketEvent extends Event
     public static class Outbound extends PacketEvent
     {
         //
-        private final boolean cached;
-
-        /**
-         *
-         *
-         * @param packet
-         */
-        public Outbound(Packet<?> packet, boolean cached)
-        {
-            super(packet);
-            this.cached = cached;
-        }
+        private boolean cached;
 
         /**
          *
@@ -76,7 +66,8 @@ public class PacketEvent extends Event
          */
         public Outbound(Packet<?> packet)
         {
-            this(packet, false);
+            super(packet);
+            this.cached = Managers.NETWORK.isCached(packet);
         }
 
         /**

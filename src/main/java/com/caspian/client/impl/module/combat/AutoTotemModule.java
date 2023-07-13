@@ -86,15 +86,14 @@ public class AutoTotemModule extends ToggleModule
     Config<Boolean> hotbarTotemConfig = new BooleanConfig("HotbarTotem",
             "Attempts to swap totems into the offhand from the hotbar", false);
     Config<Integer> totemSlotConfig = new NumberConfig<>("TotemSlot", "Slot " +
-            "in the hotbar that is dedicated for hotbar totem swaps", 0,
-            8, 8);
+            "in the hotbar that is dedicated for hotbar totem swaps", 0, 8, 8);
     //
     private Item offhand;
     //
     private boolean sneaking, sprinting;
     //
     private boolean popTick;
-    private int calcTotem, calcPotion;
+    private int calcTotem;
     private int totems;
     //
     private static final int OFFHAND_SLOT = 45;
@@ -141,9 +140,10 @@ public class AutoTotemModule extends ToggleModule
     public void onRunTick(RunTickEvent event)
     {
         // runs before mc gameloop ...
-        if (tickStageConfig.getValue() == TickStage.LOOP)
+        if (mc.player != null && mc.world != null
+                && tickStageConfig.getValue() == TickStage.LOOP)
         {
-            run();
+            placeOffhand();
         }
     }
 
@@ -158,7 +158,7 @@ public class AutoTotemModule extends ToggleModule
         if (tickStageConfig.getValue() == TickStage.TICK
                 && event.getStage() == EventStage.PRE)
         {
-            run();
+            placeOffhand();
         }
     }
 
@@ -166,10 +166,11 @@ public class AutoTotemModule extends ToggleModule
      *
      *
      */
-    private void run()
+    private void placeOffhand()
     {
         calcTotem = -1;
-        calcPotion = -1;
+        //
+        int calcPotion = -1;
         final ItemStack off = mc.player.getOffHandStack();
         if (off.getItem() == Items.TOTEM_OF_UNDYING)
         {
@@ -201,9 +202,10 @@ public class AutoTotemModule extends ToggleModule
                 else if (offhandPotionConfig.getValue()
                         && slot.getItem() == Items.POTION)
                 {
-                    List<StatusEffectInstance> list =
+                    final List<StatusEffectInstance> list =
                             PotionUtil.getPotionEffects(slot);
-                    if (calcPotion == -1
+                    boolean harm = list.stream().anyMatch(p -> !p.getEffectType().isBeneficial());
+                    if (calcPotion == -1 && !harm
                             && !mc.player.getStatusEffects().containsAll(list))
                     {
                         calcPotion = i;
