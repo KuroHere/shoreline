@@ -9,9 +9,12 @@ import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
-import com.caspian.client.util.player.PlayerInput;
+import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.init.Modules;
+import com.caspian.client.util.player.MovementUtil;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
@@ -30,7 +33,7 @@ public class SpeedModule extends ToggleModule
     Config<Speed> speedModeConfig = new EnumConfig<>("Mode", "Speed mode",
             Speed.STRAFE, Speed.values());
     Config<Boolean> strictJumpConfig = new BooleanConfig("StrictJump", "Use " +
-            "slightly higher and therefore slower jumps to bypass", false);
+            "slightly higher and slower jumps to bypass NCP", false);
     Config<Boolean> timerConfig = new BooleanConfig("UseTimer", "Uses " +
             "timer to increase acceleration", false);
     Config<Boolean> speedWaterConfig = new BooleanConfig("SpeedInWater",
@@ -85,7 +88,7 @@ public class SpeedModule extends ToggleModule
     @EventListener
     public void onPlayerMove(PlayerMoveEvent event)
     {
-        if (mc.player != null && PlayerInput.isInputtingMovement())
+        if (mc.player != null && MovementUtil.isInputtingMovement())
         {
             if (mc.player.isRiding()
                     || mc.player.isFallFlying()
@@ -99,12 +102,25 @@ public class SpeedModule extends ToggleModule
             }
             event.cancel();
             //
-            final float base = 0.2873f;
+            double speedEffect = 1.0;
+            double slowEffect = 1.0;
+            if (mc.player.hasStatusEffect(StatusEffects.SPEED))
+            {
+                double amplifier = mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier();
+                speedEffect = 1 + (0.2 * (amplifier + 1));
+            }
+            if (mc.player.hasStatusEffect(StatusEffects.SLOWNESS))
+            {
+                double amplifier = mc.player.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier();
+                slowEffect = 1 + (0.2 * (amplifier + 1));
+            }
+            final double speedFactor = speedEffect / slowEffect;
+            final double base = 0.2873f * speedFactor;
             if (speedModeConfig.getValue() == Speed.STRAFE)
             {
                 if (timerConfig.getValue())
                 {
-
+                    Modules.TIMER.setTimer(1.088f);
                 }
                 if (strafe == 1)
                 {
@@ -129,11 +145,10 @@ public class SpeedModule extends ToggleModule
                 }
                 else
                 {
-                    ArrayList<VoxelShape> coll = Lists.newArrayList(mc.world.getCollisions(mc.player,
-                            mc.player.getBoundingBox().offset(0, event.getMovement().getY(), 0)));
-                    if (!coll.isEmpty() || mc.player.verticalCollision && strafe > 0)
+                    if (mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0,
+                            mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision && strafe > 0)
                     {
-                        strafe = PlayerInput.isInputtingMovement() ? 1 : 0;
+                        strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                     }
                     speed = distance - (distance / 159);
                 }
@@ -168,30 +183,17 @@ public class SpeedModule extends ToggleModule
                 }
                 else
                 {
-                    ArrayList<VoxelShape> coll = Lists.newArrayList(mc.world.getCollisions(mc.player,
-                            mc.player.getBoundingBox().offset(0, event.getMovement().getY(), 0)));
-                    if (!coll.isEmpty() || mc.player.verticalCollision && strafe > 0)
+                    if (mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0,
+                            mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision && strafe > 0)
                     {
-                        strafe = PlayerInput.isInputtingMovement() ? 1 : 0;
+                        strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                     }
                     speed = distance - (distance / 159);
                 }
                 speed = Math.max(speed, base);
                 //
-                double baseMax = 0.465;
-                double baseMin = 0.44;
-                if (mc.player.hasStatusEffect(StatusEffects.SPEED))
-                {
-                    double amplifier = mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier();
-                    baseMax *= 1 + (0.2 * (amplifier + 1));
-                    baseMin *= 1 + (0.2 * (amplifier + 1));
-                }
-                if (mc.player.hasStatusEffect(StatusEffects.SLOWNESS))
-                {
-                    double amplifier = mc.player.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier();
-                    baseMax /= 1 + (0.2 * (amplifier + 1));
-                    baseMin /= 1 + (0.2 * (amplifier + 1));
-                }
+                double baseMax = 0.465 * speedFactor;
+                double baseMin = 0.44 * speedFactor;
                 speed = Math.min(speed, strictTicks > 25 ? baseMax : baseMin);
                 strictTicks++;
                 if (strictTicks > 50)
@@ -217,7 +219,7 @@ public class SpeedModule extends ToggleModule
         float forward = mc.player.input.movementForward;
         float strafe = mc.player.input.movementSideways;
         float yaw = mc.player.prevYaw + (mc.player.getYaw() - mc.player.prevYaw) * mc.getTickDelta();
-        if (!PlayerInput.isInputtingMovement())
+        if (!MovementUtil.isInputtingMovement())
         {
             return Vec2f.ZERO;
         }
@@ -245,6 +247,18 @@ public class SpeedModule extends ToggleModule
         float sin = (float) -Math.sin(Math.toRadians(yaw));
         return new Vec2f((forward * speed * sin) + (strafe * speed * cos),
                 (forward * speed * cos) - (strafe * speed * sin));
+    }
+
+    @EventListener
+    public void onPacketInbound(PacketEvent.Inbound event)
+    {
+        if (mc.player != null && mc.world != null)
+        {
+            if (event.getPacket() instanceof PlayerPositionLookS2CPacket packet)
+            {
+                clear();
+            }
+        }
     }
 
     /**

@@ -8,7 +8,7 @@ import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.init.Managers;
-import com.caspian.client.util.player.PlayerInput;
+import com.caspian.client.util.player.MovementUtil;
 import com.caspian.client.util.string.EnumFormatter;
 import net.minecraft.entity.effect.StatusEffects;
 
@@ -53,7 +53,7 @@ public class SprintModule extends ToggleModule
         {
             if (!Managers.POSITION.isSprinting()
                     && !Managers.POSITION.isSneaking()
-                    && PlayerInput.isInputtingMovement()
+                    && MovementUtil.isInputtingMovement()
                     && mc.player.getHungerManager().getFoodLevel() > 6.0F
                     && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS))
             {

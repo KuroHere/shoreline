@@ -1,7 +1,5 @@
 package com.caspian.client;
 
-import com.caspian.client.api.account.Account;
-import com.caspian.client.api.account.AccountType;
 import com.caspian.client.api.event.handler.EventHandler;
 import com.caspian.client.api.file.ClientConfiguration;
 import com.caspian.client.init.Managers;
@@ -33,7 +31,6 @@ public class Caspian
     // Client shutdown hooks which will run once when the MinecraftClient
     // game instance is shutdown.
     public static ShutdownHook SHUTDOWN;
-
     public static Executor EXECUTOR;
 
     /**
@@ -69,7 +66,6 @@ public class Caspian
         // this is to prevent configs loading before certain aspects of managers are available
         CONFIG = new ClientConfiguration();
         CONFIG.loadClient();
-
         // DEBUG LINE IS BELOW UNTIL ALT MANAGER IS MADE!
         // new Account(AccountType.MICROSOFT, "<email here>", "<password here>").login();
     }

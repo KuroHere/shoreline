@@ -34,7 +34,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -353,7 +352,7 @@ public class AutoCrystalModule extends ToggleModule
     private final Deque<Long> placeTimes = new ArrayDeque<>(20);
     private final Timer lastSwap = new CacheTimer();
     private final Timer lastSwapAlt = new CacheTimer();
-    private final Timer lastAutoSwap = new CacheTimer();
+    private final Timer autoSwapTimer = new CacheTimer();
     // private final Timer lastClean = new Timer();
     // ROTATIONS
     //
@@ -906,7 +905,7 @@ public class AutoCrystalModule extends ToggleModule
             {
                 if (!event.isCached())
                 {
-                    lastAutoSwap.reset();
+                    autoSwapTimer.reset();
                 }
                 lastSwap.reset();
             }
@@ -1202,20 +1201,21 @@ public class AutoCrystalModule extends ToggleModule
                 }
                 if (radius != -1.0f)
                 {
-                    sequential = sequence != null && sequence.squaredDistanceTo(dx, dy,
-                            dz) < radius * radius;
+                    sequential = sequence != null && sequence.squaredDistanceTo(dx, dy, dz)
+                            < radius * radius;
                     for (Entity e : mc.world.getEntities())
                     {
-                        if (e != null && e.isAlive() && e instanceof EndCrystalEntity)
+                        if (e != null && e.isAlive() && e instanceof EndCrystalEntity crystal
+                                && crystal.squaredDistanceTo(dx, dy, dz) < radius * radius)
                         {
-                            if (e.squaredDistanceTo(dx, dy, dz) < radius * radius)
+                            final Long breakTime =
+                                    attacks.remove(crystal. getId());
+                            if (breakTime != null)
                             {
-                                Long breakTime = attacks.remove(e.getId());
-                                if (breakTime != null)
-                                {
-                                    e.kill();
-                                    breakTimes.push(System.currentTimeMillis() - breakTime);
-                                }
+                                // crystal.kill();
+                                crystal.remove(Entity.RemovalReason.KILLED);
+                                crystal.onRemoved();
+                                breakTimes.push(System.currentTimeMillis() - breakTime);
                             }
                         }
                     }
@@ -1697,7 +1697,7 @@ public class AutoCrystalModule extends ToggleModule
     {
         if (mc.options.useKey.isPressed() || mc.options.attackKey.isPressed())
         {
-            lastAutoSwap.reset();
+            autoSwapTimer.reset();
         }
         if (sequentialConfig.getValue() == Sequential.STRICT)
         {
@@ -1722,7 +1722,7 @@ public class AutoCrystalModule extends ToggleModule
     {
         if (swapConfig.getValue() == Swap.NORMAL)
         {
-            return lastAutoSwap.passed(500);
+            return autoSwapTimer.passed(500);
         }
         return true;
     }
@@ -2116,6 +2116,7 @@ public class AutoCrystalModule extends ToggleModule
             {
                 y -= 0.08;
             }
+            // Drag
             // x *= 0.91;
             y *= 0.9800000190734863;
             // z *= 0.91;

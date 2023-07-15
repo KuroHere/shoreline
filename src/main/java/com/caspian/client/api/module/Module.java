@@ -27,7 +27,6 @@ public class Module extends ConfigContainer implements Globals
     // Concise module description, displayed in the ClickGui to help users
     // understand the functionality of the module.
     private final String desc;
-
     // Modules are grouped into categories for easy navigation in the
     // ClickGui. Modules with ModuleCategory.TEST category are not available
     // to the user.

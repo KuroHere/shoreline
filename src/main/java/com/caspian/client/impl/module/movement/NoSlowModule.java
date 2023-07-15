@@ -190,9 +190,9 @@ public class NoSlowModule extends ToggleModule
     @EventListener
     public void onMovementSlowdown(MovementSlowdownEvent event)
     {
+        final Input input = event.getInput();
         if (checkSlowed())
         {
-            Input input = event.getInput();
             input.movementForward *= 5.0f;
             input.movementSideways *= 5.0f;
         }

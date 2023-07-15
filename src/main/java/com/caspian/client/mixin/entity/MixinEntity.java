@@ -39,7 +39,7 @@ public abstract class MixinEntity implements Globals
      * @param ci
      */
     @Inject(method = "move", at = @At(value = "HEAD"), cancellable = true)
-    private void onMove(MovementType movementType, Vec3d movement,
+    private void hookMove(MovementType movementType, Vec3d movement,
                         CallbackInfo ci)
     {
         if (((Object) this) == mc.player)

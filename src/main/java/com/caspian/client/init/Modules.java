@@ -9,6 +9,7 @@ import com.caspian.client.impl.module.client.RotationsModule;
 import com.caspian.client.impl.module.combat.AutoCrystalModule;
 import com.caspian.client.impl.module.combat.AutoTotemModule;
 import com.caspian.client.impl.module.exploit.SwingModule;
+import com.caspian.client.impl.module.misc.TimerModule;
 import com.caspian.client.impl.module.movement.VelocityModule;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
 import com.caspian.client.impl.module.movement.NoSlowModule;
@@ -46,6 +47,7 @@ public class Modules
     public static final VelocityModule VELOCITY;
     public static final AntiHungerModule ANTI_HUNGER;
     public static final SwingModule SWING;
+    public static final TimerModule TIMER;
     public static final NoSlowModule NO_SLOW;
     public static final SprintModule SPRINT;
     public static final FullbrightModule FULLBRIGHT;
@@ -99,6 +101,7 @@ public class Modules
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
                     "antihunger-module");
             SWING = (SwingModule) getRegisteredModule("swing-module");
+            TIMER = (TimerModule) getRegisteredModule("timer-module");
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow-module");
             SPRINT = (SprintModule) getRegisteredModule("sprint-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
