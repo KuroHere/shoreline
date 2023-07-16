@@ -3,6 +3,8 @@ package com.caspian.client.api.config.setting;
 import com.caspian.client.api.config.Config;
 import com.google.gson.JsonObject;
 
+import java.util.function.Supplier;
+
 /**
  *
  *
@@ -23,6 +25,13 @@ public class EnumConfig<T extends Enum<?>> extends Config<T>
     public EnumConfig(String name, String desc, T val, T[] values)
     {
         super(name, desc, val);
+        this.values = values;
+    }
+
+    public EnumConfig(String name, String desc, T val, T[] values,
+                      Supplier<Boolean> visible)
+    {
+        super(name, desc, val, visible);
         this.values = values;
     }
 

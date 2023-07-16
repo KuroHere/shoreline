@@ -86,7 +86,8 @@ public class AutoTotemModule extends ToggleModule
     Config<Boolean> hotbarTotemConfig = new BooleanConfig("HotbarTotem",
             "Attempts to swap totems into the offhand from the hotbar", false);
     Config<Integer> totemSlotConfig = new NumberConfig<>("TotemSlot", "Slot " +
-            "in the hotbar that is dedicated for hotbar totem swaps", 0, 8, 8);
+            "in the hotbar that is dedicated for hotbar totem swaps", 0, 8, 8,
+            () -> hotbarTotemConfig.getValue());
     //
     private Item offhand;
     //
@@ -284,7 +285,6 @@ public class AutoTotemModule extends ToggleModule
                 if (calcTotem == -1)
                 {
                     Caspian.error("No TOTEM_OF_UNDYING left in inventory!");
-
                 }
                 else if (off.isEmpty()
                         || off.getItem() != Items.TOTEM_OF_UNDYING)

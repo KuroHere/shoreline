@@ -4,6 +4,8 @@ import com.caspian.client.api.config.Config;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import java.util.function.Supplier;
+
 /**
  *
  *
@@ -46,10 +48,47 @@ public class NumberConfig<T extends Number> extends Config<T>
      * @param min
      * @param value
      * @param max
+     * @param format
+     * @param visible
+     */
+    public NumberConfig(String name, String desc, T min, T value, T max,
+                        NumberDisplay format, Supplier<Boolean> visible)
+    {
+        super(name, desc, value, visible);
+        this.min = min;
+        this.max = max;
+        this.format = format;
+    }
+
+    /**
+     *
+     *
+     * @param name
+     * @param desc
+     * @param min
+     * @param value
+     * @param max
      */
     public NumberConfig(String name, String desc, T min, T value, T max)
     {
         this(name, desc, min, value, max, NumberDisplay.DEFAULT);
+    }
+
+    /**
+     *
+     *
+     * @param name
+     * @param desc
+     * @param min
+     * @param value
+     * @param max
+     * @param visible
+     */
+    public NumberConfig(String name, String desc, T min, T value, T max,
+                        Supplier<Boolean> visible)
+    {
+        this(name, desc, min, value, max, NumberDisplay.DEFAULT, visible);
+
     }
 
     /**

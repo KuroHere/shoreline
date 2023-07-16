@@ -56,7 +56,7 @@ public class NoSlowModule extends ToggleModule
     Config<Boolean> websConfig = new BooleanConfig("Webs", "Removes the " +
             "slowdown caused when moving through webs", false);
     Config<Float> webSpeedConfig = new NumberConfig<>("WebSpeed", "Speed to " +
-            "fall through webs", 0.0f, 3.5f, 20.0f);
+            "fall through webs", 0.0f, 3.5f, 20.0f, () -> websConfig.getValue());
     Config<Boolean> soulsandConfig = new BooleanConfig("SoulSand", "Removes " +
             "the slowdown effect caused by walking over SoulSand blocks", false);
     Config<Boolean> honeyblockConfig = new BooleanConfig("HoneyBlock", "Removes " +

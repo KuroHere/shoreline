@@ -66,7 +66,7 @@ public class HudModule extends ToggleModule
     Config<Boolean> arraylistConfig = new BooleanConfig("Arraylist",
             "Displays a list of all active modules", true);
     Config<Ordering> orderingConfig = new EnumConfig<>("Ordering", "",
-            Ordering.LENGTH, Ordering.values());
+            Ordering.LENGTH, Ordering.values(), () -> arraylistConfig.getValue());
 
     /**
      *

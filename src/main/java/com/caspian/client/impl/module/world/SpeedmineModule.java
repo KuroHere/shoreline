@@ -53,17 +53,20 @@ public class SpeedmineModule extends ToggleModule
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates" +
             " when mining the block", true);
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool" +
-            " using alternative packets", false);
+            " using alternative packets", false, () -> swapConfig.getValue() != Swap.OFF);
     Config<Boolean> remineConfig = new BooleanConfig("Remine",
             "Attempts to remine blocks", true);
     Config<Boolean> fastConfig = new BooleanConfig("Fast", "Attempts to " +
             "instantly remine blocks", false);
     Config<Boolean> remineFullConfig = new BooleanConfig("RemineFull",
-            "Resets the block breaking state when remining", true);
+            "Resets the block breaking state when remining", true,
+            () -> remineConfig.getValue());
     Config<Boolean> infiniteRemineConfig = new BooleanConfig("InfiniteRemine",
-            "Attempts to remine blocks infinitely", false);
+            "Attempts to remine blocks infinitely", false,
+            () -> remineConfig.getValue());
     Config<Integer> maxRemineConfig = new NumberConfig<>("MaxRemines",
-            "Maximum remines of a block before reset", 0, 2, 10);
+            "Maximum remines of a block before reset", 0, 2, 10,
+            () -> remineConfig.getValue() && !infiniteRemineConfig.getValue());
     // Mining block info
     private BlockPos mining;
     private BlockState state;

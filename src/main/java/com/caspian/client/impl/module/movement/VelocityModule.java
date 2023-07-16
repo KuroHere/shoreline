@@ -29,10 +29,10 @@ public class VelocityModule extends ToggleModule
             VelocityMode.values());
     Config<Float> horizontalConfig = new NumberConfig<>("Horizontal",
             "How much horizontal knock-back to take", 0.0f, 0.0f, 100.0f,
-            NumberDisplay.PERCENT);
+            NumberDisplay.PERCENT, () -> modeConfig.getValue() == VelocityMode.NORMAL);
     Config<Float> verticalConfig = new NumberConfig<>("Vertical",
             "How much vertical knock-back to take", 0.0f, 0.0f, 100.0f,
-            NumberDisplay.PERCENT);
+            NumberDisplay.PERCENT, () -> modeConfig.getValue() == VelocityMode.NORMAL);
     //
     private boolean velocity;
     private final Set<Integer> velocityTransactions = new HashSet<>();

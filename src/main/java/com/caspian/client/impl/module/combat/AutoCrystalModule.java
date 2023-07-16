@@ -87,20 +87,23 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> instantCalcConfig = new BooleanConfig("SpawnTime-Calc",
             "Calculates a crystal when it spawns and attacks if it meets " +
                     "MINIMUM requirements, this will result in non-ideal " +
-                    "crystal attacks", false);
+                    "crystal attacks", false, () -> instantConfig.getValue());
     Config<Boolean> instantMaxConfig = new BooleanConfig("InstantMax",
             "Attacks crystals instantly if they exceed the previous max " +
                     "attack damage (Note: This is still not a perfect check " +
-                    "because the next tick could have better damages", true);
+                    "because the next tick could have better damages", true,
+            () -> instantConfig.getValue());
     Config<Float> instantDamageConfig = new NumberConfig<>("InstantDamage",
-            "Minimum damage to attack crystals instantly", 1.0f, 6.0f, 10.0f);
+            "Minimum damage to attack crystals instantly", 1.0f, 6.0f, 10.0f,
+            () -> instantConfig.getValue() && instantCalcConfig.getValue());
     Config<Float> calcSleepConfig = new NumberConfig<>("CalcTimeout", "Time " +
             "to sleep and pause calculation directly after completing a " +
             "calculation", 0.00f, 0.03f, 0.05f);
     Config<Boolean> latencyPositionConfig = new BooleanConfig(
             "LatencyPosition", "Targets the latency positions of enemies", false);
     Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency",
-            "Maximum latency factor when calculating positions", 50, 250, 1000);
+            "Maximum latency factor when calculating positions", 50, 250,
+            1000, () -> latencyPositionConfig.getValue());
     // Config<Boolean> raytraceConfig = new BooleanConfig("Raytrace", "",
     //        false);
     Config<Sequential> sequentialConfig = new EnumConfig<>("Sequential",
@@ -108,7 +111,8 @@ public class AutoCrystalModule extends ToggleModule
                     "expected crystal is broken", Sequential.NORMAL,
             Sequential.values());
     Config<Boolean> preSequentialCalcConfig = new BooleanConfig(
-            "PreSequential-Calc", "", false);
+            "PreSequential-Calc", "", false,
+            () -> sequentialConfig.getValue() != Sequential.NONE);
     Config<Boolean> swingConfig = new BooleanConfig("Swing",
             "Swing hand when placing and attacking crystals", true);
     // ROTATE SETTINGS
@@ -116,23 +120,26 @@ public class AutoCrystalModule extends ToggleModule
             "before placing and breaking", false);
     Config<Rotate> strictRotateConfig = new EnumConfig<>("StrictRotate",
             "Rotates yaw over multiple ticks to prevent certain rotation  " +
-                    "flags in NCP", Rotate.OFF, Rotate.values());
+                    "flags in NCP", Rotate.OFF, Rotate.values(),
+            () -> rotateConfig.getValue());
     Config<Integer> rotateLimitConfig = new NumberConfig<>(
             "RotateLimit", "Maximum yaw rotation in degrees for one tick",
-            1, 180, 180, NumberDisplay.DEGREES);
+            1, 180, 180, NumberDisplay.DEGREES,
+            () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
     Config<Integer> yawTicksConfig = new NumberConfig<>("YawTicks",
-            "Minimum ticks to rotate yaw", 1, 1, 5);
+            "Minimum ticks to rotate yaw", 1, 1, 5,
+            () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
     Config<Integer> rotateSuspendConfig = new NumberConfig<>(
             "RotateTimeout", "Minimum ticks to hold the rotation yaw after " +
-            "reaching the rotation", 0, 0, 5);
+            "reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
     Config<Boolean> randomVectorConfig = new BooleanConfig("RandomVector",
-            "Randomizes attack rotations", false);
+            "Randomizes attack rotations", false, () -> rotateConfig.getValue());
     Config<Boolean> offsetFacingConfig = new BooleanConfig("InteractOffset",
             "Rotates to the side of interact (only applies to PLACE " +
-                    "rotations)", false);
+                    "rotations)", false, () -> rotateConfig.getValue());
     Config<Integer> rotatePreserveTicksConfig = new NumberConfig<>(
             "PreserveTicks", "Time to preserve rotations before switching " +
-            "back", 0, 20, 20);
+            "back", 0, 20, 20, () -> rotateConfig.getValue());
     // ENEMY SETTINGS
     Config<Boolean> playersConfig = new BooleanConfig("Players",
             "Target players", true);
@@ -184,10 +191,11 @@ public class AutoCrystalModule extends ToggleModule
     Config<Integer> inhibitTicksConfig = new NumberConfig<>("InhibitTicks",
             "Counts crystals for x amount of ticks before determining that " +
                     "the attack won't violate NCP attack speeds (aka " +
-                    "shortterm ticks)", 5, 8, 15);
+                    "shortterm ticks)", 5, 8, 15,
+            () -> inhibitConfig.getValue() == Inhibit.FULL);
     Config<Integer> inhibitLimitConfig = new NumberConfig<>("InhibitLimit",
             "Limit to crystal attacks that would flag NCP attack limits",
-            1, 13, 20);
+            1, 13, 20, () -> inhibitConfig.getValue() == Inhibit.FULL);
     // default NCP config
     // limitforseconds:
     //        half: 8
@@ -197,13 +205,16 @@ public class AutoCrystalModule extends ToggleModule
     //        eight: 100
     Config<Integer> attackFreqConfig = new NumberConfig<>(
             "AttackFreq-Half", "Limit of attack packets sent for each " +
-            "half-second interval", 1, 8, 20);
+            "half-second interval", 1, 8, 20,
+            () -> inhibitConfig.getValue() == Inhibit.FULL);
     Config<Integer> attackFreqFullConfig = new NumberConfig<>(
             "AttackFreq-Full", "Limit of attack packets sent for each " +
-            "one-second interval", 10, 15, 30);
+            "one-second interval", 10, 15, 30,
+            () -> inhibitConfig.getValue() == Inhibit.FULL);
     Config<Integer> attackFreqMaxConfig = new NumberConfig<>(
             "AttackFreq-Max", "Limit of attack packets sent for each " +
-            "eight-second interval", 80, 100, 150);
+            "eight-second interval", 80, 100, 150,
+            () -> inhibitConfig.getValue() == Inhibit.FULL);
     Config<Boolean> manualConfig = new BooleanConfig("Manual",
             "Always breaks manually placed crystals", false);
     // PLACE SETTINGS
@@ -211,53 +222,60 @@ public class AutoCrystalModule extends ToggleModule
             " to damage enemies. Place settings will only function if this " +
             "setting is enabled.", true);
     Config<Float> placeSpeedConfig = new NumberConfig<>("PlaceSpeed",
-            "Speed to place crystals", 0.1f, 18.0f, 20.0f);
+            "Speed to place crystals", 0.1f, 18.0f, 20.0f,
+            () -> placeConfig.getValue());
     Config<Float> placeTimeoutConfig = new NumberConfig<>("PlaceTimeout",
             "Time after waiting for the average place time before considering" +
-                    " a crystal placement failed", 0.0f, 3.0f, 10.0f);
+                    " a crystal placement failed", 0.0f, 3.0f, 10.0f,
+            () -> placeConfig.getValue());
     Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange",
-            "Range to place crystals", 0.1f, 4.0f, 5.0f);
+            "Range to place crystals", 0.1f, 4.0f, 5.0f,
+            () -> placeConfig.getValue());
     Config<Float> strictPlaceRangeConfig = new NumberConfig<>(
             "StrictPlaceRange", "NCP range to place crystals", 0.1f, 4.0f,
-            5.0f);
+            5.0f, () -> placeConfig.getValue());
     Config<Float> placeWallRangeConfig = new NumberConfig<>(
             "PlaceWallRange", "Range to place crystals through walls", 0.1f,
-            4.0f, 5.0f);
+            4.0f, 5.0f, () -> placeConfig.getValue());
     Config<Boolean> minePlaceConfig = new BooleanConfig("MinePlace",
             "Places on mining blocks that when broken, can be placed on to " +
                     "damage enemies. Instantly destroys items spawned from " +
-                    "breaking block and allows faster placing", false);
+                    "breaking block and allows faster placing", false,
+            () -> placeConfig.getValue());
     Config<Boolean> placeRangeEyeConfig = new BooleanConfig(
             "PlaceRangeEye", "Calculates place ranges starting from the eye " +
             "position of the player, which is how NCP calculates ranges",
-            false);
+            false, () -> placeConfig.getValue());
     Config<Boolean> placeRangeCenterConfig = new BooleanConfig(
             "PlaceRangeCenter", "Calculates place ranges to the center of the" +
-            " block, which is how NCP calculates ranges", true);
+            " block, which is how NCP calculates ranges", true,
+            () -> placeConfig.getValue());
     Config<Boolean> halfCrystalConfig = new BooleanConfig("HalfBB-Place",
-            "Allow placements at a lower bounding", false);
+            "Allow placements at a lower bounding", false,
+            () -> placeConfig.getValue());
     Config<Boolean> antiTotemConfig = new BooleanConfig("AntiTotem",
             "Predicts totems and places crystals to instantly double pop and " +
-                    "kill the target", false);
+                    "kill the target", false, () -> placeConfig.getValue());
     Config<Swap> swapConfig = new EnumConfig<>("Swap", "Swaps to an end " +
             "crystal before placing if the player is not holding one", Swap.OFF,
-            Swap.values());
+            Swap.values(), () -> placeConfig.getValue());
     // Config<Boolean> swapSyncConfig = new BooleanConfig("SwapSync",
     //        "", false);
     Config<Float> alternateSpeedConfig = new NumberConfig<>("AlternateSpeed",
-            "Speed for alternative swapping crystals", 1.0f, 18.0f, 20.0f);
+            "Speed for alternative swapping crystals", 1.0f, 18.0f, 20.0f,
+            () -> swapConfig.getValue() == Swap.SILENT_ALT);
     Config<Boolean> breakValidConfig = new BooleanConfig(
             "BreakValid-Test", "Only places crystals that can be attacked",
-            false);
+            false, () -> placeConfig.getValue());
     Config<Boolean> strictDirectionConfig = new BooleanConfig(
             "StrictDirection", "Interacts with only visible directions when " +
-            "placing crystals", false);
+            "placing crystals", false, () -> placeConfig.getValue());
     Config<Boolean> exposedDirectionConfig = new BooleanConfig(
             "ExposedDirection", "Interacts with only exposed directions when " +
-            "placing crystals", false);
+            "placing crystals", false, () -> placeConfig.getValue());
     Config<Placements> placementsConfig = new EnumConfig<>("Placements",
             "Version standard for placing end crystals", Placements.NATIVE,
-            Placements.values());
+            Placements.values(), () -> placeConfig.getValue());
     // DAMAGE SETTINGS
     Config<Float> minDamageConfig = new NumberConfig<>("MinDamage",
             "Minimum damage required to consider attacking or placing an end " +
@@ -266,11 +284,12 @@ public class AutoCrystalModule extends ToggleModule
             "Attempts to break enemy armor with crystals", true);
     Config<Float> armorScaleConfig = new NumberConfig<>("ArmorScale",
             "Armor damage scale before attempting to break enemy armor with " +
-                    "crystals", 1.0f, 5.0f, 20.0f, NumberDisplay.PERCENT);
+                    "crystals", 1.0f, 5.0f, 20.0f, NumberDisplay.PERCENT,
+            () -> armorBreakerConfig.getValue());
     Config<Float> lethalMultiplier = new NumberConfig<>(
             "LethalMultiplier", "If we can kill an enemy with this many " +
             "crystals, disregard damage values", 0.0f, 1.5f, 4.0f);
-    Config<Boolean> safetyConfig = new BooleanConfig("Safety",  "Accounts for" +
+    Config<Boolean> safetyConfig = new BooleanConfig("Safety", "Accounts for" +
             " total player safety when attacking and placing crystals", true);
     Config<Boolean> safetyBalanceConfig = new BooleanConfig(
             "SafetyBalance", "Target damage must be greater than player " +
@@ -304,7 +323,8 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> renderSpawnConfig = new BooleanConfig("RenderSpawn",
             "Indicates if the current placement was spawned", false);
     Config<Boolean> damageNametagConfig = new BooleanConfig("DamageNametag",
-            "Renders the current expected damage of a place/attack", false);
+            "Renders the current expected damage of a place/attack", false,
+            () -> renderConfig.getValue());
     //
     private int tick;
     //

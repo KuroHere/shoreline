@@ -25,7 +25,6 @@ public class ConfigContainer implements Configurable
 {
     // Container name is its UNIQUE identifier.
     private final String name;
-
     // List of all configurations in the container. The configs are managed
     // by a Map with references to their data tags.
     private final Map<String, Config<?>> configurations =
@@ -114,7 +113,7 @@ public class ConfigContainer implements Configurable
                 // couldn't parse Json value
                 catch (Exception e)
                 {
-                    Caspian.error("Couldn't parse Json for %s", name);
+                    Caspian.error("Couldn't parse Json for {}", name);
                     e.printStackTrace();
                 }
             }

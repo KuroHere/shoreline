@@ -5,6 +5,8 @@ import com.caspian.client.api.config.setting.*;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.impl.event.config.ConfigUpdateEvent;
 
+import java.util.function.Supplier;
+
 /**
  * Client Configuration which is saved to a local <tt>.json</tt> file. All
  * configs must be associated with a {@link ConfigContainer} which is
@@ -39,6 +41,8 @@ public abstract class Config<T> implements Configurable
     // Parent container. All configs should be added to a config container,
     // otherwise they will not be saved locally.
     private ConfigContainer container;
+    //
+    private Supplier<Boolean> visible;
 
     /**
      * Initializes the config with a default value. This constructor should
@@ -59,6 +63,23 @@ public abstract class Config<T> implements Configurable
         this.name = name;
         this.desc = desc;
         this.value = value;
+    }
+
+    /**
+     * Initializes the config with a default value. This constructor should
+     * not be used to initialize a configuration, instead use the explicit
+     * definitions of the configs in {@link com.caspian.client.api.config.setting}.
+     *
+     * @param name  The unique config identifier
+     * @param desc  The config description
+     * @param value The default config value
+     * @param visible The visibility of the config
+     * @throws NullPointerException if value is <tt>null</tt>
+     */
+    public Config(String name, String desc, T value, Supplier<Boolean> visible)
+    {
+        this(name, desc, value);
+        this.visible = visible;
     }
 
     /**

@@ -12,8 +12,11 @@ import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.player.MovementUtil;
+import com.caspian.client.util.string.EnumFormatter;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
@@ -33,9 +36,12 @@ public class SpeedModule extends ToggleModule
     Config<Speed> speedModeConfig = new EnumConfig<>("Mode", "Speed mode",
             Speed.STRAFE, Speed.values());
     Config<Boolean> strictJumpConfig = new BooleanConfig("StrictJump", "Use " +
-            "slightly higher and slower jumps to bypass NCP", false);
+            "slightly higher and slower jumps to bypass NCP", false,
+            () -> speedModeConfig.getValue() == Speed.STRAFE_STRICT);
     Config<Boolean> timerConfig = new BooleanConfig("UseTimer", "Uses " +
             "timer to increase acceleration", false);
+    Config<Boolean> strafeBoostConfig = new BooleanConfig("StrafeBoost",
+            "Uses explosion velocity to boost Strafe", false);
     Config<Boolean> speedWaterConfig = new BooleanConfig("SpeedInWater",
             "Applies speed even in water and lava", false);
     //
@@ -62,6 +68,17 @@ public class SpeedModule extends ToggleModule
     public void onEnable()
     {
         clear();
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    @Override
+    public String getMetaData()
+    {
+        return EnumFormatter.formatEnum(speedModeConfig.getValue());
     }
 
     /**
@@ -116,11 +133,12 @@ public class SpeedModule extends ToggleModule
             }
             final double speedFactor = speedEffect / slowEffect;
             final double base = 0.2873f * speedFactor;
+            // ~29 kmh
             if (speedModeConfig.getValue() == Speed.STRAFE)
             {
                 if (timerConfig.getValue())
                 {
-                    Modules.TIMER.setTimer(1.088f);
+                    Modules.TIMER.setTimer(1.0888f);
                 }
                 if (strafe == 1)
                 {
@@ -128,6 +146,10 @@ public class SpeedModule extends ToggleModule
                 }
                 else if (strafe == 2)
                 {
+                    if (mc.player.input.jumping || !mc.player.isOnGround())
+                    {
+                        return;
+                    }
                     float jump = 0.3999999463558197f;
                     if (mc.player.hasStatusEffect(StatusEffects.JUMP_BOOST))
                     {
@@ -150,7 +172,7 @@ public class SpeedModule extends ToggleModule
                     {
                         strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                     }
-                    speed = distance - (distance / 159);
+                    speed = distance - distance / 159;
                 }
                 speed = Math.max(speed, base);
                 final Vec2f motion = handleStrafeMotion((float) speed);
@@ -158,6 +180,7 @@ public class SpeedModule extends ToggleModule
                 event.setZ(motion.y);
                 ++strafe;
             }
+            // ~26-27 kmh
             else if (speedModeConfig.getValue() == Speed.STRAFE_STRICT)
             {
                 if (strafe == 1)
@@ -166,6 +189,10 @@ public class SpeedModule extends ToggleModule
                 }
                 else if (strafe == 2)
                 {
+                    if (mc.player.input.jumping || !mc.player.isOnGround())
+                    {
+                        return;
+                    }
                     float jump = strictJumpConfig.getValue() ?
                             0.41999998688697815f : 0.3999999463558197f;
                     if (mc.player.hasStatusEffect(StatusEffects.JUMP_BOOST))
@@ -188,7 +215,7 @@ public class SpeedModule extends ToggleModule
                     {
                         strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                     }
-                    speed = distance - (distance / 159);
+                    speed = distance - distance / 159;
                 }
                 speed = Math.max(speed, base);
                 //
@@ -249,12 +276,32 @@ public class SpeedModule extends ToggleModule
                 (forward * speed * cos) - (strafe * speed * sin));
     }
 
+    /**
+     *
+     *
+     * @param event
+     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
         if (mc.player != null && mc.world != null)
         {
-            if (event.getPacket() instanceof PlayerPositionLookS2CPacket packet)
+            if (event.getPacket() instanceof ExplosionS2CPacket packet)
+            {
+                double x = packet.getX() / 8000.0f;
+                double z = packet.getZ() / 8000.0f;
+                double boost = Math.sqrt(x * x + z * z);
+            }
+            else if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet)
+            {
+                if (packet.getId() == mc.player.getId())
+                {
+                    double x = packet.getVelocityX() / 8000.0f;
+                    double z = packet.getVelocityZ() / 8000.0f;
+                    double boost = Math.sqrt(x * x + z * z);
+                }
+            }
+            if (event.getPacket() instanceof PlayerPositionLookS2CPacket)
             {
                 clear();
             }
