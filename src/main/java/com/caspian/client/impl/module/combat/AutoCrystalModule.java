@@ -708,10 +708,10 @@ public class AutoCrystalModule extends ToggleModule
                         {
                             if (attack(attackData))
                             {
-
                                 lastBreak.reset();
                                 addCrystalsInRange(attackData.getId(),
                                         attackData.getPos());
+                                countCrystals();
                                 randomTime.reset();
                                 currRandom = -1;
                             }
