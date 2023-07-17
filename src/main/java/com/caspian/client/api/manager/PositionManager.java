@@ -4,8 +4,8 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.handler.PositionHandler;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
+import com.caspian.client.util.world.VecUtil;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -88,19 +88,7 @@ public class PositionManager implements Globals
      */
     public Vec3d getEyePos()
     {
-        return getPos().add(0.0, getActiveEyeHeight(), 0.0);
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    public float getActiveEyeHeight()
-    {
-        EntityPose pose = mc.player.getPose();
-        return mc.player.getActiveEyeHeight(pose,
-                mc.player.getDimensions(pose));
+        return VecUtil.toEyePos(mc.player, getPos());
     }
 
     /**
@@ -135,7 +123,7 @@ public class PositionManager implements Globals
     /**
      *
      *
-     * @param e
+     * @param entity
      * @return
      */
     public double squaredReachDistanceTo(Entity entity)

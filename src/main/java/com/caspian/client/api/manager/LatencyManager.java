@@ -13,7 +13,7 @@ import net.minecraft.util.math.Vec3d;
  * @author linus
  * @since 1.0
  */
-public class LatencyPositionManager
+public class LatencyManager
 {
     //
     private final LatencyPositionHandler handler;
@@ -21,7 +21,7 @@ public class LatencyPositionManager
     /**
      *
      */
-    public LatencyPositionManager()
+    public LatencyManager()
     {
         handler = new LatencyPositionHandler(new LatencyTracker());
         Caspian.EVENT_HANDLER.subscribe(handler);

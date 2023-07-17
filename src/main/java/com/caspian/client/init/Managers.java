@@ -30,7 +30,7 @@ public class Managers
     public static RotationManager ROTATION;
     public static TotemManager TOTEM;
     public static InteractionManager INTERACT;
-    public static LatencyPositionManager LATENCY_POS;
+    public static LatencyManager LATENCY;
     public static SoundManager SOUND;
 
     /**
@@ -56,7 +56,7 @@ public class Managers
             ROTATION = new RotationManager();
             TOTEM = new TotemManager();
             INTERACT = new InteractionManager();
-            LATENCY_POS = new LatencyPositionManager();
+            LATENCY = new LatencyManager();
             SOUND = new SoundManager();
             initialized = true;
         }
