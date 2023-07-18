@@ -10,6 +10,7 @@ import com.caspian.client.impl.module.combat.AutoCrystalModule;
 import com.caspian.client.impl.module.combat.AutoTotemModule;
 import com.caspian.client.impl.module.exploit.SwingModule;
 import com.caspian.client.impl.module.misc.TimerModule;
+import com.caspian.client.impl.module.movement.SpeedModule;
 import com.caspian.client.impl.module.movement.VelocityModule;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
 import com.caspian.client.impl.module.movement.NoSlowModule;
@@ -49,6 +50,7 @@ public class Modules
     public static final SwingModule SWING;
     public static final TimerModule TIMER;
     public static final NoSlowModule NO_SLOW;
+    public static final SpeedModule SPEED;
     public static final SprintModule SPRINT;
     public static final FullbrightModule FULLBRIGHT;
     public static final NoWeatherModule NO_WEATHER;
@@ -103,6 +105,7 @@ public class Modules
             SWING = (SwingModule) getRegisteredModule("swing-module");
             TIMER = (TimerModule) getRegisteredModule("timer-module");
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow-module");
+            SPEED = (SpeedModule) getRegisteredModule("speed-module");
             SPRINT = (SprintModule) getRegisteredModule("sprint-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");

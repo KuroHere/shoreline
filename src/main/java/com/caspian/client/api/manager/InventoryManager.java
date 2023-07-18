@@ -72,8 +72,7 @@ public class InventoryManager implements Globals
      */
     public void syncSelectedSlot()
     {
-        ((AccessorClientPlayerInteractionManager) mc.interactionManager)
-                .hookSyncSelectedSlot();
+        ((AccessorClientPlayerInteractionManager) mc.interactionManager).hookSyncSelectedSlot();
     }
     
     /**

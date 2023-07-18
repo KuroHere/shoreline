@@ -28,11 +28,12 @@ public class Managers
     public static InventoryManager INVENTORY;
     public static PositionManager POSITION;
     public static RotationManager ROTATION;
+    public static NCPManager NCP;
+
     public static TotemManager TOTEM;
     public static InteractionManager INTERACT;
     public static LatencyManager LATENCY;
     public static SoundManager SOUND;
-
     /**
      * Initializes the manager instances. Should not be used if the
      * managers are already initialized.
@@ -54,6 +55,7 @@ public class Managers
             INVENTORY = new InventoryManager();
             POSITION = new PositionManager();
             ROTATION = new RotationManager();
+            NCP = new NCPManager();
             TOTEM = new TotemManager();
             INTERACT = new InteractionManager();
             LATENCY = new LatencyManager();
