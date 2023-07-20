@@ -38,6 +38,10 @@ public class FastFallModule extends ToggleModule
         super("FastFall", "Falls down blocks faster", ModuleCategory.MOVEMENT);
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public String getMetaData()
     {
@@ -74,7 +78,8 @@ public class FastFallModule extends ToggleModule
                 }
                 if (Managers.POSITION.isOnGround())
                 {
-                    if (getNearestBlockY() != -1)
+                    final int blockY = getNearestBlockY();
+                    if (blockY != -1)
                     {
                         final Vec3d motion = mc.player.getVelocity();
                         mc.player.setVelocity(motion.getX(), -3.0, motion.getZ());

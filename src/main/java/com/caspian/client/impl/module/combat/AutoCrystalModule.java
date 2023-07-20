@@ -357,9 +357,8 @@ public class AutoCrystalModule extends ToggleModule
     private int shortTermCount;
     private int shortTermTick;
     // RANDOM
-    private final Timer randomTime = new CacheTimer();
     private final Random random = new SecureRandom();
-    private long currRandom;
+    private long randomTime = -1;
     //
     private final Map<PlayerEntity, Long> pops =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
@@ -525,7 +524,7 @@ public class AutoCrystalModule extends ToggleModule
         shortTermTick = 0;
         shortTermCount = 0;
         rotating = 0;
-        currRandom = -1;
+        randomTime = -1;
         freq = 0;
         lastBreak.reset();
         lastPlace.reset();
@@ -624,7 +623,12 @@ public class AutoCrystalModule extends ToggleModule
                     return;
                 }
                 // This delay is accurate to ms
-                float delay = attackDelayConfig.getValue() * 50.0f;
+                if (randomTime < 0)
+                {
+                    randomTime = random.nextLong((long)
+                            (randomSpeedConfig.getValue() * 10.0f + 1.0f));
+                }
+                float delay = attackDelayConfig.getValue() * 50.0f + randomTime;
                 if (lastBreak.passed(delay))
                 {
                     if (attack(attackData))
@@ -632,6 +636,7 @@ public class AutoCrystalModule extends ToggleModule
                         lastBreak.reset();
                         addCrystalsInRange(attackData);
                         countCrystals();
+                        randomTime = -1;
                     }
                     attackData = null;
                 }
@@ -693,21 +698,20 @@ public class AutoCrystalModule extends ToggleModule
                             }
                             return;
                         }
-                        if (currRandom < 0)
+                        if (randomTime < 0)
                         {
-                            currRandom = random.nextLong((long)
+                            randomTime = random.nextLong((long)
                                     (randomSpeedConfig.getValue() * 10.0f + 1.0f));
                         }
                         float delay = (((NumberConfig<Float>) breakSpeedConfig).getMax()
-                                - breakSpeedConfig.getValue()) * 50.0f;
+                                - breakSpeedConfig.getValue()) * 50.0f + randomTime;
                         if (instantConfig.getValue())
                         {
                             float timeout = Math.max(getLatency(breakTimes) + (50.0f * breakTimeoutConfig.getValue()),
                                     50.0f * minTimeoutConfig.getValue());
                             delay = timeout;
                         }
-                        if (lastBreak.passed(delay)
-                                && randomTime.passed(currRandom))
+                        if (lastBreak.passed(delay))
                         {
                             if (attack(attackData))
                             {
@@ -715,8 +719,7 @@ public class AutoCrystalModule extends ToggleModule
                                 addCrystalsInRange(attackData.getId(),
                                         attackData.getPos());
                                 countCrystals();
-                                randomTime.reset();
-                                currRandom = -1;
+                                randomTime = -1;
                             }
                             attackData = null;
                         }
