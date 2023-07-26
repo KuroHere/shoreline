@@ -9,20 +9,16 @@ import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
+import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.player.MovementUtil;
 import com.caspian.client.util.string.EnumFormatter;
-import com.google.common.collect.Lists;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-
-import java.util.ArrayList;
 
 /**
  *
@@ -65,9 +61,20 @@ public class SpeedModule extends ToggleModule
      *
      */
     @Override
-    public void onEnable()
+    public void onDisable()
     {
         clear();
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onDisconnect(DisconnectEvent event)
+    {
+        disable();
     }
 
     /**

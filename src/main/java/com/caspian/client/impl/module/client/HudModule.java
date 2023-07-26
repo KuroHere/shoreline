@@ -14,7 +14,6 @@ import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.string.StringUtil;
 import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.util.Window;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -29,8 +28,11 @@ import net.minecraft.world.World;
 import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
+ *
+ *
  * @author linus
  * @since 1.0
  */
@@ -119,7 +121,7 @@ public class HudModule extends ToggleModule
             }
             if (arraylistConfig.getValue())
             {
-                List<Module> modules = (List<Module>) Managers.MODULE.getModules();
+                List<Module> modules = Managers.MODULE.getModules();
                 modules = switch (orderingConfig.getValue())
                         {
                             case ALPHABETICAL -> modules.stream()
@@ -182,27 +184,7 @@ public class HudModule extends ToggleModule
             }
             if (pingConfig.getValue())
             {
-                int latency = 0;
-                try
-                {
-                    if (mc.getNetworkHandler() != null)
-                    {
-                        for (PlayerListEntry e :
-                                mc.getNetworkHandler().getPlayerList())
-                        {
-                            if (e.getProfile().getId() ==
-                                    mc.player.getGameProfile().getId())
-                            {
-                                latency = e.getLatency();
-                                break;
-                            }
-                        }
-                    }
-                }
-                catch (Exception ignored)
-                {
-
-                }
+                int latency = Managers.NETWORK.getClientLatency();
                 String text = String.format("Ping §f%dms", latency);
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
@@ -314,7 +296,7 @@ public class HudModule extends ToggleModule
     private String getFormattedModule(final Module module)
     {
         final String metadata = module.getMetaData();
-        if (metadata != StringUtil.EMPTY_STRING)
+        if (!Objects.equals(metadata, StringUtil.EMPTY_STRING))
         {
             return String.format("%s §7[§f%s§7]", module.getName(),
                     module.getMetaData());

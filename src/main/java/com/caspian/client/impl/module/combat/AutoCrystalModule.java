@@ -13,6 +13,7 @@ import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.RunTickEvent;
+import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
@@ -246,6 +247,8 @@ public class AutoCrystalModule extends ToggleModule
                     "damage enemies. Instantly destroys items spawned from " +
                     "breaking block and allows faster placing", false,
             () -> placeConfig.getValue());
+    Config<Boolean> boundsConfig = new BooleanConfig("Bounds", "Targets " +
+            "closest bounded rotations", false);
     Config<Boolean> placeRangeEyeConfig = new BooleanConfig(
             "PlaceRangeEye", "Calculates place ranges starting from the eye " +
             "position of the player, which is how NCP calculates ranges",
@@ -268,6 +271,10 @@ public class AutoCrystalModule extends ToggleModule
     Config<Float> alternateSpeedConfig = new NumberConfig<>("AlternateSpeed",
             "Speed for alternative swapping crystals", 1.0f, 18.0f, 20.0f,
             () -> placeConfig.getValue() && swapConfig.getValue() == Swap.SILENT_ALT);
+    Config<Boolean> antiSurroundConfig = new BooleanConfig(
+            "AntiSurround", "Places crystals to block the enemy's feet and " +
+            "prevent them from using Surround", false,
+            () -> placeConfig.getValue());
     Config<Boolean> breakValidConfig = new BooleanConfig(
             "BreakValid-Test", "Only places crystals that can be attacked",
             false, () -> placeConfig.getValue());
@@ -409,6 +416,7 @@ public class AutoCrystalModule extends ToggleModule
         if (mc.player != null && mc.world != null)
         {
             freqInterval.reset();
+            freq = 0;
             // run calc
             final ArrayList<Entity> entities =
                     Lists.newArrayList(mc.world.getEntities());
@@ -440,6 +448,17 @@ public class AutoCrystalModule extends ToggleModule
     /**
      *
      *
+     * @param event
+     */
+    @EventListener
+    public void onDisconnect(DisconnectEvent event)
+    {
+        disable();
+    }
+
+    /**
+     *
+     *
      */
     private void tickCalc()
     {
@@ -452,12 +471,12 @@ public class AutoCrystalModule extends ToggleModule
             }
             catch (InterruptedException | ExecutionException e)
             {
-                Caspian.error("Failed calculation %s!", calc.getId());
+                Caspian.error("Failed calculation {}!", calc.getId());
                 e.printStackTrace();
             }
             if (calc.isDone())
             {
-                Caspian.info("Calc done for tick calculations in %dms!",
+                Caspian.info("Calc done for tick calculations in {}ms!",
                         calc.getCalcTime());
                 attackData = calc.getCalcAttack();
                 final DamageData<BlockPos> calcPlace =
@@ -544,7 +563,7 @@ public class AutoCrystalModule extends ToggleModule
     @Override
     public String getMetaData()
     {
-        return String.format("%fms", getLatency(breakTimes));
+        return String.format("{}ms", getLatency(breakTimes));
     }
 
     /**
@@ -555,38 +574,30 @@ public class AutoCrystalModule extends ToggleModule
         if (lastBreak.passed(1000))
         {
             attacks.clear();
+            explosions.clear();
             placements.clear();
             return;
         }
-        float timeout = Math.max(getLatency(breakTimes) + (50.0f * breakTimeoutConfig.getValue()),
+        final float breakTimeout = Math.max(getLatency(breakTimes) + (50.0f * breakTimeoutConfig.getValue()),
                 50.0f * minTimeoutConfig.getValue());
-        for (Map.Entry<Integer, Long> e : attacks.entrySet())
+        attacks.entrySet().removeIf(t ->
         {
-            long time = System.currentTimeMillis() - e.getValue();
-            if (time > timeout)
-            {
-                attacks.remove(e.getKey());
-            }
-        }
-        timeout += 50.0f;
-        for (Map.Entry<Integer, Long> e : explosions.entrySet())
+            long time = System.currentTimeMillis() - t.getValue();
+            return time > breakTimeout;
+        });
+        final float explodeTimeout = breakTimeout + 50.0f;
+        explosions.entrySet().removeIf(t ->
         {
-            long time = System.currentTimeMillis() - e.getValue();
-            if (time > timeout)
-            {
-                explosions.remove(e.getKey());
-            }
-        }
-        timeout = Math.max(getLatency(placeTimes) + (50.0f * placeTimeoutConfig.getValue()),
+            long time = System.currentTimeMillis() - t.getValue();
+            return time > explodeTimeout;
+        });
+        final float placeTimeout = Math.max(getLatency(placeTimes) + (50.0f * placeTimeoutConfig.getValue()),
                 50.0f * minTimeoutConfig.getValue());
-        for (Map.Entry<BlockPos, Long> e : placements.entrySet())
+        placements.entrySet().removeIf(t ->
         {
-            long time = System.currentTimeMillis() - e.getValue();
-            if (time > timeout)
-            {
-                placements.remove(e.getKey());
-            }
-        }
+            long time = System.currentTimeMillis() - t.getValue();
+            return time > placeTimeout;
+        });
     }
 
     /**
@@ -1927,8 +1938,10 @@ public class AutoCrystalModule extends ToggleModule
     }
 
     /**
+     * Returns the hotbar slot of an {@link EndCrystalItem}, if there is none
+     * in the hotbar, then returns -1.
      *
-     *
+     * @return The hotbar slot of an End Crystal item
      */
     private int getCrystalSlot()
     {

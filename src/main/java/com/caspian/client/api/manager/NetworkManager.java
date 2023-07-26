@@ -3,6 +3,7 @@ package com.caspian.client.api.manager;
 import com.caspian.client.mixin.accessor.AccessorClientWorld;
 import com.caspian.client.util.Globals;
 import net.minecraft.client.network.PendingUpdateManager;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.network.SequencedPacketCreator;
 import net.minecraft.network.listener.ServerPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -72,6 +73,35 @@ public class NetworkManager implements Globals
                 updater.close();
             }
         }
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public int getClientLatency()
+    {
+        if (mc.getNetworkHandler() != null)
+        {
+            try
+            {
+                for (PlayerListEntry e :
+                        mc.getNetworkHandler().getPlayerList())
+                {
+                    if (e.getProfile().getId() ==
+                            mc.player.getGameProfile().getId())
+                    {
+                        return e.getLatency();
+                    }
+                }
+            }
+            catch (Exception ignored)
+            {
+
+            }
+        }
+        return 0;
     }
 
     /**
