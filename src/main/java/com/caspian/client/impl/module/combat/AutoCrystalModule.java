@@ -16,6 +16,7 @@ import com.caspian.client.impl.event.RunTickEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.mixin.accessor.AccessorPlayerInteractEntityC2SPacket;
@@ -120,7 +121,7 @@ public class AutoCrystalModule extends ToggleModule
     // ROTATE SETTINGS
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
             "before placing and breaking", false);
-    Config<Rotate> strictRotateConfig = new EnumConfig<>("StrictRotate",
+    Config<Rotate> strictRotateConfig = new EnumConfig<>("Rotate-Strict",
             "Rotates yaw over multiple ticks to prevent certain rotation  " +
                     "flags in NCP", Rotate.OFF, Rotate.values(),
             () -> rotateConfig.getValue());
@@ -775,10 +776,10 @@ public class AutoCrystalModule extends ToggleModule
     /**
      *
      *
-     *
+     * @param event
      */
     @EventListener
-    public void onRenderWorld()
+    public void onRenderWorld(RenderWorldEvent event)
     {
         if (mc.player != null && mc.world != null)
         {

@@ -1,4 +1,4 @@
-package com.caspian.client.api.handler;
+package com.caspian.client.api.handler.tick;
 
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.event.network.PacketEvent;

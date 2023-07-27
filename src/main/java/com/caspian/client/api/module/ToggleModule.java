@@ -26,15 +26,16 @@ import org.lwjgl.glfw.GLFW;
  */
 public class ToggleModule extends Module
 {
-    // Config representing the module enabled state. Cannot interact with
-    // this configuration unless using #toggle() #enable() or #disable().
-    Config<Boolean> enabledConfig = new BooleanConfig("Enabled", "The module" +
-            " enabled state. This state is true when the module is running.", false);
     // Config for keybinding implementation. Module keybind is used to
     // interact with the #enabledConfig.
     Config<Macro> keybindingConfig = new MacroConfig("Keybind", "The module " +
             "keybinding. Pressing this key will toggle the module enabled " +
-            "state.", new Macro(getId(), GLFW.GLFW_KEY_UNKNOWN, this::toggle));
+            "state. Press [BACKSPACE] to delete the keybind.",
+            new Macro(getId(), GLFW.GLFW_KEY_UNKNOWN, () -> toggle()));
+    // Config representing the module enabled state. Cannot interact with
+    // this configuration unless using #toggle() #enable() or #disable().
+    Config<Boolean> enabledConfig = new BooleanConfig("Enabled", "The module" +
+            " enabled state. This state is true when the module is running.", false);
 
     /**
      *

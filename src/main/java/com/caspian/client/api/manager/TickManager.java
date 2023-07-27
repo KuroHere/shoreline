@@ -1,7 +1,7 @@
 package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.handler.TickHandler;
+import com.caspian.client.api.handler.tick.TickHandler;
 
 /**
  *
