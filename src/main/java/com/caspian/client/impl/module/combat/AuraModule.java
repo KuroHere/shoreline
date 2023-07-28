@@ -25,8 +25,12 @@ import com.caspian.client.util.string.EnumFormatter;
 import com.caspian.client.util.world.EntityUtil;
 import com.caspian.client.util.world.VecUtil;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
@@ -58,16 +62,19 @@ public class AuraModule extends ToggleModule
             "entities", 1.0f, 4.5f, 5.0f);
     Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to" +
             " attack entities through walls", 1.0f, 4.5f, 5.0f);
+    Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to " +
+            "attack entities", 1.0f, 180.0f, 180.0f);
     //
     Config<Boolean> attackDelayConfig = new BooleanConfig("AttackDelay",
             "Delays attacks according to minecraft hit delays for maximum " +
                     "damage per attack", false);
     Config<Float> attackSpeedConfig = new NumberConfig<>("AttackSpeed",
             "Delay for attacks (Only functions if AttackDelay is off)", 1.0f,
-            20.0f, 20.0f);
+            20.0f, 20.0f, () -> !attackDelayConfig.getValue());
     Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed",
             "Randomized delay for attacks (Only functions if AttackDelay is " +
-                    "off)", 0.0f, 0.0f, 10.0f);
+                    "off)", 0.0f, 0.0f, 10.0f,
+            () -> !attackDelayConfig.getValue());
     Config<Float> swapDelayConfig = new NumberConfig<>("SwapPenalty", "Delay " +
             "for attacking after swapping items which prevents NCP flags", 0.0f,
             0.0f, 10.0f);
@@ -97,7 +104,7 @@ public class AuraModule extends ToggleModule
             "RotateTimeout", "Minimum ticks to hold the rotation yaw after " +
             "reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted",
-            "The minimum age of the entity to be considered for attack", 0, 0, 200);
+            "The minimum age of the entity to be considered for attack", 0, 50, 200);
     Config<Boolean> stopSprintConfig = new BooleanConfig("StopSprint",
             "Stops sprinting before attacking to maintain vanilla behavior", false);
     Config<Boolean> stopShieldConfig = new BooleanConfig("StopShield",
@@ -116,11 +123,15 @@ public class AuraModule extends ToggleModule
     //
     private Entity target;
     private final Timer attackTimer = new CacheTimer();
+    private final Timer critTimer = new CacheTimer();
+    //
     private final Timer autoSwapTimer = new CacheTimer();
     private final Timer switchTimer = new CacheTimer();
     //
+    private boolean crit;
     private boolean sprinting;
     private boolean shielding;
+    private boolean sneaking;
     // RANDOM
     private final Random random = new SecureRandom();
     private long randomTime = -1;
@@ -143,22 +154,22 @@ public class AuraModule extends ToggleModule
     /**
      *
      *
-     */
-    @Override
-    public void onDisable()
-    {
-        clear();
-    }
-
-    /**
-     *
-     *
      * @return
      */
     @Override
     public String getMetaData()
     {
         return EnumFormatter.formatEnum(modeConfig.getValue());
+    }
+
+    /**
+     *
+     *
+     */
+    @Override
+    public void onDisable()
+    {
+        clear();
     }
 
     /**
@@ -180,8 +191,8 @@ public class AuraModule extends ToggleModule
     @EventListener
     public void onRenderWorld(RenderWorldEvent event)
     {
-        if (renderConfig.getValue() && target != null &&
-                (!swordCheckConfig.getValue() || isHoldingSword()))
+        if (renderConfig.getValue() && target != null
+                && (!swordCheckConfig.getValue() || isHoldingSword()))
         {
             final Box box = target.getBoundingBox();
             RenderManager.renderBox(box, Modules.COLORS.getRGB(60));
@@ -228,11 +239,9 @@ public class AuraModule extends ToggleModule
             {
                 return;
             }
-            if (rotating > 0)
-            {
-                yaw = yaws[--rotating];
-                rotateTimer.reset();
-            }
+            final Vec3d eyepos = Managers.POSITION.getEyePos();
+            yaw = yaws[Math.max(--rotating, 0)];
+            //
             if (!rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks()))
             {
                 Managers.ROTATION.setRotation(this, yaw, pitch);
@@ -242,9 +251,18 @@ public class AuraModule extends ToggleModule
             {
                 return;
             }
-            final Vec3d eyepos = Managers.POSITION.getEyePos();
-            //
-            target = getAuraTarget(eyepos);
+            // Search delegated to main thread
+            switch (modeConfig.getValue())
+            {
+                case SWITCH -> target = getAuraTarget(eyepos);
+                case SINGLE ->
+                {
+                    if (target != null && !isTargetValid(target))
+                    {
+                        target = getAuraTarget(eyepos);
+                    }
+                }
+            }
             if (target != null)
             {
                 if (rotateConfig.getValue() && checkFacing(target.getBoundingBox()))
@@ -257,14 +275,24 @@ public class AuraModule extends ToggleModule
                 }
                 if (switchTimer.passed(swapDelayConfig.getValue()))
                 {
+                    crit = Modules.CRITICALS.isEnabled() && critTimer.passed(500);
+                    float dist = mc.player.fallDistance;
                     if (attackDelayConfig.getValue())
                     {
-                        float ticks = 20.0f - getServerTicks();
+                        float ticks = 20.0f - Managers.TICK.getTickSync(tpsSyncConfig.getValue());
                         float progress = mc.player.getAttackCooldownProgress(ticks);
-                        if (progress >= 1)
+                        if (progress >= 1.0f)
                         {
+                            if (crit)
+                            {
+                                mc.player.fallDistance = 0.1f;
+                                event.setOnGround(false);
+                                event.cancel();
+                            }
                             attack(target);
+                            critTimer.reset();
                             mc.player.resetLastAttackedTicks();
+                            mc.player.fallDistance = dist;
                         }
                     }
                     else
@@ -277,9 +305,17 @@ public class AuraModule extends ToggleModule
                         float delay = attackSpeedConfig.getValue() * 50.0f + randomTime;
                         if (attackTimer.passed(delay))
                         {
+                            if (crit)
+                            {
+                                mc.player.fallDistance = 0.1f;
+                                event.setOnGround(false);
+                                event.cancel();
+                            }
                             attack(target);
                             attackTimer.reset();
+                            critTimer.reset();
                             randomTime = -1;
+                            mc.player.fallDistance = dist;
                         }
                     }
                 }
@@ -307,6 +343,8 @@ public class AuraModule extends ToggleModule
         randomTime = -1;
         sprinting = false;
         shielding = false;
+        sneaking = false;
+        crit = false;
     }
 
     /**
@@ -326,14 +364,15 @@ public class AuraModule extends ToggleModule
                 Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
             }
         }
-        if (!swordCheckConfig.getValue() || isHoldingSword())
+        if (swordCheckConfig.getValue() && !isHoldingSword())
         {
-            preAttack();
-            Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(entity,
-                    Managers.POSITION.isSneaking()));
-            swingDirect(Hand.MAIN_HAND);
-            postAttack();
+            return;
         }
+        preAttack();
+        Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(entity,
+                Managers.POSITION.isSneaking()));
+        swingDirect(Hand.MAIN_HAND);
+        postAttack();
     }
 
     /**
@@ -404,14 +443,38 @@ public class AuraModule extends ToggleModule
                         mc.player.getY(), mc.player.getZ())));
             }
         }
+        sneaking = false;
         sprinting = false;
         if (stopSprintConfig.getValue())
         {
+            sneaking = Managers.POSITION.isSneaking();
+            if (sneaking)
+            {
+                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                        ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            }
             sprinting = Managers.POSITION.isSprinting();
             if (sprinting)
             {
                 Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                         ClientCommandC2SPacket.Mode.STOP_SPRINTING));
+            }
+        }
+        if (Modules.CRITICALS.isEnabled())
+        {
+            if (!Managers.POSITION.isOnGround()
+                    || mc.player.isRiding()
+                    || mc.player.isSubmergedInWater()
+                    || mc.player.isInLava()
+                    || mc.player.isHoldingOntoLadder()
+                    || mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
+                    || mc.player.input.jumping)
+            {
+                return;
+            }
+            if (crit)
+            {
+                Modules.CRITICALS.preAttack();
             }
         }
     }
@@ -427,10 +490,18 @@ public class AuraModule extends ToggleModule
             Managers.NETWORK.sendSequencedPacket(s ->
                     new PlayerInteractItemC2SPacket(Hand.OFF_HAND, s));
         }
-        if (stopSprintConfig.getValue() && sprinting)
+        if (stopSprintConfig.getValue())
         {
-            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                    ClientCommandC2SPacket.Mode.START_SPRINTING));
+            if (sneaking)
+            {
+                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                        ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+            }
+            if (sprinting)
+            {
+                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                        ClientCommandC2SPacket.Mode.START_SPRINTING));
+            }
         }
     }
 
@@ -447,7 +518,14 @@ public class AuraModule extends ToggleModule
         {
             if (e != null && e.isAlive() && !Managers.SOCIAL.isFriend(e.getUuid()))
             {
-                if (e instanceof EndCrystalEntity)
+                if (e instanceof EndCrystalEntity
+                        || e instanceof ItemEntity
+                        || e instanceof ArrowEntity
+                        || e instanceof ExperienceBottleEntity)
+                {
+                    continue;
+                }
+                if (e instanceof PlayerEntity player && player.isCreative())
                 {
                     continue;
                 }
@@ -457,27 +535,65 @@ public class AuraModule extends ToggleModule
                 }
                 if (isEnemy(e))
                 {
-                    final Vec3d hitVec = getHitVec(e);
-                    //
-                    double dist = pos.distanceTo(hitVec);
-                    if (dist > rangeConfig.getValue())
+                    // Range check
+                    if (isInRange(pos, e))
                     {
-                        continue;
+                        target = e;
                     }
-                    BlockHitResult result = mc.world.raycast(new RaycastContext(
-                            Managers.POSITION.getCameraPosVec(1.0f),
-                            hitVec, RaycastContext.ShapeType.COLLIDER,
-                            RaycastContext.FluidHandling.NONE, mc.player));
-                    if (result != null && dist > wallRangeConfig.getValue())
-                    {
-                        continue;
-                    }
-
-                    target = e;
                 }
             }
         }
         return target;
+    }
+
+    /**
+     *
+     *
+     * @param pos
+     * @param entity
+     * @return
+     */
+    public boolean isInRange(Vec3d pos, Entity entity)
+    {
+        final Vec3d hitVec = getHitVec(entity);
+        //
+        double dist = pos.distanceTo(hitVec);
+        if (dist > rangeConfig.getValue())
+        {
+            return false;
+        }
+        BlockHitResult result = mc.world.raycast(new RaycastContext(
+                Managers.POSITION.getCameraPosVec(1.0f),
+                hitVec, RaycastContext.ShapeType.COLLIDER,
+                RaycastContext.FluidHandling.NONE, mc.player));
+        if (result != null && dist > wallRangeConfig.getValue())
+        {
+            return false;
+        }
+        if (fovConfig.getValue() != 180.0f)
+        {
+            float[] rots = RotationUtil.getRotationsTo(pos,
+                    getHitVec(target));
+            float diff = Managers.ROTATION.getWrappedYaw() - rots[0];
+            float magnitude = Math.abs(diff);
+            if (magnitude > fovConfig.getValue())
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     *
+     *
+     * @param entity
+     * @return
+     */
+    public boolean isTargetValid(Entity entity)
+    {
+        return entity != null && entity.isAlive()
+                && isInRange(Managers.POSITION.getEyePos(), entity);
     }
 
     /**
@@ -598,22 +714,6 @@ public class AuraModule extends ToggleModule
     /**
      *
      *
-     * @return
-     */
-    private float getServerTicks()
-    {
-        return switch (tpsSyncConfig.getValue())
-                {
-                    case AVERAGE -> Managers.TICK.getTpsAverage();
-                    case CURRENT -> Managers.TICK.getTpsCurrent();
-                    case MINIMAL -> Managers.TICK.getTpsMin();
-                    case NONE -> 20.0f;
-                };
-    }
-
-    /**
-     *
-     *
      * @param entity
      * @return
      */
@@ -622,8 +722,8 @@ public class AuraModule extends ToggleModule
         return switch (hitVectorConfig.getValue())
         {
             case EYES -> VecUtil.toEyePos(entity);
-            case TORSO -> VecUtil.toTorsoPos(entity);
             case FEET -> entity.getPos();
+            case TORSO -> VecUtil.toTorsoPos(entity);
         };
     }
 

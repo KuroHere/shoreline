@@ -47,6 +47,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
@@ -679,8 +680,8 @@ public class AutoCrystalModule extends ToggleModule
                 if (rotating > 0)
                 {
                     yaw = yaws[--rotating];
-                    rotateTimer.reset();
                 }
+                // rotateTimer.reset();
                 if (!rotateTimer.passed(rotatePreserveTicksConfig.getValue()))
                 {
                     Managers.ROTATION.setRotation(this, yaw, pitch);
@@ -913,9 +914,8 @@ public class AutoCrystalModule extends ToggleModule
             {
                 if (((AccessorPlayerInteractEntityC2SPacket) packet).hookGetTypeHandler().getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK)
                 {
-                    final MinecraftServer server = mc.world.getServer();
-                    final RegistryKey<World> world = mc.world.getRegistryKey();
-                    final Entity e = packet.getEntity(server.getWorld(world));
+                    ServerWorld world = (ServerWorld) mc.player.getWorld();
+                    final Entity e = packet.getEntity(world);
                     if (e != null && e.isAlive() && e instanceof EndCrystalEntity crystal)
                     {
                         if (preSequence != null
@@ -2740,7 +2740,7 @@ public class AutoCrystalModule extends ToggleModule
         int tick;
         if (yawstep)
         {
-            float diff = dest[0] - Managers.ROTATION.getYaw(); // yaw diff
+            float diff = Managers.ROTATION.getWrappedYaw() - dest[0]; // yaw diff
             float magnitude = Math.abs(diff);
             if (magnitude > 180.0f)
             {

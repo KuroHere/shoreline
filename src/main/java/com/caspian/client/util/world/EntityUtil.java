@@ -6,6 +6,10 @@ import net.minecraft.entity.mob.Angerable;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.SquidEntity;
+import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.entity.vehicle.ChestMinecartEntity;
+import net.minecraft.entity.vehicle.FurnaceMinecartEntity;
+import net.minecraft.entity.vehicle.MinecartEntity;
 
 /**
  *
@@ -47,5 +51,12 @@ public class EntityUtil
     {
         return e instanceof PassiveEntity || e instanceof AmbientEntity
                 || e instanceof SquidEntity;
+    }
+
+    public static boolean isVehicle(Entity e)
+    {
+        return e instanceof BoatEntity || e instanceof MinecartEntity
+                || e instanceof FurnaceMinecartEntity
+                || e instanceof ChestMinecartEntity;
     }
 }

@@ -50,6 +50,11 @@ public class MovementPacketsEvent extends StageEvent
         return y;
     }
 
+    public double getZ()
+    {
+        return z;
+    }
+
     public float getYaw()
     {
         return yaw;

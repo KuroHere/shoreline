@@ -116,6 +116,26 @@ public class NumberConfig<T extends Number> extends Config<T>
      *
      * @return
      */
+    public boolean isMin()
+    {
+        return min.doubleValue() == getValue().doubleValue();
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public boolean isMax()
+    {
+        return max.doubleValue() == getValue().doubleValue();
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
     public int getRoundingScale()
     {
         // equal to number of decimal places in value

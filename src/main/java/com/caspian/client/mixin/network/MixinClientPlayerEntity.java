@@ -105,14 +105,6 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         Caspian.EVENT_HANDLER.dispatch(movementPacketsEvent);
         if (movementPacketsEvent.isCanceled())
         {
-            final RotationRequest request =
-                    Managers.ROTATION.getCurrentRotation();
-            if (request == null)
-            {
-                return;
-            }
-            movementPacketsEvent.setYaw(request.getYaw());
-            movementPacketsEvent.setPitch(request.getPitch());
             ci.cancel();
             sendSprintingPacket();
             boolean bl = isSneaking();
@@ -126,11 +118,26 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
             }
             if (isCamera())
             {
-                double d = getX() - lastX;
-                double e = getY() - lastBaseY;
-                double f = getZ() - lastZ;
-                double g = getYaw() - lastYaw;
-                double h = getPitch() - lastPitch;
+                double x = movementPacketsEvent.getX();
+                double y = movementPacketsEvent.getY();
+                double z = movementPacketsEvent.getZ();
+                float yaw = movementPacketsEvent.getYaw();
+                float pitch = movementPacketsEvent.getPitch();
+                boolean ground = movementPacketsEvent.getOnGround();
+                //
+                final RotationRequest request =
+                        Managers.ROTATION.getCurrentRotation();
+                if (request != null)
+                {
+                    yaw = request.getYaw();
+                    pitch = request.getPitch();
+                }
+                //
+                double d = x - lastX;
+                double e = y - lastBaseY;
+                double f = z - lastZ;
+                double g = yaw - lastYaw;
+                double h = pitch - lastPitch;
                 ++ticksSinceLastPositionPacketSent;
                 boolean bl2 = MathHelper.squaredMagnitude(d, e, f) > MathHelper.square(2.0e-4)
                         || ticksSinceLastPositionPacketSent >= 20;
@@ -140,43 +147,42 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                     Vec3d vec3d = getVelocity();
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(
                             vec3d.x, -999.0, vec3d.z, getYaw(),
-                            getPitch(), onGround));
+                            getPitch(), ground));
                     bl2 = false;
                 }
                 else if (bl2 && bl3)
                 {
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(
-                            getX(), getY(), getZ(), getYaw(), getPitch(),
-                            onGround));
+                            x, y, z, yaw, pitch, ground));
                 }
                 else if (bl2)
                 {
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                            getX(), getY(), getZ(), onGround));
+                            x, y, z, ground));
                 }
                 else if (bl3)
                 {
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-                            getYaw(), getPitch(), onGround));
+                            yaw, pitch, ground));
                 }
                 else if (lastOnGround != onGround)
                 {
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(
-                            onGround));
+                           ground));
                 }
                 if (bl2)
                 {
-                    lastX = getX();
-                    lastBaseY = getY();
-                    lastZ = getZ();
+                    lastX = x;
+                    lastBaseY = y;
+                    lastZ = z;
                     ticksSinceLastPositionPacketSent = 0;
                 }
                 if (bl3)
                 {
-                    lastYaw = getYaw();
-                    lastPitch = getPitch();
+                    lastYaw = yaw;
+                    lastPitch = pitch;
                 }
-                lastOnGround = onGround;
+                lastOnGround = ground;
                 autoJumpEnabled = client.options.getAutoJump().getValue();
             }
         }

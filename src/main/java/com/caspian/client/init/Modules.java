@@ -6,8 +6,10 @@ import com.caspian.client.impl.module.client.ClickGuiModule;
 import com.caspian.client.impl.module.client.ColorsModule;
 import com.caspian.client.impl.module.client.HudModule;
 import com.caspian.client.impl.module.client.RotationsModule;
+import com.caspian.client.impl.module.combat.AuraModule;
 import com.caspian.client.impl.module.combat.AutoCrystalModule;
 import com.caspian.client.impl.module.combat.AutoTotemModule;
+import com.caspian.client.impl.module.combat.CriticalsModule;
 import com.caspian.client.impl.module.exploit.SwingModule;
 import com.caspian.client.impl.module.misc.TimerModule;
 import com.caspian.client.impl.module.movement.SpeedModule;
@@ -15,10 +17,7 @@ import com.caspian.client.impl.module.movement.VelocityModule;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
 import com.caspian.client.impl.module.movement.NoSlowModule;
 import com.caspian.client.impl.module.movement.SprintModule;
-import com.caspian.client.impl.module.render.FullbrightModule;
-import com.caspian.client.impl.module.render.NoWeatherModule;
-import com.caspian.client.impl.module.render.ViewClipModule;
-import com.caspian.client.impl.module.render.ViewModelModule;
+import com.caspian.client.impl.module.render.*;
 import com.caspian.client.impl.module.world.FastPlaceModule;
 import com.caspian.client.impl.module.world.SpeedmineModule;
 
@@ -43,8 +42,10 @@ public class Modules
     public static final ColorsModule COLORS;
     public static final HudModule HUD;
     public static final RotationsModule ROTATIONS;
+    public static final AuraModule AURA;
     public static final AutoCrystalModule AUTO_CRYSTAL;
     public static final AutoTotemModule AUTO_TOTEM;
+    public static final CriticalsModule CRITICALS;
     public static final VelocityModule VELOCITY;
     public static final AntiHungerModule ANTI_HUNGER;
     public static final SwingModule SWING;
@@ -52,6 +53,7 @@ public class Modules
     public static final NoSlowModule NO_SLOW;
     public static final SpeedModule SPEED;
     public static final SprintModule SPRINT;
+    public static final BlockHighlightModule BLOCK_HIGHLIGHT;
     public static final FullbrightModule FULLBRIGHT;
     public static final NoWeatherModule NO_WEATHER;
     public static final ViewClipModule VIEW_CLIP;
@@ -95,10 +97,12 @@ public class Modules
             HUD = (HudModule) getRegisteredModule("hud-module");
             ROTATIONS = (RotationsModule) getRegisteredModule(
                     "rotations-module");
+            AURA = (AuraModule) getRegisteredModule("aura-module");
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
                     "autocrystal-module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(
                     "autototem-module");
+            CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
             VELOCITY = (VelocityModule) getRegisteredModule("velocity");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
                     "antihunger-module");
@@ -107,6 +111,8 @@ public class Modules
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow-module");
             SPEED = (SpeedModule) getRegisteredModule("speed-module");
             SPRINT = (SprintModule) getRegisteredModule("sprint-module");
+            BLOCK_HIGHLIGHT = (BlockHighlightModule) getRegisteredModule(
+                    "blockhighlight-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");
             NO_WEATHER = (NoWeatherModule) getRegisteredModule(

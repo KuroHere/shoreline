@@ -2,6 +2,8 @@ package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.handler.tick.TickHandler;
+import com.caspian.client.api.handler.tick.TickSync;
+import com.caspian.client.init.Managers;
 
 /**
  *
@@ -75,5 +77,22 @@ public class TickManager
             }
         }
         return min;
+    }
+
+    /**
+     *
+     *
+     * @param tps
+     * @return
+     */
+    public float getTickSync(TickSync tps)
+    {
+        return switch (tps)
+                {
+                    case AVERAGE -> getTpsAverage();
+                    case CURRENT -> getTpsCurrent();
+                    case MINIMAL -> getTpsMin();
+                    case NONE -> 20.0f;
+                };
     }
 }
