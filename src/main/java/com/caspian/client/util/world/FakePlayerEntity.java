@@ -3,6 +3,7 @@ package com.caspian.client.util.world;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.Vec3d;
 
 /**
  *
@@ -28,6 +29,18 @@ public class FakePlayerEntity extends OtherClientPlayerEntity
         // setBoundingBox(player.getBoundingBox());
         getInventory().clone(player.getInventory());
         setId(player.getId());
+    }
+
+    /**
+     *
+     *
+     * @param player
+     * @param pos
+     */
+    public FakePlayerEntity(PlayerEntity player, Vec3d pos)
+    {
+        this(player);
+        setPosition(pos);
     }
 
     /**
