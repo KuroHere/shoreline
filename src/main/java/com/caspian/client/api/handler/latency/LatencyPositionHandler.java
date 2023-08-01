@@ -3,12 +3,18 @@ package com.caspian.client.api.handler.latency;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.util.Globals;
+import com.caspian.client.util.world.FakePlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.math.Vec3d;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -19,16 +25,27 @@ import net.minecraft.util.math.Vec3d;
 public class LatencyPositionHandler implements Globals
 {
     //
-    private final LatencyTracker tracker;
+    private final Map<PlayerEntity, PlayerLatencyTracker> trackers =
+            new HashMap<>();
 
     /**
      *
      *
-     * @param tracker
+     * @param floor
+     * @param player
+     * @param time
+     * @return
      */
-    public LatencyPositionHandler(LatencyTracker tracker)
+    public FakePlayerEntity getTrackedPlayer(final Vec3d floor,
+                                             final PlayerEntity player,
+                                             final long time)
     {
-        this.tracker = tracker;
+        final PlayerLatencyTracker p = trackers.get(player);
+        if (p != null)
+        {
+            return p.getTrackedPlayer(floor, time);
+        }
+        return null;
     }
 
     /**
@@ -39,11 +56,16 @@ public class LatencyPositionHandler implements Globals
      * @param time
      * @return
      */
-    public PlayerLatency getTrackedData(final Vec3d floor,
-                                        final PlayerEntity player,
-                                        final long time)
+    public Vec3d getTrackedData(final Vec3d floor,
+                                final PlayerEntity player,
+                                final long time)
     {
-        return tracker.getTrackedData(floor, player, time);
+        final PlayerLatencyTracker p = trackers.get(player);
+        if (p != null)
+        {
+            return p.getTrackedData(floor, time);
+        }
+        return null;
     }
 
     /**
@@ -58,23 +80,25 @@ public class LatencyPositionHandler implements Globals
         {
             if (event.getPacket() instanceof EntityPositionS2CPacket packet)
             {
-                Entity e = mc.world.getEntityById(packet.getId());
-                if (e instanceof PlayerEntity player)
+                final Entity entity = mc.world.getEntityById(packet.getId());
+                if (entity instanceof PlayerEntity player)
                 {
-                    tracker.addTrackedData(player, new PlayerLatency(player,
-                            new Vec3d(packet.getX(), packet.getY(),
-                            packet.getZ()), System.currentTimeMillis()));
+                    final PlayerLatencyTracker p = trackers.get(player);
+                    final Vec3d pos = new Vec3d(packet.getX(), packet.getY(),
+                            packet.getZ());
+                    p.onPositionUpdate(pos);
                 }
             }
             else if (event.getPacket() instanceof EntitySpawnS2CPacket packet)
             {
-                Entity e = mc.world.getEntityById(packet.getId());
+                final Entity entity = mc.world.getEntityById(packet.getId());
                 if (packet.getEntityType() == EntityType.PLAYER)
                 {
-                    PlayerEntity player = (PlayerEntity) e;
-                    tracker.addTrackedData(player, new PlayerLatency(player,
-                            new Vec3d(packet.getX(), packet.getY(),
-                                    packet.getZ()), System.currentTimeMillis()));
+                    final PlayerEntity player = (PlayerEntity) entity;
+                    final Vec3d spawn = new Vec3d(packet.getX(), packet.getY(),
+                            packet.getZ());
+                    trackers.put(player, new PlayerLatencyTracker(player,
+                            spawn));
                 }
             }
         }

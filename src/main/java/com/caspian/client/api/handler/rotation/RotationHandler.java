@@ -91,7 +91,7 @@ public class RotationHandler implements Globals
      *
      * @return
      */
-    public boolean preserveRotations()
+    public boolean isRotating()
     {
         return !rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks());
     }
@@ -103,7 +103,7 @@ public class RotationHandler implements Globals
      */
     public RotationRequest getLatestRequest()
     {
-        if (requests.size() <= 1 && preserveRotations())
+        if (requests.size() <= 1 && isRotating())
         {
             rotation = requests.peek();
             return rotation;

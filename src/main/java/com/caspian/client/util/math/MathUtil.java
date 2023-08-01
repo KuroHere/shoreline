@@ -317,6 +317,7 @@ public class MathUtil
         }
         return tempC*z + tempB + tempA;
     }
+
     private static class ExpIntTable
     {
         //
@@ -343,6 +344,7 @@ public class MathUtil
             }
         }
     }
+
     private static class ExpFracTable
     {
         private static final double[] EXP_FRAC_TABLE_A;

@@ -8,7 +8,7 @@ import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.config.setting.NumberDisplay;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
-import com.caspian.client.api.handler.latency.PlayerLatency;
+import com.caspian.client.api.handler.tick.TickSync;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
@@ -28,6 +28,7 @@ import com.caspian.client.util.player.PlayerUtil;
 import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.world.EndCrystalUtil;
 import com.caspian.client.util.world.EntityUtil;
+import com.caspian.client.util.world.FakePlayerEntity;
 import com.caspian.client.util.world.VecUtil;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -42,11 +43,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
@@ -55,7 +54,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
 
 import java.awt.*;
 import java.security.SecureRandom;
@@ -108,6 +106,9 @@ public class AutoCrystalModule extends ToggleModule
     Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency",
             "Maximum latency factor when calculating positions", 50, 250,
             1000, () -> latencyPositionConfig.getValue());
+    Config<TickSync> latencySyncConfig = new EnumConfig<>("LatencyTimeout",
+            "Latency calculations for time between crystal packets",
+            TickSync.AVERAGE, TickSync.values());
     // Config<Boolean> raytraceConfig = new BooleanConfig("Raytrace", "",
     //        false);
     Config<Sequential> sequentialConfig = new EnumConfig<>("Sequential",
@@ -133,7 +134,7 @@ public class AutoCrystalModule extends ToggleModule
     Config<Integer> yawTicksConfig = new NumberConfig<>("YawTicks",
             "Minimum ticks to rotate yaw", 1, 1, 5,
             () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
-    Config<Integer> rotateSuspendConfig = new NumberConfig<>(
+    Config<Integer> rotateTimeoutConfig = new NumberConfig<>(
             "RotateTimeout", "Minimum ticks to hold the rotation yaw after " +
             "reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
     Config<Boolean> vectorBorderConfig = new BooleanConfig("VectorBorder",
@@ -391,7 +392,7 @@ public class AutoCrystalModule extends ToggleModule
     private final Timer rotateTimer = new TickTimer();
     private int rotating;
     //
-    private float[] yaws;
+    private float[] yawLimits;
     private float yaw, pitch;
     // RENDER
     private final AtomicReference<Box> renderBreak =
@@ -535,6 +536,7 @@ public class AutoCrystalModule extends ToggleModule
         sequence = null;
         lastAttackData = null;
         lastPlaceData = null;
+        yawLimits = null;
         renderBreak.set(null);
         renderPlace.set(null);
         pauseCalcAttack = false;
@@ -677,9 +679,9 @@ public class AutoCrystalModule extends ToggleModule
                 {
                     return;
                 }
-                if (rotating > 0)
+                if (rotating > 0 && yawLimits != null)
                 {
-                    yaw = yaws[--rotating];
+                    yaw = yawLimits[--rotating];
                 }
                 // rotateTimer.reset();
                 if (!rotateTimer.passed(rotatePreserveTicksConfig.getValue()))
@@ -703,9 +705,9 @@ public class AutoCrystalModule extends ToggleModule
                             rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
                             rotateTimer.reset();
                             // rotate instantly
-                            if (!event.isCanceled())
+                            if (!event.isCanceled() && yawLimits != null)
                             {
-                                yaw = yaws[--rotating];
+                                yaw = yawLimits[--rotating];
                                 Managers.ROTATION.setRotation(this, yaw, pitch);
                                 event.cancel();
                             }
@@ -751,9 +753,9 @@ public class AutoCrystalModule extends ToggleModule
                         rotating = setRotation(dest, strictRotateConfig.getValue() == Rotate.FULL);
                         rotateTimer.reset();
                         // rotate instantly
-                        if (!event.isCanceled())
+                        if (!event.isCanceled() && yawLimits != null)
                         {
-                            yaw = yaws[--rotating];
+                            yaw = yawLimits[--rotating];
                             Managers.ROTATION.setRotation(this, yaw, pitch);
                             event.cancel();
                         }
@@ -880,23 +882,63 @@ public class AutoCrystalModule extends ToggleModule
      */
     private float getLatency(final Deque<Long> times)
     {
-        int size = times.size();
-        //
-        float avg = 0.0f;
-        for (long time : times)
+        return switch (latencySyncConfig.getValue())
         {
-            if (time > 1000)
+            case CURRENT ->
             {
-                size--;
-                continue;
+                for (long time : times)
+                {
+                    if (time > 1000)
+                    {
+                        continue;
+                    }
+                    yield time;
+                }
+                yield 0.0f;
             }
-            avg += time;
-        }
-        if (size > 0)
-        {
-            return avg / size;
-        }
-        return 0.0f;
+            case AVERAGE ->
+            {
+                int size = times.size();
+                //
+                float avg = 0.0f;
+                for (long time : times)
+                {
+                    if (time > 1000)
+                    {
+                        size--;
+                        continue;
+                    }
+                    avg += time;
+                }
+                if (size > 0)
+                {
+                    yield  avg / size;
+                }
+                yield 0.0f;
+            }
+            case MINIMAL ->
+            {
+                float min = Float.MAX_VALUE;
+                for (long time : times)
+                {
+                    if (time > 1000)
+                    {
+                        continue;
+                    }
+                    if (time < min)
+                    {
+                        min = time;
+                    }
+                }
+                if (min < 1000)
+                {
+                    yield min;
+                }
+                yield 0.0f;
+            }
+            // MC calc ping
+            case NONE -> Managers.NETWORK.getClientLatency();
+        };
     }
 
     /**
@@ -914,9 +956,9 @@ public class AutoCrystalModule extends ToggleModule
             {
                 if (((AccessorPlayerInteractEntityC2SPacket) packet).hookGetTypeHandler().getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK)
                 {
-                    ServerWorld world = (ServerWorld) mc.player.getWorld();
-                    final Entity e = packet.getEntity(world);
-                    if (e != null && e.isAlive() && e instanceof EndCrystalEntity crystal)
+                    final Entity entity = packet.getEntity((ServerWorld) mc.player.getWorld());
+                    if (entity != null && entity.isAlive()
+                            && entity instanceof EndCrystalEntity crystal)
                     {
                         if (preSequence != null
                                 && crystal.squaredDistanceTo(toSource(preSequence)) < 0.25f)
@@ -1060,11 +1102,11 @@ public class AutoCrystalModule extends ToggleModule
                                     if (e instanceof PlayerEntity player
                                             && latencyPositionConfig.getValue())
                                     {
-                                        PlayerLatency t = Managers.LATENCY.getTrackedData(pos,
+                                        FakePlayerEntity t = Managers.LATENCY.getTrackedPlayer(pos,
                                                 player, maxLatencyConfig.getValue());
                                         if (t != null)
                                         {
-                                            tpos = t;
+                                            tpos = t.getPos();
                                         }
                                     }
                                     double dist = cpos.squaredDistanceTo(tpos.getX(),
@@ -1300,11 +1342,11 @@ public class AutoCrystalModule extends ToggleModule
                                     if (e instanceof PlayerEntity player
                                             && latencyPositionConfig.getValue())
                                     {
-                                        PlayerLatency t = Managers.LATENCY.getTrackedData(pos,
+                                        FakePlayerEntity t = Managers.LATENCY.getTrackedPlayer(pos,
                                                 player, maxLatencyConfig.getValue());
                                         if (t != null)
                                         {
-                                            tpos = t;
+                                            tpos = t.getPos();
                                         }
                                     }
                                     double dist = src.squaredDistanceTo(tpos.getX(),
@@ -2320,11 +2362,11 @@ public class AutoCrystalModule extends ToggleModule
                             if (e instanceof PlayerEntity player
                                     && latencyPositionConfig.getValue())
                             {
-                                PlayerLatency t = Managers.LATENCY.getTrackedData(pos,
+                                FakePlayerEntity t = Managers.LATENCY.getTrackedPlayer(pos,
                                         player, maxLatencyConfig.getValue());
                                 if (t != null)
                                 {
-                                    tpos = t;
+                                    tpos = t.getPos();
                                 }
                             }
                             double dist = c.squaredDistanceTo(tpos.getX(),
@@ -2492,11 +2534,11 @@ public class AutoCrystalModule extends ToggleModule
                             if (e instanceof PlayerEntity player
                                     && latencyPositionConfig.getValue())
                             {
-                                PlayerLatency t = Managers.LATENCY.getTrackedData(pos,
+                                FakePlayerEntity t = Managers.LATENCY.getTrackedPlayer(pos,
                                         player, maxLatencyConfig.getValue());
                                 if (t != null)
                                 {
-                                    tpos = t;
+                                    tpos = t.getPos();
                                 }
                             }
                             double dist = src.squaredDistanceTo(tpos.getX(),
@@ -2685,11 +2727,11 @@ public class AutoCrystalModule extends ToggleModule
         {
             if (entity instanceof PlayerEntity player && latencyPositionConfig.getValue())
             {
-                PlayerLatency t = Managers.LATENCY.getTrackedData(pos, player,
-                        maxLatencyConfig.getValue());
+                FakePlayerEntity t = Managers.LATENCY.getTrackedPlayer(pos,
+                        player, maxLatencyConfig.getValue());
                 if (t != null)
                 {
-                    recieve = t.getLatencyPlayer();
+                    recieve = t;
                 }
             }
             else if (extrapolateTicksConfig.getValue() > 0)
@@ -2757,34 +2799,34 @@ public class AutoCrystalModule extends ToggleModule
             }
             deltaYaw *= dir;
             int yawCount = tick;
-            tick += rotateSuspendConfig.getValue();
-            yaws = new float[tick];
+            tick += rotateTimeoutConfig.getValue();
+            yawLimits = new float[tick];
             int off = tick - 1;
             float yawTotal = 0.0f;
             for (int i = 0; i < tick; ++i)
             {
                 if (i > yawCount)
                 {
-                    yaws[off - i] = 0.0f;
+                    yawLimits[off - i] = 0.0f;
                     continue;
                 }
                 yawTotal += deltaYaw;
-                yaws[off - i] = yawTotal;
+                yawLimits[off - i] = yawTotal;
             }
         }
         else
         {
-            tick = rotateSuspendConfig.getValue() + 1;
-            yaws = new float[tick];
+            tick = rotateTimeoutConfig.getValue() + 1;
+            yawLimits = new float[tick];
             int off = tick - 1;
-            yaws[off] = dest[0];
+            yawLimits[off] = dest[0];
             for (int i = 1; i < tick; ++i)
             {
-                yaws[off - i] = 0.0f;
+                yawLimits[off - i] = 0.0f;
             }
         }
         pitch = dest[1];
-        return yaws.length;
+        return yawLimits.length;
     }
 
     public enum Swap

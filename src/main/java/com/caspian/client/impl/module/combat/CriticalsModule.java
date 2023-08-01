@@ -137,7 +137,7 @@ public class CriticalsModule extends ToggleModule
                     else
                     {
                         attackPacket = packet;
-                        preAttack();
+                        hookPreAttack();
                         if (!packetSyncConfig.getValue())
                         {
                             Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(
@@ -160,10 +160,12 @@ public class CriticalsModule extends ToggleModule
     }
 
     /**
+     * Callback method for pre attack stage, must be called before the attack
+     * packet or else the movements will not be registered
      *
-     *
+     * @see AuraModule#preAttack()
      */
-    public void preAttack()
+    public void hookPreAttack()
     {
         double x = Managers.POSITION.getX();
         double y = Managers.POSITION.getY();

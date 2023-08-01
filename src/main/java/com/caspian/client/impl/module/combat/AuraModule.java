@@ -19,13 +19,19 @@ import com.caspian.client.init.Modules;
 import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.TickTimer;
 import com.caspian.client.util.math.timer.Timer;
+import com.caspian.client.util.player.InventoryUtil;
 import com.caspian.client.util.player.PlayerUtil;
 import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.string.EnumFormatter;
 import com.caspian.client.util.world.EntityUtil;
+import com.caspian.client.util.world.FakePlayerEntity;
 import com.caspian.client.util.world.VecUtil;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,6 +39,7 @@ import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Box;
@@ -43,6 +50,7 @@ import net.minecraft.world.RaycastContext;
 
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.TreeSet;
 
 /**
  *
@@ -58,12 +66,20 @@ public class AuraModule extends ToggleModule
     Config<TargetMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
             "targeting entities to attack", TargetMode.SWITCH,
             TargetMode.values());
+    Config<Priority> priorityConfig = new EnumConfig<>("Priority", "The " +
+            "heuristic to prioritize when searching for targets",
+            Priority.HEALTH, Priority.values());
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to attack " +
             "entities", 1.0f, 4.5f, 5.0f);
     Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to" +
             " attack entities through walls", 1.0f, 4.5f, 5.0f);
     Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to " +
             "attack entities", 1.0f, 180.0f, 180.0f);
+    Config<Boolean> latencyPositionConfig = new BooleanConfig(
+            "LatencyPosition", "Targets the latency positions of enemies", false);
+    Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency",
+            "Maximum latency factor when calculating positions", 50, 250,
+            1000, () -> latencyPositionConfig.getValue());
     //
     Config<Boolean> attackDelayConfig = new BooleanConfig("AttackDelay",
             "Delays attacks according to minecraft hit delays for maximum " +
@@ -75,6 +91,8 @@ public class AuraModule extends ToggleModule
             "Randomized delay for attacks (Only functions if AttackDelay is " +
                     "off)", 0.0f, 0.0f, 10.0f,
             () -> !attackDelayConfig.getValue());
+    Config<Integer> packetsConfig = new NumberConfig<>("Packets", "Maximum " +
+            "attack packets to send in a single tick", 0, 1, 20);
     Config<Float> swapDelayConfig = new NumberConfig<>("SwapPenalty", "Delay " +
             "for attacking after swapping items which prevents NCP flags", 0.0f,
             0.0f, 10.0f);
@@ -100,7 +118,7 @@ public class AuraModule extends ToggleModule
     Config<Integer> yawTicksConfig = new NumberConfig<>("YawTicks",
             "Minimum ticks to rotate yaw", 1, 1, 5,
             () -> rotateConfig.getValue() && strictRotateConfig.getValue());
-    Config<Integer> rotateSuspendConfig = new NumberConfig<>(
+    Config<Integer> rotateTimeoutConfig = new NumberConfig<>(
             "RotateTimeout", "Minimum ticks to hold the rotation yaw after " +
             "reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted",
@@ -121,7 +139,9 @@ public class AuraModule extends ToggleModule
     Config<Boolean> renderConfig = new BooleanConfig("Render",
             "Renders an indicator over the target", true);
     //
-    private Entity target;
+    private AuraTarget target;
+    //
+    private int packets;
     private final Timer attackTimer = new CacheTimer();
     private final Timer critTimer = new CacheTimer();
     //
@@ -139,8 +159,8 @@ public class AuraModule extends ToggleModule
     private final Timer rotateTimer = new TickTimer();
     private int rotating;
     //
+    private float[] yawLimits;
     private float yaw, pitch;
-    private float[] yaws;
 
     /**
      *
@@ -240,7 +260,10 @@ public class AuraModule extends ToggleModule
                 return;
             }
             final Vec3d eyepos = Managers.POSITION.getEyePos();
-            yaw = yaws[Math.max(--rotating, 0)];
+            if (rotating > 0)
+            {
+                yaw = yawLimits[--rotating];
+            }
             //
             if (!rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks()))
             {
@@ -254,12 +277,13 @@ public class AuraModule extends ToggleModule
             // Search delegated to main thread
             switch (modeConfig.getValue())
             {
-                case SWITCH -> target = getAuraTarget(eyepos);
+                case SWITCH -> target = getAuraTarget(eyepos,
+                        mc.world.getEntities());
                 case SINGLE ->
                 {
-                    if (target != null && !isTargetValid(target))
+                    if (target != null && !target.isValid())
                     {
-                        target = getAuraTarget(eyepos);
+                        target = getAuraTarget(eyepos, mc.world.getEntities());
                     }
                 }
             }
@@ -268,7 +292,7 @@ public class AuraModule extends ToggleModule
                 if (rotateConfig.getValue() && checkFacing(target.getBoundingBox()))
                 {
                     float[] rots = RotationUtil.getRotationsTo(eyepos,
-                            getHitVec(target));
+                            target.getHitVec());
                     rotating = setRotation(rots);
                     rotateTimer.reset();
                     return;
@@ -289,7 +313,11 @@ public class AuraModule extends ToggleModule
                                 event.setOnGround(false);
                                 event.cancel();
                             }
-                            attack(target);
+                            while (packets < packetsConfig.getValue())
+                            {
+                                attack(target.getEntity());
+                                packets++;
+                            }
                             critTimer.reset();
                             mc.player.resetLastAttackedTicks();
                             mc.player.fallDistance = dist;
@@ -311,13 +339,37 @@ public class AuraModule extends ToggleModule
                                 event.setOnGround(false);
                                 event.cancel();
                             }
-                            attack(target);
+                            while (packets < packetsConfig.getValue())
+                            {
+                                attack(target.getEntity());
+                                packets++;
+                            }
                             attackTimer.reset();
                             critTimer.reset();
                             randomTime = -1;
                             mc.player.fallDistance = dist;
                         }
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPacketInbound(PacketEvent.Inbound event)
+    {
+        if (mc.player != null && mc.world != null)
+        {
+            if (event.getPacket() instanceof EntityStatusS2CPacket packet)
+            {
+                if (packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING)
+                {
+
                 }
             }
         }
@@ -340,6 +392,7 @@ public class AuraModule extends ToggleModule
     {
         target = null;
         rotating = 0;
+        packets = 0;
         randomTime = -1;
         sprinting = false;
         shielding = false;
@@ -377,6 +430,7 @@ public class AuraModule extends ToggleModule
 
     /**
      *
+     *
      * @return
      */
     private boolean preSwapCheck()
@@ -384,6 +438,7 @@ public class AuraModule extends ToggleModule
         if (mc.options.useKey.isPressed() || mc.options.attackKey.isPressed())
         {
             autoSwapTimer.reset();
+            return !autoSwapConfig.getValue();
         }
         if (autoSwapConfig.getValue())
         {
@@ -439,8 +494,8 @@ public class AuraModule extends ToggleModule
             if (shielding)
             {
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.RELEASE_USE_ITEM,
-                        mc.player.getBlockPos(), Direction.getFacing(mc.player.getX(),
-                        mc.player.getY(), mc.player.getZ())));
+                        Managers.POSITION.getBlockPos(), Direction.getFacing(mc.player.getX(),
+                                mc.player.getY(), mc.player.getZ())));
             }
         }
         sneaking = false;
@@ -474,7 +529,7 @@ public class AuraModule extends ToggleModule
             }
             if (crit)
             {
-                Modules.CRITICALS.preAttack();
+                Modules.CRITICALS.hookPreAttack();
             }
         }
     }
@@ -509,14 +564,16 @@ public class AuraModule extends ToggleModule
      *
      *
      * @param pos
+     * @param entities
      * @return
      */
-    private Entity getAuraTarget(final Vec3d pos)
+    private AuraTarget getAuraTarget(final Vec3d pos,
+                                     final Iterable<Entity> entities)
     {
-        Entity target = null;
-        for (Entity e : mc.world.getEntities())
+        TreeSet<AuraTarget> targets = new TreeSet<>();
+        for (Entity e : entities)
         {
-            if (e != null && e.isAlive() && !Managers.SOCIAL.isFriend(e.getUuid()))
+            if (e != null && e.isAlive() && e != mc.player && !Managers.SOCIAL.isFriend(e.getUuid()))
             {
                 if (e instanceof EndCrystalEntity
                         || e instanceof ItemEntity
@@ -525,75 +582,46 @@ public class AuraModule extends ToggleModule
                 {
                     continue;
                 }
+                if (mc.player.isRiding() && e == mc.player.getVehicle())
+                {
+                    continue;
+                }
                 if (e instanceof PlayerEntity player && player.isCreative())
                 {
                     continue;
                 }
-                if (e.age < ticksExistedConfig.getValue())
-                {
-                    continue;
-                }
+                // Range check
                 if (isEnemy(e))
                 {
-                    // Range check
-                    if (isInRange(pos, e))
+                    if (e.age < ticksExistedConfig.getValue())
                     {
-                        target = e;
+                        continue;
+                    }
+                    Entity target = e;
+                    if (e instanceof PlayerEntity player
+                            && latencyPositionConfig.getValue())
+                    {
+                        FakePlayerEntity t = Managers.LATENCY.getTrackedPlayer(pos,
+                                player, maxLatencyConfig.getValue());
+                        if (t != null)
+                        {
+                            target = t;
+                        }
+                    }
+                    //
+                    final AuraTarget auraTarget = new AuraTarget(target);
+                    if (auraTarget.isInRange(pos))
+                    {
+                        targets.add(auraTarget);
                     }
                 }
             }
         }
-        return target;
-    }
-
-    /**
-     *
-     *
-     * @param pos
-     * @param entity
-     * @return
-     */
-    public boolean isInRange(Vec3d pos, Entity entity)
-    {
-        final Vec3d hitVec = getHitVec(entity);
-        //
-        double dist = pos.distanceTo(hitVec);
-        if (dist > rangeConfig.getValue())
+        if (!targets.isEmpty())
         {
-            return false;
+            return targets.last();
         }
-        BlockHitResult result = mc.world.raycast(new RaycastContext(
-                Managers.POSITION.getCameraPosVec(1.0f),
-                hitVec, RaycastContext.ShapeType.COLLIDER,
-                RaycastContext.FluidHandling.NONE, mc.player));
-        if (result != null && dist > wallRangeConfig.getValue())
-        {
-            return false;
-        }
-        if (fovConfig.getValue() != 180.0f)
-        {
-            float[] rots = RotationUtil.getRotationsTo(pos,
-                    getHitVec(target));
-            float diff = Managers.ROTATION.getWrappedYaw() - rots[0];
-            float magnitude = Math.abs(diff);
-            if (magnitude > fovConfig.getValue())
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     *
-     *
-     * @param entity
-     * @return
-     */
-    public boolean isTargetValid(Entity entity)
-    {
-        return entity != null && entity.isAlive()
-                && isInRange(Managers.POSITION.getEyePos(), entity);
+        return null;
     }
 
     /**
@@ -603,25 +631,20 @@ public class AuraModule extends ToggleModule
      */
     private int getWeaponSlot()
     {
-        float damage = 0.0f;
+        int sharp = -1;
         int slot = -1;
+        // Maximize item attack damage
         for (int i = 0; i < 9; i++)
         {
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            final Item item = stack.getItem();
-            if (item instanceof SwordItem sword)
+            final ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.getItem() instanceof SwordItem
+                    || stack.getItem() instanceof MiningToolItem)
             {
-                if (sword.getAttackDamage() > damage)
+                int lvl = EnchantmentHelper.getLevel(Enchantments.SHARPNESS,
+                        stack);
+                if (lvl > sharp)
                 {
-                    damage = sword.getAttackDamage();
-                    slot = i;
-                }
-            }
-            else if (item instanceof MiningToolItem tool)
-            {
-                if (tool.getAttackDamage() > damage)
-                {
-                    damage = tool.getAttackDamage();
+                    sharp = lvl;
                     slot = i;
                 }
             }
@@ -681,50 +704,34 @@ public class AuraModule extends ToggleModule
             }
             deltaYaw *= dir;
             int yawCount = tick;
-            tick += rotateSuspendConfig.getValue();
-            yaws = new float[tick];
+            tick += rotateTimeoutConfig.getValue();
+            yawLimits = new float[tick];
             int off = tick - 1;
             float yawTotal = 0.0f;
             for (int i = 0; i < tick; ++i)
             {
                 if (i > yawCount)
                 {
-                    yaws[off - i] = 0.0f;
+                    yawLimits[off - i] = 0.0f;
                     continue;
                 }
                 yawTotal += deltaYaw;
-                yaws[off - i] = yawTotal;
+                yawLimits[off - i] = yawTotal;
             }
         }
         else
         {
-            tick = rotateSuspendConfig.getValue() + 1;
-            yaws = new float[tick];
+            tick = rotateTimeoutConfig.getValue() + 1;
+            yawLimits = new float[tick];
             int off = tick - 1;
-            yaws[off] = dest[0];
+            yawLimits[off] = dest[0];
             for (int i = 1; i < tick; ++i)
             {
-                yaws[off - i] = 0.0f;
+                yawLimits[off - i] = 0.0f;
             }
         }
         pitch = dest[1];
-        return yaws.length;
-    }
-
-    /**
-     *
-     *
-     * @param entity
-     * @return
-     */
-    public Vec3d getHitVec(Entity entity)
-    {
-        return switch (hitVectorConfig.getValue())
-        {
-            case EYES -> VecUtil.toEyePos(entity);
-            case FEET -> entity.getPos();
-            case TORSO -> VecUtil.toTorsoPos(entity);
-        };
+        return yawLimits.length;
     }
 
     /**
@@ -754,5 +761,188 @@ public class AuraModule extends ToggleModule
         EYES,
         TORSO,
         FEET
+    }
+
+    public enum Priority
+    {
+        HEALTH,
+        DISTANCE,
+        ARMOR
+    }
+
+    /**
+     *
+     *
+     *
+     */
+    public class AuraTarget implements Comparable<Entity>
+    {
+        //
+        private final Entity entity;
+
+        /**
+         *
+         *
+         * @param entity
+         */
+        public AuraTarget(Entity entity)
+        {
+            this.entity = entity;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public boolean isValid()
+        {
+            return entity != null && entity.isAlive()
+                    && isInRange(Managers.POSITION.getEyePos());
+        }
+
+        /**
+         * Compares this object with the specified object for order.  Returns a
+         * negative integer, zero, or a positive integer as this object is less
+         * than, equal to, or greater than the specified object.
+         *
+         * @param o the object to be compared.
+         * @return a negative integer, zero, or a positive integer as this object
+         * is less than, equal to, or greater than the specified object.
+         * @throws NullPointerException if the specified object is null
+         * @throws ClassCastException   if the specified object's type prevents it
+         *                              from being compared to this object.
+         */
+        @Override
+        public int compareTo(Entity o)
+        {
+            Priority prio = priorityConfig.getValue();
+            if (InventoryUtil.isHolding32k())
+            {
+                prio = Priority.DISTANCE;
+            }
+            return switch (prio)
+            {
+                case HEALTH ->
+                {
+                    if (entity instanceof LivingEntity e
+                            && o instanceof LivingEntity other)
+                    {
+                        yield Float.compare(e.getHealth() + e.getAbsorptionAmount(),
+                                other.getHealth() + other.getAbsorptionAmount());
+                    }
+                    yield 0;
+                }
+                case DISTANCE ->
+                {
+                    Vec3d eyepos = Managers.POSITION.getEyePos();
+                    yield Double.compare(eyepos.distanceTo(entity.getPos()),
+                            eyepos.distanceTo(o.getPos()));
+                }
+                case ARMOR ->
+                {
+                    if (entity instanceof LivingEntity e
+                            && o instanceof LivingEntity other)
+                    {
+                        float edmg = 0.0f;
+                        float odmg = 0.0f;
+                        //
+                        float emax = 0.0f;
+                        float omax = 0.0f;
+                        for (ItemStack armor : e.getArmorItems())
+                        {
+                            if (armor != null && !armor.isEmpty())
+                            {
+                                edmg += armor.getDamage();
+                                emax += armor.getMaxDamage();
+                            }
+                        }
+                        for (ItemStack armor : other.getArmorItems())
+                        {
+                            if (armor != null && !armor.isEmpty())
+                            {
+                                odmg += armor.getDamage();
+                                omax = armor.getMaxDamage();
+                            }
+                        }
+                        float earmor = 100.0f - edmg / emax;
+                        float oarmor = 100.0f - odmg / omax;
+                        yield Float.compare(earmor, oarmor);
+                    }
+                    yield 0;
+                }
+            };
+        }
+
+        /**
+         *
+         *
+         * @param pos
+         * @return
+         */
+        public boolean isInRange(final Vec3d pos)
+        {
+            final Vec3d hitVec = getHitVec();
+            //
+            double dist = pos.distanceTo(hitVec);
+            if (dist > rangeConfig.getValue())
+            {
+                return false;
+            }
+            BlockHitResult result = mc.world.raycast(new RaycastContext(
+                    Managers.POSITION.getCameraPosVec(1.0f),
+                    hitVec, RaycastContext.ShapeType.COLLIDER,
+                    RaycastContext.FluidHandling.NONE, mc.player));
+            if (result != null && dist > wallRangeConfig.getValue())
+            {
+                return false;
+            }
+            if (fovConfig.getValue() != 180.0f)
+            {
+                float[] rots = RotationUtil.getRotationsTo(pos,
+                        target.getHitVec());
+                float diff = Managers.ROTATION.getWrappedYaw() - rots[0];
+                float magnitude = Math.abs(diff);
+                if (magnitude > fovConfig.getValue())
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public Vec3d getHitVec()
+        {
+            return switch (hitVectorConfig.getValue())
+                    {
+                        case EYES -> VecUtil.toEyePos(entity);
+                        case FEET -> entity.getPos();
+                        case TORSO -> VecUtil.toTorsoPos(entity);
+                    };
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public Entity getEntity()
+        {
+            return entity;
+        }
+
+        /**
+         *
+         *
+         * @return
+         */
+        public Box getBoundingBox()
+        {
+            return entity.getBoundingBox();
+        }
     }
 }
