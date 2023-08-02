@@ -7,6 +7,7 @@ import com.caspian.client.util.world.FakePlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.math.Vec3d;
@@ -100,6 +101,11 @@ public class LatencyPositionHandler implements Globals
                     trackers.put(player, new PlayerLatencyTracker(player,
                             spawn));
                 }
+            }
+            else if (event.getPacket() instanceof EntitiesDestroyS2CPacket packet)
+            {
+                trackers.entrySet().removeIf(t ->
+                        packet.getEntityIds().contains(t.getKey().getId()));
             }
         }
     }

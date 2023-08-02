@@ -5,6 +5,8 @@ import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  *
  *
@@ -13,6 +15,8 @@ import net.minecraft.util.math.Vec3d;
  */
 public class FakePlayerEntity extends OtherClientPlayerEntity
 {
+    //
+    public static final AtomicInteger CURRENT_ID = new AtomicInteger(1000000);
     //
     private final PlayerEntity player;
 
@@ -28,7 +32,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity
         copyPositionAndRotation(player);
         // setBoundingBox(player.getBoundingBox());
         getInventory().clone(player.getInventory());
-        setId(player.getId());
+        setId(CURRENT_ID.incrementAndGet());
     }
 
     /**

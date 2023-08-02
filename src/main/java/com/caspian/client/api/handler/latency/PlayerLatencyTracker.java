@@ -82,7 +82,7 @@ public class PlayerLatencyTracker
     public Vec3d getTrackedData(final Vec3d floor,
                                 final long range)
     {
-        Vec3d backtrack = null;
+        Vec3d trackpos = null;
         if (!latencyPositions.isEmpty())
         {
             double min = Double.MAX_VALUE;
@@ -99,10 +99,10 @@ public class PlayerLatencyTracker
                 if (dist < min)
                 {
                     min = dist;
-                    backtrack = p;
+                    trackpos = p;
                 }
             }
         }
-        return backtrack;
+        return trackpos;
     }
 }

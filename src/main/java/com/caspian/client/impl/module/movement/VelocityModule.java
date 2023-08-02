@@ -39,6 +39,15 @@ public class VelocityModule extends ToggleModule
 
     /**
      *
+     */
+    public VelocityModule()
+    {
+        super("Velocity", "Reduces the amount of player knockback velocity",
+                ModuleCategory.COMBAT);
+    }
+
+    /**
+     *
      *
      * @return
      */
@@ -51,15 +60,6 @@ public class VelocityModule extends ToggleModule
                     verticalConfig.getValue());
         }
         return EnumFormatter.formatEnum(modeConfig.getValue());
-    }
-
-    /**
-     *
-     */
-    public VelocityModule()
-    {
-        super("Velocity", "Reduces the amount of player knockback velocity",
-                ModuleCategory.COMBAT);
     }
 
     /**
@@ -85,6 +85,10 @@ public class VelocityModule extends ToggleModule
         {
             if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet)
             {
+                if (packet.getId() != mc.player.getId())
+                {
+                    return;
+                }
                 switch (modeConfig.getValue())
                 {
                     case NORMAL ->

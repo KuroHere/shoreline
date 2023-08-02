@@ -137,6 +137,15 @@ public class AutoCrystalModule extends ToggleModule
     Config<Integer> rotateTimeoutConfig = new NumberConfig<>(
             "RotateTimeout", "Minimum ticks to hold the rotation yaw after " +
             "reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
+    Config<Boolean> rotateTickFactorConfig = new BooleanConfig("Rotate-TickFactor",
+            "Factors in angles when calculating crystals to minimize " +
+                    "attack ticks and speed up the break/place loop", false,
+            () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
+    Config<Float> rotateDamageConfig = new NumberConfig<>("Rotate-MaxDamage",
+            "Maximum allowed damage loss when minimizing tick rotations", 0.0f,
+            2.0f, 10.0f, () -> rotateConfig.getValue()
+            && strictRotateConfig.getValue() != Rotate.OFF
+            && rotateTickFactorConfig.getValue());
     Config<Boolean> vectorBorderConfig = new BooleanConfig("VectorBorder",
             "Rotates to the border between attack/place", true,
             () -> rotateConfig.getValue());
@@ -266,14 +275,14 @@ public class AutoCrystalModule extends ToggleModule
     Config<Boolean> antiTotemConfig = new BooleanConfig("AntiTotem",
             "Predicts totems and places crystals to instantly double pop and " +
                     "kill the target", false, () -> placeConfig.getValue());
-    Config<Swap> swapConfig = new EnumConfig<>("Swap", "Swaps to an end " +
+    Config<Swap> autoSwapConfig = new EnumConfig<>("Swap", "Swaps to an end " +
             "crystal before placing if the player is not holding one", Swap.OFF,
             Swap.values(), () -> placeConfig.getValue());
     // Config<Boolean> swapSyncConfig = new BooleanConfig("SwapSync",
     //        "", false);
     Config<Float> alternateSpeedConfig = new NumberConfig<>("AlternateSpeed",
             "Speed for alternative swapping crystals", 1.0f, 18.0f, 20.0f,
-            () -> placeConfig.getValue() && swapConfig.getValue() == Swap.SILENT_ALT);
+            () -> placeConfig.getValue() && autoSwapConfig.getValue() == Swap.SILENT_ALT);
     Config<Boolean> antiSurroundConfig = new BooleanConfig(
             "AntiSurround", "Places crystals to block the enemy's feet and " +
             "prevent them from using Surround", false,
@@ -285,8 +294,9 @@ public class AutoCrystalModule extends ToggleModule
             "StrictDirection", "Interacts with only visible directions when " +
             "placing crystals", false, () -> placeConfig.getValue());
     Config<Boolean> exposedDirectionConfig = new BooleanConfig(
-            "ExposedDirection", "Interacts with only exposed directions when " +
-            "placing crystals", false, () -> placeConfig.getValue());
+            "StrictDirection-Exposed", "Interacts with only exposed " +
+            "directions when placing crystals", false,
+            () -> placeConfig.getValue());
     Config<Placements> placementsConfig = new EnumConfig<>("Placements",
             "Version standard for placing end crystals", Placements.NATIVE,
             Placements.values(), () -> placeConfig.getValue());
@@ -567,7 +577,7 @@ public class AutoCrystalModule extends ToggleModule
     @Override
     public String getMetaData()
     {
-        return String.format("{}ms", getLatency(breakTimes));
+        return String.format("%fms", getLatency(breakTimes));
     }
 
     /**
@@ -918,21 +928,21 @@ public class AutoCrystalModule extends ToggleModule
             }
             case MINIMAL ->
             {
-                float min = Float.MAX_VALUE;
+                float max = 0.0f;
                 for (long time : times)
                 {
                     if (time > 1000)
                     {
                         continue;
                     }
-                    if (time < min)
+                    if (time > max)
                     {
-                        min = time;
+                        max = time;
                     }
                 }
-                if (min < 1000)
+                if (max < 1000)
                 {
-                    yield min;
+                    yield max;
                 }
                 yield 0.0f;
             }
@@ -1154,12 +1164,15 @@ public class AutoCrystalModule extends ToggleModule
                                                 unsafe = false;
                                             }
                                         }
-                                        if (checkArmor(e))
+                                        final List<ItemStack> armor =
+                                                Lists.newArrayList(e.getArmorItems());
+                                        if (!armor.isEmpty() && checkArmor(e, armor))
                                         {
                                             data.addTag("armorbreak");
                                         }
+                                        double mindmg = attackData.getDamage();
                                         if (!unsafe && (instantMaxConfig.getValue()
-                                                && data.getDamage() >= attackData.getDamage()
+                                                && data.getDamage() >= mindmg
                                                 || data.isDamageValid(instantDamageConfig.getValue())))
                                         {
                                             if (rotateConfig.getValue()
@@ -1389,7 +1402,9 @@ public class AutoCrystalModule extends ToggleModule
                                             unsafe = false;
                                         }
                                     }
-                                    if (checkArmor(e))
+                                    final List<ItemStack> armor =
+                                            Lists.newArrayList(e.getArmorItems());
+                                    if (!armor.isEmpty() && checkArmor(e, armor))
                                     {
                                         data.addTag("armorbreak");
                                     }
@@ -1459,12 +1474,12 @@ public class AutoCrystalModule extends ToggleModule
     private void addCrystalsInRange(final int id, final Vec3d pos)
     {
         attacks.put(id, System.currentTimeMillis());
-        for (Entity e : mc.world.getEntities())
+        for (Entity entity : mc.world.getEntities())
         {
-            if (e instanceof EndCrystalEntity crystal
+            if (entity instanceof EndCrystalEntity crystal
                     && pos.squaredDistanceTo(crystal.getPos()) < 144.0f)
             {
-                explosions.put(e.getId(), System.currentTimeMillis());
+                explosions.put(crystal.getId(), System.currentTimeMillis());
             }
         }
     }
@@ -1502,10 +1517,10 @@ public class AutoCrystalModule extends ToggleModule
     private DamageData<EndCrystalEntity> getSrcData(final DamageData<BlockPos> pdata,
                                                     final int id)
     {
-        final EndCrystalEntity deepcopy = new EndCrystalEntity(mc.world,
+        EndCrystalEntity fakeCrystal = new EndCrystalEntity(mc.world,
                 pdata.getX(), pdata.getY(), pdata.getZ());
-        deepcopy.setId(id);
-        return new DamageData<>(pdata.getTarget(), deepcopy,
+        fakeCrystal.setId(id);
+        return new DamageData<>(pdata.getTarget(), fakeCrystal,
                 pdata.getDamage(), pdata.getLocal());
     }
 
@@ -1558,7 +1573,7 @@ public class AutoCrystalModule extends ToggleModule
                     boolean swapped = false;
                     if (preSwapCheck())
                     {
-                        swapped = swapConfig.getValue() != Swap.SILENT_ALT ?
+                        swapped = autoSwapConfig.getValue() != Swap.SILENT_ALT ?
                             swap(slot) : swapAlt(slot + 36);
                     }
                     if (swapped)
@@ -1575,7 +1590,6 @@ public class AutoCrystalModule extends ToggleModule
                         }
                     }
                 }
-                return false;
             }
             attackDirect(e);
             return true;
@@ -1691,7 +1705,7 @@ public class AutoCrystalModule extends ToggleModule
                         shortTermTick = tick;
                         shortTermCount = 1;
                     }
-                    float shortTerm = (float) shortTermCount * 1000f
+                    float shortTerm = (float) shortTermCount * 1000.0f
                             / (50.0f * inhibitTicksConfig.getValue());
                     float max = Math.max(shortTerm, total);
                     return max > inhibitLimitConfig.getValue();
@@ -1742,7 +1756,7 @@ public class AutoCrystalModule extends ToggleModule
                 preSequence = p;
                 tickSequence.reset();
             }
-            else if (swapConfig.getValue() != Swap.OFF)
+            else if (autoSwapConfig.getValue() != Swap.OFF)
             {
                 int slot = getCrystalSlot();
                 int prev = mc.player.getInventory().selectedSlot;
@@ -1751,7 +1765,7 @@ public class AutoCrystalModule extends ToggleModule
                     boolean swapped = false;
                     if (preSwapCheck())
                     {
-                        swapped = swapConfig.getValue() != Swap.SILENT_ALT ?
+                        swapped = autoSwapConfig.getValue() != Swap.SILENT_ALT ?
                                 swap(slot) : swapAlt(slot + 36);
                     }
                     if (swapped)
@@ -1760,11 +1774,11 @@ public class AutoCrystalModule extends ToggleModule
                         postSequence = null;
                         preSequence = p;
                         tickSequence.reset();
-                        if (swapConfig.getValue() == Swap.SILENT)
+                        if (autoSwapConfig.getValue() == Swap.SILENT)
                         {
                             swap(prev);
                         }
-                        else if (swapConfig.getValue() == Swap.SILENT_ALT)
+                        else if (autoSwapConfig.getValue() == Swap.SILENT_ALT)
                         {
                             swapAlt(slot + 36);
                             lastSwapAlt.reset();
@@ -1826,7 +1840,7 @@ public class AutoCrystalModule extends ToggleModule
      */
     public boolean preSwapCheck()
     {
-        if (swapConfig.getValue() == Swap.NORMAL)
+        if (autoSwapConfig.getValue() == Swap.NORMAL)
         {
             return autoSwapTimer.passed(500);
         }
@@ -2407,7 +2421,9 @@ public class AutoCrystalModule extends ToggleModule
                                     unsafe = false;
                                 }
                             }
-                            if (checkArmor(e))
+                            final List<ItemStack> armor =
+                                    Lists.newArrayList(e.getArmorItems());
+                            if (!armor.isEmpty() && checkArmor(e, armor))
                             {
                                 data.addTag("armorbreak");
                             }
@@ -2456,11 +2472,11 @@ public class AutoCrystalModule extends ToggleModule
                 Managers.POSITION.getCameraPosVec(1.0f),
                 expected, RaycastContext.ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE, mc.player));
-        float maxDist = 36.0f;
+        float maxDist = breakRangeConfig.getValue() * breakRangeConfig.getValue();
         if (result != null && result.getType() == HitResult.Type.BLOCK
                 && result.getBlockPos() != p)
         {
-            maxDist = 9.0f;
+            maxDist = breakWallRangeConfig.getValue() * breakWallRangeConfig.getValue();
             if (dist > placeWallRangeConfig.getValue() * placeWallRangeConfig.getValue())
             {
                 return true;
@@ -2586,7 +2602,9 @@ public class AutoCrystalModule extends ToggleModule
                                     unsafe = false;
                                 }
                             }
-                            if (checkArmor(e))
+                            final List<ItemStack> armor =
+                                    Lists.newArrayList(e.getArmorItems());
+                            if (!armor.isEmpty() && checkArmor(e, armor))
                             {
                                 data.addTag("armorbreak");
                             }
@@ -2633,16 +2651,18 @@ public class AutoCrystalModule extends ToggleModule
     /**
      *
      *
-     * @param e
+     * @param entity
+     * @param armor
      * @return
      */
-    private boolean checkArmor(final Entity e)
+    private boolean checkArmor(final Entity entity,
+                               final List<ItemStack> armor)
     {
-        if (e instanceof LivingEntity && armorBreakerConfig.getValue())
+        if (entity instanceof LivingEntity && armorBreakerConfig.getValue())
         {
             float dmg = 0.0f;
             float max = 0.0f;
-            for (ItemStack a : e.getArmorItems())
+            for (ItemStack a : armor)
             {
                 dmg += a.getDamage();
                 max += a.getMaxDamage();
@@ -2656,16 +2676,16 @@ public class AutoCrystalModule extends ToggleModule
     /**
      *
      *
-     * @param e
+     * @param entity
      * @param phealth
      * @param damage
      * @return
      */
-    private boolean checkAntiTotem(final Entity e,
+    private boolean checkAntiTotem(final Entity entity,
                                    final float phealth,
                                    final double damage)
     {
-        if (antiTotemConfig.getValue() && e instanceof PlayerEntity p)
+        if (antiTotemConfig.getValue() && entity instanceof PlayerEntity p)
         {
             if (phealth <= 2.0f && phealth - damage < 0.5f)
             {
@@ -3505,6 +3525,10 @@ public class AutoCrystalModule extends ToggleModule
             }
             // Diffs
             double d = getDamage() - other.getDamage();
+            if (rotateTickFactorConfig.getValue())
+            {
+                return getRotationTickDiff(other);
+            }
             if (other.isMineDamage())
             {
                 return isMineDamage() ? Double.compare(getDamage(),
@@ -3542,7 +3566,33 @@ public class AutoCrystalModule extends ToggleModule
         }
 
         /**
-         * Returns <tt>true</tt> if the two {@link DamageData} damage sources are
+         *
+         *
+         * @param other
+         * @return
+         */
+        public int getRotationTickDiff(final DamageData<?> other)
+        {
+            final Vec3d eyepos = Managers.POSITION.getEyePos();
+            float[] rots1 = getRotations(eyepos);
+            float[] rots2 = other.getRotations(eyepos);
+            float yaw = Managers.ROTATION.getWrappedYaw();
+            if (rots1 != null && rots2 != null)
+            {
+                float ticks1 = Math.abs(yaw - rots1[0]) / rotateLimitConfig.getValue();
+                float ticks2 = Math.abs(yaw - rots2[0]) / rotateLimitConfig.getValue();
+                float diff = ticks1 - ticks2;
+                double d = getDamage() - other.getDamage();
+                if (d < 0.0 && diff < 0.0f || d > 0.0 && diff > 0.0f)
+                {
+                    return Math.abs(diff) * rotateDamageConfig.getValue() > Math.abs(d) ? -1 : 1;
+                }
+            }
+            return 0;
+        }
+
+        /**
+         * Returns <tt>true</tt> if two {@link DamageData} damage sources are
          * the same
          *
          * @param other The comparing the data
@@ -3635,7 +3685,7 @@ public class AutoCrystalModule extends ToggleModule
             {
                 return crystal.getId();
             }
-            return -1;
+            return FakePlayerEntity.CURRENT_ID.incrementAndGet();
         }
 
         /**
@@ -3676,8 +3726,7 @@ public class AutoCrystalModule extends ToggleModule
             if (src instanceof EndCrystalEntity crystal)
             {
                 return randomVectorConfig.getValue() ?
-                        getRandomVec(crystal.getBlockPos(), boundingBox) :
-                        pos;
+                        getRandomVec(crystal.getBlockPos(), boundingBox) : pos;
             }
             else if (src instanceof BlockPos cpos)
             {
@@ -3842,19 +3891,26 @@ public class AutoCrystalModule extends ToggleModule
             return tags.contains("armorbreak");
         }
 
+        /**
+         * Returns <tt>true</tt> if the damage source is an
+         * {@link EndCrystalEntity}
+         *
+         * @return <tt>true</tt> if the damage source is an end crystal
+         */
         public boolean isAttackDamage()
         {
-            return tags.contains("attackdmg");
+            return src instanceof EndCrystalEntity;
         }
 
         /**
+         * Returns <tt>true</tt> if the damage source is a {@link BlockPos}
+         * base of an {@link EndCrystalEntity}
          *
-         *
-         * @return
+         * @return <tt>true</tt> if the damage source is a block position
          */
         public boolean isPlaceDamage()
         {
-            return tags.contains("placedmg");
+            return src instanceof BlockPos;
         }
 
         /**
