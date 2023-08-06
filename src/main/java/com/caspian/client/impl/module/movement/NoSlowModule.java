@@ -67,13 +67,7 @@ public class NoSlowModule extends ToggleModule
     //
     private boolean sneaking;
     //
-    private static final KeyBinding[] MOVE_KEYBINDS = new KeyBinding[]
-            {
-                    mc.options.forwardKey,
-                    mc.options.backKey,
-                    mc.options.rightKey,
-                    mc.options.leftKey
-            };
+    private static KeyBinding[] MOVE_KEYBINDS;
     
     /**
      *
@@ -82,6 +76,22 @@ public class NoSlowModule extends ToggleModule
     {
         super("NoSlow", "Prevents items from slowing down player",
                 ModuleCategory.MOVEMENT);
+    }
+
+    /**
+     *
+     *
+     */
+    @Override
+    public void onEnable()
+    {
+        MOVE_KEYBINDS = new KeyBinding[]
+            {
+                    mc.options.forwardKey,
+                    mc.options.backKey,
+                    mc.options.rightKey,
+                    mc.options.leftKey
+            };
     }
     
     /**

@@ -15,24 +15,24 @@ import com.caspian.client.api.event.Event;
 public class LightmapGammaEvent extends Event
 {
     //
-    private float gamma;
+    private int gamma;
 
     /**
      *
      *
      * @param gamma
      */
-    public LightmapGammaEvent(float gamma)
+    public LightmapGammaEvent(int gamma)
     {
         this.gamma = gamma;
     }
 
-    public float getGamma()
+    public int getGamma()
     {
         return gamma;
     }
 
-    public void setGamma(float gamma)
+    public void setGamma(int gamma)
     {
         this.gamma = gamma;
     }

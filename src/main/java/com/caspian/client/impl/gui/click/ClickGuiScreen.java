@@ -1,20 +1,18 @@
 package com.caspian.client.impl.gui.click;
 
-import com.caspian.client.impl.gui.click.component.Button;
-import com.caspian.client.impl.gui.click.component.Frame;
-import com.caspian.client.impl.gui.click.impl.config.ConfigFrame;
+import com.caspian.client.api.module.ModuleCategory;
+import com.caspian.client.impl.gui.click.impl.config.CategoryFrame;
 import com.caspian.client.impl.gui.click.impl.config.ModuleButton;
-import com.caspian.client.impl.gui.click.impl.config.setting.ConfigComponent;
+import com.caspian.client.impl.gui.click.impl.config.setting.ConfigButton;
 import com.caspian.client.impl.module.client.ClickGuiModule;
-import com.caspian.client.init.Modules;
 import com.caspian.client.util.Globals;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *
@@ -27,9 +25,16 @@ import java.util.List;
 public class ClickGuiScreen extends Screen implements Globals
 {
     //
-    private final List<Frame> frames = new ArrayList<>();
-
+    private final List<CategoryFrame> frames = new CopyOnWriteArrayList<>();
     private final ClickGuiModule module;
+    // mouse position
+    public static int MOUSE_X;
+    public static int MOUSE_Y;
+    // mouse states
+    public static boolean MOUSE_RIGHT_CLICK;
+    public static boolean MOUSE_RIGHT_HOLD;
+    public static boolean MOUSE_LEFT_CLICK;
+    public static boolean MOUSE_LEFT_HOLD;
 
     /**
      *
@@ -37,12 +42,13 @@ public class ClickGuiScreen extends Screen implements Globals
     public ClickGuiScreen(ClickGuiModule module)
     {
         super(Text.literal("ClickGui"));
-
         this.module = module;
-
-        Window res = mc.getWindow();
-        frames.add(new ConfigFrame(res.getScaledWidth() / 2.0 - 250.0,
-                res.getScaledHeight() / 2.0 - 150.0, 500.0, 300.0));
+        float x = 2.0f;
+        for (ModuleCategory category : ModuleCategory.values())
+        {
+            frames.add(new CategoryFrame(category, x, 10.0f));
+            x += 90.0f;
+        }
     }
 
     /**
@@ -57,7 +63,7 @@ public class ClickGuiScreen extends Screen implements Globals
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta)
     {
         super.render(matrices, mouseX, mouseY, delta);
-        for (Frame frame : frames)
+        for (CategoryFrame frame : frames)
         {
             frame.render(matrices, mouseX, mouseY, delta);
             float scale = module.getScale();
@@ -65,22 +71,24 @@ public class ClickGuiScreen extends Screen implements Globals
             {
                 frame.setDimensions(frame.getWidth() * scale,
                         frame.getHeight() * scale);
-                for (Button button : frame.getButtons())
+                for (ModuleButton button : frame.getModuleButtons())
                 {
                     button.setDimensions(button.getWidth() * scale,
                             button.getHeight() * scale);
-                    if (button instanceof ModuleButton)
+                    for (ConfigButton<?> component : button.getConfigButtons())
                     {
-                        for (ConfigComponent<?> component :
-                                ((ModuleButton) button).getConfigComponents())
-                        {
-                            component.setDimensions(component.getWidth() * scale,
-                                    component.getHeight() * scale);
-                        }
+                        component.setDimensions(component.getWidth() * scale,
+                                component.getHeight() * scale);
                     }
                 }
             }
         }
+        // update mouse state
+        MOUSE_LEFT_CLICK = false;
+        MOUSE_RIGHT_CLICK = false;
+        // update mouse position
+        MOUSE_X = mouseX;
+        MOUSE_Y = mouseY;
     }
 
     /**
@@ -94,11 +102,47 @@ public class ClickGuiScreen extends Screen implements Globals
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton)
     {
-        for (Frame frame : frames)
+        if (mouseButton == GLFW.GLFW_MOUSE_BUTTON_LEFT)
+        {
+            MOUSE_LEFT_CLICK = true;
+            MOUSE_LEFT_HOLD = true;
+        }
+        else if (mouseButton == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+        {
+            MOUSE_RIGHT_CLICK = true;
+            MOUSE_RIGHT_HOLD = true;
+        }
+        for (CategoryFrame frame : frames)
         {
             frame.mouseClicked(mouseX, mouseY, mouseButton);
         }
         return super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+
+    /**
+     *
+     *
+     * @param mouseX the X coordinate of the mouse
+     * @param mouseY the Y coordinate of the mouse
+     * @param button the mouse button number
+     * @return
+     */
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
+    {
+        if (button == 0)
+        {
+            MOUSE_LEFT_HOLD = false;
+        }
+        else if (button == 1)
+        {
+            MOUSE_RIGHT_HOLD = false;
+        }
+        for (CategoryFrame frame : frames)
+        {
+            frame.mouseReleased(mouseX, mouseY, button);
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     /**
@@ -112,11 +156,22 @@ public class ClickGuiScreen extends Screen implements Globals
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
-        for (Frame frame : frames)
+        for (CategoryFrame frame : frames)
         {
             frame.keyPressed(keyCode, scanCode, modifiers);
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    @Override
+    public boolean shouldPause()
+    {
+        return false;
     }
 
     /**

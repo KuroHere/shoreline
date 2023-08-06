@@ -5,7 +5,6 @@ import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.MacroConfig;
 import com.caspian.client.api.macro.Macro;
-import com.caspian.client.init.Managers;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -146,15 +145,6 @@ public class ToggleModule extends Module
     {
         keybindingConfig.setContainer(this);
         ((MacroConfig) keybindingConfig).setValue(keycode, this::toggle);
-    }
-
-    /**
-     *
-     * @return
-     */
-    public boolean isRotationBlocked()
-    {
-        return this != Managers.ROTATION.getRotatingModule();
     }
 
     /**

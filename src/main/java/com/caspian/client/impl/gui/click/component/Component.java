@@ -33,7 +33,7 @@ import java.util.function.BiConsumer;
 public abstract class Component implements Drawable, Globals
 {
     //
-    private double x, y, width, height;
+    protected float x, y, width, height;
     //
     private static final ScissorStack SCISSOR_STACK = new ScissorStack();
 
@@ -48,6 +48,17 @@ public abstract class Component implements Drawable, Globals
     @Override
     public abstract void render(MatrixStack matrices, float mouseX, float mouseY,
                         float delta);
+
+    /**
+     *
+     *
+     * @param matrices
+     * @param color
+     */
+    protected void rect(MatrixStack matrices, int color)
+    {
+        fill(matrices, x, y, width, height, color);
+    }
 
     protected void drawRoundedRect(MatrixStack matrices, double x1, double y1,
                                    double x2, double y2, int color)
@@ -186,6 +197,8 @@ public abstract class Component implements Drawable, Globals
     public void fill(MatrixStack matrices, double x1, double y1, double x2,
                             double y2, double z, int color)
     {
+        x2 += x1;
+        y2 += y1;
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
         double i;
         if (x1 < x2) 
@@ -442,24 +455,48 @@ public abstract class Component implements Drawable, Globals
         RenderSystem.disableBlend();
     }
     
-    public double getX()
+    public float getX()
     {
         return x;
     }
 
-    public double getY()
+    public float getY()
     {
         return y;
     }
 
-    public double getHeight()
+    public float getHeight()
     {
         return height;
     }
 
-    public double getWidth()
+    public float getWidth()
     {
         return width;
+    }
+
+    /**
+     *
+     *
+     * @param xval
+     * @param yval
+     * @return
+     */
+    public boolean isWithin(double xval, double yval)
+    {
+        return isWithin((float) xval, (float) yval);
+    }
+
+    /**
+     * Checks if a given value is between the width and the height
+     *
+     * @param xval The x-position of the value
+     * @param yval The y-position of the value
+     * @return Whether the given value is between the width and the height
+     */
+    public boolean isWithin(float xval, float yval)
+    {
+        return isMouseOver(xval, yval, x, y, width, height);
     }
 
     public boolean isMouseOver(double mx, double my, double x1, double y1,
@@ -474,7 +511,7 @@ public abstract class Component implements Drawable, Globals
      * @param x
      * @param y
      */
-    public void setPos(double x, double y)
+    public void setPos(float x, float y)
     {
         this.x = x;
         this.y = y;
@@ -486,18 +523,18 @@ public abstract class Component implements Drawable, Globals
      * @param width
      * @param height
      */
-    public void setDimensions(double width, double height)
+    public void setDimensions(float width, float height)
     {
         setWidth(width);
         setHeight(height);
     }
 
-    public void setHeight(double height)
+    public void setHeight(float height)
     {
         this.height = height;
     }
 
-    public void setWidth(double width)
+    public void setWidth(float width)
     {
         this.width = width;
     }

@@ -1,7 +1,7 @@
 package com.caspian.client.impl.gui.click.impl.config.setting;
 
 import com.caspian.client.api.config.Config;
-import com.caspian.client.impl.gui.click.impl.config.ConfigFrame;
+import com.caspian.client.impl.gui.click.impl.config.CategoryFrame;
 import net.minecraft.client.util.math.MatrixStack;
 
 /**
@@ -12,7 +12,7 @@ import net.minecraft.client.util.math.MatrixStack;
  *
  *
  */
-public class TextComponent extends ConfigComponent<String>
+public class TextButton extends ConfigButton<String>
 {
     /**
      *
@@ -20,22 +20,24 @@ public class TextComponent extends ConfigComponent<String>
      * @param frame
      * @param config
      */
-    public TextComponent(ConfigFrame frame, Config<String> config)
+    public TextButton(CategoryFrame frame, Config<String> config, float x, float y)
     {
-        super(frame, config);
+        super(frame, config, x, y);
     }
 
     /**
      *
      *
      * @param matrices
+     * @param ix
+     * @param iy
      * @param mouseX
      * @param mouseY
      * @param delta
      */
     @Override
-    public void render(MatrixStack matrices, float mouseX, float mouseY,
-                       float delta)
+    public void render(MatrixStack matrices, float ix, float iy, float mouseX,
+                       float mouseY, float delta)
     {
 
     }

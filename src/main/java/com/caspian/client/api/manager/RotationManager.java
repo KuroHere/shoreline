@@ -4,7 +4,7 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.handler.rotation.RotationHandler;
 import com.caspian.client.api.handler.rotation.RotationPriority;
 import com.caspian.client.api.handler.rotation.RotationRequest;
-import com.caspian.client.api.module.Module;
+import com.caspian.client.api.module.RotationModule;
 import net.minecraft.util.math.MathHelper;
 
 /**
@@ -36,7 +36,7 @@ public class RotationManager
      * @param yaw
      * @param pitch
      */
-    public void setRotation(final Module requester,
+    public void setRotation(final RotationModule requester,
                             final RotationPriority priority,
                             final float yaw,
                             final float pitch)
@@ -50,7 +50,7 @@ public class RotationManager
      * @param yaw
      * @param pitch
      */
-    public void setRotation(final Module requester,
+    public void setRotation(final RotationModule requester,
                             final float yaw,
                             final float pitch)
     {
@@ -72,7 +72,7 @@ public class RotationManager
      *
      * @param requester
      */
-    public void removeRotation(final Module requester)
+    public void removeRotation(final RotationModule requester)
     {
         handler.remove(requester);
     }
@@ -127,7 +127,7 @@ public class RotationManager
      *
      * @return
      */
-    public Module getRotatingModule()
+    public RotationModule getRotatingModule()
     {
         return handler.getRotatingModule();
     }

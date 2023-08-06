@@ -6,6 +6,7 @@ import com.caspian.client.api.handler.MacroHandler;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -19,7 +20,7 @@ import java.util.Set;
 public class MacroManager
 {
     // The handler for handling macros
-    private final MacroHandler macroHandler;
+    private final MacroHandler handler;
     //
     private final Set<Macro> macros = new HashSet<>();
 
@@ -29,8 +30,8 @@ public class MacroManager
      */
     public MacroManager()
     {
-        macroHandler = new MacroHandler();
-        Caspian.EVENT_HANDLER.subscribe(macroHandler);
+        handler = new MacroHandler();
+        Caspian.EVENT_HANDLER.subscribe(handler);
     }
 
     /**
@@ -52,6 +53,31 @@ public class MacroManager
         for (Macro macro : macros)
         {
             register(macro);
+        }
+    }
+
+    /**
+     *
+     *
+     * @param name
+     * @param keycode
+     */
+    public void replaceKey(String name, int keycode)
+    {
+        Runnable temp = null;
+        for (Macro m : macros)
+        {
+            final String id = m.getId();
+            if (id.contains(name))
+            {
+                temp = m.macro();
+                break;
+            }
+        }
+        if (temp != null)
+        {
+            macros.removeIf(m -> m.getId().contains(name));
+            macros.add(new Macro(name, keycode, temp));
         }
     }
 

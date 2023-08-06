@@ -12,6 +12,7 @@ import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.render.RenderOverlayEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import com.caspian.client.util.string.EnumFormatter;
 import com.caspian.client.util.string.StringUtil;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.Window;
@@ -56,9 +57,9 @@ public class HudModule extends ToggleModule
     Config<Boolean> netherCoordsConfig = new BooleanConfig(
             "NetherCoords", "Displays nether coordinates", true);
     Config<Boolean> serverBrandConfig = new BooleanConfig("ServerBrand",
-            "", true);
+            "Displays the current server brand", false);
     Config<Boolean> speedConfig = new BooleanConfig("Speed",
-            "", true);
+            "Displays the current movement speed of the player in kmh", true);
     Config<Boolean> pingConfig = new BooleanConfig("Ping",
             "Display server response time in ms", true);
     Config<Boolean> tpsConfig = new BooleanConfig("TPS",
@@ -128,17 +129,20 @@ public class HudModule extends ToggleModule
                                     .sorted(Comparator.comparing(m -> m.getName()))
                                     .toList();
                             case LENGTH -> modules.stream()
-                                    .sorted(Comparator.comparing(m -> RenderManager.textWidth(getFormattedModule(m))))
+                                    .sorted(Comparator.comparing(m -> -RenderManager.textWidth(getFormattedModule(m))))
                                     .toList();
                         };
                 for (Module m : modules)
                 {
-                    String text = getFormattedModule(m);
-                    int width = RenderManager.textWidth(text);
-                    RenderManager.renderText(event.getMatrices(), text,
-                            res.getScaledWidth() - width - 1.0f, topRight,
-                            Modules.COLORS.getRGB());
-                    topRight += 10.0f;
+                    if (m instanceof ToggleModule t && t.isEnabled())
+                    {
+                        String text = getFormattedModule(m);
+                        int width = RenderManager.textWidth(text);
+                        RenderManager.renderText(event.getMatrices(), text,
+                                res.getScaledWidth() - width - 1.0f, topRight,
+                                Modules.COLORS.getRGB());
+                        topRight += 10.0f;
+                    }
                 }
             }
             if (potionEffectsConfig.getValue())
@@ -217,16 +221,16 @@ public class HudModule extends ToggleModule
             if (coordsConfig.getValue())
             {
                 final DecimalFormat decimal = new DecimalFormat("#.0");
-                String x = Double.toString(mc.player.getX());
-                String y = Double.toString(mc.player.getY());
-                String z = Double.toString(mc.player.getZ());
+                double x = mc.player.getX();
+                double y = mc.player.getY();
+                double z = mc.player.getZ();
                 boolean nether = mc.world.getRegistryKey() == World.NETHER;
-                String nx = Double.toString(nether ? mc.player.getX() * 8 :
-                        mc.player.getX() / 8);
-                String nz = Double.toString(nether ? mc.player.getZ() * 8 :
-                        mc.player.getZ() / 8);
+                double nx = nether ? mc.player.getX() * 8 :
+                        mc.player.getX() / 8;
+                double nz = nether ? mc.player.getZ() * 8 :
+                        mc.player.getZ() / 8;
                 RenderManager.renderText(event.getMatrices(), String.format(
-                                "XYZ %s, %s, %s" + (netherCoordsConfig.getValue() ?
+                                "XYZ %s, %s, %s " + (netherCoordsConfig.getValue() ?
                                         "[%s, %s]" : ""),
                                 Formatting.WHITE + decimal.format(x),
                                 decimal.format(y),
@@ -239,10 +243,10 @@ public class HudModule extends ToggleModule
             if (directionConfig.getValue())
             {
                 Direction direction = mc.player.getHorizontalFacing();
+                String dir = EnumFormatter.formatEnum(direction);
                 Direction.AxisDirection axis = direction.getDirection();
                 RenderManager.renderText(event.getMatrices(), String.format("%s [%s]",
-                                direction.getName(), Formatting.WHITE + "" +
-                                        direction.getAxis() +
+                                dir, Formatting.WHITE + "" + direction.getAxis() +
                                         (axis == Direction.AxisDirection.POSITIVE ? "+" : "-")
                                         + Formatting.RESET),
                         2, bottomLeft, Modules.COLORS.getRGB());

@@ -1,6 +1,6 @@
 package com.caspian.client.api.handler.rotation;
 
-import com.caspian.client.api.module.Module;
+import com.caspian.client.api.module.RotationModule;
 
 /**
  *
@@ -11,7 +11,7 @@ import com.caspian.client.api.module.Module;
 public class RotationRequest implements Comparable<RotationRequest>
 {
     //
-    private final Module requester;
+    private final RotationModule requester;
     private final long time;
     private final int priority;
     //
@@ -25,7 +25,7 @@ public class RotationRequest implements Comparable<RotationRequest>
      * @param yaw
      * @param pitch
      */
-    public RotationRequest(Module requester,
+    public RotationRequest(RotationModule requester,
                            RotationPriority priority,
                            float yaw,
                            float pitch)
@@ -44,7 +44,7 @@ public class RotationRequest implements Comparable<RotationRequest>
      * @param yaw
      * @param pitch
      */
-    public RotationRequest(Module requester,
+    public RotationRequest(RotationModule requester,
                            float yaw,
                            float pitch)
     {
@@ -72,7 +72,7 @@ public class RotationRequest implements Comparable<RotationRequest>
         return Integer.compare(priority, other.getPriority());
     }
 
-    public Module getRequester()
+    public RotationModule getRequester()
     {
         return requester;
     }

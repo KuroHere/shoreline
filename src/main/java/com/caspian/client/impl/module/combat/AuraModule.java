@@ -8,6 +8,7 @@ import com.caspian.client.api.config.setting.NumberDisplay;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.handler.tick.TickSync;
 import com.caspian.client.api.module.ModuleCategory;
+import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.network.DisconnectEvent;
@@ -58,7 +59,7 @@ import java.util.TreeSet;
  * @author linus
  * @since 1.0
  */
-public class AuraModule extends ToggleModule
+public class AuraModule extends RotationModule
 {
     Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swings the " +
             "hand after attacking", true);
@@ -281,7 +282,7 @@ public class AuraModule extends ToggleModule
                         mc.world.getEntities());
                 case SINGLE ->
                 {
-                    if (target != null && !target.isValid())
+                    if (target == null || !target.isValid())
                     {
                         target = getAuraTarget(eyepos, mc.world.getEntities());
                     }

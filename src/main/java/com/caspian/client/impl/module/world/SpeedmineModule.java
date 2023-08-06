@@ -8,7 +8,7 @@ import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.handler.rotation.RotationPriority;
 import com.caspian.client.api.module.ModuleCategory;
-import com.caspian.client.api.module.ToggleModule;
+import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.AttackBlockEvent;
@@ -18,12 +18,10 @@ import com.caspian.client.init.Modules;
 import com.caspian.client.util.player.RotationUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
@@ -41,7 +39,7 @@ import net.minecraft.world.BlockView;
  * @author linus
  * @since 1.0
  */
-public class SpeedmineModule extends ToggleModule
+public class SpeedmineModule extends RotationModule
 {
     //
     Config<Boolean> instantConfig = new BooleanConfig("Instant",

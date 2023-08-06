@@ -2,6 +2,7 @@ package com.caspian.client.api.handler.rotation;
 
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.Module;
+import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.render.RenderPlayerEvent;
 import com.caspian.client.init.Modules;
@@ -57,7 +58,7 @@ public class RotationHandler implements Globals
      * @param yaw
      * @param pitch
      */
-    public void request(final Module requester,
+    public void request(final RotationModule requester,
                         final RotationPriority priority,
                         final float yaw,
                         final float pitch)
@@ -81,7 +82,7 @@ public class RotationHandler implements Globals
      * @param yaw
      * @param pitch
      */
-    public void request(Module requester, float yaw, float pitch)
+    public void request(RotationModule requester, float yaw, float pitch)
     {
         request(requester, RotationPriority.NORMAL, yaw, pitch);
     }
@@ -122,8 +123,12 @@ public class RotationHandler implements Globals
      *
      * @return
      */
-    public Module getRotatingModule()
+    public RotationModule getRotatingModule()
     {
+        if (rotation == null)
+        {
+            return null;
+        }
         return rotation.getRequester();
     }
 

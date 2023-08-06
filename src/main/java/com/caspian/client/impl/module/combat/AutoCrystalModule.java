@@ -10,6 +10,7 @@ import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.handler.tick.TickSync;
 import com.caspian.client.api.module.ModuleCategory;
+import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.RunTickEvent;
@@ -72,7 +73,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @see ThreadCalcProcessor
  * @see DamageData
  */
-public class AutoCrystalModule extends ToggleModule
+public class AutoCrystalModule extends RotationModule
 {
     // GENERAL SETTINGS
     Config<Boolean> multitaskConfig = new BooleanConfig("Multitask",
@@ -137,7 +138,7 @@ public class AutoCrystalModule extends ToggleModule
     Config<Integer> rotateTimeoutConfig = new NumberConfig<>(
             "RotateTimeout", "Minimum ticks to hold the rotation yaw after " +
             "reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
-    Config<Boolean> rotateTickFactorConfig = new BooleanConfig("Rotate-TickFactor",
+    Config<Boolean> rotateTickFactorConfig = new BooleanConfig("Rotate-TickReduction",
             "Factors in angles when calculating crystals to minimize " +
                     "attack ticks and speed up the break/place loop", false,
             () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
@@ -2337,7 +2338,7 @@ public class AutoCrystalModule extends ToggleModule
                 return attackData;
             }
             //
-            final TreeSet<DamageData<EndCrystalEntity>> min = new TreeSet<>();
+            NavigableSet<DamageData<EndCrystalEntity>> min = new TreeSet<>();
             for (EndCrystalEntity c : crystals)
             {
                 if (manualConfig.getValue() && manuals.remove(toBase(c)) != null)
@@ -2467,7 +2468,7 @@ public class AutoCrystalModule extends ToggleModule
             return true;
         }
         final Vec3d expected = new Vec3d(p.getX() + 0.5,
-                p.getY() + 2.70000004768372, p.getZ() + 0.5);
+                p.getY() + 2.700000047683716, p.getZ() + 0.5);
         final BlockHitResult result = mc.world.raycast(new RaycastContext(
                 Managers.POSITION.getCameraPosVec(1.0f),
                 expected, RaycastContext.ShapeType.COLLIDER,
@@ -2516,7 +2517,7 @@ public class AutoCrystalModule extends ToggleModule
             //
             final BlockPos mine = Modules.SPEEDMINE.getBlockTarget();
             //
-            final TreeSet<DamageData<BlockPos>> min = new TreeSet<>();
+            NavigableSet<DamageData<BlockPos>> min = new TreeSet<>();
             // placement processing
             for (BlockPos p : blocks)
             {
@@ -3525,10 +3526,6 @@ public class AutoCrystalModule extends ToggleModule
             }
             // Diffs
             double d = getDamage() - other.getDamage();
-            if (rotateTickFactorConfig.getValue())
-            {
-                return getRotationTickDiff(other);
-            }
             if (other.isMineDamage())
             {
                 return isMineDamage() ? Double.compare(getDamage(),
@@ -3540,6 +3537,11 @@ public class AutoCrystalModule extends ToggleModule
             }
             if (Math.abs(d) > 0.2)
             {
+                double diff = getRotationTickDiff(other);
+                if (diff != 0.0)
+                {
+                    return diff >= Math.abs(d) ? 1 : -1;
+                }
                 return Double.compare(getDamage(), other.getDamage());
             }
             double l = getLocal() - other.getLocal();
@@ -3571,24 +3573,27 @@ public class AutoCrystalModule extends ToggleModule
          * @param other
          * @return
          */
-        public int getRotationTickDiff(final DamageData<?> other)
+        private double getRotationTickDiff(final DamageData<?> other)
         {
-            final Vec3d eyepos = Managers.POSITION.getEyePos();
-            float[] rots1 = getRotations(eyepos);
-            float[] rots2 = other.getRotations(eyepos);
-            float yaw = Managers.ROTATION.getWrappedYaw();
-            if (rots1 != null && rots2 != null)
+            if (rotateTickFactorConfig.getValue())
             {
-                float ticks1 = Math.abs(yaw - rots1[0]) / rotateLimitConfig.getValue();
-                float ticks2 = Math.abs(yaw - rots2[0]) / rotateLimitConfig.getValue();
-                float diff = ticks1 - ticks2;
-                double d = getDamage() - other.getDamage();
-                if (d < 0.0 && diff < 0.0f || d > 0.0 && diff > 0.0f)
+                final Vec3d eyepos = Managers.POSITION.getEyePos();
+                float[] rots1 = getRotations(eyepos);
+                float[] rots2 = other.getRotations(eyepos);
+                float yaw = Managers.ROTATION.getWrappedYaw();
+                if (rots1 != null && rots2 != null)
                 {
-                    return Math.abs(diff) * rotateDamageConfig.getValue() > Math.abs(d) ? -1 : 1;
+                    float ticks1 = Math.abs(yaw - rots1[0]) / rotateLimitConfig.getValue();
+                    float ticks2 = Math.abs(yaw - rots2[0]) / rotateLimitConfig.getValue();
+                    double diff = Math.ceil(ticks1) - Math.ceil(ticks2);
+                    double d = getDamage() - other.getDamage();
+                    if (d < 0.0 && diff < 0.0f || d > 0.0 && diff > 0.0f)
+                    {
+                        return Math.abs(diff) * rotateDamageConfig.getValue();
+                    }
                 }
             }
-            return 0;
+            return 0.0;
         }
 
         /**
@@ -3704,7 +3709,7 @@ public class AutoCrystalModule extends ToggleModule
             else if (src instanceof BlockPos cpos)
             {
                 final Vec3d border = new Vec3d(cpos.getX() + 0.5,
-                        cpos.getY() + 0.95, cpos.getZ() + 0.5);
+                        cpos.getY() + 1.0, cpos.getZ() + 0.5);
                 final Vec3d rot = vectorBorderConfig.getValue() ? border :
                         cpos.toCenterPos();
                 return randomVectorConfig.getValue() ? getRandomVec(cpos,
@@ -3819,7 +3824,6 @@ public class AutoCrystalModule extends ToggleModule
         {
             return target;
         }
-
 
         /**
          *

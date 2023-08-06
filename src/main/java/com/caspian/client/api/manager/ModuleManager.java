@@ -4,7 +4,22 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.module.Module;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.module.client.ClickGuiModule;
-import com.caspian.client.impl.module.movement.SprintModule;
+import com.caspian.client.impl.module.client.ColorsModule;
+import com.caspian.client.impl.module.client.HudModule;
+import com.caspian.client.impl.module.client.RotationsModule;
+import com.caspian.client.impl.module.combat.AuraModule;
+import com.caspian.client.impl.module.combat.AutoCrystalModule;
+import com.caspian.client.impl.module.combat.AutoTotemModule;
+import com.caspian.client.impl.module.combat.CriticalsModule;
+import com.caspian.client.impl.module.exploit.AntiHungerModule;
+import com.caspian.client.impl.module.exploit.FakeLatencyModule;
+import com.caspian.client.impl.module.exploit.SwingModule;
+import com.caspian.client.impl.module.misc.TimerModule;
+import com.caspian.client.impl.module.movement.*;
+import com.caspian.client.impl.module.render.BlockHighlightModule;
+import com.caspian.client.impl.module.render.FullbrightModule;
+import com.caspian.client.impl.module.world.FastPlaceModule;
+import com.caspian.client.impl.module.world.SpeedmineModule;
 import com.caspian.client.init.Managers;
 
 import java.util.*;
@@ -30,13 +45,31 @@ public class ModuleManager
         register(
                 // Client
                 new ClickGuiModule(),
+                new ColorsModule(),
+                new HudModule(),
+                new RotationsModule(),
                 // Combat
-                // new AutoCrystalModule(),
+                new AuraModule(),
+                new AutoCrystalModule(),
+                new AutoTotemModule(),
+                new CriticalsModule(),
                 // Exploit
+                new AntiHungerModule(),
+                new SwingModule(),
+                // Misc
+                new TimerModule(),
                 // Movement
-                new SprintModule()
+                new FastFallModule(),
+                new NoSlowModule(),
+                new SpeedModule(),
+                new SprintModule(),
+                new VelocityModule(),
                 // Render
+                new BlockHighlightModule(),
+                new FullbrightModule(),
                 // World
+                new FastPlaceModule(),
+                new SpeedmineModule()
         );
         Caspian.info("Registered {} modules!", modules.size());
     }

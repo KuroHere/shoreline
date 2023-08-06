@@ -3,6 +3,7 @@ package com.caspian.client.mixin.network;
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.handler.rotation.RotationRequest;
+import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.MovementSlowdownEvent;
 import com.caspian.client.impl.event.network.SetCurrentHandEvent;
@@ -13,6 +14,7 @@ import net.minecraft.client.input.Input;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.MovementType;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -75,6 +77,9 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     protected MinecraftClient client;
     @Shadow
     public Input input;
+    //
+    @Shadow
+    protected abstract void autoJump(float dx, float dz);
 
     /**
      * 
@@ -203,6 +208,30 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         MovementSlowdownEvent movementUpdateEvent =
                 new MovementSlowdownEvent(input);
         Caspian.EVENT_HANDLER.dispatch(movementUpdateEvent);
+    }
+
+    /**
+     *
+     *
+     * @param movementType
+     * @param movement
+     * @param ci
+     */
+    @Inject(method = "move", at = @At(value = "HEAD"), cancellable = true)
+    private void hookMove(MovementType movementType, Vec3d movement,
+                          CallbackInfo ci)
+    {
+        final PlayerMoveEvent playerMoveEvent =
+                new PlayerMoveEvent(movementType, movement);
+        Caspian.EVENT_HANDLER.dispatch(playerMoveEvent);
+        if (playerMoveEvent.isCanceled())
+        {
+            ci.cancel();
+            double d = getX();
+            double e = getZ();
+            super.move(movementType, playerMoveEvent.getMovement());
+            autoJump((float) (getX() - d), (float) (getZ() - e));
+        }
     }
     
     /**

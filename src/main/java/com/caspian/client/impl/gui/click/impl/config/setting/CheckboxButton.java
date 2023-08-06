@@ -1,7 +1,9 @@
 package com.caspian.client.impl.gui.click.impl.config.setting;
 
 import com.caspian.client.api.config.Config;
-import com.caspian.client.impl.gui.click.impl.config.ConfigFrame;
+import com.caspian.client.api.render.RenderManager;
+import com.caspian.client.impl.gui.click.impl.config.CategoryFrame;
+import com.caspian.client.init.Modules;
 import net.minecraft.client.util.math.MatrixStack;
 
 /**
@@ -10,8 +12,9 @@ import net.minecraft.client.util.math.MatrixStack;
  * @author linus
  * @since 1.0
  *
+ * @see Config
  */
-public class DropdownComponent extends ConfigComponent<Enum<?>>
+public class CheckboxButton extends ConfigButton<Boolean>
 {
     /**
      *
@@ -19,24 +22,32 @@ public class DropdownComponent extends ConfigComponent<Enum<?>>
      * @param frame
      * @param config
      */
-    public DropdownComponent(ConfigFrame frame, Config<Enum<?>> config)
+    public CheckboxButton(CategoryFrame frame, Config<Boolean> config,
+                          float x, float y)
     {
-        super(frame, config);
+        super(frame, config, x, y);
     }
 
     /**
      *
      *
      * @param matrices
+     * @param ix
+     * @param iy
      * @param mouseX
      * @param mouseY
      * @param delta
      */
     @Override
-    public void render(MatrixStack matrices, float mouseX, float mouseY,
-                       float delta)
+    public void render(MatrixStack matrices, float ix, float iy, float mouseX,
+                       float mouseY, float delta)
     {
-
+        x = ix;
+        y = iy;
+        boolean val = config.getValue();
+        rect(matrices, val ? Modules.COLORS.getRGB() : 0x00000000);
+        RenderManager.renderText(matrices, config.getName(), ix + 2.0f,
+                iy + 4.0f, -1);
     }
 
     /**
@@ -49,7 +60,14 @@ public class DropdownComponent extends ConfigComponent<Enum<?>>
     @Override
     public void mouseClicked(double mouseX, double mouseY, int button)
     {
-
+        if (isWithin(mouseX, mouseY))
+        {
+            if (button == 0)
+            {
+                boolean val = config.getValue();
+                config.setValue(!val);
+            }
+        }
     }
 
     /**
@@ -77,4 +95,5 @@ public class DropdownComponent extends ConfigComponent<Enum<?>>
     {
 
     }
+
 }

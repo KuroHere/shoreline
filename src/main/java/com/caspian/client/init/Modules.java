@@ -55,9 +55,9 @@ public class Modules
     public static final SprintModule SPRINT;
     public static final BlockHighlightModule BLOCK_HIGHLIGHT;
     public static final FullbrightModule FULLBRIGHT;
-    public static final NoWeatherModule NO_WEATHER;
-    public static final ViewClipModule VIEW_CLIP;
-    public static final ViewModelModule VIEW_MODEL;
+    // public static final NoWeatherModule NO_WEATHER;
+    // public static final ViewClipModule VIEW_CLIP;
+    // public static final ViewModelModule VIEW_MODEL;
     public static final FastPlaceModule FAST_PLACE;
     public static final SpeedmineModule SPEEDMINE;
 
@@ -103,7 +103,6 @@ public class Modules
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(
                     "autototem-module");
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
-            VELOCITY = (VelocityModule) getRegisteredModule("velocity");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
                     "antihunger-module");
             SWING = (SwingModule) getRegisteredModule("swing-module");
@@ -111,16 +110,17 @@ public class Modules
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow-module");
             SPEED = (SpeedModule) getRegisteredModule("speed-module");
             SPRINT = (SprintModule) getRegisteredModule("sprint-module");
+            VELOCITY = (VelocityModule) getRegisteredModule("velocity");
             BLOCK_HIGHLIGHT = (BlockHighlightModule) getRegisteredModule(
                     "blockhighlight-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");
-            NO_WEATHER = (NoWeatherModule) getRegisteredModule(
-                    "noweather-module");
-            VIEW_CLIP = (ViewClipModule) getRegisteredModule(
-                    "viewclip-module");
-            VIEW_MODEL = (ViewModelModule) getRegisteredModule(
-                    "viewmodel-module");
+            // NO_WEATHER = (NoWeatherModule) getRegisteredModule(
+            //        "noweather-module");
+            // VIEW_CLIP = (ViewClipModule) getRegisteredModule(
+            //        "viewclip-module");
+            // VIEW_MODEL = (ViewModelModule) getRegisteredModule(
+            //        "viewmodel-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule(
                     "fastplace-module");
             SPEEDMINE = (SpeedmineModule) getRegisteredModule(
@@ -128,6 +128,10 @@ public class Modules
             // reflect configuration properties for each cached module
             for (Module module : CACHE)
             {
+                if (module == null)
+                {
+                    continue;
+                }
                 module.reflectConfigs();
             }
             CACHE.clear();

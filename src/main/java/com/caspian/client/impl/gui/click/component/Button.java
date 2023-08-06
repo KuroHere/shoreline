@@ -8,7 +8,25 @@ package com.caspian.client.impl.gui.click.component;
 public abstract class Button extends Component implements Interactable
 {
     //
-    private final Frame frame;
+    protected final Frame frame;
+
+    /**
+     *
+     *
+     * @param frame
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     */
+    public Button(Frame frame, float x, float y, float width, float height)
+    {
+        this.frame = frame;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
 
     /**
      *
