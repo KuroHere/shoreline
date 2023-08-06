@@ -16,7 +16,7 @@ import java.awt.*;
 public class ColorsModule extends ConcurrentModule
 {
     //
-    final Config<Color> colorConfig = new ColorConfig("Color", "Global" +
+    Config<Color> colorConfig = new ColorConfig("Color", "Global" +
             " client color", new Color(0xffff0050));
     /**
      *

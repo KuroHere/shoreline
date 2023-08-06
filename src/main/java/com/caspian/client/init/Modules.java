@@ -12,11 +12,8 @@ import com.caspian.client.impl.module.combat.AutoTotemModule;
 import com.caspian.client.impl.module.combat.CriticalsModule;
 import com.caspian.client.impl.module.exploit.SwingModule;
 import com.caspian.client.impl.module.misc.TimerModule;
-import com.caspian.client.impl.module.movement.SpeedModule;
-import com.caspian.client.impl.module.movement.VelocityModule;
+import com.caspian.client.impl.module.movement.*;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
-import com.caspian.client.impl.module.movement.NoSlowModule;
-import com.caspian.client.impl.module.movement.SprintModule;
 import com.caspian.client.impl.module.render.*;
 import com.caspian.client.impl.module.world.FastPlaceModule;
 import com.caspian.client.impl.module.world.SpeedmineModule;
@@ -36,30 +33,31 @@ public class Modules
 {
     // The module initialization cache. This prevents modules from being
     // initialized more than once.
-    private static final Set<Module> CACHE;
+    private static Set<Module> CACHE;
     // Module instances.
-    public static final ClickGuiModule CLICK_GUI;
-    public static final ColorsModule COLORS;
-    public static final HudModule HUD;
-    public static final RotationsModule ROTATIONS;
-    public static final AuraModule AURA;
-    public static final AutoCrystalModule AUTO_CRYSTAL;
-    public static final AutoTotemModule AUTO_TOTEM;
-    public static final CriticalsModule CRITICALS;
-    public static final VelocityModule VELOCITY;
-    public static final AntiHungerModule ANTI_HUNGER;
-    public static final SwingModule SWING;
-    public static final TimerModule TIMER;
-    public static final NoSlowModule NO_SLOW;
-    public static final SpeedModule SPEED;
-    public static final SprintModule SPRINT;
-    public static final BlockHighlightModule BLOCK_HIGHLIGHT;
-    public static final FullbrightModule FULLBRIGHT;
-    // public static final NoWeatherModule NO_WEATHER;
-    // public static final ViewClipModule VIEW_CLIP;
-    // public static final ViewModelModule VIEW_MODEL;
-    public static final FastPlaceModule FAST_PLACE;
-    public static final SpeedmineModule SPEEDMINE;
+    public static ClickGuiModule CLICK_GUI;
+    public static ColorsModule COLORS;
+    public static HudModule HUD;
+    public static RotationsModule ROTATIONS;
+    public static AuraModule AURA;
+    public static AutoCrystalModule AUTO_CRYSTAL;
+    public static AutoTotemModule AUTO_TOTEM;
+    public static CriticalsModule CRITICALS;
+    public static VelocityModule VELOCITY;
+    public static AntiHungerModule ANTI_HUNGER;
+    public static SwingModule SWING;
+    public static TimerModule TIMER;
+    public static FastFallModule FAST_FALL;
+    public static NoSlowModule NO_SLOW;
+    public static SpeedModule SPEED;
+    public static SprintModule SPRINT;
+    public static BlockHighlightModule BLOCK_HIGHLIGHT;
+    public static FullbrightModule FULLBRIGHT;
+    // public static NoWeatherModule NO_WEATHER;
+    // public static ViewClipModule VIEW_CLIP;
+    // public static ViewModelModule VIEW_MODEL;
+    public static FastPlaceModule FAST_PLACE;
+    public static SpeedmineModule SPEEDMINE;
 
     /**
      * Returns the registered {@link Module} with the param name in the
@@ -72,7 +70,7 @@ public class Modules
      *
      * @see ModuleManager
      */
-    private static Module getRegisteredModule(String id)
+    private static Module getRegisteredModule(final String id)
     {
         Module registered = Managers.MODULE.getModule(id);
         if (CACHE.add(registered))
@@ -86,7 +84,15 @@ public class Modules
         }
     }
 
-    static
+    /**
+     * Initializes the modules instances. Should not be used if the
+     * modules are already initialized. Cannot function unless the
+     * {@link ModuleManager} is initialized.
+     *
+     * @see #getRegisteredModule(String)
+     * @see Managers#isInitialized()
+     */
+    public static void init()
     {
         if (Managers.isInitialized())
         {
@@ -107,10 +113,11 @@ public class Modules
                     "antihunger-module");
             SWING = (SwingModule) getRegisteredModule("swing-module");
             TIMER = (TimerModule) getRegisteredModule("timer-module");
+            FAST_FALL = (FastFallModule) getRegisteredModule("fastfall-module");
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow-module");
             SPEED = (SpeedModule) getRegisteredModule("speed-module");
             SPRINT = (SprintModule) getRegisteredModule("sprint-module");
-            VELOCITY = (VelocityModule) getRegisteredModule("velocity");
+            VELOCITY = (VelocityModule) getRegisteredModule("velocity-module");
             BLOCK_HIGHLIGHT = (BlockHighlightModule) getRegisteredModule(
                     "blockhighlight-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(

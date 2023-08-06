@@ -3,6 +3,7 @@ package com.caspian.client;
 import com.caspian.client.api.event.handler.EventHandler;
 import com.caspian.client.api.file.ClientConfiguration;
 import com.caspian.client.init.Managers;
+import com.caspian.client.init.Modules;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,6 +52,7 @@ public class Caspian
     {
         info("Starting init ...");
         Managers.init();
+        Modules.init();
     }
 
     /**

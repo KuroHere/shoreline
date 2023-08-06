@@ -40,16 +40,6 @@ public class FastFallModule extends ToggleModule
 
     /**
      *
-     * @return
-     */
-    @Override
-    public String getMetaData()
-    {
-        return EnumFormatter.formatEnum(fallModeConfig.getValue());
-    }
-
-    /**
-     *
      *
      * @param event
      */
