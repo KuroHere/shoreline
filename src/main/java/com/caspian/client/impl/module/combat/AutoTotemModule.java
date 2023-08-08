@@ -284,7 +284,8 @@ public class AutoTotemModule extends ToggleModule
             {
                 if (calcTotem == -1)
                 {
-                    Caspian.error("No TOTEM_OF_UNDYING left in inventory!");
+                    Caspian.error(Modules.AUTO_TOTEM, "No TOTEM_OF_UNDYING " +
+                            "left in inventory!");
                 }
                 else if (off.isEmpty()
                         || off.getItem() != Items.TOTEM_OF_UNDYING)
@@ -357,7 +358,7 @@ public class AutoTotemModule extends ToggleModule
             }
             if (calcOffhand == -1)
             {
-                Caspian.error("No %s left in inventory!",
+                Caspian.error(Modules.AUTO_TOTEM, "No {} left in inventory!",
                         offhand.getName());
                 return;
             }
@@ -399,7 +400,8 @@ public class AutoTotemModule extends ToggleModule
                     ItemStack off = mc.player.getOffHandStack();
                     if (calcTotem == -1)
                     {
-                        Caspian.error("No TOTEM_OF_UNDYING left in inventory!");
+                        Caspian.error(Modules.AUTO_TOTEM, "No TOTEM_OF_UNDYING"
+                                + "left in inventory!");
                         return;
                     }
                     preClickSlot();

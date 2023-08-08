@@ -11,10 +11,10 @@ public class StringUtil
     public static final String EMPTY_STRING = "";
 
     /**
+     * Capitalises a given string
      *
-     *
-     * @param string
-     * @return
+     * @param string The string to capitalise
+     * @return The string with the first letter capitalised
      */
     public static String capitalize(final String string)
     {

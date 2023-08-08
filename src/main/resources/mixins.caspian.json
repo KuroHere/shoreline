@@ -18,6 +18,7 @@
     "render.MixinLightmapTextureManager",
     "render.MixinRenderTickCounter",
     "render.entity.MixinPlayerEntityRenderer",
+    "particle.MixinParticleManager",
     "accessor.AccessorChatScreen",
     "accessor.AccessorClientWorld",
     "accessor.AccessorEntityVelocityUpdateS2CPacket",

@@ -23,7 +23,7 @@ import java.math.RoundingMode;
  */
 public class SliderButton<T extends Number> extends ConfigButton<T>
 {
-    //
+    // Slider rounding scale
     private final int scale;
 
     /**
@@ -35,7 +35,7 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
     public SliderButton(CategoryFrame frame, Config<T> config, float x, float y)
     {
         super(frame, config, x, y);
-        // Slider scale
+        //
         final String sval = String.valueOf(config.getValue());
         scale = sval.substring(sval.indexOf(".") + 1).length();
     }

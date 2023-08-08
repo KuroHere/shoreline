@@ -12,12 +12,13 @@ import com.caspian.client.impl.module.combat.AutoCrystalModule;
 import com.caspian.client.impl.module.combat.AutoTotemModule;
 import com.caspian.client.impl.module.combat.CriticalsModule;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
-import com.caspian.client.impl.module.exploit.FakeLatencyModule;
 import com.caspian.client.impl.module.exploit.SwingModule;
+import com.caspian.client.impl.module.misc.FakePlayerModule;
 import com.caspian.client.impl.module.misc.TimerModule;
 import com.caspian.client.impl.module.movement.*;
 import com.caspian.client.impl.module.render.BlockHighlightModule;
 import com.caspian.client.impl.module.render.FullbrightModule;
+import com.caspian.client.impl.module.render.NoRenderModule;
 import com.caspian.client.impl.module.world.FastPlaceModule;
 import com.caspian.client.impl.module.world.SpeedmineModule;
 import com.caspian.client.init.Managers;
@@ -32,7 +33,8 @@ import java.util.*;
  */
 public class ModuleManager
 {
-    //
+    // The client module register. Keeps a list of modules and their ids for
+    // easy retrieval by id.
     private final Map<String, Module> modules =
             Collections.synchronizedMap(new LinkedHashMap<>());
 
@@ -57,6 +59,7 @@ public class ModuleManager
                 new AntiHungerModule(),
                 new SwingModule(),
                 // Misc
+                new FakePlayerModule(),
                 new TimerModule(),
                 // Movement
                 new FastFallModule(),
@@ -67,6 +70,7 @@ public class ModuleManager
                 // Render
                 new BlockHighlightModule(),
                 new FullbrightModule(),
+                new NoRenderModule(),
                 // World
                 new FastPlaceModule(),
                 new SpeedmineModule()

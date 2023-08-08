@@ -16,14 +16,6 @@ public interface AccessorPlayerInteractEntityC2SPacket
     /**
      *
      *
-     * @param entityId
-     */
-    @Accessor("entityId")
-    void hookSetEntityId(int entityId);
-
-    /**
-     *
-     *
      * @return
      */
     @Accessor("type")

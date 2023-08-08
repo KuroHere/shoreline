@@ -1,10 +1,13 @@
 package com.caspian.client.util.world;
 
+import com.caspian.client.util.Globals;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -13,23 +16,38 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author linus
  * @since 1.0
  */
-public class FakePlayerEntity extends OtherClientPlayerEntity
+public class FakePlayerEntity extends OtherClientPlayerEntity implements Globals
 {
     //
-    public static final AtomicInteger CURRENT_ID = new AtomicInteger(1000000);
-    //
     private final PlayerEntity player;
+    //
+    public static final AtomicInteger CURRENT_ID = new AtomicInteger(1000000);
 
     /**
      *
      *
      * @param player
+     * @param name
      */
-    public FakePlayerEntity(PlayerEntity player)
+    public FakePlayerEntity(PlayerEntity player, String name)
     {
-        super(MinecraftClient.getInstance().world, player.getGameProfile());
+        super(MinecraftClient.getInstance().world,
+                new GameProfile(UUID.fromString("8667ba71-b85a-4004-af54-457a9734eed7"), name));
         this.player = player;
         copyPositionAndRotation(player);
+        prevYaw = getYaw();
+        prevPitch = getPitch();
+        headYaw = player.headYaw;
+        prevHeadYaw = headYaw;
+        bodyYaw = player.bodyYaw;
+        prevBodyYaw = bodyYaw;
+        Byte playerModel = player.getDataTracker()
+                        .get(PlayerEntity.PLAYER_MODEL_PARTS);
+        dataTracker.set(PlayerEntity.PLAYER_MODEL_PARTS, playerModel);
+        getAttributes().setFrom(player.getAttributes());
+        setPose(player.getPose());
+        setHealth(player.getHealth());
+        setAbsorptionAmount(player.getAbsorptionAmount());
         // setBoundingBox(player.getBoundingBox());
         getInventory().clone(player.getInventory());
         setId(CURRENT_ID.incrementAndGet());
@@ -39,22 +57,36 @@ public class FakePlayerEntity extends OtherClientPlayerEntity
      *
      *
      * @param player
-     * @param pos
      */
-    public FakePlayerEntity(PlayerEntity player, Vec3d pos)
+    public FakePlayerEntity(PlayerEntity player)
     {
-        this(player);
-        setPosition(pos);
+        this(player, player.getEntityName());
     }
 
     /**
      *
      *
-     * @return
      */
-    public PlayerEntity getPlayer()
+    public void spawnPlayer()
     {
-        return player;
+        if (mc.world != null)
+        {
+            unsetRemoved();
+            mc.world.addEntity(getId(), this);
+        }
+    }
+
+    /**
+     *
+     *
+     */
+    public void despawnPlayer()
+    {
+        if (mc.world != null)
+        {
+            mc.world.removeEntity(getId(), RemovalReason.DISCARDED);
+            setRemoved(RemovalReason.DISCARDED);
+        }
     }
 
     /**
@@ -65,5 +97,15 @@ public class FakePlayerEntity extends OtherClientPlayerEntity
     public boolean isDead()
     {
         return false;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public PlayerEntity getPlayer()
+    {
+        return player;
     }
 }

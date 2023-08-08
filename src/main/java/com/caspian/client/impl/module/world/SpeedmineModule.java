@@ -33,6 +33,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockView;
 
+import java.text.DecimalFormat;
+
 /**
  *
  *
@@ -51,7 +53,8 @@ public class SpeedmineModule extends RotationModule
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates" +
             " when mining the block", true);
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool" +
-            " using alternative packets", false, () -> swapConfig.getValue() != Swap.OFF);
+            " using alternative packets to bypass NCP silent swap", false,
+            () -> swapConfig.getValue() != Swap.OFF);
     Config<Boolean> remineConfig = new BooleanConfig("Remine",
             "Attempts to remine blocks", true);
     Config<Boolean> fastConfig = new BooleanConfig("Fast", "Attempts to " +
@@ -79,6 +82,18 @@ public class SpeedmineModule extends RotationModule
     public SpeedmineModule()
     {
         super("Speedmine", "Mines faster", ModuleCategory.WORLD);
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    @Override
+    public String getMetaData()
+    {
+        DecimalFormat decimal = new DecimalFormat("0.0");
+        return decimal.format(damage);
     }
 
     /**
@@ -433,14 +448,12 @@ public class SpeedmineModule extends RotationModule
             if (mining != null && !mc.player.isCreative())
             {
                 Vec3d center = new Box(mining).getCenter();
-                Box scaled = new Box(center.getX(), center.getY(),
-                        center.getZ(), center.getX(), center.getY(), center.getZ());
                 float scale = damage;
                 if (scale > 1.0f)
                 {
                     scale = 1.0f;
                 }
-                scaled = scaled.expand(0.5 * scale);
+                final Box scaled = new Box(center, center).expand(0.5 * scale);
                 RenderManager.renderBox(scaled, damage > 0.95f ? 0x6000ff00 :
                         0x60ff0000);
             }

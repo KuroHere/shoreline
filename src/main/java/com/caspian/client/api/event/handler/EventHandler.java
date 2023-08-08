@@ -59,28 +59,19 @@ public class EventHandler
         }
     }
 
-    /**
-     *
-     *
-     * @param obj
-     */
-    public void unsubscribe(Object obj)
-    {
-        unsubscribe(obj.getClass());
-    }
 
     /**
      * Unsubscribes the subscriber {@link Class} and all associated
      * {@link EventListener} from the listener map.
      *
-     * @param clazz The subscriber class
+     * @param obj The subscriber object
      */
-    public void unsubscribe(Class<?> clazz)
+    public void unsubscribe(Object obj)
     {
-        if (subscribers.remove(clazz))
+        if (subscribers.remove(obj))
         {
             listeners.values().forEach(set ->
-                    set.removeIf(l -> l.getSubscriber() == clazz));
+                    set.removeIf(l -> l.getSubscriber() == obj));
             listeners.entrySet().removeIf(e -> e.getValue().isEmpty());
         }
     }

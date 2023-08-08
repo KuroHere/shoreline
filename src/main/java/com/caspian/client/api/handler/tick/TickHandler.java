@@ -65,6 +65,15 @@ public class TickHandler implements Globals
      *
      * @return
      */
+    public Float poll()
+    {
+        return ticks.poll();
+    }
+
+    /**
+     *
+     * @return
+     */
     public Float peek()
     {
         return ticks.peek();

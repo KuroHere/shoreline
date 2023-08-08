@@ -1,5 +1,7 @@
 package com.caspian.client.util.string;
 
+import net.minecraft.util.math.Direction;
+
 /**
  *
  *
@@ -37,17 +39,37 @@ public class EnumFormatter
     }
 
     /**
-     * Capitalises a given string
      *
-     * @param in The string to capitalise
-     * @return The string with the first letter capitalised
+     *
+     * @param direction
+     * @return
      */
-    public static String capitalise(final String in)
+    public static String formatDirection(Direction direction)
     {
-        if (in.length() != 0)
-        {
-            return Character.toTitleCase(in.charAt(0)) + in.substring(1);
-        }
-        return "";
+        return switch (direction)
+                {
+                    case UP -> "Up";
+                    case DOWN -> "Down";
+                    case NORTH -> "North";
+                    case SOUTH -> "South";
+                    case EAST -> "East";
+                    case WEST -> "West";
+                };
+    }
+
+    /**
+     *
+     *
+     * @param axis
+     * @return
+     */
+    public static String formatAxis(Direction.Axis axis)
+    {
+        return switch (axis)
+                {
+                    case X -> "X";
+                    case Y -> "Y";
+                    case Z -> "Z";
+                };
     }
 }

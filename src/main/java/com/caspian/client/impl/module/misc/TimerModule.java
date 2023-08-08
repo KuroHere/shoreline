@@ -5,6 +5,7 @@ import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.api.module.InvokeModule;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
@@ -17,7 +18,7 @@ import com.caspian.client.init.Managers;
  * @author linus
  * @since 1.0
  */
-public class TimerModule extends ToggleModule
+public class TimerModule extends InvokeModule
 {
     //
     Config<Float> ticksConfig = new NumberConfig<>("Ticks", "Tick speed",
@@ -26,7 +27,6 @@ public class TimerModule extends ToggleModule
             "tick speed to server tick speed", false);
     //
     private float timer;
-    private boolean override;
 
     /**
      *
@@ -45,13 +45,8 @@ public class TimerModule extends ToggleModule
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (event.getStage() == EventStage.POST)
+        if (isEnabled() && event.getStage() == EventStage.POST)
         {
-            if (override)
-            {
-                override = false;
-                return;
-            }
             if (tpsSyncConfig.getValue())
             {
                 timer = Math.max(Managers.TICK.getTpsCurrent() / 20.0f, 0.01f);
@@ -69,7 +64,7 @@ public class TimerModule extends ToggleModule
     @EventListener
     public void onTickCounter(TickCounterEvent event)
     {
-        if (timer != 1.0f)
+        if (isRunning() && timer != 1.0f)
         {
             event.cancel();
             event.setTicks(timer);
@@ -95,6 +90,6 @@ public class TimerModule extends ToggleModule
     public void setTimer(float timer)
     {
         this.timer = timer;
-        override = true;
+        setRunning(true);
     }
 }

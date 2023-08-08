@@ -1,5 +1,6 @@
 package com.caspian.client;
 
+import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.event.handler.EventHandler;
 import com.caspian.client.api.file.ClientConfiguration;
 import com.caspian.client.init.Managers;
@@ -97,6 +98,33 @@ public class Caspian
     }
 
     /**
+     * Wrapper method for {@link Logger#info(String)} which logs a message to
+     * the client {@link Logger}.
+     *
+     * @param container
+     * @param message The log message
+     *
+     * @see Logger#info(String)
+     */
+    public static void info(ConfigContainer container, String message)
+    {
+        LOGGER.info(String.format("[%s] %s", container.getName(), message));
+    }
+
+    /**
+     *
+     *
+     * @param container
+     * @param message
+     * @param params
+     */
+    public static void info(ConfigContainer container, String message,
+                            Object... params)
+    {
+        LOGGER.info(String.format("[%s] %s", container.getName(), message), params);
+    }
+
+    /**
      * Wrapper method for {@link Logger#error(String)} which logs an error to
      * the client {@link Logger}.
      *
@@ -117,5 +145,32 @@ public class Caspian
     public static void error(String message, Object... params)
     {
         LOGGER.error(message, params);
+    }
+
+    /**
+     * Wrapper method for {@link Logger#error(String)} which logs an error to
+     * the client {@link Logger}.
+     *
+     * @param container
+     * @param message The log message
+     *
+     * @see Logger#error(String)
+     */
+    public static void error(ConfigContainer container, String message)
+    {
+        LOGGER.error(String.format("[%s] %s", container.getName(), message));
+    }
+
+    /**
+     *
+     *
+     * @param container
+     * @param message
+     * @param params
+     */
+    public static void error(ConfigContainer container, String message,
+                             Object... params)
+    {
+        LOGGER.error(String.format("[%s] %s", container.getName(), message), params);
     }
 }

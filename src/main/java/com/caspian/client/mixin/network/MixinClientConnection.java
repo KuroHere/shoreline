@@ -3,7 +3,6 @@ package com.caspian.client.mixin.network;
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
-import com.caspian.client.init.Managers;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.Packet;
@@ -20,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @since 1.0
  */
 @Mixin(ClientConnection.class)
-public abstract class MixinClientConnection
+public class MixinClientConnection
 {
     /**
      *
@@ -48,7 +47,8 @@ public abstract class MixinClientConnection
      * @param packet
      * @param ci
      */
-    @Inject(method = "channelRead0*", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "channelRead0*", at = @At(value = "HEAD"),
+            cancellable = true)
     private void hookChannelRead0(ChannelHandlerContext channelHandlerContext,
                                   Packet<?> packet, CallbackInfo ci)
     {

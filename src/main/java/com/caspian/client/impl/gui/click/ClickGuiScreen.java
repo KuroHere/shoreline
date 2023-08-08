@@ -9,6 +9,7 @@ import com.caspian.client.util.Globals;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ClickGuiScreen extends Screen implements Globals
 {
     //
+    private CategoryFrame focus;
     private final List<CategoryFrame> frames = new CopyOnWriteArrayList<>();
     private final ClickGuiModule module;
     // mouse position
@@ -65,6 +67,10 @@ public class ClickGuiScreen extends Screen implements Globals
         super.render(matrices, mouseX, mouseY, delta);
         for (CategoryFrame frame : frames)
         {
+            if (frame.isWithin(mouseX, mouseY))
+            {
+                focus = frame;
+            }
             frame.render(matrices, mouseX, mouseY, delta);
             float scale = module.getScale();
             if (scale != 1.0f)
@@ -148,6 +154,24 @@ public class ClickGuiScreen extends Screen implements Globals
     /**
      *
      *
+     * @param mouseX the X coordinate of the mouse
+     * @param mouseY the Y coordinate of the mouse
+     * @param amount value is {@code < 0} if scrolled down, {@code > 0} if scrolled up
+     * @return
+     */
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount)
+    {
+        if (focus != null)
+        {
+            focus.setPos(focus.getX(), (float) (focus.getY() + amount));
+        }
+        return super.mouseScrolled(mouseX, mouseY, amount);
+    }
+
+    /**
+     *
+     *
      * @param keyCode
      * @param scanCode
      * @param modifiers
@@ -180,7 +204,7 @@ public class ClickGuiScreen extends Screen implements Globals
     @Override
     public void close()
     {
-        super.close();
         module.disable();
+        super.close();
     }
 }

@@ -71,8 +71,7 @@ public class FastFallModule extends ToggleModule
                     final int blockY = getNearestBlockY();
                     if (blockY != -1)
                     {
-                        final Vec3d motion = mc.player.getVelocity();
-                        mc.player.setVelocity(motion.getX(), -3.0, motion.getZ());
+                        Managers.MOVEMENT.setMotionY(-3.0);
                         // Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
                     }
                 }

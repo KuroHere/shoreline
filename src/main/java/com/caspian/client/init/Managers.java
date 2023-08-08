@@ -29,7 +29,7 @@ public class Managers
     public static PositionManager POSITION;
     public static RotationManager ROTATION;
     public static NCPManager NCP;
-
+    public static MovementManager MOVEMENT;
     public static TotemManager TOTEM;
     public static InteractionManager INTERACT;
     public static LatencyManager LATENCY;
@@ -56,6 +56,7 @@ public class Managers
             POSITION = new PositionManager();
             ROTATION = new RotationManager();
             NCP = new NCPManager();
+            MOVEMENT = new MovementManager();
             TOTEM = new TotemManager();
             INTERACT = new InteractionManager();
             LATENCY = new LatencyManager();

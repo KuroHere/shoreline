@@ -13,6 +13,7 @@ import com.caspian.client.util.string.EnumFormatter;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 
+import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,7 +44,7 @@ public class VelocityModule extends ToggleModule
     public VelocityModule()
     {
         super("Velocity", "Reduces the amount of player knockback velocity",
-                ModuleCategory.COMBAT);
+                ModuleCategory.MOVEMENT);
     }
 
     /**
@@ -56,8 +57,10 @@ public class VelocityModule extends ToggleModule
     {
         if (modeConfig.getValue() == VelocityMode.NORMAL)
         {
-            return String.format("H:%f%%, V:%f%%", horizontalConfig.getValue(),
-                    verticalConfig.getValue());
+            DecimalFormat decimal = new DecimalFormat("0.0");
+            return String.format("H:%s%%, V:%s%%",
+                    decimal.format(horizontalConfig.getValue()),
+                    decimal.format(verticalConfig.getValue()));
         }
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }

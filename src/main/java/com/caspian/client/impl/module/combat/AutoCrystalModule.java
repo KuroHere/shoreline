@@ -11,7 +11,6 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.handler.tick.TickSync;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
-import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.RunTickEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
@@ -386,7 +385,8 @@ public class AutoCrystalModule extends RotationModule
     //
     private final Timer freqInterval = new CacheTimer();
     private int freq;
-    private final ArrayList<Integer> attackFreq = new ArrayList<>(16);
+    private final ArrayList<Integer> attackFreq =
+            new ArrayList<>(Collections.nCopies(16, 0));
     //
     private boolean attacking, placing;
     private final Timer lastPlace = new CacheTimer();
@@ -402,6 +402,7 @@ public class AutoCrystalModule extends RotationModule
     //
     private final Timer rotateTimer = new TickTimer();
     private int rotating;
+    private Rotate rotateTarget = Rotate.OFF;
     //
     private float[] yawLimits;
     private float yaw, pitch;
@@ -485,18 +486,19 @@ public class AutoCrystalModule extends RotationModule
             }
             catch (InterruptedException | ExecutionException e)
             {
-                Caspian.error("Failed calculation {}!", calc.getId());
+                Caspian.error(Modules.AUTO_CRYSTAL, "Failed calculation {}!",
+                        calc.getId());
                 e.printStackTrace();
             }
             if (calc.isDone())
             {
-                Caspian.info("Calc done for tick calculations in {}ms!",
-                        calc.getCalcTime());
+                Caspian.info(Modules.AUTO_CRYSTAL, "Calc done for tick " +
+                                "calculations in {}ms!", calc.getCalcTime());
                 attackData = calc.getCalcAttack();
                 final DamageData<BlockPos> calcPlace =
                         calc.getCalcPlace();
-                mining = calcPlace.isMineDamage() ? calcPlace.getSrc() :
-                        null;
+                mining = calcPlace != null && calcPlace.isMineDamage() ?
+                    calcPlace.getSrc() : null;
                 placeData = calcPlace;
                 // IMPORTANT NOTE FOR ROTATIONS:
                 // If we have found new data, stop the current rotation and
@@ -504,10 +506,7 @@ public class AutoCrystalModule extends RotationModule
                 // This means that if the rotations steps >= 1,
                 // then there is a possibility that the current rotation may
                 // "fall through" and never actually complete.
-                if (rotating > 0 && (!lastAttackData.isSrcEqual(attackData)
-                        && lastAttackData.getYawDiff(attackData) > 30.0f
-                        || !lastPlaceData.isSrcEqual(placeData)
-                        && lastPlaceData.getYawDiff(placeData) > 30.0f))
+                if (rotating > 0 && isRotationComplete())
                 {
                     rotating = 0;
                     rotateTimer.setElapsedTime(Timer.MAX_TIME);
@@ -554,6 +553,7 @@ public class AutoCrystalModule extends RotationModule
         pauseCalcPlace = false;
         attacking = false;
         placing = false;
+        rotateTarget = Rotate.OFF;
         tick = 0;
         shortTermTick = 0;
         shortTermCount = 0;
@@ -578,7 +578,7 @@ public class AutoCrystalModule extends RotationModule
     @Override
     public String getMetaData()
     {
-        return String.format("%fms", getLatency(breakTimes));
+        return String.format("%dms", (int) getLatency(breakTimes));
     }
 
     /**
@@ -618,6 +618,30 @@ public class AutoCrystalModule extends RotationModule
     /**
      *
      *
+     * @return
+     */
+    private boolean isRotationComplete()
+    {
+        if (lastPlaceData != null && lastAttackData != null
+                && placeData != null && attackData != null)
+        {
+            if (rotateTarget == Rotate.FULL)
+            {
+                return !attackData.isSrcEqual(lastAttackData)
+                        && attackData.getYawDiff(lastAttackData) > 30.0f;
+            }
+            else if (rotateTarget == Rotate.SEMI)
+            {
+                return !placeData.isSrcEqual(lastPlaceData)
+                        && placeData.getYawDiff(lastPlaceData) > 30.0f;
+            }
+        }
+        return false;
+    }
+
+    /**
+     *
+     *
      * @param event
      */
     @EventListener
@@ -646,6 +670,7 @@ public class AutoCrystalModule extends RotationModule
                     float[] dest = attackData.getRotations(Managers.POSITION.getEyePos());
                     rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
                     rotateTimer.reset();
+                    rotateTarget = Rotate.FULL;
                     return;
                 }
                 // This delay is accurate to ms
@@ -715,6 +740,7 @@ public class AutoCrystalModule extends RotationModule
                             float[] dest = attackData.getRotations(Managers.POSITION.getEyePos());
                             rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
                             rotateTimer.reset();
+                            rotateTarget = Rotate.FULL;
                             // rotate instantly
                             if (!event.isCanceled() && yawLimits != null)
                             {
@@ -763,6 +789,7 @@ public class AutoCrystalModule extends RotationModule
                                 placeData.getRotations(Managers.POSITION.getEyePos());
                         rotating = setRotation(dest, strictRotateConfig.getValue() == Rotate.FULL);
                         rotateTimer.reset();
+                        rotateTarget = Rotate.SEMI;
                         // rotate instantly
                         if (!event.isCanceled() && yawLimits != null)
                         {
@@ -923,7 +950,7 @@ public class AutoCrystalModule extends RotationModule
                 }
                 if (size > 0)
                 {
-                    yield  avg / size;
+                    yield avg / size;
                 }
                 yield 0.0f;
             }
@@ -1081,6 +1108,7 @@ public class AutoCrystalModule extends RotationModule
                                         cpos);
                                 rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
                                 rotateTimer.reset();
+                                rotateTarget = Rotate.FULL;
                             }
                             if (attack(packet.getId()))
                             {
@@ -1245,6 +1273,7 @@ public class AutoCrystalModule extends RotationModule
                                             crystal.getPos());
                                     rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
                                     rotateTimer.reset();
+                                    rotateTarget = Rotate.FULL;
                                     if (strictRotateConfig.getValue() != Rotate.OFF
                                             || attackDelayConfig.getValue() > 0.0f)
                                     {
@@ -1440,6 +1469,7 @@ public class AutoCrystalModule extends RotationModule
                                     placeData.getRotations(Managers.POSITION.getEyePos());
                             rotating = setRotation(dest, strictRotateConfig.getValue() == Rotate.FULL);
                             rotateTimer.reset();
+                            rotateTarget = Rotate.SEMI;
                         }
                         if (place(placeData, dir))
                         {
@@ -1609,9 +1639,11 @@ public class AutoCrystalModule extends RotationModule
     private void attackDirect(int id)
     {
         // retarded hack to set entity id
-        PlayerInteractEntityC2SPacket packet =
-                PlayerInteractEntityC2SPacket.attack(null, mc.player.isSneaking());
-        ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(id);
+        EndCrystalEntity fakeCrystal = new EndCrystalEntity(mc.world, 0.0, 0.0, 0.0);
+        fakeCrystal.setId(id);
+        PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(fakeCrystal,
+                        mc.player.isSneaking());
+        // ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(id);
         Managers.NETWORK.sendPacket(packet);
         Hand hand = getCrystalHand();
         swingDirect(hand != null ? hand : Hand.MAIN_HAND);
@@ -1635,6 +1667,7 @@ public class AutoCrystalModule extends RotationModule
                             placeData.getRotations(Managers.POSITION.getEyePos());
                     rotating = setRotation(dest, strictRotateConfig.getValue() == Rotate.FULL);
                     rotateTimer.reset();
+                    rotateTarget = Rotate.SEMI;
                 }
                 if (place(placeData, dir))
                 {
@@ -3028,7 +3061,7 @@ public class AutoCrystalModule extends RotationModule
          */
         public void shutdown()
         {
-            Caspian.info("Shutdown processor! Completed %d tasks",
+            Caspian.info(Modules.AUTO_CRYSTAL, "Shutdown processor! Completed {} tasks",
                     getCompletedCalcCount());
             try
             {
@@ -3037,14 +3070,15 @@ public class AutoCrystalModule extends RotationModule
                         TimeUnit.MILLISECONDS);
                 if (timeout)
                 {
-                    Caspian.error("Process timed out! Shutting down pool!");
+                    Caspian.error(Modules.AUTO_CRYSTAL, "Process timed out! " +
+                            "Shutting down pool!");
                     // pool.shutdownNow();
                 }
             }
             catch (InterruptedException e)
             {
-                Caspian.error("Failed to shutdown pool! Maintained interrupt " +
-                        "state!");
+                Caspian.error(Modules.AUTO_CRYSTAL, "Failed to shutdown pool!" +
+                        "  Maintained interrupt state!");
                 Thread.currentThread().interrupt();
             }
             finally
@@ -3158,7 +3192,8 @@ public class AutoCrystalModule extends RotationModule
                     }
                     catch (InterruptedException e)
                     {
-                        Caspian.error("Thread interrupted for calc %s", id);
+                        Caspian.error(Modules.AUTO_CRYSTAL, "Thread " +
+                                "interrupted for calc {}", id);
                         Thread.currentThread().interrupt();
                     }
                     return getCrystal(entities, crystals, finalPos);
@@ -3203,7 +3238,8 @@ public class AutoCrystalModule extends RotationModule
                         final DamageData<?> data = result.get();
                         if (data == null)
                         {
-                            Caspian.error("Failed to get data for calc %s!", getId());
+                            Caspian.error(Modules.AUTO_CRYSTAL, "Failed to " +
+                                    "get data for calc {}!", getId());
                             return;
                         }
                         if (data.isAttackDamage())

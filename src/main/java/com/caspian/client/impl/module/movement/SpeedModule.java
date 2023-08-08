@@ -11,6 +11,7 @@ import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.player.MovementUtil;
 import com.caspian.client.util.string.EnumFormatter;
@@ -138,8 +139,7 @@ public class SpeedModule extends ToggleModule
                 double amplifier = mc.player.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier();
                 slowEffect = 1 + (0.2 * (amplifier + 1));
             }
-            final double speedFactor = speedEffect / slowEffect;
-            final double base = 0.2873f * speedFactor;
+            final double base = 0.2873f * speedEffect / slowEffect;
             // ~29 kmh
             if (speedModeConfig.getValue() == Speed.STRAFE)
             {
@@ -164,6 +164,7 @@ public class SpeedModule extends ToggleModule
                         jump += (amplifier + 1) * 0.1f;
                     }
                     event.setY(jump);
+                    Managers.MOVEMENT.setMotionY(jump);
                     speed *= accelerate ? 1.6835 : 1.395;
                 }
                 else if (strafe == 3)
@@ -185,7 +186,7 @@ public class SpeedModule extends ToggleModule
                 final Vec2f motion = handleStrafeMotion((float) speed);
                 event.setX(motion.x);
                 event.setZ(motion.y);
-                ++strafe;
+                strafe++;
             }
             // ~26-27 kmh
             else if (speedModeConfig.getValue() == Speed.STRAFE_STRICT)
@@ -208,6 +209,7 @@ public class SpeedModule extends ToggleModule
                         jump += (amplifier + 1) * 0.1f;
                     }
                     event.setY(jump);
+                    Managers.MOVEMENT.setMotionY(jump);
                     speed *= 2.149;
                 }
                 else if (strafe == 3)
@@ -224,12 +226,12 @@ public class SpeedModule extends ToggleModule
                     }
                     speed = distance - distance / 159;
                 }
+                strictTicks++;
                 speed = Math.max(speed, base);
                 //
-                double baseMax = 0.465 * speedFactor;
-                double baseMin = 0.44 * speedFactor;
+                double baseMax = 0.465 * speedEffect / slowEffect;
+                double baseMin = 0.44 * speedEffect / slowEffect;
                 speed = Math.min(speed, strictTicks > 25 ? baseMax : baseMin);
-                strictTicks++;
                 if (strictTicks > 50)
                 {
                     strictTicks = 0;
@@ -237,7 +239,7 @@ public class SpeedModule extends ToggleModule
                 final Vec2f motion = handleStrafeMotion((float) speed);
                 event.setX(motion.x);
                 event.setZ(motion.y);
-                ++strafe;
+                strafe++;
             }
         }
     }
@@ -253,34 +255,35 @@ public class SpeedModule extends ToggleModule
         float forward = mc.player.input.movementForward;
         float strafe = mc.player.input.movementSideways;
         float yaw = mc.player.prevYaw + (mc.player.getYaw() - mc.player.prevYaw) * mc.getTickDelta();
-        if (!MovementUtil.isInputtingMovement())
+        if (forward == 0.0f && strafe == 0.0f)
         {
             return Vec2f.ZERO;
         }
-        else if (forward != 0)
+        else if (forward != 0.0f)
         {
-            if (strafe > 0)
+            if (strafe > 1.0f)
             {
-                yaw += forward > 0 ? -45 : 45;
+                yaw += forward > 0.0f ? -45 : 45;
+                strafe = 0.0f;
             }
-            else if (strafe < 0)
+            else if (strafe < 1.0f)
             {
-                yaw += forward > 0 ? 45 : -45;
+                yaw += forward > 0.0f ? 45 : -45;
+                strafe = 0.0f;
             }
-            strafe = 0;
-            if (forward > 0)
+            if (forward > 0.0f)
             {
-                forward = 1;
+                forward = 1.0f;
             }
-            else if (forward < 0)
+            else if (forward < 0.0f)
             {
-                forward = -1;
+                forward = -1.0f;
             }
         }
-        float cos = (float) Math.cos(Math.toRadians(yaw));
-        float sin = (float) -Math.sin(Math.toRadians(yaw));
-        return new Vec2f((forward * speed * sin) + (strafe * speed * cos),
-                (forward * speed * cos) - (strafe * speed * sin));
+        float rx = (float) Math.cos(Math.toRadians(yaw + 90.0f));
+        float rz = (float) -Math.sin(Math.toRadians(yaw + 90.0f));
+        return new Vec2f((forward * speed * rz) + (strafe * speed * rx),
+                (forward * speed * rx) - (strafe * speed * rz));
     }
 
     /**

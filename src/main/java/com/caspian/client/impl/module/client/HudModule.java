@@ -179,7 +179,7 @@ public class HudModule extends ToggleModule
                 double div = 0.05 / 3600.0;
                 final double speed = dist / div;
                 String text = String.format("Speed §f%skm/h",
-                        new DecimalFormat("#.0").format(speed));
+                        new DecimalFormat("0.0").format(speed));
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, bottomRight,
@@ -243,10 +243,11 @@ public class HudModule extends ToggleModule
             if (directionConfig.getValue())
             {
                 Direction direction = mc.player.getHorizontalFacing();
-                String dir = EnumFormatter.formatEnum(direction);
+                String dir = EnumFormatter.formatDirection(direction);
                 Direction.AxisDirection axis = direction.getDirection();
+                String axisDir = EnumFormatter.formatAxis(direction.getAxis());
                 RenderManager.renderText(event.getMatrices(), String.format("%s [%s]",
-                                dir, Formatting.WHITE + "" + direction.getAxis() +
+                                dir, Formatting.WHITE + axisDir +
                                         (axis == Direction.AxisDirection.POSITIVE ? "+" : "-")
                                         + Formatting.RESET),
                         2, bottomLeft, Modules.COLORS.getRGB());

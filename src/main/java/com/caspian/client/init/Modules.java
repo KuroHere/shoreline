@@ -1,5 +1,6 @@
 package com.caspian.client.init;
 
+import com.caspian.client.Caspian;
 import com.caspian.client.api.module.Module;
 import com.caspian.client.api.manager.ModuleManager;
 import com.caspian.client.impl.module.client.ClickGuiModule;
@@ -11,6 +12,7 @@ import com.caspian.client.impl.module.combat.AutoCrystalModule;
 import com.caspian.client.impl.module.combat.AutoTotemModule;
 import com.caspian.client.impl.module.combat.CriticalsModule;
 import com.caspian.client.impl.module.exploit.SwingModule;
+import com.caspian.client.impl.module.misc.FakePlayerModule;
 import com.caspian.client.impl.module.misc.TimerModule;
 import com.caspian.client.impl.module.movement.*;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
@@ -31,6 +33,10 @@ import java.util.Set;
  */
 public class Modules
 {
+    // The initialized state of the modules. Once this is true, all modules
+    // have been initialized and the init process is complete. As a general
+    // rule, it is good practice to check this state before accessing instances.
+    private static boolean initialized;
     // The module initialization cache. This prevents modules from being
     // initialized more than once.
     private static Set<Module> CACHE;
@@ -46,6 +52,7 @@ public class Modules
     public static VelocityModule VELOCITY;
     public static AntiHungerModule ANTI_HUNGER;
     public static SwingModule SWING;
+    public static FakePlayerModule FAKE_PLAYER;
     public static TimerModule TIMER;
     public static FastFallModule FAST_FALL;
     public static NoSlowModule NO_SLOW;
@@ -53,6 +60,7 @@ public class Modules
     public static SprintModule SPRINT;
     public static BlockHighlightModule BLOCK_HIGHLIGHT;
     public static FullbrightModule FULLBRIGHT;
+    public static NoRenderModule NO_RENDER;
     // public static NoWeatherModule NO_WEATHER;
     // public static ViewClipModule VIEW_CLIP;
     // public static ViewModelModule VIEW_MODEL;
@@ -112,6 +120,8 @@ public class Modules
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
                     "antihunger-module");
             SWING = (SwingModule) getRegisteredModule("swing-module");
+            FAKE_PLAYER = (FakePlayerModule) getRegisteredModule("fakeplayer" +
+                    "-module");
             TIMER = (TimerModule) getRegisteredModule("timer-module");
             FAST_FALL = (FastFallModule) getRegisteredModule("fastfall-module");
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow-module");
@@ -122,6 +132,7 @@ public class Modules
                     "blockhighlight-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");
+            NO_RENDER = (NoRenderModule) getRegisteredModule("norender-module");
             // NO_WEATHER = (NoWeatherModule) getRegisteredModule(
             //        "noweather-module");
             // VIEW_CLIP = (ViewClipModule) getRegisteredModule(
@@ -132,6 +143,7 @@ public class Modules
                     "fastplace-module");
             SPEEDMINE = (SpeedmineModule) getRegisteredModule(
                     "speedmine-module");
+            initialized = true;
             // reflect configuration properties for each cached module
             for (Module module : CACHE)
             {
@@ -140,6 +152,7 @@ public class Modules
                     continue;
                 }
                 module.reflectConfigs();
+                module.onLoad();
             }
             CACHE.clear();
         }
@@ -148,5 +161,20 @@ public class Modules
             throw new RuntimeException("Accessed modules before managers " +
                     "finished initializing!");
         }
+    }
+
+    /**
+     * Returns <tt>true</tt> if the {@link Module} instances have been
+     * initialized. This should always return <tt>true</tt> if
+     * {@link Caspian#preInit()} has finished running.
+     *
+     * @return <tt>true</tt> if the module instances have been initialized
+     *
+     * @see #init()
+     * @see #initialized
+     */
+    public static boolean isInitialized()
+    {
+        return initialized;
     }
 }
