@@ -161,10 +161,10 @@ public class RotationHandler implements Globals
     @EventListener
     public void onRenderPlayer(RenderPlayerEvent event)
     {
-        if (event.getEntity() == mc.player)
+        if (event.getEntity() == mc.player && rotation != null)
         {
-            event.setYaw(yaw);
-            event.setPitch(pitch);
+            event.setYaw(rotation.getYaw());
+            event.setPitch(rotation.getPitch());
             event.cancel();
         }
     }

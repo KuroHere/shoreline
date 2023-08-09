@@ -6,19 +6,23 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 /**
+ *
+ *
  * @author Gavin
  * @since 1.0
  */
 @Mixin(EntityVelocityUpdateS2CPacket.class)
-public interface AccessorEntityVelocityUpdateS2CPacket {
-
-    @Accessor("velocityX") @Final
+public interface AccessorEntityVelocityUpdateS2CPacket
+{
+    @Accessor("velocityX")
+    @Final
     void setVelocityX(int velocityX);
 
-    @Accessor("velocityY") @Final
+    @Accessor("velocityY")
+    @Final
     void setVelocityY(int velocityY);
 
-    @Accessor("velocityZ") @Final
+    @Accessor("velocityZ")
+    @Final
     void setVelocityZ(int velocityZ);
-
 }

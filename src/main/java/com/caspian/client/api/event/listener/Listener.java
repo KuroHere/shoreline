@@ -46,6 +46,8 @@ public class Listener implements Comparable<Listener>
     // subscribed to the EventHandler in order for this Listener to be invoked.
     private final Object subscriber;
     //
+    private final boolean receiveCanceled;
+    //
     private final int priority;
     // subscriber invoker cache for each listener method
     private static final Map<Method, Invoker<Object>> INVOKE_CACHE =
@@ -58,13 +60,16 @@ public class Listener implements Comparable<Listener>
      *
      * @param method
      * @param subscriber
+     * @param receiveCanceled
      * @param priority
      */
     @SuppressWarnings("unchecked")
-    public Listener(Method method, Object subscriber, int priority)
+    public Listener(Method method, Object subscriber,
+                    boolean receiveCanceled, int priority)
     {
         this.method = method;
         this.subscriber = subscriber;
+        this.receiveCanceled = receiveCanceled;
         this.priority = priority;
         // lambda at runtime to call the method
         try
@@ -140,6 +145,16 @@ public class Listener implements Comparable<Listener>
     public Object getSubscriber()
     {
         return subscriber;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public boolean isReceiveCanceled()
+    {
+        return receiveCanceled;
     }
 
     /**

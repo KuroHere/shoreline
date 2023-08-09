@@ -25,8 +25,6 @@ public class MixinMinecraftClient
 {
     //
     @Shadow
-    private Profiler profiler;
-    @Shadow
     public ClientWorld world;
     @Shadow
     public ClientPlayerEntity player;
@@ -55,11 +53,9 @@ public class MixinMinecraftClient
     {
         if (player != null && world != null)
         {
-            profiler.push("caspian_pre_tick");
             TickEvent tickPreEvent = new TickEvent();
             tickPreEvent.setStage(EventStage.PRE);
             Caspian.EVENT_HANDLER.dispatch(tickPreEvent);
-            profiler.pop();
         }
     }
 
@@ -73,11 +69,9 @@ public class MixinMinecraftClient
     {
         if (player != null && world != null)
         {
-            profiler.push("caspian_post_tick");
             TickEvent tickPostEvent = new TickEvent();
             tickPostEvent.setStage(EventStage.POST);
             Caspian.EVENT_HANDLER.dispatch(tickPostEvent);
-            profiler.pop();
         }
     }
 }

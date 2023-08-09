@@ -1,5 +1,6 @@
 package com.caspian.client.api.module;
 
+import com.caspian.client.api.handler.rotation.RotationPriority;
 import com.caspian.client.init.Managers;
 
 /**
@@ -19,6 +20,30 @@ public class RotationModule extends ToggleModule
     {
         super(name, desc, category);
     }
+
+    /**
+     *
+     *
+     * @param yaw
+     * @param pitch
+     */
+    protected void setRotation(float yaw, float pitch)
+    {
+        setRotation(RotationPriority.NORMAL, yaw, pitch);
+    }
+
+    /**
+     *
+     *
+     * @param priority
+     * @param yaw
+     * @param pitch
+     */
+    protected void setRotation(RotationPriority priority, float yaw, float pitch)
+    {
+        Managers.ROTATION.setRotation(this, priority, yaw, pitch);
+    }
+
     /**
      *
      *

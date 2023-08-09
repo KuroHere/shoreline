@@ -19,7 +19,6 @@ import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
-import com.caspian.client.mixin.accessor.AccessorPlayerInteractEntityC2SPacket;
 import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.TickTimer;
 import com.caspian.client.util.math.timer.Timer;
@@ -46,7 +45,6 @@ import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
@@ -722,7 +720,7 @@ public class AutoCrystalModule extends RotationModule
                 // rotateTimer.reset();
                 if (!rotateTimer.passed(rotatePreserveTicksConfig.getValue()))
                 {
-                    Managers.ROTATION.setRotation(this, yaw, pitch);
+                    setRotation(yaw, pitch);
                     event.cancel();
                 }
                 if (rotating != 0)
@@ -745,7 +743,7 @@ public class AutoCrystalModule extends RotationModule
                             if (!event.isCanceled() && yawLimits != null)
                             {
                                 yaw = yawLimits[--rotating];
-                                Managers.ROTATION.setRotation(this, yaw, pitch);
+                                setRotation(yaw, pitch);
                                 event.cancel();
                             }
                             return;
@@ -794,7 +792,7 @@ public class AutoCrystalModule extends RotationModule
                         if (!event.isCanceled() && yawLimits != null)
                         {
                             yaw = yawLimits[--rotating];
-                            Managers.ROTATION.setRotation(this, yaw, pitch);
+                            setRotation(yaw, pitch);
                             event.cancel();
                         }
                         return;
@@ -989,25 +987,7 @@ public class AutoCrystalModule extends RotationModule
     {
         if (mc.world != null && mc.player != null)
         {
-            if (event.getPacket() instanceof PlayerInteractEntityC2SPacket packet
-                    && event.isCached())
-            {
-                if (((AccessorPlayerInteractEntityC2SPacket) packet).hookGetTypeHandler().getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK)
-                {
-                    final Entity entity = packet.getEntity((ServerWorld) mc.player.getWorld());
-                    if (entity != null && entity.isAlive()
-                            && entity instanceof EndCrystalEntity crystal)
-                    {
-                        if (preSequence != null
-                                && crystal.squaredDistanceTo(toSource(preSequence)) < 0.25f)
-                        {
-                            sequence = crystal;
-                            startSequence.reset();
-                        }
-                    }
-                }
-            }
-            else if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet
+            if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet
                     && !event.isCached())
             {
                 ItemStack stack = mc.player.getStackInHand(packet.getHand());
@@ -1071,8 +1051,8 @@ public class AutoCrystalModule extends RotationModule
                     renderSpawn = sblock;
                     if (instantConfig.getValue())
                     {
-                        final Vec3d base = new Vec3d(packet.getX() - 0.5,
-                                packet.getY() - 1.0, packet.getZ() - 0.5);
+                        final Vec3d base = new Vec3d(packet.getX(),
+                                packet.getY() - 1.0, packet.getZ());
                         if (preBreakRangeCheck(eyepos, cpos))
                         {
                             return;
@@ -1110,7 +1090,7 @@ public class AutoCrystalModule extends RotationModule
                                 rotateTimer.reset();
                                 rotateTarget = Rotate.FULL;
                             }
-                            if (attack(packet.getId()))
+                            if (attack(packet.getId(), cpos))
                             {
                                 lastBreak.reset();
                                 addCrystalsInRange(packet.getId(), cpos);
@@ -1220,7 +1200,7 @@ public class AutoCrystalModule extends RotationModule
                                                 rotating = setRotation(dest, strictRotateConfig.getValue() != Rotate.OFF);
                                                 rotateTimer.reset();
                                             }
-                                            if (attack(packet.getId()))
+                                            if (attack(packet.getId(), cpos))
                                             {
                                                 lastBreak.reset();
                                                 addCrystalsInRange(packet.getId(),
@@ -1283,7 +1263,7 @@ public class AutoCrystalModule extends RotationModule
                                     }
                                 }
                                 attacking = true;
-                                if (attack(crystal.getId()))
+                                if (attack(crystal.getId(), crystal.getPos()))
                                 {
                                     lastBreak.reset();
                                     addCrystalsInRange(crystal.getId(),
@@ -1296,7 +1276,7 @@ public class AutoCrystalModule extends RotationModule
                     }
                 }
             }
-            if (sequentialConfig.getValue() != Sequential.NONE
+            if (sequence != null && sequentialConfig.getValue() != Sequential.NONE
                     && sequentialConfig.getValue() != Sequential.FAST)
             {
                 boolean sequential = false;
@@ -1334,8 +1314,7 @@ public class AutoCrystalModule extends RotationModule
                 }
                 if (radius != -1.0f)
                 {
-                    sequential = sequence != null && sequence.squaredDistanceTo(dx, dy, dz)
-                            < radius * radius;
+                    sequential = sequence.squaredDistanceTo(dx, dy, dz) < radius * radius;
                     for (Entity e : mc.world.getEntities())
                     {
                         if (e != null && e.isAlive() && e instanceof EndCrystalEntity crystal
@@ -1563,19 +1542,20 @@ public class AutoCrystalModule extends RotationModule
      */
     private boolean attack(DamageData<EndCrystalEntity> data)
     {
-        return attack(data.getId());
+        return attack(data.getId(), data.getPos());
     }
 
     /**
      *
      *
      * @param e
+     * @param pos
      * @return
      * 
-     * @see #attackDirect(int) 
+     * @see #attackDirect(int, Vec3d)
      * @see #preAttackCheck(int) 
      */
-    private boolean attack(int e)
+    private boolean attack(int e, Vec3d pos)
     {
         if (preAttackCheck(e))
         {
@@ -1609,7 +1589,7 @@ public class AutoCrystalModule extends RotationModule
                     }
                     if (swapped)
                     {
-                        attackDirect(e);
+                        attackDirect(e, pos);
                         if (antiWeaknessConfig.getValue() == Swap.SILENT)
                         {
                             swap(prev);
@@ -1622,7 +1602,7 @@ public class AutoCrystalModule extends RotationModule
                     }
                 }
             }
-            attackDirect(e);
+            attackDirect(e, pos);
             return true;
         }
         return false;
@@ -1633,13 +1613,15 @@ public class AutoCrystalModule extends RotationModule
      * player {@link Hand}.
      * 
      * @param id The target entity id
+     * @param pos
      *
      * @see PlayerInteractEntityC2SPacket
      */
-    private void attackDirect(int id)
+    private void attackDirect(int id, Vec3d pos)
     {
         // retarded hack to set entity id
-        EndCrystalEntity fakeCrystal = new EndCrystalEntity(mc.world, 0.0, 0.0, 0.0);
+        final EndCrystalEntity fakeCrystal = new EndCrystalEntity(mc.world,
+                pos.getX(), pos.getY(), pos.getZ());
         fakeCrystal.setId(id);
         PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(fakeCrystal,
                         mc.player.isSneaking());
@@ -1675,6 +1657,12 @@ public class AutoCrystalModule extends RotationModule
                 }
                 placeData = null;
             }
+        }
+        if (preSequence != null
+                && pos.squaredDistanceTo(toSource(preSequence)) < 0.25f)
+        {
+            sequence = fakeCrystal;
+            startSequence.reset();
         }
     }
 

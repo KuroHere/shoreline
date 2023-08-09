@@ -268,7 +268,7 @@ public class AuraModule extends RotationModule
             //
             if (!rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks()))
             {
-                Managers.ROTATION.setRotation(this, yaw, pitch);
+                setRotation(yaw, pitch);
                 event.cancel();
             }
             if (rotating != 0)

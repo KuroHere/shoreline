@@ -66,7 +66,7 @@ public class CacheTimer implements Timer
     @Override
     public long getElapsedTime()
     {
-        return TimeUnit.NANOSECONDS.toMillis( System.nanoTime() - time);
+        return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - time);
     }
 
     /**

@@ -57,7 +57,7 @@ public class PacketEvent extends Event
     public static class Outbound extends PacketEvent
     {
         //
-        private boolean cached;
+        private final boolean cached;
 
         /**
          *

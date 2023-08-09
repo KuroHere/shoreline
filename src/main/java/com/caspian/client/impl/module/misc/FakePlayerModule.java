@@ -1,7 +1,9 @@
 package com.caspian.client.impl.module.misc;
 
+import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
+import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.util.world.FakePlayerEntity;
 
 /**
@@ -45,10 +47,22 @@ public class FakePlayerModule extends ToggleModule
     @Override
     public void onDisable()
     {
-        if (mc.world != null)
+        if (fakePlayer != null)
         {
             fakePlayer.despawnPlayer();
             fakePlayer = null;
         }
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onDisconnect(DisconnectEvent event)
+    {
+        fakePlayer = null;
+        disable();
     }
 }

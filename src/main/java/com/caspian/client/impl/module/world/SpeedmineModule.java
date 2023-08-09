@@ -174,8 +174,7 @@ public class SpeedmineModule extends RotationModule
                             {
                                 float[] rots = RotationUtil.getRotationsTo(Managers.POSITION.getCameraPosVec(1.0f),
                                                 mining.toCenterPos());
-                                Managers.ROTATION.setRotation(this,
-                                        RotationPriority.HIGH, rots[0], rots[1]);
+                                setRotation(RotationPriority.HIGH, rots[0], rots[1]);
                             }
                             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                                     PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,

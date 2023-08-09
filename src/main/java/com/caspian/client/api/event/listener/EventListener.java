@@ -18,10 +18,17 @@ import java.lang.annotation.Target;
 public @interface EventListener
 {
     /**
-     * Returns the event priority of the listener. This values is
-     * default set to <b>0</b>.
+     * Returns the event priority of the listener. The default values is
+     * set to <b>0</b>.
      *
      * @return The priority of the listener
      */
     int priority() default 0;
+
+    /**
+     *
+     *
+     * @return Whether canceled events can be dispatched
+     */
+    boolean receiveCanceled() default false;
 }

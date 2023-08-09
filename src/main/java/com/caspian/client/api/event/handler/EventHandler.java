@@ -7,6 +7,7 @@ import com.caspian.client.api.event.listener.Listener;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *
@@ -26,7 +27,7 @@ public class EventHandler
             Collections.synchronizedSet(new HashSet<>());
     // Map of events and their associated listeners. All listeners in a class
     // will be added when the class is subscribed to this EventHandler.
-    private final Map<Object, TreeSet<Listener>> listeners =
+    private final Map<Object, List<Listener>> listeners =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
 
     /**
@@ -43,16 +44,16 @@ public class EventHandler
             method.trySetAccessible();
             if (method.isAnnotationPresent(EventListener.class))
             {
-                EventListener a = method.getAnnotation(EventListener.class);
+                EventListener listener = method.getAnnotation(EventListener.class);
                 if (method.getReturnType() == Void.TYPE)
                 {
                     Class<?>[] params = method.getParameterTypes();
-                    if (params.length == 1 && Event.class.isAssignableFrom(params[0]))
+                    if (params.length == 1)
                     {
-                        Set<Listener> active =
-                                listeners.computeIfAbsent(params[0],
-                                v -> new TreeSet<>());
-                        active.add(new Listener(method, obj, a.priority()));
+                        List<Listener> active = listeners.computeIfAbsent(params[0],
+                                v -> new CopyOnWriteArrayList<>());
+                        active.add(new Listener(method, obj,
+                                listener.receiveCanceled(), listener.priority()));
                     }
                 }
             }
@@ -85,7 +86,7 @@ public class EventHandler
      */
     public boolean dispatch(Event event)
     {
-        Set<Listener> active = listeners.get(event.getClass());
+        List<Listener> active = listeners.get(event.getClass());
         // if there are no items to dispatch to, just early return
         if (active == null || active.isEmpty())
         {
@@ -93,6 +94,10 @@ public class EventHandler
         }
         for (Listener listener : active)
         {
+            if (event.isCanceled() && !listener.isReceiveCanceled())
+            {
+                continue;
+            }
             listener.invoke(event);
         }
         return event.isCanceled();

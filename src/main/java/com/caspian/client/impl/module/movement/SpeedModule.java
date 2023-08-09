@@ -175,8 +175,8 @@ public class SpeedModule extends ToggleModule
                 }
                 else
                 {
-                    if (mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0,
-                            mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision && strafe > 0)
+                    if ((!mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0,
+                            mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision) && strafe > 0)
                     {
                         strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                     }
@@ -219,8 +219,8 @@ public class SpeedModule extends ToggleModule
                 }
                 else
                 {
-                    if (mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0,
-                            mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision && strafe > 0)
+                    if ((!mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0,
+                            mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision) && strafe > 0)
                     {
                         strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                     }
@@ -261,12 +261,12 @@ public class SpeedModule extends ToggleModule
         }
         else if (forward != 0.0f)
         {
-            if (strafe > 1.0f)
+            if (strafe >= 1.0f)
             {
                 yaw += forward > 0.0f ? -45 : 45;
                 strafe = 0.0f;
             }
-            else if (strafe < 1.0f)
+            else if (strafe <= -1.0f)
             {
                 yaw += forward > 0.0f ? 45 : -45;
                 strafe = 0.0f;
@@ -280,8 +280,8 @@ public class SpeedModule extends ToggleModule
                 forward = -1.0f;
             }
         }
-        float rx = (float) Math.cos(Math.toRadians(yaw + 90.0f));
-        float rz = (float) -Math.sin(Math.toRadians(yaw + 90.0f));
+        float rx = (float) Math.cos(Math.toRadians(yaw));
+        float rz = (float) -Math.sin(Math.toRadians(yaw));
         return new Vec2f((forward * speed * rz) + (strafe * speed * rx),
                 (forward * speed * rx) - (strafe * speed * rz));
     }
