@@ -17,6 +17,7 @@
     "network.MixinClientPlayNetworkHandler",
     "render.MixinLightmapTextureManager",
     "render.MixinRenderTickCounter",
+    "render.MixinWorldRenderer",
     "render.entity.MixinPlayerEntityRenderer",
     "particle.MixinParticleManager",
     "accessor.AccessorChatScreen",
@@ -27,7 +28,8 @@
     "accessor.AccessorPlayerSkinProvider",
     "accessor.AccessorTextFieldWidget",
     "accessor.AccessorClientPlayerInteractionManager",
-    "accessor.AccessorClientPlayerEntity"
+    "accessor.AccessorClientPlayerEntity",
+    "accessor.AccessorWorldRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

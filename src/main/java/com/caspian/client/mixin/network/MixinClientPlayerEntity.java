@@ -7,6 +7,7 @@ import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.MovementSlowdownEvent;
 import com.caspian.client.impl.event.network.SetCurrentHandEvent;
+import com.caspian.client.impl.event.network.SprintCancelEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
 import net.minecraft.client.MinecraftClient;
@@ -25,6 +26,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -233,6 +235,8 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
             autoJump((float) (getX() - d), (float) (getZ() - e));
         }
     }
+
+    // @Inject(method = "tickMovement", at = @At(value = "INVOKE"))
     
     /**
      *
@@ -245,5 +249,28 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     {
         SetCurrentHandEvent setCurrentHandEvent = new SetCurrentHandEvent();
         Caspian.EVENT_HANDLER.dispatch(setCurrentHandEvent);
+    }
+
+    /**
+     *
+     *
+     * @param instance
+     * @param b
+     */
+    @Redirect(method = "tickMovement", at = @At(value = "INVOKE", target =
+            "Lnet/minecraft/client/network/ClientPlayerEntity;setSprinting(Z)V",
+            ordinal = 2))
+    private void hookSetSprinting(ClientPlayerEntity instance, boolean b)
+    {
+        final SprintCancelEvent sprintEvent = new SprintCancelEvent();
+        Caspian.EVENT_HANDLER.dispatch(sprintEvent);
+        if (sprintEvent.isCanceled())
+        {
+            instance.setSprinting(true);
+        }
+        else
+        {
+            instance.setSprinting(b);
+        }
     }
 }

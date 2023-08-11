@@ -753,8 +753,8 @@ public class AutoCrystalModule extends RotationModule
                             randomTime = random.nextLong((long)
                                     (randomSpeedConfig.getValue() * 10.0f + 1.0f));
                         }
-                        float delay = (((NumberConfig<Float>) breakSpeedConfig).getMax()
-                                - breakSpeedConfig.getValue()) * 50.0f + randomTime;
+                        float delay = 1000.0f - breakSpeedConfig.getValue() * 50.0f
+                                + randomTime;
                         if (instantConfig.getValue())
                         {
                             float timeout = Math.max(getLatency(breakTimes) + (50.0f * breakTimeoutConfig.getValue()),
@@ -797,8 +797,7 @@ public class AutoCrystalModule extends RotationModule
                         }
                         return;
                     }
-                    float delay = (((NumberConfig<Float>) placeSpeedConfig).getMax()
-                            - placeSpeedConfig.getValue()) * 50.0f;
+                    float delay = 1000.0f - placeSpeedConfig.getValue() * 50.0f;
                     if (lastPlace.passed(delay))
                     {
                         if (place(placeData, dir))
@@ -831,8 +830,8 @@ public class AutoCrystalModule extends RotationModule
                     final Box rb = renderBreak.get();
                     if (rb != null)
                     {
-                        RenderManager.renderBoundingBox(rb,
-                                1.5f, color);
+                        RenderManager.renderBoundingBox(event.getMatrices(),
+                                rb, 1.5f, color);
                     }
                 }
                 final BlockPos rp = renderPlace.get();
@@ -844,8 +843,9 @@ public class AutoCrystalModule extends RotationModule
                         int alpha = c.getAlpha() + 55;
                         color = (color & 0x00ffffff) | (alpha << 24);
                     }
-                    RenderManager.renderBox(rp, color);
-                    RenderManager.renderBoundingBox(rp, 1.5f, color);
+                    RenderManager.renderBox(event.getMatrices(), rp, color);
+                    RenderManager.renderBoundingBox(event.getMatrices(), rp,
+                            1.5f, color);
                 }
             }
         }
@@ -1045,14 +1045,13 @@ public class AutoCrystalModule extends RotationModule
                         eyepos = VecUtil.toEyePos(mc.player, pos);
                     }
                     //
-                    final Vec3d cpos = new Vec3d(packet.getX(), packet.getY(),
-                            packet.getZ());
+                    final Vec3d cpos = new Vec3d(packet.getX() - 0.5,
+                            packet.getY(), packet.getZ() - 0.5);
                     final BlockPos sblock = BlockPos.ofFloored(cpos);
                     renderSpawn = sblock;
                     if (instantConfig.getValue())
                     {
-                        final Vec3d base = new Vec3d(packet.getX(),
-                                packet.getY() - 1.0, packet.getZ());
+                        final Vec3d base = cpos.subtract(0.0, 1.0, 0.0);
                         if (preBreakRangeCheck(eyepos, cpos))
                         {
                             return;
@@ -1620,10 +1619,10 @@ public class AutoCrystalModule extends RotationModule
     private void attackDirect(int id, Vec3d pos)
     {
         // retarded hack to set entity id
-        final EndCrystalEntity fakeCrystal = new EndCrystalEntity(mc.world,
+        final EndCrystalEntity crystalEntity = new EndCrystalEntity(mc.world,
                 pos.getX(), pos.getY(), pos.getZ());
-        fakeCrystal.setId(id);
-        PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(fakeCrystal,
+        crystalEntity.setId(id);
+        PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(crystalEntity,
                         mc.player.isSneaking());
         // ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(id);
         Managers.NETWORK.sendPacket(packet);
@@ -1661,7 +1660,7 @@ public class AutoCrystalModule extends RotationModule
         if (preSequence != null
                 && pos.squaredDistanceTo(toSource(preSequence)) < 0.25f)
         {
-            sequence = fakeCrystal;
+            sequence = crystalEntity;
             startSequence.reset();
         }
     }

@@ -13,7 +13,6 @@ import com.caspian.client.impl.event.render.RenderOverlayEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.string.EnumFormatter;
-import com.caspian.client.util.string.StringUtil;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.Window;
 import net.minecraft.entity.Entity;
@@ -22,14 +21,12 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 /**
  *
@@ -113,9 +110,8 @@ public class HudModule extends ToggleModule
             }
             if (watermarkConfig.getValue())
             {
-                RenderManager.renderText(event.getMatrices(), String.format("%s %s.%s",
-                                CaspianMod.MOD_NAME,
-                                Formatting.WHITE + CaspianMod.MOD_VER,
+                RenderManager.renderText(event.getMatrices(), String.format("%s §f%s-%s",
+                                CaspianMod.MOD_NAME, CaspianMod.MOD_VER,
                                 CaspianMod.MOD_BUILD_NUMBER), 2.0f,
                         topLeft, Modules.COLORS.getRGB());
                 // topLeft += 10.0f;
@@ -149,10 +145,11 @@ public class HudModule extends ToggleModule
             {
                 for (StatusEffectInstance e : mc.player.getStatusEffects())
                 {
-                    StatusEffect effect = e.getEffectType();
-                    String text = String.format("%s %s%s", effect.getName(),
-                            e.getAmplifier() > 1 ? e.getAmplifier() + " ":
-                                    "" + Formatting.WHITE,
+                    final StatusEffect effect = e.getEffectType();
+                    boolean amplifier = e.getAmplifier() > 1;
+                    String text = String.format("%s %s§f%s",
+                            effect.getName().getString(),
+                            amplifier ? e.getAmplifier() + " " : "",
                             StatusEffectUtil.durationToString(e, 1.0f));
                     int width = RenderManager.textWidth(text);
                     RenderManager.renderText(event.getMatrices(), text,
@@ -220,7 +217,7 @@ public class HudModule extends ToggleModule
             }
             if (coordsConfig.getValue())
             {
-                final DecimalFormat decimal = new DecimalFormat("#.0");
+                final DecimalFormat decimal = new DecimalFormat("0.0");
                 double x = mc.player.getX();
                 double y = mc.player.getY();
                 double z = mc.player.getZ();
@@ -230,27 +227,26 @@ public class HudModule extends ToggleModule
                 double nz = nether ? mc.player.getZ() * 8 :
                         mc.player.getZ() / 8;
                 RenderManager.renderText(event.getMatrices(), String.format(
-                                "XYZ %s, %s, %s " + (netherCoordsConfig.getValue() ?
-                                        "[%s, %s]" : ""),
-                                Formatting.WHITE + decimal.format(x),
+                                "XYZ §f%s, %s, %s " + (netherCoordsConfig.getValue() ?
+                                        "§7[§f%s, %s§7]" : ""),
+                                nether ? decimal.format(nx) : decimal.format(x),
                                 decimal.format(y),
-                                decimal.format(z) + Formatting.RESET,
-                                Formatting.WHITE + decimal.format(nx),
-                                decimal.format(nz) + Formatting.RESET), 2,
-                        bottomLeft, Modules.COLORS.getRGB());
+                                nether ? decimal.format(nz) : decimal.format(z),
+                                nether ? decimal.format(x) : decimal.format(nx),
+                                nether ? decimal.format(z) : decimal.format(nz)),
+                        2, bottomLeft, Modules.COLORS.getRGB());
                 bottomLeft -= 10.0f;
             }
             if (directionConfig.getValue())
             {
-                Direction direction = mc.player.getHorizontalFacing();
+                final Direction direction = mc.player.getHorizontalFacing();
                 String dir = EnumFormatter.formatDirection(direction);
-                Direction.AxisDirection axis = direction.getDirection();
-                String axisDir = EnumFormatter.formatAxis(direction.getAxis());
-                RenderManager.renderText(event.getMatrices(), String.format("%s [%s]",
-                                dir, Formatting.WHITE + axisDir +
-                                        (axis == Direction.AxisDirection.POSITIVE ? "+" : "-")
-                                        + Formatting.RESET),
-                        2, bottomLeft, Modules.COLORS.getRGB());
+                String axis = EnumFormatter.formatAxis(direction.getAxis());
+                boolean pos = direction.getDirection() == Direction.AxisDirection.POSITIVE;
+                RenderManager.renderText(event.getMatrices(),
+                        String.format("%s §7[§f%s%s§7]", dir, axis,
+                                pos ? "+" : "-"), 2, bottomLeft,
+                        Modules.COLORS.getRGB());
                 // bottomLeft -= 10.0f;
             }
             if (armorConfig.getValue())
@@ -259,25 +255,22 @@ public class HudModule extends ToggleModule
                 //
                 int x = res.getScaledWidth() / 2 + 15;
                 int y = res.getScaledHeight();
-                if (!mc.player.isCreative())
+                if (mc.player.isSubmergedInWater() && mc.player.getAir() > 0)
                 {
-                    if (mc.player.isSubmergedInWater() && mc.player.getAir() > 0)
-                    {
-                        y -= 65;
-                    }
-                    else if (riding instanceof LivingEntity entity)
-                    {
-                        y -= 45 + (int) Math.ceil((entity.getMaxHealth() - 1.0f) / 20.0f) * 10;
-                    }
-                    else if (riding != null)
-                    {
-                        y -= 45;
-                    }
-                    else
-                    {
-                        y -= mc.player.isCreative() ?
-                                (mc.player.isRiding() ? 45 : 38) : 5;
-                    }
+                    y -= 65;
+                }
+                else if (riding instanceof LivingEntity entity)
+                {
+                    y -= 45 + (int) Math.ceil((entity.getMaxHealth() - 1.0f) / 20.0f) * 10;
+                }
+                else if (riding != null)
+                {
+                    y -= 45;
+                }
+                else
+                {
+                    y -= mc.player.isCreative() ?
+                            (mc.player.isRiding() ? 45 : 38) : 5;
                 }
                 for (int i = 3; i >= 0; --i)
                 {
@@ -301,7 +294,7 @@ public class HudModule extends ToggleModule
     private String getFormattedModule(final Module module)
     {
         final String metadata = module.getMetaData();
-        if (!Objects.equals(metadata, StringUtil.EMPTY_STRING))
+        if (!metadata.isEmpty())
         {
             return String.format("%s §7[§f%s§7]", module.getName(),
                     module.getMetaData());

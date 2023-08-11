@@ -40,6 +40,17 @@ public class TimerModule extends InvokeModule
     /**
      *
      *
+     * @return
+     */
+    @Override
+    public String getMetaData()
+    {
+        return Float.toString(timer);
+    }
+
+    /**
+     *
+     *
      * @param event
      */
     @EventListener
@@ -49,7 +60,7 @@ public class TimerModule extends InvokeModule
         {
             if (tpsSyncConfig.getValue())
             {
-                timer = Math.max(Managers.TICK.getTpsCurrent() / 20.0f, 0.01f);
+                timer = Math.max(Managers.TICK.getTpsCurrent() / 20.0f, 0.1f);
                 return;
             }
             timer = ticksConfig.getValue();
@@ -69,17 +80,6 @@ public class TimerModule extends InvokeModule
             event.cancel();
             event.setTicks(timer);
         }
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    @Override
-    public String getMetaData()
-    {
-        return Float.toString(timer);
     }
 
     /**

@@ -453,8 +453,8 @@ public class SpeedmineModule extends RotationModule
                     scale = 1.0f;
                 }
                 final Box scaled = new Box(center, center).expand(0.5 * scale);
-                RenderManager.renderBox(scaled, damage > 0.95f ? 0x6000ff00 :
-                        0x60ff0000);
+                RenderManager.renderBox(event.getMatrices(), scaled,
+                        damage > 0.95f ? 0x6000ff00 : 0x60ff0000);
             }
         }
     }

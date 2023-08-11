@@ -7,6 +7,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.impl.event.network.SprintCancelEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.player.MovementUtil;
 import com.caspian.client.util.string.EnumFormatter;
@@ -71,6 +72,24 @@ public class SprintModule extends ToggleModule
                     case RAGE -> mc.player.setSprinting(true);
                 }
             }
+        }
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onSprintCancel(SprintCancelEvent event)
+    {
+        if (!Managers.POSITION.isSneaking()
+                && MovementUtil.isInputtingMovement()
+                && mc.player.getHungerManager().getFoodLevel() > 6.0F
+                && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
+                && modeConfig.getValue() == SprintMode.RAGE)
+        {
+            event.cancel();
         }
     }
 

@@ -17,11 +17,11 @@ public class CaspianMod implements ClientModInitializer
     public static final String MOD_NAME = "Caspian";
     // Mod version - should comply with https://semver.org/
     // UPDATE BEFORE RELEASE
-    public static final String MOD_VER = "1.0.0";
+    public static final String MOD_VER = "1.0";
     // Build number - updated every time a major change happens
     // This is more of debug information and could be formatted as:
     // Caspian 1.0.{BUILD_NUMBER}-{GIT_HASH}
-    public static final int MOD_BUILD_NUMBER = 1;
+    public static final String MOD_BUILD_NUMBER = "b2";
     // Mod mc version
     public static final String MOD_MC_VER = "1.19.4";
 
@@ -33,8 +33,8 @@ public class CaspianMod implements ClientModInitializer
     @Override
     public void onInitializeClient()
     {
-         Caspian.preInit();
-         Caspian.init();
-         Caspian.postInit();
+        Caspian.preInit();
+        Caspian.init();
+        Caspian.postInit();
     }
 }

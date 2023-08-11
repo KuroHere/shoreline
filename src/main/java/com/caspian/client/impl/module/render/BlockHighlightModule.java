@@ -92,13 +92,13 @@ public class BlockHighlightModule extends ToggleModule
             {
                 case FILL ->
                 {
-                    RenderManager.renderBox(render,
+                    RenderManager.renderBox(event.getMatrices(), render,
                             Modules.COLORS.getRGB(60));
-                    RenderManager.renderBoundingBox(render, 1.5f,
-                            Modules.COLORS.getRGB(145));
+                    RenderManager.renderBoundingBox(event.getMatrices(),
+                            render, 1.5f, Modules.COLORS.getRGB(145));
                 }
-                case OUTLINE -> RenderManager.renderBoundingBox(render, 1.5f,
-                        Modules.COLORS.getRGB(145));
+                case OUTLINE -> RenderManager.renderBoundingBox(event.getMatrices(),
+                        render, 1.5f, Modules.COLORS.getRGB(145));
             }
         }
     }

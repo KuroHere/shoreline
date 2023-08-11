@@ -9,7 +9,6 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.handler.tick.TickSync;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
-import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
@@ -38,7 +37,10 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.MiningToolItem;
+import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.util.Hand;
@@ -216,8 +218,9 @@ public class AuraModule extends RotationModule
                 && (!swordCheckConfig.getValue() || isHoldingSword()))
         {
             final Box box = target.getBoundingBox();
-            RenderManager.renderBox(box, Modules.COLORS.getRGB(60));
-            RenderManager.renderBoundingBox(box, 1.5f,
+            RenderManager.renderBox(event.getMatrices(), box,
+                    Modules.COLORS.getRGB(60));
+            RenderManager.renderBoundingBox(event.getMatrices(), box, 1.5f,
                     Modules.COLORS.getRGB(145));
         }
     }
