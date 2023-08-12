@@ -81,7 +81,7 @@ public class AutoCrystalModule extends RotationModule
             "Range to search for potential enemies", 1.0f, 10.0f, 13.0f);
     Config<Boolean> multithreadConfig = new BooleanConfig("Concurrent",
             "Attempts to run calculations in the background of the main " +
-                    "minecraft ticks on a seperate thread pool", false);
+                    "minecraft ticks on a concurrent thread pool", false);
     Config<Boolean> instantConfig = new BooleanConfig("Instant",
             "Instantly attacks crystals when they spawn", false);
     Config<Boolean> instantCalcConfig = new BooleanConfig("SpawnTime-Calc",
@@ -135,6 +135,10 @@ public class AutoCrystalModule extends RotationModule
     Config<Integer> rotateTimeoutConfig = new NumberConfig<>(
             "RotateTimeout", "Minimum ticks to hold the rotation yaw after " +
             "reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
+    Config<Integer> rotateMaxConfig = new NumberConfig<>("Rotate-LeniencyTicks",
+            "Maximum ticks the current rotation has to complete before the " +
+                    "next rotation overrides the rotation", 0, 1, 3,
+            () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
     Config<Boolean> rotateTickFactorConfig = new BooleanConfig("Rotate-TickReduction",
             "Factors in angles when calculating crystals to minimize " +
                     "attack ticks and speed up the break/place loop", false,
@@ -201,6 +205,9 @@ public class AutoCrystalModule extends RotationModule
     //        limit: 13
     // shortterm:
     //        ticks: 8
+    Config<Boolean> breakCommitConfig = new BooleanConfig("BreakCommit",
+            "Completes the pre-check calculations for crystals and " +
+                    "skips the \"post processing\" of calculations", false);
     Config<Inhibit> inhibitConfig = new EnumConfig<>("Inhibit",
             "Prevents excessive attacks", Inhibit.NONE, Inhibit.values());
     Config<Integer> inhibitTicksConfig = new NumberConfig<>("InhibitTicks",
@@ -504,7 +511,7 @@ public class AutoCrystalModule extends RotationModule
                 // This means that if the rotations steps >= 1,
                 // then there is a possibility that the current rotation may
                 // "fall through" and never actually complete.
-                if (rotating > 0 && isRotationComplete())
+                if (rotating > 0 && isRotationModified())
                 {
                     rotating = 0;
                     rotateTimer.setElapsedTime(Timer.MAX_TIME);
@@ -618,20 +625,23 @@ public class AutoCrystalModule extends RotationModule
      *
      * @return
      */
-    private boolean isRotationComplete()
+    private boolean isRotationModified()
     {
-        if (lastPlaceData != null && lastAttackData != null
+        if (rotateMaxConfig.getValue() > 0
+                && strictRotateConfig.getValue() != Rotate.OFF
+                && lastPlaceData != null && lastAttackData != null
                 && placeData != null && attackData != null)
         {
+            float maxYaw = Math.max(rotateMaxConfig.getValue() * rotateLimitConfig.getValue(), 180.0f);
             if (rotateTarget == Rotate.FULL)
             {
                 return !attackData.isSrcEqual(lastAttackData)
-                        && attackData.getYawDiff(lastAttackData) > 30.0f;
+                        && attackData.getYawDiff(lastAttackData) > maxYaw;
             }
             else if (rotateTarget == Rotate.SEMI)
             {
                 return !placeData.isSrcEqual(lastPlaceData)
-                        && placeData.getYawDiff(lastPlaceData) > 30.0f;
+                        && placeData.getYawDiff(lastPlaceData) > maxYaw;
             }
         }
         return false;
