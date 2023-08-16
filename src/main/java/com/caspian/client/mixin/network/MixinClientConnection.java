@@ -27,7 +27,8 @@ public class MixinClientConnection
      * @param packet
      * @param ci
      */
-    @Inject(method = "send*", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V",
+            at = @At(value = "HEAD"), cancellable = true)
     private void hookSend(Packet<?> packet, CallbackInfo ci)
     {
         PacketEvent.Outbound packetOutboundEvent =
@@ -47,7 +48,8 @@ public class MixinClientConnection
      * @param packet
      * @param ci
      */
-    @Inject(method = "channelRead0*", at = @At(value = "HEAD"),
+    @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;" +
+            "Lnet/minecraft/network/packet/Packet;)V", at = @At(value = "HEAD"),
             cancellable = true)
     private void hookChannelRead0(ChannelHandlerContext channelHandlerContext,
                                   Packet<?> packet, CallbackInfo ci)

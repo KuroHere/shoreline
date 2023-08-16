@@ -45,6 +45,18 @@ public class ConfigContainer implements Configurable
     }
 
     /**
+     *
+     * @param configs
+     */
+    protected void register(Config<?>... configs)
+    {
+        for (Config<?> config : configs)
+        {
+            configurations.put(config.getId(), config);
+        }
+    }
+
+    /**
      * Reflect configuration fields
      */
     public void reflectConfigs()

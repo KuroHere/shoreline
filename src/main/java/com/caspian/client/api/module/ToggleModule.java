@@ -46,6 +46,8 @@ public class ToggleModule extends Module
     public ToggleModule(String name, String desc, ModuleCategory category)
     {
         super(name, desc, category);
+        // Toggle settings
+        register(keybindingConfig, enabledConfig);
     }
 
     /**

@@ -3,7 +3,6 @@ package com.caspian.client.api.config.setting;
 import com.caspian.client.api.config.Config;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
 import java.awt.*;
 
@@ -82,7 +81,7 @@ public class ColorConfig extends Config<Color>
     {
         JsonObject configObj = super.toJson();
         // hex value for readability
-        configObj.addProperty("value", Integer.toHexString(rgb));
+        configObj.addProperty("value", "0x" + Integer.toHexString(rgb));
         return configObj;
     }
 
@@ -98,7 +97,7 @@ public class ColorConfig extends Config<Color>
         {
             JsonElement element = jsonObj.get("value");
             String hex = element.getAsString();
-            setValue(Integer.parseInt(hex));
+            setValue(Integer.decode(hex));
         }
     }
 }

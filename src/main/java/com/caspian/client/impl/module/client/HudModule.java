@@ -20,6 +20,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Direction;
@@ -153,7 +154,11 @@ public class HudModule extends ToggleModule
                 for (StatusEffectInstance e : mc.player.getStatusEffects())
                 {
                     final StatusEffect effect = e.getEffectType();
-                    boolean amplifier = e.getAmplifier() > 1;
+                    if (effect == StatusEffects.NIGHT_VISION)
+                    {
+                        continue;
+                    }
+                    boolean amplifier = e.getAmplifier() > 1 && !e.isInfinite();
                     Text duration = StatusEffectUtil.durationToString(e, 1.0f);
                     String text = String.format("%s %s§f%s",
                             effect.getName().getString(),
