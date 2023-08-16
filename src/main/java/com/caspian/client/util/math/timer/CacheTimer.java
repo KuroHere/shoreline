@@ -39,7 +39,7 @@ public class CacheTimer implements Timer
         {
             return true;
         }
-        return getElapsedTime() > TimeUnit.NANOSECONDS.toMillis(time.longValue());
+        return getElapsedTime() > time.longValue();
     }
 
     /**
@@ -55,7 +55,7 @@ public class CacheTimer implements Timer
      */
     public boolean passed(Number time, TimeUnit unit)
     {
-        return passed(unit.toNanos(time.longValue()));
+        return passed(unit.toMillis(time.longValue()));
     }
 
     /**
@@ -66,7 +66,7 @@ public class CacheTimer implements Timer
     @Override
     public long getElapsedTime()
     {
-        return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - time);
+        return toMillis(System.nanoTime() - time);
     }
 
     /**
@@ -76,7 +76,7 @@ public class CacheTimer implements Timer
      */
     public long getElapsedTime(TimeUnit unit)
     {
-        return unit.convert(getElapsedTime(), TimeUnit.NANOSECONDS);
+        return unit.convert(getElapsedTime(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -98,5 +98,15 @@ public class CacheTimer implements Timer
     public void reset()
     {
         this.time = System.nanoTime();
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    private long toMillis(long nanos)
+    {
+        return nanos / 1000000;
     }
 }
