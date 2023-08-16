@@ -132,6 +132,15 @@ public class Account extends ConfigContainer implements Globals
 
     /**
      *
+     * @return
+     */
+    public String getPassword()
+    {
+        return password.getValue();
+    }
+
+    /**
+     *
      *
      * @return
      */

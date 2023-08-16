@@ -1,6 +1,7 @@
 package com.caspian.client.api.config.setting;
 
 import com.caspian.client.api.config.Config;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
@@ -168,7 +169,7 @@ public class NumberConfig<T extends Number> extends Config<T>
         }
         else if (val.doubleValue() > max.doubleValue())
         {
-            super.setValue(min);
+            super.setValue(max);
         }
         // inbounds
         else
@@ -185,7 +186,20 @@ public class NumberConfig<T extends Number> extends Config<T>
     @Override
     public JsonObject toJson()
     {
-        return new JsonPrimitive(getValue()).getAsJsonObject();
+        JsonObject configObj = super.toJson();
+        if (getValue() instanceof Integer)
+        {
+            configObj.addProperty("value", (Integer) getValue());
+        }
+        else if (getValue() instanceof Float)
+        {
+            configObj.addProperty("value", (Float) getValue());
+        }
+        else if (getValue() instanceof Double)
+        {
+            configObj.addProperty("value", (Double) getValue());
+        }
+        return configObj;
     }
 
     /**
@@ -196,21 +210,25 @@ public class NumberConfig<T extends Number> extends Config<T>
     @Override
     public void fromJson(JsonObject jsonObj)
     {
-        // get config as number
-        if (getValue() instanceof Integer)
+        if (jsonObj.has("value"))
         {
-            Integer val = (Integer) jsonObj.getAsInt();
-            setValue((T) val);
-        }
-        else if (getValue() instanceof Float)
-        {
-            Float val = (Float) jsonObj.getAsFloat();
-            setValue((T) val);
-        }
-        else if (getValue() instanceof Double)
-        {
-            Double val = (Double) jsonObj.getAsDouble();
-            setValue((T) val);
+            JsonElement element = jsonObj.get("value");
+            // get config as number
+            if (getValue() instanceof Integer)
+            {
+                Integer val = (Integer) element.getAsInt();
+                setValue((T) val);
+            }
+            else if (getValue() instanceof Float)
+            {
+                Float val = (Float) element.getAsFloat();
+                setValue((T) val);
+            }
+            else if (getValue() instanceof Double)
+            {
+                Double val = (Double) element.getAsDouble();
+                setValue((T) val);
+            }
         }
     }
 }

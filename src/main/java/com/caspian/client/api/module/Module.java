@@ -1,6 +1,5 @@
 package com.caspian.client.api.module;
 
-import com.caspian.client.Caspian;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.Configurable;
@@ -48,23 +47,12 @@ public class Module extends ConfigContainer implements Globals
     }
 
     /**
-     * Will run when the game is starting. Called when the client is
-     * loaded and all client functionality is FULLY INITIALIZED.
-     *
-     * @see Caspian#init()
-     */
-    public void onLoad()
-    {
-
-    }
-
-    /**
      *
      *
      * @return
      *
      * @see ModuleManager#getModule(String)
-     * @see ModulePreset#save()
+     * @see ModuleFile#save()
      */
     public String getId()
     {

@@ -21,6 +21,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
@@ -45,8 +46,12 @@ public class HudModule extends ToggleModule
             "Displays facing direction", true);
     Config<Boolean> armorConfig = new BooleanConfig("Armor",
             "Displays player equipped armor and durability", true);
-    Config<PotionHud> potionHudConfig = new EnumConfig<>("PotionHud", "",
-            PotionHud.HIDE, PotionHud.values());
+    Config<VanillaHud> potionHudConfig = new EnumConfig<>("PotionHud",
+            "Renders the Minecraft potion Hud", VanillaHud.HIDE,
+            VanillaHud.values());
+    Config<VanillaHud> itemNameConfig = new EnumConfig<>("ItemName",
+            "Renders the Minecraft item name display", VanillaHud.MOVE,
+            VanillaHud.values());
     Config<Boolean> potionEffectsConfig = new BooleanConfig("PotionEffects",
             "Displays active potion effects", true);
     Config<Boolean> coordsConfig = new BooleanConfig("Coords",
@@ -67,6 +72,8 @@ public class HudModule extends ToggleModule
             "Displays a list of all active modules", true);
     Config<Ordering> orderingConfig = new EnumConfig<>("Ordering", "",
             Ordering.LENGTH, Ordering.values(), () -> arraylistConfig.getValue());
+    //
+    private final DecimalFormat decimal = new DecimalFormat("0.0");
 
     /**
      *
@@ -85,7 +92,7 @@ public class HudModule extends ToggleModule
      * @param event The render overlay event
      */
     @EventListener
-    public void onRenderOverlay(RenderOverlayEvent event)
+    public void onRenderOverlayPost(RenderOverlayEvent.Post event)
     {
         if (mc.player != null && mc.world != null)
         {
@@ -101,7 +108,7 @@ public class HudModule extends ToggleModule
                 bottomLeft -= 14.0f;
                 bottomRight -= 14.0f;
             }
-            if (potionHudConfig.getValue() == PotionHud.MOVE)
+            if (potionHudConfig.getValue() == VanillaHud.MOVE)
             {
                 if (!mc.player.getStatusEffects().isEmpty())
                 {
@@ -147,10 +154,11 @@ public class HudModule extends ToggleModule
                 {
                     final StatusEffect effect = e.getEffectType();
                     boolean amplifier = e.getAmplifier() > 1;
+                    Text duration = StatusEffectUtil.durationToString(e, 1.0f);
                     String text = String.format("%s %s§f%s",
                             effect.getName().getString(),
                             amplifier ? e.getAmplifier() + " " : "",
-                            StatusEffectUtil.durationToString(e, 1.0f));
+                            e.isInfinite() ? "" : duration.getString());
                     int width = RenderManager.textWidth(text);
                     RenderManager.renderText(event.getMatrices(), text,
                             res.getScaledWidth() - width - 1.0f, bottomRight,
@@ -176,7 +184,7 @@ public class HudModule extends ToggleModule
                 double div = 0.05 / 3600.0;
                 final double speed = dist / div;
                 String text = String.format("Speed §f%skm/h",
-                        new DecimalFormat("0.0").format(speed));
+                        decimal.format(speed));
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, bottomRight,
@@ -195,11 +203,11 @@ public class HudModule extends ToggleModule
             }
             if (tpsConfig.getValue())
             {
-                String curr = Float.toString(Managers.TICK.getTpsCurrent());
-                String avg = Float.toString(Managers.TICK.getTpsAverage());
+                float curr = Managers.TICK.getTpsCurrent();
+                float avg = Managers.TICK.getTpsAverage();
                 String text = String.format("TPS §f%s §7[§f%s§7]",
-                        curr.substring(0, curr.indexOf(".") + 2),
-                        avg.substring(0, avg.indexOf(".") + 2));
+                        decimal.format(avg),
+                        decimal.format(curr));
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, bottomRight,
@@ -217,7 +225,6 @@ public class HudModule extends ToggleModule
             }
             if (coordsConfig.getValue())
             {
-                final DecimalFormat decimal = new DecimalFormat("0.0");
                 double x = mc.player.getX();
                 double y = mc.player.getY();
                 double z = mc.player.getZ();
@@ -287,6 +294,19 @@ public class HudModule extends ToggleModule
 
     /**
      *
+     * @param event
+     */
+    @EventListener
+    public void onRenderOverlayStatusEffect(RenderOverlayEvent.StatusEffect event)
+    {
+        if (potionHudConfig.getValue() == VanillaHud.HIDE)
+        {
+            event.cancel();
+        }
+    }
+
+    /**
+     *
      *
      * @param module
      * @return
@@ -302,7 +322,7 @@ public class HudModule extends ToggleModule
         return module.getName();
     }
 
-    public enum PotionHud
+    public enum VanillaHud
     {
         MOVE,
         HIDE,

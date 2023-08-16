@@ -20,7 +20,7 @@ import net.minecraft.entity.effect.StatusEffects;
 public class FullbrightModule extends ToggleModule
 {
     Config<Brightness> brightnessConfig = new EnumConfig<>("Mode", "Mode for " +
-            "world brightness", Brightness.GAMMA, Brightness.values());
+            "world brightness", Brightness.POTION, Brightness.values());
 
     /**
      *
@@ -42,7 +42,7 @@ public class FullbrightModule extends ToggleModule
             if (brightnessConfig.getValue() == Brightness.POTION)
             {
                 mc.player.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.NIGHT_VISION, 100000, 0));
+                        StatusEffects.NIGHT_VISION, -1, 0)); // INFINITE
             }
         }
     }
@@ -92,7 +92,7 @@ public class FullbrightModule extends ToggleModule
             if (brightnessConfig.getValue() == Brightness.POTION)
             {
                 mc.player.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.NIGHT_VISION, 100000, 0));
+                        StatusEffects.NIGHT_VISION, -1, 0));
                 return;
             }
             mc.player.removeStatusEffect(StatusEffects.NIGHT_VISION);

@@ -1,6 +1,7 @@
 package com.caspian.client.api.config.setting;
 
 import com.caspian.client.api.config.Config;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
@@ -59,22 +60,45 @@ public class ColorConfig extends Config<Color>
         rgb = val.getRGB();
     }
 
+    /**
+     *
+     *
+     * @param val
+     */
     public void setValue(int val)
     {
-        setValue(new Color(val, (val & 0xff000000) != 0xff000000));
+        Color color = new Color(val, (val & 0xff000000) != 0xff000000);
+        setValue(color);
         rgb = val;
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     @Override
     public JsonObject toJson()
     {
+        JsonObject configObj = super.toJson();
         // hex value for readability
-        return new JsonPrimitive("#" + Integer.toHexString(rgb)).getAsJsonObject();
+        configObj.addProperty("value", Integer.toHexString(rgb));
+        return configObj;
     }
 
+    /**
+     *
+     *
+     * @param jsonObj The data as a json object
+     */
     @Override
     public void fromJson(JsonObject jsonObj)
     {
-        setValue(Integer.parseInt(jsonObj.getAsString().substring(1)));
+        if (jsonObj.has("value"))
+        {
+            JsonElement element = jsonObj.get("value");
+            String hex = element.getAsString();
+            setValue(Integer.parseInt(hex));
+        }
     }
 }

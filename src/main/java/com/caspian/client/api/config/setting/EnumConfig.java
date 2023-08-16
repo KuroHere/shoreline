@@ -1,6 +1,7 @@
 package com.caspian.client.api.config.setting;
 
 import com.caspian.client.api.config.Config;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.function.Supplier;
@@ -35,6 +36,15 @@ public class EnumConfig<T extends Enum<?>> extends Config<T>
         this.values = values;
     }
 
+    /**
+     *
+     * @return
+     */
+    public String getValueName()
+    {
+        return getValue().name();
+    }
+
     public T[] getValues()
     {
         return values;
@@ -66,15 +76,31 @@ public class EnumConfig<T extends Enum<?>> extends Config<T>
         return values[index];
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public JsonObject toJson()
     {
-        return null;
+        JsonObject configObj = super.toJson();
+        configObj.addProperty("value", getValueName());
+        return configObj;
     }
 
+    /**
+     *
+     *
+     * @param jsonObj The data as a json object
+     */
     @Override
     public void fromJson(JsonObject jsonObj)
     {
-
+        if (jsonObj.has("value"))
+        {
+            JsonElement element = jsonObj.get("value");
+            setValue((T) (Enum<?>) Enum.valueOf((Class<Enum>) getValue().getClass(),
+                    element.getAsString()));
+        }
     }
 }

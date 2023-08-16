@@ -7,9 +7,12 @@ import com.caspian.client.impl.event.TickEvent;
 
 /**
  *
+ * TODO: Test the accuracy of ticks
  *
  * @author linus
  * @since 1.0
+ *
+ * @see Timer
  */
 public class TickTimer implements Timer
 {
@@ -31,7 +34,7 @@ public class TickTimer implements Timer
      *
      * @param event
      */
-    @EventListener(priority = 1000)
+    @EventListener
     public void onTick(TickEvent event)
     {
         if (event.getStage() == EventStage.PRE)

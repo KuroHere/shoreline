@@ -3,7 +3,6 @@ package com.caspian.client.api.manager;
 import com.caspian.client.Caspian;
 import com.caspian.client.api.handler.tick.TickHandler;
 import com.caspian.client.api.handler.tick.TickSync;
-import com.caspian.client.init.Managers;
 
 /**
  *
@@ -16,7 +15,7 @@ import com.caspian.client.init.Managers;
 public class TickManager
 {
     // The TPS tick handler.
-    private final TickHandler handler;
+    private final TickHandler handler = new TickHandler();;
 
     /**
      *
@@ -24,7 +23,6 @@ public class TickManager
      */
     public TickManager()
     {
-        handler = new TickHandler();
         Caspian.EVENT_HANDLER.subscribe(handler);
     }
 

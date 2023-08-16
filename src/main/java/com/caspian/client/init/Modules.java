@@ -152,7 +152,6 @@ public class Modules
                     continue;
                 }
                 module.reflectConfigs();
-                module.onLoad();
             }
             CACHE.clear();
         }

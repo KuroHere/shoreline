@@ -54,7 +54,7 @@ public class BlockHighlightModule extends ToggleModule
     @Override
     public String getMetaData()
     {
-        DecimalFormat decimal = new DecimalFormat("##.##");
+        DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(distance);
     }
 

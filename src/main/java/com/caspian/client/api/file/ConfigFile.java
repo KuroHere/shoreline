@@ -1,14 +1,17 @@
 package com.caspian.client.api.file;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.module.ModulePreset;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
+import com.caspian.client.api.module.ModuleFile;
+import com.google.gson.*;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import static org.apache.logging.log4j.core.util.IOUtils.EOF;
 
 /**
  *
@@ -16,7 +19,7 @@ import java.nio.file.Path;
  * @author linus
  * @since 1.0
  *
- * @see ModulePreset
+ * @see ModuleFile
  */
 public abstract class ConfigFile
 {
@@ -25,8 +28,6 @@ public abstract class ConfigFile
             .setLenient() // leniency to allow for .cfg files
             .setPrettyPrinting()
             .create();
-    //
-    protected static final JsonParser PARSER = new JsonParser();
     // The UNIX filepath to configuration file. This filepath is always
     // within the client directory.
     private final Path filepath;
@@ -48,11 +49,88 @@ public abstract class ConfigFile
             // create dir error
             catch (IOException e)
             {
-                Caspian.error("Could not create %s dir", dir);
+                Caspian.error("Could not create {} dir", dir);
                 e.printStackTrace();
             }
         }
         filepath = dir.resolve(toJsonPath(path));
+    }
+
+    /**
+     *
+     *
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    protected String read(Path path) throws IOException
+    {
+        StringBuilder content = new StringBuilder();
+        InputStream in = Files.newInputStream(path);
+        int b;
+        while ((b = in.read()) != EOF)
+        {
+            content.append((char) b);
+        }
+        in.close();
+        return content.toString();
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    protected String serialize(Object obj)
+    {
+        return GSON.toJson(obj);
+    }
+
+    /**
+     *
+     * @param json
+     * @return
+     */
+    protected JsonObject parseObject(String json)
+    {
+        return parse(json, JsonObject.class);
+    }
+
+    /**
+     *
+     * @param json
+     * @return
+     */
+    protected JsonArray parseArray(String json)
+    {
+        return parse(json, JsonArray.class);
+    }
+
+    /**
+     *
+     * @param json
+     * @param type
+     * @return
+     * @param <T>
+     */
+    protected <T> T parse(String json, Class<T> type)
+    {
+        return GSON.fromJson(json, type);
+    }
+
+    /**
+     *
+     *
+     * @param path
+     * @param content
+     * @throws IOException
+     */
+    protected void write(Path path, String content) throws IOException
+    {
+        OutputStream out = Files.newOutputStream(path);
+        byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+        out.write(bytes, 0, bytes.length);
+        out.close();
     }
 
     /**

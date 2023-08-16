@@ -1,13 +1,13 @@
 package com.caspian.client.api.file;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.account.AccountPreset;
+import com.caspian.client.api.account.AccountFile;
 import com.caspian.client.api.account.AccountType;
 import com.caspian.client.api.module.Module;
-import com.caspian.client.api.module.ModulePreset;
+import com.caspian.client.api.module.ModuleFile;
 import com.caspian.client.api.social.SocialRelation;
-import com.caspian.client.api.social.SocialPreset;
-import com.caspian.client.api.waypoint.WaypointPreset;
+import com.caspian.client.api.social.SocialFile;
+import com.caspian.client.api.waypoint.WaypointFile;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
 
@@ -81,19 +81,19 @@ public class ClientConfiguration implements Globals
         for (Module module : Managers.MODULE.getModules())
         {
             // files.add(new ModulePreset(clientDir.resolve("Defaults"), module));
-            files.add(new ModulePreset(clientDir.resolve("Modules"), module));
+            files.add(new ModuleFile(clientDir.resolve("Modules"), module));
         }
         for (SocialRelation relation : SocialRelation.values())
         {
-            files.add(new SocialPreset(clientDir, relation));
+            files.add(new SocialFile(clientDir, relation));
         }
         for (String ip : Managers.WAYPOINT.getIps())
         {
-            files.add(new WaypointPreset(clientDir.resolve("Waypoints"), ip));
+            files.add(new WaypointFile(clientDir.resolve("Waypoints"), ip));
         }
         for (AccountType accountType : AccountType.values())
         {
-            files.add(new AccountPreset(clientDir.resolve("Accounts"),
+            files.add(new AccountFile(clientDir.resolve("Accounts"),
                     accountType));
         }
     }

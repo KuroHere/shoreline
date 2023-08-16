@@ -56,7 +56,7 @@ public class TimerModule extends InvokeModule
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (isEnabled() && event.getStage() == EventStage.POST)
+        if (isEnabled() && event.getStage() == EventStage.PRE)
         {
             if (tpsSyncConfig.getValue())
             {

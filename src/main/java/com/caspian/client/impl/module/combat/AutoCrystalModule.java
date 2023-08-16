@@ -19,6 +19,7 @@ import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.TickTimer;
 import com.caspian.client.util.math.timer.Timer;
@@ -769,6 +770,10 @@ public class AutoCrystalModule extends RotationModule
                         {
                             float timeout = Math.max(getLatency(breakTimes) + (50.0f * breakTimeoutConfig.getValue()),
                                     50.0f * minTimeoutConfig.getValue());
+                            if (sequentialConfig.getValue() == Sequential.STRICT)
+                            {
+                                timeout += 50.0f;
+                            }
                             delay = timeout;
                         }
                         if (lastBreak.passed(delay))
@@ -3176,7 +3181,8 @@ public class AutoCrystalModule extends RotationModule
             if (extrapolateRangeConfig.getValue())
             {
                 pos = extrapolatePosition(mc.player, pos,
-                        mc.player.getBoundingBox(), selfExtrapolateTicksConfig.getValue());
+                        mc.player.getBoundingBox(),
+                        selfExtrapolateTicksConfig.getValue());
             }
             if (multithreadConfig.getValue())
             {
@@ -3197,7 +3203,8 @@ public class AutoCrystalModule extends RotationModule
                 });
                 if (placeConfig.getValue())
                 {
-                    processor.submitCalc(() -> getPlace(entities, blocks, finalPos));
+                    processor.submitCalc(() -> getPlace(entities,
+                            blocks, finalPos));
                 }
                 return;
             }

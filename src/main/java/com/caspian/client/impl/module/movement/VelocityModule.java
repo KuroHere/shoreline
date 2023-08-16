@@ -9,8 +9,11 @@ import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
+import com.caspian.client.mixin.accessor.AccessorExplosionS2CPacket;
+import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.string.EnumFormatter;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 
 import java.text.DecimalFormat;
@@ -108,6 +111,31 @@ public class VelocityModule extends ToggleModule
                                 * (verticalConfig.getValue() / 100.0f)));
                         ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityZ((int) (packet.getVelocityZ()
                                 * (horizontalConfig.getValue() / 100.0f)));
+                    }
+                    case STRICT ->
+                    {
+
+                    }
+                }
+            }
+            if (event.getPacket() instanceof ExplosionS2CPacket packet)
+            {
+                switch (modeConfig.getValue())
+                {
+                    case NORMAL ->
+                    {
+                        if (horizontalConfig.getValue() == 0.0f
+                                && verticalConfig.getValue() == 0.0f)
+                        {
+                            event.cancel();
+                            return;
+                        }
+                        ((AccessorExplosionS2CPacket) packet).setPlayerVelocityX(packet.getPlayerVelocityX()
+                                * (horizontalConfig.getValue() / 100.0f));
+                        ((AccessorExplosionS2CPacket) packet).setPlayerVelocityY(packet.getPlayerVelocityY()
+                                * (verticalConfig.getValue() / 100.0f));
+                        ((AccessorExplosionS2CPacket) packet).setPlayerVelocityZ(packet.getPlayerVelocityZ()
+                                * (horizontalConfig.getValue() / 100.0f));
                     }
                     case STRICT ->
                     {

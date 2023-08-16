@@ -1,6 +1,7 @@
 package com.caspian.client.api.config;
 
 import com.caspian.client.Caspian;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -48,8 +49,8 @@ public class ConfigContainer implements Configurable
      */
     public void reflectConfigs()
     {
+        final ConfigFactory factory = new ConfigFactory(this);
         // populate container using reflection
-        ConfigFactory factory = new ConfigFactory(this);
         for (Field field : getClass().getDeclaredFields())
         {
             if (Config.class.isAssignableFrom(field.getType()))
@@ -78,11 +79,13 @@ public class ConfigContainer implements Configurable
     @Override
     public JsonObject toJson()
     {
-        JsonObject out = new JsonObject();
+        final JsonObject out = new JsonObject();
+        final JsonArray array = new JsonArray();
         for (Config<?> config : getConfigs())
         {
-            out.add(config.getId(), config.toJson());
+            array.add(config.toJson());
         }
+        out.add("configs", array);
         return out;
     }
 
@@ -97,21 +100,34 @@ public class ConfigContainer implements Configurable
     @Override
     public void fromJson(JsonObject jsonObj)
     {
-        for (Map.Entry<String, JsonElement> entry : jsonObj.entrySet())
+        if (jsonObj.has("configs"))
         {
-            // config from id
-            Config<?> config = getConfig(entry.getKey());
-            if (config != null)
+            JsonElement element = jsonObj.get("configs");
+            if (!element.isJsonArray())
             {
-                try
+                return;
+            }
+            for (JsonElement je : element.getAsJsonArray())
+            {
+                if (je.isJsonObject())
                 {
-                    config.fromJson(entry.getValue().getAsJsonObject());
-                }
-                // couldn't parse Json value
-                catch (Exception e)
-                {
-                    Caspian.error("Couldn't parse Json for {}", name);
-                    e.printStackTrace();
+                    final JsonObject configObj = je.getAsJsonObject();
+                    final JsonElement id = configObj.get("id");
+                    Config<?> config = getConfig(id.getAsString());
+                    if (config != null)
+                    {
+                        try
+                        {
+                            config.fromJson(configObj);
+                        }
+                        // couldn't parse Json value
+                        catch (Exception e)
+                        {
+                            Caspian.error("Couldn't parse Json for {}",
+                                    config.getName());
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
         }

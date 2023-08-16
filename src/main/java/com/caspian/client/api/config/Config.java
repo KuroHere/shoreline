@@ -4,6 +4,7 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.config.setting.*;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.impl.event.config.ConfigUpdateEvent;
+import com.google.gson.JsonObject;
 
 import java.util.function.Supplier;
 
@@ -170,6 +171,19 @@ public abstract class Config<T> implements Configurable
     public void setContainer(final ConfigContainer cont)
     {
         container = cont;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    @Override
+    public JsonObject toJson()
+    {
+        JsonObject configObj = new JsonObject();
+        configObj.addProperty("id", getId());
+        return configObj;
     }
 }
 

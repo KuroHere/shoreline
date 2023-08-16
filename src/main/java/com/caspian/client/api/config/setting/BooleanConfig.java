@@ -1,6 +1,7 @@
 package com.caspian.client.api.config.setting;
 
 import com.caspian.client.api.config.Config;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
@@ -25,15 +26,31 @@ public class BooleanConfig extends Config<Boolean>
         super(name, desc, val, visible);
     }
 
+    /**
+     *
+     *
+     * @return
+     */
     @Override
     public JsonObject toJson()
     {
-        return new JsonPrimitive(getValue()).getAsJsonObject();
+        JsonObject configObj = super.toJson();
+        configObj.addProperty("value", (Boolean) getValue());
+        return configObj;
     }
 
+    /**
+     *
+     *
+     * @param jsonObj The data as a json object
+     */
     @Override
     public void fromJson(JsonObject jsonObj)
     {
-
+        if (jsonObj.has("value"))
+        {
+            JsonElement element = jsonObj.get("value");
+            setValue(element.getAsBoolean());
+        }
     }
 }
