@@ -10,7 +10,6 @@ import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
 import com.caspian.client.mixin.accessor.AccessorExplosionS2CPacket;
-import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.string.EnumFormatter;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
@@ -73,11 +72,11 @@ public class VelocityModule extends ToggleModule
      *
      * @param event
      */
-    @EventListener
-    public void onPacketOutbound(PacketEvent.Outbound event)
-    {
-
-    }
+    // @EventListener
+    // public void onPacketOutbound(PacketEvent.Outbound event)
+    // {
+    //
+    // }
 
     /**
      *
@@ -118,7 +117,7 @@ public class VelocityModule extends ToggleModule
                     }
                 }
             }
-            if (event.getPacket() instanceof ExplosionS2CPacket packet)
+            else if (event.getPacket() instanceof ExplosionS2CPacket packet)
             {
                 switch (modeConfig.getValue())
                 {

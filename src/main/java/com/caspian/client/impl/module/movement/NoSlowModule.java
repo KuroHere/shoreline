@@ -85,13 +85,16 @@ public class NoSlowModule extends ToggleModule
     @Override
     public void onEnable()
     {
-        MOVE_KEYBINDS = new KeyBinding[]
-            {
-                    mc.options.forwardKey,
-                    mc.options.backKey,
-                    mc.options.rightKey,
-                    mc.options.leftKey
-            };
+        if (MOVE_KEYBINDS == null)
+        {
+            MOVE_KEYBINDS = new KeyBinding[]
+                    {
+                            mc.options.forwardKey,
+                            mc.options.backKey,
+                            mc.options.rightKey,
+                            mc.options.leftKey
+                    };
+        }
     }
     
     /**

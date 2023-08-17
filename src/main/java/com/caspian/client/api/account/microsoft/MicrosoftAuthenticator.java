@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * From: https://mojang-api-docs.gapple.pw/authentication/msa
+ * @see <a href="https://mojang-api-docs.gapple.pw/authentication/msa">MSA</a>
  *
  * @author Gavin
  * @since 1.0

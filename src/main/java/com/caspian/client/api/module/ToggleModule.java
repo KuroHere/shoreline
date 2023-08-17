@@ -1,9 +1,9 @@
 package com.caspian.client.api.module;
 
-import com.caspian.client.Caspian;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.MacroConfig;
+import com.caspian.client.api.config.setting.ToggleConfig;
 import com.caspian.client.api.macro.Macro;
 import org.lwjgl.glfw.GLFW;
 
@@ -33,7 +33,7 @@ public class ToggleModule extends Module
             new Macro(getId(), GLFW.GLFW_KEY_UNKNOWN, () -> toggle()));
     // Config representing the module enabled state. Cannot interact with
     // this configuration unless using #toggle() #enable() or #disable().
-    Config<Boolean> enabledConfig = new BooleanConfig("Enabled", "The module" +
+    Config<Boolean> enabledConfig = new ToggleConfig("Enabled", "The module" +
             " enabled state. This state is true when the module is running.", false);
 
     /**
@@ -90,11 +90,11 @@ public class ToggleModule extends Module
      * the {@link #onEnable()} callback.
      *
      * @see #onEnable()
+     * @see ToggleConfig#setValue(Boolean)
      */
     public void enable()
     {
         enabledConfig.setValue(true);
-        Caspian.EVENT_HANDLER.subscribe(this);
         onEnable();
     }
 
@@ -103,11 +103,11 @@ public class ToggleModule extends Module
      * the {@link #onDisable()} callback.
      *
      * @see #onDisable()
+     * @see ToggleConfig#setValue(Boolean)
      */
     public void disable()
     {
         enabledConfig.setValue(false);
-        Caspian.EVENT_HANDLER.unsubscribe(this);
         onDisable();
     }
 
@@ -146,7 +146,7 @@ public class ToggleModule extends Module
     public void keybind(int keycode)
     {
         keybindingConfig.setContainer(this);
-        ((MacroConfig) keybindingConfig).setValue(keycode, this::toggle);
+        ((MacroConfig) keybindingConfig).setValue(keycode, () -> toggle());
     }
 
     /**

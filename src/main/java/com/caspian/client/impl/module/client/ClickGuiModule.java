@@ -19,12 +19,11 @@ import org.lwjgl.glfw.GLFW;
 public class ClickGuiModule extends ToggleModule
 {
     //
-    private static ClickGuiScreen CLICK_GUI_SCREEN;
-
-    //
     Config<Float> scaleConfig = new NumberConfig<>("Scale", "ClickGui " +
             "component scaling factor.", 0.1f, 1.0f, 3.0f,
             NumberDisplay.PERCENT);
+    //
+    private static ClickGuiScreen CLICK_GUI_SCREEN;
 
     /**
      *

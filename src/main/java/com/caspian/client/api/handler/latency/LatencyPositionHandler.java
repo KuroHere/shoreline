@@ -82,10 +82,14 @@ public class LatencyPositionHandler implements Globals
                 final Entity entity = mc.world.getEntityById(packet.getId());
                 if (entity instanceof PlayerEntity player)
                 {
-                    final PlayerLatencyTracker p = trackers.get(player);
+                    final PlayerLatencyTracker latency = trackers.get(player);
+                    if (latency == null)
+                    {
+                        return;
+                    }
                     final Vec3d pos = new Vec3d(packet.getX(), packet.getY(),
                             packet.getZ());
-                    p.onPositionUpdate(pos);
+                    latency.onPositionUpdate(pos);
                 }
             }
             else if (event.getPacket() instanceof EntitySpawnS2CPacket packet)

@@ -13,13 +13,13 @@ import com.caspian.client.api.event.Event;
 public class TickMovementEvent extends Event
 {
     //
-    private final int iterations;
+    private int iterations;
 
     /**
      *
      * @param iterations
      */
-    public TickMovementEvent(int iterations)
+    public void setIterations(int iterations)
     {
         this.iterations = iterations;
     }

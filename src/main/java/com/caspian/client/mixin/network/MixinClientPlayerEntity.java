@@ -259,7 +259,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
      */
     @Redirect(method = "tickMovement", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/client/network/ClientPlayerEntity;setSprinting(Z)V",
-            ordinal = 2))
+            ordinal = 3))
     private void hookSetSprinting(ClientPlayerEntity instance, boolean b)
     {
         final SprintCancelEvent sprintEvent = new SprintCancelEvent();

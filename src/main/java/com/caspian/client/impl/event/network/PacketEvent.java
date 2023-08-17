@@ -1,5 +1,6 @@
 package com.caspian.client.impl.event.network;
 
+import com.caspian.client.api.event.Cancelable;
 import com.caspian.client.api.event.Event;
 import com.caspian.client.init.Managers;
 import net.minecraft.network.packet.Packet;
@@ -38,6 +39,7 @@ public class PacketEvent extends Event
     /**
      *
      */
+    @Cancelable
     public static class Inbound extends PacketEvent
     {
         /**
@@ -54,6 +56,7 @@ public class PacketEvent extends Event
     /**
      *
      */
+    @Cancelable
     public static class Outbound extends PacketEvent
     {
         //

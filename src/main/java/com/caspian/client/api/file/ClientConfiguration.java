@@ -87,10 +87,6 @@ public class ClientConfiguration implements Globals
         {
             files.add(new SocialFile(clientDir, relation));
         }
-        for (String ip : Managers.WAYPOINT.getIps())
-        {
-            files.add(new WaypointFile(clientDir.resolve("Waypoints"), ip));
-        }
         for (AccountType accountType : AccountType.values())
         {
             files.add(new AccountFile(clientDir.resolve("Accounts"),
@@ -103,6 +99,10 @@ public class ClientConfiguration implements Globals
      */
     public void saveClient()
     {
+        for (String ip : Managers.WAYPOINT.getIps())
+        {
+            files.add(new WaypointFile(clientDir.resolve("Waypoints"), ip));
+        }
         for (ConfigFile file : files)
         {
             file.save();

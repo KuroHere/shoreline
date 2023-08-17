@@ -19,7 +19,6 @@ import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
-import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.TickTimer;
 import com.caspian.client.util.math.timer.Timer;

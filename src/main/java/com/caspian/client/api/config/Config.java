@@ -88,6 +88,20 @@ public abstract class Config<T> implements Configurable
      *
      * @return
      */
+    @Override
+    public JsonObject toJson()
+    {
+        final JsonObject obj = new JsonObject();
+        obj.addProperty("name", getName());
+        obj.addProperty("id", getId());
+        return obj;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
     public String getName()
     {
         return name;
@@ -138,6 +152,15 @@ public abstract class Config<T> implements Configurable
     }
 
     /**
+     *
+     * @return
+     */
+    public boolean isVisible()
+    {
+        return visible.get();
+    }
+
+    /**
      * Sets the current config value to the param value. The passed value
      * cannot be <tt>null</tt>.
      *
@@ -171,19 +194,6 @@ public abstract class Config<T> implements Configurable
     public void setContainer(final ConfigContainer cont)
     {
         container = cont;
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    @Override
-    public JsonObject toJson()
-    {
-        JsonObject configObj = new JsonObject();
-        configObj.addProperty("id", getId());
-        return configObj;
     }
 }
 

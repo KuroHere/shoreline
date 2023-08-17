@@ -40,8 +40,18 @@ public class ConfigContainer implements Configurable
     public ConfigContainer(String name)
     {
         // set name of this container early
-        // DO NOT MOVE THIS BACK TO THE BOTTOM - aesthetical
+        // DO NOT MOVE THIS BACK - aesthetical
         this.name = name;
+    }
+
+    /**
+     *
+     * @param config
+     */
+    protected void register(Config<?> config)
+    {
+        config.setContainer(this);
+        configurations.put(config.getId(), config);
     }
 
     /**
@@ -52,7 +62,7 @@ public class ConfigContainer implements Configurable
     {
         for (Config<?> config : configs)
         {
-            configurations.put(config.getId(), config);
+            register(config);
         }
     }
 
@@ -67,15 +77,14 @@ public class ConfigContainer implements Configurable
         {
             if (Config.class.isAssignableFrom(field.getType()))
             {
-                Config<?> product = factory.build(field);
-                if (product == null)
+                Config<?> config = factory.build(field);
+                if (config == null)
                 {
                     // failsafe for debugging purposes
-                    Caspian.error("Value for field {} is null", field);
+                    Caspian.error("Value for field {} is null!", field);
                     continue;
                 }
-                product.setContainer(this);
-                configurations.put(product.getId(), product);
+                register(config);
             }
         }
     }

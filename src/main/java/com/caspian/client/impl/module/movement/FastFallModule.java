@@ -8,6 +8,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.impl.event.network.TickMovementEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.string.EnumFormatter;
@@ -61,8 +62,7 @@ public class FastFallModule extends ToggleModule
                 {
                     return;
                 }
-                if (!Managers.NCP.passed(1000)
-                        || Modules.SPEED.isEnabled())
+                if (Modules.SPEED.isEnabled())
                 {
                     return;
                 }
@@ -74,6 +74,43 @@ public class FastFallModule extends ToggleModule
                         Managers.MOVEMENT.setMotionY(-3.0);
                         // Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onTickMovement(TickMovementEvent event)
+    {
+        if (fallModeConfig.getValue() == FallMode.STEP)
+        {
+            if (mc.player.isRiding()
+                    || mc.player.isFallFlying()
+                    || mc.player.isHoldingOntoLadder()
+                    || mc.player.fallDistance > 0.5f
+                    || mc.player.isInLava()
+                    || mc.player.isTouchingWater()
+                    || mc.player.input.jumping
+                    || mc.player.input.sneaking)
+            {
+                return;
+            }
+            if (!Managers.NCP.passed(1000)
+                    || Modules.SPEED.isEnabled())
+            {
+                return;
+            }
+            if (Managers.POSITION.isOnGround())
+            {
+                final int blockY = getNearestBlockY();
+                if (blockY != -1)
+                {
+                    event.cancel();
+                    event.setIterations(shiftTicksConfig.getValue());
                 }
             }
         }
