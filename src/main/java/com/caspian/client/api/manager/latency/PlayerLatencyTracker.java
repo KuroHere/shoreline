@@ -1,4 +1,4 @@
-package com.caspian.client.api.handler.latency;
+package com.caspian.client.api.manager.latency;
 
 import com.caspian.client.util.world.FakePlayerEntity;
 import net.fabricmc.loader.impl.lib.sat4j.core.Vec;

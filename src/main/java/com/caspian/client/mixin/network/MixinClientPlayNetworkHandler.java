@@ -1,7 +1,7 @@
 package com.caspian.client.mixin.network;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.impl.event.chat.ChatInputEvent;
+import com.caspian.client.impl.event.chat.ChatMessageEvent;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,7 +27,8 @@ public class MixinClientPlayNetworkHandler
             cancellable = true)
     private void hookSendChatMessage(String content, CallbackInfo ci)
     {
-        ChatInputEvent chatInputEvent = new ChatInputEvent(content);
+        ChatMessageEvent.Server chatInputEvent =
+                new ChatMessageEvent.Server(content);
         Caspian.EVENT_HANDLER.dispatch(chatInputEvent);
         // prevent chat packet from sending
         if (chatInputEvent.isCanceled())

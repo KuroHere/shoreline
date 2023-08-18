@@ -1,4 +1,4 @@
-package com.caspian.client.api.handler.sound;
+package com.caspian.client.api.manager.sound;
 
 import net.minecraft.util.Identifier;
 

@@ -127,7 +127,7 @@ public class FastPlaceModule extends ToggleModule
                 {
                     case WHITELIST -> ((ListConfig<Item>) whitelistConfig)
                             .contains(held.getItem());
-                    case BLACKLIST -> ((ListConfig<Item>) blacklistConfig)
+                    case BLACKLIST -> !((ListConfig<Item>) blacklistConfig)
                             .contains(held.getItem());
                     case ALL -> true;
                 };

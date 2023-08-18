@@ -1,6 +1,7 @@
 package com.caspian.client.mixin.gui.screen;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.impl.event.chat.ChatMessageEvent;
 import com.caspian.client.mixin.accessor.AccessorChatScreen;
 import com.caspian.client.mixin.accessor.AccessorTextFieldWidget;
 import com.caspian.client.impl.event.chat.ChatInputEvent;
@@ -39,8 +40,24 @@ public class MixinChatScreen implements Globals
         ChatScreen source = (ChatScreen) (Object) this;
         TextFieldWidget chatField = ((AccessorChatScreen) source).getChatField();
         ChatInputEvent chatKeyPressedEvent =
-                new ChatInputEvent(chatField.getText());
+                new ChatInputEvent(keyCode, chatField.getText());
         Caspian.EVENT_HANDLER.dispatch(chatKeyPressedEvent);
+    }
+
+    /**
+     *
+     *
+     * @param chatText
+     * @param addToHistory
+     * @param cir
+     */
+    @Inject(method = "sendMessage", at = @At(value = "HEAD"))
+    private void hookSendMessage(String chatText, boolean addToHistory,
+                                 CallbackInfoReturnable<Boolean> cir)
+    {
+        ChatMessageEvent.Client chatMessageEvent =
+                new ChatMessageEvent.Client(chatText);
+        Caspian.EVENT_HANDLER.dispatch(chatMessageEvent);
     }
 
     /**

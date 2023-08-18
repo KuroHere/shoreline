@@ -1,8 +1,12 @@
 package com.caspian.client.api.command.arg;
 
 import com.caspian.client.api.command.Command;
-import com.caspian.client.api.handler.CommandHandler;
+import com.caspian.client.api.config.Config;
+import com.caspian.client.api.manager.CommandManager;
 import com.caspian.client.impl.event.chat.ChatInputEvent;
+import com.google.gson.JsonObject;
+
+import java.util.Collection;
 
 /**
  * {@link Command} Argument structure which builds the value from the literal
@@ -14,16 +18,27 @@ import com.caspian.client.impl.event.chat.ChatInputEvent;
  * @param <T> The argument value type
  *
  * @see Command
- * @see CommandHandler
+ * @see CommandManager
  */
-public abstract class Argument<T>
+public abstract class Argument<T> extends Config<T>
 {
     // The literal string input of the user which will be updated every key
     // press. If the input is null, the argument is left blank.
     private String literal;
-    // The value of the argument. This value is only calculated when the
-    // command is run.
-    private T value;
+
+    /**
+     * Initializes the config with a default value. This constructor should
+     * not be used to initialize a configuration, instead use the explicit
+     * definitions of the configs in {@link com.caspian.client.api.config.setting}.
+     *
+     * @param name  The unique config identifier
+     * @param desc  The config description
+     * @throws NullPointerException if value is <tt>null</tt>
+     */
+    public Argument(String name, String desc)
+    {
+        super(name, desc, (T) new Object());
+    }
 
     /**
      * Automatically completes the argument from the {@link #getSuggestion()}
@@ -31,16 +46,38 @@ public abstract class Argument<T>
      *
      * @see #getSuggestion()
      */
-    public void autoComplete()
+    public String completeLiteral()
     {
         if (literal != null && !literal.isBlank())
         {
-            String suggestion = getSuggestion();
+            final String suggestion = getSuggestion();
             if (suggestion != null)
             {
                 setLiteral(suggestion);
+                return suggestion;
             }
         }
+        return "";
+    }
+
+    /**
+     *
+     *
+     * @see Command#onCommandInput()
+     */
+    public abstract T parse() throws ArgumentParseException;
+
+    /**
+     * Reads all data from a {@link JsonObject} and updates the values of the
+     * data in the object.
+     *
+     * @param jsonObj The data as a json object
+     * @see #toJson()
+     */
+    @Override
+    public void fromJson(JsonObject jsonObj)
+    {
+
     }
 
     /**
@@ -56,11 +93,13 @@ public abstract class Argument<T>
     /**
      *
      *
-     * @return
+     * @param literal
+     *
+     * @see CommandManager#onChatInput(ChatInputEvent)
      */
-    public T getValue()
+    public void setLiteral(String literal)
     {
-        return value;
+        this.literal = literal;
     }
 
     /**
@@ -85,39 +124,9 @@ public abstract class Argument<T>
     /**
      *
      *
-     * @param literal
-     *
-     * @see Command#setArgInputs(String[])
-     * @see CommandHandler#onChatInput(ChatInputEvent)
-     */
-    public void setLiteral(String literal)
-    {
-        this.literal = literal;
-    }
-
-    /**
-     *
-     *
-     * @param val
-     */
-    protected void setValue(T val)
-    {
-        value = val;
-    }
-
-    /**
-     *
-     *
-     * @see Command#runCommand()
-     */
-    public abstract void buildArgument();
-
-    /**
-     *
-     *
      * @return
      *
      * @see #getSuggestion()
      */
-    public abstract String[] getSuggestions();
+    public abstract Collection<String> getSuggestions();
 }

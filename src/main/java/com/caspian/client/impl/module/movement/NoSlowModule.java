@@ -153,7 +153,8 @@ public class NoSlowModule extends ToggleModule
                 //                new BlockHitResult(Vec3d.ZERO, Direction.UP,
                 //                        BlockPos.ORIGIN, false), id));
             }
-            if (checkScreen() && inventoryMoveConfig.getValue())
+            if (checkScreen() && inventoryMoveConfig.getValue()
+                    && MOVE_KEYBINDS != null)
             {
                 final long handle = mc.getWindow().getHandle();
                 for (KeyBinding binding : MOVE_KEYBINDS)

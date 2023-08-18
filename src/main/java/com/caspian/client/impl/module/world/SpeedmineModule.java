@@ -6,7 +6,7 @@ import com.caspian.client.api.config.setting.EnumConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
-import com.caspian.client.api.handler.rotation.RotationPriority;
+import com.caspian.client.api.manager.rotation.RotationPriority;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.render.RenderManager;

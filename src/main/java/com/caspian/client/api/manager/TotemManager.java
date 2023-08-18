@@ -1,9 +1,19 @@
 package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.handler.TotemHandler;
+import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.impl.event.network.DisconnectEvent;
+import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.util.Globals;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
+
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  *
@@ -11,10 +21,11 @@ import net.minecraft.entity.player.PlayerEntity;
  * @author linus
  * @since 1.0
  */
-public class TotemManager
+public class TotemManager implements Globals
 {
     //
-    private final TotemHandler handler;
+    private final ConcurrentMap<UUID, Integer> totems =
+            new ConcurrentHashMap<>();
 
     /**
      *
@@ -22,18 +33,52 @@ public class TotemManager
      */
     public TotemManager()
     {
-        handler = new TotemHandler();
-        Caspian.EVENT_HANDLER.subscribe(handler);
+        Caspian.EVENT_HANDLER.subscribe(this);
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPacketInbound(PacketEvent.Inbound event)
+    {
+        if (mc.world != null)
+        {
+            if (event.getPacket() instanceof EntityStatusS2CPacket packet
+                    && packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING)
+            {
+                final Entity entity = packet.getEntity(mc.world);
+                if (entity != null && entity.isAlive())
+                {
+                    totems.put(entity.getUuid(), totems.containsKey(entity.getUuid()) ?
+                            totems.get(entity.getUuid()) + 1 : 1);
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onDisconnect(DisconnectEvent event)
+    {
+        totems.clear();
     }
 
     /**
      * Returns the number of totems popped by the given {@link PlayerEntity}
      * or 0 if the given player has not popped any totems.
      *
+     * @param entity
      * @return Ehe number of totems popped by the player
      */
-    public int getTotems(Entity e)
+    public int getTotems(Entity entity)
     {
-        return handler.getTotems(e);
+        return totems.getOrDefault(entity.getUuid(), 0);
     }
 }

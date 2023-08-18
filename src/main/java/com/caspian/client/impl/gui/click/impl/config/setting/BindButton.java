@@ -100,14 +100,10 @@ public class BindButton extends ConfigButton<Macro>
             {
                 ((MacroConfig) config).setValue(GLFW.GLFW_KEY_UNKNOWN,
                         val.macro());
-                Managers.MACRO.replaceKey(config.getId(),
-                        GLFW.GLFW_KEY_UNKNOWN);
             }
             else
             {
                 ((MacroConfig) config).setValue(keyCode, val.macro());
-                Managers.MACRO.register();
-                Managers.MACRO.replaceKey(config.getId(), keyCode);
             }
             listen = false;
         }

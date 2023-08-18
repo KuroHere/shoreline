@@ -1,8 +1,13 @@
 package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.handler.NCPHandler;
+import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.util.Globals;
+import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.Timer;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.math.Vec3d;
 
 /**
  *
@@ -10,10 +15,12 @@ import com.caspian.client.util.math.timer.Timer;
  * @author linus
  * @since 1.0
  */
-public class NCPManager implements Timer
+public class NCPManager implements Timer, Globals
 {
     //
-    private final NCPHandler handler;
+    private double x, y, z;
+    private boolean lag;
+    private final Timer lastRubberband = new CacheTimer();
     //
     private boolean strict;
 
@@ -23,8 +30,39 @@ public class NCPManager implements Timer
      */
     public NCPManager()
     {
-        handler = new NCPHandler();
-        Caspian.EVENT_HANDLER.subscribe(handler);
+        Caspian.EVENT_HANDLER.subscribe(this);
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPacketInbound(PacketEvent.Inbound event)
+    {
+        if (mc.player != null && mc.world != null)
+        {
+            if (event.getPacket() instanceof PlayerPositionLookS2CPacket packet)
+            {
+                Vec3d last = new Vec3d(x, y, z);
+                x = packet.getX();
+                y = packet.getY();
+                z = packet.getZ();
+                lag = last.squaredDistanceTo(x, y, z) <= 1.0;
+                lastRubberband.reset();
+            }
+        }
+    }
+
+
+    /**
+     *
+     * @return
+     */
+    public boolean isStrict()
+    {
+        return strict;
     }
 
     /**
@@ -39,21 +77,12 @@ public class NCPManager implements Timer
 
     /**
      *
-     * @return
-     */
-    public boolean isStrict()
-    {
-        return strict;
-    }
-
-    /**
-     *
      *
      * @return
      */
     public boolean isInRubberband()
     {
-        return handler.isInRubberband();
+        return lag;
     }
 
     /**
@@ -67,7 +96,7 @@ public class NCPManager implements Timer
     @Override
     public boolean passed(Number time)
     {
-        return handler.passedSinceRubberband(time.longValue());
+        return lastRubberband.passed(time);
     }
 
     /**
@@ -89,7 +118,7 @@ public class NCPManager implements Timer
     @Override
     public long getElapsedTime()
     {
-        return handler.timeSinceRubberband();
+        return lastRubberband.getElapsedTime();
     }
 
     /**

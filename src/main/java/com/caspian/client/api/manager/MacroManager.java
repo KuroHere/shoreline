@@ -1,12 +1,16 @@
 package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.macro.Macro;
-import com.caspian.client.api.handler.MacroHandler;
+import com.caspian.client.api.module.Module;
+import com.caspian.client.api.module.ToggleModule;
+import com.caspian.client.impl.event.keyboard.KeyboardInputEvent;
+import com.caspian.client.init.Managers;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -20,7 +24,6 @@ import java.util.Set;
 public class MacroManager
 {
     // The handler for handling macros
-    private final MacroHandler handler;
     //
     private final Set<Macro> macros = new HashSet<>();
 
@@ -30,8 +33,39 @@ public class MacroManager
      */
     public MacroManager()
     {
-        handler = new MacroHandler();
-        Caspian.EVENT_HANDLER.subscribe(handler);
+        Caspian.EVENT_HANDLER.subscribe(this);
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onKeyboardInput(KeyboardInputEvent event)
+    {
+        // module keybind impl
+        for (Module module : Managers.MODULE.getModules())
+        {
+            if (module instanceof ToggleModule toggle)
+            {
+                final Macro keybind = toggle.getKeybinding();
+                if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
+                        && event.getKeycode() == keybind.keycode())
+                {
+                    keybind.runMacro();
+                }
+            }
+        }
+        //
+        for (Macro macro : macros)
+        {
+            if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
+                    && event.getKeycode() == macro.keycode())
+            {
+                macro.runMacro();
+            }
+        }
     }
 
     /**
@@ -53,31 +87,6 @@ public class MacroManager
         for (Macro macro : macros)
         {
             register(macro);
-        }
-    }
-
-    /**
-     *
-     *
-     * @param name
-     * @param keycode
-     */
-    public void replaceKey(String name, int keycode)
-    {
-        Runnable temp = null;
-        for (Macro m : macros)
-        {
-            final String id = m.getId();
-            if (id.contains(name))
-            {
-                temp = m.macro();
-                break;
-            }
-        }
-        if (temp != null)
-        {
-            macros.removeIf(m -> m.getId().contains(name));
-            macros.add(new Macro(name, keycode, temp));
         }
     }
 

@@ -1,7 +1,10 @@
-package com.caspian.client.api.command.arg;
+package com.caspian.client.api.command.arg.arguments;
 
 import com.caspian.client.api.command.Command;
+import com.caspian.client.api.command.arg.Argument;
+import com.caspian.client.api.command.arg.ArgumentParseException;
 import com.caspian.client.util.Globals;
+import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.ArrayList;
@@ -18,18 +21,17 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
     /**
      *
      */
-    public PlayerArgument()
+    public PlayerArgument(String name, String desc)
     {
-
+        super(name, desc);
     }
 
     /**
      *
-     *
-     * @see Command#runCommand()
+     * @see Command#onCommandInput()
      */
     @Override
-    public void buildArgument()
+    public PlayerEntity parse() throws ArgumentParseException
     {
         if (mc.world != null)
         {
@@ -38,11 +40,11 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
                 if (player.getDisplayName().getString()
                         .equalsIgnoreCase(getLiteral()))
                 {
-                    setValue(player);
-                    break;
+                    return player;
                 }
             }
         }
+        throw new ArgumentParseException("Could not find player!");
     }
 
     /**
@@ -51,7 +53,7 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
      * @return
      */
     @Override
-    public String[] getSuggestions()
+    public Collection<String> getSuggestions()
     {
         Collection<String> playerNames = new ArrayList<>();
         if (mc.world != null)
@@ -61,7 +63,6 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
                 playerNames.add(player.getDisplayName().getString());
             }
         }
-
-        return (String[]) playerNames.toArray();
+        return playerNames;
     }
 }

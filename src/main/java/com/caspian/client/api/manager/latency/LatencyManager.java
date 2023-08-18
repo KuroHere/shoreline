@@ -1,5 +1,6 @@
-package com.caspian.client.api.handler.latency;
+package com.caspian.client.api.manager.latency;
 
+import com.caspian.client.Caspian;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.util.Globals;
@@ -21,7 +22,7 @@ import java.util.Map;
  * @author linus
  * @since 1.0
  */
-public class LatencyPositionHandler implements Globals
+public class LatencyManager implements Globals
 {
     //
     private final Map<PlayerEntity, PlayerLatencyTracker> trackers =
@@ -29,42 +30,10 @@ public class LatencyPositionHandler implements Globals
 
     /**
      *
-     *
-     * @param floor
-     * @param player
-     * @param time
-     * @return
      */
-    public FakePlayerEntity getTrackedPlayer(final Vec3d floor,
-                                             final PlayerEntity player,
-                                             final long time)
+    public LatencyManager()
     {
-        final PlayerLatencyTracker p = trackers.get(player);
-        if (p != null)
-        {
-            return p.getTrackedPlayer(floor, time);
-        }
-        return null;
-    }
-
-    /**
-     *
-     *
-     * @param floor
-     * @param player
-     * @param time
-     * @return
-     */
-    public Vec3d getTrackedData(final Vec3d floor,
-                                final PlayerEntity player,
-                                final long time)
-    {
-        final PlayerLatencyTracker p = trackers.get(player);
-        if (p != null)
-        {
-            return p.getTrackedData(floor, time);
-        }
-        return null;
+        Caspian.EVENT_HANDLER.subscribe(this);
     }
 
     /**
@@ -110,5 +79,45 @@ public class LatencyPositionHandler implements Globals
                         packet.getEntityIds().contains(t.getKey().getId()));
             }
         }
+    }
+
+    /**
+     *
+     *
+     * @param floor
+     * @param player
+     * @param time
+     * @return
+     */
+    public FakePlayerEntity getTrackedPlayer(final Vec3d floor,
+                                             final PlayerEntity player,
+                                             final long time)
+    {
+        final PlayerLatencyTracker p = trackers.get(player);
+        if (p != null)
+        {
+            return p.getTrackedPlayer(floor, time);
+        }
+        return null;
+    }
+
+    /**
+     *
+     *
+     * @param floor
+     * @param player
+     * @param time
+     * @return
+     */
+    public Vec3d getTrackedData(final Vec3d floor,
+                                final PlayerEntity player,
+                                final long time)
+    {
+        final PlayerLatencyTracker p = trackers.get(player);
+        if (p != null)
+        {
+            return p.getTrackedData(floor, time);
+        }
+        return null;
     }
 }

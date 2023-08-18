@@ -1,5 +1,6 @@
-package com.caspian.client.api.handler.tick;
+package com.caspian.client.api.manager.tick;
 
+import com.caspian.client.Caspian;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.util.Globals;
@@ -14,11 +15,21 @@ import java.util.Queue;
  * @author linus
  * @since 1.0
  */
-public class TickHandler implements Globals
+public class TickManager implements Globals
 {
+    // The TPS tick handler.
     //
     private long time;
     private final Queue<Float> ticks = new ArrayDeque<>(20);
+
+    /**
+     *
+     *
+     */
+    public TickManager()
+    {
+        Caspian.EVENT_HANDLER.subscribe(this);
+    }
 
     /**
      *
@@ -56,27 +67,18 @@ public class TickHandler implements Globals
      *
      * @return
      */
-    public boolean hasTicks()
+    public float getTpsAverage()
     {
-        return !ticks.isEmpty();
-    }
-
-    /**
-     *
-     * @return
-     */
-    public Float poll()
-    {
-        return ticks.poll();
-    }
-
-    /**
-     *
-     * @return
-     */
-    public Float peek()
-    {
-        return ticks.peek();
+        float avg = 0.0f;
+        if (!ticks.isEmpty())
+        {
+            for (float t : ticks)
+            {
+                avg += t;
+            }
+            avg /= ticks.size();
+        }
+        return avg;
     }
 
     /**
@@ -84,8 +86,47 @@ public class TickHandler implements Globals
      *
      * @return
      */
-    public int size()
+    public float getTpsCurrent()
     {
-        return ticks.size();
+        if (!ticks.isEmpty())
+        {
+            return ticks.peek();
+        }
+        return 20.0f;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public float getTpsMin()
+    {
+        float min = 20.0f;
+        for (float t : ticks)
+        {
+            if (t < min)
+            {
+                min = t;
+            }
+        }
+        return min;
+    }
+
+    /**
+     *
+     *
+     * @param tps
+     * @return
+     */
+    public float getTickSync(TickSync tps)
+    {
+        return switch (tps)
+                {
+                    case AVERAGE -> getTpsAverage();
+                    case CURRENT -> getTpsCurrent();
+                    case MINIMAL -> getTpsMin();
+                    case NONE -> 20.0f;
+                };
     }
 }

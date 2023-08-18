@@ -2,6 +2,8 @@ package com.caspian.client.impl.event.chat;
 
 import com.caspian.client.api.event.Cancelable;
 import com.caspian.client.api.event.Event;
+import net.minecraft.util.StringHelper;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -22,7 +24,16 @@ public class ChatMessageEvent extends Event
 
     public String getMessage()
     {
-        return message;
+        return normalize(message);
+    }
+
+    /**
+     * @return the {@code message} normalized by trimming it and then
+     * normalizing spaces
+     */
+    private String normalize(String chatText)
+    {
+        return StringHelper.truncateChat(StringUtils.normalizeSpace(chatText.trim()));
     }
 
     public static class Client extends ChatMessageEvent

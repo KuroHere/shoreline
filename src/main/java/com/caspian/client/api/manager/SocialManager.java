@@ -79,6 +79,16 @@ public class SocialManager
 
     /**
      *
+     * @param uuid
+     * @return
+     */
+    public SocialRelation remove(UUID uuid)
+    {
+        return relationships.remove(uuid);
+    }
+
+    /**
+     *
      *
      * @param relation
      * @return

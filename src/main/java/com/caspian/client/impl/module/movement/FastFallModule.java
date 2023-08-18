@@ -86,7 +86,7 @@ public class FastFallModule extends ToggleModule
     @EventListener
     public void onTickMovement(TickMovementEvent event)
     {
-        if (fallModeConfig.getValue() == FallMode.STEP)
+        if (fallModeConfig.getValue() == FallMode.SHIFT)
         {
             if (mc.player.isRiding()
                     || mc.player.isFallFlying()

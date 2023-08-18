@@ -57,7 +57,12 @@ public record Macro(String name, int keycode, Runnable macro)
      */
     public String getKeyName()
     {
-        return keycode == GLFW.GLFW_KEY_UNKNOWN ? "NONE" :
-                GLFW.glfwGetKeyName(keycode, GLFW.glfwGetKeyScancode(keycode));
+        if (keycode != GLFW.GLFW_KEY_UNKNOWN)
+        {
+            final String name = GLFW.glfwGetKeyName(keycode,
+                    GLFW.glfwGetKeyScancode(keycode));
+            return name != null ? name.toUpperCase() : "NONE";
+        }
+        return "NONE";
     }
 }

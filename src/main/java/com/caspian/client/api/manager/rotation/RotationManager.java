@@ -1,7 +1,9 @@
-package com.caspian.client.api.handler.rotation;
+package com.caspian.client.api.manager.rotation;
 
+import com.caspian.client.Caspian;
 import com.caspian.client.api.event.listener.EventListener;
-import com.caspian.client.api.module.Module;
+import com.caspian.client.api.manager.rotation.RotationPriority;
+import com.caspian.client.api.manager.rotation.RotationRequest;
 import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.render.RenderPlayerEvent;
@@ -10,6 +12,7 @@ import com.caspian.client.util.Globals;
 import com.caspian.client.util.math.timer.TickTimer;
 import com.caspian.client.util.math.timer.Timer;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.PriorityQueue;
 
@@ -19,7 +22,7 @@ import java.util.PriorityQueue;
  * @author linus
  * @since 1.0
  */
-public class RotationHandler implements Globals
+public class RotationManager implements Globals
 {
     //
     private float yaw, pitch;
@@ -28,6 +31,15 @@ public class RotationHandler implements Globals
     private final PriorityQueue<RotationRequest> requests =
             new PriorityQueue<>();
     private final Timer rotateTimer = new TickTimer();
+
+    /**
+     *
+     *
+     */
+    public RotationManager()
+    {
+        Caspian.EVENT_HANDLER.subscribe(this);
+    }
 
     /**
      *
@@ -53,15 +65,31 @@ public class RotationHandler implements Globals
     /**
      *
      *
+     * @param event
+     */
+    @EventListener
+    public void onRenderPlayer(RenderPlayerEvent event)
+    {
+        if (event.getEntity() == mc.player && rotation != null)
+        {
+            event.setYaw(rotation.getYaw());
+            event.setPitch(rotation.getPitch());
+            event.cancel();
+        }
+    }
+
+    /**
+     *
+     *
      * @param requester
      * @param priority
      * @param yaw
      * @param pitch
      */
-    public void request(final RotationModule requester,
-                        final RotationPriority priority,
-                        final float yaw,
-                        final float pitch)
+    public void setRotation(final RotationModule requester,
+                            final RotationPriority priority,
+                            final float yaw,
+                            final float pitch)
     {
         for (RotationRequest r : requests)
         {
@@ -74,7 +102,6 @@ public class RotationHandler implements Globals
         }
         requests.add(new RotationRequest(requester, priority, yaw, pitch));
     }
-
     /**
      *
      *
@@ -82,9 +109,36 @@ public class RotationHandler implements Globals
      * @param yaw
      * @param pitch
      */
-    public void request(RotationModule requester, float yaw, float pitch)
+    public void setRotation(final RotationModule requester,
+                            final float yaw,
+                            final float pitch)
     {
-        request(requester, RotationPriority.NORMAL, yaw, pitch);
+        setRotation(requester, RotationPriority.NORMAL, yaw, pitch);
+    }
+
+    /**
+     *
+     *
+     * @param request
+     */
+    public boolean removeRotation(final RotationRequest request)
+    {
+        return requests.remove(request);
+    }
+
+    /**
+     *
+     *
+     * @param requester
+     */
+    public void removeRotation(final RotationModule requester)
+    {
+        requests.removeIf(r -> requester == r.getRequester());
+    }
+
+    public void setRotationClient(float yaw, float pitch)
+    {
+
     }
 
     /**
@@ -102,7 +156,7 @@ public class RotationHandler implements Globals
      *
      * @return
      */
-    public RotationRequest getLatestRequest()
+    public RotationRequest getCurrentRotation()
     {
         if (requests.size() <= 1 && isRotating())
         {
@@ -135,48 +189,21 @@ public class RotationHandler implements Globals
     /**
      *
      *
-     * @param requester
-     */
-    public void remove(final Module requester)
-    {
-        requests.removeIf(r -> requester == r.getRequester());
-    }
-
-    /**
-     *
-     *
-     * @param request
-     * @return
-     */
-    public boolean remove(RotationRequest request)
-    {
-        return requests.remove(request);
-    }
-
-    /**
-     *
-     *
-     * @param event
-     */
-    @EventListener
-    public void onRenderPlayer(RenderPlayerEvent event)
-    {
-        if (event.getEntity() == mc.player && rotation != null)
-        {
-            event.setYaw(rotation.getYaw());
-            event.setPitch(rotation.getPitch());
-            event.cancel();
-        }
-    }
-
-    /**
-     *
-     *
      * @return
      */
     public float getYaw()
     {
         return yaw;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public float getWrappedYaw()
+    {
+        return MathHelper.wrapDegrees(yaw);
     }
 
     /**

@@ -2,6 +2,10 @@ package com.caspian.client.init;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.manager.*;
+import com.caspian.client.api.manager.latency.LatencyManager;
+import com.caspian.client.api.manager.rotation.RotationManager;
+import com.caspian.client.api.manager.sound.SoundManager;
+import com.caspian.client.api.manager.tick.TickManager;
 
 /**
  *

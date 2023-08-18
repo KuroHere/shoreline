@@ -306,8 +306,8 @@ public class SpeedModule extends ToggleModule
             {
                 if (packet.getId() == mc.player.getId())
                 {
-                    double x = packet.getVelocityX() / 8000.0f;
-                    double z = packet.getVelocityZ() / 8000.0f;
+                    double x = packet.getVelocityX();
+                    double z = packet.getVelocityZ();
                     double boost = Math.sqrt(x * x + z * z);
                 }
             }

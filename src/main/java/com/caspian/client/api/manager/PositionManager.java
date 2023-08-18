@@ -1,11 +1,13 @@
 package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.handler.PositionHandler;
+import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
 import com.caspian.client.util.world.VecUtil;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -20,7 +22,12 @@ import net.minecraft.util.math.Vec3d;
 public class PositionManager implements Globals
 {
     //
-    private final PositionHandler handler;
+    private double x, y, z;
+    private BlockPos blockPos;
+    //
+    private boolean sneaking, sprinting;
+    //
+    private boolean onGround;
 
     /**
      *
@@ -28,8 +35,7 @@ public class PositionManager implements Globals
      */
     public PositionManager()
     {
-        handler = new PositionHandler();
-        Caspian.EVENT_HANDLER.subscribe(handler);
+        Caspian.EVENT_HANDLER.subscribe(this);
     }
 
     /**
@@ -69,16 +75,6 @@ public class PositionManager implements Globals
     public Vec3d getPos()
     {
         return new Vec3d(getX(), getY(), getZ());
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    public BlockPos getBlockPos()
-    {
-        return handler.getBlockPos();
     }
 
     /**
@@ -135,19 +131,66 @@ public class PositionManager implements Globals
         return MathHelper.squaredMagnitude(f, g, h);
     }
 
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPacketOutbound(PacketEvent.Outbound event)
+    {
+        if (mc.player != null && mc.world != null)
+        {
+            if (event.getPacket() instanceof PlayerMoveC2SPacket packet)
+            {
+                onGround = packet.isOnGround();
+                if (packet.changesPosition())
+                {
+                    x = packet.getX(x);
+                    y = packet.getY(y);
+                    z = packet.getZ(z);
+                    int i = MathHelper.floor(x);
+                    int j = MathHelper.floor(y);
+                    int k = MathHelper.floor(z);
+                    blockPos = new BlockPos(i, j, k);
+                }
+            }
+            else if (event.getPacket() instanceof ClientCommandC2SPacket packet)
+            {
+                switch (packet.getMode())
+                {
+                    case START_SPRINTING -> sprinting = true;
+                    case STOP_SPRINTING -> sprinting = false;
+                    case PRESS_SHIFT_KEY -> sneaking = true;
+                    case RELEASE_SHIFT_KEY -> sneaking = false;
+                }
+            }
+        }
+    }
+
     public double getX()
     {
-        return handler.getX();
+        return x;
     }
 
     public double getY()
     {
-        return handler.getY();
+        return y;
     }
 
     public double getZ()
     {
-        return handler.getZ();
+        return z;
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public BlockPos getBlockPos()
+    {
+        return blockPos;
     }
 
     /**
@@ -157,7 +200,7 @@ public class PositionManager implements Globals
      */
     public boolean isSneaking()
     {
-        return handler.isSneaking();
+        return sneaking;
     }
 
     /**
@@ -167,7 +210,7 @@ public class PositionManager implements Globals
      */
     public boolean isSprinting()
     {
-        return handler.isSprinting();
+        return sprinting;
     }
 
     /**
@@ -176,6 +219,6 @@ public class PositionManager implements Globals
      */
     public boolean isOnGround()
     {
-        return handler.isOnGround();
+        return onGround;
     }
 }

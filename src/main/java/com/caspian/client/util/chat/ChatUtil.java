@@ -2,6 +2,7 @@ package com.caspian.client.util.chat;
 
 import com.caspian.client.util.Globals;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 /**
  *
@@ -34,5 +35,14 @@ public class ChatUtil implements Globals
         {
             mc.player.networkHandler.sendChatMessage(message);
         }
+    }
+
+    /**
+     *
+     * @param message
+     */
+    public static void error(String message)
+    {
+        clientSendMessage(Formatting.RED + message);
     }
 }

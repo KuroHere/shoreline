@@ -97,7 +97,7 @@ public class ColorConfig extends Config<Color>
         {
             JsonElement element = jsonObj.get("value");
             String hex = element.getAsString();
-            setValue(Integer.decode(hex));
+            setValue(Integer.valueOf(hex.substring(2), 16));
         }
     }
 }

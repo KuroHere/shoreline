@@ -1,7 +1,6 @@
-package com.caspian.client.api.config;
+package com.caspian.client.api.command.arg;
 
 import com.caspian.client.Caspian;
-
 import java.lang.reflect.Field;
 
 /**
@@ -9,49 +8,46 @@ import java.lang.reflect.Field;
  *
  * @author linus
  * @since 1.0
- *
- * @see ConfigContainer
  */
-public class ConfigFactory
+public class ArgumentFactory
 {
-    // The object to grab from
-    protected final Object configObj;
+    //
+    private final Object argObj;
 
     /**
      *
-     *
-     * @param configObj
+     * @param argObj
      */
-    public ConfigFactory(Object configObj)
+    public ArgumentFactory(Object argObj)
     {
-        this.configObj = configObj;
+        this.argObj = argObj;
     }
 
     /**
-     * Creates and returns a new {@link Config} instance from a {@link Field}
+     * Creates and returns a new {@link Argument} instance from a {@link Field}
      * using Java reflection lib.
      *
-     * @param f The config field
+     * @param f The arg field
      * @return The created config
      * @throws RuntimeException if the field is not a Config type or reflect
      * could not access the field
      */
-    public Config<?> build(Field f)
+    public Argument<?> build(Field f)
     {
         f.setAccessible(true);
         // attempt to extract object from field
         try
         {
-            return (Config<?>) f.get(configObj);
+            return (Argument<?>) f.get(argObj);
         }
         // field getter error
         catch (IllegalArgumentException | IllegalAccessException e)
         {
-            Caspian.error("Failed to build config from field {}!",
+            Caspian.error("Failed to build argument from field {}!",
                     f.getName());
             e.printStackTrace();
         }
-        // failed config creation
+        // failed arg creation
         throw new RuntimeException("Invalid field!");
     }
 }

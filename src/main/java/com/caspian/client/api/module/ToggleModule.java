@@ -1,7 +1,6 @@
 package com.caspian.client.api.module;
 
 import com.caspian.client.api.config.Config;
-import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.MacroConfig;
 import com.caspian.client.api.config.setting.ToggleConfig;
 import com.caspian.client.api.macro.Macro;
@@ -22,6 +21,7 @@ import org.lwjgl.glfw.GLFW;
  * @since 1.0
  *
  * @see Macro
+ * @see ToggleConfig
  */
 public class ToggleModule extends Module
 {
@@ -151,7 +151,7 @@ public class ToggleModule extends Module
 
     /**
      * Returns <tt>true</tt> if the module is currently enabled and running.
-     * Wrapper method for {@link BooleanConfig#getValue()}.
+     * Wrapper method for {@link ToggleConfig#getValue()}.
      *
      * @return <tt>true</tt> if the module is enabled
      *

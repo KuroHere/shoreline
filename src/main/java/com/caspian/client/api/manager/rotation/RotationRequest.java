@@ -1,4 +1,4 @@
-package com.caspian.client.api.handler.rotation;
+package com.caspian.client.api.manager.rotation;
 
 import com.caspian.client.api.module.RotationModule;
 

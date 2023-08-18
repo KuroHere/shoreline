@@ -144,7 +144,7 @@ public class ConfigContainer implements Configurable
                         // couldn't parse Json value
                         catch (Exception e)
                         {
-                            Caspian.error("Couldn't parse Json for {}",
+                            Caspian.error("Couldn't parse Json for {}!",
                                     config.getName());
                             e.printStackTrace();
                         }

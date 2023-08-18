@@ -79,18 +79,11 @@ public class ModuleManager
     }
 
     /**
-     * Post initialization stage for all modules, used to initialize additional
-     * info that may not have been initialized in {@link Caspian#init()}
+     *
      */
     public void postInit()
     {
-        for (Module mod : getModules())
-        {
-            if (mod instanceof ToggleModule toggle)
-            {
-                Managers.MACRO.register(toggle.getKeybinding());
-            }
-        }
+        // TODO
     }
 
     /**

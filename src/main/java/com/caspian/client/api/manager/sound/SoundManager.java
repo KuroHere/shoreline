@@ -1,6 +1,6 @@
-package com.caspian.client.api.manager;
+package com.caspian.client.api.manager.sound;
 
-import com.caspian.client.api.handler.sound.SoundEvents;
+import com.caspian.client.api.manager.sound.SoundEvents;
 import com.caspian.client.util.Globals;
 import net.minecraft.client.sound.Sound;
 import net.minecraft.client.sound.SoundInstance;

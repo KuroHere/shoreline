@@ -1,4 +1,4 @@
-package com.caspian.client.api.handler.tick;
+package com.caspian.client.api.manager.tick;
 
 public enum TickSync
 {

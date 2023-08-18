@@ -1,6 +1,7 @@
 package com.caspian.client.impl.command;
 
-import com.caspian.client.api.command.arg.CommandArgument;
+import com.caspian.client.api.command.arg.Argument;
+import com.caspian.client.api.command.arg.arguments.CommandArgument;
 import com.caspian.client.api.command.Command;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.chat.ChatUtil;
@@ -13,36 +14,46 @@ import com.caspian.client.util.chat.ChatUtil;
  */
 public class HelpCommand extends Command
 {
+    //
+    Argument<Command> commandArg = new CommandArgument("HelpCommand", "The " +
+            "specified command to display info");
+
     /**
      *
      */
     public HelpCommand()
     {
-        super("help", "<opt:command>", "Displays command functionality",
-                new CommandArgument());
+        super("help", "<opt:command>", "Displays command functionality");
     }
 
     /**
      *
      */
     @Override
-    public void runCommand()
+    public void onCommandInput()
     {
-        super.runCommand();
-        Command commandArg = (Command) getArg(0).getValue();
-        if (commandArg != null)
+        final Command command = commandArg.parse();
+        if (command != null)
         {
-            ChatUtil.clientSendMessage(commandArg.getName() + " - " +
-                    commandArg.getDescription());
+            ChatUtil.clientSendMessage(toHelpMessage(command));
         }
-
         else
         {
-            for (Command command : Managers.COMMAND.getCommands())
+            for (Command c : Managers.COMMAND.getCommands())
             {
-                ChatUtil.clientSendMessage(command.getName() + " - " +
-                        command.getDescription());
+                ChatUtil.clientSendMessage(toHelpMessage(c));
             }
         }
+    }
+
+    /**
+     *
+     * @param command
+     * @return
+     */
+    private String toHelpMessage(Command command)
+    {
+        return String.format("%s %s - %s", command.getName(),
+                command.getUsage(), command.getDescription());
     }
 }

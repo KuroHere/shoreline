@@ -1,12 +1,13 @@
 package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.handler.InventoryHandler;
+import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.mixin.accessor.AccessorClientPlayerInteractionManager;
 import com.caspian.client.util.Globals;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.ClickType;
 
 /**
  *
@@ -16,8 +17,9 @@ import net.minecraft.util.ClickType;
  */
 public class InventoryManager implements Globals
 {
-    //
-    private final InventoryHandler handler;
+    // The serverside selected hotbar slot. This will determine the held item
+    // serverside
+    private int slot;
     
     /**
      *
@@ -25,8 +27,32 @@ public class InventoryManager implements Globals
      */
     public InventoryManager()
     {
-        handler = new InventoryHandler();
-        Caspian.EVENT_HANDLER.subscribe(handler);
+        slot = -1;
+        Caspian.EVENT_HANDLER.subscribe(this);
+    }
+
+    /**
+     *
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPacketInbound(PacketEvent.Inbound event)
+    {
+        if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket packet)
+        {
+            slot = packet.getSelectedSlot();
+        }
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    public int getServerSlot()
+    {
+        return slot;
     }
     
     /**
@@ -74,17 +100,7 @@ public class InventoryManager implements Globals
     {
         ((AccessorClientPlayerInteractionManager) mc.interactionManager).hookSyncSelectedSlot();
     }
-    
-    /**
-     *
-     *
-     * @return
-     */
-    public int getServerSlot()
-    {
-        return handler.getServerSlot();
-    }
-    
+
     /**
      *
      *
