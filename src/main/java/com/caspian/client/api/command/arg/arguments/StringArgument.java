@@ -34,13 +34,25 @@ public class StringArgument extends Argument<String>
     /**
      *
      *
+     * @param name
+     * @param desc
+     */
+    public StringArgument(String name, String desc)
+    {
+        super(name, desc);
+        this.allowedValues = null;
+    }
+
+    /**
+     *
+     *
      * @see Command#onCommandInput()
      */
     @Override
     public String parse()
     {
         final String literal = getLiteral();
-        if (allowedValues.contains(literal))
+        if (allowedValues == null || allowedValues.contains(literal))
         {
             return literal;
         }

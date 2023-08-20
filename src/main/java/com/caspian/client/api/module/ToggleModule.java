@@ -4,6 +4,8 @@ import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.setting.MacroConfig;
 import com.caspian.client.api.config.setting.ToggleConfig;
 import com.caspian.client.api.macro.Macro;
+import com.caspian.client.api.render.anim.Animation;
+import com.caspian.client.api.render.anim.Easing;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -35,6 +37,8 @@ public class ToggleModule extends Module
     // this configuration unless using #toggle() #enable() or #disable().
     Config<Boolean> enabledConfig = new ToggleConfig("Enabled", "The module" +
             " enabled state. This state is true when the module is running.", false);
+    //
+    final Animation animation = new Animation(Easing.CUBIC_IN_OUT);
 
     /**
      *
@@ -170,5 +174,14 @@ public class ToggleModule extends Module
     public Macro getKeybinding()
     {
         return keybindingConfig.getValue();
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Animation getAnimation()
+    {
+        return animation;
     }
 }

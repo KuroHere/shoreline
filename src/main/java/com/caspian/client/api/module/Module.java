@@ -54,6 +54,7 @@ public class Module extends ConfigContainer implements Globals
      * @see ModuleManager#getModule(String)
      * @see ModuleFile#save()
      */
+    @Override
     public String getId()
     {
         return String.format("%s-module", getName().toLowerCase());

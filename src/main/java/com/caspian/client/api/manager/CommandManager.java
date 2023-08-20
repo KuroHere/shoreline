@@ -7,6 +7,7 @@ import com.caspian.client.api.command.arg.ArgumentParseException;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.command.FriendCommand;
 import com.caspian.client.impl.command.HelpCommand;
+import com.caspian.client.impl.command.PrefixCommand;
 import com.caspian.client.impl.event.chat.ChatInputEvent;
 import com.caspian.client.impl.event.chat.ChatMessageEvent;
 import com.caspian.client.impl.event.chat.ChatRenderEvent;
@@ -40,7 +41,8 @@ public class CommandManager implements Globals
         Caspian.EVENT_HANDLER.subscribe(this);
         register(
                 new HelpCommand(),
-                new FriendCommand()
+                new FriendCommand(),
+                new PrefixCommand()
         );
         Caspian.info("Registered {} commands!", commands.size());
     }
@@ -82,7 +84,7 @@ public class CommandManager implements Globals
                     {
                         Argument<?> arg = command.getArg(i - 1);
                         arg.setLiteral(args[i]);
-                        if (i < args.length - 1)
+                        if (i + 1 < args.length)
                         {
                             chat.append(arg.getLiteral());
                         }
@@ -97,6 +99,7 @@ public class CommandManager implements Globals
                 else if (name.startsWith(args[0]))
                 {
                     chat.append(command.getName());
+                    break;
                 }
             }
         }
@@ -120,7 +123,8 @@ public class CommandManager implements Globals
             String[] args = literal.split(" ");
             for (Command command : getCommands())
             {
-                if (command.getName().equalsIgnoreCase(args[0]))
+                String name = command.getName();
+                if (name.equals(args[0]))
                 {
                     try
                     {
@@ -174,20 +178,20 @@ public class CommandManager implements Globals
 
     /**
      *
-     * @param prefix
-     */
-    public void setPrefix(String prefix)
-    {
-        this.prefix = prefix;
-    }
-
-    /**
-     *
      *
      * @return
      */
     public List<Command> getCommands()
     {
         return commands;
+    }
+
+    /**
+     *
+     * @param prefix
+     */
+    public void setPrefix(String prefix)
+    {
+        this.prefix = prefix;
     }
 }

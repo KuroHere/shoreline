@@ -15,6 +15,7 @@ import com.caspian.client.api.module.ToggleModule;
  */
 public class StepModule extends ToggleModule
 {
+    //
     Config<StepMode> modeConfig = new EnumConfig<>("Mode", "Step mode",
             StepMode.NORMAL, StepMode.values());
     Config<Float> heightConfig = new NumberConfig<>("Height", "The maximum " +
@@ -22,7 +23,7 @@ public class StepModule extends ToggleModule
     Config<Boolean> useTimerConfig = new BooleanConfig("UseTimer", "Slows " +
             "down packets by applying timer when stepping", true);
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Confirms the " +
-            "step height for NCP servers", false);
+            "step height for NCP servers", false, () -> heightConfig.getValue() <= 2.5f);
     Config<Boolean> entityStepConfig = new BooleanConfig("EntityStep",
             "Allows entities to step up blocks", false);
 

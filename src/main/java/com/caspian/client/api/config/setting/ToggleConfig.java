@@ -3,6 +3,7 @@ package com.caspian.client.api.config.setting;
 import com.caspian.client.Caspian;
 import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.module.ToggleModule;
+import com.caspian.client.api.render.anim.Animation;
 
 /**
  *
@@ -30,6 +31,8 @@ public class ToggleConfig extends BooleanConfig
         ConfigContainer container = getContainer();
         if (container instanceof ToggleModule toggle)
         {
+            Animation anim = toggle.getAnimation();
+            anim.setState(val);
             if (val)
             {
                 Caspian.EVENT_HANDLER.subscribe(toggle);

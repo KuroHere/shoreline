@@ -26,7 +26,7 @@ public class TimerModule extends InvokeModule
     Config<Boolean> tpsSyncConfig = new BooleanConfig("TPSSync", "Syncs game " +
             "tick speed to server tick speed", false);
     //
-    private float timer;
+    private float timer = 1.0f;
 
     /**
      *

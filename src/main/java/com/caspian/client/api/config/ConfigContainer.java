@@ -101,6 +101,8 @@ public class ConfigContainer implements Configurable
     public JsonObject toJson()
     {
         final JsonObject out = new JsonObject();
+        out.addProperty("name", getName());
+        out.addProperty("id", getId());
         final JsonArray array = new JsonArray();
         for (Config<?> config : getConfigs())
         {
@@ -163,6 +165,15 @@ public class ConfigContainer implements Configurable
     public String getName()
     {
         return name;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String getId()
+    {
+        return String.format("%s-container", getName().toLowerCase());
     }
 
     /**

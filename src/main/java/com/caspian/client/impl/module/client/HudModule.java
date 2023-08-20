@@ -9,6 +9,7 @@ import com.caspian.client.api.module.Module;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
+import com.caspian.client.api.render.anim.Animation;
 import com.caspian.client.impl.event.render.RenderOverlayEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
@@ -138,13 +139,19 @@ public class HudModule extends ToggleModule
                         };
                 for (Module m : modules)
                 {
-                    if (m instanceof ToggleModule t && t.isEnabled())
+                    if (m instanceof ToggleModule t)
                     {
+                        final Animation anim = t.getAnimation();
+                        float factor = anim.getScaledTime();
+                        if (factor <= 0.01f)
+                        {
+                            continue;
+                        }
                         String text = getFormattedModule(m);
                         int width = RenderManager.textWidth(text);
                         RenderManager.renderText(event.getMatrices(), text,
-                                res.getScaledWidth() - width - 1.0f, topRight,
-                                Modules.COLORS.getRGB());
+                                res.getScaledWidth() - width * factor - 1.0f,
+                                topRight, Modules.COLORS.getRGB());
                         topRight += 10.0f;
                     }
                 }
@@ -307,6 +314,28 @@ public class HudModule extends ToggleModule
         if (potionHudConfig.getValue() == VanillaHud.HIDE)
         {
             event.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onRenderOverlayItemName(RenderOverlayEvent.ItemName event)
+    {
+        if (itemNameConfig.getValue() != VanillaHud.KEEP)
+        {
+            event.cancel();
+        }
+        if (itemNameConfig.getValue() == VanillaHud.MOVE)
+        {
+            final Window window = mc.getWindow();
+            int m = window.getScaledWidth() / 2 - 91;
+            int n = window.getScaledHeight() - 49;
+            int o = mc.player.getAbsorptionAmount() > 0.0f ? n : n - 10;
+            event.setX(m);
+            event.setY(o);
         }
     }
 

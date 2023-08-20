@@ -49,21 +49,21 @@ public class FriendCommand extends Command
                 if (action.equalsIgnoreCase("add"))
                 {
                     ChatUtil.clientSendMessage("Added friend with name " +
-                            Formatting.AQUA + player.getEntityName());
+                            Formatting.AQUA + player.getEntityName() + Formatting.RESET + "!");
                     Managers.SOCIAL.addFriend(player.getUuid());
                 }
                 else if (action.equalsIgnoreCase("remove")
                         || action.equalsIgnoreCase("del"))
                 {
                     ChatUtil.clientSendMessage("Removed friend with name " +
-                            Formatting.AQUA + player.getEntityName());
+                            Formatting.AQUA + player.getEntityName() + Formatting.RESET + "!");
                     Managers.SOCIAL.remove(player.getUuid());
                 }
             }
             else
             {
                 ChatUtil.clientSendMessage("Added friend with name " +
-                        Formatting.AQUA + player.getEntityName());
+                        Formatting.AQUA + player.getEntityName() + Formatting.RESET + "!");
                 Managers.SOCIAL.addFriend(player.getUuid());
             }
         }
