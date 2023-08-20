@@ -2,9 +2,7 @@ package com.caspian.client.api.command.arg.arguments;
 
 import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
-import com.caspian.client.api.command.arg.ArgumentParseException;
 import com.caspian.client.util.chat.ChatUtil;
-import com.google.gson.JsonObject;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +35,7 @@ public class BooleanArgument extends Argument<Boolean>
      * @see Command#onCommandInput()
      */
     @Override
-    public Boolean parse() throws ArgumentParseException
+    public Boolean parse()
     {
         // TODO: Make cleaner
         String literal = getLiteral();
@@ -51,7 +49,8 @@ public class BooleanArgument extends Argument<Boolean>
         {
             return Boolean.FALSE;
         }
-        throw new ArgumentParseException("Could not parse Boolean argument!");
+        ChatUtil.error("Could not parse Boolean argument!");
+        return null;
     }
 
     /**

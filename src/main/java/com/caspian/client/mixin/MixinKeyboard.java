@@ -41,7 +41,7 @@ public class MixinKeyboard
     private void hookOnKey(long window, int key, int scancode, int action,
                            int modifiers, CallbackInfo ci)
     {
-        if (client.getWindow().getHandle() == window)
+        if (client.getWindow().getHandle() == window && action != 0)
         {
             KeyboardInputEvent keyboardInputEvent = new KeyboardInputEvent(key);
             Caspian.EVENT_HANDLER.dispatch(keyboardInputEvent);

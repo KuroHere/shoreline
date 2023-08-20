@@ -36,6 +36,7 @@ public class ChatMessageEvent extends Event
         return StringHelper.truncateChat(StringUtils.normalizeSpace(chatText.trim()));
     }
 
+    @Cancelable
     public static class Client extends ChatMessageEvent
     {
         public Client(String message)
@@ -44,6 +45,7 @@ public class ChatMessageEvent extends Event
         }
     }
 
+    @Cancelable
     public static class Server extends ChatMessageEvent
     {
         public Server(String message)

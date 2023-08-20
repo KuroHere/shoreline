@@ -2,10 +2,10 @@ package com.caspian.client.api.command.arg.arguments;
 
 import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
-import com.caspian.client.api.command.arg.ArgumentParseException;
 import com.caspian.client.util.chat.ChatUtil;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -37,14 +37,15 @@ public class StringArgument extends Argument<String>
      * @see Command#onCommandInput()
      */
     @Override
-    public String parse() throws ArgumentParseException
+    public String parse()
     {
         final String literal = getLiteral();
         if (allowedValues.contains(literal))
         {
             return literal;
         }
-        throw new ArgumentParseException("Could not parse argument! Allowed values: ");
+        ChatUtil.error("Could not parse argument! Allowed values: ");
+        return null;
     }
 
     /**

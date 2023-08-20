@@ -58,6 +58,10 @@ public class MacroManager
             }
         }
         //
+        if (macros.isEmpty())
+        {
+            return;
+        }
         for (Macro macro : macros)
         {
             if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN

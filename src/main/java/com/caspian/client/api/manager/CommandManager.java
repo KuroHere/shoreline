@@ -11,7 +11,6 @@ import com.caspian.client.impl.event.chat.ChatInputEvent;
 import com.caspian.client.impl.event.chat.ChatMessageEvent;
 import com.caspian.client.impl.event.chat.ChatRenderEvent;
 import com.caspian.client.util.Globals;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,31 +30,31 @@ public class CommandManager implements Globals
     //
     private StringBuilder chat = new StringBuilder();
     // Command prefix, used to identify a command in the chat
-    public static final String CMD_PREFIX = ".";
-
-    /**
-     *
-     */
-    public CommandManager()
-    {
-        Caspian.EVENT_HANDLER.subscribe(this);
-    }
+    private String prefix = ".";
 
     /**
      * Registers commands to the CommandManager
      */
-    public void postInit()
+    public CommandManager()
     {
+        Caspian.EVENT_HANDLER.subscribe(this);
         register(
                 new HelpCommand(),
                 new FriendCommand()
         );
+        Caspian.info("Registered {} commands!", commands.size());
+    }
+
+    /**
+     * Reflects arguments and assigns them to their respective commands
+     */
+    public void postInit()
+    {
         // get args
         for (Command command : commands)
         {
             command.reflectConfigs();
         }
-        Caspian.info("Registered {} commands!", commands.size());
     }
 
     /**
@@ -66,18 +65,19 @@ public class CommandManager implements Globals
     @EventListener
     public void onChatInput(ChatInputEvent event)
     {
-        final String text = event.getChatText();
-        if (text.startsWith(CMD_PREFIX))
+        chat = new StringBuilder();
+        final String text = event.getChatText().trim();
+        if (text.startsWith(prefix))
         {
             String literal = text.substring(1);
             String[] args = literal.split(" ");
             //
-            chat = new StringBuilder();
             for (Command command : getCommands())
             {
-                if (command.getName().equalsIgnoreCase(args[0]))
+                String name = command.getName();
+                if (name.equals(args[0]))
                 {
-                    chat.append(args[0]);
+                    chat.append(args[0]).append(" ");
                     for (int i = 1; i < args.length; i++)
                     {
                         Argument<?> arg = command.getArg(i - 1);
@@ -88,14 +88,15 @@ public class CommandManager implements Globals
                         }
                         else
                         {
-                            if (event.getKeyCode() == GLFW.GLFW_KEY_TAB)
-                            {
-                                arg.completeLiteral();
-                            }
                             chat.append(arg.getSuggestion());
                         }
+                        chat.append(" ");
                     }
                     break;
+                }
+                else if (name.startsWith(args[0]))
+                {
+                    chat.append(command.getName());
                 }
             }
         }
@@ -109,9 +110,12 @@ public class CommandManager implements Globals
     @EventListener
     public void onClientChatMessage(ChatMessageEvent.Client event)
     {
-        String msg = event.getMessage();
-        if (msg.startsWith(CMD_PREFIX))
+        String msg = event.getMessage().trim();
+        if (msg.startsWith(prefix))
         {
+            event.cancel();
+            mc.inGameHud.getChatHud().addToMessageHistory(msg);
+            //
             String literal = msg.substring(1);
             String[] args = literal.split(" ");
             for (Command command : getCommands())
@@ -121,6 +125,7 @@ public class CommandManager implements Globals
                     try
                     {
                         command.onCommandInput();
+                        // chat = new StringBuilder();
                     }
                     catch (ArgumentParseException e)
                     {
@@ -165,6 +170,15 @@ public class CommandManager implements Globals
     private void register(Command command)
     {
         commands.add(command);
+    }
+
+    /**
+     *
+     * @param prefix
+     */
+    public void setPrefix(String prefix)
+    {
+        this.prefix = prefix;
     }
 
     /**

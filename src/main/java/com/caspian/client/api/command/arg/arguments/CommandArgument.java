@@ -2,7 +2,6 @@ package com.caspian.client.api.command.arg.arguments;
 
 import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
-import com.caspian.client.api.command.arg.ArgumentParseException;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.chat.ChatUtil;
 
@@ -31,17 +30,13 @@ public class CommandArgument extends Argument<Command>
     public CommandArgument(String name, String desc)
     {
         super(name, desc);
-        for (Command command : Managers.COMMAND.getCommands())
-        {
-            commandIds.add(command.getName());
-        }
     }
 
     /**
      * @see Command#onCommandInput()
      */
     @Override
-    public Command parse() throws ArgumentParseException
+    public Command parse()
     {
         for (Command command : Managers.COMMAND.getCommands())
         {
@@ -50,7 +45,8 @@ public class CommandArgument extends Argument<Command>
                 return command;
             }
         }
-        throw new ArgumentParseException("Could not parse Command argument!");
+        ChatUtil.error("Could not parse Command argument! Literal: " + getLiteral());
+        return null;
     }
 
     /**
@@ -60,6 +56,14 @@ public class CommandArgument extends Argument<Command>
     @Override
     public Collection<String> getSuggestions()
     {
+        if (!commandIds.isEmpty())
+        {
+            return commandIds;
+        }
+        for (Command command : Managers.COMMAND.getCommands())
+        {
+            commandIds.add(command.getName());
+        }
         return commandIds;
     }
 }

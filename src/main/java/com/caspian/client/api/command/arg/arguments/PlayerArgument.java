@@ -2,7 +2,6 @@ package com.caspian.client.api.command.arg.arguments;
 
 import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
-import com.caspian.client.api.command.arg.ArgumentParseException;
 import com.caspian.client.util.Globals;
 import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,7 +30,7 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
      * @see Command#onCommandInput()
      */
     @Override
-    public PlayerEntity parse() throws ArgumentParseException
+    public PlayerEntity parse()
     {
         if (mc.world != null)
         {
@@ -44,7 +43,8 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
                 }
             }
         }
-        throw new ArgumentParseException("Could not find player!");
+        ChatUtil.error("Could not find player!");
+        return null;
     }
 
     /**

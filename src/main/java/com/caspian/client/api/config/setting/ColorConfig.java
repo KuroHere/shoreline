@@ -97,7 +97,23 @@ public class ColorConfig extends Config<Color>
         {
             JsonElement element = jsonObj.get("value");
             String hex = element.getAsString();
-            setValue(Integer.valueOf(hex.substring(2), 16));
+            setValue(parseColor(hex));
         }
+    }
+
+    /**
+     *
+     * @param colorString
+     * @return
+     * @throws IllegalArgumentException
+     */
+    private int parseColor(String colorString)
+    {
+        if (colorString.startsWith("0x"))
+        {
+            long color = Long.parseLong(colorString.substring(2), 16);
+            return (int) color;
+        }
+        throw new IllegalArgumentException("Unknown color " + colorString);
     }
 }

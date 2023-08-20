@@ -16,6 +16,5 @@ public class ArgumentParseException extends RuntimeException
     {
         super(message);
         ChatUtil.error(message);
-
     }
 }

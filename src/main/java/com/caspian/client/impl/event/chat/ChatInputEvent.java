@@ -10,22 +10,11 @@ import com.caspian.client.api.event.Event;
  */
 public class ChatInputEvent extends Event
 {
-    private final int keycode;
     private final String chatText;
 
-    public ChatInputEvent(int keycode, String chatText)
+    public ChatInputEvent(String chatText)
     {
-        this.keycode = keycode;
         this.chatText = chatText;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public int getKeyCode()
-    {
-        return keycode;
     }
 
     public String getChatText()

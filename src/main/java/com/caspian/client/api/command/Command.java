@@ -24,8 +24,8 @@ public abstract class Command extends ConfigContainer
     //
     private final String desc;
     // The command arguments, For reference: If the command line (chat) is
-    // split up by the " " then the command ".friend add {player_name}" would
-    // be split into args -> "add" and "{player_name}"
+    // split up by whitespaces then the command ".friend add {player_name}"
+    // would be split into args -> "add" and "{player_name}"
     private final List<Argument<?>> arguments = new ArrayList<>();
 
     /**

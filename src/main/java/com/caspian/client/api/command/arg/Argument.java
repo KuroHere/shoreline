@@ -4,6 +4,7 @@ import com.caspian.client.api.command.Command;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.manager.CommandManager;
 import com.caspian.client.impl.event.chat.ChatInputEvent;
+import com.caspian.client.util.string.StringUtil;
 import com.google.gson.JsonObject;
 
 import java.util.Collection;
@@ -37,7 +38,9 @@ public abstract class Argument<T> extends Config<T>
      */
     public Argument(String name, String desc)
     {
+        // LMAOOOOOOOOO WTF IS THIS
         super(name, desc, (T) new Object());
+        this.literal = StringUtil.EMPTY_STRING;
     }
 
     /**
@@ -63,9 +66,11 @@ public abstract class Argument<T> extends Config<T>
     /**
      *
      *
+     * @throws ArgumentParseException
+     *
      * @see Command#onCommandInput()
      */
-    public abstract T parse() throws ArgumentParseException;
+    public abstract T parse();
 
     /**
      * Reads all data from a {@link JsonObject} and updates the values of the
@@ -118,7 +123,7 @@ public abstract class Argument<T> extends Config<T>
                 return suggestion;
             }
         }
-        return null;
+        return literal;
     }
 
     /**

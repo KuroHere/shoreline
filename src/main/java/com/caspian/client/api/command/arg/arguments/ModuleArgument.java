@@ -2,7 +2,6 @@ package com.caspian.client.api.command.arg.arguments;
 
 import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
-import com.caspian.client.api.command.arg.ArgumentParseException;
 import com.caspian.client.api.module.Module;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.chat.ChatUtil;
@@ -30,17 +29,13 @@ public class ModuleArgument extends Argument<Module>
     public ModuleArgument(String name, String desc)
     {
         super(name, desc);
-        for (Module module : Managers.MODULE.getModules())
-        {
-            moduleNames.add(module.getName());
-        }
     }
 
     /**
      * @see Command#onCommandInput()
      */
     @Override
-    public Module parse() throws ArgumentParseException
+    public Module parse()
     {
         for (Module module : Managers.MODULE.getModules())
         {
@@ -49,7 +44,8 @@ public class ModuleArgument extends Argument<Module>
                 return module;
             }
         }
-        throw new ArgumentParseException("Could not parse Module argument!");
+        ChatUtil.error("Could not parse Module argument!");
+        return null;
     }
 
     /**
@@ -60,6 +56,14 @@ public class ModuleArgument extends Argument<Module>
     @Override
     public Collection<String> getSuggestions()
     {
+        if (!moduleNames.isEmpty())
+        {
+            return moduleNames;
+        }
+        for (Module module : Managers.MODULE.getModules())
+        {
+            moduleNames.add(module.getName());
+        }
         return moduleNames;
     }
 }

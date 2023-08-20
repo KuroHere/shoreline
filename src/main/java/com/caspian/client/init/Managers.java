@@ -50,7 +50,6 @@ public class Managers
         {
             NETWORK = new NetworkManager();
             MODULE = new ModuleManager();
-            COMMAND = new CommandManager();
             MACRO = new MacroManager();
             SOCIAL = new SocialManager();
             WAYPOINT = new WaypointManager();
@@ -64,6 +63,7 @@ public class Managers
             TOTEM = new TotemManager();
             INTERACT = new InteractionManager();
             LATENCY = new LatencyManager();
+            COMMAND = new CommandManager();
             SOUND = new SoundManager();
             initialized = true;
         }

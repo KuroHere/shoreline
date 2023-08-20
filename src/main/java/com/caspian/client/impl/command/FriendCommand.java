@@ -5,7 +5,9 @@ import com.caspian.client.api.command.arg.Argument;
 import com.caspian.client.api.command.arg.arguments.PlayerArgument;
 import com.caspian.client.api.command.arg.arguments.StringArgument;
 import com.caspian.client.init.Managers;
+import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Formatting;
 
 import java.util.Arrays;
 
@@ -46,16 +48,22 @@ public class FriendCommand extends Command
             {
                 if (action.equalsIgnoreCase("add"))
                 {
+                    ChatUtil.clientSendMessage("Added friend with name " +
+                            Formatting.AQUA + player.getEntityName());
                     Managers.SOCIAL.addFriend(player.getUuid());
                 }
                 else if (action.equalsIgnoreCase("remove")
                         || action.equalsIgnoreCase("del"))
                 {
+                    ChatUtil.clientSendMessage("Removed friend with name " +
+                            Formatting.AQUA + player.getEntityName());
                     Managers.SOCIAL.remove(player.getUuid());
                 }
             }
             else
             {
+                ChatUtil.clientSendMessage("Added friend with name " +
+                        Formatting.AQUA + player.getEntityName());
                 Managers.SOCIAL.addFriend(player.getUuid());
             }
         }
