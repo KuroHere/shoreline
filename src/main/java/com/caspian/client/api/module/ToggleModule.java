@@ -1,9 +1,11 @@
 package com.caspian.client.api.module;
 
 import com.caspian.client.api.config.Config;
+import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.MacroConfig;
 import com.caspian.client.api.config.setting.ToggleConfig;
 import com.caspian.client.api.macro.Macro;
+import com.caspian.client.api.render.Hideable;
 import com.caspian.client.api.render.anim.Animation;
 import com.caspian.client.api.render.anim.Easing;
 import org.lwjgl.glfw.GLFW;
@@ -25,7 +27,7 @@ import org.lwjgl.glfw.GLFW;
  * @see Macro
  * @see ToggleConfig
  */
-public class ToggleModule extends Module
+public class ToggleModule extends Module implements Hideable
 {
     // Config for keybinding implementation. Module keybind is used to
     // interact with the #enabledConfig.
@@ -37,8 +39,10 @@ public class ToggleModule extends Module
     // this configuration unless using #toggle() #enable() or #disable().
     Config<Boolean> enabledConfig = new ToggleConfig("Enabled", "The module" +
             " enabled state. This state is true when the module is running.", false);
-    //
-    final Animation animation = new Animation(Easing.CUBIC_IN_OUT);
+    // Arraylist rendering info
+    Config<Boolean> hiddenConfig = new BooleanConfig("Hidden", "The hidden " +
+            "state of the module in the Arraylist", false);
+    private final Animation animation = new Animation(Easing.CUBIC_IN_OUT);
 
     /**
      *
@@ -51,7 +55,27 @@ public class ToggleModule extends Module
     {
         super(name, desc, category);
         // Toggle settings
-        register(keybindingConfig, enabledConfig);
+        register(keybindingConfig, enabledConfig, hiddenConfig);
+    }
+
+    /**
+     *
+     * @param hidden
+     */
+    @Override
+    public void setHidden(boolean hidden)
+    {
+        hiddenConfig.setValue(hidden);
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public boolean isHidden()
+    {
+        return hiddenConfig.getValue();
     }
 
     /**

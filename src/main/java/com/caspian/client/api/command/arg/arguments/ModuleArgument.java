@@ -18,7 +18,7 @@ import java.util.Collection;
 public class ModuleArgument extends Argument<Module>
 {
     //
-    private final ArrayList<String> moduleNames = new ArrayList<>();
+    private ArrayList<String> moduleNames;
 
     /**
      *
@@ -56,13 +56,14 @@ public class ModuleArgument extends Argument<Module>
     @Override
     public Collection<String> getSuggestions()
     {
-        if (!moduleNames.isEmpty())
+        if (moduleNames != null)
         {
             return moduleNames;
         }
+        moduleNames = new ArrayList<>();
         for (Module module : Managers.MODULE.getModules())
         {
-            moduleNames.add(module.getName());
+            moduleNames.add(module.getName().toLowerCase());
         }
         return moduleNames;
     }

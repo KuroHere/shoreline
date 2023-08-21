@@ -67,7 +67,7 @@ public class ClickGuiScreen extends Screen implements Globals
         super.render(matrices, mouseX, mouseY, delta);
         for (CategoryFrame frame : frames)
         {
-            if (frame.isWithin(mouseX, mouseY))
+            if (frame.isWithinTotal(mouseX, mouseY))
             {
                 focus = frame;
             }

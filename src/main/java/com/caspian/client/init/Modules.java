@@ -61,7 +61,7 @@ public class Modules
     public static BlockHighlightModule BLOCK_HIGHLIGHT;
     public static FullbrightModule FULLBRIGHT;
     public static NoRenderModule NO_RENDER;
-    // public static NoWeatherModule NO_WEATHER;
+    public static NoWeatherModule NO_WEATHER;
     // public static ViewClipModule VIEW_CLIP;
     // public static ViewModelModule VIEW_MODEL;
     public static FastPlaceModule FAST_PLACE;
@@ -133,8 +133,8 @@ public class Modules
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");
             NO_RENDER = (NoRenderModule) getRegisteredModule("norender-module");
-            // NO_WEATHER = (NoWeatherModule) getRegisteredModule(
-            //        "noweather-module");
+            NO_WEATHER = (NoWeatherModule) getRegisteredModule(
+                    "noweather-module");
             // VIEW_CLIP = (ViewClipModule) getRegisteredModule(
             //        "viewclip-module");
             // VIEW_MODEL = (ViewModelModule) getRegisteredModule(

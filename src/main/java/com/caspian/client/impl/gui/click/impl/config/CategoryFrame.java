@@ -199,6 +199,17 @@ public class CategoryFrame extends Frame
     }
 
     /**
+     *
+     * @param mx
+     * @param my
+     * @return
+     */
+    public boolean isWithinTotal(float mx, float my)
+    {
+        return isMouseOver(mx, my, x, y, width, getTotalHeight());
+    }
+
+    /**
      * Update global offset
      *
      * @param in The offset
@@ -225,7 +236,7 @@ public class CategoryFrame extends Frame
      */
     public float getTotalHeight()
     {
-        return fheight;
+        return height + fheight;
     }
 
     /**

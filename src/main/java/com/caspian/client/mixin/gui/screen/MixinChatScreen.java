@@ -2,6 +2,7 @@ package com.caspian.client.mixin.gui.screen;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.chat.ChatInputEvent;
+import com.caspian.client.impl.event.chat.ChatKeyInputEvent;
 import com.caspian.client.impl.event.chat.ChatMessageEvent;
 import com.caspian.client.impl.event.chat.ChatRenderEvent;
 import com.caspian.client.mixin.accessor.AccessorTextFieldWidget;
@@ -39,6 +40,27 @@ public class MixinChatScreen
     {
         ChatInputEvent chatInputEvent = new ChatInputEvent(chatText);
         Caspian.EVENT_HANDLER.dispatch(chatInputEvent);
+    }
+
+    /**
+     *
+     * @param keyCode
+     * @param scanCode
+     * @param modifiers
+     * @param cir
+     */
+    @Inject(method = "keyPressed", at = @At(value = "HEAD"), cancellable = true)
+    private void hookKeyPressed(int keyCode, int scanCode, int modifiers,
+                                CallbackInfoReturnable<Boolean> cir)
+    {
+        ChatKeyInputEvent keyInputEvent = new ChatKeyInputEvent(keyCode,
+                chatField.getText());
+        Caspian.EVENT_HANDLER.dispatch(keyInputEvent);
+        if (keyInputEvent.isCanceled())
+        {
+            cir.cancel();
+            chatField.setText(keyInputEvent.getChatText());
+        }
     }
 
     /**

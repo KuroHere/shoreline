@@ -110,12 +110,10 @@ public class HudModule extends ToggleModule
                 bottomLeft -= 14.0f;
                 bottomRight -= 14.0f;
             }
-            if (potionHudConfig.getValue() == VanillaHud.MOVE)
+            if (potionHudConfig.getValue() == VanillaHud.MOVE
+                    && !mc.player.getStatusEffects().isEmpty())
             {
-                if (!mc.player.getStatusEffects().isEmpty())
-                {
-                    topRight += 27.0f;
-                }
+                topRight += 27.0f;
             }
             if (watermarkConfig.getValue())
             {
@@ -143,7 +141,7 @@ public class HudModule extends ToggleModule
                     {
                         final Animation anim = t.getAnimation();
                         float factor = anim.getScaledTime();
-                        if (factor <= 0.01f)
+                        if (factor <= 0.01f || t.isHidden())
                         {
                             continue;
                         }
@@ -289,7 +287,7 @@ public class HudModule extends ToggleModule
                 else
                 {
                     y -= mc.player.isCreative() ?
-                            (mc.player.isRiding() ? 45 : 38) : 5;
+                            (mc.player.isRiding() ? 45 : 38) : 55;
                 }
                 for (int i = 3; i >= 0; --i)
                 {
@@ -331,11 +329,19 @@ public class HudModule extends ToggleModule
         if (itemNameConfig.getValue() == VanillaHud.MOVE)
         {
             final Window window = mc.getWindow();
-            int m = window.getScaledWidth() / 2 - 91;
-            int n = window.getScaledHeight() - 49;
-            int o = mc.player.getAbsorptionAmount() > 0.0f ? n : n - 10;
-            event.setX(m);
-            event.setY(o);
+            int x = window.getScaledWidth() / 2 - 90;
+            int y = window.getScaledHeight() - 49;
+            boolean armor = !mc.player.getInventory().armor.isEmpty();
+            if (mc.player.getAbsorptionAmount() > 0.0f)
+            {
+                y -= 9;
+            }
+            if (armor)
+            {
+                y -= 9;
+            }
+            event.setX(x);
+            event.setY(y);
         }
     }
 

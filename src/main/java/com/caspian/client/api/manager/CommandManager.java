@@ -5,13 +5,15 @@ import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
 import com.caspian.client.api.command.arg.ArgumentParseException;
 import com.caspian.client.api.event.listener.EventListener;
-import com.caspian.client.impl.command.FriendCommand;
-import com.caspian.client.impl.command.HelpCommand;
-import com.caspian.client.impl.command.PrefixCommand;
+import com.caspian.client.api.module.Module;
+import com.caspian.client.impl.command.*;
 import com.caspian.client.impl.event.chat.ChatInputEvent;
+import com.caspian.client.impl.event.chat.ChatKeyInputEvent;
 import com.caspian.client.impl.event.chat.ChatMessageEvent;
 import com.caspian.client.impl.event.chat.ChatRenderEvent;
+import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +44,14 @@ public class CommandManager implements Globals
         register(
                 new HelpCommand(),
                 new FriendCommand(),
-                new PrefixCommand()
+                new PrefixCommand(),
+                new DrawnCommand()
         );
+        //
+        for (Module module : Managers.MODULE.getModules())
+        {
+            register(new ModuleCommand(module));
+        }
         Caspian.info("Registered {} commands!", commands.size());
     }
 
@@ -129,13 +137,48 @@ public class CommandManager implements Globals
                     try
                     {
                         command.onCommandInput();
-                        // chat = new StringBuilder();
+                        chat = new StringBuilder();
                     }
                     catch (ArgumentParseException e)
                     {
                         e.printStackTrace();
                     }
                     break;
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onChatKeyInput(ChatKeyInputEvent event)
+    {
+        if (event.getKeycode() == GLFW.GLFW_KEY_TAB)
+        {
+            String msg = event.getChatText().trim();
+            if (msg.startsWith(prefix))
+            {
+                event.cancel();
+                String literal = msg.substring(1);
+                String[] args = literal.split(" ");
+                for (Command command : getCommands())
+                {
+                    String name = command.getName();
+                    if (args.length > 1 && name.equals(args[0]))
+                    {
+                        Argument<?> tail = command.getLastArg();
+                        tail.completeLiteral();
+                        event.setChatText(command.getLiteral(prefix));
+                        break;
+                    }
+                    else if (name.startsWith(args[0]))
+                    {
+                        event.setChatText(prefix + name);
+                        break;
+                    }
                 }
             }
         }

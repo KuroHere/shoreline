@@ -19,6 +19,7 @@ import com.caspian.client.impl.module.movement.*;
 import com.caspian.client.impl.module.render.BlockHighlightModule;
 import com.caspian.client.impl.module.render.FullbrightModule;
 import com.caspian.client.impl.module.render.NoRenderModule;
+import com.caspian.client.impl.module.render.NoWeatherModule;
 import com.caspian.client.impl.module.world.FastPlaceModule;
 import com.caspian.client.impl.module.world.SpeedmineModule;
 import com.caspian.client.init.Managers;
@@ -71,6 +72,7 @@ public class ModuleManager
                 new BlockHighlightModule(),
                 new FullbrightModule(),
                 new NoRenderModule(),
+                new NoWeatherModule(),
                 // World
                 new FastPlaceModule(),
                 new SpeedmineModule()

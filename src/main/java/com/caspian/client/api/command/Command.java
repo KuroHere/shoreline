@@ -4,6 +4,7 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.command.arg.Argument;
 import com.caspian.client.api.command.arg.ArgumentFactory;
 import com.caspian.client.api.config.ConfigContainer;
+import com.caspian.client.init.Managers;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -90,6 +91,24 @@ public abstract class Command extends ConfigContainer
     public abstract void onCommandInput();
 
     /**
+     *
+     * @param prefix
+     * @return
+     */
+    public String getLiteral(String prefix)
+    {
+        final StringBuilder literal = new StringBuilder(prefix);
+        literal.append(getName());
+        literal.append(" ");
+        for (Argument<?> arg : arguments)
+        {
+            literal.append(arg.getLiteral());
+            literal.append(" ");
+        }
+        return literal.toString();
+    }
+
+    /**
      * 
      * 
      * @return
@@ -119,6 +138,15 @@ public abstract class Command extends ConfigContainer
     public Argument<?> getArg(int i)
     {
         return arguments.get(i);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Argument<?> getLastArg()
+    {
+        return getArg(arguments.size() - 1);
     }
 
     /**

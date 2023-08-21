@@ -21,7 +21,7 @@ public class FriendCommand extends Command
 {
     //
     Argument<String> actionArg = new StringArgument("Action", "Whether to add" +
-            " or remove the friend", Arrays.asList("add", "remove"));
+            " or remove the friend", Arrays.asList("add", "remove", "del"));
     Argument<PlayerEntity> playerArg = new PlayerArgument("Player", "The " +
             "player to add/remove friend");
 

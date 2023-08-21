@@ -7,6 +7,7 @@ import com.caspian.client.api.module.Module;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.keyboard.KeyboardInputEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.util.Globals;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Collection;
@@ -21,9 +22,9 @@ import java.util.Set;
  *
  * @see Macro
  */
-public class MacroManager
+public class MacroManager implements Globals
 {
-    // The handler for handling macros
+    // For handling macros
     //
     private final Set<Macro> macros = new HashSet<>();
 
@@ -44,6 +45,11 @@ public class MacroManager
     @EventListener
     public void onKeyboardInput(KeyboardInputEvent event)
     {
+        if (mc.player == null || mc.world == null
+                || mc.currentScreen != null)
+        {
+            return;
+        }
         // module keybind impl
         for (Module module : Managers.MODULE.getModules())
         {

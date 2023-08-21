@@ -150,8 +150,8 @@ public class NoSlowModule extends ToggleModule
                 // Old NCP
                 // Managers.NETWORK.sendSequencedPacket(id ->
                 //        new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND,
-                //                new BlockHitResult(Vec3d.ZERO, Direction.UP,
-                //                        BlockPos.ORIGIN, false), id));
+                //                new BlockHitResult(mc.player.getPos(),
+                //                Direction.UP, BlockPos.ORIGIN, false), id));
             }
             if (checkScreen() && inventoryMoveConfig.getValue()
                     && MOVE_KEYBINDS != null)
