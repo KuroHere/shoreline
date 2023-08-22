@@ -57,7 +57,7 @@ public class MacroManager implements Globals
             {
                 final Macro keybind = toggle.getKeybinding();
                 if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
-                        && event.getKeycode() == keybind.keycode())
+                        && event.getKeycode() == keybind.getKeycode())
                 {
                     keybind.runMacro();
                 }
@@ -71,7 +71,7 @@ public class MacroManager implements Globals
         for (Macro macro : macros)
         {
             if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
-                    && event.getKeycode() == macro.keycode())
+                    && event.getKeycode() == macro.getKeycode())
             {
                 macro.runMacro();
             }

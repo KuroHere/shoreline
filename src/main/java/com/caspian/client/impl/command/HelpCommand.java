@@ -15,7 +15,7 @@ import com.caspian.client.util.chat.ChatUtil;
 public class HelpCommand extends Command
 {
     //
-    Argument<Command> commandArg = new CommandArgument("HelpCommand", "The " +
+    Argument<Command> commandArg = new CommandArgument("Command", "The " +
             "specified command to display info");
 
     /**
@@ -23,7 +23,7 @@ public class HelpCommand extends Command
      */
     public HelpCommand()
     {
-        super("help", "<opt:command>", "Displays command functionality");
+        super("Help", "Displays command functionality");
     }
 
     /**
@@ -35,7 +35,7 @@ public class HelpCommand extends Command
         final Command command = commandArg.parse();
         if (command != null)
         {
-            if (isModuleCommand(command))
+            if (command instanceof ModuleCommand)
             {
                 ChatUtil.clientSendMessage("module <setting> <value> - Configures the module");
                 return;
@@ -47,10 +47,14 @@ public class HelpCommand extends Command
             boolean sent = false;
             for (Command c : Managers.COMMAND.getCommands())
             {
-                if (isModuleCommand(c) && !sent)
+                ChatUtil.clientSendMessageRaw("§7[§fCommands Help§7]");
+                if (c instanceof ModuleCommand)
                 {
-                    ChatUtil.clientSendMessage("module <setting> <value> - Configures the module");
-                    sent = true;
+                    if (!sent)
+                    {
+                        ChatUtil.clientSendMessageRaw("module <setting> <value> - Configures the module");
+                        sent = true;
+                    }
                     continue;
                 }
                 ChatUtil.clientSendMessage(toHelpMessage(c));
@@ -65,13 +69,7 @@ public class HelpCommand extends Command
      */
     private String toHelpMessage(Command command)
     {
-        return String.format("%s %s - %s", command.getName(),
+        return String.format("%s %s- %s", command.getName(),
                 command.getUsage(), command.getDescription());
-    }
-
-    private boolean isModuleCommand(Command command)
-    {
-        // DO NOT LOOK AT THIS BS
-        return command.getUsage().equals("<setting> <value>");
     }
 }

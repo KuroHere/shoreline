@@ -48,6 +48,8 @@ public class CommandManager implements Globals
         register(
                 new HelpCommand(),
                 new FriendCommand(),
+                new HClipCommand(),
+                new VClipCommand(),
                 new PrefixCommand(),
                 new DrawnCommand()
         );
@@ -91,7 +93,8 @@ public class CommandManager implements Globals
                 String name = command.getName();
                 if (name.equals(args[0]))
                 {
-                    chat.append(args[0]).append(" ");
+                    chat.append(args[0]);
+                    chat.append(" ");
                     for (int i = 1; i < args.length; i++)
                     {
                         Argument<?> arg = command.getArg(i - 1);

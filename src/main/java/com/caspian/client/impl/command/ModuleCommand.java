@@ -33,8 +33,7 @@ public class ModuleCommand extends Command
      */
     public ModuleCommand(Module module)
     {
-        super(module.getName().toLowerCase(), "<setting> <value>",
-                "Configures the module");
+        super(module.getName(), "Configures the module");
         configArg.setContainer(module);
     }
 
@@ -103,7 +102,7 @@ public class ModuleCommand extends Command
             else if (config.getValue() instanceof Macro macro)
             {
                 ((Config<Macro>) config).setValue(new Macro(config.getId(),
-                        KeyboardUtil.getKeyCode(value), macro.macro()));
+                        KeyboardUtil.getKeyCode(value), macro.getRunnable()));
             }
             else if (config.getValue() instanceof String)
             {

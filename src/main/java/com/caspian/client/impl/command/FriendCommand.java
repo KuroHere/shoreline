@@ -21,8 +21,8 @@ import java.util.Arrays;
 public class FriendCommand extends Command
 {
     //
-    Argument<String> actionArg = new StringArgument("Action", "Whether to add" +
-            " or remove the friend", Arrays.asList("add", "remove", "del"));
+    Argument<String> actionArg = new StringArgument("Add/Remove", "Whether to" +
+            " add or remove the friend", Arrays.asList("Add", "remove", "del"));
     Argument<PlayerEntity> playerArg = new PlayerArgument("Player", "The " +
             "player to add/remove friend");
     Argument<Boolean> notifyArg = new BooleanArgument("Notify", "Notifies the" +
@@ -33,8 +33,7 @@ public class FriendCommand extends Command
      */
     public FriendCommand()
     {
-        super("friend", "<add/remove> <player name>", "Adds/Removes a friend " +
-                "from the player list");
+        super("Friend", "Adds/Removes a friend from the player list");
     }
 
     /**

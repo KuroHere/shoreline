@@ -28,7 +28,7 @@ public class DrawnCommand extends Command
      */
     public DrawnCommand()
     {
-        super("drawn", "<module>", "Toggles the drawn state of the module");
+        super("Drawn", "Toggles the drawn state of the module");
     }
 
     /**

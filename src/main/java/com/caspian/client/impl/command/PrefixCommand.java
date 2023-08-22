@@ -20,16 +20,15 @@ import net.minecraft.util.Formatting;
 public class PrefixCommand extends Command
 {
     //
-    Argument<String> prefixArg = new StringArgument("Prefix", "The new " +
-            "chat command prefix");
+    Argument<String> prefixArg = new StringArgument("Single-char Prefix",
+            "The new chat command prefix");
 
     /**
      *
      */
     public PrefixCommand()
     {
-        super("prefix", "<single-char prefix>", "Allows you to change the " +
-                "chat command prefix");
+        super("Prefix", "Allows you to change the chat command prefix");
     }
 
     /**
@@ -49,7 +48,7 @@ public class PrefixCommand extends Command
             int keycode = KeyboardUtil.getKeyCode(prefix);
             for (Macro macro : Managers.MACRO.getMacros())
             {
-                if (macro.keycode() == keycode)
+                if (macro.getKeycode() == keycode)
                 {
                     ChatUtil.error("Macro already bound to " + prefix + "!");
                     return;
@@ -60,7 +59,7 @@ public class PrefixCommand extends Command
                 if (module instanceof ToggleModule toggle)
                 {
                     Macro keybind = toggle.getKeybinding();
-                    if (keybind.keycode() == keycode)
+                    if (keybind.getKeycode() == keycode)
                     {
                         ChatUtil.error(module.getName() + " already bound to "
                                 + prefix + "!");

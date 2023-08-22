@@ -94,16 +94,14 @@ public class BindButton extends ConfigButton<Macro>
     {
         if (listen)
         {
-            final Macro val = config.getValue();
             // unbind
             if (keyCode == GLFW.GLFW_KEY_ESCAPE || keyCode == GLFW.GLFW_KEY_BACKSPACE)
             {
-                ((MacroConfig) config).setValue(GLFW.GLFW_KEY_UNKNOWN,
-                        val.macro());
+                ((MacroConfig) config).setValue(GLFW.GLFW_KEY_UNKNOWN);
             }
             else
             {
-                ((MacroConfig) config).setValue(keyCode, val.macro());
+                ((MacroConfig) config).setValue(keyCode);
             }
             listen = false;
         }

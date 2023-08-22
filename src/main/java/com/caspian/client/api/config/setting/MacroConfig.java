@@ -17,21 +17,20 @@ public class MacroConfig extends Config<Macro>
      * instantiating new {@link Macro} based on method parameters.
      *
      * @param keycode The macro keycode
-     * @param macro   The macro runnable
      */
-    public void setValue(int keycode, Runnable macro)
+    public void setValue(int keycode)
     {
-        setValue(new Macro(getId(), keycode, macro));
+        getValue().setKeycode(keycode);
     }
 
-    public Runnable getMacro()
+    public Runnable getRunnable()
     {
-        return getValue().macro();
+        return getValue().getRunnable();
     }
 
     public int getKeycode()
     {
-        return getValue().keycode();
+        return getValue().getKeycode();
     }
 
     public String getKeyName()
@@ -53,7 +52,7 @@ public class MacroConfig extends Config<Macro>
         if (jsonObj.has("value"))
         {
             JsonElement element = jsonObj.get("value");
-            setValue(element.getAsInt(), getMacro());
+            setValue(element.getAsInt());
         }
     }
 }

@@ -42,7 +42,7 @@ public abstract class Argument<T> extends Config<T>
     public Argument(String name, String desc)
     {
         // LMAOOOOOOOOO WTF IS THIS
-        super(name, desc, (T) new Object());
+        super(name.toLowerCase(), desc, (T) new Object());
         this.literal = StringUtil.EMPTY_STRING;
     }
 

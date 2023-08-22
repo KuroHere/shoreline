@@ -19,9 +19,6 @@ import java.util.List;
  */
 public abstract class Command extends ConfigContainer implements Globals
 {
-    // The unique command identifier, used to identify the command in the chat.
-    // Ex: help, prefix, openfolder, etc.
-    private final String usage;
     //
     private final String desc;
     // The command arguments, For reference: If the command line (chat) is
@@ -33,13 +30,11 @@ public abstract class Command extends ConfigContainer implements Globals
      *
      *
      * @param name
-     * @param usage
      * @param desc
      */
-    public Command(String name, String usage, String desc)
+    public Command(String name, String desc)
     {
-        super(name);
-        this.usage = usage;
+        super(name.toLowerCase());
         this.desc = desc;
     }
 
@@ -113,13 +108,21 @@ public abstract class Command extends ConfigContainer implements Globals
     }
 
     /**
-     * 
+     * Returns the unique command identifier, used to identify the command in
+     * the chat. Ex: help, prefix, openfolder, etc.
      * 
      * @return
      */
     public String getUsage()
     {
-        return usage;
+        StringBuilder usage = new StringBuilder();
+        for (Argument<?> arg : arguments)
+        {
+            usage.append("<");
+            usage.append(arg.getName());
+            usage.append("> ");
+        }
+        return usage.toString();
     }
 
     /**

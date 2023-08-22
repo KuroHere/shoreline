@@ -174,7 +174,7 @@ public class ToggleModule extends Module implements Hideable
     public void keybind(int keycode)
     {
         keybindingConfig.setContainer(this);
-        ((MacroConfig) keybindingConfig).setValue(keycode, () -> toggle());
+        ((MacroConfig) keybindingConfig).setValue(keycode);
     }
 
     /**

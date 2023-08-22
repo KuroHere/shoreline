@@ -5,15 +5,35 @@ import org.lwjgl.glfw.GLFW;
 /**
  *
  *
- * @param macro   Runnable macro which represents the functionality of the keybind.
- *                This code block will run when the key is pressed.
- * @param keycode The GLFW keycode which represents the macro keybind.
  *
  * @author linus
  * @since 1.0
+ *
+ * @see com.caspian.client.api.manager.MacroManager
  */
-public record Macro(String name, int keycode, Runnable macro)
+public class Macro
 {
+    //
+    private final String name;
+    // Runnable macro which represents the functionality of the keybind. This
+    // code block will run when the key is pressed.
+    private final Runnable macro;
+    // The GLFW keycode which represents the macro keybind.
+    private int keycode;
+
+    /**
+     *
+     * @param name
+     * @param keycode
+     * @param macro
+     */
+    public Macro(String name, int keycode, Runnable macro)
+    {
+        this.name = name;
+        this.keycode = keycode;
+        this.macro = macro;
+    }
+
     /**
      *
      *
@@ -25,14 +45,31 @@ public record Macro(String name, int keycode, Runnable macro)
     }
 
     /**
+     *
+     * @return
+     */
+    public Runnable getRunnable()
+    {
+        return macro;
+    }
+
+    /**
+     *
+     * @param keycode
+     */
+    public void setKeycode(int keycode)
+    {
+        this.keycode = keycode;
+    }
+
+    /**
      * Returns the macro keybind represented as {@link GLFW} keycode integer
      * between <b>0 and 348</b>.
      *
      * @return The macro keycode
      * @see #keycode
      */
-    @Override
-    public int keycode()
+    public int getKeycode()
     {
         return keycode;
     }

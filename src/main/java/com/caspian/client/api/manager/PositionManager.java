@@ -47,24 +47,33 @@ public class PositionManager implements Globals
      */
     public void setPosition(double x, double y, double z)
     {
+        if (mc.player.isRiding())
+        {
+            mc.player.getVehicle().setPosition(x, y, z);
+            return;
+        }
         Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                 x, y, z, isOnGround()));
-        setPositionClient(x, y, z);
+        mc.player.setPosition(x, y, z);
     }
 
     /**
      *
-     *
      * @param x
-     * @param y
      * @param z
      */
-    public void setPositionClient(double x, double y, double z)
+    public void setPositionXZ(double x, double z)
     {
-        if (mc.player != null && mc.world != null)
-        {
-            mc.player.setPosition(x, y, z);
-        }
+        setPosition(x, y, z);
+    }
+
+    /**
+     *
+     * @param y
+     */
+    public void setPositionY(double y)
+    {
+        setPosition(x, y, z);
     }
 
     /**
