@@ -7,6 +7,7 @@ import com.caspian.client.api.command.arg.arguments.StringArgument;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.macro.Macro;
 import com.caspian.client.api.module.Module;
+import com.caspian.client.util.KeyboardUtil;
 import com.caspian.client.util.chat.ChatUtil;
 import org.lwjgl.glfw.GLFW;
 
@@ -101,30 +102,13 @@ public class ModuleCommand extends Command
             }
             else if (config.getValue() instanceof Macro macro)
             {
-                ((Config<Macro>) config).setValue(new Macro(config.getId() + "-macro",
-                        getKeyCode(value), macro.macro()));
+                ((Config<Macro>) config).setValue(new Macro(config.getId(),
+                        KeyboardUtil.getKeyCode(value), macro.macro()));
             }
             else if (config.getValue() instanceof String)
             {
                 ((Config<String>) config).setValue(value);
             }
         }
-    }
-
-    /**
-     *
-     * @param key
-     * @return
-     */
-    private int getKeyCode(String key)
-    {
-        for (int i = 39; i < 97; i++)
-        {
-            if (key.equalsIgnoreCase(GLFW.glfwGetKeyName(GLFW.GLFW_KEY_UNKNOWN, i)))
-            {
-                return i;
-            }
-        }
-        return -1;
     }
 }

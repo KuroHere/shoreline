@@ -51,13 +51,11 @@ public class RotationManager implements Globals
     {
         if (mc.player != null && mc.world != null)
         {
-            if (event.getPacket() instanceof PlayerMoveC2SPacket packet)
+            if (event.getPacket() instanceof PlayerMoveC2SPacket packet
+                    && packet.changesLook())
             {
-                if (packet.changesLook())
-                {
-                    yaw = packet.getYaw(yaw);
-                    pitch = packet.getPitch(pitch);
-                }
+                yaw = packet.getYaw(yaw);
+                pitch = packet.getPitch(pitch);
             }
         }
     }

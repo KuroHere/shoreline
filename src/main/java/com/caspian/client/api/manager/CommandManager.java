@@ -11,8 +11,11 @@ import com.caspian.client.impl.event.chat.ChatInputEvent;
 import com.caspian.client.impl.event.chat.ChatKeyInputEvent;
 import com.caspian.client.impl.event.chat.ChatMessageEvent;
 import com.caspian.client.impl.event.chat.ChatRenderEvent;
+import com.caspian.client.impl.event.keyboard.KeyboardInputEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
+import com.caspian.client.util.chat.ChatUtil;
+import net.minecraft.client.gui.screen.ChatScreen;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -34,6 +37,7 @@ public class CommandManager implements Globals
     private StringBuilder chat = new StringBuilder();
     // Command prefix, used to identify a command in the chat
     private String prefix = ".";
+    private int prefixKey = GLFW.GLFW_KEY_PERIOD;
 
     /**
      * Registers commands to the CommandManager
@@ -91,8 +95,13 @@ public class CommandManager implements Globals
                     for (int i = 1; i < args.length; i++)
                     {
                         Argument<?> arg = command.getArg(i - 1);
+                        if (arg == null)
+                        {
+                            // ChatUtil.error("Too many arguments!");
+                            break;
+                        }
                         arg.setLiteral(args[i]);
-                        if (i + 1 < args.length)
+                        if (i < args.length - 1)
                         {
                             chat.append(arg.getLiteral());
                         }
@@ -154,8 +163,28 @@ public class CommandManager implements Globals
      * @param event
      */
     @EventListener
+    public void onKeyboardInput(KeyboardInputEvent event)
+    {
+        if (mc.player == null || mc.world == null
+                || mc.currentScreen instanceof ChatScreen)
+        {
+            return;
+        }
+        if (event.getKeycode() == prefixKey)
+        {
+            event.cancel();
+            mc.setScreen(new ChatScreen(""));
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
     public void onChatKeyInput(ChatKeyInputEvent event)
     {
+        // autocomplete
         if (event.getKeycode() == GLFW.GLFW_KEY_TAB)
         {
             String msg = event.getChatText().trim();
@@ -169,14 +198,19 @@ public class CommandManager implements Globals
                     String name = command.getName();
                     if (args.length > 1 && name.equals(args[0]))
                     {
-                        Argument<?> tail = command.getLastArg();
+                        Argument<?> tail = command.getArg(args.length - 2);
+                        if (tail == null || tail.getSuggestions().isEmpty())
+                        {
+                            ChatUtil.error("Unable to autocomplete!");
+                            break;
+                        }
                         tail.completeLiteral();
                         event.setChatText(command.getLiteral(prefix));
                         break;
                     }
                     else if (name.startsWith(args[0]))
                     {
-                        event.setChatText(prefix + name);
+                        event.setChatText(prefix + name + " ");
                         break;
                     }
                 }
@@ -232,9 +266,11 @@ public class CommandManager implements Globals
     /**
      *
      * @param prefix
+     * @param prefixKey
      */
-    public void setPrefix(String prefix)
+    public void setPrefix(String prefix, int prefixKey)
     {
         this.prefix = prefix;
+        this.prefixKey = prefixKey;
     }
 }

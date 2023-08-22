@@ -4,7 +4,6 @@ import com.caspian.client.api.config.Config;
 import com.caspian.client.api.macro.Macro;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
 public class MacroConfig extends Config<Macro>
 {
@@ -33,6 +32,11 @@ public class MacroConfig extends Config<Macro>
     public int getKeycode()
     {
         return getValue().keycode();
+    }
+
+    public String getKeyName()
+    {
+        return getValue().getKeyName();
     }
 
     @Override

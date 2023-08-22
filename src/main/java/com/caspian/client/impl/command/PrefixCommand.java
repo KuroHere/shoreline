@@ -3,7 +3,11 @@ package com.caspian.client.impl.command;
 import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
 import com.caspian.client.api.command.arg.arguments.StringArgument;
+import com.caspian.client.api.macro.Macro;
+import com.caspian.client.api.module.Module;
+import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.init.Managers;
+import com.caspian.client.util.KeyboardUtil;
 import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.util.Formatting;
 
@@ -37,9 +41,36 @@ public class PrefixCommand extends Command
         final String prefix = prefixArg.parse();
         if (prefix != null)
         {
+            if (prefix.length() > 1)
+            {
+                ChatUtil.error("Prefix can only be one character!");
+                return;
+            }
+            int keycode = KeyboardUtil.getKeyCode(prefix);
+            for (Macro macro : Managers.MACRO.getMacros())
+            {
+                if (macro.keycode() == keycode)
+                {
+                    ChatUtil.error("Macro already bound to " + prefix + "!");
+                    return;
+                }
+            }
+            for (Module module : Managers.MODULE.getModules())
+            {
+                if (module instanceof ToggleModule toggle)
+                {
+                    Macro keybind = toggle.getKeybinding();
+                    if (keybind.keycode() == keycode)
+                    {
+                        ChatUtil.error(module.getName() + " already bound to "
+                                + prefix + "!");
+                        return;
+                    }
+                }
+            }
+            Managers.COMMAND.setPrefix(prefix, keycode);
             ChatUtil.clientSendMessage("Client command prefix changed to " +
                     Formatting.AQUA + prefix + Formatting.RESET + "!");
-            Managers.COMMAND.setPrefix(prefix);
         }
     }
 }

@@ -2,6 +2,7 @@ package com.caspian.client.impl.command;
 
 import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
+import com.caspian.client.api.command.arg.arguments.BooleanArgument;
 import com.caspian.client.api.command.arg.arguments.PlayerArgument;
 import com.caspian.client.api.command.arg.arguments.StringArgument;
 import com.caspian.client.init.Managers;
@@ -24,6 +25,8 @@ public class FriendCommand extends Command
             " or remove the friend", Arrays.asList("add", "remove", "del"));
     Argument<PlayerEntity> playerArg = new PlayerArgument("Player", "The " +
             "player to add/remove friend");
+    Argument<Boolean> notifyArg = new BooleanArgument("Notify", "Notifies the" +
+            " friended player through chat message");
 
     /**
      *
@@ -44,6 +47,7 @@ public class FriendCommand extends Command
         if (player != null)
         {
             final String action = actionArg.parse();
+            final Boolean notify = notifyArg.parse();
             if (action != null)
             {
                 if (action.equalsIgnoreCase("add"))
@@ -51,6 +55,11 @@ public class FriendCommand extends Command
                     ChatUtil.clientSendMessage("Added friend with name " +
                             Formatting.AQUA + player.getEntityName() + Formatting.RESET + "!");
                     Managers.SOCIAL.addFriend(player.getUuid());
+                    if (notify)
+                    {
+                        ChatUtil.serverSendMessage(String.format("/w %s Friended by %s!",
+                                player.getEntityName(), mc.player.getEntityName()));
+                    }
                 }
                 else if (action.equalsIgnoreCase("remove")
                         || action.equalsIgnoreCase("del"))
@@ -65,6 +74,11 @@ public class FriendCommand extends Command
                 ChatUtil.clientSendMessage("Added friend with name " +
                         Formatting.AQUA + player.getEntityName() + Formatting.RESET + "!");
                 Managers.SOCIAL.addFriend(player.getUuid());
+                if (notify)
+                {
+                    ChatUtil.serverSendMessage(String.format("/w %s Friended by %s!",
+                            player.getEntityName(), mc.player.getEntityName()));
+                }
             }
         }
     }

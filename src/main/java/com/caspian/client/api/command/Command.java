@@ -4,7 +4,7 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.command.arg.Argument;
 import com.caspian.client.api.command.arg.ArgumentFactory;
 import com.caspian.client.api.config.ConfigContainer;
-import com.caspian.client.init.Managers;
+import com.caspian.client.util.Globals;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.List;
  * @author linus
  * @since 1.0
  */
-public abstract class Command extends ConfigContainer
+public abstract class Command extends ConfigContainer implements Globals
 {
     // The unique command identifier, used to identify the command in the chat.
     // Ex: help, prefix, openfolder, etc.
@@ -102,8 +102,12 @@ public abstract class Command extends ConfigContainer
         literal.append(" ");
         for (Argument<?> arg : arguments)
         {
-            literal.append(arg.getLiteral());
-            literal.append(" ");
+            String l = arg.getLiteral().trim();
+            literal.append(l);
+            if (!l.isBlank())
+            {
+                literal.append(" ");
+            }
         }
         return literal.toString();
     }
@@ -137,16 +141,11 @@ public abstract class Command extends ConfigContainer
      */
     public Argument<?> getArg(int i)
     {
-        return arguments.get(i);
-    }
-
-    /**
-     *
-     * @return
-     */
-    public Argument<?> getLastArg()
-    {
-        return getArg(arguments.size() - 1);
+        if (i >= 0 && i < arguments.size())
+        {
+            return arguments.get(i);
+        }
+        return null;
     }
 
     /**

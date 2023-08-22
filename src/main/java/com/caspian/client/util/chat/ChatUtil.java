@@ -12,6 +12,9 @@ import net.minecraft.util.Formatting;
  */
 public class ChatUtil implements Globals
 {
+    //
+    private static final String PREFIX = "§7[§fCaspian§7] §f";
+
     /**
      * Sends a message in the {@link net.minecraft.client.gui.hud.ChatHud}
      * which is not visible to others
@@ -20,7 +23,7 @@ public class ChatUtil implements Globals
      */
     public static void clientSendMessage(String message)
     {
-        mc.inGameHud.getChatHud().addMessage(Text.literal(message));
+        mc.inGameHud.getChatHud().addMessage(Text.of(PREFIX + message), null, null);
     }
 
     /**
@@ -33,7 +36,7 @@ public class ChatUtil implements Globals
     {
         if (mc.player != null)
         {
-            mc.player.networkHandler.sendChatMessage(message);
+            mc.player.networkHandler.sendChatMessage(PREFIX + message);
         }
     }
 

@@ -7,6 +7,7 @@ import com.caspian.client.impl.event.chat.ChatInputEvent;
 import com.caspian.client.util.string.StringUtil;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -26,6 +27,8 @@ public abstract class Argument<T> extends Config<T>
     // The literal string input of the user which will be updated every key
     // press. If the input is null, the argument is left blank.
     private String literal;
+    //
+
 
     /**
      * Initializes the config with a default value. This constructor should

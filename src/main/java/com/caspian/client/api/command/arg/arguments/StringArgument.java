@@ -4,6 +4,7 @@ import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
 import com.caspian.client.util.chat.ChatUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -60,6 +61,10 @@ public class StringArgument extends Argument<String>
         return null;
     }
 
+    //
+    private static final ArrayList<String> EMPTY_SUGGESTIONS =
+            new ArrayList<>();
+
     /**
      *
      *
@@ -68,6 +73,6 @@ public class StringArgument extends Argument<String>
     @Override
     public Collection<String> getSuggestions()
     {
-        return allowedValues;
+        return allowedValues != null ? allowedValues : EMPTY_SUGGESTIONS;
     }
 }

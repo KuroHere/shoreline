@@ -4,7 +4,7 @@ public interface Hideable
 {
     /**
      *
-     * @param drawn
+     * @param hidden
      */
     void setHidden(boolean hidden);
 

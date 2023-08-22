@@ -35,12 +35,24 @@ public class HelpCommand extends Command
         final Command command = commandArg.parse();
         if (command != null)
         {
+            if (isModuleCommand(command))
+            {
+                ChatUtil.clientSendMessage("module <setting> <value> - Configures the module");
+                return;
+            }
             ChatUtil.clientSendMessage(toHelpMessage(command));
         }
         else
         {
+            boolean sent = false;
             for (Command c : Managers.COMMAND.getCommands())
             {
+                if (isModuleCommand(c) && !sent)
+                {
+                    ChatUtil.clientSendMessage("module <setting> <value> - Configures the module");
+                    sent = true;
+                    continue;
+                }
                 ChatUtil.clientSendMessage(toHelpMessage(c));
             }
         }
@@ -55,5 +67,11 @@ public class HelpCommand extends Command
     {
         return String.format("%s %s - %s", command.getName(),
                 command.getUsage(), command.getDescription());
+    }
+
+    private boolean isModuleCommand(Command command)
+    {
+        // DO NOT LOOK AT THIS BS
+        return command.getUsage().equals("<setting> <value>");
     }
 }
