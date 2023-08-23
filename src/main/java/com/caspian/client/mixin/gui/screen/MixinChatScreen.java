@@ -1,10 +1,10 @@
 package com.caspian.client.mixin.gui.screen;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.impl.event.chat.ChatInputEvent;
-import com.caspian.client.impl.event.chat.ChatKeyInputEvent;
-import com.caspian.client.impl.event.chat.ChatMessageEvent;
-import com.caspian.client.impl.event.chat.ChatRenderEvent;
+import com.caspian.client.impl.event.gui.chat.ChatInputEvent;
+import com.caspian.client.impl.event.gui.chat.ChatKeyInputEvent;
+import com.caspian.client.impl.event.gui.chat.ChatMessageEvent;
+import com.caspian.client.impl.event.gui.chat.ChatRenderEvent;
 import com.caspian.client.mixin.accessor.AccessorTextFieldWidget;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;

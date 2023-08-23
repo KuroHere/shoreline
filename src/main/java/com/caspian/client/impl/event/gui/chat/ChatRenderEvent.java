@@ -1,4 +1,4 @@
-package com.caspian.client.impl.event.chat;
+package com.caspian.client.impl.event.gui.chat;
 
 import com.caspian.client.api.event.Cancelable;
 import com.caspian.client.api.event.Event;

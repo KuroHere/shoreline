@@ -1,13 +1,16 @@
 package com.caspian.client.mixin.gui.hud;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.impl.event.render.RenderOverlayEvent;
+import com.caspian.client.impl.event.gui.hud.RenderOverlayEvent;
 import com.caspian.client.util.Globals;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -24,6 +27,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InGameHud.class)
 public class MixinInGameHud implements Globals
 {
+    @Shadow
+    @Final
+    private static Identifier PUMPKIN_BLUR;
+    //
+    @Shadow
+    @Final
+    private static Identifier POWDER_SNOW_OUTLINE;
+
     /**
      *
      *
@@ -57,6 +68,59 @@ public class MixinInGameHud implements Globals
         if (renderOverlayEvent.isCanceled())
         {
             ci.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param matrices
+     * @param scale
+     * @param ci
+     */
+    @Inject(method = "renderSpyglassOverlay", at = @At(value = "HEAD"),
+            cancellable = true)
+    private void hookRenderSpyglassOverlay(MatrixStack matrices, float scale,
+                                           CallbackInfo ci)
+    {
+        RenderOverlayEvent.Spyglass renderOverlayEvent =
+                new RenderOverlayEvent.Spyglass(matrices);
+        Caspian.EVENT_HANDLER.dispatch(renderOverlayEvent);
+        if (renderOverlayEvent.isCanceled())
+        {
+            ci.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param matrices
+     * @param texture
+     * @param opacity
+     * @param ci
+     */
+    @Inject(method = "renderOverlay", at = @At(value = "HEAD"), cancellable = true)
+    private void hookRenderOverlay(MatrixStack matrices, Identifier texture,
+                                   float opacity, CallbackInfo ci)
+    {
+        if (texture.getPath().equals(PUMPKIN_BLUR.getPath()))
+        {
+            RenderOverlayEvent.Pumpkin renderOverlayEvent =
+                    new RenderOverlayEvent.Pumpkin(matrices);
+            Caspian.EVENT_HANDLER.dispatch(renderOverlayEvent);
+            if (renderOverlayEvent.isCanceled())
+            {
+                ci.cancel();
+            }
+        }
+        else if (texture.getPath().equals(POWDER_SNOW_OUTLINE.getPath()))
+        {
+            RenderOverlayEvent.Frostbite renderOverlayEvent =
+                    new RenderOverlayEvent.Frostbite(matrices);
+            Caspian.EVENT_HANDLER.dispatch(renderOverlayEvent);
+            if (renderOverlayEvent.isCanceled())
+            {
+                ci.cancel();
+            }
         }
     }
 

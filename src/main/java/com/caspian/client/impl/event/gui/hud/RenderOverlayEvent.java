@@ -1,4 +1,4 @@
-package com.caspian.client.impl.event.render;
+package com.caspian.client.impl.event.gui.hud;
 
 import com.caspian.client.api.event.Cancelable;
 import com.caspian.client.api.event.Event;
@@ -121,6 +121,90 @@ public class RenderOverlayEvent extends Event
         public int getY()
         {
             return y;
+        }
+    }
+
+    @Cancelable
+    public static class Fire extends RenderOverlayEvent
+    {
+        /**
+         * @param matrices
+         */
+        public Fire(MatrixStack matrices)
+        {
+            super(matrices);
+        }
+    }
+
+    @Cancelable
+    public static class Water extends RenderOverlayEvent
+    {
+        /**
+         * @param matrices
+         */
+        public Water(MatrixStack matrices)
+        {
+            super(matrices);
+        }
+    }
+
+    @Cancelable
+    public static class Block extends RenderOverlayEvent
+    {
+        /**
+         * @param matrices
+         */
+        public Block(MatrixStack matrices)
+        {
+            super(matrices);
+        }
+    }
+
+    @Cancelable
+    public static class Spyglass extends RenderOverlayEvent
+    {
+        /**
+         * @param matrices
+         */
+        public Spyglass(MatrixStack matrices)
+        {
+            super(matrices);
+        }
+    }
+
+    @Cancelable
+    public static class Pumpkin extends RenderOverlayEvent
+    {
+        /**
+         * @param matrices
+         */
+        public Pumpkin(MatrixStack matrices)
+        {
+            super(matrices);
+        }
+    }
+
+    @Cancelable
+    public static class BossBar extends RenderOverlayEvent
+    {
+        /**
+         * @param matrices
+         */
+        public BossBar(MatrixStack matrices)
+        {
+            super(matrices);
+        }
+    }
+
+    @Cancelable
+    public static class Frostbite extends RenderOverlayEvent
+    {
+        /**
+         * @param matrices
+         */
+        public Frostbite(MatrixStack matrices)
+        {
+            super(matrices);
         }
     }
 }

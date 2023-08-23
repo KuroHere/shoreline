@@ -46,4 +46,16 @@ public class ParticleEvent extends Event
     {
         return particle.getType();
     }
+
+    @Cancelable
+    public static class Emitter extends ParticleEvent
+    {
+        /**
+         * @param particle
+         */
+        public Emitter(ParticleEffect particle)
+        {
+            super(particle);
+        }
+    }
 }

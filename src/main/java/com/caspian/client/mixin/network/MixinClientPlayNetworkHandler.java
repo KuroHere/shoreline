@@ -1,7 +1,7 @@
 package com.caspian.client.mixin.network;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.impl.event.chat.ChatMessageEvent;
+import com.caspian.client.impl.event.gui.chat.ChatMessageEvent;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

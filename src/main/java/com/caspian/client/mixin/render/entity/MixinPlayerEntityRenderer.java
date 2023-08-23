@@ -1,7 +1,7 @@
 package com.caspian.client.mixin.render.entity;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.impl.event.render.RenderPlayerEvent;
+import com.caspian.client.impl.event.render.entity.RenderPlayerEvent;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;

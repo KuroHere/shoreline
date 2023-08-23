@@ -26,7 +26,7 @@ public class NoWeatherModule extends ToggleModule
     Config<Weather> weatherConfig = new EnumConfig<>("Weather", "The world " +
             "weather", Weather.CLEAR, Weather.values());
     Config<Integer> dayTimeConfig = new NumberConfig<>("Time", "The world " +
-            "time of day", 0, 12000, 24000);
+            "time of day", 0, 6000, 24000);
     //
     private Weather weather;
 

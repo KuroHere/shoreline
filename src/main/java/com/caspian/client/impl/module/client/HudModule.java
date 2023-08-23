@@ -10,7 +10,7 @@ import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.api.render.anim.Animation;
-import com.caspian.client.impl.event.render.RenderOverlayEvent;
+import com.caspian.client.impl.event.gui.hud.RenderOverlayEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.string.EnumFormatter;
@@ -52,7 +52,7 @@ public class HudModule extends ToggleModule
             "Renders the Minecraft potion Hud", VanillaHud.HIDE,
             VanillaHud.values());
     Config<VanillaHud> itemNameConfig = new EnumConfig<>("ItemName",
-            "Renders the Minecraft item name display", VanillaHud.MOVE,
+            "Renders the Minecraft item name display", VanillaHud.HIDE,
             VanillaHud.values());
     Config<Boolean> potionEffectsConfig = new BooleanConfig("PotionEffects",
             "Displays active potion effects", true);

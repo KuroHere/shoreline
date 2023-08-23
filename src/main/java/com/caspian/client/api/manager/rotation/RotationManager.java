@@ -2,11 +2,9 @@ package com.caspian.client.api.manager.rotation;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.listener.EventListener;
-import com.caspian.client.api.manager.rotation.RotationPriority;
-import com.caspian.client.api.manager.rotation.RotationRequest;
 import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.impl.event.network.PacketEvent;
-import com.caspian.client.impl.event.render.RenderPlayerEvent;
+import com.caspian.client.impl.event.render.entity.RenderPlayerEvent;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.Globals;
 import com.caspian.client.util.math.timer.TickTimer;
