@@ -2,6 +2,7 @@ package com.caspian.client.mixin.entity;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.entity.VelocityMultiplierEvent;
+import com.caspian.client.impl.event.entity.player.PushEntityEvent;
 import com.caspian.client.util.Globals;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -9,7 +10,9 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  *
@@ -45,5 +48,21 @@ public abstract class MixinEntity implements Globals
             return Blocks.DIRT;
         }
         return instance.getBlock();
+    }
+
+    /**
+     *
+     * @param entity
+     * @param ci
+     */
+    @Inject(method = "pushAwayFrom", at = @At(value = "HEAD"), cancellable = true)
+    private void hookPushAwayFrom(Entity entity, CallbackInfo ci)
+    {
+        PushEntityEvent pushEntityEvent = new PushEntityEvent();
+        Caspian.EVENT_HANDLER.dispatch(pushEntityEvent);
+        if (pushEntityEvent.isCanceled())
+        {
+            ci.cancel();
+        }
     }
 }

@@ -56,10 +56,14 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
     public Collection<String> getSuggestions()
     {
         Collection<String> playerNames = new ArrayList<>();
-        if (mc.world != null)
+        if (mc.player != null && mc.world != null)
         {
             for (PlayerEntity player : mc.world.getPlayers())
             {
+                if (player == mc.player)
+                {
+                    continue;
+                }
                 playerNames.add(player.getEntityName().toLowerCase());
             }
         }

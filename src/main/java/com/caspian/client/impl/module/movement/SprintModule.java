@@ -55,8 +55,12 @@ public class SprintModule extends ToggleModule
             if (!Managers.POSITION.isSprinting()
                     && !Managers.POSITION.isSneaking()
                     && MovementUtil.isInputtingMovement()
-                    && mc.player.getHungerManager().getFoodLevel() > 6.0F
-                    && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS))
+                    && !mc.player.isRiding()
+                    && !mc.player.isTouchingWater()
+                    && !mc.player.isInLava()
+                    && !mc.player.isHoldingOntoLadder()
+                    && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
+                    && mc.player.getHungerManager().getFoodLevel() > 6.0F)
             {
                 switch (modeConfig.getValue())
                 {
@@ -85,8 +89,12 @@ public class SprintModule extends ToggleModule
     {
         if (!Managers.POSITION.isSneaking()
                 && MovementUtil.isInputtingMovement()
-                && mc.player.getHungerManager().getFoodLevel() > 6.0F
+                && !mc.player.isRiding()
+                && !mc.player.isTouchingWater()
+                && !mc.player.isInLava()
+                && !mc.player.isHoldingOntoLadder()
                 && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
+                && mc.player.getHungerManager().getFoodLevel() > 6.0F
                 && modeConfig.getValue() == SprintMode.RAGE)
         {
             event.cancel();

@@ -11,6 +11,8 @@ import com.caspian.client.util.world.FakePlayerEntity;
  *
  * @author linus
  * @since 1.0
+ *
+ * @see FakePlayerEntity
  */
 public class FakePlayerModule extends ToggleModule
 {
@@ -23,7 +25,7 @@ public class FakePlayerModule extends ToggleModule
     public FakePlayerModule()
     {
         super("FakePlayer", "Spawns an indestructible client-side player",
-                ModuleCategory.MOVEMENT);
+                ModuleCategory.MISCELLANEOUS);
     }
 
     /**

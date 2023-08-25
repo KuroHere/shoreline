@@ -49,8 +49,7 @@ public class NoSlowModule extends ToggleModule
             "the player to look while in inventories or screens by using the " +
             "arrow keys", false);
     Config<Boolean> itemsConfig = new BooleanConfig("Items", "Removes " +
-            "the slowdown effect caused by using items",
-            true);
+            "the slowdown effect caused by using items", true);
     Config<Boolean> shieldsConfig = new BooleanConfig("Shields", "Removes the" +
             " slowdown effect caused by shields", true);
     Config<Boolean> websConfig = new BooleanConfig("Webs", "Removes the " +
@@ -276,24 +275,22 @@ public class NoSlowModule extends ToggleModule
                             Managers.INVENTORY.getServerSlot()));
                 }
             }
-            else if (event.getPacket() instanceof ClickSlotC2SPacket)
+            else if (event.getPacket() instanceof ClickSlotC2SPacket
+                    && strictConfig.getValue())
             {
-                if (strictConfig.getValue())
+                if (mc.player.isUsingItem())
                 {
-                    if (mc.player.isUsingItem())
-                    {
-                        mc.player.stopUsingItem();
-                    }
-                    if (sneaking || Managers.POSITION.isSneaking())
-                    {
-                        Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                                ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-                    }
-                    if (Managers.POSITION.isSprinting())
-                    {
-                        Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                                ClientCommandC2SPacket.Mode.STOP_SPRINTING));
-                    }
+                    mc.player.stopUsingItem();
+                }
+                if (sneaking || Managers.POSITION.isSneaking())
+                {
+                    Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                            ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+                }
+                if (Managers.POSITION.isSprinting())
+                {
+                    Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                            ClientCommandC2SPacket.Mode.STOP_SPRINTING));
                 }
             }
         }

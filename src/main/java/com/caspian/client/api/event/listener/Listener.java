@@ -5,15 +5,19 @@ import com.caspian.client.api.Invoker;
 import com.caspian.client.api.event.Event;
 import com.caspian.client.api.event.handler.EventHandler;
 
-import java.lang.invoke.*;
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link Event} Listener that creates an {@link Invoker} and runs {@link #invoke(Event)}
- * when the event is dispatched by the {@link EventHandler}.
+ * {@link Event} Listener that creates an {@link Invoker} and runs
+ * {@link #invokeSubscriber(Event)} when the event is dispatched by
+ * the {@link EventHandler}.
  *
  * <p>The invoker is created using {@link LambdaMetafactory} which is nearly
  * as fast as direct access; This method of invocation allows for blazing
@@ -104,12 +108,17 @@ public class Listener implements Comparable<Listener>
      *
      *
      * @param event
+     * @throws NullPointerException
      *
      * @see Invoker#invoke(Object)
      */
-    public void invoke(Event event)
+    public void invokeSubscriber(Event event)
     {
-        invoker.invoke(event);
+        if (event != null)
+        {
+            invoker.invoke(event);
+        }
+        // throw new NullPointerException("Failed to invoke subscriber!");
     }
 
     /**

@@ -15,11 +15,13 @@ import com.caspian.client.impl.event.render.HurtCamEvent;
 import com.caspian.client.impl.event.render.RenderFloatingItemEvent;
 import com.caspian.client.impl.event.render.RenderNauseaEvent;
 import com.caspian.client.impl.event.render.block.RenderTileEntityEvent;
+import com.caspian.client.impl.event.render.entity.RenderArmorEvent;
 import com.caspian.client.impl.event.render.entity.RenderItemEvent;
 import com.caspian.client.impl.event.render.entity.RenderWitherSkullEvent;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
 
@@ -111,6 +113,19 @@ public class NoRenderModule extends ToggleModule
     public void onHurtCam(HurtCamEvent event)
     {
         if (hurtCamConfig.getValue())
+        {
+            event.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onRenderArmor(RenderArmorEvent event)
+    {
+        if (armorConfig.getValue() && event.getEntity() instanceof PlayerEntity)
         {
             event.cancel();
         }

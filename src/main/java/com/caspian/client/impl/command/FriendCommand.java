@@ -54,7 +54,7 @@ public class FriendCommand extends Command
                     ChatUtil.clientSendMessage("Added friend with name " +
                             Formatting.AQUA + player.getEntityName() + Formatting.RESET + "!");
                     Managers.SOCIAL.addFriend(player.getUuid());
-                    if (notify)
+                    if (notify != null && notify)
                     {
                         ChatUtil.serverSendMessage(String.format("/w %s Friended by %s!",
                                 player.getEntityName(), mc.player.getEntityName()));
@@ -73,7 +73,7 @@ public class FriendCommand extends Command
                 ChatUtil.clientSendMessage("Added friend with name " +
                         Formatting.AQUA + player.getEntityName() + Formatting.RESET + "!");
                 Managers.SOCIAL.addFriend(player.getUuid());
-                if (notify)
+                if (notify != null && notify)
                 {
                     ChatUtil.serverSendMessage(String.format("/w %s Friended by %s!",
                             player.getEntityName(), mc.player.getEntityName()));

@@ -8,7 +8,9 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.impl.event.config.ConfigUpdateEvent;
 import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
+import com.caspian.client.impl.event.gui.click.ToggleGuiEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
@@ -48,6 +50,8 @@ public class SpeedModule extends ToggleModule
     //
     private double speed;
     private double distance;
+    //
+    private boolean prevTimer;
 
     /**
      *
@@ -60,11 +64,43 @@ public class SpeedModule extends ToggleModule
     /**
      *
      *
+     * @return
+     */
+    @Override
+    public String getMetaData()
+    {
+        return EnumFormatter.formatEnum(speedModeConfig.getValue());
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onEnable()
+    {
+        prevTimer = Modules.TIMER.isEnabled();
+        if (timerConfig.getValue() && !prevTimer)
+        {
+            Modules.TIMER.enable();
+        }
+    }
+
+    /**
+     *
+     *
      */
     @Override
     public void onDisable()
     {
         clear();
+        if (Modules.TIMER.isEnabled())
+        {
+            Modules.TIMER.resetTimer();
+            if (!prevTimer)
+            {
+                Modules.TIMER.disable();
+            }
+        }
     }
 
     /**
@@ -76,17 +112,6 @@ public class SpeedModule extends ToggleModule
     public void onDisconnect(DisconnectEvent event)
     {
         disable();
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    @Override
-    public String getMetaData()
-    {
-        return EnumFormatter.formatEnum(speedModeConfig.getValue());
     }
 
     /**
@@ -113,9 +138,10 @@ public class SpeedModule extends ToggleModule
     @EventListener
     public void onPlayerMove(PlayerMoveEvent event)
     {
-        if (mc.player != null && MovementUtil.isInputtingMovement())
+        if (mc.player != null && mc.world != null)
         {
-            if (mc.player.isRiding()
+            if (!MovementUtil.isInputtingMovement()
+                    || mc.player.isRiding()
                     || mc.player.isFallFlying()
                     || mc.player.isHoldingOntoLadder()
                     || mc.player.fallDistance > 2.0f
@@ -123,6 +149,7 @@ public class SpeedModule extends ToggleModule
                     && !speedWaterConfig.getValue())
             {
                 clear();
+                Modules.TIMER.setTimer(1.0f);
                 return;
             }
             event.cancel();
@@ -316,6 +343,57 @@ public class SpeedModule extends ToggleModule
                 clear();
             }
         }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onConfigUpdate(ConfigUpdateEvent event)
+    {
+        if (event.getConfig() == timerConfig && event.getStage() == EventStage.POST)
+        {
+            if (timerConfig.getValue())
+            {
+                prevTimer = Modules.TIMER.isEnabled();
+                if (!prevTimer)
+                {
+                    Modules.TIMER.enable();
+                    // Modules.TIMER.setTimer(1.0888f);
+                }
+            }
+            else if (Modules.TIMER.isEnabled())
+            {
+                Modules.TIMER.resetTimer();
+                if (!prevTimer)
+                {
+                    Modules.TIMER.disable();
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onToggleGui(ToggleGuiEvent event)
+    {
+        if (event.getModule() == Modules.TIMER)
+        {
+            prevTimer = event.isEnabled();
+        }
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean isUsingTimer()
+    {
+        return timerConfig.getValue();
     }
 
     /**

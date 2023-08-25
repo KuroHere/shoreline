@@ -1,6 +1,7 @@
 package com.caspian.client.api.manager;
 
 import com.caspian.client.api.social.SocialRelation;
+import com.caspian.client.util.Globals;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentMap;
  * @see UUID
  * @see SocialRelation
  */
-public class SocialManager
+public class SocialManager implements Globals
 {
     //
     private final ConcurrentMap<UUID, SocialRelation> relationships =
@@ -56,6 +57,10 @@ public class SocialManager
      */
     public void addRelation(UUID uuid, SocialRelation relation)
     {
+        if (mc.player != null && uuid.equals(mc.player.getUuid()))
+        {
+            return;
+        }
         final SocialRelation relationship = relationships.get(uuid);
         if (relationship != null)
         {

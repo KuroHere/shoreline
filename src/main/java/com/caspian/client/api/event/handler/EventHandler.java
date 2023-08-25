@@ -78,14 +78,18 @@ public class EventHandler
     }
 
     /**
-     * Runs {@link Listener#invoke(Event)} on all active {@link Listener} for
-     * the param {@link Event}
+     * Runs {@link Listener#invokeSubscriber(Event)} on all
+     * active {@link Listener} for the param {@link Event}
      *
      * @param event The event to dispatch listeners
      * @return <tt>true</tt> if {@link Event#isCanceled()} is <tt>true</tt>
      */
     public boolean dispatch(Event event)
     {
+        if (event == null)
+        {
+            return false;
+        }
         List<Listener> active = listeners.get(event.getClass());
         // if there are no items to dispatch to, just early return
         if (active == null || active.isEmpty())
@@ -98,7 +102,7 @@ public class EventHandler
             {
                 continue;
             }
-            listener.invoke(event);
+            listener.invokeSubscriber(event);
         }
         return event.isCanceled();
     }

@@ -4,10 +4,7 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.manager.rotation.RotationRequest;
 import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
-import com.caspian.client.impl.event.network.MovementPacketsEvent;
-import com.caspian.client.impl.event.network.MovementSlowdownEvent;
-import com.caspian.client.impl.event.network.SetCurrentHandEvent;
-import com.caspian.client.impl.event.network.SprintCancelEvent;
+import com.caspian.client.impl.event.network.*;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
 import net.minecraft.client.MinecraftClient;
@@ -233,6 +230,24 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
             double e = getZ();
             super.move(movementType, playerMoveEvent.getMovement());
             autoJump((float) (getX() - d), (float) (getZ() - e));
+        }
+    }
+
+    /**
+     *
+     * @param x
+     * @param z
+     * @param ci
+     */
+    @Inject(method = "pushOutOfBlocks", at = @At(value = "HEAD"),
+            cancellable = true)
+    private void onPushOutOfBlocks(double x, double z, CallbackInfo ci)
+    {
+        PushOutOfBlocksEvent pushOutOfBlocksEvent = new PushOutOfBlocksEvent();
+        Caspian.EVENT_HANDLER.dispatch(pushOutOfBlocksEvent);
+        if (pushOutOfBlocksEvent.isCanceled())
+        {
+            ci.cancel();
         }
     }
 

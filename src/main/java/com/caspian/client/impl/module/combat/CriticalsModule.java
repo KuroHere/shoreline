@@ -110,7 +110,7 @@ public class CriticalsModule extends ToggleModule
             {
                 if (!Managers.POSITION.isOnGround()
                         || mc.player.isRiding()
-                        || mc.player.isSubmergedInWater()
+                        || mc.player.isTouchingWater()
                         || mc.player.isInLava()
                         || mc.player.isHoldingOntoLadder()
                         || mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
@@ -137,7 +137,7 @@ public class CriticalsModule extends ToggleModule
                     else
                     {
                         attackPacket = packet;
-                        hookPreAttack();
+                        preAttackPacket();
                         if (!packetSyncConfig.getValue())
                         {
                             Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(
@@ -165,7 +165,7 @@ public class CriticalsModule extends ToggleModule
      *
      * @see AuraModule#preAttack()
      */
-    public void hookPreAttack()
+    public void preAttackPacket()
     {
         double x = Managers.POSITION.getX();
         double y = Managers.POSITION.getY();
@@ -191,7 +191,7 @@ public class CriticalsModule extends ToggleModule
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                         x, y + 0.0000013579f, z, false));
             }
-            case VANILLA_STRICT ->
+            case VANILLA ->
             {
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                         x, y + 0.0626024016927725f, z, false));
@@ -216,7 +216,7 @@ public class CriticalsModule extends ToggleModule
     {
         PACKET,
         PACKET_STRICT,
-        VANILLA_STRICT,
+        VANILLA,
         LOW_JUMP
     }
 }

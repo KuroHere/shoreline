@@ -1,5 +1,6 @@
 package com.caspian.client.mixin.render;
 
+import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.render.LightmapGammaEvent;
 import net.minecraft.client.render.LightmapTextureManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,6 +30,7 @@ public class MixinLightmapTextureManager
     {
         LightmapGammaEvent lightmapGammaEvent =
                 new LightmapGammaEvent(args.get(2));
+        Caspian.EVENT_HANDLER.dispatch(lightmapGammaEvent);
         if (lightmapGammaEvent.isCanceled())
         {
             args.set(2, lightmapGammaEvent.getGamma());

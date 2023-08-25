@@ -533,7 +533,7 @@ public class AuraModule extends RotationModule
             }
             if (crit)
             {
-                Modules.CRITICALS.hookPreAttack();
+                Modules.CRITICALS.preAttackPacket();
             }
         }
     }

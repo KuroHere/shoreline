@@ -5,12 +5,14 @@ import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
-import com.caspian.client.api.module.InvokeModule;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.render.TickCounterEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.init.Modules;
+
+import java.text.DecimalFormat;
 
 /**
  *
@@ -18,7 +20,7 @@ import com.caspian.client.init.Managers;
  * @author linus
  * @since 1.0
  */
-public class TimerModule extends InvokeModule
+public class TimerModule extends ToggleModule
 {
     //
     Config<Float> ticksConfig = new NumberConfig<>("Ticks", "Tick speed",
@@ -26,6 +28,7 @@ public class TimerModule extends InvokeModule
     Config<Boolean> tpsSyncConfig = new BooleanConfig("TPSSync", "Syncs game " +
             "tick speed to server tick speed", false);
     //
+    private float prevTimer = -1.0f;
     private float timer = 1.0f;
 
     /**
@@ -45,7 +48,21 @@ public class TimerModule extends InvokeModule
     @Override
     public String getMetaData()
     {
-        return Float.toString(timer);
+        DecimalFormat decimal = new DecimalFormat("0.0#");
+        return decimal.format(timer);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void toggle()
+    {
+        if (Modules.SPEED.isEnabled() && Modules.SPEED.isUsingTimer())
+        {
+            return;
+        }
+        super.toggle();
     }
 
     /**
@@ -56,8 +73,12 @@ public class TimerModule extends InvokeModule
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (isEnabled() && event.getStage() == EventStage.PRE)
+        if (event.getStage() == EventStage.PRE)
         {
+            if (Modules.SPEED.isEnabled() && Modules.SPEED.isUsingTimer())
+            {
+                return;
+            }
             if (tpsSyncConfig.getValue())
             {
                 timer = Math.max(Managers.TICK.getTpsCurrent() / 20.0f, 0.1f);
@@ -75,10 +96,22 @@ public class TimerModule extends InvokeModule
     @EventListener
     public void onTickCounter(TickCounterEvent event)
     {
-        if (isRunning() && timer != 1.0f)
+        if (timer != 1.0f)
         {
             event.cancel();
             event.setTicks(timer);
+        }
+    }
+
+    /**
+     *
+     */
+    public void resetTimer()
+    {
+        if (prevTimer > 0.0f)
+        {
+            this.timer = prevTimer;
+            prevTimer = -1.0f;
         }
     }
 
@@ -89,7 +122,7 @@ public class TimerModule extends InvokeModule
      */
     public void setTimer(float timer)
     {
+        prevTimer = this.timer;
         this.timer = timer;
-        setRunning(true);
     }
 }
