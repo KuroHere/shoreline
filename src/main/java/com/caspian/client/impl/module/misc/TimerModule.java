@@ -58,6 +58,7 @@ public class TimerModule extends ToggleModule
     @Override
     public void toggle()
     {
+        Modules.SPEED.setPrevTimer();
         if (Modules.SPEED.isUsingTimer())
         {
             return;

@@ -1,10 +1,8 @@
 package com.caspian.client.impl.module.combat;
 
-import com.caspian.client.Caspian;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.EnumConfig;
-import com.caspian.client.api.config.setting.ItemConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
@@ -21,7 +19,10 @@ import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -45,14 +46,8 @@ public class AutoTotemModule extends ToggleModule
     Config<TickStage> tickStageConfig = new EnumConfig<>("TickStage", "Tick stage " +
             "to run the totem swap. (Note: LOOP will run much more frequently " +
             "than TICK, may cause performance issues)", TickStage.TICK, TickStage.values());
-    Config<Item> offhandConfig = new ItemConfig("Offhand", "Item to keep" +
-            " in offhand when in a safe environment", Items.TOTEM_OF_UNDYING,
-            new Item[]
-                    {
-                            Items.TOTEM_OF_UNDYING,
-                            Items.END_CRYSTAL,
-                            Items.GOLDEN_APPLE
-                    });
+    Config<OffhandItem> offhandConfig = new EnumConfig<>("Offhand", "Item to " +
+            "keep in offhand when in a safe environment", OffhandItem.TOTEM, OffhandItem.values());
     Config<Float> healthConfig = new NumberConfig<>("Health", "Lethal offhand" +
             " health", 0.0f, 0.0f, 20.0f);
     Config<Boolean> lethalConfig = new BooleanConfig("Lethal",
@@ -120,6 +115,7 @@ public class AutoTotemModule extends ToggleModule
         totems = 0;
         sneaking = false;
         sprinting = false;
+        popTick = false;
     }
 
     /**
@@ -169,21 +165,18 @@ public class AutoTotemModule extends ToggleModule
      */
     private void placeOffhand()
     {
+        int totemCount = 0;
         calcTotem = -1;
         //
         int calcPotion = -1;
         final ItemStack off = mc.player.getOffHandStack();
-        if (off.getItem() == Items.TOTEM_OF_UNDYING)
-        {
-            totems++;
-        }
         if (hotbarTotemConfig.getValue())
         {
             int idx = totemSlotConfig.getValue() + 36;
             ItemStack slot = mc.player.getInventory().getStack(idx);
             if (slot.getItem() == Items.TOTEM_OF_UNDYING)
             {
-                totems++;
+                totemCount++;
                 calcTotem = totemSlotConfig.getValue();
             }
         }
@@ -194,11 +187,12 @@ public class AutoTotemModule extends ToggleModule
                 ItemStack slot = mc.player.getInventory().getStack(i);
                 if (slot.getItem() == Items.TOTEM_OF_UNDYING)
                 {
-                    if (calcTotem == -1)
+                    totemCount++;
+                    if (calcTotem != -1)
                     {
-                        calcTotem = i;
+                       continue;
                     }
-                    totems++;
+                    calcTotem = i;
                 }
                 else if (offhandPotionConfig.getValue()
                         && slot.getItem() == Items.POTION)
@@ -214,13 +208,15 @@ public class AutoTotemModule extends ToggleModule
                 }
             }
         }
+        totems = totemCount;
         if (mc.currentScreen == null)
         {
             if (!popTick)
             {
+                OffhandItem offhandItem = offhandConfig.getValue();
                 offhand = crystalCheckConfig.getValue()
                         && Modules.AUTO_CRYSTAL.isPlacing() ?
-                        Items.END_CRYSTAL : offhandConfig.getValue();
+                        Items.END_CRYSTAL : offhandItem.getItem();
                 //
                 final ItemStack mainhand = mc.player.getMainHandStack();
                 if (mainhand.getItem() instanceof SwordItem
@@ -232,7 +228,7 @@ public class AutoTotemModule extends ToggleModule
                 }
                 if (!mc.player.isCreative())
                 {
-                    final float health = mc.player.getHealth()
+                    float health = mc.player.getHealth()
                             + mc.player.getAbsorptionAmount();
                     if (health + 0.5 < healthConfig.getValue())
                     {
@@ -284,11 +280,13 @@ public class AutoTotemModule extends ToggleModule
             {
                 if (calcTotem == -1)
                 {
-                    Caspian.error(Modules.AUTO_TOTEM, "No TOTEM_OF_UNDYING " +
-                            "left in inventory!");
+                    // ChatUtil.error("No TOTEM_OF_UNDYING left in inventory!");
+                    if (fallbackCrystalConfig.getValue())
+                    {
+                        offhand = Items.END_CRYSTAL;
+                    }
                 }
-                else if (off.isEmpty()
-                        || off.getItem() != Items.TOTEM_OF_UNDYING)
+                else if (off.isEmpty() || off.getItem() != Items.TOTEM_OF_UNDYING)
                 {
                     if (hotbarTotemConfig.getValue())
                     {
@@ -315,11 +313,7 @@ public class AutoTotemModule extends ToggleModule
                     }
                     calcTotem = -1;
                 }
-                if (!fallbackCrystalConfig.getValue())
-                {
-                    return;
-                }
-                offhand = Items.END_CRYSTAL;
+                return;
             }
             // OFFHAND SECTION
             int calcOffhand = -1;
@@ -335,19 +329,28 @@ public class AutoTotemModule extends ToggleModule
                 for (int i = 9; i < (hotbarConfig.getValue() ? 45 : 36); i++)
                 {
                     final ItemStack slot = mc.player.getInventory().getStack(i);
-                    if (slot.getItem() == Items.GOLDEN_APPLE
-                            && offhand == Items.GOLDEN_APPLE)
+                    if (offhand == Items.GOLDEN_APPLE)
                     {
                         if (glint)
                         {
                             break;
                         }
-                        calcOffhand = i;
                         // in 1.12.2 we can restore all of our absorption
                         // hearts using crapples when the absorption
                         // effect is active
-                        glint = mc.player.hasStatusEffect(StatusEffects.ABSORPTION)
-                                && crappleConfig.getValue() != slot.hasGlint();
+                        if (slot.getItem() == Items.GOLDEN_APPLE)
+                        {
+                            if (crappleConfig.getValue() && mc.player.hasStatusEffect(StatusEffects.ABSORPTION))
+                            {
+                                glint = true;
+                            }
+                            calcOffhand = i;
+                        }
+                        else if (slot.getItem() == Items.ENCHANTED_GOLDEN_APPLE)
+                        {
+                            glint = true;
+                            calcOffhand = i;
+                        }
                     }
                     else if (slot.getItem() == offhand)
                     {
@@ -358,12 +361,10 @@ public class AutoTotemModule extends ToggleModule
             }
             if (calcOffhand == -1)
             {
-                Caspian.error(Modules.AUTO_TOTEM, "No {} left in inventory!",
-                        offhand.getName());
+                // ChatUtil.error("No %s left in inventory!", offhand.getName());
                 return;
             }
-            final ItemStack cSlot =
-                    mc.player.getInventory().getStack(calcOffhand);
+            final ItemStack cSlot = mc.player.getInventory().getStack(calcOffhand);
             if (!isStackInOffhand(cSlot))
             {
                 preClickSlot();
@@ -400,8 +401,8 @@ public class AutoTotemModule extends ToggleModule
                     ItemStack off = mc.player.getOffHandStack();
                     if (calcTotem == -1)
                     {
-                        Caspian.error(Modules.AUTO_TOTEM, "No TOTEM_OF_UNDYING"
-                                + "left in inventory!");
+                        // ChatUtil.error("No TOTEM_OF_UNDYING left in " +
+                        //        "inventory!");
                         return;
                     }
                     preClickSlot();
@@ -520,5 +521,25 @@ public class AutoTotemModule extends ToggleModule
         TICK,
         // EXPERIMENTAL
         LOOP
+    }
+
+    public enum OffhandItem
+    {
+        TOTEM(Items.TOTEM_OF_UNDYING),
+        CRYSTAL(Items.END_CRYSTAL),
+        GAPPLE(Items.GOLDEN_APPLE);
+
+        //
+        private final Item item;
+
+        OffhandItem(Item item)
+        {
+            this.item = item;
+        }
+
+        public Item getItem()
+        {
+            return item;
+        }
     }
 }

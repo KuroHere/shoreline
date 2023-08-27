@@ -15,7 +15,6 @@ import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
-import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.player.MovementUtil;
 import com.caspian.client.util.string.EnumFormatter;
 import net.minecraft.entity.effect.StatusEffects;
@@ -377,16 +376,10 @@ public class SpeedModule extends ToggleModule
 
     /**
      *
-     * @param event
      */
-    @EventListener
-    public void onToggleGui(ToggleGuiEvent event)
+    public void setPrevTimer()
     {
-        if (event.getModule() == Modules.TIMER)
-        {
-            ChatUtil.clientSendMessageRaw("lol");
-            prevTimer = event.isEnabled();
-        }
+        prevTimer = !prevTimer;
     }
 
     /**

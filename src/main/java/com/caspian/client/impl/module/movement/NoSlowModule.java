@@ -23,10 +23,8 @@ import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
@@ -104,7 +102,7 @@ public class NoSlowModule extends ToggleModule
     @Override
     public void onDisable()
     {
-        if (sneaking && airStrictConfig.getValue())
+        if (airStrictConfig.getValue() && sneaking)
         {
             Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                     ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
@@ -120,7 +118,7 @@ public class NoSlowModule extends ToggleModule
     @EventListener
     public void onSetCurrentHand(SetCurrentHandEvent event)
     {
-        if (!sneaking && checkSlowed() && airStrictConfig.getValue())
+        if (airStrictConfig.getValue() && !sneaking && checkSlowed())
         {
             sneaking = true;
             Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
@@ -138,8 +136,8 @@ public class NoSlowModule extends ToggleModule
     {
         if (event.getStage() == EventStage.PRE)
         {
-            if (sneaking && !mc.player.isUsingItem()
-                    && airStrictConfig.getValue())
+            if (airStrictConfig.getValue() && sneaking
+                    && !mc.player.isUsingItem())
             {
                 sneaking = false;
                 Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
@@ -153,7 +151,7 @@ public class NoSlowModule extends ToggleModule
                 //                new BlockHitResult(mc.player.getPos(),
                 //                Direction.UP, BlockPos.ORIGIN, false), id));
             }
-            if (checkScreen() && inventoryMoveConfig.getValue()
+            if (inventoryMoveConfig.getValue() && checkScreen()
                     && MOVE_KEYBINDS != null)
             {
                 final long handle = mc.getWindow().getHandle();
@@ -269,10 +267,11 @@ public class NoSlowModule extends ToggleModule
         {
             if (event.getPacket() instanceof PlayerMoveC2SPacket packet)
             {
-                if (checkSlowed() && packet.changesPosition()
-                        && strictConfig.getValue())
+                if (strictConfig.getValue() && checkSlowed()
+                        && packet.changesPosition() && !mc.isInSingleplayer())
                 {
                     Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(0));
+                    // Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
                     Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
                 }
             }

@@ -1,12 +1,10 @@
 package com.caspian.client.impl.gui.click.impl.config;
 
-import com.caspian.client.Caspian;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.macro.Macro;
 import com.caspian.client.api.module.Module;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
-import com.caspian.client.impl.event.gui.click.ToggleGuiEvent;
 import com.caspian.client.impl.gui.click.component.Button;
 import com.caspian.client.impl.gui.click.impl.config.setting.*;
 import com.caspian.client.init.Modules;
@@ -153,8 +151,8 @@ public class ModuleButton extends Button
             {
                 t.toggle();
                 //
-                ToggleGuiEvent toggleGuiEvent = new ToggleGuiEvent(t);
-                Caspian.EVENT_HANDLER.dispatch(toggleGuiEvent);
+                // ToggleGuiEvent toggleGuiEvent = new ToggleGuiEvent(t);
+                // Caspian.EVENT_HANDLER.dispatch(toggleGuiEvent);
             }
             else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
             {

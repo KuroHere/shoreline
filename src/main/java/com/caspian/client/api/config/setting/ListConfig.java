@@ -1,7 +1,13 @@
 package com.caspian.client.api.config.setting;
 
 import com.caspian.client.api.config.Config;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,7 +72,23 @@ public class ListConfig<T> extends Config<List<T>>
     @Override
     public JsonObject toJson()
     {
-        return null;
+        JsonObject jsonObj = super.toJson();
+        JsonArray array = new JsonArray();
+        for (Object element : getValue())
+        {
+            if (element instanceof Block block)
+            {
+                array.add(String.format("block_%s",
+                        block.getName().getString()));
+            }
+            else if (element instanceof Item item)
+            {
+                array.add(String.format("item_%s",
+                        item.getName().getString()));
+            }
+        }
+        jsonObj.add("value", array);
+        return jsonObj;
     }
 
     /**
@@ -79,6 +101,21 @@ public class ListConfig<T> extends Config<List<T>>
     @Override
     public void fromJson(JsonObject jsonObj)
     {
-
+        if (jsonObj.has("value"))
+        {
+            JsonElement element = jsonObj.get("value");
+            for (JsonElement je : element.getAsJsonArray())
+            {
+                String val = je.getAsString();
+                if (val.startsWith("block"))
+                {
+                    val = val.substring(6);
+                }
+                else if (val.startsWith("item"))
+                {
+                    val = val.substring(5);
+                }
+            }
+        }
     }
 }
