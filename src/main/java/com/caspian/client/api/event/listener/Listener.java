@@ -54,8 +54,7 @@ public class Listener implements Comparable<Listener>
     //
     private final int priority;
     // subscriber invoker cache for each listener method
-    private static final Map<Method, Invoker<Object>> INVOKE_CACHE =
-            new HashMap<>();
+    private static final Map<Method, Invoker<Object>> INVOKE_CACHE = new HashMap<>();
     // the MethodHandler lookup
     private static final Lookup LOOKUP = MethodHandles.lookup();
 
@@ -99,7 +98,7 @@ public class Listener implements Comparable<Listener>
         }
         catch (Throwable e)
         {
-            Caspian.error("Failed to build invoker for %s", method.getName());
+            Caspian.error("Failed to build invoker for {}!", method.getName());
             e.printStackTrace();
         }
     }

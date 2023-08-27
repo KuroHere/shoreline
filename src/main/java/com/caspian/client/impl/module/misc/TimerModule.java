@@ -58,7 +58,7 @@ public class TimerModule extends ToggleModule
     @Override
     public void toggle()
     {
-        if (Modules.SPEED.isEnabled() && Modules.SPEED.isUsingTimer())
+        if (Modules.SPEED.isUsingTimer())
         {
             return;
         }
@@ -75,7 +75,7 @@ public class TimerModule extends ToggleModule
     {
         if (event.getStage() == EventStage.PRE)
         {
-            if (Modules.SPEED.isEnabled() && Modules.SPEED.isUsingTimer())
+            if (Modules.SPEED.isUsingTimer())
             {
                 return;
             }

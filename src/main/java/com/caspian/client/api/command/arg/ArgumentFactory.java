@@ -38,7 +38,12 @@ public class ArgumentFactory
         // attempt to extract object from field
         try
         {
-            return (Argument<?>) f.get(argObj);
+            final Argument<?> arg = (Argument<?>) f.get(argObj);
+            if (arg != null)
+            {
+                arg.setOptional(f.isAnnotationPresent(OptionalArg.class));
+            }
+            return arg;
         }
         // field getter error
         catch (IllegalArgumentException | IllegalAccessException e)

@@ -58,7 +58,7 @@ public class ConfigArgument extends Argument<Config<?>>
                 return config;
             }
         }
-        ChatUtil.error("Could not parse config!");
+        ChatUtil.error("Failed to parse config!");
         return null;
     }
 

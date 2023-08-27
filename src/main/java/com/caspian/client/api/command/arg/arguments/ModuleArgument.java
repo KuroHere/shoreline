@@ -44,7 +44,7 @@ public class ModuleArgument extends Argument<Module>
                 return module;
             }
         }
-        ChatUtil.error("Could not parse Module argument!");
+        ChatUtil.error("Failed to parse Module argument!");
         return null;
     }
 

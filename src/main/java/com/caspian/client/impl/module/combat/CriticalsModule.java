@@ -10,8 +10,10 @@ import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import com.caspian.client.impl.imixin.IPlayerInteractEntityC2SPacket;
 import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.Timer;
+import com.caspian.client.util.network.InteractType;
 import com.caspian.client.util.string.EnumFormatter;
 import com.caspian.client.util.world.EntityUtil;
 import net.minecraft.entity.Entity;
@@ -20,7 +22,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 
@@ -101,11 +102,11 @@ public class CriticalsModule extends ToggleModule
         {
             return;
         }
-        if (event.getPacket() instanceof PlayerInteractEntityC2SPacket packet)
+        if (event.getPacket() instanceof IPlayerInteractEntityC2SPacket packet
+                && packet.getType() == InteractType.ATTACK)
         {
-            ServerWorld world = (ServerWorld) mc.player.getWorld();
             // Attacked entity
-            final Entity e = packet.getEntity(world);
+            Entity e = packet.getEntity();
             if (e != null && e.isAlive())
             {
                 if (!Managers.POSITION.isOnGround()
@@ -136,7 +137,7 @@ public class CriticalsModule extends ToggleModule
                     }
                     else
                     {
-                        attackPacket = packet;
+                        attackPacket = (PlayerInteractEntityC2SPacket) packet;
                         preAttackPacket();
                         if (!packetSyncConfig.getValue())
                         {

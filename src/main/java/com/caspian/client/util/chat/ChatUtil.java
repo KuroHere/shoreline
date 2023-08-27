@@ -29,6 +29,16 @@ public class ChatUtil implements Globals
     /**
      *
      * @param message
+     * @param params
+     */
+    public static void clientSendMessage(String message, Object... params)
+    {
+        clientSendMessage(String.format(message, params));
+    }
+
+    /**
+     *
+     * @param message
      */
     public static void clientSendMessageRaw(String message)
     {
@@ -56,5 +66,15 @@ public class ChatUtil implements Globals
     public static void error(String message)
     {
         clientSendMessage(Formatting.RED + message);
+    }
+
+    /**
+     *
+     * @param message
+     * @param params
+     */
+    public static void error(String message, Object... params)
+    {
+        clientSendMessage(Formatting.RED + message, params);
     }
 }

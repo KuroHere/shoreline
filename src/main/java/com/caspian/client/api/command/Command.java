@@ -81,6 +81,29 @@ public abstract class Command extends ConfigContainer implements Globals
     }
 
     /**
+     *
+     * @param length
+     * @return
+     */
+    public boolean isValidArgLength(int length)
+    {
+        int min = 0;
+        int max = 0;
+        for (Argument<?> arg : arguments)
+        {
+            max++;
+            // Count required args
+            if (arg.isOptional())
+            {
+                continue;
+            }
+            min++;
+        }
+        length -= 1;
+        return length >= min && length <= max;
+    }
+
+    /**
      * Runs when the command is inputted in chat
      */
     public abstract void onCommandInput();

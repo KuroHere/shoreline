@@ -1,6 +1,7 @@
 package com.caspian.client.impl.command;
 
 import com.caspian.client.api.command.arg.Argument;
+import com.caspian.client.api.command.arg.OptionalArg;
 import com.caspian.client.api.command.arg.arguments.CommandArgument;
 import com.caspian.client.api.command.Command;
 import com.caspian.client.init.Managers;
@@ -15,6 +16,7 @@ import com.caspian.client.util.chat.ChatUtil;
 public class HelpCommand extends Command
 {
     //
+    @OptionalArg
     Argument<Command> commandArg = new CommandArgument("Command", "The " +
             "specified command to display info");
 
@@ -35,29 +37,24 @@ public class HelpCommand extends Command
         final Command command = commandArg.parse();
         if (command != null)
         {
-            if (command instanceof ModuleCommand)
-            {
-                ChatUtil.clientSendMessage("module <setting> <value> - Configures the module");
-                return;
-            }
             ChatUtil.clientSendMessage(toHelpMessage(command));
         }
         else
         {
+            ChatUtil.clientSendMessageRaw("§7[§fCommands Help§7]");
             boolean sent = false;
             for (Command c : Managers.COMMAND.getCommands())
             {
-                ChatUtil.clientSendMessageRaw("§7[§fCommands Help§7]");
                 if (c instanceof ModuleCommand)
                 {
                     if (!sent)
                     {
-                        ChatUtil.clientSendMessageRaw("module <setting> <value> - Configures the module");
+                        ChatUtil.clientSendMessageRaw(toHelpMessage(c));
                         sent = true;
                     }
                     continue;
                 }
-                ChatUtil.clientSendMessage(toHelpMessage(c));
+                ChatUtil.clientSendMessageRaw(toHelpMessage(c));
             }
         }
     }
@@ -69,6 +66,11 @@ public class HelpCommand extends Command
      */
     private String toHelpMessage(Command command)
     {
+        if (command instanceof ModuleCommand)
+        {
+            return String.format("module %s- %s", command.getUsage(),
+                    command.getDescription());
+        }
         return String.format("%s %s- %s", command.getName(),
                 command.getUsage(), command.getDescription());
     }

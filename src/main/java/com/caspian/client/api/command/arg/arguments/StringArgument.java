@@ -57,7 +57,7 @@ public class StringArgument extends Argument<String>
         {
             return literal;
         }
-        ChatUtil.error("Could not parse argument! Allowed values: ");
+        ChatUtil.error("Failed to parse argument! Allowed values: ");
         return null;
     }
 

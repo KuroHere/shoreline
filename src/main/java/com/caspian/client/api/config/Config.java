@@ -5,6 +5,7 @@ import com.caspian.client.api.config.setting.*;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.impl.event.config.ConfigUpdateEvent;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.util.function.Supplier;
 
@@ -67,6 +68,20 @@ public abstract class Config<T> implements Configurable
     }
 
     /**
+     * Initializes the config without the default value. DO NOT INITIALIZE
+     * CONFIGS USING THIS CONSTRUCTOR.
+     *
+     * @param name
+     * @param desc
+     */
+    @Internal
+    public Config(String name, String desc)
+    {
+        this.name = name;
+        this.desc = desc;
+    }
+
+    /**
      * Initializes the config with a default value. This constructor should
      * not be used to initialize a configuration, instead use the explicit
      * definitions of the configs in {@link com.caspian.client.api.config.setting}.
@@ -95,6 +110,16 @@ public abstract class Config<T> implements Configurable
         obj.addProperty("name", getName());
         obj.addProperty("id", getId());
         return obj;
+    }
+
+    /**
+     *
+     * @param obj The data as a json object
+     */
+    @Override
+    public void fromJson(JsonObject obj)
+    {
+
     }
 
     /**

@@ -49,7 +49,7 @@ public class BooleanArgument extends Argument<Boolean>
         {
             return Boolean.FALSE;
         }
-        ChatUtil.error("Could not parse Boolean argument!");
+        ChatUtil.error("Failed to parse Boolean argument!");
         return null;
     }
 

@@ -47,11 +47,15 @@ public class CommandManager implements Globals
         Caspian.EVENT_HANDLER.subscribe(this);
         register(
                 new HelpCommand(),
+                new ToggleCommand(),
                 new FriendCommand(),
                 new HClipCommand(),
                 new VClipCommand(),
                 new PrefixCommand(),
-                new DrawnCommand()
+                new DrawnCommand(),
+                new OpenFolderCommand(),
+                new BindCommand(),
+                new VanishCommand()
         );
         //
         for (Module module : Managers.MODULE.getModules())
@@ -146,6 +150,12 @@ public class CommandManager implements Globals
                 String name = command.getName();
                 if (name.equals(args[0]))
                 {
+                    if (!command.isValidArgLength(args.length))
+                    {
+                        ChatUtil.error("Invalid usage! Usage: %s",
+                                command.getUsage());
+                        return;
+                    }
                     try
                     {
                         command.onCommandInput();

@@ -43,7 +43,7 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
                 }
             }
         }
-        ChatUtil.error("Could not find player!");
+        ChatUtil.error("Failed to find player!");
         return null;
     }
 

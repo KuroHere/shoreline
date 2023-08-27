@@ -5,13 +5,13 @@ import com.caspian.client.api.config.Config;
 import com.caspian.client.api.manager.CommandManager;
 import com.caspian.client.impl.event.gui.chat.ChatInputEvent;
 import com.caspian.client.util.string.StringUtil;
-import com.google.gson.JsonObject;
 
 import java.util.Collection;
 
 /**
  * {@link Command} Argument structure which builds the value from the literal
- * argument.
+ * argument. The argument can be marked as an optional value by using the
+ * {@link OptionalArg} annotation.
  *
  * @author linus
  * @since 1.0
@@ -27,7 +27,7 @@ public abstract class Argument<T> extends Config<T>
     // press. If the input is null, the argument is left blank.
     private String literal;
     //
-
+    private boolean optional;
 
     /**
      * Initializes the config with a default value. This constructor should
@@ -40,8 +40,8 @@ public abstract class Argument<T> extends Config<T>
      */
     public Argument(String name, String desc)
     {
+        super(name.toLowerCase(), desc);
         // LMAOOOOOOOOO WTF IS THIS
-        super(name.toLowerCase(), desc, (T) new Object());
         this.literal = StringUtil.EMPTY_STRING;
     }
 
@@ -75,20 +75,6 @@ public abstract class Argument<T> extends Config<T>
     public abstract T parse();
 
     /**
-     * Reads all data from a {@link JsonObject} and updates the values of the
-     * data in the object.
-     *
-     * @param jsonObj The data as a json object
-     * @see #toJson()
-     */
-    @Override
-    public void fromJson(JsonObject jsonObj)
-    {
-
-    }
-
-    /**
-     *
      *
      * @return
      */
@@ -99,14 +85,11 @@ public abstract class Argument<T> extends Config<T>
 
     /**
      *
-     *
-     * @param literal
-     *
-     * @see CommandManager#onChatInput(ChatInputEvent)
+     * @return
      */
-    public void setLiteral(String literal)
+    public boolean isOptional()
     {
-        this.literal = literal;
+        return optional;
     }
 
     /**
@@ -128,6 +111,8 @@ public abstract class Argument<T> extends Config<T>
         return literal;
     }
 
+
+
     /**
      *
      *
@@ -136,4 +121,25 @@ public abstract class Argument<T> extends Config<T>
      * @see #getSuggestion()
      */
     public abstract Collection<String> getSuggestions();
+
+    /**
+     *
+     *
+     * @param literal
+     *
+     * @see CommandManager#onChatInput(ChatInputEvent)
+     */
+    public void setLiteral(String literal)
+    {
+        this.literal = literal;
+    }
+
+    /**
+     *
+     * @param optional
+     */
+    public void setOptional(boolean optional)
+    {
+        this.optional = optional;
+    }
 }

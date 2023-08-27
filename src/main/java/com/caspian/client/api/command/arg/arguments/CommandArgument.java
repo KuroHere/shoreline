@@ -45,7 +45,7 @@ public class CommandArgument extends Argument<Command>
                 return command;
             }
         }
-        // ChatUtil.error("Could not parse Command argument! Literal: " + getLiteral());
+        // ChatUtil.error("Failed to parse Command argument! Literal: " + getLiteral());
         return null;
     }
 

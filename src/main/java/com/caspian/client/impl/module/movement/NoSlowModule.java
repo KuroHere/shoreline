@@ -15,6 +15,7 @@ import com.caspian.client.impl.event.network.MovementSlowdownEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.network.SetCurrentHandEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -271,8 +272,8 @@ public class NoSlowModule extends ToggleModule
                 if (checkSlowed() && packet.changesPosition()
                         && strictConfig.getValue())
                 {
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
-                            Managers.INVENTORY.getServerSlot()));
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(0));
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
                 }
             }
             else if (event.getPacket() instanceof ClickSlotC2SPacket
