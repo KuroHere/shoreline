@@ -106,6 +106,15 @@ public class TimerModule extends ToggleModule
 
     /**
      *
+     * @return
+     */
+    public float getTimer()
+    {
+        return timer;
+    }
+
+    /**
+     *
      */
     public void resetTimer()
     {

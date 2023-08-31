@@ -28,8 +28,9 @@ public abstract class MixinPlayerInteractEntityC2SPacket implements
     @Shadow
     @Final
     private int entityId;
-
-    @Shadow public abstract void write(PacketByteBuf buf);
+    //
+    @Shadow
+    public abstract void write(PacketByteBuf buf);
 
     /**
      *

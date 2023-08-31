@@ -192,7 +192,8 @@ public class HudModule extends ToggleModule
                 double z = mc.player.getZ() - mc.player.prevZ;
                 double dist = Math.sqrt(x * x + z * z) / 1000.0;
                 double div = 0.05 / 3600.0;
-                final double speed = dist / div;
+                float timer = Modules.TIMER.isEnabled() ? Modules.TIMER.getTimer() : 1.0f;
+                final double speed = dist / div * timer;
                 String text = String.format("Speed §f%skm/h",
                         decimal.format(speed));
                 int width = RenderManager.textWidth(text);

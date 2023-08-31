@@ -35,6 +35,7 @@
     "particle.MixinParticleManager",
     "render.block.MixinEnchantingTableBlockEntityRenderer",
     "render.entity.MixinArmorFeatureRenderer",
+    "render.entity.MixinEntityRenderer",
     "render.entity.MixinItemEntityRenderer",
     "render.entity.MixinPlayerEntityRenderer",
     "render.entity.MixinWitherSkullEntityRenderer",

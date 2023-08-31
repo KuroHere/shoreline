@@ -14,11 +14,13 @@ import com.caspian.client.impl.event.particle.ParticleEvent;
 import com.caspian.client.impl.event.render.HurtCamEvent;
 import com.caspian.client.impl.event.render.RenderFloatingItemEvent;
 import com.caspian.client.impl.event.render.RenderNauseaEvent;
+import com.caspian.client.impl.event.render.block.RenderBlockEvent;
 import com.caspian.client.impl.event.render.block.RenderTileEntityEvent;
 import com.caspian.client.impl.event.render.entity.RenderArmorEvent;
 import com.caspian.client.impl.event.render.entity.RenderItemEvent;
 import com.caspian.client.impl.event.render.entity.RenderWitherSkullEvent;
 import com.google.common.collect.Lists;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -285,6 +287,19 @@ public class NoRenderModule extends ToggleModule
                 || event.getParticleType() == ParticleTypes.EXPLOSION_EMITTER)
                 || fireworksConfig.getValue() && event.getParticleType() == ParticleTypes.FIREWORK
                 || campfiresConfig.getValue() && event.getParticleType() == ParticleTypes.CAMPFIRE_COSY_SMOKE)
+        {
+            event.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onRenderBlock(RenderBlockEvent event)
+    {
+        if (barriersConfig.getValue() && event.getBlock() == Blocks.BARRIER)
         {
             event.cancel();
         }

@@ -8,9 +8,12 @@ import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.BoxRender;
 import com.caspian.client.api.render.RenderManager;
+import com.caspian.client.impl.event.render.RenderBlockOutlineEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -88,18 +91,30 @@ public class BlockHighlightModule extends ToggleModule
         }
         if (render != null)
         {
+            Camera camera = mc.gameRenderer.getCamera();
+            MatrixStack matrix = event.getCameraMatrices(camera);
             switch (boxModeConfig.getValue())
             {
                 case FILL ->
                 {
-                    RenderManager.renderBox(event.getMatrices(), render,
+                    RenderManager.renderBox(matrix, render,
                             Modules.COLORS.getRGB(60));
-                    RenderManager.renderBoundingBox(event.getMatrices(),
-                            render, 1.5f, Modules.COLORS.getRGB(145));
+                    RenderManager.renderBoundingBox(matrix, render, 1.5f,
+                            Modules.COLORS.getRGB(145));
                 }
-                case OUTLINE -> RenderManager.renderBoundingBox(event.getMatrices(),
+                case OUTLINE -> RenderManager.renderBoundingBox(matrix,
                         render, 1.5f, Modules.COLORS.getRGB(145));
             }
         }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onRenderBlockOutline(RenderBlockOutlineEvent event)
+    {
+        event.cancel();
     }
 }

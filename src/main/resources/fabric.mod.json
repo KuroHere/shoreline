@@ -3,7 +3,7 @@
   "id": "caspian",
   "version": "${version}",
   "name": "Caspian",
-  "description": "1.19.4",
+  "description": "Named after the Caspian Sea.",
   "authors": [
     "linus"
   ],

@@ -265,10 +265,14 @@ public class NoSlowModule extends ToggleModule
     {
         if (mc.player != null && mc.world != null)
         {
+            if (mc.isInSingleplayer())
+            {
+                return;
+            }
             if (event.getPacket() instanceof PlayerMoveC2SPacket packet)
             {
                 if (strictConfig.getValue() && checkSlowed()
-                        && packet.changesPosition() && !mc.isInSingleplayer())
+                        && packet.changesPosition())
                 {
                     Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(0));
                     // Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));

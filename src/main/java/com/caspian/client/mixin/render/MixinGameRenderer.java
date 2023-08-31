@@ -2,6 +2,7 @@ package com.caspian.client.mixin.render;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.render.HurtCamEvent;
+import com.caspian.client.impl.event.render.RenderBlockOutlineEvent;
 import com.caspian.client.impl.event.render.RenderFloatingItemEvent;
 import com.caspian.client.impl.event.render.RenderNauseaEvent;
 import net.minecraft.client.render.GameRenderer;
@@ -11,6 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  *
@@ -73,6 +75,24 @@ public class MixinGameRenderer
         if (renderNauseaEvent.isCanceled())
         {
             ci.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param cir
+     */
+    @Inject(method = "shouldRenderBlockOutline", at = @At(value = "HEAD"),
+            cancellable = true)
+    private void hookShouldRenderBlockOutline(CallbackInfoReturnable<Boolean> cir)
+    {
+        RenderBlockOutlineEvent renderBlockOutlineEvent =
+                new RenderBlockOutlineEvent();
+        Caspian.EVENT_HANDLER.dispatch(renderBlockOutlineEvent);
+        if (renderBlockOutlineEvent.isCanceled())
+        {
+            cir.setReturnValue(false);
+            cir.cancel();
         }
     }
 }

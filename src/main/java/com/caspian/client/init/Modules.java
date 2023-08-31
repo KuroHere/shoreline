@@ -60,6 +60,7 @@ public class Modules
     public static SprintModule SPRINT;
     public static BlockHighlightModule BLOCK_HIGHLIGHT;
     public static FullbrightModule FULLBRIGHT;
+    public static NametagsModule NAMETAGS;
     public static NoRenderModule NO_RENDER;
     public static NoWeatherModule NO_WEATHER;
     // public static ViewClipModule VIEW_CLIP;
@@ -132,6 +133,7 @@ public class Modules
                     "blockhighlight-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");
+            NAMETAGS = (NametagsModule) getRegisteredModule("nametags-module");
             NO_RENDER = (NoRenderModule) getRegisteredModule("norender-module");
             NO_WEATHER = (NoWeatherModule) getRegisteredModule(
                     "noweather-module");

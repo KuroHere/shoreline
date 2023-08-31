@@ -9,6 +9,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class ListConfig<T> extends Config<List<T>>
     @SafeVarargs
     public ListConfig(String name, String desc, T... values)
     {
-        super(name, desc, Arrays.stream(values).toList());
+        super(name, desc, List.of(values));
     }
 
     /**

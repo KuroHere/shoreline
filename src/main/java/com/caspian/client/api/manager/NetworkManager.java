@@ -20,7 +20,7 @@ import java.util.Set;
 public class NetworkManager implements Globals
 {
     //
-    private final Set<Packet<?>> cache = new HashSet<>();
+    private static final Set<Packet<?>> PACKET_CACHE = new HashSet<>();
 
     /**
      * 
@@ -29,7 +29,7 @@ public class NetworkManager implements Globals
      */
     public void sendPacket(final Packet<?> p)
     {
-        cache.add(p);
+        PACKET_CACHE.add(p);
         mc.player.networkHandler.sendPacket(p);
     }
 
@@ -43,8 +43,7 @@ public class NetworkManager implements Globals
         if (mc.world != null)
         {
             PendingUpdateManager updater =
-                    ((AccessorClientWorld) mc.world).hookGetPendingUpdateManager()
-                            .incrementSequence();
+                    ((AccessorClientWorld) mc.world).hookGetPendingUpdateManager().incrementSequence();
             try
             {
                 int i = updater.getSequence();
@@ -84,21 +83,11 @@ public class NetworkManager implements Globals
     {
         if (mc.getNetworkHandler() != null)
         {
-            try
+            final PlayerListEntry playerEntry =
+                    mc.getNetworkHandler().getPlayerListEntry(mc.player.getGameProfile().getId());
+            if (playerEntry != null)
             {
-                for (PlayerListEntry e :
-                        mc.getNetworkHandler().getPlayerList())
-                {
-                    if (e.getProfile().getId() ==
-                            mc.player.getGameProfile().getId())
-                    {
-                        return e.getLatency();
-                    }
-                }
-            }
-            catch (Exception ignored)
-            {
-
+                return playerEntry.getLatency();
             }
         }
         return 0;
@@ -112,6 +101,6 @@ public class NetworkManager implements Globals
      */
     public boolean isCached(Packet<?> p)
     {
-        return cache.remove(p);
+        return PACKET_CACHE.remove(p);
     }
 }

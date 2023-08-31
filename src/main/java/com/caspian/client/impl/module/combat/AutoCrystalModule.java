@@ -34,6 +34,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -837,6 +839,8 @@ public class AutoCrystalModule extends RotationModule
         {
             if (renderConfig.getValue() && getCrystalHand() != null)
             {
+                Camera camera = mc.gameRenderer.getCamera();
+                MatrixStack matrix = event.getCameraMatrices(camera);
                 final Color c = Modules.COLORS.getColor();
                 int color = c.getRGB();
                 if (renderAttackConfig.getValue())
@@ -844,8 +848,7 @@ public class AutoCrystalModule extends RotationModule
                     final Box rb = renderBreak.get();
                     if (rb != null)
                     {
-                        RenderManager.renderBoundingBox(event.getMatrices(),
-                                rb, 1.5f, color);
+                        RenderManager.renderBoundingBox(matrix, rb, 1.5f, color);
                     }
                 }
                 final BlockPos rp = renderPlace.get();
@@ -857,9 +860,8 @@ public class AutoCrystalModule extends RotationModule
                         int alpha = c.getAlpha() + 55;
                         color = (color & 0x00ffffff) | (alpha << 24);
                     }
-                    RenderManager.renderBox(event.getMatrices(), rp, color);
-                    RenderManager.renderBoundingBox(event.getMatrices(), rp,
-                            1.5f, color);
+                    RenderManager.renderBox(matrix, rp, color);
+                    RenderManager.renderBoundingBox(matrix, rp, 1.5f, color);
                 }
             }
         }

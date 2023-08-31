@@ -51,8 +51,7 @@ public class AutoTotemModule extends ToggleModule
     Config<Float> healthConfig = new NumberConfig<>("Health", "Lethal offhand" +
             " health", 0.0f, 0.0f, 20.0f);
     Config<Boolean> lethalConfig = new BooleanConfig("Lethal",
-            "Calculate lethal damage sources and place totem in offhand",
-            false);
+            "Calculate lethal damage sources and place totem in offhand", false);
     Config<Boolean> instantConfig = new BooleanConfig("Instant",
             "Attempt to instantly replace totem in offhand after popping a " +
                     "totem", false);
@@ -64,9 +63,9 @@ public class AutoTotemModule extends ToggleModule
     Config<Boolean> strictMoveConfig = new BooleanConfig("StrictMove",
             "Stops motion before clicking slots", false);
     Config<Boolean> offhandOverrideConfig = new BooleanConfig(
-            "OffhandOverride", "Overrides the Offhand item with a " +
+            "Offhand-Override", "Overrides the Offhand item with a " +
             "GOLDEN_APPLE when trying to use an item", false);
-    Config<Boolean> offhandPotionConfig = new BooleanConfig("OffhandPotions",
+    Config<Boolean> offhandPotionConfig = new BooleanConfig("Offhand-Potions",
             "Uses potions in the inventory before gapples", false);
     Config<Boolean> hotbarConfig = new BooleanConfig("HotbarItem",
             "Allow offhand items to be taken from the hotbar", false);
