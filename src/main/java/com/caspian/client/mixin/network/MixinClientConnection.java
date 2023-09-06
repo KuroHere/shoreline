@@ -5,8 +5,10 @@ import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.PacketCallbacks;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,6 +37,27 @@ public class MixinClientConnection
                 new PacketEvent.Outbound(packet);
         Caspian.EVENT_HANDLER.dispatch(packetOutboundEvent);
         // prevent client from sending packet to server
+        if (packetOutboundEvent.isCanceled())
+        {
+            ci.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param packet
+     * @param callbacks
+     * @param ci
+     */
+    @Inject(method = "sendImmediately", at = @At(value = "HEAD"),
+            cancellable = true)
+    private void hookSendImmediately(Packet<?> packet,
+                                     @Nullable PacketCallbacks callbacks,
+                                     CallbackInfo ci)
+    {
+        PacketEvent.Outbound packetOutboundEvent =
+                new PacketEvent.Outbound(packet);
+        Caspian.EVENT_HANDLER.dispatch(packetOutboundEvent);
         if (packetOutboundEvent.isCanceled())
         {
             ci.cancel();

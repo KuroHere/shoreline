@@ -20,7 +20,6 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
@@ -35,6 +34,12 @@ import org.lwjgl.opengl.GL11;
 public class NametagsModule extends ToggleModule
 {
     //
+    Config<Boolean> armorConfig = new BooleanConfig("Armor", "Displays " +
+            "the player's armor", true);
+    Config<Boolean> enchantmentsConfig = new BooleanConfig("Enchantments",
+            "Displays a list of the item's enchantments", true);
+    Config<Boolean> itemNameConfig = new BooleanConfig("ItemName", "Displays " +
+            "the player's current held item name", false);
     Config<Boolean> entityIdConfig = new BooleanConfig("EntityId", "Displays " +
             "the player's entity id", false);
     Config<Boolean> gamemodeConfig = new BooleanConfig("Gamemode", "Displays " +
@@ -49,6 +54,8 @@ public class NametagsModule extends ToggleModule
             "label scale", 0.001f, 0.003f, 0.01f);
     Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles",
             "Renders nametags on invisible players", true);
+    Config<Boolean> borderedConfig = new BooleanConfig("TextBorder",
+            "Renders a border behind the nametag", true);
 
     /**
      *
@@ -99,8 +106,9 @@ public class NametagsModule extends ToggleModule
                     }
                     float sdist = (float) Math.max(dist - 8.0, 0.0);
                     float scaling = 0.0245f + scalingConfig.getValue() * sdist;
-                    renderInfo(event.getMatrices(), info, hwidth, player,
-                            new Vec3d(rx, ry, rz), camera, scaling);
+                    Vec3d render = new Vec3d(rx, ry, rz);
+                    renderInfo(info, hwidth, player, render, camera, scaling);
+                    renderItems(render, camera);
                 }
             }
         }
@@ -121,7 +129,6 @@ public class NametagsModule extends ToggleModule
 
     /**
      *
-     * @param matrices
      * @param info
      * @param width
      * @param entity
@@ -129,8 +136,7 @@ public class NametagsModule extends ToggleModule
      * @param camera
      * @param scaling
      */
-    private void renderInfo(final MatrixStack matrices,
-                            final String info,
+    private void renderInfo(final String info,
                             final float width,
                             final PlayerEntity entity,
                             final Vec3d rv,
@@ -138,6 +144,7 @@ public class NametagsModule extends ToggleModule
                             final float scaling)
     {
         final Vec3d pos = camera.getPos();
+        MatrixStack matrices = new MatrixStack();
         matrices.push();
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0f));
@@ -154,18 +161,29 @@ public class NametagsModule extends ToggleModule
                 mc.getBufferBuilders().getEntityVertexConsumers();
         float g = mc.options.getTextBackgroundOpacity(0.25f);
         int j = (int) (g * 255.0f) << 24;
-        mc.textRenderer.draw(info, -width, 0.0f, 553648127,
-                false, matrices.peek().getPositionMatrix(), vertexConsumers,
-                TextRenderer.TextLayerType.NORMAL, j, 0xf000f0);
-        matrices.translate(1.0, 1.0, 0.0);
-        mc.textRenderer.draw(matrices, Text.of(info), -width, 0.0f, 0x202020);
+        //mc.textRenderer.draw(info, -width, 0.0f, 0xff20ffff,
+        //        false, matrices.peek().getPositionMatrix(), vertexConsumers,
+        //        TextRenderer.TextLayerType.NORMAL, j, 0xf000f0);
+        //matrices.translate(1.0, 1.0, 0.0);
+        //mc.textRenderer.draw(matrices, Text.of(info), -width, 0.0f, 0x202020);
         mc.textRenderer.draw(info, -width, 0.0f, getNametagColor(entity),
-                false, matrices.peek().getPositionMatrix(), vertexConsumers,
+                true, matrices.peek().getPositionMatrix(), vertexConsumers,
                 TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
         vertexConsumers.draw();
         RenderSystem.disableBlend();
         matrices.pop();
         GL11.glDepthFunc(GL11.GL_LEQUAL);
+    }
+
+    /**
+     *
+     * @param rv
+     * @param camera
+     */
+    private void renderItems(final Vec3d rv,
+                             final Camera camera)
+    {
+
     }
 
     /**

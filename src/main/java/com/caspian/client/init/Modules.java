@@ -63,7 +63,7 @@ public class Modules
     public static NametagsModule NAMETAGS;
     public static NoRenderModule NO_RENDER;
     public static NoWeatherModule NO_WEATHER;
-    // public static ViewClipModule VIEW_CLIP;
+    public static ViewClipModule VIEW_CLIP;
     // public static ViewModelModule VIEW_MODEL;
     public static FastPlaceModule FAST_PLACE;
     public static SpeedmineModule SPEEDMINE;
@@ -137,8 +137,8 @@ public class Modules
             NO_RENDER = (NoRenderModule) getRegisteredModule("norender-module");
             NO_WEATHER = (NoWeatherModule) getRegisteredModule(
                     "noweather-module");
-            // VIEW_CLIP = (ViewClipModule) getRegisteredModule(
-            //        "viewclip-module");
+            VIEW_CLIP = (ViewClipModule) getRegisteredModule(
+                    "viewclip-module");
             // VIEW_MODEL = (ViewModelModule) getRegisteredModule(
             //        "viewmodel-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule(

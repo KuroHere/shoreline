@@ -13,19 +13,20 @@ import com.caspian.client.impl.event.gui.hud.RenderOverlayEvent;
 import com.caspian.client.impl.event.particle.ParticleEvent;
 import com.caspian.client.impl.event.render.HurtCamEvent;
 import com.caspian.client.impl.event.render.RenderFloatingItemEvent;
+import com.caspian.client.impl.event.render.RenderFogEvent;
 import com.caspian.client.impl.event.render.RenderNauseaEvent;
-import com.caspian.client.impl.event.render.block.RenderBlockEvent;
 import com.caspian.client.impl.event.render.block.RenderTileEntityEvent;
 import com.caspian.client.impl.event.render.entity.RenderArmorEvent;
+import com.caspian.client.impl.event.render.entity.RenderFireworkRocketEvent;
 import com.caspian.client.impl.event.render.entity.RenderItemEvent;
 import com.caspian.client.impl.event.render.entity.RenderWitherSkullEvent;
 import com.google.common.collect.Lists;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.tag.FluidTags;
 
 /**
  *
@@ -54,6 +55,8 @@ public class NoRenderModule extends ToggleModule
             "Prevents the boss bar Hud overlay from rendering", true);
     Config<Boolean> nauseaConfig = new BooleanConfig("Nausea",
             "Prevents nausea effect from rendering (includes portal effect)", false);
+    Config<Boolean> blindnessConfig = new BooleanConfig("Blindness",
+            "Prevents blindness effect from rendering", false);
     Config<Boolean> frostbiteConfig = new BooleanConfig("Frostbite",
             "Prevents frostbite effect from rendering", false);
     Config<Boolean> skylightConfig = new BooleanConfig("Skylight",
@@ -69,10 +72,10 @@ public class NoRenderModule extends ToggleModule
             "Prevents explosion particles from rendering", true);
     Config<Boolean> campfiresConfig = new BooleanConfig("Campfires",
             "Prevents campfire particles from rendering", false);
-    Config<Boolean> barriersConfig = new BooleanConfig("Barriers",
-            "Prevents barrier particles from rendering", true);
     Config<Boolean> totemConfig = new BooleanConfig("Totems",
             "Prevents totem particles from rendering", false);
+    Config<FogRender> fogConfig = new EnumConfig<>("Fog", "Prevents fog from " +
+            "rendering in the world", FogRender.OFF, FogRender.values());
     Config<ItemRender> itemsConfig = new EnumConfig<>("Items",
             "Prevents dropped items from rendering", ItemRender.OFF,
             ItemRender.values());
@@ -297,9 +300,9 @@ public class NoRenderModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onRenderBlock(RenderBlockEvent event)
+    public void onRenderFireworkRocket(RenderFireworkRocketEvent event)
     {
-        if (barriersConfig.getValue() && event.getBlock() == Blocks.BARRIER)
+        if (fireworksConfig.getValue())
         {
             event.cancel();
         }
@@ -337,12 +340,37 @@ public class NoRenderModule extends ToggleModule
      * @param event
      */
     @EventListener
+    public void onRenderFog(RenderFogEvent event)
+    {
+        if (fogConfig.getValue() == FogRender.LIQUID_VISION
+                && mc.player != null && mc.player.isSubmergedIn(FluidTags.LAVA))
+        {
+            event.cancel();
+        }
+        else if (fogConfig.getValue() == FogRender.CLEAR)
+        {
+            event.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
     public void onRenderItem(RenderItemEvent event)
     {
         if (itemsConfig.getValue() == ItemRender.HIDE)
         {
             event.cancel();
         }
+    }
+
+    public enum FogRender
+    {
+        CLEAR,
+        LIQUID_VISION,
+        OFF
     }
 
     public enum ItemRender

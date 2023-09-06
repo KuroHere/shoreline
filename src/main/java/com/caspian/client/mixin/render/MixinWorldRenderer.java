@@ -46,7 +46,7 @@ public class MixinWorldRenderer
                             Matrix4f positionMatrix, CallbackInfo ci)
     {
         final RenderWorldEvent renderWorldEvent =
-                new RenderWorldEvent(new MatrixStack(), tickDelta);
+                new RenderWorldEvent(matrices, tickDelta);
         RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT,
                 MinecraftClient.IS_SYSTEM_MAC);
         Caspian.EVENT_HANDLER.dispatch(renderWorldEvent);

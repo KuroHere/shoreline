@@ -32,7 +32,10 @@ public class RenderManager implements Globals
      */
     public static void renderBox(MatrixStack matrices, BlockPos p, int color)
     {
+        // matrices.push();
+        // matrices.translate(p.getX(), p.getY(), p.getZ());
         renderBox(matrices, new Box(p), color);
+        // matrices.pop();
     }
 
     /**
@@ -173,7 +176,10 @@ public class RenderManager implements Globals
     public static void renderBoundingBox(MatrixStack matrices, BlockPos p,
                                          float width, int color)
     {
+        // matrices.push();
+        // matrices.translate(p.getX(), p.getY(), p.getZ());
         renderBoundingBox(matrices, new Box(p), width, color);
+        // matrices.pop();
     }
 
     /**

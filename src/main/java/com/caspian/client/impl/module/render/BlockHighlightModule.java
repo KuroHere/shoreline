@@ -18,6 +18,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
@@ -85,24 +86,24 @@ public class BlockHighlightModule extends ToggleModule
             else if (result.getType() == HitResult.Type.BLOCK)
             {
                 final BlockHitResult blockHit = (BlockHitResult) result;
-                render = new Box(blockHit.getBlockPos());
-                distance = pos.distanceTo(blockHit.getPos());
+                BlockPos hpos = blockHit.getBlockPos();
+                render = new Box(hpos);
+                distance = pos.distanceTo(hpos.toCenterPos());
             }
         }
         if (render != null)
         {
             Camera camera = mc.gameRenderer.getCamera();
-            MatrixStack matrix = event.getCameraMatrices(camera);
             switch (boxModeConfig.getValue())
             {
                 case FILL ->
                 {
-                    RenderManager.renderBox(matrix, render,
+                    RenderManager.renderBox(event.getCameraMatrices(camera), render,
                             Modules.COLORS.getRGB(60));
-                    RenderManager.renderBoundingBox(matrix, render, 1.5f,
-                            Modules.COLORS.getRGB(145));
+                    RenderManager.renderBoundingBox(event.getCameraMatrices(camera),
+                            render, 1.5f, Modules.COLORS.getRGB(145));
                 }
-                case OUTLINE -> RenderManager.renderBoundingBox(matrix,
+                case OUTLINE -> RenderManager.renderBoundingBox(event.getCameraMatrices(camera),
                         render, 1.5f, Modules.COLORS.getRGB(145));
             }
         }

@@ -71,6 +71,7 @@ public class ModuleManager
                 new NametagsModule(),
                 new NoRenderModule(),
                 new NoWeatherModule(),
+                new ViewClipModule(),
                 // World
                 new FastPlaceModule(),
                 new SpeedmineModule()

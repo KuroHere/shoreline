@@ -34,8 +34,9 @@ import java.util.concurrent.TimeUnit;
 public class FastPlaceModule extends ToggleModule
 {
     //
-    Config<Selection> selectionConfig = new EnumConfig<>("Selection", "",
-            Selection.WHITELIST, Selection.values());
+    Config<Selection> selectionConfig = new EnumConfig<>("Selection", "The " +
+            "selection of items to apply fast placements", Selection.WHITELIST,
+            Selection.values());
     Config<Integer> delayConfig = new NumberConfig<>("Delay", "Fast place " +
             "delay", 0, 1, 4);
     Config<Float> startDelayConfig = new NumberConfig<>("StartDelay", "Fast" +
@@ -73,18 +74,16 @@ public class FastPlaceModule extends ToggleModule
             {
                 startTimer.reset();
             }
-            else if (placeCheck(mc.player.getActiveItem()))
+            else if (placeCheck(mc.player.getActiveItem())
+                    && startTimer.passed(startDelayConfig.getValue(), TimeUnit.SECONDS)
+                    && ((AccessorMinecraftClient) mc).hookGetItemUseCooldown() > delayConfig.getValue())
             {
-                if (startTimer.passed(startDelayConfig.getValue(), TimeUnit.SECONDS)
-                        && ((AccessorMinecraftClient) mc).hookGetItemUseCooldown() > delayConfig.getValue())
+                if (ghostFixConfig.getValue())
                 {
-                    if (ghostFixConfig.getValue())
-                    {
-                        Managers.NETWORK.sendSequencedPacket(id ->
-                                new PlayerInteractItemC2SPacket(mc.player.getActiveHand(), id));
-                    }
-                    ((AccessorMinecraftClient) mc).hookSetItemUseCooldown(delayConfig.getValue());
+                    Managers.NETWORK.sendSequencedPacket(id ->
+                            new PlayerInteractItemC2SPacket(mc.player.getActiveHand(), id));
                 }
+                ((AccessorMinecraftClient) mc).hookSetItemUseCooldown(delayConfig.getValue());
             }
         }
     }
@@ -99,17 +98,15 @@ public class FastPlaceModule extends ToggleModule
     {
         if (mc.player != null && mc.world != null)
         {
-            if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet)
+            if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet
+                    && ghostFixConfig.getValue() && !event.isCached()
+                    && placeCheck(mc.player.getStackInHand(packet.getHand())))
             {
-                if (ghostFixConfig.getValue() && !event.isCached()
-                        && placeCheck(mc.player.getStackInHand(packet.getHand())))
+                final BlockState state = mc.world.getBlockState(
+                        packet.getBlockHitResult().getBlockPos());
+                if (!SneakBlocks.isSneakBlock(state))
                 {
-                    final BlockState state = mc.world.getBlockState(
-                            packet.getBlockHitResult().getBlockPos());
-                    if (!SneakBlocks.isSneakBlock(state))
-                    {
-                        event.cancel();
-                    }
+                    event.cancel();
                 }
             }
         }
