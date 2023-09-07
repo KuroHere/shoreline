@@ -1,4 +1,4 @@
-package com.caspian.client.api.config.setting;
+package com.caspian.client.api.config;
 
 /**
  *

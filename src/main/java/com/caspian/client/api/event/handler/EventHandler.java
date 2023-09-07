@@ -16,10 +16,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @since 1.0
  *
  * @see Event
+ * @see EventBus
  * @see EventListener
  * @see Listener
  */
-public class EventHandler
+public class EventHandler implements EventBus
 {
     // Active subscriber cache. Used to check if a class is already
     // subscribed to this EventHandler.
@@ -36,6 +37,7 @@ public class EventHandler
      *
      * @param obj The subscriber object
      */
+    @Override
     public void subscribe(Object obj)
     {
         subscribers.add(obj);
@@ -67,6 +69,7 @@ public class EventHandler
      *
      * @param obj The subscriber object
      */
+    @Override
     public void unsubscribe(Object obj)
     {
         if (subscribers.remove(obj))
@@ -84,6 +87,7 @@ public class EventHandler
      * @param event The event to dispatch listeners
      * @return <tt>true</tt> if {@link Event#isCanceled()} is <tt>true</tt>
      */
+    @Override
     public boolean dispatch(Event event)
     {
         if (event == null)
