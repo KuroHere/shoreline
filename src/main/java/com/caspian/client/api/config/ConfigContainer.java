@@ -137,59 +137,62 @@ public class ConfigContainer implements Configurable<Config<?>>
             }
             for (JsonElement je : element.getAsJsonArray())
             {
-                if (je.isJsonObject())
+                if (!je.isJsonObject())
                 {
-                    final JsonObject configObj = je.getAsJsonObject();
-                    final JsonElement id = configObj.get("id");
-                    Config<?> config = getConfig(id.getAsString());
-                    if (config != null)
+                    continue;
+                }
+                final JsonObject configObj = je.getAsJsonObject();
+                final JsonElement id = configObj.get("id");
+                //
+                Config<?> config = getConfig(id.getAsString());
+                if (config == null)
+                {
+                    continue;
+                }
+                try
+                {
+                    if (config instanceof BooleanConfig cfg)
                     {
-                        try
-                        {
-                            if (config instanceof BooleanConfig cfg)
-                            {
-                                Boolean val = cfg.fromJson(configObj);
-                                cfg.setValue(val);
-                            }
-                            else if (config instanceof ColorConfig cfg)
-                            {
-                                Color val = cfg.fromJson(configObj);
-                                cfg.setValue(val);
-                            }
-                            else if (config instanceof EnumConfig cfg)
-                            {
-                                Enum<?> val = cfg.fromJson(configObj);
-                                cfg.setValue(val);
-                            }
-                            else if (config instanceof ListConfig cfg)
-                            {
-                                List<?> val = cfg.fromJson(configObj);
-                                cfg.setValue(val);
-                            }
-                            else if (config instanceof MacroConfig cfg)
-                            {
-                                Macro val = cfg.fromJson(configObj);
-                                cfg.setValue(val);
-                            }
-                            else if (config instanceof NumberConfig cfg)
-                            {
-                                Number val = cfg.fromJson(configObj);
-                                cfg.setValue(val);
-                            }
-                            else if (config instanceof StringConfig cfg)
-                            {
-                                String val = cfg.fromJson(configObj);
-                                cfg.setValue(val);
-                            }
-                        }
-                        // couldn't parse Json value
-                        catch (Exception e)
-                        {
-                            Caspian.error("Couldn't parse Json for {}!",
-                                    config.getName());
-                            e.printStackTrace();
-                        }
+                        Boolean val = cfg.fromJson(configObj);
+                        cfg.setValue(val);
                     }
+                    else if (config instanceof ColorConfig cfg)
+                    {
+                        Color val = cfg.fromJson(configObj);
+                        cfg.setValue(val);
+                    }
+                    else if (config instanceof EnumConfig cfg)
+                    {
+                        Enum<?> val = cfg.fromJson(configObj);
+                        cfg.setValue(val);
+                    }
+                    else if (config instanceof ListConfig cfg)
+                    {
+                        List<?> val = cfg.fromJson(configObj);
+                        cfg.setValue(val);
+                    }
+                    else if (config instanceof MacroConfig cfg)
+                    {
+                        Macro val = cfg.fromJson(configObj);
+                        cfg.setValue(val);
+                    }
+                    else if (config instanceof NumberConfig cfg)
+                    {
+                        Number val = cfg.fromJson(configObj);
+                        cfg.setValue(val);
+                    }
+                    else if (config instanceof StringConfig cfg)
+                    {
+                        String val = cfg.fromJson(configObj);
+                        cfg.setValue(val);
+                    }
+                }
+                // couldn't parse Json value
+                catch (Exception e)
+                {
+                    Caspian.error("Couldn't parse Json for {}!",
+                            config.getName());
+                    e.printStackTrace();
                 }
             }
         }

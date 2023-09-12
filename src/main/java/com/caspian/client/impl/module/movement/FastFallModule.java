@@ -70,7 +70,7 @@ public class FastFallModule extends ToggleModule
                 {
                     return;
                 }
-                if (mc.player.isOnGround() && isNearestBlockWithinHeight())
+                if (mc.player.isOnGround() && isNearestBlockWithinHeight(heightConfig.getValue()))
                 {
                     Managers.MOVEMENT.setMotionY(-3.0);
                     // Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
@@ -105,7 +105,7 @@ public class FastFallModule extends ToggleModule
                 return;
             }
             if (mc.player.getVelocity().y < 0 && prevOnGround && !mc.player.isOnGround()
-                    && isNearestBlockWithinHeight())
+                    && isNearestBlockWithinHeight(heightConfig.getValue() + 0.01))
             {
                 fallTimer.reset();
                 event.cancel();
@@ -119,10 +119,10 @@ public class FastFallModule extends ToggleModule
      *
      * @return
      */
-    private boolean isNearestBlockWithinHeight()
+    private boolean isNearestBlockWithinHeight(double height)
     {
         Box bb = mc.player.getBoundingBox();
-        for (double i = 0; i < heightConfig.getValue() + 0.5; i += 0.01)
+        for (double i = 0; i < height + 0.5; i += 0.01)
         {
             if (!mc.world.isSpaceEmpty(mc.player, bb.offset(0, -i, 0)))
             {
