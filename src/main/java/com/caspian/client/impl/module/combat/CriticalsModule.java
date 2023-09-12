@@ -105,20 +105,21 @@ public class CriticalsModule extends ToggleModule
         if (event.getPacket() instanceof IPlayerInteractEntityC2SPacket packet
                 && packet.getType() == InteractType.ATTACK)
         {
+            if (!Managers.POSITION.isOnGround()
+                    || mc.player.isRiding()
+                    || mc.player.isFallFlying()
+                    || mc.player.isTouchingWater()
+                    || mc.player.isInLava()
+                    || mc.player.isHoldingOntoLadder()
+                    || mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
+                    || mc.player.input.jumping)
+            {
+                return;
+            }
             // Attacked entity
-            Entity e = packet.getEntity();
+            final Entity e = packet.getEntity();
             if (e != null && e.isAlive())
             {
-                if (!Managers.POSITION.isOnGround()
-                        || mc.player.isRiding()
-                        || mc.player.isTouchingWater()
-                        || mc.player.isInLava()
-                        || mc.player.isHoldingOntoLadder()
-                        || mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
-                        || mc.player.input.jumping)
-                {
-                    return;
-                }
                 if (e instanceof EndCrystalEntity)
                 {
                     return;

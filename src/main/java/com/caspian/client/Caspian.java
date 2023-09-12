@@ -1,6 +1,7 @@
 package com.caspian.client;
 
 import com.caspian.client.api.config.ConfigContainer;
+import com.caspian.client.api.event.handler.EventBus;
 import com.caspian.client.api.event.handler.EventHandler;
 import com.caspian.client.api.file.ClientConfiguration;
 import com.caspian.client.init.Managers;
@@ -44,7 +45,7 @@ public class Caspian
         LOGGER = LogManager.getLogger("Caspian");
         info("Starting preInit ...");
         EXECUTOR = Executors.newFixedThreadPool(1);
-        EVENT_HANDLER = new EventHandler();
+        EVENT_HANDLER = new EventBus();
     }
 
     /**

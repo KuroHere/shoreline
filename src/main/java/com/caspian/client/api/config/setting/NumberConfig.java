@@ -206,9 +206,10 @@ public class NumberConfig<T extends Number> extends Config<T>
      *
      *
      * @param jsonObj The data as a json object
+     * @return
      */
     @Override
-    public void fromJson(JsonObject jsonObj)
+    public T fromJson(JsonObject jsonObj)
     {
         if (jsonObj.has("value"))
         {
@@ -217,18 +218,19 @@ public class NumberConfig<T extends Number> extends Config<T>
             if (getValue() instanceof Integer)
             {
                 Integer val = (Integer) element.getAsInt();
-                setValue((T) val);
+                return (T) val;
             }
             else if (getValue() instanceof Float)
             {
                 Float val = (Float) element.getAsFloat();
-                setValue((T) val);
+                return (T) val;
             }
             else if (getValue() instanceof Double)
             {
                 Double val = (Double) element.getAsDouble();
-                setValue((T) val);
+                return (T) val;
             }
         }
+        return null;
     }
 }

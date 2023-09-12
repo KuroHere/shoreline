@@ -36,7 +36,7 @@ public class ViewClipModule extends ToggleModule
     @EventListener
     public void onCameraClip(CameraClipEvent event)
     {
-        event.setDistance(distanceConfig.getValue());
         event.cancel();
+        event.setDistance(distanceConfig.getValue());
     }
 }

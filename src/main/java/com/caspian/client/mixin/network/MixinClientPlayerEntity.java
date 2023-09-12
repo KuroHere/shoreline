@@ -8,6 +8,7 @@ import com.caspian.client.impl.event.network.*;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -21,6 +22,7 @@ import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -35,8 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @see ClientPlayerEntity
  */
 @Mixin(ClientPlayerEntity.class)
-public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
-        implements Globals
+public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity implements Globals
 {
     //
     @Shadow
@@ -79,6 +80,12 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     //
     @Shadow
     protected abstract void autoJump(float dx, float dz);
+    //
+    @Shadow
+    public abstract void tick();
+    //
+    @Shadow
+    protected abstract void sendMovementPackets();
 
     /**
      * 
@@ -193,6 +200,37 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         movementPacketsEvent.setStage(EventStage.POST);
         Caspian.EVENT_HANDLER.dispatch(movementPacketsEvent);
     }
+
+    //
+    @Unique
+    private boolean ticking;
+
+    /**
+     *
+     * @param ci
+     */
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/" +
+            "minecraft/client/network/ClientPlayerEntity;sendMovementPackets" +
+            "()V", ordinal = 0, shift = At.Shift.AFTER))
+    private void hookTick(CallbackInfo ci)
+    {
+        if (ticking)
+        {
+            return;
+        }
+        TickMovementEvent tickMovementEvent = new TickMovementEvent();
+        Caspian.EVENT_HANDLER.dispatch(tickMovementEvent);
+        if (tickMovementEvent.isCanceled())
+        {
+            for (int i = 0; i < tickMovementEvent.getIterations(); i++)
+            {
+                ticking = true;
+                tick();
+                ticking = false;
+                sendMovementPackets();
+            }
+        }
+    }
     
     /**
      *
@@ -250,8 +288,6 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
             ci.cancel();
         }
     }
-
-    // @Inject(method = "tickMovement", at = @At(value = "INVOKE"))
     
     /**
      *
@@ -287,5 +323,19 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         {
             instance.setSprinting(b);
         }
+    }
+
+    /**
+     *
+     * @param instance
+     * @return
+     */
+    @Redirect(method = "updateNausea", at = @At(value = "FIELD", target = "Lnet" +
+            "/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/" +
+            "client/gui/screen/Screen;"))
+    private Screen hookCurrentScreen(MinecraftClient instance)
+    {
+        //
+        return null;
     }
 }

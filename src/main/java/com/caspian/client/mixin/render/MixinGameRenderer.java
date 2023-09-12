@@ -1,13 +1,11 @@
 package com.caspian.client.mixin.render;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.impl.event.render.HurtCamEvent;
-import com.caspian.client.impl.event.render.RenderBlockOutlineEvent;
-import com.caspian.client.impl.event.render.RenderFloatingItemEvent;
-import com.caspian.client.impl.event.render.RenderNauseaEvent;
+import com.caspian.client.impl.event.render.*;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -25,6 +23,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer
 {
+
+    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/render" +
+            "/GameRenderer;renderHand:Z", opcode = Opcodes.GETFIELD,
+            ordinal = 0), method = "renderWorld")
+    private void hookRenderWorld(float tickDelta, long limitTime,
+                                 MatrixStack matrices, CallbackInfo ci)
+    {
+        final RenderWorldEvent renderWorldEvent =
+                new RenderWorldEvent(matrices, tickDelta);
+        Caspian.EVENT_HANDLER.dispatch(renderWorldEvent);
+    }
+
     /**
      *
      * @param matrices

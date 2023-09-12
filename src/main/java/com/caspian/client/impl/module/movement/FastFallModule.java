@@ -11,8 +11,9 @@ import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.TickMovementEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
-import com.caspian.client.util.string.EnumFormatter;
-import net.minecraft.util.math.Vec3d;
+import com.caspian.client.util.math.timer.CacheTimer;
+import com.caspian.client.util.math.timer.Timer;
+import net.minecraft.util.math.Box;
 
 /**
  *
@@ -28,8 +29,11 @@ public class FastFallModule extends ToggleModule
     Config<FallMode> fallModeConfig = new EnumConfig<>("Mode", "The mode for " +
             "falling down blocks", FallMode.STEP, FallMode.values());
     Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks",
-            "Number of ticks to shift ahead", 0, 3, 5,
+            "Number of ticks to shift ahead", 1, 3, 5,
             () -> fallModeConfig.getValue() == FallMode.SHIFT);
+    //
+    private boolean prevOnGround;
+    private final Timer fallTimer = new CacheTimer();
 
     /**
      *
@@ -49,12 +53,12 @@ public class FastFallModule extends ToggleModule
     {
         if (event.getStage() == EventStage.PRE)
         {
+            prevOnGround = mc.player.isOnGround();
             if (fallModeConfig.getValue() == FallMode.STEP)
             {
                 if (mc.player.isRiding()
                         || mc.player.isFallFlying()
                         || mc.player.isHoldingOntoLadder()
-                        || mc.player.fallDistance > 0.5f
                         || mc.player.isInLava()
                         || mc.player.isTouchingWater()
                         || mc.player.input.jumping
@@ -66,14 +70,10 @@ public class FastFallModule extends ToggleModule
                 {
                     return;
                 }
-                if (Managers.POSITION.isOnGround())
+                if (mc.player.isOnGround() && isNearestBlockWithinHeight())
                 {
-                    final int blockY = getNearestBlockY();
-                    if (blockY != -1)
-                    {
-                        Managers.MOVEMENT.setMotionY(-3.0);
-                        // Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
-                    }
+                    Managers.MOVEMENT.setMotionY(-3.0);
+                    // Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
                 }
             }
         }
@@ -82,6 +82,7 @@ public class FastFallModule extends ToggleModule
     /**
      *
      * @param event
+     * @see TickMovementEvent
      */
     @EventListener
     public void onTickMovement(TickMovementEvent event)
@@ -91,7 +92,6 @@ public class FastFallModule extends ToggleModule
             if (mc.player.isRiding()
                     || mc.player.isFallFlying()
                     || mc.player.isHoldingOntoLadder()
-                    || mc.player.fallDistance > 0.5f
                     || mc.player.isInLava()
                     || mc.player.isTouchingWater()
                     || mc.player.input.jumping
@@ -99,19 +99,17 @@ public class FastFallModule extends ToggleModule
             {
                 return;
             }
-            if (!Managers.NCP.passed(1000)
+            if (!Managers.NCP.passed(1000) || !fallTimer.passed(1000)
                     || Modules.SPEED.isEnabled())
             {
                 return;
             }
-            if (Managers.POSITION.isOnGround())
+            if (mc.player.getVelocity().y < 0 && prevOnGround && !mc.player.isOnGround()
+                    && isNearestBlockWithinHeight())
             {
-                final int blockY = getNearestBlockY();
-                if (blockY != -1)
-                {
-                    event.cancel();
-                    event.setIterations(shiftTicksConfig.getValue());
-                }
+                fallTimer.reset();
+                event.cancel();
+                event.setIterations(shiftTicksConfig.getValue());
             }
         }
     }
@@ -121,14 +119,17 @@ public class FastFallModule extends ToggleModule
      *
      * @return
      */
-    private int getNearestBlockY()
+    private boolean isNearestBlockWithinHeight()
     {
-        int y = mc.player.getBlockY();
-        for (int i = y; i < heightConfig.getValue(); i++)
+        Box bb = mc.player.getBoundingBox();
+        for (double i = 0; i < heightConfig.getValue() + 0.5; i += 0.01)
         {
-
+            if (!mc.world.isSpaceEmpty(mc.player, bb.offset(0, -i, 0)))
+            {
+                return true;
+            }
         }
-        return y;
+        return false;
     }
 
     public enum FallMode

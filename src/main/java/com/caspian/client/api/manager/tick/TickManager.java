@@ -3,6 +3,7 @@ package com.caspian.client.api.manager.tick;
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.util.EvictingQueue;
 import com.caspian.client.util.Globals;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 
@@ -20,7 +21,7 @@ public class TickManager implements Globals
     // The TPS tick handler.
     //
     private long time;
-    private final Queue<Float> ticks = new ArrayDeque<>(20);
+    private final ArrayDeque<Float> ticks = new EvictingQueue<>(20);
 
     /**
      *
@@ -41,14 +42,16 @@ public class TickManager implements Globals
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
-        if (mc.player != null && mc.world != null)
+        if (mc.player == null || mc.world == null)
         {
-            if (event.getPacket() instanceof WorldTimeUpdateS2CPacket)
-            {
-                float last = 20000.0f / (System.currentTimeMillis() - time);
-                ticks.add(last);
-                time = System.currentTimeMillis();
-            }
+            return;
+        }
+        // ticks/actual
+        if (event.getPacket() instanceof WorldTimeUpdateS2CPacket)
+        {
+            float last = 20000.0f / (System.currentTimeMillis() - time);
+            ticks.addFirst(last);
+            time = System.currentTimeMillis();
         }
     }
 
@@ -70,7 +73,7 @@ public class TickManager implements Globals
     public float getTpsAverage()
     {
         float avg = 0.0f;
-        if (!ticks.isEmpty())
+        if (ticks.size() > 0)
         {
             for (float t : ticks)
             {
@@ -90,7 +93,7 @@ public class TickManager implements Globals
     {
         if (!ticks.isEmpty())
         {
-            return ticks.peek();
+            return ticks.getFirst();
         }
         return 20.0f;
     }

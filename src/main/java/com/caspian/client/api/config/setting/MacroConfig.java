@@ -23,19 +23,24 @@ public class MacroConfig extends Config<Macro>
         getValue().setKeycode(keycode);
     }
 
+    public String getMacroId()
+    {
+        return value.getName();
+    }
+
     public Runnable getRunnable()
     {
-        return getValue().getRunnable();
+        return value.getRunnable();
     }
 
     public int getKeycode()
     {
-        return getValue().getKeycode();
+        return value.getKeycode();
     }
 
     public String getKeyName()
     {
-        return getValue().getKeyName();
+        return value.getKeyName();
     }
 
     @Override
@@ -47,12 +52,13 @@ public class MacroConfig extends Config<Macro>
     }
 
     @Override
-    public void fromJson(JsonObject jsonObj)
+    public Macro fromJson(JsonObject jsonObj)
     {
         if (jsonObj.has("value"))
         {
             JsonElement element = jsonObj.get("value");
-            setValue(element.getAsInt());
+            return new Macro(getMacroId(), element.getAsInt(), getRunnable());
         }
+        return null;
     }
 }

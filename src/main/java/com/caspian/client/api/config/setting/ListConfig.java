@@ -1,16 +1,16 @@
 package com.caspian.client.api.config.setting;
 
 import com.caspian.client.api.config.Config;
+import com.caspian.client.util.IdNamespace;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,23 +21,8 @@ import java.util.List;
  *
  * @param <T>
  */
-public class ListConfig<T> extends Config<List<T>>
+public class ListConfig<T extends List<?>> extends Config<T>
 {
-    /**
-     * Initializes the config with a default value. This constructor should
-     * not be used to initialize a configuration, instead use the explicit
-     * definitions of the configs in {@link com.caspian.client.api.config.setting}.
-     *
-     * @param name  The unique config identifier
-     * @param desc  The config description
-     * @param value The default config value
-     * @throws NullPointerException if value is <tt>null</tt>
-     */
-    public ListConfig(String name, String desc, List<T> value)
-    {
-        super(name, desc, value);
-    }
-
     /**
      * Initializes the config with a default value. This constructor should
      * not be used to initialize a configuration, instead use the explicit
@@ -48,21 +33,21 @@ public class ListConfig<T> extends Config<List<T>>
      * @param values The default config values
      * @throws NullPointerException if value is <tt>null</tt>
      */
-    @SafeVarargs
-    public ListConfig(String name, String desc, T... values)
+    @SuppressWarnings("unchecked")
+    public ListConfig(String name, String desc, Object... values)
     {
-        super(name, desc, List.of(values));
+        super(name, desc, (T) List.of(values));
     }
 
     /**
      *
      *
-     * @param e
+     * @param obj
      * @return
      */
-    public boolean contains(T e)
+    public boolean contains(Object obj)
     {
-        return getValue().contains(e);
+        return value.contains(obj);
     }
 
     /**
@@ -79,13 +64,13 @@ public class ListConfig<T> extends Config<List<T>>
         {
             if (element instanceof Block block)
             {
-                array.add(String.format("block_%s",
-                        block.getName().getString()));
+                Identifier id = Registries.BLOCK.getId(block);
+                array.add(String.format("block:%s", id.getPath()));
             }
             else if (element instanceof Item item)
             {
-                array.add(String.format("item_%s",
-                        item.getName().getString()));
+                Identifier id = Registries.ITEM.getId(item);
+                array.add(String.format("item:%s", id.getPath()));
             }
         }
         jsonObj.add("value", array);
@@ -97,26 +82,41 @@ public class ListConfig<T> extends Config<List<T>>
      * data in the object.
      *
      * @param jsonObj The data as a json object
+     * @return
+     *
      * @see #toJson()
      */
     @Override
-    public void fromJson(JsonObject jsonObj)
+    public T fromJson(JsonObject jsonObj)
     {
         if (jsonObj.has("value"))
         {
             JsonElement element = jsonObj.get("value");
+            List<?> temp = null;
             for (JsonElement je : element.getAsJsonArray())
             {
                 String val = je.getAsString();
-                if (val.startsWith("block"))
+                if (val.contains("block"))
                 {
-                    val = val.substring(6);
+                    if (temp == null)
+                    {
+                        temp = new ArrayList<Block>();
+                    }
+                    Block block = Registries.BLOCK.get(IdNamespace.toId(val));
+                    ((List<Block>) temp).add(block);
                 }
-                else if (val.startsWith("item"))
+                else if (val.contains("item"))
                 {
-                    val = val.substring(5);
+                    if (temp == null)
+                    {
+                        temp = new ArrayList<Item>();
+                    }
+                    Item item = Registries.ITEM.get(IdNamespace.toId(val));
+                    ((List<Item>) temp).add(item);
                 }
             }
+            return (T) temp;
         }
+        return null;
     }
 }

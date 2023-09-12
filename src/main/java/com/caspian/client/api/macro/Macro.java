@@ -48,6 +48,15 @@ public class Macro
      *
      * @return
      */
+    public String getName()
+    {
+        return name;
+    }
+
+    /**
+     *
+     * @return
+     */
     public Runnable getRunnable()
     {
         return macro;

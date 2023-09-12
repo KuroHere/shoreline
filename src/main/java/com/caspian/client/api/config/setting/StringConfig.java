@@ -47,14 +47,16 @@ public class StringConfig extends Config<String>
      *
      *
      * @param jsonObj
+     * @return
      */
     @Override
-    public void fromJson(JsonObject jsonObj)
+    public String fromJson(JsonObject jsonObj)
     {
         if (jsonObj.has("value"))
         {
             JsonElement element = jsonObj.get("value");
-            setValue(element.getAsString());
+            return element.getAsString();
         }
+        return null;
     }
 }

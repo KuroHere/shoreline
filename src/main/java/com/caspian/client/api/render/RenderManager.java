@@ -7,6 +7,7 @@ import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
@@ -21,7 +22,7 @@ import java.awt.*;
 public class RenderManager implements Globals
 {
     //
-    public static final Tessellator TESSELLATOR = RenderSystem.renderThreadTesselator();
+    public static final Tessellator TESSELLATOR = Tessellator.getInstance();
     public static final BufferBuilder BUFFER = TESSELLATOR.getBuffer();
     
     /**
@@ -32,10 +33,7 @@ public class RenderManager implements Globals
      */
     public static void renderBox(MatrixStack matrices, BlockPos p, int color)
     {
-        // matrices.push();
-        // matrices.translate(p.getX(), p.getY(), p.getZ());
         renderBox(matrices, new Box(p), color);
-        // matrices.pop();
     }
 
     /**
@@ -49,16 +47,19 @@ public class RenderManager implements Globals
     {
         if (!isFrustumVisible(box))
         {
-            return;
+            // return;
         }
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
+        RenderSystem.enableDepthTest();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
         BUFFER.begin(VertexFormat.DrawMode.QUADS,
                 VertexFormats.POSITION_COLOR);
         Color c = new Color(color);
         drawBox(matrices, BUFFER, box, c.getRed(), c.getGreen(),
                 c.getBlue(), c.getAlpha());
         TESSELLATOR.draw();
+        RenderSystem.disableDepthTest();
         RenderSystem.disableBlend();
     }
 
@@ -75,8 +76,15 @@ public class RenderManager implements Globals
     public static void drawBox(MatrixStack matrices, VertexConsumer vertexConsumer,
                                Box box, float red, float green, float blue, float alpha)
     {
-        drawBox(matrices, vertexConsumer, box.minX, box.minY, box.minZ,
-                box.maxX, box.maxY, box.maxZ, red, green, blue, alpha);
+        final Vec3d cam = mc.getEntityRenderDispatcher().camera.getPos();
+        double minX = box.minX - cam.getX();
+        double minY = box.minY - cam.getY();
+        double minZ = box.minZ - cam.getZ();
+        double maxX = box.maxX - cam.getX();
+        double maxY = box.maxY - cam.getY();
+        double maxZ = box.maxZ - cam.getZ();
+        drawBox(matrices, vertexConsumer, minX, minY, minZ, maxX, maxY, maxZ,
+                red, green, blue, alpha);
     }
     
 

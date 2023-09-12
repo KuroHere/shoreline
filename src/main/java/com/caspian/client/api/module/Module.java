@@ -5,6 +5,7 @@ import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.Configurable;
 import com.caspian.client.api.manager.ModuleManager;
 import com.caspian.client.util.Globals;
+import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.string.StringUtil;
 
 /**
@@ -48,16 +49,32 @@ public class Module extends ConfigContainer implements Globals
 
     /**
      *
+     * @param message
+     */
+    protected void sendModuleMessage(String message)
+    {
+        ChatUtil.clientSendMessageRaw("§7[%s]§f %s", name, message);
+    }
+
+    /**
+     *
+     * @param message
+     * @param params
+     */
+    protected void sendModuleMessage(String message, Object... params)
+    {
+        sendModuleMessage(String.format(message, params));
+    }
+
+    /**
+     *
      *
      * @return
-     *
-     * @see ModuleManager#getModule(String)
-     * @see ModuleFile#save()
      */
     @Override
     public String getId()
     {
-        return String.format("%s-module", getName().toLowerCase());
+        return String.format("%s-module", name.toLowerCase());
     }
 
     /**

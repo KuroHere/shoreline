@@ -74,7 +74,7 @@ public class FastPlaceModule extends ToggleModule
             {
                 startTimer.reset();
             }
-            else if (placeCheck(mc.player.getActiveItem())
+            else if (placeCheck(mc.player.getMainHandStack())
                     && startTimer.passed(startDelayConfig.getValue(), TimeUnit.SECONDS)
                     && ((AccessorMinecraftClient) mc).hookGetItemUseCooldown() > delayConfig.getValue())
             {
@@ -122,9 +122,9 @@ public class FastPlaceModule extends ToggleModule
     {
         return switch (selectionConfig.getValue())
                 {
-                    case WHITELIST -> ((ListConfig<Item>) whitelistConfig)
+                    case WHITELIST -> ((ListConfig<?>) whitelistConfig)
                             .contains(held.getItem());
-                    case BLACKLIST -> !((ListConfig<Item>) blacklistConfig)
+                    case BLACKLIST -> !((ListConfig<?>) blacklistConfig)
                             .contains(held.getItem());
                     case ALL -> true;
                 };

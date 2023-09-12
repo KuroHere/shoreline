@@ -1,12 +1,16 @@
 package com.caspian.client.api.config;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.api.config.setting.*;
+import com.caspian.client.api.macro.Macro;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.awt.*;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -19,10 +23,10 @@ import java.util.concurrent.ConcurrentMap;
  * @see Config
  * @see ConfigFactory
  */
-public class ConfigContainer implements Configurable
+public class ConfigContainer implements Configurable<Config<?>>
 {
     // Container name is its UNIQUE identifier.
-    private final String name;
+    protected final String name;
     // List of all configurations in the container. The configs are managed
     // by a Map with references to their data tags.
     private final Map<String, Config<?>> configurations =
@@ -117,18 +121,19 @@ public class ConfigContainer implements Configurable
      * the {@link Config} values.
      *
      * @param jsonObj The container as a json object
+     * @return
      *
      * @see Config#fromJson(JsonObject)
      */
     @Override
-    public void fromJson(JsonObject jsonObj)
+    public Config<?> fromJson(JsonObject jsonObj)
     {
         if (jsonObj.has("configs"))
         {
             JsonElement element = jsonObj.get("configs");
             if (!element.isJsonArray())
             {
-                return;
+                return null;
             }
             for (JsonElement je : element.getAsJsonArray())
             {
@@ -141,7 +146,41 @@ public class ConfigContainer implements Configurable
                     {
                         try
                         {
-                            config.fromJson(configObj);
+                            if (config instanceof BooleanConfig cfg)
+                            {
+                                Boolean val = cfg.fromJson(configObj);
+                                cfg.setValue(val);
+                            }
+                            else if (config instanceof ColorConfig cfg)
+                            {
+                                Color val = cfg.fromJson(configObj);
+                                cfg.setValue(val);
+                            }
+                            else if (config instanceof EnumConfig cfg)
+                            {
+                                Enum<?> val = cfg.fromJson(configObj);
+                                cfg.setValue(val);
+                            }
+                            else if (config instanceof ListConfig cfg)
+                            {
+                                List<?> val = cfg.fromJson(configObj);
+                                cfg.setValue(val);
+                            }
+                            else if (config instanceof MacroConfig cfg)
+                            {
+                                Macro val = cfg.fromJson(configObj);
+                                cfg.setValue(val);
+                            }
+                            else if (config instanceof NumberConfig cfg)
+                            {
+                                Number val = cfg.fromJson(configObj);
+                                cfg.setValue(val);
+                            }
+                            else if (config instanceof StringConfig cfg)
+                            {
+                                String val = cfg.fromJson(configObj);
+                                cfg.setValue(val);
+                            }
                         }
                         // couldn't parse Json value
                         catch (Exception e)
@@ -154,6 +193,7 @@ public class ConfigContainer implements Configurable
                 }
             }
         }
+        return null;
     }
 
     /**

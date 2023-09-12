@@ -4,6 +4,7 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.config.setting.*;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.impl.event.config.ConfigUpdateEvent;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
@@ -20,7 +21,6 @@ import java.util.function.Supplier;
  *
  * @author linus
  * @since 1.0
- *
  * @param <T> The config value type
  *
  * @see BooleanConfig
@@ -30,7 +30,7 @@ import java.util.function.Supplier;
  * @see NumberConfig
  * @see StringConfig
  */
-public abstract class Config<T> implements Configurable
+public abstract class Config<T> implements Configurable<T>
 {
     // Config name is its UNIQUE identifier
     private final String name;
@@ -39,7 +39,9 @@ public abstract class Config<T> implements Configurable
     private final String desc;
     // Config value which modifies some property. This value is configured by
     // the user and saved to a local JSON file.
-    private T value;
+    protected T value;
+    //
+    private T defaultValue;
     // Parent container. All configs should be added to a config container,
     // otherwise they will not be saved locally.
     private ConfigContainer container;
@@ -65,20 +67,7 @@ public abstract class Config<T> implements Configurable
         this.name = name;
         this.desc = desc;
         this.value = value;
-    }
-
-    /**
-     * Initializes the config without the default value. DO NOT INITIALIZE
-     * CONFIGS USING THIS CONSTRUCTOR.
-     *
-     * @param name
-     * @param desc
-     */
-    @Internal
-    public Config(String name, String desc)
-    {
-        this.name = name;
-        this.desc = desc;
+        this.defaultValue = value;
     }
 
     /**
@@ -99,6 +88,20 @@ public abstract class Config<T> implements Configurable
     }
 
     /**
+     * Initializes the config without the default value. DO NOT INITIALIZE
+     * CONFIGS USING THIS CONSTRUCTOR.
+     *
+     * @param name
+     * @param desc
+     */
+    @Internal
+    public Config(String name, String desc)
+    {
+        this.name = name;
+        this.desc = desc;
+    }
+
+    /**
      *
      *
      * @return
@@ -115,11 +118,17 @@ public abstract class Config<T> implements Configurable
     /**
      *
      * @param obj The data as a json object
+     * @return
      */
     @Override
-    public void fromJson(JsonObject obj)
+    public T fromJson(JsonObject obj)
     {
-
+        if (obj.has("value"))
+        {
+            JsonElement element = obj.get("value");
+            return (T) (Byte) element.getAsByte();
+        }
+        return null;
     }
 
     /**
@@ -196,7 +205,7 @@ public abstract class Config<T> implements Configurable
     {
         if (val == null)
         {
-            throw new NullPointerException("Null values not supported");
+            throw new NullPointerException("Null values not supported!");
         }
         final ConfigUpdateEvent event = new ConfigUpdateEvent(this);
         // PRE
@@ -206,6 +215,14 @@ public abstract class Config<T> implements Configurable
         // POST
         event.setStage(EventStage.POST);
         Caspian.EVENT_HANDLER.dispatch(event);
+    }
+
+    /**
+     *
+     */
+    public void resetValue()
+    {
+        setValue(defaultValue);
     }
 
     /**

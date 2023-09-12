@@ -7,9 +7,21 @@ import org.lwjgl.glfw.GLFW;
  *
  * @author linus
  * @since 1.0
+ *
+ * @see GLFW
  */
 public class KeyboardUtil
 {
+    /**
+     *
+     * @param keycode
+     * @return
+     */
+    public static String getKeyName(int keycode)
+    {
+        return GLFW.glfwGetKeyName(keycode, GLFW.glfwGetKeyScancode(keycode));
+    }
+
     /**
      *
      * @param key

@@ -45,10 +45,10 @@ public class MixinWorldRenderer
                             LightmapTextureManager lightmapTextureManager,
                             Matrix4f positionMatrix, CallbackInfo ci)
     {
-        final RenderWorldEvent renderWorldEvent =
-                new RenderWorldEvent(matrices, tickDelta);
-        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT,
-                MinecraftClient.IS_SYSTEM_MAC);
-        Caspian.EVENT_HANDLER.dispatch(renderWorldEvent);
+        // final RenderWorldEvent renderWorldEvent =
+        //        new RenderWorldEvent(matrices, tickDelta);
+        // RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT,
+        //        MinecraftClient.IS_SYSTEM_MAC);
+        // Caspian.EVENT_HANDLER.dispatch(renderWorldEvent);
     }
 }

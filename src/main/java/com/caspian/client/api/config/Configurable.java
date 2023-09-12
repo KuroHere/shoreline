@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
  * @see Config
  * @see JsonObject
  */
-public interface Configurable
+public interface Configurable<T>
 {
     /**
      * Converts all data in the object to a {@link JsonObject}.
@@ -29,5 +29,5 @@ public interface Configurable
      *
      * @see #toJson()
      */
-    void fromJson(JsonObject jsonObj);
+    T fromJson(JsonObject jsonObj);
 }

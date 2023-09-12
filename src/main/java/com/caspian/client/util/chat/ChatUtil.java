@@ -46,6 +46,16 @@ public class ChatUtil implements Globals
     }
 
     /**
+     *
+     * @param message
+     * @param params
+     */
+    public static void clientSendMessageRaw(String message, Object... params)
+    {
+        clientSendMessageRaw(String.format(message, params));
+    }
+
+    /**
      * Sends a message in the {@link net.minecraft.client.network.ClientPlayNetworkHandler}
      * which is visible to others on a server
      *

@@ -9,9 +9,13 @@ import com.caspian.client.api.macro.Macro;
 import com.caspian.client.api.module.Module;
 import com.caspian.client.util.KeyboardUtil;
 import com.caspian.client.util.chat.ChatUtil;
-import org.lwjgl.glfw.GLFW;
+import com.caspian.client.util.IdNamespace;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraft.registry.Registries;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -52,6 +56,7 @@ public class ModuleCommand extends Command
             {
                 return;
             }
+            // parse value
             try
             {
                 if (config.getValue() instanceof Integer)
@@ -99,8 +104,29 @@ public class ModuleCommand extends Command
                         .getClass(), values[ix]);
                 ((Config<Enum<?>>) config).setValue(val);
             }
+            else if (config.getValue() instanceof List<?>)
+            {
+                if (value.startsWith("item"))
+                {
+                    Item item = Registries.ITEM.get(IdNamespace.toId(value));
+                    ((Config<List<Item>>) config).getValue().add(item);
+                }
+                else if (value.startsWith("block"))
+                {
+                    Block block = Registries.BLOCK.get(IdNamespace.toId(value));
+                    ((Config<List<Block>>) config).getValue().add(block);
+                }
+                ChatUtil.clientSendMessage("%s was added to §7%s§f!", value,
+                        config.getName());
+                return;
+            }
             else if (config.getValue() instanceof Macro macro)
             {
+                if (config.getName().equalsIgnoreCase("Keybind"))
+                {
+                    ChatUtil.error("Use the 'bind' command to keybind modules!");
+                    return;
+                }
                 ((Config<Macro>) config).setValue(new Macro(config.getId(),
                         KeyboardUtil.getKeyCode(value), macro.getRunnable()));
             }
@@ -108,6 +134,7 @@ public class ModuleCommand extends Command
             {
                 ((Config<String>) config).setValue(value);
             }
+            ChatUtil.clientSendMessage("§7%s§f was set to %s!", config.getName(), value);
         }
     }
 }

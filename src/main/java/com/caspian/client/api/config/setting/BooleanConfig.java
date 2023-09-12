@@ -45,12 +45,13 @@ public class BooleanConfig extends Config<Boolean>
      * @param jsonObj The data as a json object
      */
     @Override
-    public void fromJson(JsonObject jsonObj)
+    public Boolean fromJson(JsonObject jsonObj)
     {
         if (jsonObj.has("value"))
         {
             JsonElement element = jsonObj.get("value");
-            setValue(element.getAsBoolean());
+            return element.getAsBoolean();
         }
+        return null;
     }
 }

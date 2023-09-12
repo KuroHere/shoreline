@@ -189,7 +189,7 @@ public class NoSlowModule extends ToggleModule
             if (state.getBlock() == Blocks.COBWEB && websConfig.getValue()
                     && !Managers.POSITION.isOnGround())
             {
-        
+
             }
         }
     }

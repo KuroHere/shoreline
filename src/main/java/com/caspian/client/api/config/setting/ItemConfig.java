@@ -61,11 +61,13 @@ public class ItemConfig extends Config<Item>
      * data in the object.
      *
      * @param jsonObj The data as a json object
+     * @return
+     *
      * @see #toJson()
      */
     @Override
-    public void fromJson(JsonObject jsonObj)
+    public Item fromJson(JsonObject jsonObj)
     {
-
+        return null;
     }
 }

@@ -89,16 +89,18 @@ public class ColorConfig extends Config<Color>
      *
      *
      * @param jsonObj The data as a json object
+     * @return
      */
     @Override
-    public void fromJson(JsonObject jsonObj)
+    public Color fromJson(JsonObject jsonObj)
     {
         if (jsonObj.has("value"))
         {
             JsonElement element = jsonObj.get("value");
             String hex = element.getAsString();
-            setValue(parseColor(hex));
+            return parseColor(hex);
         }
+        return null;
     }
 
     /**
@@ -107,13 +109,13 @@ public class ColorConfig extends Config<Color>
      * @return
      * @throws IllegalArgumentException
      */
-    private int parseColor(String colorString)
+    private Color parseColor(String colorString)
     {
         if (colorString.startsWith("0x"))
         {
-            long color = Long.parseLong(colorString.substring(2), 16);
-            return (int) color;
+            colorString = colorString.substring(2);
+            return new Color((int) Long.parseLong(colorString, 16));
         }
-        throw new IllegalArgumentException("Unknown color " + colorString);
+        throw new IllegalArgumentException("Unknown color: " + colorString);
     }
 }

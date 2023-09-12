@@ -46,7 +46,8 @@
     "render.MixinRenderTickCounter",
     "render.MixinWorldRenderer",
     "render.MixinCamera",
-    "render.MixinGameRenderer"
+    "render.MixinGameRenderer",
+    "world.MixinBlockCollisionSpliterator"
   ],
   "injectors": {
     "defaultRequire": 1
