@@ -7,10 +7,7 @@ import com.caspian.client.impl.module.client.ClickGuiModule;
 import com.caspian.client.impl.module.client.ColorsModule;
 import com.caspian.client.impl.module.client.HudModule;
 import com.caspian.client.impl.module.client.RotationsModule;
-import com.caspian.client.impl.module.combat.AuraModule;
-import com.caspian.client.impl.module.combat.AutoCrystalModule;
-import com.caspian.client.impl.module.combat.AutoTotemModule;
-import com.caspian.client.impl.module.combat.CriticalsModule;
+import com.caspian.client.impl.module.combat.*;
 import com.caspian.client.impl.module.exploit.SwingModule;
 import com.caspian.client.impl.module.misc.FakePlayerModule;
 import com.caspian.client.impl.module.misc.TimerModule;
@@ -46,6 +43,7 @@ public class Modules
     public static HudModule HUD;
     public static RotationsModule ROTATIONS;
     public static AuraModule AURA;
+    public static AutoBowReleaseModule AUTO_BOW_RELEASE;
     public static AutoCrystalModule AUTO_CRYSTAL;
     public static AutoTotemModule AUTO_TOTEM;
     public static CriticalsModule CRITICALS;
@@ -60,6 +58,7 @@ public class Modules
     public static SprintModule SPRINT;
     public static BlockHighlightModule BLOCK_HIGHLIGHT;
     public static FullbrightModule FULLBRIGHT;
+    public static HoleEspModule HOLE_ESP;
     public static NametagsModule NAMETAGS;
     public static NoRenderModule NO_RENDER;
     public static NoWeatherModule NO_WEATHER;
@@ -113,6 +112,8 @@ public class Modules
             ROTATIONS = (RotationsModule) getRegisteredModule(
                     "rotations-module");
             AURA = (AuraModule) getRegisteredModule("aura-module");
+            AUTO_BOW_RELEASE = (AutoBowReleaseModule) getRegisteredModule(
+                    "autobowrelease-module");
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
                     "autocrystal-module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(

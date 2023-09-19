@@ -8,7 +8,7 @@ import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.config.NumberDisplay;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
-import com.caspian.client.api.manager.tick.TickSync;
+import com.caspian.client.api.manager.world.tick.TickSync;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.render.RenderManager;

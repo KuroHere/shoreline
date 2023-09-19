@@ -1,6 +1,7 @@
 package com.caspian.client.util.world;
 
 import com.caspian.client.util.Globals;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.chunk.ChunkManager;
 
@@ -12,6 +13,18 @@ import net.minecraft.world.chunk.ChunkManager;
  */
 public class BlockUtil implements Globals
 {
+    /**
+     *
+     * @param pos
+     * @return
+     */
+    public static boolean isBlockAccessible(BlockPos pos)
+    {
+        return mc.world.isAir(pos) && !mc.world.isAir(pos.add(0, -1, 0))
+                && mc.world.isAir(pos.add(0, 1, 0)) && mc.world.isAir(pos.add(0, 2, 0));
+    }
+
+
     /**
      *
      * @param x

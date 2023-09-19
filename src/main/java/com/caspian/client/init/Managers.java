@@ -2,10 +2,23 @@ package com.caspian.client.init;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.manager.*;
-import com.caspian.client.api.manager.latency.LatencyManager;
-import com.caspian.client.api.manager.rotation.RotationManager;
-import com.caspian.client.api.manager.sound.SoundManager;
-import com.caspian.client.api.manager.tick.TickManager;
+import com.caspian.client.api.manager.anticheat.NCPManager;
+import com.caspian.client.api.manager.client.AccountManager;
+import com.caspian.client.api.manager.client.CommandManager;
+import com.caspian.client.api.manager.client.MacroManager;
+import com.caspian.client.api.manager.client.SocialManager;
+import com.caspian.client.api.manager.combat.TotemManager;
+import com.caspian.client.api.manager.combat.hole.HoleManager;
+import com.caspian.client.api.manager.network.latency.LatencyManager;
+import com.caspian.client.api.manager.network.NetworkManager;
+import com.caspian.client.api.manager.player.InteractionManager;
+import com.caspian.client.api.manager.player.InventoryManager;
+import com.caspian.client.api.manager.player.MovementManager;
+import com.caspian.client.api.manager.player.PositionManager;
+import com.caspian.client.api.manager.player.rotation.RotationManager;
+import com.caspian.client.api.manager.world.sound.SoundManager;
+import com.caspian.client.api.manager.world.tick.TickManager;
+import com.caspian.client.api.manager.world.WaypointManager;
 
 /**
  *
@@ -34,6 +47,7 @@ public class Managers
     public static RotationManager ROTATION;
     public static NCPManager NCP;
     public static MovementManager MOVEMENT;
+    public static HoleManager HOLE;
     public static TotemManager TOTEM;
     public static InteractionManager INTERACT;
     public static LatencyManager LATENCY;
@@ -60,6 +74,7 @@ public class Managers
             ROTATION = new RotationManager();
             NCP = new NCPManager();
             MOVEMENT = new MovementManager();
+            HOLE = new HoleManager();
             TOTEM = new TotemManager();
             INTERACT = new InteractionManager();
             LATENCY = new LatencyManager();

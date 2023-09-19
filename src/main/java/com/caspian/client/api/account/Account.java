@@ -5,7 +5,7 @@ import com.caspian.client.api.account.microsoft.MicrosoftAuthException;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.setting.StringConfig;
-import com.caspian.client.api.manager.AccountManager;
+import com.caspian.client.api.manager.client.AccountManager;
 import com.caspian.client.mixin.accessor.AccessorMinecraftClient;
 import com.caspian.client.mixin.accessor.AccessorPlayerSkinProvider;
 import com.caspian.client.util.Globals;

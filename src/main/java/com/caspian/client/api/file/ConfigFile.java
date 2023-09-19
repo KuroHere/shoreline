@@ -1,7 +1,6 @@
 package com.caspian.client.api.file;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.module.ModuleFile;
 import com.google.gson.*;
 
 import java.io.IOException;
@@ -18,8 +17,6 @@ import static org.apache.logging.log4j.core.util.IOUtils.EOF;
  *
  * @author linus
  * @since 1.0
- *
- * @see ModuleFile
  */
 public abstract class ConfigFile
 {
@@ -115,7 +112,16 @@ public abstract class ConfigFile
      */
     protected <T> T parse(String json, Class<T> type)
     {
-        return GSON.fromJson(json, type);
+        try
+        {
+            return GSON.fromJson(json, type);
+        }
+        catch (JsonSyntaxException e)
+        {
+            Caspian.error("Invalid json syntax!");
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -160,11 +166,11 @@ public abstract class ConfigFile
     /**
      *
      *
-     * @param path
+     * @param fileName
      * @return
      */
-    private String toJsonPath(final String path)
+    private String toJsonPath(String fileName)
     {
-        return String.format("%s.json", path).toLowerCase();
+        return String.format("%s.json", fileName).toLowerCase();
     }
 }

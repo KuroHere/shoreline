@@ -2,7 +2,7 @@ package com.caspian.client.api.command.arg;
 
 import com.caspian.client.api.command.Command;
 import com.caspian.client.api.config.Config;
-import com.caspian.client.api.manager.CommandManager;
+import com.caspian.client.api.manager.client.CommandManager;
 import com.caspian.client.impl.event.gui.chat.ChatInputEvent;
 import com.caspian.client.util.string.StringUtil;
 

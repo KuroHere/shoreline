@@ -59,27 +59,27 @@ public class FriendCommand extends Command
                     Managers.SOCIAL.addFriend(player.getUuid());
                     if (notify != null && notify)
                     {
-                        ChatUtil.serverSendMessage(String.format("/w %s Friended by %s!",
-                                player.getEntityName(), mc.player.getEntityName()));
+                        ChatUtil.serverSendMessage(player, "You were friended by %s!",
+                                mc.player.getEntityName());
                     }
                 }
                 else if (action.equalsIgnoreCase("remove")
                         || action.equalsIgnoreCase("del"))
                 {
                     ChatUtil.clientSendMessage("Removed friend with name " +
-                            Formatting.AQUA + player.getEntityName() + Formatting.RESET + "!");
+                            Formatting.DARK_BLUE + player.getEntityName() + Formatting.RESET + "!");
                     Managers.SOCIAL.remove(player.getUuid());
                 }
             }
             else
             {
                 ChatUtil.clientSendMessage("Added friend with name " +
-                        Formatting.AQUA + player.getEntityName() + Formatting.RESET + "!");
+                        Formatting.DARK_BLUE + player.getEntityName() + Formatting.RESET + "!");
                 Managers.SOCIAL.addFriend(player.getUuid());
                 if (notify != null && notify)
                 {
-                    ChatUtil.serverSendMessage(String.format("/w %s Friended by %s!",
-                            player.getEntityName(), mc.player.getEntityName()));
+                    ChatUtil.serverSendMessage(player, "You were friended by %s!",
+                            mc.player.getEntityName());
                 }
             }
         }

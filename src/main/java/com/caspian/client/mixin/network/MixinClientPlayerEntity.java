@@ -2,7 +2,7 @@ package com.caspian.client.mixin.network;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.EventStage;
-import com.caspian.client.api.manager.rotation.RotationRequest;
+import com.caspian.client.api.manager.player.rotation.RotationRequest;
 import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.impl.event.network.*;
 import com.caspian.client.init.Managers;

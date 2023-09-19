@@ -1,6 +1,7 @@
 package com.caspian.client.api.config;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.api.Identifiable;
 import com.caspian.client.api.config.setting.*;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.impl.event.config.ConfigUpdateEvent;
@@ -30,7 +31,7 @@ import java.util.function.Supplier;
  * @see NumberConfig
  * @see StringConfig
  */
-public abstract class Config<T> implements Configurable<T>
+public abstract class Config<T> implements Identifiable, Serializable<T>
 {
     // Config name is its UNIQUE identifier
     private final String name;
@@ -148,6 +149,7 @@ public abstract class Config<T> implements Configurable<T>
      *
      * @see ConfigContainer#getName()
      */
+    @Override
     public String getId()
     {
         return String.format("%s-%s-config", container.getName().toLowerCase(),

@@ -1,7 +1,7 @@
 package com.caspian.client.api.event.listener;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.Invoker;
+import com.caspian.client.api.Invokable;
 import com.caspian.client.api.event.Event;
 import com.caspian.client.api.event.handler.EventHandler;
 
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link Event} Listener that creates an {@link Invoker} and runs
+ * {@link Event} Listener that creates an {@link Invokable} and runs
  * {@link #invokeSubscriber(Event)} when the event is dispatched by
  * the {@link EventHandler}.
  *
@@ -42,7 +42,7 @@ public class Listener implements Comparable<Listener>
 {
     // The Listener invoker created by the LambdaMetaFactory which invokes the
     // code from the Listener method.
-    private Invoker<Object> invoker;
+    private Invokable<Object> invoker;
     // The EventListener method which contains the code to invoke when the
     // listener is invoked.
     private final Method method;
@@ -54,7 +54,7 @@ public class Listener implements Comparable<Listener>
     //
     private final int priority;
     // subscriber invoker cache for each listener method
-    private static final Map<Method, Invoker<Object>> INVOKE_CACHE = new HashMap<>();
+    private static final Map<Method, Invokable<Object>> INVOKE_CACHE = new HashMap<>();
     // the MethodHandler lookup
     private static final Lookup LOOKUP = MethodHandles.lookup();
 
@@ -79,7 +79,7 @@ public class Listener implements Comparable<Listener>
         {
             if (!INVOKE_CACHE.containsKey(method))
             {
-                MethodType methodType = MethodType.methodType(Invoker.class);
+                MethodType methodType = MethodType.methodType(Invokable.class);
                 CallSite callSite = LambdaMetafactory.metafactory(
                         LOOKUP, "invoke",
                         methodType.appendParameterTypes(subscriber.getClass()),
@@ -88,7 +88,7 @@ public class Listener implements Comparable<Listener>
                         MethodType.methodType(void.class,
                                 method.getParameterTypes()[0])
                 );
-                invoker = (Invoker<Object>) callSite.getTarget().invoke(subscriber);
+                invoker = (Invokable<Object>) callSite.getTarget().invoke(subscriber);
                 INVOKE_CACHE.put(method, invoker);
             }
             else
@@ -109,7 +109,7 @@ public class Listener implements Comparable<Listener>
      * @param event
      * @throws NullPointerException
      *
-     * @see Invoker#invoke(Object)
+     * @see Invokable#invoke(Object)
      */
     public void invokeSubscriber(Event event)
     {

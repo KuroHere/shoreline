@@ -1,6 +1,7 @@
 package com.caspian.client.api.config;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.api.Identifiable;
 import com.caspian.client.api.config.setting.*;
 import com.caspian.client.api.macro.Macro;
 import com.google.gson.JsonArray;
@@ -23,7 +24,7 @@ import java.util.concurrent.ConcurrentMap;
  * @see Config
  * @see ConfigFactory
  */
-public class ConfigContainer implements Configurable<Config<?>>
+public class ConfigContainer implements Identifiable, Serializable<Config<?>>
 {
     // Container name is its UNIQUE identifier.
     protected final String name;
@@ -214,6 +215,7 @@ public class ConfigContainer implements Configurable<Config<?>>
      *
      * @return
      */
+    @Override
     public String getId()
     {
         return String.format("%s-container", getName().toLowerCase());

@@ -1,6 +1,7 @@
 package com.caspian.client.util.chat;
 
 import com.caspian.client.util.Globals;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -67,6 +68,34 @@ public class ChatUtil implements Globals
         {
             mc.player.networkHandler.sendChatMessage(PREFIX + message);
         }
+    }
+
+    /**
+     *
+     *
+     * @param player
+     * @param message
+     */
+    public static void serverSendMessage(PlayerEntity player, String message)
+    {
+        if (mc.player != null)
+        {
+            String reply = "/w " + player.getEntityName() + " ";
+            mc.player.networkHandler.sendChatMessage(reply + PREFIX + message);
+        }
+    }
+
+    /**
+     *
+     *
+     * @param player
+     * @param message
+     * @param params
+     */
+    public static void serverSendMessage(PlayerEntity player, String message,
+                                         Object... params)
+    {
+        serverSendMessage(player, String.format(message, params));
     }
 
     /**

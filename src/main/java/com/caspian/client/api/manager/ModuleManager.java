@@ -7,10 +7,7 @@ import com.caspian.client.impl.module.client.ClickGuiModule;
 import com.caspian.client.impl.module.client.ColorsModule;
 import com.caspian.client.impl.module.client.HudModule;
 import com.caspian.client.impl.module.client.RotationsModule;
-import com.caspian.client.impl.module.combat.AuraModule;
-import com.caspian.client.impl.module.combat.AutoCrystalModule;
-import com.caspian.client.impl.module.combat.AutoTotemModule;
-import com.caspian.client.impl.module.combat.CriticalsModule;
+import com.caspian.client.impl.module.combat.*;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
 import com.caspian.client.impl.module.exploit.SwingModule;
 import com.caspian.client.impl.module.misc.FakePlayerModule;
@@ -50,6 +47,7 @@ public class ModuleManager
                 new RotationsModule(),
                 // Combat
                 new AuraModule(),
+                new AutoBowReleaseModule(),
                 new AutoCrystalModule(),
                 new AutoTotemModule(),
                 new CriticalsModule(),

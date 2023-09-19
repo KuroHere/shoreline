@@ -1,6 +1,6 @@
 package com.caspian.client.api.module;
 
-import com.caspian.client.api.manager.rotation.RotationPriority;
+import com.caspian.client.api.manager.player.rotation.RotationPriority;
 import com.caspian.client.init.Managers;
 
 /**

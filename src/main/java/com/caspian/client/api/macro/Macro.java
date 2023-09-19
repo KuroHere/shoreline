@@ -1,5 +1,7 @@
 package com.caspian.client.api.macro;
 
+import com.caspian.client.api.Identifiable;
+import com.caspian.client.api.manager.client.MacroManager;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -9,9 +11,9 @@ import org.lwjgl.glfw.GLFW;
  * @author linus
  * @since 1.0
  *
- * @see com.caspian.client.api.manager.MacroManager
+ * @see MacroManager
  */
-public class Macro
+public class Macro implements Identifiable
 {
     //
     private final String name;
@@ -88,6 +90,7 @@ public class Macro
      *
      * @return
      */
+    @Override
     public String getId()
     {
         return String.format("%s-macro", name.toLowerCase());

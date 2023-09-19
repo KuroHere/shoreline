@@ -2,8 +2,7 @@ package com.caspian.client.api.module;
 
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.ConfigContainer;
-import com.caspian.client.api.config.Configurable;
-import com.caspian.client.api.manager.ModuleManager;
+import com.caspian.client.api.config.Serializable;
 import com.caspian.client.util.Globals;
 import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.string.StringUtil;
@@ -13,7 +12,7 @@ import com.caspian.client.util.string.StringUtil;
  * unique name which is also used as the module identifier. Modules are
  * grouped by {@link ModuleCategory}.
  *
- * <p>Modules are {@link Configurable} and hold {@link Config}
+ * <p>Modules are {@link Serializable} and hold {@link Config}
  * in a {@link ConfigContainer}. Modules can be configured in the ClickGui
  * or through the use of Commands in the chat.</p>
  *
