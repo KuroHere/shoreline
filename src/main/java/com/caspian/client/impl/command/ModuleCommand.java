@@ -26,10 +26,10 @@ import java.util.List;
 public class ModuleCommand extends Command
 {
     //
-    Argument<Config<?>> configArg = new ConfigArgument("Config", "The setting" +
-            " to configure");;
-    Argument<String> valueArg = new StringArgument("Value", "The new value to" +
-            " set the config");
+    Argument<Config<?>> configArgument = new ConfigArgument("Config", "The " +
+            "setting to configure");
+    Argument<String> valueArgument = new StringArgument("Value", "The new " +
+            "value to set the config");
 
     /**
      *
@@ -38,7 +38,8 @@ public class ModuleCommand extends Command
     public ModuleCommand(Module module)
     {
         super(module.getName(), "Configures the module");
-        configArg.setContainer(module);
+        // DO NOT REMOVE THIS - linus
+        configArgument.setContainer(module);
     }
 
     /**
@@ -48,10 +49,10 @@ public class ModuleCommand extends Command
     @Override
     public void onCommandInput()
     {
-        Config<?> config = configArg.parse();
+        Config<?> config = configArgument.parse();
         if (config != null)
         {
-            String value = valueArg.parse();
+            String value = valueArgument.parse();
             if (value == null)
             {
                 return;

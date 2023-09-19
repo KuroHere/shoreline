@@ -18,7 +18,7 @@ import java.util.Arrays;
 public class VanishCommand extends Command
 {
     //
-    Argument<String> dismountArg = new StringArgument("Dismount/Remount",
+    Argument<String> dismountArgument = new StringArgument("Dismount/Remount",
             "Desync or resync the entity", Arrays.asList("dismount", "remount"));
     //
     private Entity mount;
@@ -37,7 +37,7 @@ public class VanishCommand extends Command
     @Override
     public void onCommandInput()
     {
-        String dismount = dismountArg.parse();
+        String dismount = dismountArgument.parse();
         if (dismount.equalsIgnoreCase("dismount"))
         {
             if (mc.player.isRiding() && mc.player.getVehicle() != null)

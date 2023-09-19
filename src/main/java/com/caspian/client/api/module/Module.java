@@ -105,6 +105,6 @@ public class Module extends ConfigContainer implements Globals
      */
     public String getMetaData()
     {
-        return StringUtil.EMPTY_STRING;
+        return "ARRAYLIST_INFO";
     }
 }

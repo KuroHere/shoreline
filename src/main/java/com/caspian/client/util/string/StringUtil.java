@@ -8,8 +8,6 @@ package com.caspian.client.util.string;
  */
 public class StringUtil
 {
-    public static final String EMPTY_STRING = "";
-
     /**
      * Capitalises a given string
      *
@@ -22,6 +20,6 @@ public class StringUtil
         {
             return Character.toTitleCase(string.charAt(0)) + string.substring(1);
         }
-        return EMPTY_STRING;
+        return "";
     }
 }

@@ -218,7 +218,7 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>
     @Override
     public String getId()
     {
-        return String.format("%s-container", getName().toLowerCase());
+        return String.format("%s-container", name.toLowerCase());
     }
 
     /**

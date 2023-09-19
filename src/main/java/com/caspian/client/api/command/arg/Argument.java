@@ -41,8 +41,6 @@ public abstract class Argument<T> extends Config<T>
     public Argument(String name, String desc)
     {
         super(name.toLowerCase(), desc);
-        // LMAOOOOOOOOO WTF IS THIS
-        this.literal = StringUtil.EMPTY_STRING;
     }
 
     /**

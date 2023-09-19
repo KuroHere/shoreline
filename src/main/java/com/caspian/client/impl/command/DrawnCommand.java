@@ -20,8 +20,8 @@ import net.minecraft.util.Formatting;
 public class DrawnCommand extends Command
 {
     //
-    Argument<Module> moduleArg = new ModuleArgument("Module", "The module to " +
-            "toggle the drawn state");
+    Argument<Module> moduleArgument = new ModuleArgument("Module", "The " +
+            "module to toggle the drawn state");
 
     /**
      *
@@ -37,7 +37,7 @@ public class DrawnCommand extends Command
     @Override
     public void onCommandInput()
     {
-        Module module = moduleArg.parse();
+        Module module = moduleArgument.parse();
         if (module instanceof ToggleModule toggle)
         {
             boolean hide = !toggle.isHidden();

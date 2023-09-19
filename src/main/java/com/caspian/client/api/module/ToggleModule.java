@@ -42,6 +42,7 @@ public class ToggleModule extends Module implements Hideable
     // Arraylist rendering info
     Config<Boolean> hiddenConfig = new BooleanConfig("Hidden", "The hidden " +
             "state of the module in the Arraylist", false);
+    //
     private final Animation animation = new Animation(Easing.CUBIC_IN_OUT);
 
     /**

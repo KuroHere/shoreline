@@ -20,7 +20,7 @@ import net.minecraft.util.Formatting;
 public class PrefixCommand extends Command
 {
     //
-    Argument<String> prefixArg = new StringArgument("Single-char Prefix",
+    Argument<String> prefixArgument = new StringArgument("Single-char Prefix",
             "The new chat command prefix");
 
     /**
@@ -37,7 +37,7 @@ public class PrefixCommand extends Command
     @Override
     public void onCommandInput()
     {
-        final String prefix = prefixArg.parse();
+        final String prefix = prefixArgument.parse();
         if (prefix != null)
         {
             if (prefix.length() > 1)
@@ -69,7 +69,7 @@ public class PrefixCommand extends Command
             }
             Managers.COMMAND.setPrefix(prefix, keycode);
             ChatUtil.clientSendMessage("Client command prefix changed to " +
-                    Formatting.AQUA + prefix + Formatting.RESET + "!");
+                    Formatting.DARK_BLUE + prefix + Formatting.RESET + "!");
         }
     }
 }

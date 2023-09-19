@@ -23,13 +23,14 @@ public class FriendCommand extends Command
 {
     //
     @OptionalArg
-    Argument<String> actionArg = new StringArgument("Add/Remove", "Whether to" +
-            " add or remove the friend", Arrays.asList("Add", "remove", "del"));
-    Argument<PlayerEntity> playerArg = new PlayerArgument("Player", "The " +
-            "player to add/remove friend");
+    Argument<String> actionArgument = new StringArgument("Add/Remove",
+            "Whether to add or remove the friend", Arrays.asList("Add", "remove", "del"));
+    Argument<PlayerEntity> playerArgument = new PlayerArgument("Player", "The" +
+            " player to add/remove friend");
+    // Optionally notifies the player you are friending in chat
     @OptionalArg
-    Argument<Boolean> notifyArg = new BooleanArgument("Notify", "Notifies the" +
-            " friended player through chat message");
+    Argument<Boolean> notifyArgument = new BooleanArgument("Notify",
+            "Notifies the friended player in the chat");
 
     /**
      *
@@ -45,11 +46,11 @@ public class FriendCommand extends Command
     @Override
     public void onCommandInput()
     {
-        final PlayerEntity player = playerArg.parse();
+        final PlayerEntity player = playerArgument.parse();
         if (player != null)
         {
-            final String action = actionArg.parse();
-            final Boolean notify = notifyArg.parse();
+            final String action = actionArgument.parse();
+            final Boolean notify = notifyArgument.parse();
             if (action != null)
             {
                 if (action.equalsIgnoreCase("add"))

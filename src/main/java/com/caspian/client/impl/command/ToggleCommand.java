@@ -16,8 +16,8 @@ import com.caspian.client.util.chat.ChatUtil;
 public class ToggleCommand extends Command
 {
     //
-    Argument<Module> moduleArg = new ModuleArgument("Module", "The module to " +
-            "enable/disable");
+    Argument<Module> moduleArgument = new ModuleArgument("Module", "The " +
+            "module to enable/disable");
 
     /**
      *
@@ -33,7 +33,7 @@ public class ToggleCommand extends Command
     @Override
     public void onCommandInput()
     {
-        Module module = moduleArg.parse();
+        Module module = moduleArgument.parse();
         if (module instanceof ToggleModule t)
         {
             t.toggle();

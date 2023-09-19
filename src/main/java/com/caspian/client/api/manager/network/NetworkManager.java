@@ -1,5 +1,8 @@
 package com.caspian.client.api.manager.network;
 
+import com.caspian.client.Caspian;
+import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.mixin.accessor.AccessorClientWorld;
 import com.caspian.client.util.Globals;
 import net.minecraft.client.network.PendingUpdateManager;
@@ -21,6 +24,21 @@ public class NetworkManager implements Globals
 {
     //
     private static final Set<Packet<?>> PACKET_CACHE = new HashSet<>();
+
+    public NetworkManager()
+    {
+        Caspian.EVENT_HANDLER.subscribe(this);
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onDisconnect(DisconnectEvent event)
+    {
+        PACKET_CACHE.clear();
+    }
 
     /**
      * 
@@ -101,6 +119,6 @@ public class NetworkManager implements Globals
      */
     public boolean isCached(Packet<?> p)
     {
-        return PACKET_CACHE.remove(p);
+        return PACKET_CACHE.contains(p);
     }
 }

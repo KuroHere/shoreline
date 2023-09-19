@@ -20,11 +20,10 @@ import org.lwjgl.glfw.GLFW;
 public class BindCommand extends Command
 {
     //
-    Argument<Module> moduleArg = new ModuleArgument("Module", "The " +
+    Argument<Module> moduleArgument = new ModuleArgument("Module", "The " +
             "param module to keybind");
-    @OptionalArg
-    Argument<String> keybind = new StringArgument("Keybind", "The new key to " +
-            "bind the module");
+    Argument<String> keybindArgument = new StringArgument("Keybind", "The new" +
+            " key to bind the module");
 
     /**
      *
@@ -40,10 +39,10 @@ public class BindCommand extends Command
     @Override
     public void onCommandInput()
     {
-        Module module = moduleArg.parse();
+        Module module = moduleArgument.parse();
         if (module instanceof ToggleModule t)
         {
-            final String key = keybind.parse();
+            final String key = keybindArgument.parse();
             if (key == null || key.length() > 1)
             {
                 ChatUtil.error("Invalid key!");

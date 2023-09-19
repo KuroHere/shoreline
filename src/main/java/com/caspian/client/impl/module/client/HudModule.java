@@ -355,7 +355,7 @@ public class HudModule extends ToggleModule
     private String getFormattedModule(final Module module)
     {
         final String metadata = module.getMetaData();
-        if (!metadata.isEmpty())
+        if (!metadata.equals("ARRAYLIST_INFO"))
         {
             return String.format("%s §7[§f%s§7]", module.getName(),
                     module.getMetaData());

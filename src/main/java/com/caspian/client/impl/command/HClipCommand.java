@@ -15,7 +15,7 @@ import com.caspian.client.util.chat.ChatUtil;
 public class HClipCommand extends Command
 {
     //
-    Argument<String> distanceArg = new StringArgument("Distance", "The " +
+    Argument<String> distanceArgument = new StringArgument("Distance", "The " +
             "distance to horizontally clip");
 
     /**
@@ -32,7 +32,7 @@ public class HClipCommand extends Command
     @Override
     public void onCommandInput()
     {
-        final String distance = distanceArg.parse();
+        final String distance = distanceArgument.parse();
         try
         {
             double dist = Double.parseDouble(distance);
