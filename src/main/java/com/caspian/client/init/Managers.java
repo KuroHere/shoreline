@@ -28,7 +28,7 @@ import com.caspian.client.api.manager.world.WaypointManager;
  */
 public class Managers
 {
-    // The initialized state of the managers. Once this is true, all managers
+    // The initialized state of the managers. If this is true, all managers
     // have been initialized and the init process is complete. As a general
     // rule, it is good practice to check this state before accessing instances.
     private static boolean initialized;
@@ -85,8 +85,8 @@ public class Managers
     }
 
     /**
-     * Initializes final manager properties. Only does anything if
-     * {@link #isInitialized()}.
+     * Initializes final manager properties. Only runs if the Manager
+     * instances have been initialized.
      *
      * @see #init()
      * @see #isInitialized()
@@ -95,19 +95,20 @@ public class Managers
     {
         if (isInitialized())
         {
-            MACRO.postInit();
             MODULE.postInit();
+            MACRO.postInit();
             COMMAND.postInit();
         }
     }
 
     /**
-     * Returns <tt>true</tt> if the manager instances have been initialized.
+     * Returns <tt>true</tt> if the Manager instances have been initialized.
      * This should always return <tt>true</tt> if {@link Caspian#preInit()} has
      * finished running.
      *
-     * @return <tt>true</tt> if the manager instances have been initialized
+     * @return <tt>true</tt> if the Manager instances have been initialized
      *
+     * @see Caspian#preInit()
      * @see #init()
      * @see #initialized
      */

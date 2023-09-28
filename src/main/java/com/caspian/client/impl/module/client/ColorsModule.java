@@ -17,7 +17,7 @@ public class ColorsModule extends ConcurrentModule
 {
     //
     Config<Color> colorConfig = new ColorConfig("Color", "Global" +
-            " client color", new Color(0xffff0050));
+            " client color", new Color(0x8149c1));
     /**
      *
      */

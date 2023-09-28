@@ -20,8 +20,7 @@ public class ClickGuiModule extends ToggleModule
 {
     //
     Config<Float> scaleConfig = new NumberConfig<>("Scale", "ClickGui " +
-            "component scaling factor.", 0.1f, 1.0f, 3.0f,
-            NumberDisplay.PERCENT);
+            "component scaling factor.", 0.1f, 1.0f, 3.0f, NumberDisplay.PERCENT);
     //
     private static ClickGuiScreen CLICK_GUI_SCREEN;
 

@@ -21,8 +21,9 @@ public class RequestUtil
     public static final String ACCEPT_HTML_ALL = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
     //
     private static Proxy PROXY = Proxy.NO_PROXY;
-    private static final int READ_TIMEOUT = 15 * 1000;
-    private static final int CONNECT_TIMEOUT = 15 * 1000;
+    // Timeout = 15 seconds
+    private static final int READ_TIMEOUT = 15000;
+    private static final int CONNECT_TIMEOUT = 15000;
 
     /**
      * Sends a GET request to a URL

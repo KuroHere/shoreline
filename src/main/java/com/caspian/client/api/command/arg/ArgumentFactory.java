@@ -25,7 +25,7 @@ public class ArgumentFactory
 
     /**
      * Creates and returns a new {@link Argument} instance from a {@link Field}
-     * using Java reflection lib.
+     * using {@link java.lang.reflect} lib.
      *
      * @param f The arg field
      * @return The created config
@@ -48,8 +48,7 @@ public class ArgumentFactory
         // field getter error
         catch (IllegalArgumentException | IllegalAccessException e)
         {
-            Caspian.error("Failed to build argument from field {}!",
-                    f.getName());
+            Caspian.error("Failed to build argument from field {}!", f.getName());
             e.printStackTrace();
         }
         // failed arg creation

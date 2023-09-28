@@ -15,4 +15,16 @@ public class MovementManager implements Globals
         Vec3d motion = mc.player.getVelocity();
         mc.player.setVelocity(motion.getX(), y, motion.getZ());
     }
+
+    /**
+     *
+     *
+     * @param x
+     * @param z
+     */
+    public void setMotionXZ(double x, double z)
+    {
+        Vec3d motion = mc.player.getVelocity();
+        mc.player.setVelocity(x, motion.y, z);
+    }
 }

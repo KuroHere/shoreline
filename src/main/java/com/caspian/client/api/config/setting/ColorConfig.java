@@ -1,10 +1,13 @@
 package com.caspian.client.api.config.setting;
 
 import com.caspian.client.api.config.Config;
+import com.caspian.client.init.Managers;
+import com.caspian.client.init.Modules;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.awt.*;
+import java.util.function.Supplier;
 
 /**
  *
@@ -15,6 +18,8 @@ public class ColorConfig extends Config<Color>
 {
     // RGB value of the current Color value
     private int rgb;
+    //
+    private boolean global;
 
     public ColorConfig(String name, String desc, Color value)
     {
@@ -22,9 +27,22 @@ public class ColorConfig extends Config<Color>
         rgb = value.getRGB();
     }
 
+    public ColorConfig(String name, String desc, Color value,
+                       Supplier<Boolean> visible)
+    {
+        super(name, desc, value, visible);
+        rgb = value.getRGB();
+    }
+
     public ColorConfig(String name, String desc, Integer rgb)
     {
         this(name, desc, new Color(rgb, (rgb & 0xff000000) != 0xff000000));
+    }
+
+    @Override
+    public Color getValue()
+    {
+        return global ? Modules.COLORS.getColor(getAlpha()) : value;
     }
 
     public int getRgb()
@@ -50,6 +68,16 @@ public class ColorConfig extends Config<Color>
     public int getAlpha()
     {
         return (rgb >> 24) & 0xff;
+    }
+
+    public void syncGlobal()
+    {
+        setGlobal(true);
+    }
+
+    public void setGlobal(boolean global)
+    {
+        this.global = global;
     }
 
     @Override

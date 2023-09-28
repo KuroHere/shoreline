@@ -22,7 +22,7 @@ import com.caspian.client.init.Modules;
 import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.TickTimer;
 import com.caspian.client.util.math.timer.Timer;
-import com.caspian.client.util.ncp.DirectionChecks;
+import com.caspian.client.util.anticheat.DirectionChecks;
 import com.caspian.client.util.player.PlayerUtil;
 import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.world.EndCrystalUtil;
@@ -3433,7 +3433,7 @@ public class AutoCrystalModule extends RotationModule
          *
          * @return A valid interact direction
          *
-         * @see DirectionChecks#getInteractableDirections(int, int, int, int, int, int, boolean)
+         * @see DirectionChecks#getPlaceDirectionsNCP(int, int, int, int, int, int, boolean)
          */
         public Direction getInteractDirection()
         {
@@ -3455,7 +3455,7 @@ public class AutoCrystalModule extends RotationModule
                     int z = blockPos.getZ();
                     if (x != dx && y != dy && z != dz)
                     {
-                        Set<Direction> dirs = DirectionChecks.getInteractableDirections(
+                        Set<Direction> dirs = DirectionChecks.getPlaceDirectionsNCP(
                                 x, y, z, dx, dy, dz, exposedDirectionConfig.getValue());
                         if (!dirs.isEmpty())
                         {

@@ -59,6 +59,8 @@ public class ModuleManager
                 new TimerModule(),
                 // Movement
                 new FastFallModule(),
+                new FlightModule(),
+                new LongJumpModule(),
                 new NoSlowModule(),
                 new SpeedModule(),
                 new SprintModule(),

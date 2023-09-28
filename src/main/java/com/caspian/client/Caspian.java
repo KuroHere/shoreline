@@ -1,5 +1,6 @@
 package com.caspian.client;
 
+import com.caspian.client.api.Identifiable;
 import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.event.handler.EventBus;
 import com.caspian.client.api.event.handler.EventHandler;
@@ -45,6 +46,7 @@ public class Caspian
         LOGGER = LogManager.getLogger("Caspian");
         info("Starting preInit ...");
         EXECUTOR = Executors.newFixedThreadPool(1);
+        //
         EVENT_HANDLER = new EventBus();
     }
 
@@ -101,27 +103,27 @@ public class Caspian
      * Wrapper method for {@link Logger#info(String)} which logs a message to
      * the client {@link Logger}.
      *
-     * @param container
+     * @param feature
      * @param message The log message
      *
      * @see Logger#info(String)
      */
-    public static void info(ConfigContainer container, String message)
+    public static void info(Identifiable feature, String message)
     {
-        LOGGER.info(String.format("[%s] %s", container.getName(), message));
+        LOGGER.info(String.format("[%s] %s", feature.getId(), message));
     }
 
     /**
      *
      *
-     * @param container
+     * @param feature
      * @param message
      * @param params
      */
-    public static void info(ConfigContainer container, String message,
+    public static void info(Identifiable feature, String message,
                             Object... params)
     {
-        LOGGER.info(String.format("[%s] %s", container.getName(), message), params);
+        LOGGER.info(String.format("[%s] %s", feature.getId(), message), params);
     }
 
     /**
@@ -151,26 +153,26 @@ public class Caspian
      * Wrapper method for {@link Logger#error(String)} which logs an error to
      * the client {@link Logger}.
      *
-     * @param container
+     * @param feature
      * @param message The log message
      *
      * @see Logger#error(String)
      */
-    public static void error(ConfigContainer container, String message)
+    public static void error(Identifiable feature, String message)
     {
-        LOGGER.error(String.format("[%s] %s", container.getName(), message));
+        LOGGER.error(String.format("[%s] %s", feature.getId(), message));
     }
 
     /**
      *
      *
-     * @param container
+     * @param feature
      * @param message
      * @param params
      */
-    public static void error(ConfigContainer container, String message,
+    public static void error(Identifiable feature, String message,
                              Object... params)
     {
-        LOGGER.error(String.format("[%s] %s", container.getName(), message), params);
+        LOGGER.error(String.format("[%s] %s", feature.getId(), message), params);
     }
 }

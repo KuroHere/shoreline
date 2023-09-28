@@ -29,7 +29,7 @@ public class ConfigFactory
 
     /**
      * Creates and returns a new {@link Config} instance from a {@link Field}
-     * using Java reflection lib.
+     * using {@link java.lang.reflect} lib.
      *
      * @param f The config field
      * @return The created config
@@ -47,8 +47,7 @@ public class ConfigFactory
         // field getter error
         catch (IllegalArgumentException | IllegalAccessException e)
         {
-            Caspian.error("Failed to build config from field {}!",
-                    f.getName());
+            Caspian.error("Failed to build config from field {}!", f.getName());
             e.printStackTrace();
         }
         // failed config creation

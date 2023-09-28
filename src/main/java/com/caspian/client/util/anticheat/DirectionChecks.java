@@ -1,7 +1,6 @@
-package com.caspian.client.util.ncp;
+package com.caspian.client.util.anticheat;
 
 import com.caspian.client.util.Globals;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -29,13 +28,13 @@ public class DirectionChecks implements Globals
      * @param exposed
      * @return
      */
-    public static Set<Direction> getInteractableDirections(final int x,
-                                                           final int y,
-                                                           final int z,
-                                                           final int dx,
-                                                           final int dy,
-                                                           final int dz,
-                                                           final boolean exposed)
+    public static Set<Direction> getPlaceDirectionsNCP(final int x,
+                                                       final int y,
+                                                       final int z,
+                                                       final int dx,
+                                                       final int dy,
+                                                       final int dz,
+                                                       final boolean exposed)
     {
         // directly from NCP src
         final BlockPos pos = new BlockPos(dx, dy, dz);

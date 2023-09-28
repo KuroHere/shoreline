@@ -41,8 +41,6 @@ public class HoleEspModule extends ToggleModule
     Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades the opacity" +
             " of holes based on distance", false);
     //
-    Config<Boolean> globalConfig = new BooleanConfig("GlobalColor", "Uses the" +
-            " global client color when rendering holes", false);
     Config<Color> obsidianConfig = new ColorConfig("ObsidianColor", "The " +
             "color for rendering obsidian holes", new Color(255, 0, 0, 60));
     Config<Color> mixedConfig = new ColorConfig("MixedColor", "The " +
@@ -121,10 +119,6 @@ public class HoleEspModule extends ToggleModule
      */
     private Color getHoleColor(Hole hole)
     {
-        if (globalConfig.getValue())
-        {
-            return Modules.COLORS.getColor(60);
-        }
         return switch (hole.getSafety())
         {
             case RESISTANT -> obsidianConfig.getValue();

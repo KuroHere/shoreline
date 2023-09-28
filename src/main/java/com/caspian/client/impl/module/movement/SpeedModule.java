@@ -141,6 +141,9 @@ public class SpeedModule extends ToggleModule
         if (mc.player != null && mc.world != null)
         {
             if (!MovementUtil.isInputtingMovement()
+                    || Modules.FLIGHT.isEnabled()
+                    || Modules.LONG_JUMP.isEnabled()
+                    || Modules.ELYTRA_FLY.isEnabled()
                     || mc.player.isRiding()
                     || mc.player.isFallFlying()
                     || mc.player.isHoldingOntoLadder()

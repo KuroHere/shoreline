@@ -52,7 +52,10 @@ public class Modules
     public static SwingModule SWING;
     public static FakePlayerModule FAKE_PLAYER;
     public static TimerModule TIMER;
+    public static ElytraFlyModule ELYTRA_FLY;
     public static FastFallModule FAST_FALL;
+    public static FlightModule FLIGHT;
+    public static LongJumpModule LONG_JUMP;
     public static NoSlowModule NO_SLOW;
     public static SpeedModule SPEED;
     public static SprintModule SPRINT;
@@ -126,6 +129,8 @@ public class Modules
                     "-module");
             TIMER = (TimerModule) getRegisteredModule("timer-module");
             FAST_FALL = (FastFallModule) getRegisteredModule("fastfall-module");
+            FLIGHT = (FlightModule) getRegisteredModule("flight-module");
+            LONG_JUMP = (LongJumpModule) getRegisteredModule("longjump-module");
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow-module");
             SPEED = (SpeedModule) getRegisteredModule("speed-module");
             SPRINT = (SprintModule) getRegisteredModule("sprint-module");

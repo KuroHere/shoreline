@@ -3,6 +3,7 @@ package com.caspian.client.api.manager.world.tick;
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.render.TickCounterEvent;
 import com.caspian.client.util.EvictingQueue;
 import com.caspian.client.util.Globals;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
@@ -24,7 +25,6 @@ public class TickManager implements Globals
     private final ArrayDeque<Float> ticks = new EvictingQueue<>(20);
 
     /**
-     *
      *
      */
     public TickManager()
@@ -52,6 +52,32 @@ public class TickManager implements Globals
             float last = 20000.0f / (System.currentTimeMillis() - time);
             ticks.addFirst(last);
             time = System.currentTimeMillis();
+        }
+    }
+
+    //
+    private float clientTick = 1.0f;
+
+    /**
+     *
+     * @param ticks
+     */
+    public void setClientTick(float ticks)
+    {
+        clientTick = ticks;
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onTickCounter(TickCounterEvent event)
+    {
+        if (clientTick != 1.0f)
+        {
+            event.cancel();
+            event.setTicks(clientTick);
         }
     }
 

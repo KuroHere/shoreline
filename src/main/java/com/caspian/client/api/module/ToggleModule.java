@@ -61,6 +61,21 @@ public class ToggleModule extends Module implements Hideable
 
     /**
      *
+     *
+     * @param name     The module unique identifier
+     * @param desc     The module description
+     * @param category The module category
+     * @param keycode  The module default keybind
+     */
+    public ToggleModule(String name, String desc, ModuleCategory category,
+                        Integer keycode)
+    {
+        this(name, desc, category);
+        keybind(keycode);
+    }
+
+    /**
+     *
      * @param hidden
      */
     @Override
@@ -77,21 +92,6 @@ public class ToggleModule extends Module implements Hideable
     public boolean isHidden()
     {
         return hiddenConfig.getValue();
-    }
-
-    /**
-     *
-     *
-     * @param name     The module unique identifier
-     * @param desc     The module description
-     * @param category The module category
-     * @param keycode  The module default keybind
-     */
-    public ToggleModule(String name, String desc, ModuleCategory category,
-                        Integer keycode)
-    {
-        super(name, desc, category);
-        keybind(keycode);
     }
 
     /**

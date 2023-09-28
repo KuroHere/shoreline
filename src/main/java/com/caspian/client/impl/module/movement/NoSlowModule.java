@@ -15,10 +15,12 @@ import com.caspian.client.impl.event.network.MovementSlowdownEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.network.SetCurrentHandEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.init.Modules;
 import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.option.KeyBinding;
@@ -307,7 +309,7 @@ public class NoSlowModule extends ToggleModule
      */
     public boolean checkSlowed()
     {
-        return !mc.player.isRiding()
+        return !mc.player.isRiding() && !mc.player.isFallFlying()
                 && (mc.player.isUsingItem() && itemsConfig.getValue())
                 || (mc.player.isBlocking() && shieldsConfig.getValue());
     }
@@ -321,6 +323,7 @@ public class NoSlowModule extends ToggleModule
     {
         return mc.currentScreen != null
                 && !(mc.currentScreen instanceof ChatScreen
-                || mc.currentScreen instanceof SignEditScreen);
+                || mc.currentScreen instanceof SignEditScreen
+                || mc.currentScreen instanceof DeathScreen);
     }
 }
