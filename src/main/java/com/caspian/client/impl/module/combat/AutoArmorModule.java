@@ -1,0 +1,270 @@
+package com.caspian.client.impl.module.combat;
+
+import com.caspian.client.api.config.Config;
+import com.caspian.client.api.config.NumberDisplay;
+import com.caspian.client.api.config.setting.BooleanConfig;
+import com.caspian.client.api.config.setting.EnumConfig;
+import com.caspian.client.api.config.setting.NumberConfig;
+import com.caspian.client.api.event.EventStage;
+import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.api.module.ModuleCategory;
+import com.caspian.client.api.module.ToggleModule;
+import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.init.Managers;
+import com.caspian.client.util.player.EnchantmentUtil;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+
+import java.util.TreeSet;
+
+/**
+ *
+ *
+ * @author linus
+ * @since 1.0
+ */
+public class AutoArmorModule extends ToggleModule
+{
+    //
+    Config<Priority> priorityConfig = new EnumConfig<>("Priority", "Armor " +
+            "enchantment priority", Priority.BLAST_PROTECTION, Priority.values());
+    Config<Float> minDurabilityConfig = new NumberConfig<>("MinDurability",
+            "Durability percent to replace armor", 0.0f, 0.0f, 20.0f, NumberDisplay.PERCENT);
+    Config<Boolean> elytraPriorityConfig = new BooleanConfig("ElytraPriority",
+            "Prioritizes existing elytras in the chestplate armor slot", true);
+    Config<Boolean> blastLeggingsConfig = new BooleanConfig("Leggings-BlastPriority",
+            "Prioritizes Blast Protection leggings", true);
+    Config<Boolean> noBindingConfig = new BooleanConfig("NoBinding", "Avoids " +
+            "armor with the Curse of Binding enchantment", true);
+    Config<Boolean> inventoryConfig = new BooleanConfig("AllowInventory",
+            "Allows armor to be swapped while in the inventory menu", false);
+    //
+    private final TreeSet<ArmorSlot> helmet = new TreeSet<>();
+    private final TreeSet<ArmorSlot> chestplate = new TreeSet<>();
+    private final TreeSet<ArmorSlot> leggings = new TreeSet<>();
+    private final TreeSet<ArmorSlot> boots = new TreeSet<>();
+
+    /**
+     *
+     */
+    public AutoArmorModule()
+    {
+        super("AutoArmor", "Automatically replaces broken armor pieces",
+                ModuleCategory.COMBAT);
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onTick(TickEvent event)
+    {
+        if (event.getStage() != EventStage.PRE)
+        {
+            return;
+        }
+        if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen
+                && inventoryConfig.getValue()))
+        {
+            return;
+        }
+        //
+        helmet.clear();
+        chestplate.clear();
+        leggings.clear();
+        boots.clear();
+        for (int i = 0; i < 4; i++)
+        {
+            ItemStack armorStack = mc.player.getInventory().getArmorStack(i);
+            if (elytraPriorityConfig.getValue() && armorStack.getItem() == Items.ELYTRA)
+            {
+                continue;
+            }
+            float armorDura = (armorStack.getMaxDamage() - armorStack.getDamage()) / (float) armorStack.getMaxDamage();
+            if (!armorStack.isEmpty() || armorDura >= minDurabilityConfig.getValue())
+            {
+                continue;
+            }
+            for (int j = 0; j < 36; j++)
+            {
+                ItemStack stack = mc.player.getInventory().getStack(j);
+                if (stack.isEmpty() || !(stack.getItem() instanceof ArmorItem armor))
+                {
+                    continue;
+                }
+                if (noBindingConfig.getValue() && EnchantmentHelper.hasBindingCurse(stack))
+                {
+                    continue;
+                }
+                int index = armor.getSlotType().getEntitySlotId();
+                if (index != i)
+                {
+                    continue;
+                }
+                float dura = (stack.getMaxDamage() - stack.getDamage()) / (float) stack.getMaxDamage();
+                if (dura < minDurabilityConfig.getValue())
+                {
+                    continue;
+                }
+                ArmorSlot data = new ArmorSlot(i, j, stack);
+                switch (i)
+                {
+                    case 0 -> helmet.add(data);
+                    case 1 -> chestplate.add(data);
+                    case 2 -> leggings.add(data);
+                    case 3 -> boots.add(data);
+                }
+            }
+        }
+        if (!helmet.isEmpty())
+        {
+            ArmorSlot helmetSlot = helmet.last();
+            swapArmor(helmetSlot.getType(), helmetSlot.getSlot());
+        }
+        if (!chestplate.isEmpty())
+        {
+            ArmorSlot chestSlot = chestplate.last();
+            swapArmor(chestSlot.getType(), chestSlot.getSlot());
+        }
+        if (!leggings.isEmpty())
+        {
+            ArmorSlot leggingsSlot = leggings.last();
+            swapArmor(leggingsSlot.getType(), leggingsSlot.getSlot());
+        }
+        if (!boots.isEmpty())
+        {
+            ArmorSlot bootsSlot = boots.last();
+            swapArmor(bootsSlot.getType(), bootsSlot.getSlot());
+        }
+    }
+
+    public void swapArmor(int armorSlot, int slot)
+    {
+        ItemStack stack = mc.player.getInventory().getArmorStack(armorSlot);
+        Managers.INVENTORY.pickupSlot(slot);
+        boolean rt = !stack.isEmpty();
+        Managers.INVENTORY.pickupSlot(armorSlot);
+        if (rt)
+        {
+            Managers.INVENTORY.pickupSlot(slot);
+        }
+    }
+
+    public float getPriority(int i, ItemStack armorStack)
+    {
+        /*
+        float j = 1.0f;
+        if (armorStack.hasEnchantments())
+        {
+            j += 1.5f;
+        }
+        if (hasEnchantment(Enchantments.BLAST_PROTECTION))
+        {
+
+        }
+        if (hasEnchantment(Enchantments.PROTECTION))
+        {
+
+        }
+        if (hasEnchantment(Enchantments.PROJECTILE_PROTECTION))
+        {
+
+        }
+         */
+        return 1.0f;
+    }
+
+    public enum Priority
+    {
+        BLAST_PROTECTION(Enchantments.BLAST_PROTECTION),
+        PROTECTION(Enchantments.PROTECTION),
+        PROJECTILE_PROTECTION(Enchantments.PROJECTILE_PROTECTION);
+
+        //
+        private final Enchantment enchant;
+
+        Priority(Enchantment enchant)
+        {
+            this.enchant = enchant;
+        }
+
+        public Enchantment getEnchantment()
+        {
+            return enchant;
+        }
+    }
+
+    public class ArmorSlot implements Comparable<ArmorSlot>
+    {
+        private final int armorType;
+        private final int slot;
+        private final ItemStack armorStack;
+
+        public ArmorSlot(int armorType, int slot, ItemStack armorStack)
+        {
+            this.armorType = armorType;
+            this.slot = slot;
+            this.armorStack = armorStack;
+        }
+
+        /**
+         * Compares this object with the specified object for order.  Returns a
+         * negative integer, zero, or a positive integer as this object is less
+         * than, equal to, or greater than the specified object.
+         *
+         * @param other the object to be compared.
+         * @return a negative integer, zero, or a positive integer as this object
+         * is less than, equal to, or greater than the specified object.
+         * @throws NullPointerException if the specified object is null
+         * @throws ClassCastException  if the specified object's type
+         * prevents it from being compared to this object.
+         */
+        @Override
+        public int compareTo(ArmorSlot other)
+        {
+            Enchantment enchantment = priorityConfig.getValue().getEnchantment();
+            if (blastLeggingsConfig.getValue() && armorType == 2
+                    && hasEnchantment(Enchantments.BLAST_PROTECTION))
+            {
+                return 1;
+            }
+            if (hasEnchantment(enchantment))
+            {
+                return other.hasEnchantment(enchantment) ? 0 : 1;
+            }
+            else
+            {
+                return other.hasEnchantment(enchantment) ? -1 : 0;
+            }
+        }
+
+        public boolean hasEnchantment(Enchantment enchantment)
+        {
+            Object2IntMap<Enchantment> enchants =
+                    EnchantmentUtil.getEnchantments(armorStack);
+            return enchants.containsKey(enchantment);
+        }
+
+        public ItemStack getArmorStack()
+        {
+            return armorStack;
+        }
+
+        public int getType()
+        {
+            return armorType;
+        }
+
+        public int getSlot()
+        {
+            return slot;
+        }
+    }
+}

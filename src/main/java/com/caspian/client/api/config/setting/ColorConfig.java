@@ -70,7 +70,7 @@ public class ColorConfig extends Config<Color>
         return (rgb >> 24) & 0xff;
     }
 
-    public void syncGlobal()
+    public void setGlobal()
     {
         setGlobal(true);
     }

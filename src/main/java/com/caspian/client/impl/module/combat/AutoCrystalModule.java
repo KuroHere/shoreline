@@ -1001,7 +1001,7 @@ public class AutoCrystalModule extends RotationModule
         if (mc.world != null && mc.player != null)
         {
             if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet
-                    && !event.isCached())
+                    && !event.isClientPacket())
             {
                 ItemStack stack = mc.player.getStackInHand(packet.getHand());
                 if (stack.getItem() == Items.END_CRYSTAL)
@@ -1013,7 +1013,7 @@ public class AutoCrystalModule extends RotationModule
             }
             else if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket)
             {
-                if (!event.isCached())
+                if (!event.isClientPacket())
                 {
                     autoSwapTimer.reset();
                 }

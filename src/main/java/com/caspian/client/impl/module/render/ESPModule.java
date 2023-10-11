@@ -147,6 +147,10 @@ public class ESPModule extends ToggleModule
     @EventListener
     public void onConfigUpdate(ConfigUpdateEvent event)
     {
+        if (mc.world == null)
+        {
+            return;
+        }
         if (event.getConfig() == modeConfig && event.getStage() == EventStage.POST)
         {
             if (modeConfig.getValue() == ESPMode.GLOW)

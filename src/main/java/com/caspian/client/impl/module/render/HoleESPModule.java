@@ -12,7 +12,6 @@ import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
-import com.caspian.client.init.Modules;
 import net.minecraft.util.math.Box;
 
 import java.awt.*;
@@ -23,7 +22,7 @@ import java.awt.*;
  * @author linus
  * @since 1.0
  */
-public class HoleEspModule extends ToggleModule
+public class HoleESPModule extends ToggleModule
 {
     //
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to " +
@@ -51,7 +50,7 @@ public class HoleEspModule extends ToggleModule
     /**
      *
      */
-    public HoleEspModule()
+    public HoleESPModule()
     {
         super("HoleESP", "Displays nearby blast-resistant holes",
                 ModuleCategory.RENDER);

@@ -77,7 +77,7 @@ public class PacketEvent extends Event
          *
          * @return
          */
-        public boolean isCached()
+        public boolean isClientPacket()
         {
             return cached;
         }

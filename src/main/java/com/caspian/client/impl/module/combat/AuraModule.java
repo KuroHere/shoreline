@@ -235,7 +235,7 @@ public class AuraModule extends RotationModule
     {
         if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket)
         {
-            if (!event.isCached())
+            if (!event.isClientPacket())
             {
                 autoSwapTimer.reset();
             }

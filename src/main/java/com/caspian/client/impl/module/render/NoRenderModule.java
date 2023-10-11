@@ -10,6 +10,7 @@ import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.chunk.light.RenderSkylightEvent;
 import com.caspian.client.impl.event.gui.hud.RenderOverlayEvent;
+import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.particle.ParticleEvent;
 import com.caspian.client.impl.event.render.HurtCamEvent;
 import com.caspian.client.impl.event.render.RenderFloatingItemEvent;
@@ -25,6 +26,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.FluidTags;
 
@@ -74,6 +76,8 @@ public class NoRenderModule extends ToggleModule
             "Prevents campfire particles from rendering", false);
     Config<Boolean> totemConfig = new BooleanConfig("Totems",
             "Prevents totem particles from rendering", false);
+    Config<Boolean> unicodeConfig = new BooleanConfig("UnicodeChat",
+            "Prevents unicode characters from being rendered in chat", false);
     Config<FogRender> fogConfig = new EnumConfig<>("Fog", "Prevents fog from " +
             "rendering in the world", FogRender.OFF, FogRender.values());
     Config<ItemRender> itemsConfig = new EnumConfig<>("Items",
@@ -105,6 +109,28 @@ public class NoRenderModule extends ToggleModule
                 if (entity instanceof ItemEntity)
                 {
                     mc.world.removeEntity(entity.getId(), Entity.RemovalReason.DISCARDED);
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPacketInbound(PacketEvent.Inbound event)
+    {
+        if (event.getPacket() instanceof ChatMessageS2CPacket packet
+                && unicodeConfig.getValue())
+        {
+            String msg = packet.body().content();
+            for (char c : msg.toCharArray())
+            {
+                if (Character.UnicodeBlock.of(c) != Character.UnicodeBlock.BASIC_LATIN)
+                {
+                    event.cancel();
+                    break;
                 }
             }
         }

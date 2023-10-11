@@ -14,6 +14,7 @@ import com.caspian.client.impl.imixin.IPlayerInteractEntityC2SPacket;
 import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.Timer;
 import com.caspian.client.util.network.InteractType;
+import com.caspian.client.util.player.InventoryUtil;
 import com.caspian.client.util.string.EnumFormatter;
 import com.caspian.client.util.world.EntityUtil;
 import net.minecraft.entity.Entity;
@@ -112,7 +113,8 @@ public class CriticalsModule extends ToggleModule
                     || mc.player.isInLava()
                     || mc.player.isHoldingOntoLadder()
                     || mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
-                    || mc.player.input.jumping)
+                    || mc.player.input.jumping
+                    || InventoryUtil.isHolding32k())
             {
                 return;
             }

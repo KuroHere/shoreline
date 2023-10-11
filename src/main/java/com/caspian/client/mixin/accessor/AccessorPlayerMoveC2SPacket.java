@@ -22,4 +22,28 @@ public interface AccessorPlayerMoveC2SPacket
     @Accessor("onGround")
     @Mutable
     void hookSetOnGround(boolean onGround);
+
+    /**
+     *
+     * @param x
+     */
+    @Accessor("x")
+    @Mutable
+    void hookSetX(double x);
+
+    /**
+     *
+     * @param y
+     */
+    @Accessor("y")
+    @Mutable
+    void hookSetY(double y);
+
+    /**
+     *
+     * @param z
+     */
+    @Accessor("z")
+    @Mutable
+    void hookSetZ(double z);
 }

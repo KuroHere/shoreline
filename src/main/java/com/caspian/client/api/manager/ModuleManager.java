@@ -2,21 +2,23 @@ package com.caspian.client.api.manager;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.module.Module;
-import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.module.client.ClickGuiModule;
 import com.caspian.client.impl.module.client.ColorsModule;
 import com.caspian.client.impl.module.client.HudModule;
 import com.caspian.client.impl.module.client.RotationsModule;
 import com.caspian.client.impl.module.combat.*;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
+import com.caspian.client.impl.module.exploit.ReachModule;
 import com.caspian.client.impl.module.exploit.SwingModule;
+import com.caspian.client.impl.module.misc.AutoRespawnModule;
 import com.caspian.client.impl.module.misc.FakePlayerModule;
 import com.caspian.client.impl.module.misc.TimerModule;
+import com.caspian.client.impl.module.misc.XCarryModule;
 import com.caspian.client.impl.module.movement.*;
 import com.caspian.client.impl.module.render.*;
+import com.caspian.client.impl.module.world.AvoidModule;
 import com.caspian.client.impl.module.world.FastPlaceModule;
 import com.caspian.client.impl.module.world.SpeedmineModule;
-import com.caspian.client.init.Managers;
 
 import java.util.*;
 
@@ -47,17 +49,22 @@ public class ModuleManager
                 new RotationsModule(),
                 // Combat
                 new AuraModule(),
+                new AutoArmorModule(),
                 new AutoBowReleaseModule(),
                 new AutoCrystalModule(),
                 new AutoTotemModule(),
                 new CriticalsModule(),
                 // Exploit
                 new AntiHungerModule(),
+                new ReachModule(),
                 new SwingModule(),
                 // Misc
+                new AutoRespawnModule(),
                 new FakePlayerModule(),
                 new TimerModule(),
+                new XCarryModule(),
                 // Movement
+                new EntityControlModule(),
                 new FastFallModule(),
                 new FlightModule(),
                 new LongJumpModule(),
@@ -65,14 +72,17 @@ public class ModuleManager
                 new SpeedModule(),
                 new SprintModule(),
                 new VelocityModule(),
+                new YawModule(),
                 // Render
                 new BlockHighlightModule(),
+                new ESPModule(),
                 new FullbrightModule(),
                 new NametagsModule(),
                 new NoRenderModule(),
                 new NoWeatherModule(),
                 new ViewClipModule(),
                 // World
+                new AvoidModule(),
                 new FastPlaceModule(),
                 new SpeedmineModule()
         );

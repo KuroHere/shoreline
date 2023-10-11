@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * 
@@ -298,7 +299,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     @Inject(method = "setCurrentHand", at = @At(value = "HEAD"))
     private void hookSetCurrentHand(Hand hand, CallbackInfo ci)
     {
-        SetCurrentHandEvent setCurrentHandEvent = new SetCurrentHandEvent();
+        SetCurrentHandEvent setCurrentHandEvent = new SetCurrentHandEvent(hand);
         Caspian.EVENT_HANDLER.dispatch(setCurrentHandEvent);
     }
 
@@ -337,5 +338,23 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     {
         //
         return null;
+    }
+
+    /**
+     *
+     * @param cir
+     */
+    @Inject(method = "getMountJumpStrength", at = @At(value = "HEAD"),
+            cancellable = true)
+    private void hookGetMountJumpStrength(CallbackInfoReturnable<Float> cir)
+    {
+        MountJumpStrengthEvent mountJumpStrengthEvent =
+                new MountJumpStrengthEvent();
+        Caspian.EVENT_HANDLER.dispatch(mountJumpStrengthEvent);
+        if (mountJumpStrengthEvent.isCanceled())
+        {
+            cir.cancel();
+            cir.setReturnValue(1.0f);
+        }
     }
 }

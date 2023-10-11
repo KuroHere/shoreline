@@ -8,12 +8,16 @@ import com.caspian.client.impl.module.client.ColorsModule;
 import com.caspian.client.impl.module.client.HudModule;
 import com.caspian.client.impl.module.client.RotationsModule;
 import com.caspian.client.impl.module.combat.*;
+import com.caspian.client.impl.module.exploit.ReachModule;
 import com.caspian.client.impl.module.exploit.SwingModule;
+import com.caspian.client.impl.module.misc.AutoRespawnModule;
 import com.caspian.client.impl.module.misc.FakePlayerModule;
 import com.caspian.client.impl.module.misc.TimerModule;
+import com.caspian.client.impl.module.misc.XCarryModule;
 import com.caspian.client.impl.module.movement.*;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
 import com.caspian.client.impl.module.render.*;
+import com.caspian.client.impl.module.world.AvoidModule;
 import com.caspian.client.impl.module.world.FastPlaceModule;
 import com.caspian.client.impl.module.world.SpeedmineModule;
 
@@ -43,30 +47,38 @@ public class Modules
     public static HudModule HUD;
     public static RotationsModule ROTATIONS;
     public static AuraModule AURA;
+    public static AutoArmorModule AUTO_ARMOR;
     public static AutoBowReleaseModule AUTO_BOW_RELEASE;
     public static AutoCrystalModule AUTO_CRYSTAL;
     public static AutoTotemModule AUTO_TOTEM;
     public static CriticalsModule CRITICALS;
-    public static VelocityModule VELOCITY;
     public static AntiHungerModule ANTI_HUNGER;
+    public static ReachModule REACH;
     public static SwingModule SWING;
+    public static AutoRespawnModule AUTO_RESPAWN;
     public static FakePlayerModule FAKE_PLAYER;
     public static TimerModule TIMER;
+    public static XCarryModule XCARRY;
     public static ElytraFlyModule ELYTRA_FLY;
+    public static EntityControlModule ENTITY_CONTROL;
     public static FastFallModule FAST_FALL;
     public static FlightModule FLIGHT;
     public static LongJumpModule LONG_JUMP;
     public static NoSlowModule NO_SLOW;
     public static SpeedModule SPEED;
     public static SprintModule SPRINT;
+    public static VelocityModule VELOCITY;
+    public static YawModule YAW;
     public static BlockHighlightModule BLOCK_HIGHLIGHT;
+    public static ESPModule ESP;
     public static FullbrightModule FULLBRIGHT;
-    public static HoleEspModule HOLE_ESP;
+    public static HoleESPModule HOLE_ESP;
     public static NametagsModule NAMETAGS;
     public static NoRenderModule NO_RENDER;
     public static NoWeatherModule NO_WEATHER;
     public static ViewClipModule VIEW_CLIP;
     // public static ViewModelModule VIEW_MODEL;
+    public static AvoidModule AVOID;
     public static FastPlaceModule FAST_PLACE;
     public static SpeedmineModule SPEEDMINE;
 
@@ -115,6 +127,7 @@ public class Modules
             ROTATIONS = (RotationsModule) getRegisteredModule(
                     "rotations-module");
             AURA = (AuraModule) getRegisteredModule("aura-module");
+            AUTO_ARMOR = (AutoArmorModule) getRegisteredModule("autoarmor-module");
             AUTO_BOW_RELEASE = (AutoBowReleaseModule) getRegisteredModule(
                     "autobowrelease-module");
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
@@ -124,10 +137,16 @@ public class Modules
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
                     "antihunger-module");
+            REACH = (ReachModule) getRegisteredModule("reach-module");
             SWING = (SwingModule) getRegisteredModule("swing-module");
-            FAKE_PLAYER = (FakePlayerModule) getRegisteredModule("fakeplayer" +
-                    "-module");
+            AUTO_RESPAWN = (AutoRespawnModule) getRegisteredModule(
+                    "autorespawn-module");
+            FAKE_PLAYER = (FakePlayerModule) getRegisteredModule(
+                    "fakeplayer-module");
             TIMER = (TimerModule) getRegisteredModule("timer-module");
+            XCARRY = (XCarryModule) getRegisteredModule("xcarry-module");
+            ENTITY_CONTROL = (EntityControlModule) getRegisteredModule(
+                    "entitycontrol-module");
             FAST_FALL = (FastFallModule) getRegisteredModule("fastfall-module");
             FLIGHT = (FlightModule) getRegisteredModule("flight-module");
             LONG_JUMP = (LongJumpModule) getRegisteredModule("longjump-module");
@@ -135,8 +154,10 @@ public class Modules
             SPEED = (SpeedModule) getRegisteredModule("speed-module");
             SPRINT = (SprintModule) getRegisteredModule("sprint-module");
             VELOCITY = (VelocityModule) getRegisteredModule("velocity-module");
+            YAW = (YawModule) getRegisteredModule("yaw-module");
             BLOCK_HIGHLIGHT = (BlockHighlightModule) getRegisteredModule(
                     "blockhighlight-module");
+            ESP = (ESPModule) getRegisteredModule("esp-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");
             NAMETAGS = (NametagsModule) getRegisteredModule("nametags-module");
@@ -147,6 +168,7 @@ public class Modules
                     "viewclip-module");
             // VIEW_MODEL = (ViewModelModule) getRegisteredModule(
             //        "viewmodel-module");
+            AVOID = (AvoidModule) getRegisteredModule("avoid-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule(
                     "fastplace-module");
             SPEEDMINE = (SpeedmineModule) getRegisteredModule(

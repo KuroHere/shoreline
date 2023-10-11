@@ -99,7 +99,7 @@ public class FastPlaceModule extends ToggleModule
         if (mc.player != null && mc.world != null)
         {
             if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet
-                    && ghostFixConfig.getValue() && !event.isCached()
+                    && ghostFixConfig.getValue() && !event.isClientPacket()
                     && placeCheck(mc.player.getStackInHand(packet.getHand())))
             {
                 final BlockState state = mc.world.getBlockState(
