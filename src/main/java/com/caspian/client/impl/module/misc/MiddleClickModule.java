@@ -26,7 +26,7 @@ public class MiddleClickModule extends ToggleModule
 {
     //
     Config<Action> actionConfig = new EnumConfig<>("Action", "The action to " +
-            "perform when middle-clicking", Action.FRIED, Action.values());
+            "perform when middle-clicking", Action.FRIEND, Action.values());
     Config<Boolean> pearlConfig = new BooleanConfig("Pearl", "Throws a pearl " +
             "if looking at air", false);
 
@@ -57,7 +57,7 @@ public class MiddleClickModule extends ToggleModule
             {
                 switch (actionConfig.getValue())
                 {
-                    case FRIED ->
+                    case FRIEND ->
                     {
                         if (Managers.SOCIAL.isFriend(target.getUuid()))
                         {
@@ -102,7 +102,7 @@ public class MiddleClickModule extends ToggleModule
 
     public enum Action
     {
-        FRIED,
+        FRIEND,
         DUEL
     }
 }
