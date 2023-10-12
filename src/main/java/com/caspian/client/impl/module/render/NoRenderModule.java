@@ -27,6 +27,7 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket;
+import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.FluidTags;
 
@@ -78,6 +79,8 @@ public class NoRenderModule extends ToggleModule
             "Prevents totem particles from rendering", false);
     Config<Boolean> unicodeConfig = new BooleanConfig("UnicodeChat",
             "Prevents unicode characters from being rendered in chat", false);
+    Config<Boolean> particlesConfig = new BooleanConfig("LagParticles",
+            "Prevents laggy particles from crashing the game", false);
     Config<FogRender> fogConfig = new EnumConfig<>("Fog", "Prevents fog from " +
             "rendering in the world", FogRender.OFF, FogRender.values());
     Config<ItemRender> itemsConfig = new EnumConfig<>("Items",
@@ -133,6 +136,11 @@ public class NoRenderModule extends ToggleModule
                     break;
                 }
             }
+        }
+        else if (event.getPacket() instanceof ParticleS2CPacket packet
+                && packet.getCount() > 100 && particlesConfig.getValue())
+        {
+            event.cancel();
         }
     }
 

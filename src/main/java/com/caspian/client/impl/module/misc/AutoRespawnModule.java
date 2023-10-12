@@ -28,10 +28,14 @@ public class AutoRespawnModule extends ToggleModule
                 ModuleCategory.MISCELLANEOUS);
     }
 
+    /**
+     *
+     * @param event
+     */
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (event.getStage() == EventStage.PRE && mc.player.isDead() && respawn)
+        if (event.getStage() == EventStage.PRE && respawn && mc.player.isDead())
         {
             mc.player.requestRespawn();
             respawn = false;

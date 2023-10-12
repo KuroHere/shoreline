@@ -8,6 +8,7 @@ import com.caspian.client.impl.module.client.HudModule;
 import com.caspian.client.impl.module.client.RotationsModule;
 import com.caspian.client.impl.module.combat.*;
 import com.caspian.client.impl.module.exploit.AntiHungerModule;
+import com.caspian.client.impl.module.exploit.FakeLatencyModule;
 import com.caspian.client.impl.module.exploit.ReachModule;
 import com.caspian.client.impl.module.exploit.SwingModule;
 import com.caspian.client.impl.module.misc.AutoRespawnModule;
@@ -56,6 +57,7 @@ public class ModuleManager
                 new CriticalsModule(),
                 // Exploit
                 new AntiHungerModule(),
+                new FakeLatencyModule(),
                 new ReachModule(),
                 new SwingModule(),
                 // Misc
@@ -68,9 +70,11 @@ public class ModuleManager
                 new FastFallModule(),
                 new FlightModule(),
                 new LongJumpModule(),
+                new NoFallModule(),
                 new NoSlowModule(),
                 new SpeedModule(),
                 new SprintModule(),
+                new TickShiftModule(),
                 new VelocityModule(),
                 new YawModule(),
                 // Render
@@ -79,6 +83,7 @@ public class ModuleManager
                 new FullbrightModule(),
                 new NametagsModule(),
                 new NoRenderModule(),
+                new NoRotateModule(),
                 new NoWeatherModule(),
                 new ViewClipModule(),
                 // World

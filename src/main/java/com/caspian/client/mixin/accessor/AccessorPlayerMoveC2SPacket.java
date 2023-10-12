@@ -46,4 +46,20 @@ public interface AccessorPlayerMoveC2SPacket
     @Accessor("z")
     @Mutable
     void hookSetZ(double z);
+
+    /**
+     *
+     * @param yaw
+     */
+    @Accessor("yaw")
+    @Mutable
+    void hookSetYaw(float yaw);
+
+    /**
+     *
+     * @param pitch
+     */
+    @Accessor("pitch")
+    @Mutable
+    void hookSetPitch(float pitch);
 }

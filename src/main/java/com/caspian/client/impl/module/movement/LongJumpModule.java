@@ -12,6 +12,7 @@ import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.string.EnumFormatter;
+import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
@@ -299,7 +300,8 @@ public class LongJumpModule extends ToggleModule
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
-        if (mc.player == null || mc.world == null)
+        if (mc.player == null || mc.world == null
+                || mc.currentScreen instanceof DownloadingTerrainScreen)
         {
             return;
         }

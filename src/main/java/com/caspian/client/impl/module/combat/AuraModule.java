@@ -10,6 +10,7 @@ import com.caspian.client.api.manager.world.tick.TickSync;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.render.RenderManager;
+import com.caspian.client.impl.event.ScreenOpenEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
@@ -26,6 +27,7 @@ import com.caspian.client.util.string.EnumFormatter;
 import com.caspian.client.util.world.EntityUtil;
 import com.caspian.client.util.world.FakePlayerEntity;
 import com.caspian.client.util.world.VecUtil;
+import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
@@ -204,6 +206,19 @@ public class AuraModule extends RotationModule
     public void onDisconnect(DisconnectEvent event)
     {
         disable();
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onScreenOpen(ScreenOpenEvent event)
+    {
+        if (event.getScreen() instanceof DeathScreen)
+        {
+            disable();
+        }
     }
 
     /**

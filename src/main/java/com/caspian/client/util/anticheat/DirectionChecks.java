@@ -18,6 +18,26 @@ public class DirectionChecks implements Globals
 {
     /**
      *
+     * @param x
+     * @param y
+     * @param z
+     * @param dx
+     * @param dy
+     * @param dz
+     * @return
+     */
+    public static Set<Direction> getPlaceDirectionsNCP(final int x,
+                                                       final int y,
+                                                       final int z,
+                                                       final int dx,
+                                                       final int dy,
+                                                       final int dz)
+    {
+        return getPlaceDirectionsNCP(x, y, z, dx, dy, dz, false);
+    }
+
+    /**
+     *
      *
      * @param x
      * @param y

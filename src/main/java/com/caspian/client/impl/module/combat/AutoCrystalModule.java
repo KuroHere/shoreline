@@ -13,6 +13,7 @@ import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.RunTickEvent;
+import com.caspian.client.impl.event.ScreenOpenEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
@@ -34,6 +35,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -45,6 +47,9 @@ import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.server.world.ServerChunkManager;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
@@ -474,6 +479,19 @@ public class AutoCrystalModule extends RotationModule
     public void onDisconnect(DisconnectEvent event)
     {
         disable();
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onScreenOpen(ScreenOpenEvent event)
+    {
+        if (event.getScreen() instanceof DeathScreen)
+        {
+            disable();
+        }
     }
 
     /**
@@ -1298,7 +1316,8 @@ public class AutoCrystalModule extends RotationModule
                 float radius = -1.0f;
                 if (event.getPacket() instanceof PlaySoundS2CPacket packet)
                 {
-                    if (packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE)
+                    if (packet.getCategory() == SoundCategory.BLOCKS &&
+                            packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE)
                     {
                         dx = packet.getX();
                         dy = packet.getY();
@@ -1896,6 +1915,15 @@ public class AutoCrystalModule extends RotationModule
             mc.player.handSwingTicks = -1;
             mc.player.preferredHand = Modules.SWING.isEnabled() ?
                     Modules.SWING.getSwingHand() : hand;
+            if (mc.player.world instanceof ServerWorld)
+            {
+                EntityAnimationS2CPacket entityAnimationS2CPacket = new EntityAnimationS2CPacket(mc.player,
+                                hand == Hand.MAIN_HAND ? EntityAnimationS2CPacket.SWING_MAIN_HAND :
+                                        EntityAnimationS2CPacket.SWING_OFF_HAND);
+                ServerChunkManager serverChunkManager = ((ServerWorld) mc.player.world).getChunkManager();
+                serverChunkManager.sendToOtherNearbyPlayers(mc.player,
+                        entityAnimationS2CPacket);
+            }
         }
         Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
     }
