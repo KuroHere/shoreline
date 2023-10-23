@@ -2,7 +2,6 @@ package com.caspian.client.impl.command;
 
 import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
-import com.caspian.client.api.command.arg.OptionalArg;
 import com.caspian.client.api.command.arg.arguments.ModuleArgument;
 import com.caspian.client.api.command.arg.arguments.StringArgument;
 import com.caspian.client.api.module.Module;

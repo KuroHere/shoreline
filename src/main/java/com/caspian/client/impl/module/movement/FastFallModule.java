@@ -66,7 +66,8 @@ public class FastFallModule extends ToggleModule
                 {
                     return;
                 }
-                if (Modules.SPEED.isEnabled())
+                if (Modules.SPEED.isEnabled() || Modules.LONG_JUMP.isEnabled()
+                        || Modules.FLIGHT.isEnabled())
                 {
                     return;
                 }
@@ -100,7 +101,9 @@ public class FastFallModule extends ToggleModule
                 return;
             }
             if (!Managers.NCP.passed(1000) || !fallTimer.passed(1000)
-                    || Modules.SPEED.isEnabled())
+                    || Modules.SPEED.isEnabled()
+                    || Modules.LONG_JUMP.isEnabled()
+                    || Modules.FLIGHT.isEnabled())
             {
                 return;
             }

@@ -4,14 +4,13 @@ import com.caspian.client.api.command.Command;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.manager.client.CommandManager;
 import com.caspian.client.impl.event.gui.chat.ChatInputEvent;
-import com.caspian.client.util.string.StringUtil;
 
 import java.util.Collection;
 
 /**
  * {@link Command} Argument structure which builds the value from the literal
  * argument. The argument can be marked as an optional value by using the
- * {@link OptionalArg} annotation.
+ * {@link OptionalArgument} annotation.
  *
  * @author linus
  * @since 1.0

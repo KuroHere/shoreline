@@ -41,7 +41,7 @@ public class ArgumentFactory
             final Argument<?> arg = (Argument<?>) f.get(argObj);
             if (arg != null)
             {
-                arg.setOptional(f.isAnnotationPresent(OptionalArg.class));
+                arg.setOptional(f.isAnnotationPresent(OptionalArgument.class));
             }
             return arg;
         }

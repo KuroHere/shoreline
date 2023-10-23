@@ -85,7 +85,7 @@ public class EventBus implements EventHandler
      * active {@link Listener} for the param {@link Event}
      *
      * @param event The event to dispatch listeners
-     * @return <tt>true</tt> if {@link Event#isCanceled()} is <tt>true</tt>
+     * @return <tt>true</tt> if {@link Event#isCanceled()}
      */
     @Override
     public boolean dispatch(Event event)

@@ -1,7 +1,9 @@
 package com.caspian.client.util.anticheat;
 
+import com.caspian.client.api.manager.player.rotation.RotationPriority;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
+import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.world.SneakBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -30,20 +32,34 @@ public class BlockPlacement implements Globals
     /**
      *
      * @param pos
+     * @param rotate
      * @param strictDirection
      */
-    public static void placeBlock(BlockPos pos, boolean strictDirection)
+    public static void placeBlock(BlockPos pos, boolean rotate,
+                                  boolean strictDirection)
     {
-        placeBlock(pos, Hand.MAIN_HAND, strictDirection);
+        placeBlock(pos, Hand.MAIN_HAND, rotate, strictDirection);
     }
 
     /**
      *
      * @param pos
+     * @param hand
+     * @param rotate
      */
-    public static void placeBlock(BlockPos pos, Hand hand)
+    public static void placeBlock(BlockPos pos, Hand hand, boolean rotate)
     {
-        placeBlock(pos, hand, false);
+        placeBlock(pos, hand, rotate, false);
+    }
+
+    /**
+     *
+     * @param pos
+     * @param rotate
+     */
+    public static void placeBlock(BlockPos pos, boolean rotate)
+    {
+        placeBlock(pos, Hand.MAIN_HAND, rotate);
     }
 
     /**
@@ -52,16 +68,18 @@ public class BlockPlacement implements Globals
      */
     public static void placeBlock(BlockPos pos)
     {
-        placeBlock(pos, Hand.MAIN_HAND, false);
+        placeBlock(pos, false);
     }
 
     /**
      *
      * @param pos
      * @param hand
+     * @param rotate
      * @param strictDirection
      */
-    public static void placeBlock(BlockPos pos, Hand hand, boolean strictDirection)
+    public static void placeBlock(BlockPos pos, Hand hand,
+                                  boolean rotate, boolean strictDirection)
     {
         final List<Entity> entities = mc.world.getOtherEntities(null,
                 new Box(pos), e -> e != null && !(e instanceof ExperienceOrbEntity));
@@ -96,6 +114,12 @@ public class BlockPlacement implements Globals
                     dir.getOffsetY() * 0.5, dir.getOffsetZ() * 0.5);
             final BlockHitResult result = new BlockHitResult(pos1,
                     dir.getOpposite(), off, false);
+            if (rotate)
+            {
+                float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), result.getPos());
+                Managers.ROTATION.setRotation(null, RotationPriority.HIGHEST,
+                        angles[0], angles[1]);
+            }
             Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractBlockC2SPacket(hand, result, id));
             Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
             if (sneaking)

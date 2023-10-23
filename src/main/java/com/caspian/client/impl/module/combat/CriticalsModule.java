@@ -41,7 +41,6 @@ public class CriticalsModule extends ToggleModule
             " attack modifier", CritMode.PACKET, CritMode.values());
     Config<Boolean> packetSyncConfig = new BooleanConfig("Packet-Sync",
             "Syncs the cached packet interaction to the MC tick", false);
-
     //
     private final Timer attackTimer = new CacheTimer();
     // The cached attack packets that will be resent after manipulating

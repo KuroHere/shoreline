@@ -27,6 +27,16 @@ public class MovementUtil implements Globals
 
     /**
      *
+     * @return
+     */
+    public static boolean isMovingInput()
+    {
+        return mc.player.input.movementForward != 0.0f
+                || mc.player.input.movementSideways != 0.0f;
+    }
+
+    /**
+     *
      *
      * @return
      */

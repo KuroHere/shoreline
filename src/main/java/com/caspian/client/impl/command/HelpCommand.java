@@ -1,7 +1,7 @@
 package com.caspian.client.impl.command;
 
 import com.caspian.client.api.command.arg.Argument;
-import com.caspian.client.api.command.arg.OptionalArg;
+import com.caspian.client.api.command.arg.OptionalArgument;
 import com.caspian.client.api.command.arg.arguments.CommandArgument;
 import com.caspian.client.api.command.Command;
 import com.caspian.client.init.Managers;
@@ -16,7 +16,7 @@ import com.caspian.client.util.chat.ChatUtil;
 public class HelpCommand extends Command
 {
     //
-    @OptionalArg
+    @OptionalArgument
     Argument<Command> commandArgument = new CommandArgument("Command", "The " +
             "specified command to display info");
 

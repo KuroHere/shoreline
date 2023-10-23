@@ -204,8 +204,11 @@ public class SurroundModule extends ToggleModule
                     return;
                 }
                 int prev = mc.player.getInventory().selectedSlot;
-                mc.player.getInventory().selectedSlot = slot;
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+                if (prev != slot)
+                {
+                    mc.player.getInventory().selectedSlot = slot;
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+                }
                 for (BlockPos p : placements)
                 {
                     double dist = mc.player.squaredDistanceTo(p.toCenterPos());
@@ -213,10 +216,14 @@ public class SurroundModule extends ToggleModule
                     {
                         continue;
                     }
-                    BlockPlacement.placeBlock(pos, strictDirectionConfig.getValue());
+                    BlockPlacement.placeBlock(pos, rotateConfig.getValue(),
+                            strictDirectionConfig.getValue());
                 }
-                mc.player.getInventory().selectedSlot = prev;
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+                if (prev != slot)
+                {
+                    mc.player.getInventory().selectedSlot = prev;
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+                }
             }
         }
     }
@@ -244,12 +251,19 @@ public class SurroundModule extends ToggleModule
                     return;
                 }
                 int prev = mc.player.getInventory().selectedSlot;
-                mc.player.getInventory().selectedSlot = slot;
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+                if (prev != slot)
+                {
+                    mc.player.getInventory().selectedSlot = slot;
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+                }
                 //
-                BlockPlacement.placeBlock(pos, strictDirectionConfig.getValue());
-                mc.player.getInventory().selectedSlot = prev;
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+                BlockPlacement.placeBlock(pos, rotateConfig.getValue(),
+                        strictDirectionConfig.getValue());
+                if (prev != slot)
+                {
+                    mc.player.getInventory().selectedSlot = prev;
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+                }
             }
         }
         else if (event.getPacket() instanceof PlaySoundS2CPacket packet
@@ -266,12 +280,19 @@ public class SurroundModule extends ToggleModule
                     return;
                 }
                 int prev = mc.player.getInventory().selectedSlot;
-                mc.player.getInventory().selectedSlot = slot;
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+                if (prev != slot)
+                {
+                    mc.player.getInventory().selectedSlot = slot;
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+                }
                 //
-                BlockPlacement.placeBlock(pos, strictDirectionConfig.getValue());
-                mc.player.getInventory().selectedSlot = prev;
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+                BlockPlacement.placeBlock(pos, rotateConfig.getValue(),
+                        strictDirectionConfig.getValue());
+                if (prev != slot)
+                {
+                    mc.player.getInventory().selectedSlot = prev;
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+                }
             }
         }
     }

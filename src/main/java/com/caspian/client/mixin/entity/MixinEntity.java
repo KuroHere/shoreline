@@ -1,6 +1,7 @@
 package com.caspian.client.mixin.entity;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.impl.event.entity.EntityPositionEvent;
 import com.caspian.client.impl.event.entity.VelocityMultiplierEvent;
 import com.caspian.client.impl.event.entity.player.PushEntityEvent;
 import com.caspian.client.util.Globals;
@@ -8,7 +9,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MovementType;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -25,6 +30,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Entity.class)
 public abstract class MixinEntity implements Globals
 {
+    //
+    @Shadow
+    public abstract Box getBoundingBox();
+
+    /**
+     * credit - @auto
+     *
+     * @param movementType
+     * @param movement
+     * @param ci
+     */
+    @Inject(method = "move", at = @At(value = "INVOKE", target = "Lnet" +
+            "/minecraft/util/profiler/Profiler;pop()V", ordinal = 0, shift =
+            At.Shift.BEFORE))
+    private void hookMove(MovementType movementType, Vec3d movement,
+                          CallbackInfo ci)
+    {
+        if (((Entity) (Object) this).equals(mc.player))
+        {
+            EntityPositionEvent entityPositionEvent =
+                    new EntityPositionEvent(getBoundingBox());
+            Caspian.EVENT_HANDLER.dispatch(entityPositionEvent);
+        }
+    }
+
     /**
      *
      *

@@ -5,7 +5,7 @@ import net.minecraft.util.Formatting;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ShadowCache
+public class ShadowColors
 {
     private static final Map<Character, Integer> SHADOW_CACHE;
 

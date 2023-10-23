@@ -7,14 +7,8 @@ import com.caspian.client.impl.module.client.ColorsModule;
 import com.caspian.client.impl.module.client.HudModule;
 import com.caspian.client.impl.module.client.RotationsModule;
 import com.caspian.client.impl.module.combat.*;
-import com.caspian.client.impl.module.exploit.AntiHungerModule;
-import com.caspian.client.impl.module.exploit.FakeLatencyModule;
-import com.caspian.client.impl.module.exploit.ReachModule;
-import com.caspian.client.impl.module.exploit.SwingModule;
-import com.caspian.client.impl.module.misc.AutoRespawnModule;
-import com.caspian.client.impl.module.misc.FakePlayerModule;
-import com.caspian.client.impl.module.misc.TimerModule;
-import com.caspian.client.impl.module.misc.XCarryModule;
+import com.caspian.client.impl.module.exploit.*;
+import com.caspian.client.impl.module.misc.*;
 import com.caspian.client.impl.module.movement.*;
 import com.caspian.client.impl.module.render.*;
 import com.caspian.client.impl.module.world.AvoidModule;
@@ -58,30 +52,47 @@ public class ModuleManager
                 // Exploit
                 new AntiHungerModule(),
                 new FakeLatencyModule(),
+                new FastProjectileModule(),
+                new NoMineAnimationModule(),
+                new PortalGodModeModule(),
                 new ReachModule(),
                 new SwingModule(),
                 // Misc
+                new AntiBookBanModule(),
+                new AntiSpamModule(),
+                new AntiVanishModule(),
+                new AutoFishModule(),
                 new AutoRespawnModule(),
                 new FakePlayerModule(),
+                new MiddleClickModule(),
+                new NoSoundLagModule(),
+                new SkinBlinkModule(),
                 new TimerModule(),
+                new TrueDurabilityModule(),
                 new XCarryModule(),
                 // Movement
+                new AntiLevitationModule(),
                 new EntityControlModule(),
                 new FastFallModule(),
                 new FlightModule(),
+                new HighJumpModule(),
+                new IceSpeedModule(),
                 new LongJumpModule(),
                 new NoFallModule(),
                 new NoSlowModule(),
                 new SpeedModule(),
                 new SprintModule(),
+                new StepModule(),
                 new TickShiftModule(),
                 new VelocityModule(),
                 new YawModule(),
                 // Render
                 new BlockHighlightModule(),
                 new ESPModule(),
+                new ExtraTabModule(),
                 new FullbrightModule(),
                 new NametagsModule(),
+                new NoBobModule(),
                 new NoRenderModule(),
                 new NoRotateModule(),
                 new NoWeatherModule(),

@@ -2,7 +2,7 @@ package com.caspian.client.impl.command;
 
 import com.caspian.client.api.command.Command;
 import com.caspian.client.api.command.arg.Argument;
-import com.caspian.client.api.command.arg.OptionalArg;
+import com.caspian.client.api.command.arg.OptionalArgument;
 import com.caspian.client.api.command.arg.arguments.BooleanArgument;
 import com.caspian.client.api.command.arg.arguments.PlayerArgument;
 import com.caspian.client.api.command.arg.arguments.StringArgument;
@@ -22,13 +22,13 @@ import java.util.Arrays;
 public class FriendCommand extends Command
 {
     //
-    @OptionalArg
+    @OptionalArgument
     Argument<String> actionArgument = new StringArgument("Add/Remove",
             "Whether to add or remove the friend", Arrays.asList("Add", "remove", "del"));
     Argument<PlayerEntity> playerArgument = new PlayerArgument("Player", "The" +
             " player to add/remove friend");
     // Optionally notifies the player you are friending in chat
-    @OptionalArg
+    @OptionalArgument
     Argument<Boolean> notifyArgument = new BooleanArgument("Notify",
             "Notifies the friended player in the chat");
 

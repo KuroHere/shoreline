@@ -58,6 +58,7 @@ public class Caspian
         info("Starting init ...");
         Managers.init();
         Modules.init();
+        // Commands.init();
     }
 
     /**
@@ -85,7 +86,7 @@ public class Caspian
      */
     public static void info(String message)
     {
-        LOGGER.info(message);
+        LOGGER.info(String.format("[Caspian] %s", message));
     }
 
     /**
@@ -96,7 +97,7 @@ public class Caspian
      */
     public static void info(String message, Object... params)
     {
-        LOGGER.info(message, params);
+        LOGGER.info(String.format("[Caspian] %s", message), params);
     }
 
     /**

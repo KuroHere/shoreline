@@ -20,8 +20,8 @@ import net.minecraft.network.packet.s2c.play.PositionFlag;
 public class NoRotateModule extends ToggleModule
 {
     //
-    private boolean rotate;
     private float yaw, pitch;
+    private boolean cancelRotate;
 
     /**
      *
@@ -51,7 +51,8 @@ public class NoRotateModule extends ToggleModule
             ((AccessorPlayerPositionLookS2CPacket) packet).setPitch(mc.player.getPitch());
             packet.getFlags().remove(PositionFlag.X_ROT);
             packet.getFlags().remove(PositionFlag.Y_ROT);
-            rotate = true;
+            cancelRotate = true;
+            // Cancel packet and custom handle??
         }
     }
 
@@ -62,11 +63,11 @@ public class NoRotateModule extends ToggleModule
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
-        if (event.getPacket() instanceof PlayerMoveC2SPacket.Full packet && rotate)
+        if (event.getPacket() instanceof PlayerMoveC2SPacket.Full packet && cancelRotate)
         {
             ((AccessorPlayerMoveC2SPacket) packet).hookSetYaw(yaw);
             ((AccessorPlayerMoveC2SPacket) packet).hookSetPitch(pitch);
-            rotate = false;
+            cancelRotate = false;
         }
     }
 }

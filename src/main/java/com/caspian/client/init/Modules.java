@@ -8,12 +8,9 @@ import com.caspian.client.impl.module.client.ColorsModule;
 import com.caspian.client.impl.module.client.HudModule;
 import com.caspian.client.impl.module.client.RotationsModule;
 import com.caspian.client.impl.module.combat.*;
-import com.caspian.client.impl.module.exploit.FakeLatencyModule;
-import com.caspian.client.impl.module.exploit.ReachModule;
-import com.caspian.client.impl.module.exploit.SwingModule;
+import com.caspian.client.impl.module.exploit.*;
 import com.caspian.client.impl.module.misc.*;
 import com.caspian.client.impl.module.movement.*;
-import com.caspian.client.impl.module.exploit.AntiHungerModule;
 import com.caspian.client.impl.module.render.*;
 import com.caspian.client.impl.module.world.AvoidModule;
 import com.caspian.client.impl.module.world.FastPlaceModule;
@@ -55,33 +52,49 @@ public class Modules
     // Exploit
     public static AntiHungerModule ANTI_HUNGER;
     public static FakeLatencyModule FAKE_LATENCY;
+    public static FastProjectileModule FAST_PROJECTILE;
+    public static NoMineAnimationModule NO_MINE_ANIMATION;
+    public static PortalGodModeModule PORTAL_GOD_MODE;
     public static ReachModule REACH;
     public static SwingModule SWING;
     // Misc
+    public static AntiBookBanModule ANTI_BOOK_BAN;
+    public static AntiSpamModule ANTI_SPAM;
+    public static AntiVanishModule ANTI_VANISH;
+    public static AutoFishModule AUTO_FISH;
     public static AutoRespawnModule AUTO_RESPAWN;
     public static FakePlayerModule FAKE_PLAYER;
     public static MiddleClickModule MIDDLE_CLICK;
+    public static NoSoundLagModule NO_SOUND_LAG;
+    public static SkinBlinkModule SKIN_BLINK;
     public static TimerModule TIMER;
+    public static TrueDurabilityModule TRUE_DURABILITY;
     public static XCarryModule XCARRY;
     // Movement
+    public static AntiLevitationModule ANTI_LEVITATION;
     public static ElytraFlyModule ELYTRA_FLY;
     public static EntityControlModule ENTITY_CONTROL;
     public static FastFallModule FAST_FALL;
     public static FlightModule FLIGHT;
+    public static HighJumpModule HIGH_JUMP;
+    public static IceSpeedModule ICE_SPEED;
     public static LongJumpModule LONG_JUMP;
     public static NoFallModule NO_FALL;
     public static NoSlowModule NO_SLOW;
     public static SpeedModule SPEED;
     public static SprintModule SPRINT;
+    public static StepModule STEP;
     public static TickShiftModule TICK_SHIFT;
     public static VelocityModule VELOCITY;
     public static YawModule YAW;
     // Render
     public static BlockHighlightModule BLOCK_HIGHLIGHT;
     public static ESPModule ESP;
+    public static ExtraTabModule EXTRA_TAB;
     public static FullbrightModule FULLBRIGHT;
     public static HoleESPModule HOLE_ESP;
     public static NametagsModule NAMETAGS;
+    public static NoBobModule NO_BOB;
     public static NoRenderModule NO_RENDER;
     public static NoRotateModule NO_ROTATE;
     public static NoWeatherModule NO_WEATHER;
@@ -149,25 +162,47 @@ public class Modules
                     "antihunger-module");
             FAKE_LATENCY = (FakeLatencyModule) getRegisteredModule(
                     "fakelatency-module");
+            FAST_PROJECTILE = (FastProjectileModule) getRegisteredModule(
+                    "fastprojectile-module");
+            NO_MINE_ANIMATION = (NoMineAnimationModule) getRegisteredModule(
+                    "nomineanimation-module");
+            PORTAL_GOD_MODE = (PortalGodModeModule) getRegisteredModule(
+                    "portalgodmode-module");
             REACH = (ReachModule) getRegisteredModule("reach-module");
             SWING = (SwingModule) getRegisteredModule("swing-module");
+            ANTI_BOOK_BAN = (AntiBookBanModule) getRegisteredModule(
+                    "antibookban-module");
+            ANTI_SPAM = (AntiSpamModule) getRegisteredModule("antispam-module");
+            ANTI_VANISH = (AntiVanishModule) getRegisteredModule(
+                    "antivanish-module");
+            AUTO_FISH = (AutoFishModule) getRegisteredModule("autofish-module");
             AUTO_RESPAWN = (AutoRespawnModule) getRegisteredModule(
                     "autorespawn-module");
             FAKE_PLAYER = (FakePlayerModule) getRegisteredModule(
                     "fakeplayer-module");
             MIDDLE_CLICK = (MiddleClickModule) getRegisteredModule(
                     "middleclick-module");
+            NO_SOUND_LAG = (NoSoundLagModule) getRegisteredModule(
+                    "nosoundlag-module");
+            SKIN_BLINK = (SkinBlinkModule) getRegisteredModule("skinblink-module");
             TIMER = (TimerModule) getRegisteredModule("timer-module");
+            TRUE_DURABILITY = (TrueDurabilityModule) getRegisteredModule(
+                    "truedurability-module");
             XCARRY = (XCarryModule) getRegisteredModule("xcarry-module");
+            ANTI_LEVITATION = (AntiLevitationModule) getRegisteredModule(
+                    "antilevitation-module");
             ENTITY_CONTROL = (EntityControlModule) getRegisteredModule(
                     "entitycontrol-module");
             FAST_FALL = (FastFallModule) getRegisteredModule("fastfall-module");
             FLIGHT = (FlightModule) getRegisteredModule("flight-module");
+            HIGH_JUMP = (HighJumpModule) getRegisteredModule("highjump-module");
+            ICE_SPEED = (IceSpeedModule) getRegisteredModule("icespeed-module");
             LONG_JUMP = (LongJumpModule) getRegisteredModule("longjump-module");
             NO_FALL = (NoFallModule) getRegisteredModule("nofall-module");
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow-module");
             SPEED = (SpeedModule) getRegisteredModule("speed-module");
             SPRINT = (SprintModule) getRegisteredModule("sprint-module");
+            STEP = (StepModule) getRegisteredModule("step-module");
             TICK_SHIFT = (TickShiftModule) getRegisteredModule(
                     "tickshift-module");
             VELOCITY = (VelocityModule) getRegisteredModule("velocity-module");
@@ -175,9 +210,11 @@ public class Modules
             BLOCK_HIGHLIGHT = (BlockHighlightModule) getRegisteredModule(
                     "blockhighlight-module");
             ESP = (ESPModule) getRegisteredModule("esp-module");
+            EXTRA_TAB = (ExtraTabModule) getRegisteredModule("extratab-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");
             NAMETAGS = (NametagsModule) getRegisteredModule("nametags-module");
+            NO_BOB = (NoBobModule) getRegisteredModule("nobob-module");
             NO_RENDER = (NoRenderModule) getRegisteredModule("norender-module");
             NO_ROTATE = (NoRotateModule) getRegisteredModule("norotate-module");
             NO_WEATHER = (NoWeatherModule) getRegisteredModule(
