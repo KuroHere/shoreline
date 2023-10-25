@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.awt.*;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -20,6 +21,7 @@ public class ColorConfig extends Config<Color>
     private int rgb;
     //
     private boolean global;
+    public static final Integer GLOBAL_COLOR = -0xffffffff;
 
     public ColorConfig(String name, String desc, Color value)
     {
@@ -36,7 +38,12 @@ public class ColorConfig extends Config<Color>
 
     public ColorConfig(String name, String desc, Integer rgb)
     {
-        this(name, desc, new Color(rgb, (rgb & 0xff000000) != 0xff000000));
+        this(name, desc, rgb.equals(GLOBAL_COLOR) ? Color.WHITE :
+                new Color(rgb, (rgb & 0xff000000) != 0xff000000));
+        if (rgb.equals(GLOBAL_COLOR))
+        {
+            setGlobal();
+        }
     }
 
     @Override

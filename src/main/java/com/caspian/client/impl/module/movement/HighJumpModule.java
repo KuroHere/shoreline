@@ -8,6 +8,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.init.Managers;
 
 /**
@@ -37,12 +38,14 @@ public class HighJumpModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
+    public void onPlayerMove(PlayerMoveEvent event)
     {
-        if (event.getStage() == EventStage.PRE && mc.options.jumpKey.isPressed()
-                && (mc.player.isOnGround() || airJumpConfig.getValue()))
+        if (mc.options.jumpKey.isPressed() && (mc.player.isOnGround()
+                || airJumpConfig.getValue()))
         {
             Managers.MOVEMENT.setMotionY(heightConfig.getValue());
+            event.cancel();
+            event.setY(mc.player.getVelocity().y);
         }
     }
 }

@@ -22,6 +22,7 @@
     "accessor.AccessorEntityVelocityUpdateS2CPacket",
     "accessor.AccessorPlayerSkinProvider",
     "accessor.AccessorTextFieldWidget",
+    "accessor.AccessorLightmapTextureManager",
     "accessor.AccessorWorldRenderer",
     "block.MixinBlock",
     "block.MixinSlimeBlock",
@@ -41,6 +42,7 @@
     "gui.hud.MixinPlayerListHud",
     "gui.hud.MixinInGameOverlayRenderer",
     "gui.screen.MixinChatScreen",
+    "text.MixinTextVisitFactory",
     "network.MixinClientConnection",
     "network.MixinClientPlayerEntity",
     "network.MixinClientPlayerInteractionManager",
@@ -62,6 +64,7 @@
     "render.entity.MixinLivingEntityRenderer",
     "render.entity.MixinPlayerEntityRenderer",
     "render.entity.MixinWitherSkullEntityRenderer",
+    "world.MixinClientWorld",
     "world.MixinBlockCollisionSpliterator"
   ],
   "injectors": {

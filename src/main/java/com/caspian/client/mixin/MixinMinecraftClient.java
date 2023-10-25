@@ -2,6 +2,7 @@ package com.caspian.client.mixin;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.EventStage;
+import com.caspian.client.impl.event.ItemMultitaskEvent;
 import com.caspian.client.impl.event.RunTickEvent;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.ScreenOpenEvent;
@@ -17,6 +18,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -130,5 +132,33 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
     private void hookDoItemUse(CallbackInfo ci)
     {
         doItemUseCalled = true;
+    }
+
+    /**
+     *
+     * @param instance
+     * @return
+     */
+    @Redirect(method = "handleBlockBreaking",at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"))
+    private boolean hookIsUsingItem(ClientPlayerEntity instance)
+    {
+        ItemMultitaskEvent itemMultitaskEvent = new ItemMultitaskEvent();
+        Caspian.EVENT_HANDLER.dispatch(itemMultitaskEvent);
+        return !itemMultitaskEvent.isCanceled() && instance.isUsingItem();
+    }
+
+    /**
+     *
+     * @param instance
+     * @return
+     */
+    @Redirect(method = "doItemUse",at = @At(value = "INVOKE", target = "Lnet" +
+            "/minecraft/client/network/ClientPlayerInteractionManager;isBreakingBlock()Z"))
+    private boolean hookIsBreakingBlock(ClientPlayerInteractionManager instance)
+    {
+        ItemMultitaskEvent itemMultitaskEvent = new ItemMultitaskEvent();
+        Caspian.EVENT_HANDLER.dispatch(itemMultitaskEvent);
+        return !itemMultitaskEvent.isCanceled() && instance.isBreakingBlock();
     }
 }

@@ -13,6 +13,7 @@ import com.caspian.client.impl.module.movement.*;
 import com.caspian.client.impl.module.render.*;
 import com.caspian.client.impl.module.world.AvoidModule;
 import com.caspian.client.impl.module.world.FastPlaceModule;
+import com.caspian.client.impl.module.world.MultitaskModule;
 import com.caspian.client.impl.module.world.SpeedmineModule;
 
 import java.util.*;
@@ -48,12 +49,15 @@ public class ModuleManager
                 new AutoBowReleaseModule(),
                 new AutoCrystalModule(),
                 new AutoTotemModule(),
+                new BlockLagModule(),
                 new CriticalsModule(),
+                new SurroundModule(),
                 // Exploit
                 new AntiHungerModule(),
                 new FakeLatencyModule(),
                 new FastProjectileModule(),
                 new NoMineAnimationModule(),
+                new PacketFlyModule(),
                 new PortalGodModeModule(),
                 new ReachModule(),
                 new SwingModule(),
@@ -91,15 +95,18 @@ public class ModuleManager
                 new ESPModule(),
                 new ExtraTabModule(),
                 new FullbrightModule(),
+                new NameProtectModule(),
                 new NametagsModule(),
                 new NoBobModule(),
                 new NoRenderModule(),
                 new NoRotateModule(),
                 new NoWeatherModule(),
+                new SkyboxModule(),
                 new ViewClipModule(),
                 // World
                 new AvoidModule(),
                 new FastPlaceModule(),
+                new MultitaskModule(),
                 new SpeedmineModule()
         );
         Caspian.info("Registered {} modules!", modules.size());

@@ -14,6 +14,7 @@ import com.caspian.client.impl.module.movement.*;
 import com.caspian.client.impl.module.render.*;
 import com.caspian.client.impl.module.world.AvoidModule;
 import com.caspian.client.impl.module.world.FastPlaceModule;
+import com.caspian.client.impl.module.world.MultitaskModule;
 import com.caspian.client.impl.module.world.SpeedmineModule;
 
 import java.util.HashSet;
@@ -48,12 +49,15 @@ public class Modules
     public static AutoBowReleaseModule AUTO_BOW_RELEASE;
     public static AutoCrystalModule AUTO_CRYSTAL;
     public static AutoTotemModule AUTO_TOTEM;
+    public static BlockLagModule BLOCK_LAG;
     public static CriticalsModule CRITICALS;
+    public static SurroundModule SURROUND;
     // Exploit
     public static AntiHungerModule ANTI_HUNGER;
     public static FakeLatencyModule FAKE_LATENCY;
     public static FastProjectileModule FAST_PROJECTILE;
     public static NoMineAnimationModule NO_MINE_ANIMATION;
+    public static PacketFlyModule PACKET_FLY;
     public static PortalGodModeModule PORTAL_GOD_MODE;
     public static ReachModule REACH;
     public static SwingModule SWING;
@@ -92,17 +96,20 @@ public class Modules
     public static ESPModule ESP;
     public static ExtraTabModule EXTRA_TAB;
     public static FullbrightModule FULLBRIGHT;
+    public static NameProtectModule NAME_PROTECT;
     public static HoleESPModule HOLE_ESP;
     public static NametagsModule NAMETAGS;
     public static NoBobModule NO_BOB;
     public static NoRenderModule NO_RENDER;
     public static NoRotateModule NO_ROTATE;
     public static NoWeatherModule NO_WEATHER;
+    public static SkyboxModule SKYBOX;
     public static ViewClipModule VIEW_CLIP;
     // public static ViewModelModule VIEW_MODEL;
     // World
     public static AvoidModule AVOID;
     public static FastPlaceModule FAST_PLACE;
+    public static MultitaskModule MULTITASK;
     public static SpeedmineModule SPEEDMINE;
 
     /**
@@ -157,7 +164,9 @@ public class Modules
                     "autocrystal-module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(
                     "autototem-module");
+            BLOCK_LAG = (BlockLagModule) getRegisteredModule("blocklag-module");
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
+            SURROUND = (SurroundModule) getRegisteredModule("surround-module");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
                     "antihunger-module");
             FAKE_LATENCY = (FakeLatencyModule) getRegisteredModule(
@@ -166,6 +175,8 @@ public class Modules
                     "fastprojectile-module");
             NO_MINE_ANIMATION = (NoMineAnimationModule) getRegisteredModule(
                     "nomineanimation-module");
+            PACKET_FLY = (PacketFlyModule) getRegisteredModule(
+                    "packetfly-module");
             PORTAL_GOD_MODE = (PortalGodModeModule) getRegisteredModule(
                     "portalgodmode-module");
             REACH = (ReachModule) getRegisteredModule("reach-module");
@@ -213,12 +224,15 @@ public class Modules
             EXTRA_TAB = (ExtraTabModule) getRegisteredModule("extratab-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");
+            NAME_PROTECT = (NameProtectModule) getRegisteredModule(
+                    "nameprotect-module");
             NAMETAGS = (NametagsModule) getRegisteredModule("nametags-module");
             NO_BOB = (NoBobModule) getRegisteredModule("nobob-module");
             NO_RENDER = (NoRenderModule) getRegisteredModule("norender-module");
             NO_ROTATE = (NoRotateModule) getRegisteredModule("norotate-module");
             NO_WEATHER = (NoWeatherModule) getRegisteredModule(
                     "noweather-module");
+            SKYBOX = (SkyboxModule) getRegisteredModule("skybox-module");
             VIEW_CLIP = (ViewClipModule) getRegisteredModule(
                     "viewclip-module");
             // VIEW_MODEL = (ViewModelModule) getRegisteredModule(
@@ -226,6 +240,7 @@ public class Modules
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule(
                     "fastplace-module");
+            MULTITASK = (MultitaskModule) getRegisteredModule("multitask-module");
             SPEEDMINE = (SpeedmineModule) getRegisteredModule(
                     "speedmine-module");
             initialized = true;

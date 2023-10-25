@@ -81,6 +81,8 @@ public class NoRenderModule extends ToggleModule
             "Prevents unicode characters from being rendered in chat", false);
     Config<Boolean> particlesConfig = new BooleanConfig("LagParticles",
             "Prevents laggy particles from crashing the game", false);
+    Config<Boolean> worldBorderConfig = new BooleanConfig("WorldBorder",
+            "Prevents world border from rendering", false);
     Config<FogRender> fogConfig = new EnumConfig<>("Fog", "Prevents fog from " +
             "rendering in the world", FogRender.OFF, FogRender.values());
     Config<ItemRender> itemsConfig = new EnumConfig<>("Items",

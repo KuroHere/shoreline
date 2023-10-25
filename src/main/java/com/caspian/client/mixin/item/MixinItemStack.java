@@ -44,6 +44,10 @@ public abstract class MixinItemStack
             value = "RETURN"))
     private void hookInitItem(ItemConvertible item, int count, CallbackInfo ci)
     {
+        if (Caspian.EVENT_HANDLER == null)
+        {
+            return;
+        }
         DurabilityEvent durabilityEvent = new DurabilityEvent(getDamage());
         Caspian.EVENT_HANDLER.dispatch(durabilityEvent);
         if (durabilityEvent.isCanceled())
@@ -61,6 +65,10 @@ public abstract class MixinItemStack
             value = "RETURN"))
     private void hookInitNbt(NbtCompound nbt, CallbackInfo ci)
     {
+        if (Caspian.EVENT_HANDLER == null)
+        {
+            return;
+        }
         DurabilityEvent durabilityEvent = new DurabilityEvent(nbt.getInt("Damage"));
         Caspian.EVENT_HANDLER.dispatch(durabilityEvent);
         if (durabilityEvent.isCanceled())
