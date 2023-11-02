@@ -11,10 +11,7 @@ import com.caspian.client.impl.module.exploit.*;
 import com.caspian.client.impl.module.misc.*;
 import com.caspian.client.impl.module.movement.*;
 import com.caspian.client.impl.module.render.*;
-import com.caspian.client.impl.module.world.AvoidModule;
-import com.caspian.client.impl.module.world.FastPlaceModule;
-import com.caspian.client.impl.module.world.MultitaskModule;
-import com.caspian.client.impl.module.world.SpeedmineModule;
+import com.caspian.client.impl.module.world.*;
 
 import java.util.*;
 
@@ -44,6 +41,7 @@ public class ModuleManager
                 new HudModule(),
                 new RotationsModule(),
                 // Combat
+                new AntiBotsModule(),
                 new AuraModule(),
                 new AutoArmorModule(),
                 new AutoBowReleaseModule(),
@@ -51,23 +49,39 @@ public class ModuleManager
                 new AutoTotemModule(),
                 new BlockLagModule(),
                 new CriticalsModule(),
+                // new HoleFillModule(),
+                // new SelfBowModule(),
+                // new SelfTrapModule(),
                 new SurroundModule(),
+                // new TriggerModule(),
                 // Exploit
                 new AntiHungerModule(),
+                new ChorusControlModule(),
+                new ColorSignsModule(),
                 new FakeLatencyModule(),
                 new FastProjectileModule(),
                 new NoMineAnimationModule(),
                 new PacketFlyModule(),
+                // new PhaseModule(),
                 new PortalGodModeModule(),
                 new ReachModule(),
                 new SwingModule(),
                 // Misc
+                // new AnnouncerModule(),
+                // new AntiAFKModule(),
+                // new AntiAimModule(),
                 new AntiBookBanModule(),
                 new AntiSpamModule(),
                 new AntiVanishModule(),
+                new AutoAcceptModule(),
+                // new AutoEatModule(),
                 new AutoFishModule(),
+                // new AutoMountModule(),
                 new AutoRespawnModule(),
+                // new BeaconSelectorModule(),
+                // new ChestStealerModule(),
                 new FakePlayerModule(),
+                new InvCleanerModule(),
                 new MiddleClickModule(),
                 new NoSoundLagModule(),
                 new SkinBlinkModule(),
@@ -76,7 +90,10 @@ public class ModuleManager
                 new XCarryModule(),
                 // Movement
                 new AntiLevitationModule(),
+                new AutoWalkModule(),
+                // new ElytraFlyModule(),
                 new EntityControlModule(),
+                // new FakeLagModule(),
                 new FastFallModule(),
                 new FlightModule(),
                 new HighJumpModule(),
@@ -84,6 +101,7 @@ public class ModuleManager
                 new LongJumpModule(),
                 new NoFallModule(),
                 new NoSlowModule(),
+                new ParkourModule(),
                 new SpeedModule(),
                 new SprintModule(),
                 new StepModule(),
@@ -94,7 +112,9 @@ public class ModuleManager
                 new BlockHighlightModule(),
                 new ESPModule(),
                 new ExtraTabModule(),
+                // new FreecamModule(),
                 new FullbrightModule(),
+                // new HoleESPModule(),
                 new NameProtectModule(),
                 new NametagsModule(),
                 new NoBobModule(),
@@ -102,12 +122,17 @@ public class ModuleManager
                 new NoRotateModule(),
                 new NoWeatherModule(),
                 new SkyboxModule(),
+                new TracersModule(),
                 new ViewClipModule(),
+                // new ViewModelModule(),
                 // World
                 new AvoidModule(),
+                new FastDropModule(),
                 new FastPlaceModule(),
                 new MultitaskModule(),
+                // new ScaffoldModule(),
                 new SpeedmineModule()
+                // new WallhackModule()
         );
         Caspian.info("Registered {} modules!", modules.size());
     }

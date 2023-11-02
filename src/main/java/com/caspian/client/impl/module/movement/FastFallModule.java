@@ -8,6 +8,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.impl.event.network.TickMovementEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
@@ -34,6 +35,9 @@ public class FastFallModule extends ToggleModule
     //
     private boolean prevOnGround;
     private final Timer fallTimer = new CacheTimer();
+    //
+    private boolean cancelFallMovement;
+    private int fallTicks;
 
     /**
      *
@@ -41,6 +45,16 @@ public class FastFallModule extends ToggleModule
     public FastFallModule()
     {
         super("FastFall", "Falls down blocks faster", ModuleCategory.MOVEMENT);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onDisable()
+    {
+        cancelFallMovement = false;
+        fallTicks = 0;
     }
 
     /**
@@ -113,6 +127,28 @@ public class FastFallModule extends ToggleModule
                 fallTimer.reset();
                 event.cancel();
                 event.setIterations(shiftTicksConfig.getValue());
+                cancelFallMovement = true;
+                fallTicks = 0;
+            }
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPlayerMove(PlayerMoveEvent event)
+    {
+        if (cancelFallMovement && fallModeConfig.getValue() == FallMode.SHIFT)
+        {
+            event.setX(0.0);
+            event.setZ(0.0);
+            ++fallTicks;
+            if (fallTicks > shiftTicksConfig.getValue())
+            {
+                cancelFallMovement = false;
+                fallTicks = 0;
             }
         }
     }

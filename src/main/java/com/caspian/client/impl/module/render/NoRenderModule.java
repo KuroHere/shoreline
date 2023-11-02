@@ -12,10 +12,7 @@ import com.caspian.client.impl.event.chunk.light.RenderSkylightEvent;
 import com.caspian.client.impl.event.gui.hud.RenderOverlayEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.particle.ParticleEvent;
-import com.caspian.client.impl.event.render.HurtCamEvent;
-import com.caspian.client.impl.event.render.RenderFloatingItemEvent;
-import com.caspian.client.impl.event.render.RenderFogEvent;
-import com.caspian.client.impl.event.render.RenderNauseaEvent;
+import com.caspian.client.impl.event.render.*;
 import com.caspian.client.impl.event.render.block.RenderTileEntityEvent;
 import com.caspian.client.impl.event.render.entity.RenderArmorEvent;
 import com.caspian.client.impl.event.render.entity.RenderFireworkRocketEvent;
@@ -366,6 +363,19 @@ public class NoRenderModule extends ToggleModule
     public void onRenderFloatingItem(RenderFloatingItemEvent event)
     {
         if (totemConfig.getValue() && event.getFloatingItem() == Items.TOTEM_OF_UNDYING)
+        {
+            event.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onRenderWorldBorder(RenderWorldBorderEvent event)
+    {
+        if (worldBorderConfig.getValue())
         {
             event.cancel();
         }

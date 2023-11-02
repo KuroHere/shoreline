@@ -35,14 +35,14 @@ public class ModuleArgument extends Argument<Module>
      * @see Command#onCommandInput()
      */
     @Override
-    public Module parse()
+    public Module getValue()
     {
-        for (Module module : Managers.MODULE.getModules())
+        String id = String.format(Module.MODULE_ID_FORMAT,
+            getLiteral().toLowerCase());
+        Module module = Managers.MODULE.getModule(id);
+        if (module != null)
         {
-            if (module.getName().equalsIgnoreCase(getLiteral()))
-            {
-                return module;
-            }
+            return module;
         }
         ChatUtil.error("Failed to parse Module argument!");
         return null;

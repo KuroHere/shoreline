@@ -6,6 +6,7 @@ import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.Timer;
 import net.minecraft.util.math.Position;
+import net.minecraft.util.math.Vec3d;
 
 /**
  *
@@ -77,5 +78,14 @@ public class Waypoint extends ConfigContainer implements Position
     public double getZ()
     {
         return zConfig.getValue();
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Vec3d getPos()
+    {
+        return new Vec3d(getX(), getY(), getZ());
     }
 }

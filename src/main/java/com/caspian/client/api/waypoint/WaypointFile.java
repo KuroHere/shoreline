@@ -29,8 +29,6 @@ public class WaypointFile extends ConfigFile
      *
      * @param dir
      * @param serverIp
-     *
-     *
      */
     public WaypointFile(Path dir, String serverIp)
     {

@@ -37,7 +37,7 @@ public class PrefixCommand extends Command
     @Override
     public void onCommandInput()
     {
-        final String prefix = prefixArgument.parse();
+        final String prefix = prefixArgument.getValue();
         if (prefix != null)
         {
             if (prefix.length() > 1)

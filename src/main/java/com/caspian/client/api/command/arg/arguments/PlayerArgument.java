@@ -30,7 +30,7 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
      * @see Command#onCommandInput()
      */
     @Override
-    public PlayerEntity parse()
+    public PlayerEntity getValue()
     {
         if (mc.world != null)
         {

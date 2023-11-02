@@ -46,7 +46,7 @@ public class Caspian
         LOGGER = LogManager.getLogger("Caspian");
         info("Starting preInit ...");
         EXECUTOR = Executors.newFixedThreadPool(1);
-        //
+        // Create event handler instance
         EVENT_HANDLER = new EventBus();
     }
 
@@ -73,7 +73,7 @@ public class Caspian
         // load configs AFTER everything has been initialized
         // this is to prevent configs loading before certain aspects of managers are available
         CONFIG = new ClientConfiguration();
-        CONFIG.loadClient();
+        // CONFIG.loadClient();
     }
 
     /**

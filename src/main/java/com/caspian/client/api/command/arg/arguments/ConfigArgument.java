@@ -49,7 +49,7 @@ public class ConfigArgument extends Argument<Config<?>>
      * @return
      */
     @Override
-    public Config<?> parse()
+    public Config<?> getValue()
     {
         for (Config<?> config : container.getConfigs())
         {

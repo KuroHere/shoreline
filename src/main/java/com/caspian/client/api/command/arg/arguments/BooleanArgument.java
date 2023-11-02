@@ -35,7 +35,7 @@ public class BooleanArgument extends Argument<Boolean>
      * @see Command#onCommandInput()
      */
     @Override
-    public Boolean parse()
+    public Boolean getValue()
     {
         // TODO: Make cleaner
         String literal = getLiteral();

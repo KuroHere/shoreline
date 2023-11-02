@@ -61,7 +61,6 @@
     "render.entity.MixinEntityRenderer",
     "render.entity.MixinFireworkRocketEntityRenderer",
     "render.entity.MixinItemEntityRenderer",
-    "render.entity.MixinLivingEntityRenderer",
     "render.entity.MixinPlayerEntityRenderer",
     "render.entity.MixinWitherSkullEntityRenderer",
     "world.MixinClientWorld",

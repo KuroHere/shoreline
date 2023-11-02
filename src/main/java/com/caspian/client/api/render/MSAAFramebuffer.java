@@ -72,6 +72,15 @@ public class MSAAFramebuffer extends Framebuffer
     }
 
     /**
+     *
+     * @param drawAction
+     */
+    public static void use(Runnable drawAction)
+    {
+        use(Math.min(16, MAX_SAMPLES), drawAction);
+    }
+
+    /**
      * <p>Uses the framebuffer with the rendering calls in the action specified</p>
      * <p>Switching frame buffers is not particularly efficient. Use with caution</p>
      *

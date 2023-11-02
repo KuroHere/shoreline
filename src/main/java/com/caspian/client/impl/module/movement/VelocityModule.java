@@ -53,7 +53,7 @@ public class VelocityModule extends ToggleModule
     Config<Boolean> pushFishhookConfig = new BooleanConfig("NoPush-Fishhook",
             "Prevents being pulled by fishing rod hooks", true);
     //
-    private boolean velocity;
+    private boolean cancelVelocity;
     private final Set<Integer> velocityTransactions = new HashSet<>();
 
     /**
@@ -173,7 +173,7 @@ public class VelocityModule extends ToggleModule
             else if (event.getPacket() instanceof ScreenHandlerSlotUpdateS2CPacket packet)
             {
                 // TODO: check if this is the equivalent to 1.8 C0F
-                if (modeConfig.getValue() == VelocityMode.STRICT && velocity)
+                if (modeConfig.getValue() == VelocityMode.STRICT && cancelVelocity)
                 {
                     velocityTransactions.add(packet.getRevision());
                 }

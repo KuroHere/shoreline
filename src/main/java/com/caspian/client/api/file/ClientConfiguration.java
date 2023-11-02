@@ -9,6 +9,7 @@ import com.caspian.client.api.social.SocialRelation;
 import com.caspian.client.api.social.SocialFile;
 import com.caspian.client.api.waypoint.WaypointFile;
 import com.caspian.client.init.Managers;
+import com.caspian.client.init.Modules;
 import com.caspian.client.util.Globals;
 
 import java.io.File;
@@ -83,6 +84,7 @@ public class ClientConfiguration implements Globals
             // files.add(new ModulePreset(clientDir.resolve("Defaults"), module));
             files.add(new ModuleFile(clientDir.resolve("Modules"), module));
         }
+        files.add(Modules.INV_CLEANER.getBlacklistFile(clientDir));
         for (SocialRelation relation : SocialRelation.values())
         {
             files.add(new SocialFile(clientDir, relation));
@@ -118,5 +120,14 @@ public class ClientConfiguration implements Globals
         {
             file.load();
         }
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Path getClientDirectory()
+    {
+        return clientDir;
     }
 }

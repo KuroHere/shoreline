@@ -39,21 +39,6 @@ public class RenderWorldEvent extends Event
 
     /**
      *
-     * @param camera
-     * @return
-     */
-    public MatrixStack getCameraMatrices(Camera camera)
-    {
-        MatrixStack matrices = new MatrixStack();
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0f));
-        final Vec3d pos = camera.getPos();
-        matrices.translate(-pos.getX(), -pos.getY(), -pos.getZ());
-        return matrices;
-    }
-
-    /**
-     *
      * @return
      */
     public float getTickDelta()

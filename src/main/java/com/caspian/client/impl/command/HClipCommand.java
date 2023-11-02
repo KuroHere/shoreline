@@ -32,7 +32,7 @@ public class HClipCommand extends Command
     @Override
     public void onCommandInput()
     {
-        final String distance = distanceArgument.parse();
+        final String distance = distanceArgument.getValue();
         try
         {
             double dist = Double.parseDouble(distance);

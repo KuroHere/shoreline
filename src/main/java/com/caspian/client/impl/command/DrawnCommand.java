@@ -37,7 +37,7 @@ public class DrawnCommand extends Command
     @Override
     public void onCommandInput()
     {
-        Module module = moduleArgument.parse();
+        Module module = moduleArgument.getValue();
         if (module instanceof ToggleModule toggle)
         {
             boolean hide = !toggle.isHidden();

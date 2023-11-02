@@ -2,6 +2,7 @@ package com.caspian.client.api.manager.client;
 
 import com.caspian.client.api.social.SocialRelation;
 import com.caspian.client.util.Globals;
+import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,6 +48,16 @@ public class SocialManager implements Globals
     public boolean isFriend(UUID uuid)
     {
         return isRelation(uuid, SocialRelation.FRIEND);
+    }
+
+    /**
+     *
+     * @param name
+     * @return
+     */
+    public boolean isFriend(String name)
+    {
+        return getFriendEntities().stream().anyMatch(e -> e.getEntityName().equals(name));
     }
 
     /**
@@ -122,5 +133,33 @@ public class SocialManager implements Globals
     public Collection<UUID> getFriends()
     {
         return getRelations(SocialRelation.FRIEND);
+    }
+
+    /**
+     *
+     * @param relation
+     * @return
+     */
+    public Collection<PlayerEntity> getEntities(SocialRelation relation)
+    {
+        if (mc.world == null)
+        {
+            return null;
+        }
+        Collection<PlayerEntity> entities = new ArrayList<>();
+        for (UUID uuid : getRelations(relation))
+        {
+            entities.add(mc.world.getPlayerByUuid(uuid));
+        }
+        return entities;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Collection<PlayerEntity> getFriendEntities()
+    {
+        return getEntities(SocialRelation.FRIEND);
     }
 }

@@ -96,12 +96,19 @@ public class EnumConfig<T extends Enum<?>> extends Config<T>
     @Override
     public T fromJson(JsonObject jsonObj)
     {
-        if (jsonObj.has("value"))
+        try
         {
-            JsonElement element = jsonObj.get("value");
-            return (T) (Enum<?>) Enum.valueOf((Class<Enum>) getValue().getClass(),
-                    element.getAsString());
+            if (jsonObj.has("value"))
+            {
+                JsonElement element = jsonObj.get("value");
+                return (T) (Enum<?>) Enum.valueOf((Class<Enum>) getValue().getClass(),
+                        element.getAsString());
+            }
         }
-        return null;
+        catch (IllegalArgumentException e)
+        {
+            e.printStackTrace();
+        }
+        return getValue();
     }
 }

@@ -50,7 +50,7 @@ public class StringArgument extends Argument<String>
      * @see Command#onCommandInput()
      */
     @Override
-    public String parse()
+    public String getValue()
     {
         final String literal = getLiteral();
         if (allowedValues == null || allowedValues.contains(literal))

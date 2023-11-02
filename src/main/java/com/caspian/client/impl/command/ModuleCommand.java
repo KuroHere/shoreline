@@ -49,10 +49,10 @@ public class ModuleCommand extends Command
     @Override
     public void onCommandInput()
     {
-        Config<?> config = configArgument.parse();
+        Config<?> config = configArgument.getValue();
         if (config != null)
         {
-            String value = valueArgument.parse();
+            String value = valueArgument.getValue();
             if (value == null)
             {
                 return;

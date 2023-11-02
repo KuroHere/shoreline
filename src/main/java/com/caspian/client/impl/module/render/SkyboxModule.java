@@ -63,7 +63,7 @@ public class SkyboxModule extends ToggleModule
         if (ambientConfig.getValue())
         {
             ((AccessorLightmapTextureManager) mc.gameRenderer.getLightmapTextureManager()).setUpdateLightmap(true);
-            WorldRenderUtil.reloadRenders();
+            WorldRenderUtil.reloadRenders(true);
         }
     }
 
@@ -79,7 +79,7 @@ public class SkyboxModule extends ToggleModule
         }
         if (ambientConfig.getValue())
         {
-            WorldRenderUtil.reloadRenders();
+            WorldRenderUtil.reloadRenders(true);
         }
     }
 
@@ -100,16 +100,16 @@ public class SkyboxModule extends ToggleModule
             if (ambientConfig.getValue())
             {
                 ((AccessorLightmapTextureManager) mc.gameRenderer.getLightmapTextureManager()).setUpdateLightmap(true);
-                WorldRenderUtil.reloadRenders();
+                WorldRenderUtil.reloadRenders(true);
             }
             else
             {
-                WorldRenderUtil.reloadRenders();
+                WorldRenderUtil.reloadRenders(true);
             }
         }
         else if (event.getConfig() == ambientColorConfig)
         {
-            WorldRenderUtil.reloadRenders();
+            WorldRenderUtil.reloadRenders(true);
         }
     }
 

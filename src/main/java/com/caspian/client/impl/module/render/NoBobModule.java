@@ -5,6 +5,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.impl.event.render.BobViewEvent;
 
 /**
  *
@@ -28,11 +29,8 @@ public class NoBobModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
+    public void onBobView(BobViewEvent event)
     {
-        if (event.getStage() == EventStage.PRE)
-        {
-            mc.player.distanceTraveled = 4.0f;
-        }
+        event.cancel();
     }
 }

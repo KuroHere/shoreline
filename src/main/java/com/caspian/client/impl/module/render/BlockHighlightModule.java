@@ -13,7 +13,6 @@ import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -93,18 +92,17 @@ public class BlockHighlightModule extends ToggleModule
         }
         if (render != null)
         {
-            Camera camera = mc.gameRenderer.getCamera();
             switch (boxModeConfig.getValue())
             {
                 case FILL ->
                 {
-                    RenderManager.renderBox(event.getCameraMatrices(camera), render,
+                    RenderManager.renderBox(event.getMatrices(), render,
                             Modules.COLORS.getRGB(60));
-                    RenderManager.renderBoundingBox(event.getCameraMatrices(camera),
-                            render, 1.5f, Modules.COLORS.getRGB(145));
+                    RenderManager.renderBoundingBox(event.getMatrices(),
+                            render, 2.5f, Modules.COLORS.getRGB(145));
                 }
-                case OUTLINE -> RenderManager.renderBoundingBox(event.getCameraMatrices(camera),
-                        render, 1.5f, Modules.COLORS.getRGB(145));
+                case OUTLINE -> RenderManager.renderBoundingBox(event.getMatrices(),
+                        render, 2.5f, Modules.COLORS.getRGB(145));
             }
         }
     }

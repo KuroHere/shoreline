@@ -46,11 +46,11 @@ public class FriendCommand extends Command
     @Override
     public void onCommandInput()
     {
-        final PlayerEntity player = playerArgument.parse();
+        final PlayerEntity player = playerArgument.getValue();
         if (player != null)
         {
-            final String action = actionArgument.parse();
-            final Boolean notify = notifyArgument.parse();
+            final String action = actionArgument.getValue();
+            final Boolean notify = notifyArgument.getValue();
             if (action != null)
             {
                 if (action.equalsIgnoreCase("add"))

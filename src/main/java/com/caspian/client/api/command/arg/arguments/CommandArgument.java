@@ -36,7 +36,7 @@ public class CommandArgument extends Argument<Command>
      * @see Command#onCommandInput()
      */
     @Override
-    public Command parse()
+    public Command getValue()
     {
         for (Command command : Managers.COMMAND.getCommands())
         {

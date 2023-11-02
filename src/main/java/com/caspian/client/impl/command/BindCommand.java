@@ -38,10 +38,10 @@ public class BindCommand extends Command
     @Override
     public void onCommandInput()
     {
-        Module module = moduleArgument.parse();
+        Module module = moduleArgument.getValue();
         if (module instanceof ToggleModule t)
         {
-            final String key = keybindArgument.parse();
+            final String key = keybindArgument.getValue();
             if (key == null || key.length() > 1)
             {
                 ChatUtil.error("Invalid key!");

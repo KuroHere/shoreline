@@ -1,6 +1,7 @@
 package com.caspian.client.api.manager.world;
 
 import com.caspian.client.api.waypoint.Waypoint;
+import io.netty.util.internal.ConcurrentSet;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -16,7 +17,7 @@ import java.util.Set;
 public class WaypointManager
 {
     //
-    private final Set<Waypoint> waypoints = new HashSet<>();
+    private final Set<Waypoint> waypoints = new ConcurrentSet<>();
 
     /**
      *
@@ -39,6 +40,33 @@ public class WaypointManager
         {
             register(waypoint);
         }
+    }
+
+    /**
+     *
+     * @param waypoint
+     * @return
+     */
+    public boolean remove(Waypoint waypoint)
+    {
+        return waypoints.remove(waypoint);
+    }
+
+    /**
+     *
+     * @param waypoint
+     * @return
+     */
+    public boolean remove(String waypoint)
+    {
+        for (Waypoint w : getWaypoints())
+        {
+            if (w.getName().equalsIgnoreCase(waypoint))
+            {
+                return waypoints.remove(w);
+            }
+        }
+        return false;
     }
 
     /**

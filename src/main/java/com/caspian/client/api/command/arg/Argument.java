@@ -69,7 +69,8 @@ public abstract class Argument<T> extends Config<T>
      *
      * @see Command#onCommandInput()
      */
-    public abstract T parse();
+    @Override
+    public abstract T getValue();
 
     /**
      *

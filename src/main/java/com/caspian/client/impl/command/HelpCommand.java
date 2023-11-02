@@ -34,7 +34,7 @@ public class HelpCommand extends Command
     @Override
     public void onCommandInput()
     {
-        final Command command = commandArgument.parse();
+        final Command command = commandArgument.getValue();
         if (command != null)
         {
             ChatUtil.clientSendMessage(toHelpMessage(command));

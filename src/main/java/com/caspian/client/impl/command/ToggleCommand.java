@@ -33,7 +33,7 @@ public class ToggleCommand extends Command
     @Override
     public void onCommandInput()
     {
-        Module module = moduleArgument.parse();
+        Module module = moduleArgument.getValue();
         if (module instanceof ToggleModule t)
         {
             t.toggle();

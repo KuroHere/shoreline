@@ -1,12 +1,15 @@
 package com.caspian.client.mixin.world;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.impl.event.world.RemoveEntityEvent;
 import com.caspian.client.impl.event.world.SkyboxEvent;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
@@ -18,6 +21,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientWorld.class)
 public class MixinClientWorld
 {
+    /**
+     *
+     * @param entityId
+     * @param removalReason
+     * @param ci
+     */
+    @Inject(method = "removeEntity", at = @At(value = "HEAD"), cancellable = true)
+    private void hookRemoveEntity(int entityId,
+                                  Entity.RemovalReason removalReason,
+                                  CallbackInfo ci)
+    {
+        final RemoveEntityEvent removeEntityEvent = new RemoveEntityEvent(
+                entityId, removalReason);
+        Caspian.EVENT_HANDLER.dispatch(removeEntityEvent);
+    }
+
     /**
      *
      * @param cameraPos

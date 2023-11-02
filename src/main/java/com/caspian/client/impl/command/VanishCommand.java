@@ -37,7 +37,7 @@ public class VanishCommand extends Command
     @Override
     public void onCommandInput()
     {
-        String dismount = dismountArgument.parse();
+        String dismount = dismountArgument.getValue();
         if (dismount.equalsIgnoreCase("dismount"))
         {
             if (mc.player.isRiding() && mc.player.getVehicle() != null)

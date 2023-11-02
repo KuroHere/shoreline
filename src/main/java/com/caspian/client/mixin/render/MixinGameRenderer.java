@@ -1,6 +1,7 @@
 package com.caspian.client.mixin.render;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.api.render.MSAAFramebuffer;
 import com.caspian.client.impl.event.network.ReachEvent;
 import com.caspian.client.impl.event.render.*;
 import net.minecraft.client.MinecraftClient;
@@ -42,15 +43,16 @@ public class MixinGameRenderer
      * @param matrices
      * @param ci
      */
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/render" +
-            "/GameRenderer;renderHand:Z", opcode = Opcodes.GETFIELD,
-            ordinal = 0), method = "renderWorld")
+    @Inject(method = "renderWorld", at = @At(value = "FIELD", target = "Lnet" +
+            "/minecraft/client/render/GameRenderer;renderHand:Z",
+            opcode = Opcodes.GETFIELD, ordinal = 0))
     private void hookRenderWorld(float tickDelta, long limitTime,
                                  MatrixStack matrices, CallbackInfo ci)
     {
-        final RenderWorldEvent renderWorldEvent =
-                new RenderWorldEvent(matrices, tickDelta);
-        Caspian.EVENT_HANDLER.dispatch(renderWorldEvent);
+        // final RenderWorldEvent renderWorldEvent =
+        //         new RenderWorldEvent(matrices, tickDelta);
+        // MSAAFramebuffer.use(() ->
+        //         Caspian.EVENT_HANDLER.dispatch(renderWorldEvent));
     }
 
     /**
@@ -171,5 +173,24 @@ public class MixinGameRenderer
         Caspian.EVENT_HANDLER.dispatch(reachEvent);
         double reach = reachEvent.getReach() + 3.0;
         return reachEvent.isCanceled() ? reach * reach : 9.0;
+    }
+
+
+    /**
+     *
+     * @param matrices
+     * @param tickDelta
+     * @param ci
+     */
+    @Inject(method = "bobView", at = @At(value = "HEAD"), cancellable = true)
+    private void hookBobView(MatrixStack matrices, float tickDelta,
+                             CallbackInfo ci)
+    {
+        BobViewEvent bobViewEvent = new BobViewEvent();
+        Caspian.EVENT_HANDLER.dispatch(bobViewEvent);
+        if (bobViewEvent.isCanceled())
+        {
+            ci.cancel();
+        }
     }
 }

@@ -31,6 +31,8 @@ public class Module extends ConfigContainer implements Globals
     // ClickGui. Modules with ModuleCategory.TEST category are not available
     // to the user.
     private final ModuleCategory category;
+    //
+    public static final String MODULE_ID_FORMAT = "%s-module";
 
     /**
      *
@@ -73,7 +75,7 @@ public class Module extends ConfigContainer implements Globals
     @Override
     public String getId()
     {
-        return String.format("%s-module", name.toLowerCase());
+        return String.format(MODULE_ID_FORMAT, name.toLowerCase());
     }
 
     /**

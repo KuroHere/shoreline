@@ -1,16 +1,16 @@
 package com.caspian.client.mixin.render;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.impl.event.render.RenderWorldBorderEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
+import com.caspian.client.util.Globals;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @since 1.0
  */
 @Mixin(WorldRenderer.class)
-public class MixinWorldRenderer
+public class MixinWorldRenderer implements Globals
 {
     /**
      *
@@ -45,10 +45,27 @@ public class MixinWorldRenderer
                             LightmapTextureManager lightmapTextureManager,
                             Matrix4f positionMatrix, CallbackInfo ci)
     {
-        // final RenderWorldEvent renderWorldEvent =
-        //        new RenderWorldEvent(matrices, tickDelta);
-        // RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT,
-        //        MinecraftClient.IS_SYSTEM_MAC);
-        // Caspian.EVENT_HANDLER.dispatch(renderWorldEvent);
+        Vec3d pos = mc.getBlockEntityRenderDispatcher().camera.getPos();
+        matrices.translate(-pos.x, -pos.y, -pos.z);
+        final RenderWorldEvent renderWorldEvent =
+                new RenderWorldEvent(matrices, tickDelta);
+        Caspian.EVENT_HANDLER.dispatch(renderWorldEvent);
+    }
+
+    /**
+     *
+     * @param camera
+     * @param ci
+     */
+    @Inject(method = "renderWorldBorder", at = @At(value = "HEAD"), cancellable = true)
+    private void hookRenderWorldBorder(Camera camera, CallbackInfo ci)
+    {
+        RenderWorldBorderEvent renderWorldBorderEvent =
+                new RenderWorldBorderEvent();
+        Caspian.EVENT_HANDLER.dispatch(renderWorldBorderEvent);
+        if (renderWorldBorderEvent.isCanceled())
+        {
+            ci.cancel();
+        }
     }
 }
