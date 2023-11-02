@@ -14,7 +14,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
- * Client main class. Handles main client mod initializing of static service
+ * Client main class. Handles main client mod initializing of static handler
  * instances and client managers.
  *
  * @author linus
@@ -73,7 +73,7 @@ public class Caspian
         // load configs AFTER everything has been initialized
         // this is to prevent configs loading before certain aspects of managers are available
         CONFIG = new ClientConfiguration();
-        // CONFIG.loadClient();
+        CONFIG.loadClient();
     }
 
     /**

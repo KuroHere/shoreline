@@ -855,15 +855,13 @@ public class AutoCrystalModule extends RotationModule
         {
             if (renderConfig.getValue() && getCrystalHand() != null)
             {
-                final Color c = Modules.COLORS.getColor();
-                int color = c.getRGB();
                 if (renderAttackConfig.getValue())
                 {
                     final Box rb = renderBreak.get();
                     if (rb != null)
                     {
                         RenderManager.renderBoundingBox(event.getMatrices(),
-                                rb, 1.5f, color);
+                                rb, 1.5f, Modules.COLORS.getRGB(145));
                     }
                 }
                 final BlockPos rp = renderPlace.get();
@@ -872,11 +870,16 @@ public class AutoCrystalModule extends RotationModule
                     if (renderSpawn != null && renderSpawn.equals(rp)
                             && renderSpawnConfig.getValue())
                     {
-                        int alpha = c.getAlpha() + 55;
-                        color = (color & 0x00ffffff) | (alpha << 24);
+                        RenderManager.renderBox(event.getMatrices(), rp,
+                                Modules.COLORS.getRGB(100));
+                        RenderManager.renderBoundingBox(event.getMatrices(), rp, 1.5f,
+                                Modules.COLORS.getRGB(145));
+                        return;
                     }
-                    RenderManager.renderBox(event.getMatrices(), rp, color);
-                    RenderManager.renderBoundingBox(event.getMatrices(), rp, 1.5f, color);
+                    RenderManager.renderBox(event.getMatrices(), rp,
+                            Modules.COLORS.getRGB(60));
+                    RenderManager.renderBoundingBox(event.getMatrices(), rp, 1.5f,
+                            Modules.COLORS.getRGB(145));
                 }
             }
         }

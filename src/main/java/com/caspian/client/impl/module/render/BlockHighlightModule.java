@@ -12,6 +12,7 @@ import com.caspian.client.impl.event.render.RenderBlockOutlineEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
@@ -80,12 +81,14 @@ public class BlockHighlightModule extends ToggleModule
                 final EntityHitResult entityHit = (EntityHitResult) result;
                 final Entity entity = entityHit.getEntity();
                 render = entity.getBoundingBox();
-                distance = pos.squaredDistanceTo(entity.getPos());
+                distance = pos.distanceTo(entity.getPos());
             }
             else if (result.getType() == HitResult.Type.BLOCK)
             {
                 final BlockHitResult blockHit = (BlockHitResult) result;
                 BlockPos hpos = blockHit.getBlockPos();
+                // render = mc.world.getBlockState(hpos)
+                //        .getCollisionShape(mc.world, hpos).getBoundingBox();
                 render = new Box(hpos);
                 distance = pos.distanceTo(hpos.toCenterPos());
             }

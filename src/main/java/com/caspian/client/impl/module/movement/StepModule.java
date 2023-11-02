@@ -4,24 +4,24 @@ import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.EnumConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
+import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.entity.EntityPositionEvent;
+import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.Timer;
 import com.caspian.client.util.string.EnumFormatter;
-import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseEntity;
 import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.passive.MuleEntity;
-import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class StepModule extends ToggleModule
             "Allows entities to step up blocks", false);
     //
     private final Timer stepTimer = new CacheTimer();
-    private boolean timerCancel;
+    private boolean cancelTimer;
 
     /**
      *
@@ -86,12 +86,12 @@ public class StepModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onEntityPosition(EntityPositionEvent event)
+    public void onMovementPackets(MovementPacketsEvent event)
     {
         if (modeConfig.getValue() == StepMode.NORMAL)
         {
-            double height = event.getUpdatePos().minY - mc.player.getY();
-            if (height <= 0 || height > heightConfig.getValue())
+            double height = mc.player.getY() - mc.player.prevY;
+            if (height <= 0.5 || height > heightConfig.getValue())
             {
                 return;
             }
@@ -100,7 +100,7 @@ public class StepModule extends ToggleModule
             if (useTimerConfig.getValue())
             {
                 Managers.TICK.setClientTick(height > 1.0 ? 0.15f : 0.35f);
-                timerCancel = true;
+                cancelTimer = true;
             }
             for (int i = 0; i < (height > 1.0 ? offs.size() : 2); i++)
             {
@@ -118,6 +118,10 @@ public class StepModule extends ToggleModule
     @EventListener
     public void onTick(TickEvent event)
     {
+        if (event.getStage() != EventStage.PRE)
+        {
+            return;
+        }
         if (mc.player.isTouchingWater()
                 || mc.player.isInLava()
                 || mc.player.isFallFlying())
@@ -126,10 +130,10 @@ public class StepModule extends ToggleModule
             setStepHeight(isAbstractHorse(mc.player.getVehicle()) ? 1.0f : 0.6f);
             return;
         }
-        if (timerCancel && mc.player.isOnGround())
+        if (cancelTimer && mc.player.isOnGround())
         {
             Managers.TICK.setClientTick(1.0f);
-            timerCancel = false;
+            cancelTimer = false;
         }
         if (mc.player.isOnGround() && stepTimer.passed(200))
         {
