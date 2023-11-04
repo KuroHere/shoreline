@@ -20,6 +20,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
@@ -155,20 +156,19 @@ public class NametagsModule extends ToggleModule
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        matrices.scale(-scaling, -scaling, 1.0f);
+        matrices.scale(-scaling, -scaling, -1.0f);
         GL11.glDepthFunc(GL11.GL_ALWAYS);
         VertexConsumerProvider.Immediate vertexConsumers =
                 mc.getBufferBuilders().getEntityVertexConsumers();
-        float g = mc.options.getTextBackgroundOpacity(0.25f);
-        int j = (int) (g * 255.0f) << 24;
-        //mc.textRenderer.draw(info, -width, 0.0f, 0xff20ffff,
-        //        false, matrices.peek().getPositionMatrix(), vertexConsumers,
-        //        TextRenderer.TextLayerType.NORMAL, j, 0xf000f0);
-        //matrices.translate(1.0, 1.0, 0.0);
-        //mc.textRenderer.draw(matrices, Text.of(info), -width, 0.0f, 0x202020);
+
         mc.textRenderer.draw(info, -width, 0.0f, getNametagColor(entity),
-                true, matrices.peek().getPositionMatrix(), vertexConsumers,
+                false, matrices.peek().getPositionMatrix(), vertexConsumers,
                 TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
+
+        matrices.translate(1.0, 1.0, 0.0);
+
+        mc.textRenderer.draw(matrices, Formatting.strip(info), -width, 0.0f, 0x151515);
+
         vertexConsumers.draw();
         RenderSystem.disableBlend();
         matrices.pop();
