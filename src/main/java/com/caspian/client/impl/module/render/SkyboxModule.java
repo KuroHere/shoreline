@@ -11,7 +11,7 @@ import com.caspian.client.impl.event.config.ConfigUpdateEvent;
 import com.caspian.client.impl.event.render.AmbientColorEvent;
 import com.caspian.client.impl.event.world.SkyboxEvent;
 import com.caspian.client.mixin.accessor.AccessorLightmapTextureManager;
-import com.caspian.client.util.world.WorldRenderUtil;
+import com.caspian.client.util.world.RenderUtil;
 
 import java.awt.*;
 
@@ -63,7 +63,7 @@ public class SkyboxModule extends ToggleModule
         if (ambientConfig.getValue())
         {
             ((AccessorLightmapTextureManager) mc.gameRenderer.getLightmapTextureManager()).setUpdateLightmap(true);
-            WorldRenderUtil.reloadRenders(true);
+            RenderUtil.reloadRenders(true);
         }
     }
 
@@ -79,7 +79,7 @@ public class SkyboxModule extends ToggleModule
         }
         if (ambientConfig.getValue())
         {
-            WorldRenderUtil.reloadRenders(true);
+            RenderUtil.reloadRenders(true);
         }
     }
 
@@ -100,16 +100,16 @@ public class SkyboxModule extends ToggleModule
             if (ambientConfig.getValue())
             {
                 ((AccessorLightmapTextureManager) mc.gameRenderer.getLightmapTextureManager()).setUpdateLightmap(true);
-                WorldRenderUtil.reloadRenders(true);
+                RenderUtil.reloadRenders(true);
             }
             else
             {
-                WorldRenderUtil.reloadRenders(true);
+                RenderUtil.reloadRenders(true);
             }
         }
         else if (event.getConfig() == ambientColorConfig)
         {
-            WorldRenderUtil.reloadRenders(true);
+            RenderUtil.reloadRenders(true);
         }
     }
 

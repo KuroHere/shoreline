@@ -191,7 +191,7 @@ public abstract class Component implements Drawable, Globals
     public void fill(MatrixStack matrices, double x1, double y1, double x2,
                      double y2, int color)
     {
-        fill(matrices, x1, y1, x2, y2, 0, color);
+        fill(matrices, x1, y1, x2, y2, 0.0, color);
     }
 
     public void fill(MatrixStack matrices, double x1, double y1, double x2,

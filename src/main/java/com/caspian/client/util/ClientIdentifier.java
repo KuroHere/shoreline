@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
  *
  * @see Identifier
  */
-public class IdNamespace
+public class ClientIdentifier
 {
     /**
      * FOR CLIENT ONLY. NOT FOR MINECRAFT NAMESPACES

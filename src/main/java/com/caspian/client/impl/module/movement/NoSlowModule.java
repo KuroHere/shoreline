@@ -11,12 +11,11 @@ import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.block.BlockSlipperinessEvent;
 import com.caspian.client.impl.event.block.SteppedOnSlimeBlockEvent;
 import com.caspian.client.impl.event.entity.VelocityMultiplierEvent;
+import com.caspian.client.impl.event.network.GameJoinEvent;
 import com.caspian.client.impl.event.network.MovementSlowdownEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.network.SetCurrentHandEvent;
 import com.caspian.client.init.Managers;
-import com.caspian.client.init.Modules;
-import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -25,8 +24,10 @@ import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.network.packet.c2s.play.*;
-import net.minecraft.util.Hand;
+import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
@@ -110,6 +111,16 @@ public class NoSlowModule extends ToggleModule
                     ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         }
         sneaking = false;
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onGameJoin(GameJoinEvent event)
+    {
+        onEnable();
     }
     
     /**

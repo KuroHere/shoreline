@@ -2,6 +2,7 @@ package com.caspian.client.util.world;
 
 import com.caspian.client.util.Globals;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 
@@ -37,9 +38,11 @@ public class BlastResistantBlocks implements Globals
     }
 
     /**
+     * Returns <tt>true</tt> if the {@link BlockState} of the mining block is
+     * breakable in survival mode
      *
-     * @param block
-     * @return
+     * @param block The block state of the mining block
+     * @return <tt>true</tt> if the mining block is breakable
      */
     public static boolean isBreakable(Block block)
     {

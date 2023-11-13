@@ -7,6 +7,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.config.ConfigUpdateEvent;
+import com.caspian.client.impl.event.network.GameJoinEvent;
 import com.caspian.client.impl.event.render.LightmapGammaEvent;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -61,6 +62,16 @@ public class FullbrightModule extends ToggleModule
                 mc.player.removeStatusEffect(StatusEffects.NIGHT_VISION);
             }
         }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onGameJoin(GameJoinEvent event)
+    {
+        onEnable();
     }
 
     /**

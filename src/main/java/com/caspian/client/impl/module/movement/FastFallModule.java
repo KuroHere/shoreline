@@ -81,7 +81,7 @@ public class FastFallModule extends ToggleModule
                     return;
                 }
                 if (Modules.SPEED.isEnabled() || Modules.LONG_JUMP.isEnabled()
-                        || Modules.FLIGHT.isEnabled())
+                        || Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled())
                 {
                     return;
                 }
@@ -117,7 +117,8 @@ public class FastFallModule extends ToggleModule
             if (!Managers.NCP.passed(1000) || !fallTimer.passed(1000)
                     || Modules.SPEED.isEnabled()
                     || Modules.LONG_JUMP.isEnabled()
-                    || Modules.FLIGHT.isEnabled())
+                    || Modules.FLIGHT.isEnabled()
+                    || Modules.PACKET_FLY.isEnabled())
             {
                 return;
             }
@@ -140,10 +141,15 @@ public class FastFallModule extends ToggleModule
     @EventListener
     public void onPlayerMove(PlayerMoveEvent event)
     {
+        if (Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled())
+        {
+            return;
+        }
         if (cancelFallMovement && fallModeConfig.getValue() == FallMode.SHIFT)
         {
             event.setX(0.0);
             event.setZ(0.0);
+            Managers.MOVEMENT.setMotionXZ(0.0, 0.0);
             ++fallTicks;
             if (fallTicks > shiftTicksConfig.getValue())
             {

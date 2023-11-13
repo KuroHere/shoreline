@@ -12,7 +12,6 @@ import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
-import com.caspian.client.util.anticheat.BlockPlacement;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DeathScreen;
@@ -216,7 +215,7 @@ public class SurroundModule extends ToggleModule
                     {
                         continue;
                     }
-                    BlockPlacement.placeBlock(pos, rotateConfig.getValue(),
+                    Managers.INTERACT.placeBlock(pos, rotateConfig.getValue(),
                             strictDirectionConfig.getValue());
                 }
                 if (prev != slot)
@@ -257,7 +256,7 @@ public class SurroundModule extends ToggleModule
                     Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
                 }
                 //
-                BlockPlacement.placeBlock(pos, rotateConfig.getValue(),
+                Managers.INTERACT.placeBlock(pos, rotateConfig.getValue(),
                         strictDirectionConfig.getValue());
                 if (prev != slot)
                 {
@@ -286,7 +285,7 @@ public class SurroundModule extends ToggleModule
                     Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
                 }
                 //
-                BlockPlacement.placeBlock(pos, rotateConfig.getValue(),
+                Managers.INTERACT.placeBlock(pos, rotateConfig.getValue(),
                         strictDirectionConfig.getValue());
                 if (prev != slot)
                 {

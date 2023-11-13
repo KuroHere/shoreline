@@ -22,6 +22,7 @@ import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.passive.MuleEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -90,22 +91,28 @@ public class StepModule extends ToggleModule
     {
         if (modeConfig.getValue() == StepMode.NORMAL)
         {
-            double height = mc.player.getY() - mc.player.prevY;
-            if (height <= 0.5 || height > heightConfig.getValue())
+            double stepHeight = mc.player.getY() - mc.player.prevY;
+            ChatUtil.clientSendMessageRaw("" + stepHeight);
+            if (stepHeight <= 0.5 || stepHeight > heightConfig.getValue())
             {
                 return;
             }
             //
-            final List<Double> offs = getStepOffsets(height);
+            double[] offs = getStepOffsets(stepHeight);
             if (useTimerConfig.getValue())
             {
-                Managers.TICK.setClientTick(height > 1.0 ? 0.15f : 0.35f);
+                Managers.TICK.setClientTick(stepHeight > 1.0 ? 0.15f : 0.35f);
                 cancelTimer = true;
             }
-            for (int i = 0; i < (height > 1.0 ? offs.size() : 2); i++)
+            for (int i = 0; i < (stepHeight > 1.0 ? offs.length : 2); i++)
             {
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(),
-                        mc.player.getY() + offs.get(i), mc.player.getZ(), false));
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.prevX,
+                        mc.player.prevY + offs[i], mc.player.prevZ, false));
+            }
+            if (strictConfig.getValue())
+            {
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.prevX,
+                        mc.player.prevY + stepHeight, mc.player.prevZ, false));
             }
             stepTimer.reset();
         }
@@ -163,21 +170,30 @@ public class StepModule extends ToggleModule
 
     /**
      *
-     * @param height The step height
+     * @param stepHeight The step height
      * @return
      */
-    private List<Double> getStepOffsets(double height)
+    private double[] getStepOffsets(double stepHeight)
     {
-        List<Double> packets = Arrays.asList(0.42,
-                height < 1.0 && height > 0.8 ? 0.753 : 0.75, 1.0, 1.16, 1.23, 1.2);
-        if (height >= 2.0)
+        double[] packets = new double[]
+                {
+                        0.42, stepHeight <= 1.0 && stepHeight > 0.8 ? 0.753 :
+                        0.75, 1.0, 1.16, 1.23, 1.2
+                };
+        if (stepHeight >= 2.5)
         {
-            packets = Arrays.asList(0.42, 0.78, 0.63, 0.51, 0.9,
-                    1.21, 1.45, 1.43);
+            packets = new double[]
+                    {
+                            0.425, 0.821, 0.699, 0.599, 1.022, 1.372, 1.652,
+                            1.869, 2.019, 1.907
+                    };
         }
-        if (strictConfig.getValue())
+        else if (stepHeight >= 2.0)
         {
-            packets.add(height);
+            packets = new double[]
+                    {
+                            0.42, 0.78, 0.63, 0.51, 0.9, 1.21, 1.45, 1.43
+                    };
         }
         return packets;
     }

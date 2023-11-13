@@ -208,9 +208,7 @@ public class CriticalsModule extends ToggleModule
             case LOW_JUMP ->
             {
                 mc.player.jump();
-                final Vec3d motion = mc.player.getVelocity();
-                mc.player.setVelocity(motion.getX(),
-                        motion.getY() / 2.0, motion.getZ());
+                Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y / 2.0);
             }
         }
     }

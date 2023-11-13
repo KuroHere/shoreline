@@ -7,6 +7,7 @@ import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.render.entity.RenderPlayerEvent;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.Globals;
+import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.TickTimer;
 import com.caspian.client.util.math.timer.Timer;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -28,7 +29,7 @@ public class RotationManager implements Globals
     private RotationRequest rotation;
     private final PriorityQueue<RotationRequest> requests =
             new PriorityQueue<>();
-    private final Timer rotateTimer = new TickTimer();
+    private final Timer rotateTimer = new CacheTimer();
 
     /**
      *
@@ -132,9 +133,20 @@ public class RotationManager implements Globals
         requests.removeIf(r -> requester == r.getRequester());
     }
 
+    /**
+     *
+     * @param yaw
+     * @param pitch
+     */
     public void setRotationClient(float yaw, float pitch)
     {
-
+        if (mc.player == null)
+        {
+            return;
+        }
+        mc.player.setYaw(yaw);
+        mc.player.setHeadYaw(yaw);
+        mc.player.setPitch(pitch);
     }
 
     /**
@@ -144,7 +156,7 @@ public class RotationManager implements Globals
      */
     public boolean isRotating()
     {
-        return !rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks());
+        return !rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks() * 50);
     }
 
     /**
@@ -156,7 +168,6 @@ public class RotationManager implements Globals
     {
         if (requests.size() <= 1 && isRotating())
         {
-            rotation = requests.peek();
             return rotation;
         }
         else if (requests.size() > 1)

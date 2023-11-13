@@ -14,6 +14,7 @@ import com.caspian.client.impl.event.world.BlockCollisionEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.mixin.accessor.AccessorKeyBinding;
+import com.caspian.client.mixin.accessor.AccessorPlayerMoveC2SPacket;
 import com.caspian.client.util.string.EnumFormatter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -85,8 +86,8 @@ public class JesusModule extends ToggleModule
     public void onBlockCollision(BlockCollisionEvent event)
     {
         BlockState state = event.getState();
-        if (Modules.FLIGHT.isEnabled()
-                || mc.player.isSpectator()
+        if (Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled()
+                || mc.player.isSpectator() || mc.player.isOnFire()
                 || state.getFluidState().isEmpty())
         {
             return;
@@ -115,13 +116,16 @@ public class JesusModule extends ToggleModule
     {
         if (event.getStage() == EventStage.PRE)
         {
-            if (Modules.FLIGHT.isEnabled())
+            if (Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled())
             {
                 return;
             }
             if (modeConfig.getValue() == JesusMode.SOLID)
             {
-                floatOffset = floatOffset == 0.05 ? 0.0 : 0.05;
+                if (!strictConfig.getValue())
+                {
+                    floatOffset = floatOffset == 0.05 ? 0.0 : 0.05;
+                }
                 if (isInFluid() || mc.player.fallDistance > 3.0f
                         || mc.player.isSneaking())
                 {
@@ -161,7 +165,7 @@ public class JesusModule extends ToggleModule
     @EventListener
     public void onMovementPackets(MovementPacketsEvent event)
     {
-        if (Modules.FLIGHT.isEnabled())
+        if (Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled())
         {
             return;
         }
@@ -207,39 +211,19 @@ public class JesusModule extends ToggleModule
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
-        if (mc.player == null || mc.getNetworkHandler() == null
-                || mc.player.age <= 20 || Modules.FLIGHT.isEnabled())
+        if (event.isClientPacket() || mc.player == null || mc.getNetworkHandler() == null
+                || mc.player.age <= 20 || Modules.FLIGHT.isEnabled()
+                || Modules.PACKET_FLY.isEnabled())
         {
             return;
         }
-        if (event.getPacket() instanceof PlayerMoveC2SPacket.PositionAndOnGround packet
+        if (event.getPacket() instanceof PlayerMoveC2SPacket packet
+                && packet.changesPosition()
                 && modeConfig.getValue() == JesusMode.SOLID && !isInFluid()
                 && isOnFluid() && mc.player.fallDistance <= 3.0f)
         {
             double y = packet.getY(mc.player.getY());
-            PlayerMoveC2SPacket.PositionAndOnGround p = new PlayerMoveC2SPacket.PositionAndOnGround(
-                    packet.getX(0.0), y - floatOffset, packet.getZ(0.0), false);
-            event.cancel();
-            mc.getNetworkHandler().sendPacket(p);
-            if (strictConfig.getValue())
-            {
-                floatOffset += 0.12;
-                if (floatOffset > 0.4)
-                {
-                    floatOffset = 0.2;
-                }
-            }
-        }
-        else if (event.getPacket() instanceof PlayerMoveC2SPacket.Full packet
-                && modeConfig.getValue() == JesusMode.SOLID && !isInFluid()
-                && isOnFluid() && mc.player.fallDistance <= 3.0f)
-        {
-            double y = packet.getY(mc.player.getY());
-            PlayerMoveC2SPacket.Full p = new PlayerMoveC2SPacket.Full(
-                    packet.getX(0.0), y - floatOffset, packet.getZ(0.0),
-                    packet.getYaw(0.0f), packet.getPitch(0.0f), false);
-            event.cancel();
-            mc.getNetworkHandler().sendPacket(p);
+            ((AccessorPlayerMoveC2SPacket) packet).hookSetY(y - floatOffset);
             if (strictConfig.getValue())
             {
                 floatOffset += 0.12;

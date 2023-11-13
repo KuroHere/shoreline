@@ -41,7 +41,7 @@ public class EntityControlModule extends ToggleModule
         vehicle.setYaw(mc.player.getYaw());
         if (vehicle instanceof LlamaEntity llama)
         {
-            llama.headYaw = mc.player.getHeadYaw();
+            llama.headYaw = mc.player.getYaw();
         }
     }
 

@@ -5,9 +5,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.mixin.accessor.AccessorClientWorld;
 import com.caspian.client.util.Globals;
-import net.minecraft.client.network.PendingUpdateManager;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.network.SequencedPacketCreator;
+import net.minecraft.client.network.*;
 import net.minecraft.network.listener.ServerPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 
@@ -22,6 +20,9 @@ import java.util.Set;
  */
 public class NetworkManager implements Globals
 {
+    //
+    private ServerAddress address;
+    private ServerInfo info;
     //
     private static final Set<Packet<?>> PACKET_CACHE = new HashSet<>();
 
@@ -109,6 +110,26 @@ public class NetworkManager implements Globals
             }
         }
         return 0;
+    }
+
+    public ServerAddress getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress(ServerAddress address)
+    {
+        this.address = address;
+    }
+
+    public ServerInfo getInfo()
+    {
+        return info;
+    }
+
+    public void setInfo(ServerInfo info)
+    {
+        this.info = info;
     }
 
     /**

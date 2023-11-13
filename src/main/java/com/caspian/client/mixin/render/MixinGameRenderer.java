@@ -1,7 +1,6 @@
 package com.caspian.client.mixin.render;
 
 import com.caspian.client.Caspian;
-import com.caspian.client.api.render.MSAAFramebuffer;
 import com.caspian.client.impl.event.network.ReachEvent;
 import com.caspian.client.impl.event.render.*;
 import net.minecraft.client.MinecraftClient;

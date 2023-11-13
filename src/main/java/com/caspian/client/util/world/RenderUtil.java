@@ -7,10 +7,11 @@ import com.caspian.client.util.Globals;
  *
  * @see net.minecraft.client.render.WorldRenderer
  */
-public class WorldRenderUtil implements Globals
+public class RenderUtil implements Globals
 {
     /**
      *
+     * @param softReload
      */
     public static void reloadRenders(boolean softReload)
     {

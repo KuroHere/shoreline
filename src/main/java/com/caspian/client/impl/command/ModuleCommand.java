@@ -9,7 +9,7 @@ import com.caspian.client.api.macro.Macro;
 import com.caspian.client.api.module.Module;
 import com.caspian.client.util.KeyboardUtil;
 import com.caspian.client.util.chat.ChatUtil;
-import com.caspian.client.util.IdNamespace;
+import com.caspian.client.util.ClientIdentifier;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
@@ -109,12 +109,12 @@ public class ModuleCommand extends Command
             {
                 if (value.startsWith("item"))
                 {
-                    Item item = Registries.ITEM.get(IdNamespace.toId(value));
+                    Item item = Registries.ITEM.get(ClientIdentifier.toId(value));
                     ((Config<List<Item>>) config).getValue().add(item);
                 }
                 else if (value.startsWith("block"))
                 {
-                    Block block = Registries.BLOCK.get(IdNamespace.toId(value));
+                    Block block = Registries.BLOCK.get(ClientIdentifier.toId(value));
                     ((Config<List<Block>>) config).getValue().add(block);
                 }
                 ChatUtil.clientSendMessage("%s was added to §7%s§f!", value,

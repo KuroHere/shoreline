@@ -160,20 +160,18 @@ public class NametagsModule extends ToggleModule
         GL11.glDepthFunc(GL11.GL_ALWAYS);
         VertexConsumerProvider.Immediate vertexConsumers =
                 mc.getBufferBuilders().getEntityVertexConsumers();
-
         mc.textRenderer.draw(info, -width, 0.0f, getNametagColor(entity),
-                false, matrices.peek().getPositionMatrix(), vertexConsumers,
+                true, matrices.peek().getPositionMatrix(), vertexConsumers,
                 TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
-
-        matrices.translate(1.0, 1.0, 0.0);
-
-        mc.textRenderer.draw(matrices, Formatting.strip(info), -width, 0.0f, 0x151515);
-
+        // matrices.translate(1.0, 1.0, 0.0);
+        // mc.textRenderer.draw(matrices, info, -width, 0.0f, 0x151515);
         vertexConsumers.draw();
         RenderSystem.disableBlend();
         matrices.pop();
         GL11.glDepthFunc(GL11.GL_LEQUAL);
     }
+
+
 
     /**
      *

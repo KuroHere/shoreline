@@ -6,7 +6,7 @@ import java.util.ArrayDeque;
 
 /**
  * Implementation of https://guava.dev/releases/15.0/api/docs/com/google/common/collect/EvictingQueue.html
- * backed by a FILO {@link ArrayDeque}.
+ * backed by a first-in last-out {@link ArrayDeque}.
  *
  * @author linus
  * @since 1.0

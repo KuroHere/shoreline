@@ -87,9 +87,9 @@ public class BlockHighlightModule extends ToggleModule
             {
                 final BlockHitResult blockHit = (BlockHitResult) result;
                 BlockPos hpos = blockHit.getBlockPos();
-                // render = mc.world.getBlockState(hpos)
-                //        .getCollisionShape(mc.world, hpos).getBoundingBox();
-                render = new Box(hpos);
+                render = mc.world.getBlockState(hpos)
+                       .getOutlineShape(mc.world, hpos).getBoundingBox();
+                // render = new Box(hpos);
                 distance = pos.distanceTo(hpos.toCenterPos());
             }
         }

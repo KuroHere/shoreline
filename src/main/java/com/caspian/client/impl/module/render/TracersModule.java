@@ -87,8 +87,8 @@ public class TracersModule extends ToggleModule
         }
         float eyeHeight = mc.player.getEyeHeight(EntityPose.STANDING);
         Vec3d pos = new Vec3d(0.0, 0.0, 1.0)
-                .rotateY(-((float) Math.toRadians(mc.player.getPitch())))
-                .rotateX(-((float) Math.toRadians(mc.player.getYaw())))
+                .rotateX(-((float) Math.toRadians(mc.player.getPitch())))
+                .rotateY(-((float) Math.toRadians(mc.player.getYaw())))
                 .add(0.0, eyeHeight, 0.0);
         for (Entity entity : mc.world.getEntities())
         {

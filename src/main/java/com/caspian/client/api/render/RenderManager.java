@@ -3,10 +3,15 @@ package com.caspian.client.api.render;
 import com.caspian.client.mixin.accessor.AccessorWorldRenderer;
 import com.caspian.client.util.Globals;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.font.TextRenderer.Drawer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Style;
+import net.minecraft.text.TextVisitFactory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -354,6 +359,70 @@ public class RenderManager implements Globals
 
     /**
      *
+     * @param matrices
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @param color
+     */
+    public static void rect(MatrixStack matrices, double x1, double y1,
+                            double x2, double y2, int color)
+    {
+        rect(matrices, x1, y1, x2, y2, 0.0, color);
+    }
+
+    /**
+     *
+     * @param matrices
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @param z
+     * @param color
+     */
+    public static void rect(MatrixStack matrices, double x1, double y1,
+                            double x2, double y2, double z, int color)
+    {
+        x2 += x1;
+        y2 += y1;
+        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+        double i;
+        if (x1 < x2)
+        {
+            i = x1;
+            x1 = x2;
+            x2 = i;
+        }
+        if (y1 < y2)
+        {
+            i = y1;
+            y1 = y2;
+            y2 = i;
+        }
+        float f = (float) ColorHelper.Argb.getAlpha(color) / 255.0f;
+        float g = (float) ColorHelper.Argb.getRed(color) / 255.0f;
+        float h = (float) ColorHelper.Argb.getGreen(color) / 255.0f;
+        float j = (float) ColorHelper.Argb.getBlue(color) / 255.0f;
+        RenderSystem.enableBlend();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        BUFFER.begin(VertexFormat.DrawMode.QUADS,
+                VertexFormats.POSITION_COLOR);
+        BUFFER.vertex(matrix4f, (float) x1, (float) y1, (float) z)
+                .color(g, h, j, f).next();
+        BUFFER.vertex(matrix4f, (float) x1, (float) y2, (float) z)
+                .color(g, h, j, f).next();
+        BUFFER.vertex(matrix4f, (float) x2, (float) y2, (float) z)
+                .color(g, h, j, f).next();
+        BUFFER.vertex(matrix4f, (float) x2, (float) y1, (float) z)
+                .color(g, h, j, f).next();
+        BufferRenderer.drawWithGlobalProgram(BUFFER.end());
+        RenderSystem.disableBlend();
+    }
+
+    /**
+     *
      *
      * @param matrices
      * @param text
@@ -365,6 +434,77 @@ public class RenderManager implements Globals
                                   float y, int color)
     {
         mc.textRenderer.drawWithShadow(matrices, text, x, y, color);
+    }
+
+    /**
+     *
+     *
+     * @return
+     */
+    private static int drawStringInternal()
+    {
+        return 0;
+    }
+
+    /**
+     *
+     * @param text
+     * @param x
+     * @param y
+     * @param color
+     * @param shadow
+     * @param matrix
+     * @param vertexConsumers
+     * @param layerType
+     * @param backgroundColor
+     * @param light
+     */
+    private static int drawStringInternal(String text, float x, float y,
+                                          int color, boolean shadow,
+                                          Matrix4f matrix,
+                                          VertexConsumerProvider vertexConsumers,
+                                          TextRenderer.TextLayerType layerType,
+                                          int backgroundColor, int light)
+    {
+        color = (color & -67108864) == 0 ? color | -16777216 : color;
+        Matrix4f matrix4f = new Matrix4f(matrix);
+        if (shadow)
+        {
+            drawLayerInternal(text, x, y, color, true, matrix, vertexConsumers,
+                    layerType, backgroundColor, light);
+            matrix4f.translate(1.0f, 1.0f, 0.0f);
+        }
+        x = drawLayerInternal(text, x, y, color, false, matrix4f,
+                vertexConsumers, layerType, backgroundColor, light);
+        return (int) x + (shadow ? 1 : 0);
+    }
+
+    /**
+     *
+     * @param text
+     * @param x
+     * @param y
+     * @param color
+     * @param shadow
+     * @param matrix
+     * @param vertexConsumerProvider
+     * @param layerType
+     * @param underlineColor
+     * @param light
+     * @return
+     */
+    private static float drawLayerInternal(String text, float x, float y,
+                                           int color, boolean shadow,
+                                           Matrix4f matrix,
+                                           VertexConsumerProvider vertexConsumerProvider,
+                                           TextRenderer.TextLayerType layerType,
+                                           int underlineColor, int light)
+    {
+        // Drawer drawer = new Drawer(vertexConsumerProvider, x, y, color,
+        //    shadow, matrix, layerType, light);
+        // TextVisitFactory.visitFormatted(text, Style.EMPTY, drawer);
+        // return drawer.drawLayer(underlineColor, x);
+        return 0.0f;
     }
 
     /**

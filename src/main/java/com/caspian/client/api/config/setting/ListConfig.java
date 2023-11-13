@@ -1,7 +1,7 @@
 package com.caspian.client.api.config.setting;
 
 import com.caspian.client.api.config.Config;
-import com.caspian.client.util.IdNamespace;
+import com.caspian.client.util.ClientIdentifier;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -102,7 +102,7 @@ public class ListConfig<T extends List<?>> extends Config<T>
                     {
                         temp = new ArrayList<Block>();
                     }
-                    Block block = Registries.BLOCK.get(IdNamespace.toId(val));
+                    Block block = Registries.BLOCK.get(ClientIdentifier.toId(val));
                     ((List<Block>) temp).add(block);
                 }
                 else if (val.contains("item"))
@@ -111,7 +111,7 @@ public class ListConfig<T extends List<?>> extends Config<T>
                     {
                         temp = new ArrayList<Item>();
                     }
-                    Item item = Registries.ITEM.get(IdNamespace.toId(val));
+                    Item item = Registries.ITEM.get(ClientIdentifier.toId(val));
                     ((List<Item>) temp).add(item);
                 }
             }
