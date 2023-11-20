@@ -12,8 +12,6 @@ import com.caspian.client.impl.event.render.RenderBlockOutlineEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -21,6 +19,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 
 import java.text.DecimalFormat;
 
@@ -42,7 +41,6 @@ public class BlockHighlightModule extends ToggleModule
 
     /**
      *
-     *
      */
     public BlockHighlightModule()
     {
@@ -51,7 +49,6 @@ public class BlockHighlightModule extends ToggleModule
     }
 
     /**
-     *
      *
      * @return
      */
@@ -70,6 +67,10 @@ public class BlockHighlightModule extends ToggleModule
     @EventListener
     public void onRenderWorld(RenderWorldEvent event)
     {
+        if (mc.world == null)
+        {
+            return;
+        }
         Box render = null;
         final HitResult result = mc.crosshairTarget;
         if (result != null)
@@ -87,8 +88,13 @@ public class BlockHighlightModule extends ToggleModule
             {
                 final BlockHitResult blockHit = (BlockHitResult) result;
                 BlockPos hpos = blockHit.getBlockPos();
-                render = mc.world.getBlockState(hpos)
-                       .getOutlineShape(mc.world, hpos).getBoundingBox();
+                //
+                final VoxelShape shape = mc.world.getBlockState(hpos)
+                        .getOutlineShape(mc.world, hpos);
+                if (!shape.isEmpty())
+                {
+                    render = shape.getBoundingBox();
+                }
                 // render = new Box(hpos);
                 distance = pos.distanceTo(hpos.toCenterPos());
             }

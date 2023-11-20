@@ -26,6 +26,9 @@ public class NetworkManager implements Globals
     //
     private static final Set<Packet<?>> PACKET_CACHE = new HashSet<>();
 
+    /**
+     *
+     */
     public NetworkManager()
     {
         Caspian.EVENT_HANDLER.subscribe(this);

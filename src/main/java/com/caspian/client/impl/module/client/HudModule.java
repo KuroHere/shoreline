@@ -99,6 +99,7 @@ public class HudModule extends ToggleModule
         if (mc.player != null && mc.world != null)
         {
             Window res = mc.getWindow();
+            Modules.COLORS.resetRainbowOffset();
             // Render offsets for each corner of the screen.
             float topLeft = 2.0f;
             float topRight = topLeft;
@@ -151,6 +152,7 @@ public class HudModule extends ToggleModule
                                 res.getScaledWidth() - width * factor - 1.0f,
                                 topRight, Modules.COLORS.getRGB());
                         topRight += 10.0f;
+                        Modules.COLORS.setRainbowOffset();
                     }
                 }
             }
@@ -174,6 +176,7 @@ public class HudModule extends ToggleModule
                             res.getScaledWidth() - width - 1.0f, bottomRight,
                             effect.getColor());
                     bottomRight -= 10.0f;
+                    Modules.COLORS.setRainbowOffset();
                 }
             }
             if (serverBrandConfig.getValue())
@@ -184,6 +187,7 @@ public class HudModule extends ToggleModule
                         res.getScaledWidth() - width - 1.0f, bottomRight,
                         Modules.COLORS.getRGB());
                 bottomRight -= 10.0f;
+                Modules.COLORS.setRainbowOffset();
             }
             if (speedConfig.getValue())
             {
@@ -201,6 +205,7 @@ public class HudModule extends ToggleModule
                         res.getScaledWidth() - width - 1.0f, bottomRight,
                         Modules.COLORS.getRGB());
                 bottomRight -= 10.0f;
+                Modules.COLORS.setRainbowOffset();
             }
             if (pingConfig.getValue())
             {
@@ -211,6 +216,7 @@ public class HudModule extends ToggleModule
                         res.getScaledWidth() - width - 1.0f, bottomRight,
                         Modules.COLORS.getRGB());
                 bottomRight -= 10.0f;
+                Modules.COLORS.setRainbowOffset();
             }
             if (tpsConfig.getValue())
             {
@@ -224,6 +230,7 @@ public class HudModule extends ToggleModule
                         res.getScaledWidth() - width - 1.0f, bottomRight,
                         Modules.COLORS.getRGB());
                 bottomRight -= 10.0f;
+                Modules.COLORS.setRainbowOffset();
             }
             if (fpsConfig.getValue())
             {
@@ -233,6 +240,7 @@ public class HudModule extends ToggleModule
                         res.getScaledWidth() - width - 1.0f, bottomRight,
                         Modules.COLORS.getRGB());
                 bottomRight -= 10.0f;
+                Modules.COLORS.setRainbowOffset();
             }
             if (coordsConfig.getValue())
             {
@@ -254,6 +262,7 @@ public class HudModule extends ToggleModule
                                 nether ? decimal.format(z) : decimal.format(nz)),
                         2, bottomLeft, Modules.COLORS.getRGB());
                 bottomLeft -= 10.0f;
+                Modules.COLORS.setRainbowOffset();
             }
             if (directionConfig.getValue())
             {
@@ -266,6 +275,7 @@ public class HudModule extends ToggleModule
                                 pos ? "+" : "-"), 2, bottomLeft,
                         Modules.COLORS.getRGB());
                 // bottomLeft -= 10.0f;
+                Modules.COLORS.setRainbowOffset();
             }
             if (armorConfig.getValue())
             {

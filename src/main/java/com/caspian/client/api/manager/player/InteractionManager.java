@@ -1,8 +1,10 @@
 package com.caspian.client.api.manager.player;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.manager.player.rotation.RotationPriority;
+import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
@@ -31,11 +33,12 @@ import java.util.Set;
  */
 public class InteractionManager implements Globals
 {
+    //
+    private boolean blockCancel;
     // TODO: usingItem impl
     private boolean breakingBlock, usingItem;
 
     /**
-     *
      *
      */
     public InteractionManager()
@@ -71,6 +74,26 @@ public class InteractionManager implements Globals
             else if (event.getPacket() instanceof PlayerInteractBlockC2SPacket)
             {
                 usingItem = true;
+            }
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onTick(TickEvent event)
+    {
+        if (event.getStage() == EventStage.PRE)
+        {
+            blockCancel = false;
+        }
+        else if (event.getStage() == EventStage.POST)
+        {
+            if (!blockCancel && mc.interactionManager != null)
+            {
+                mc.interactionManager.cancelBlockBreaking();
             }
         }
     }
@@ -175,6 +198,45 @@ public class InteractionManager implements Globals
             }
             return;
         }
+    }
+
+    /**
+     *
+     * @param pos
+     * @param direction
+     */
+    public void breakBlock(BlockPos pos, Direction direction)
+    {
+        breakBlock(pos, direction, true);
+    }
+
+    /**
+     *
+     * @param pos
+     * @param direction
+     * @param swing
+     */
+    public void breakBlock(BlockPos pos, Direction direction, boolean swing)
+    {
+        // Create new instance
+        BlockPos breakPos = pos;
+        if (mc.interactionManager.isBreakingBlock())
+        {
+            mc.interactionManager.updateBlockBreakingProgress(breakPos, direction);
+        }
+        else
+        {
+            mc.interactionManager.attackBlock(breakPos, direction);
+        }
+        if (swing)
+        {
+            mc.player.swingHand(Hand.MAIN_HAND);
+        }
+        else
+        {
+            mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        }
+        blockCancel = true;
     }
 
     /**

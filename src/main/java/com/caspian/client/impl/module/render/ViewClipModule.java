@@ -17,8 +17,8 @@ import com.caspian.client.impl.event.render.CameraClipEvent;
 public class ViewClipModule extends ToggleModule
 {
     //
-    Config<Float> distanceConfig = new NumberConfig<>("Distance", "Third-person" +
-            " camera distance", 1.0f, 3.5f, 20.0f);
+    Config<Float> distanceConfig = new NumberConfig<>("Distance", "The third" +
+            "-person camera clip distance", 1.0f, 3.5f, 20.0f);
 
     /**
      *

@@ -2,6 +2,7 @@ package com.caspian.client.mixin.network;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.gui.chat.ChatMessageEvent;
+import com.caspian.client.impl.event.network.GameJoinEvent;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,6 +47,7 @@ public class MixinClientPlayNetworkHandler
     @Inject(method = "onGameJoin", at = @At(value = "TAIL"))
     private void hookOnGameJoin(GameJoinS2CPacket packet, CallbackInfo ci)
     {
-
+        GameJoinEvent gameJoinEvent = new GameJoinEvent();
+        Caspian.EVENT_HANDLER.dispatch(gameJoinEvent);
     }
 }

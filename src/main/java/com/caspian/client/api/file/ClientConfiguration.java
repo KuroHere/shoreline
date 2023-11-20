@@ -35,6 +35,8 @@ public class ClientConfiguration implements Globals
     // Set of configuration files that must be saved and loaded. This can be
     // modified after init.
     private final Set<ConfigFile> files = new HashSet<>();
+    //
+    private String configPreset;
 
     /**
      * 
@@ -120,6 +122,11 @@ public class ClientConfiguration implements Globals
         {
             file.load();
         }
+    }
+
+    public void setConfigPreset(String configPreset)
+    {
+        this.configPreset = configPreset;
     }
 
     /**

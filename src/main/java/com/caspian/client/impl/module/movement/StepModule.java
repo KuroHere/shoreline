@@ -89,10 +89,13 @@ public class StepModule extends ToggleModule
     @EventListener
     public void onMovementPackets(MovementPacketsEvent event)
     {
+        if (event.getStage() != EventStage.POST)
+        {
+            return;
+        }
         if (modeConfig.getValue() == StepMode.NORMAL)
         {
             double stepHeight = mc.player.getY() - mc.player.prevY;
-            ChatUtil.clientSendMessageRaw("" + stepHeight);
             if (stepHeight <= 0.5 || stepHeight > heightConfig.getValue())
             {
                 return;

@@ -20,6 +20,7 @@ import net.minecraft.entity.effect.StatusEffects;
  */
 public class FullbrightModule extends ToggleModule
 {
+    //
     Config<Brightness> brightnessConfig = new EnumConfig<>("Mode", "Mode for " +
             "world brightness", Brightness.POTION, Brightness.values());
 
@@ -71,6 +72,7 @@ public class FullbrightModule extends ToggleModule
     @EventListener
     public void onGameJoin(GameJoinEvent event)
     {
+        onDisable();
         onEnable();
     }
 
