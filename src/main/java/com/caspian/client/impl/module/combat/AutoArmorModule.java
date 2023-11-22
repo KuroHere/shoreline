@@ -18,9 +18,12 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.ArmorMaterials;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.TreeSet;
 
 /**
@@ -45,10 +48,10 @@ public class AutoArmorModule extends ToggleModule
     Config<Boolean> inventoryConfig = new BooleanConfig("AllowInventory",
             "Allows armor to be swapped while in the inventory menu", false);
     //
-    private final TreeSet<ArmorSlot> helmet = new TreeSet<>();
-    private final TreeSet<ArmorSlot> chestplate = new TreeSet<>();
-    private final TreeSet<ArmorSlot> leggings = new TreeSet<>();
-    private final TreeSet<ArmorSlot> boots = new TreeSet<>();
+    private final Queue<ArmorSlot> helmet = new PriorityQueue<>();
+    private final Queue<ArmorSlot> chestplate = new PriorityQueue<>();
+    private final Queue<ArmorSlot> leggings = new PriorityQueue<>();
+    private final Queue<ArmorSlot> boots = new PriorityQueue<>();
 
     /**
      *
@@ -92,7 +95,7 @@ public class AutoArmorModule extends ToggleModule
             {
                 continue;
             }
-            for (int j = 0; j < 36; j++)
+            for (int j = 9; j < 45; j++)
             {
                 ItemStack stack = mc.player.getInventory().getStack(j);
                 if (stack.isEmpty() || !(stack.getItem() instanceof ArmorItem armor))
@@ -125,22 +128,22 @@ public class AutoArmorModule extends ToggleModule
         }
         if (!helmet.isEmpty())
         {
-            ArmorSlot helmetSlot = helmet.last();
+            ArmorSlot helmetSlot = helmet.poll();
             swapArmor(helmetSlot.getType(), helmetSlot.getSlot());
         }
         if (!chestplate.isEmpty())
         {
-            ArmorSlot chestSlot = chestplate.last();
+            ArmorSlot chestSlot = chestplate.poll();
             swapArmor(chestSlot.getType(), chestSlot.getSlot());
         }
         if (!leggings.isEmpty())
         {
-            ArmorSlot leggingsSlot = leggings.last();
+            ArmorSlot leggingsSlot = leggings.poll();
             swapArmor(leggingsSlot.getType(), leggingsSlot.getSlot());
         }
         if (!boots.isEmpty())
         {
-            ArmorSlot bootsSlot = boots.last();
+            ArmorSlot bootsSlot = boots.poll();
             swapArmor(bootsSlot.getType(), bootsSlot.getSlot());
         }
     }
@@ -203,6 +206,7 @@ public class AutoArmorModule extends ToggleModule
 
     public class ArmorSlot implements Comparable<ArmorSlot>
     {
+        //
         private final int armorType;
         private final int slot;
         private final ItemStack armorStack;
@@ -229,19 +233,28 @@ public class AutoArmorModule extends ToggleModule
         @Override
         public int compareTo(ArmorSlot other)
         {
+            final ItemStack otherStack = other.getArmorStack();
+            ArmorItem armorItem = (ArmorItem) armorStack.getItem();
+            ArmorItem otherItem = (ArmorItem) otherStack.getItem();
+            float durabilityDiff = otherItem.getMaterial().getDurability(otherItem.getType())
+                    - armorItem.getMaterial().getDurability(armorItem.getType());
+            if (durabilityDiff != 0.0f)
+            {
+                return (int) durabilityDiff;
+            }
             Enchantment enchantment = priorityConfig.getValue().getEnchantment();
             if (blastLeggingsConfig.getValue() && armorType == 2
                     && hasEnchantment(Enchantments.BLAST_PROTECTION))
             {
-                return 1;
+                return -1;
             }
             if (hasEnchantment(enchantment))
             {
-                return other.hasEnchantment(enchantment) ? 0 : 1;
+                return other.hasEnchantment(enchantment) ? 0 : -1;
             }
             else
             {
-                return other.hasEnchantment(enchantment) ? -1 : 0;
+                return other.hasEnchantment(enchantment) ? 1 : 0;
             }
         }
 

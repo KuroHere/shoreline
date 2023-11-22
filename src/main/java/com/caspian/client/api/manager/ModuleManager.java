@@ -48,6 +48,7 @@ public class ModuleManager
                 new AutoCrystalModule(),
                 new AutoTotemModule(),
                 new BlockLagModule(),
+                new BowAimModule(),
                 new CriticalsModule(),
                 // new HoleFillModule(),
                 // new SelfBowModule(),
@@ -67,7 +68,7 @@ public class ModuleManager
                 new ReachModule(),
                 new SwingModule(),
                 // Misc
-                // new AnnouncerModule(),
+                new AnnouncerModule(),
                 // new AntiAFKModule(),
                 new AntiAimModule(),
                 new AntiBookBanModule(),

@@ -1,14 +1,18 @@
 package com.caspian.client.mixin.entity;
 
 import com.caspian.client.Caspian;
+import com.caspian.client.impl.event.entity.ConsumeItemEvent;
 import com.caspian.client.impl.event.entity.LevitationEvent;
 import com.caspian.client.util.Globals;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  *
@@ -26,6 +30,10 @@ public abstract class MixinLivingEntity implements Globals
      */
     @Shadow
     public abstract boolean hasStatusEffect(StatusEffect effect);
+
+    //
+    @Shadow
+    protected ItemStack activeItemStack;
 
     /**
      *
@@ -45,5 +53,23 @@ public abstract class MixinLivingEntity implements Globals
             return !levitationEvent.isCanceled() && hasStatusEffect(effect);
         }
         return hasStatusEffect(effect);
+    }
+
+    /**
+     *
+     * @param ci
+     */
+    @Inject(method = "consumeItem", at = @At(value = "INVOKE", target = "Lnet/" +
+            "minecraft/item/ItemStack;finishUsing(Lnet/minecraft/world/World;" +
+            "Lnet/minecraft/entity/LivingEntity;)" +
+            "Lnet/minecraft/item/ItemStack;", shift = At.Shift.AFTER))
+    private void hookConsumeItem(CallbackInfo ci)
+    {
+        if ((Object) this != mc.player)
+        {
+            return;
+        }
+        ConsumeItemEvent consumeItemEvent = new ConsumeItemEvent(activeItemStack);
+        Caspian.EVENT_HANDLER.dispatch(consumeItemEvent);
     }
 }

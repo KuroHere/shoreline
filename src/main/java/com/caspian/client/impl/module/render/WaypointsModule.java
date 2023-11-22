@@ -52,6 +52,10 @@ public class WaypointsModule extends ToggleModule
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
+        if (mc.world == null)
+        {
+            return;
+        }
         if (event.getPacket() instanceof PlayerListS2CPacket packet
                 && logoutsConfig.getValue())
         {

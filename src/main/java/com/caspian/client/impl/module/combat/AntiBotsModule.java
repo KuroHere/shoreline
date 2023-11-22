@@ -136,6 +136,16 @@ public class AntiBotsModule extends ToggleModule
      * @param player
      * @return
      */
+    public boolean contains(PlayerEntity player)
+    {
+        return botPlayers.contains(player);
+    }
+
+    /**
+     *
+     * @param player
+     * @return
+     */
     private boolean checkInvisibility(PlayerEntity player)
     {
         return invisibleConfig.getValue() && player.isInvisible()

@@ -48,6 +48,7 @@ public class Modules
     public static AutoCrystalModule AUTO_CRYSTAL;
     public static AutoTotemModule AUTO_TOTEM;
     public static BlockLagModule BLOCK_LAG;
+    public static BowAimModule BOW_AIM;
     public static CriticalsModule CRITICALS;
     public static SurroundModule SURROUND;
     // Exploit
@@ -62,6 +63,7 @@ public class Modules
     public static ReachModule REACH;
     public static SwingModule SWING;
     // Misc
+    public static AnnouncerModule ANNOUNCER;
     public static AntiAimModule ANTI_AIM;
     public static AntiBookBanModule ANTI_BOOK_BAN;
     public static AntiSpamModule ANTI_SPAM;
@@ -179,6 +181,7 @@ public class Modules
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(
                     "autototem-module");
             BLOCK_LAG = (BlockLagModule) getRegisteredModule("blocklag-module");
+            BOW_AIM = (BowAimModule) getRegisteredModule("bowaim-module");
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
             SURROUND = (SurroundModule) getRegisteredModule("surround-module");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
@@ -199,6 +202,8 @@ public class Modules
                     "portalgodmode-module");
             REACH = (ReachModule) getRegisteredModule("reach-module");
             SWING = (SwingModule) getRegisteredModule("swing-module");
+            ANNOUNCER = (AnnouncerModule) getRegisteredModule(
+                    "announcer-module");
             ANTI_AIM = (AntiAimModule) getRegisteredModule("antiaim-module");
             ANTI_BOOK_BAN = (AntiBookBanModule) getRegisteredModule(
                     "antibookban-module");

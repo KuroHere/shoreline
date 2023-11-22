@@ -8,6 +8,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.impl.event.entity.player.PlayerJumpEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.world.BlockCollisionEvent;
@@ -104,6 +105,19 @@ public class JesusModule extends ToggleModule
                 event.setVoxelShape(VoxelShapes.cuboid(new Box(0.0, 0.0, 0.0, 1.0,
                         0.949999988079071, 1.0)));
             }
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPlayerJump(PlayerJumpEvent event)
+    {
+        if (!isInFluid() && isOnFluid())
+        {
+            event.cancel();
         }
     }
 
