@@ -3,8 +3,10 @@ package com.caspian.client.mixin.network;
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.gui.chat.ChatMessageEvent;
 import com.caspian.client.impl.event.network.GameJoinEvent;
+import com.caspian.client.impl.event.network.InventoryEvent;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
+import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,5 +51,17 @@ public class MixinClientPlayNetworkHandler
     {
         GameJoinEvent gameJoinEvent = new GameJoinEvent();
         Caspian.EVENT_HANDLER.dispatch(gameJoinEvent);
+    }
+
+    /**
+     *
+     * @param packet
+     * @param ci
+     */
+    @Inject(method = "onInventory", at = @At(value = "TAIL"))
+    private void hookOnInventory(InventoryS2CPacket packet, CallbackInfo ci)
+    {
+        InventoryEvent inventoryEvent = new InventoryEvent(packet);
+        Caspian.EVENT_HANDLER.dispatch(inventoryEvent);
     }
 }

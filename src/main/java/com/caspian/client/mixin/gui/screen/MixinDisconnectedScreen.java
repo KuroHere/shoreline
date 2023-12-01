@@ -39,8 +39,14 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
     private void hookInit(CallbackInfo ci)
     {
         ButtonWidget.Builder reconnectButton = ButtonWidget.builder(Text.of("Reconnect"),
-                (button) -> ConnectScreen.connect((DisconnectedScreen) (Object) this, mc,
-                        Managers.NETWORK.getAddress(), Managers.NETWORK.getInfo()));
+                (button) ->
+                {
+                    if (Managers.NETWORK.getAddress() != null && Managers.NETWORK.getInfo() != null)
+                    {
+                        ConnectScreen.connect((DisconnectedScreen) (Object) this, mc,
+                                Managers.NETWORK.getAddress(), Managers.NETWORK.getInfo());
+                    }
+                });
         ButtonWidget.Builder autoReconnectButton = ButtonWidget.builder(
                 Text.of("AutoReconnect"), (button) ->
                 {
@@ -77,7 +83,7 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
                 {
                     --reconnectSeconds;
                 }
-                else
+                else if (Managers.NETWORK.getAddress() != null && Managers.NETWORK.getInfo() != null)
                 {
                     ConnectScreen.connect((DisconnectedScreen) (Object) this, mc,
                             Managers.NETWORK.getAddress(), Managers.NETWORK.getInfo());

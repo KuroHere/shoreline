@@ -13,6 +13,7 @@
     "accessor.AccessorClientPlayerEntity",
     "accessor.AccessorClientPlayerInteractionManager",
     "accessor.AccessorClientWorld",
+    "accessor.AccessorCustomPayloadC2SPacket",
     "accessor.AccessorEntity",
     "accessor.AccessorEntityVelocityUpdateS2CPacket",
     "accessor.AccessorExplosionS2CPacket",

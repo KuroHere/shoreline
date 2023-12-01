@@ -5,7 +5,7 @@ import com.caspian.client.api.module.Module;
 import com.caspian.client.api.manager.ModuleManager;
 import com.caspian.client.impl.module.client.ClickGuiModule;
 import com.caspian.client.impl.module.client.ColorsModule;
-import com.caspian.client.impl.module.client.HudModule;
+import com.caspian.client.impl.module.client.HUDModule;
 import com.caspian.client.impl.module.client.RotationsModule;
 import com.caspian.client.impl.module.combat.*;
 import com.caspian.client.impl.module.exploit.*;
@@ -38,7 +38,7 @@ public class Modules
     // Module instances.
     public static ClickGuiModule CLICK_GUI;
     public static ColorsModule COLORS;
-    public static HudModule HUD;
+    public static HUDModule HUD;
     public static RotationsModule ROTATIONS;
     // Combat
     public static AntiBotsModule ANTI_BOTS;
@@ -46,18 +46,22 @@ public class Modules
     public static AutoArmorModule AUTO_ARMOR;
     public static AutoBowReleaseModule AUTO_BOW_RELEASE;
     public static AutoCrystalModule AUTO_CRYSTAL;
+    public static AutoPotModule AUTO_POT;
     public static AutoTotemModule AUTO_TOTEM;
     public static BlockLagModule BLOCK_LAG;
     public static BowAimModule BOW_AIM;
     public static CriticalsModule CRITICALS;
     public static SurroundModule SURROUND;
+    public static TriggerModule TRIGGER;
     // Exploit
     public static AntiHungerModule ANTI_HUNGER;
     public static ChorusControlModule CHORUS_CONTROL;
     public static ColorSignsModule COLOR_SIGNS;
+    public static CrasherModule CRASHER;
     public static FakeLatencyModule FAKE_LATENCY;
     public static FastProjectileModule FAST_PROJECTILE;
     public static NoMineAnimationModule NO_MINE_ANIMATION;
+    public static PacketCancelerModule PACKET_CANCELER;
     public static PacketFlyModule PACKET_FLY;
     public static PortalGodModeModule PORTAL_GOD_MODE;
     public static ReachModule REACH;
@@ -72,6 +76,7 @@ public class Modules
     public static AutoFishModule AUTO_FISH;
     public static AutoReconnectModule AUTO_RECONNECT;
     public static AutoRespawnModule AUTO_RESPAWN;
+    public static ChestAuraModule CHEST_AURA;
     public static FakePlayerModule FAKE_PLAYER;
     public static InvCleanerModule INV_CLEANER;
     public static MiddleClickModule MIDDLE_CLICK;
@@ -79,6 +84,7 @@ public class Modules
     public static SkinBlinkModule SKIN_BLINK;
     public static TimerModule TIMER;
     public static TrueDurabilityModule TRUE_DURABILITY;
+    public static UnfocusedFPSModule UNFOCUSED_FPS;
     public static XCarryModule XCARRY;
     // Movement
     public static AntiLevitationModule ANTI_LEVITATION;
@@ -114,6 +120,7 @@ public class Modules
     public static NoRenderModule NO_RENDER;
     public static NoRotateModule NO_ROTATE;
     public static NoWeatherModule NO_WEATHER;
+    public static SkeletonModule SKELETON;
     public static SkyboxModule SKYBOX;
     public static TooltipsModule TOOLTIPS;
     public static TracersModule TRACERS;
@@ -168,7 +175,7 @@ public class Modules
             CLICK_GUI = (ClickGuiModule) getRegisteredModule(
                     "clickgui-module");
             COLORS = (ColorsModule) getRegisteredModule("colors-module");
-            HUD = (HudModule) getRegisteredModule("hud-module");
+            HUD = (HUDModule) getRegisteredModule("hud-module");
             ROTATIONS = (RotationsModule) getRegisteredModule(
                     "rotations-module");
             ANTI_BOTS = (AntiBotsModule) getRegisteredModule("antibots-module");
@@ -178,24 +185,29 @@ public class Modules
                     "autobowrelease-module");
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
                     "autocrystal-module");
+            AUTO_POT = (AutoPotModule) getRegisteredModule("autopot-module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(
                     "autototem-module");
             BLOCK_LAG = (BlockLagModule) getRegisteredModule("blocklag-module");
             BOW_AIM = (BowAimModule) getRegisteredModule("bowaim-module");
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
             SURROUND = (SurroundModule) getRegisteredModule("surround-module");
+            TRIGGER = (TriggerModule) getRegisteredModule("trigger-module");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
                     "antihunger-module");
             CHORUS_CONTROL = (ChorusControlModule) getRegisteredModule(
                     "choruscontrol-module");
             COLOR_SIGNS = (ColorSignsModule) getRegisteredModule(
                     "colorsigns-module");
+            CRASHER = (CrasherModule) getRegisteredModule("crasher-module");
             FAKE_LATENCY = (FakeLatencyModule) getRegisteredModule(
                     "fakelatency-module");
             FAST_PROJECTILE = (FastProjectileModule) getRegisteredModule(
                     "fastprojectile-module");
             NO_MINE_ANIMATION = (NoMineAnimationModule) getRegisteredModule(
                     "nomineanimation-module");
+            PACKET_CANCELER = (PacketCancelerModule) getRegisteredModule(
+                    "packetcanceler-module");
             PACKET_FLY = (PacketFlyModule) getRegisteredModule(
                     "packetfly-module");
             PORTAL_GOD_MODE = (PortalGodModeModule) getRegisteredModule(
@@ -217,6 +229,7 @@ public class Modules
                     "autoreconnect-module");
             AUTO_RESPAWN = (AutoRespawnModule) getRegisteredModule(
                     "autorespawn-module");
+            CHEST_AURA = (ChestAuraModule) getRegisteredModule("chestaura-module");
             FAKE_PLAYER = (FakePlayerModule) getRegisteredModule(
                     "fakeplayer-module");
             INV_CLEANER = (InvCleanerModule) getRegisteredModule(
@@ -229,6 +242,8 @@ public class Modules
             TIMER = (TimerModule) getRegisteredModule("timer-module");
             TRUE_DURABILITY = (TrueDurabilityModule) getRegisteredModule(
                     "truedurability-module");
+            UNFOCUSED_FPS = (UnfocusedFPSModule) getRegisteredModule(
+                    "unfocusedfps-module");
             XCARRY = (XCarryModule) getRegisteredModule("xcarry-module");
             ANTI_LEVITATION = (AntiLevitationModule) getRegisteredModule(
                     "antilevitation-module");
@@ -269,6 +284,7 @@ public class Modules
             NO_ROTATE = (NoRotateModule) getRegisteredModule("norotate-module");
             NO_WEATHER = (NoWeatherModule) getRegisteredModule(
                     "noweather-module");
+            SKELETON = (SkeletonModule) getRegisteredModule("skeleton-module");
             SKYBOX = (SkyboxModule) getRegisteredModule("skybox-module");
             TOOLTIPS = (TooltipsModule) getRegisteredModule("tooltips-module");
             TRACERS = (TracersModule) getRegisteredModule("tracers-module");

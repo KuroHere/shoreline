@@ -18,6 +18,7 @@ import com.caspian.client.util.math.timer.CacheTimer;
 import com.caspian.client.util.math.timer.Timer;
 import com.caspian.client.util.network.InteractType;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.client.network.ServerAddress;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;

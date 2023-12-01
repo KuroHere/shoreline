@@ -23,8 +23,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket;
-import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.FluidTags;
 
@@ -39,6 +39,8 @@ public class NoRenderModule extends ToggleModule
     //
     Config<Boolean> hurtCamConfig = new BooleanConfig("NoHurtCam",
             "Prevents the hurt camera shake effect from rendering", true);
+    Config<Boolean> antiCrashConfig = new BooleanConfig("AntiCrash",
+            "Prevents server packets from crashing the client", false);
     Config<Boolean> armorConfig = new BooleanConfig("Armor",
             "Prevents armor pieces from rendering", false);
     Config<Boolean> fireOverlayConfig = new BooleanConfig("Overlay-Fire",
@@ -76,8 +78,6 @@ public class NoRenderModule extends ToggleModule
             "Prevents totem particles from rendering", false);
     Config<Boolean> unicodeConfig = new BooleanConfig("UnicodeChat",
             "Prevents unicode characters from being rendered in chat", false);
-    Config<Boolean> particlesConfig = new BooleanConfig("LagParticles",
-            "Prevents laggy particles from crashing the game", false);
     Config<Boolean> worldBorderConfig = new BooleanConfig("WorldBorder",
             "Prevents world border from rendering", false);
     Config<FogRender> fogConfig = new EnumConfig<>("Fog", "Prevents fog from " +
@@ -123,6 +123,10 @@ public class NoRenderModule extends ToggleModule
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
+        if (mc.world == null)
+        {
+            return;
+        }
         if (event.getPacket() instanceof ChatMessageS2CPacket packet
                 && unicodeConfig.getValue())
         {
@@ -136,10 +140,39 @@ public class NoRenderModule extends ToggleModule
                 }
             }
         }
-        else if (event.getPacket() instanceof ParticleS2CPacket packet
-                && packet.getCount() > 100 && particlesConfig.getValue())
+        if (antiCrashConfig.getValue())
         {
-            event.cancel();
+            // Crash packets from server
+            if (event.getPacket() instanceof PlayerPositionLookS2CPacket packet
+                    && (packet.getX() > 30000000 || packet.getY() > mc.world.getTopY()
+                    || packet.getZ() > 30000000 || packet.getX() < -30000000
+                    || packet.getY() < mc.world.getBottomY() || packet.getZ() < -30000000))
+            {
+                event.cancel();
+            }
+            else if (event.getPacket() instanceof ExplosionS2CPacket packet
+                    && (packet.getX() > 30000000 || packet.getY() > mc.world.getTopY()
+                    || packet.getZ() > 30000000 || packet.getX() < -30000000
+                    || packet.getY() < mc.world.getBottomY() || packet.getZ() < -30000000
+                    || packet.getRadius() > 1000 || packet.getAffectedBlocks().size() > 1000
+                    || packet.getPlayerVelocityX() > 1000 || packet.getPlayerVelocityY() > 1000
+                    || packet.getPlayerVelocityZ() > 1000 || packet.getPlayerVelocityX() < -1000
+                    || packet.getPlayerVelocityY() < -1000 || packet.getPlayerVelocityZ() < -1000))
+            {
+                event.cancel();
+            }
+            else if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet
+                    && (packet.getVelocityX() > 1000 || packet.getVelocityY() > 1000 ||
+                    packet.getVelocityZ() > 1000 || packet.getVelocityX() < -1000 ||
+                    packet.getVelocityY() < -1000 || packet.getVelocityZ() < -1000))
+            {
+                event.cancel();
+            }
+            else if (event.getPacket() instanceof ParticleS2CPacket packet
+                && packet.getCount() > 800)
+            {
+                event.cancel();
+            }
         }
     }
 

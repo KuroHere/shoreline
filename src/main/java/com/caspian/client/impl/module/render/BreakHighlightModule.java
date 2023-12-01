@@ -58,7 +58,7 @@ public class BreakHighlightModule extends ToggleModule
                 continue;
             }
             int damage = info.getValue().getStage();
-            Box bb = mc.world.getBlockState(pos).getOutlineShape(mc.world, pos).getBoundingBox();
+            Box bb = new Box(info.getValue().getPos());
             double x = bb.minX + (bb.maxX - bb.minX) / 2.0;
             double y = bb.minY + (bb.maxY - bb.minY) / 2.0;
             double z = bb.minZ + (bb.maxZ - bb.minZ) / 2.0;

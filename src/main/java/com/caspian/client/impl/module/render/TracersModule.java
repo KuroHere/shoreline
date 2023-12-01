@@ -100,7 +100,7 @@ public class TracersModule extends ToggleModule
             //
             if (color != null)
             {
-                Vec3d entityPos = Interpolation.getInterpolatedPosition(entity,
+                Vec3d entityPos = Interpolation.getRenderPosition(entity,
                         event.getTickDelta());
                 Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
                 entityPos = entityPos.subtract(cameraPos).add(0.0,

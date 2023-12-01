@@ -116,7 +116,6 @@ public interface AccessorMinecraftClient
 
     /**
      *
-     *
      * @param itemUseCooldown
      */
     @Accessor("itemUseCooldown")
@@ -124,9 +123,15 @@ public interface AccessorMinecraftClient
 
     /**
      *
-     *
      * @return
      */
     @Accessor("itemUseCooldown")
     int hookGetItemUseCooldown();
+
+    /**
+     *
+     * @param attackCooldown
+     */
+    @Accessor("attackCooldown")
+    void hookSetAttackCooldown(int attackCooldown);
 }

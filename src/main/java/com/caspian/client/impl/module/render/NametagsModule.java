@@ -20,7 +20,6 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
@@ -76,7 +75,7 @@ public class NametagsModule extends ToggleModule
     {
         if (mc.gameRenderer != null && mc.getCameraEntity() != null)
         {
-            Vec3d interpolate = Interpolation.getInterpolatedPosition(
+            Vec3d interpolate = Interpolation.getRenderPosition(
                     mc.getCameraEntity(), mc.getTickDelta());
             Camera camera = mc.gameRenderer.getCamera();
             for (Entity entity : mc.world.getEntities())
@@ -89,7 +88,7 @@ public class NametagsModule extends ToggleModule
                         continue;
                     }
                     String info = getNametagInfo(player);
-                    Vec3d pinterpolate = Interpolation.getInterpolatedPosition(
+                    Vec3d pinterpolate = Interpolation.getRenderPosition(
                             player, mc.getTickDelta());
                     double rx = player.getX() - pinterpolate.getX();
                     double ry = player.getY() - pinterpolate.getY();

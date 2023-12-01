@@ -4,7 +4,7 @@ import com.caspian.client.Caspian;
 import com.caspian.client.api.module.Module;
 import com.caspian.client.impl.module.client.ClickGuiModule;
 import com.caspian.client.impl.module.client.ColorsModule;
-import com.caspian.client.impl.module.client.HudModule;
+import com.caspian.client.impl.module.client.HUDModule;
 import com.caspian.client.impl.module.client.RotationsModule;
 import com.caspian.client.impl.module.combat.*;
 import com.caspian.client.impl.module.exploit.*;
@@ -38,7 +38,7 @@ public class ModuleManager
                 // Client
                 new ClickGuiModule(),
                 new ColorsModule(),
-                new HudModule(),
+                new HUDModule(),
                 new RotationsModule(),
                 // Combat
                 new AntiBotsModule(),
@@ -46,6 +46,7 @@ public class ModuleManager
                 new AutoArmorModule(),
                 new AutoBowReleaseModule(),
                 new AutoCrystalModule(),
+                new AutoPotModule(),
                 new AutoTotemModule(),
                 new BlockLagModule(),
                 new BowAimModule(),
@@ -54,14 +55,16 @@ public class ModuleManager
                 // new SelfBowModule(),
                 // new SelfTrapModule(),
                 new SurroundModule(),
-                // new TriggerModule(),
+                new TriggerModule(),
                 // Exploit
                 new AntiHungerModule(),
                 new ChorusControlModule(),
                 new ColorSignsModule(),
+                new CrasherModule(),
                 new FakeLatencyModule(),
                 new FastProjectileModule(),
                 new NoMineAnimationModule(),
+                new PacketCancelerModule(),
                 new PacketFlyModule(),
                 // new PhaseModule(),
                 new PortalGodModeModule(),
@@ -81,6 +84,7 @@ public class ModuleManager
                 new AutoReconnectModule(),
                 new AutoRespawnModule(),
                 // new BeaconSelectorModule(),
+                new ChestAuraModule(),
                 // new ChestStealerModule(),
                 new FakePlayerModule(),
                 new InvCleanerModule(),
@@ -89,6 +93,7 @@ public class ModuleManager
                 new SkinBlinkModule(),
                 new TimerModule(),
                 new TrueDurabilityModule(),
+                new UnfocusedFPSModule(),
                 new XCarryModule(),
                 // Movement
                 new AntiLevitationModule(),
@@ -126,6 +131,7 @@ public class ModuleManager
                 new NoRenderModule(),
                 new NoRotateModule(),
                 new NoWeatherModule(),
+                new SkeletonModule(),
                 new SkyboxModule(),
                 new TooltipsModule(),
                 new TracersModule(),

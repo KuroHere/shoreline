@@ -64,7 +64,6 @@ public class NoSlowModule extends ToggleModule
             "the slowdown effect caused by walking over Honey blocks", false);
     Config<Boolean> slimeblockConfig = new BooleanConfig("SlimeBlock",  "Removes " +
             "the slowdown effect caused by walking over Slime blocks", false);
-    
     //
     private boolean sneaking;
     //

@@ -10,6 +10,8 @@ import com.caspian.client.api.module.ToggleModule;
  *
  * @author linus
  * @since 1.0
+ *
+ * @see com.caspian.client.mixin.gui.screen.MixinDisconnectedScreen
  */
 public class AutoReconnectModule extends ToggleModule
 {

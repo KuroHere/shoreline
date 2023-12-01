@@ -1,6 +1,7 @@
 package com.caspian.client.impl.module.client;
 
 import com.caspian.client.api.config.Config;
+import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.module.ConcurrentModule;
 import com.caspian.client.api.module.ModuleCategory;
@@ -17,6 +18,8 @@ public class RotationsModule extends ConcurrentModule
     Config<Float> preserveTicksConfig = new NumberConfig<>("PreserveTicks",
             "Time to preserve rotations after reaching the target rotations",
             0.0f, 20.0f, 20.0f);
+    Config<Boolean> movementFixConfig = new BooleanConfig("MovementFix",
+            "Fixes movement on NCP when rotating", false);
 
     /**
      *

@@ -2,10 +2,7 @@ package com.caspian.client.mixin;
 
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.EventStage;
-import com.caspian.client.impl.event.ItemMultitaskEvent;
-import com.caspian.client.impl.event.RunTickEvent;
-import com.caspian.client.impl.event.TickEvent;
-import com.caspian.client.impl.event.ScreenOpenEvent;
+import com.caspian.client.impl.event.*;
 import com.caspian.client.impl.imixin.IMinecraftClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -20,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  *
@@ -45,11 +43,26 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
     @Shadow
     protected abstract void doItemUse();
 
+    @Shadow protected abstract boolean doAttack();
+
+    @Unique
+    private boolean leftClick;
     // https://github.com/MeteorDevelopment/meteor-client/blob/master/src/main/java/meteordevelopment/meteorclient/mixin/MinecraftClientMixin.java#L54
     @Unique
     private boolean rightClick;
     @Unique
+    private boolean doAttackCalled;
+    @Unique
     private boolean doItemUseCalled;
+
+    /**
+     *
+     */
+    @Override
+    public void leftClick()
+    {
+        leftClick = true;
+    }
 
     /**
      *
@@ -82,6 +95,7 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
     @Inject(method = "tick", at = @At(value = "HEAD"))
     private void hookTickPre(CallbackInfo ci)
     {
+        doAttackCalled = false;
         doItemUseCalled = false;
         if (player != null && world != null)
         {
@@ -89,10 +103,19 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
             tickPreEvent.setStage(EventStage.PRE);
             Caspian.EVENT_HANDLER.dispatch(tickPreEvent);
         }
-        if (rightClick && !doItemUseCalled && interactionManager != null)
+        if (interactionManager == null)
+        {
+            return;
+        }
+        if (leftClick && !doAttackCalled)
+        {
+            doAttack();
+        }
+        if (rightClick && !doItemUseCalled)
         {
             doItemUse();
         }
+        leftClick = false;
         rightClick = false;
     }
 
@@ -128,10 +151,20 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
      *
      * @param ci
      */
-    @Inject(method = "doItemUse", at = @At("HEAD"))
+    @Inject(method = "doItemUse", at = @At(value = "HEAD"))
     private void hookDoItemUse(CallbackInfo ci)
     {
         doItemUseCalled = true;
+    }
+
+    /**
+     *
+     * @param cir
+     */
+    @Inject(method = "doAttack", at = @At(value = "HEAD"))
+    private void hookDoAttack(CallbackInfoReturnable<Boolean> cir)
+    {
+        doAttackCalled = true;
     }
 
     /**
@@ -160,5 +193,21 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
         ItemMultitaskEvent itemMultitaskEvent = new ItemMultitaskEvent();
         Caspian.EVENT_HANDLER.dispatch(itemMultitaskEvent);
         return !itemMultitaskEvent.isCanceled() && instance.isBreakingBlock();
+    }
+
+    /**
+     *
+     * @param cir
+     */
+    @Inject(method = "getFramerateLimit", at = @At(value = "HEAD"), cancellable = true)
+    private void hookGetFramerateLimit(CallbackInfoReturnable<Integer> cir)
+    {
+        FramerateLimitEvent framerateLimitEvent = new FramerateLimitEvent();
+        Caspian.EVENT_HANDLER.dispatch(framerateLimitEvent);
+        if (framerateLimitEvent.isCanceled())
+        {
+            cir.cancel();
+            cir.setReturnValue(framerateLimitEvent.getFramerateLimit());
+        }
     }
 }

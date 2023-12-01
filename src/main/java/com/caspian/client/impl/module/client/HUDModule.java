@@ -37,7 +37,7 @@ import java.util.List;
  * @author linus
  * @since 1.0
  */
-public class HudModule extends ToggleModule
+public class HUDModule extends ToggleModule
 {
     //
     // private static final HudScreen HUD_SCREEN = new HudScreen();
@@ -81,7 +81,7 @@ public class HudModule extends ToggleModule
      *
      *
      */
-    public HudModule()
+    public HUDModule()
     {
         super("HUD", "Displays the HUD (heads up display) screen.",
                 ModuleCategory.CLIENT);

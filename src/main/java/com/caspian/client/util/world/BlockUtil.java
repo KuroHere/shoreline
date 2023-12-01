@@ -1,9 +1,12 @@
 package com.caspian.client.util.world;
 
 import com.caspian.client.util.Globals;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.chunk.ChunkManager;
+
+import java.util.List;
 
 /**
  *
@@ -13,6 +16,15 @@ import net.minecraft.world.chunk.ChunkManager;
  */
 public class BlockUtil implements Globals
 {
+    /**
+     *
+     * @return
+     */
+    public static List<BlockEntity> blockEntities()
+    {
+        return null;
+    }
+
     /**
      *
      * @param pos
