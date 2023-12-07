@@ -80,7 +80,7 @@ public class ModuleManager
                 new AutoAcceptModule(),
                 // new AutoEatModule(),
                 new AutoFishModule(),
-                // new AutoMountModule(),
+                new AutoMountModule(),
                 new AutoReconnectModule(),
                 new AutoRespawnModule(),
                 // new BeaconSelectorModule(),

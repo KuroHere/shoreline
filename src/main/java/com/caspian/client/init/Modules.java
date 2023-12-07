@@ -74,6 +74,7 @@ public class Modules
     public static AutoAcceptModule AUTO_ACCEPT;
     public static AntiVanishModule ANTI_VANISH;
     public static AutoFishModule AUTO_FISH;
+    public static AutoMountModule AUTO_MOUNT;
     public static AutoReconnectModule AUTO_RECONNECT;
     public static AutoRespawnModule AUTO_RESPAWN;
     public static ChestAuraModule CHEST_AURA;
@@ -225,6 +226,7 @@ public class Modules
             ANTI_VANISH = (AntiVanishModule) getRegisteredModule(
                     "antivanish-module");
             AUTO_FISH = (AutoFishModule) getRegisteredModule("autofish-module");
+            AUTO_MOUNT = (AutoMountModule) getRegisteredModule("automount-module");
             AUTO_RECONNECT = (AutoReconnectModule) getRegisteredModule(
                     "autoreconnect-module");
             AUTO_RESPAWN = (AutoRespawnModule) getRegisteredModule(

@@ -78,6 +78,10 @@ public class AutoPotModule extends ToggleModule
     @EventListener
     public void onMovementPackets(MovementPacketsEvent event)
     {
+        if (!mc.player.isOnGround() && onGroundConfig.getValue())
+        {
+            return;
+        }
         if (event.getStage() == EventStage.PRE)
         {
             float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
