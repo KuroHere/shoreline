@@ -679,11 +679,7 @@ public class AutoCrystalModule extends RotationModule
             {
                 return;
             }
-            if (attackDelayConfig.getValue() <= 0.0f)
-            {
-                return;
-            }
-            if (rotating != 0)
+            if (attackDelayConfig.getValue() <= 0.0f || rotating != 0)
             {
                 return;
             }
