@@ -16,9 +16,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ExperienceOrbEntity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
@@ -29,11 +26,10 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -54,11 +50,13 @@ public class SurroundModule extends ToggleModule
             "crystals in the way of surround", true);
     Config<Boolean> extendConfig = new BooleanConfig("Extend", "Extends " +
             "surround if the player is not in the center of a block", true);
+    Config<Boolean> floorConfig = new BooleanConfig("Floor", "Creates a " +
+            "floor for the surround if there is none", false);
     Config<Boolean> jumpDisableConfig = new BooleanConfig("AutoDisable",
             "Disables after moving out of the hole", true);
     //
     private List<BlockPos> surround = new ArrayList<>();
-    private List<BlockPos> placements = new ArrayList<>();
+    private final List<BlockPos> placements = new ArrayList<>();
     //
     private double prevY;
 
@@ -122,72 +120,9 @@ public class SurroundModule extends ToggleModule
             BlockPos pos = BlockPos.ofFloored(mc.player.getX(),
                     mc.player.getY(), mc.player.getZ());
             //
-            final List<BlockPos> temp = new ArrayList<>();
-            final Set<Direction> intersectDirs = new HashSet<>();
             // surround.clear();
             placements.clear();
-            for (Direction dir : Direction.values())
-            {
-                if (dir == Direction.UP)
-                {
-                    continue;
-                }
-                final BlockPos off = pos.offset(dir);
-                if (isEntityIntersecting(off))
-                {
-                    if (extendConfig.getValue())
-                    {
-                        for (Direction dir2 : Direction.values())
-                        {
-                            if (dir2 == Direction.UP)
-                            {
-                                continue;
-                            }
-                            BlockPos extendOff = off.offset(dir2);
-                            if (extendOff == pos)
-                            {
-                                continue;
-                            }
-                            if (mc.world.isAir(extendOff))
-                            {
-                                if (isEntityIntersecting(extendOff))
-                                {
-                                    intersectDirs.add(dir2);
-                                }
-                                else
-                                {
-                                    temp.add(extendOff);
-                                }
-                            }
-                        }
-                        if (intersectDirs.size() > 1)
-                        {
-                            BlockPos corner = pos;
-                            for (Direction dir2 : intersectDirs)
-                            {
-                                corner.offset(dir2);
-                            }
-                            for (Direction dir2 : Direction.values())
-                            {
-                                if (dir2 == Direction.UP)
-                                {
-                                    continue;
-                                }
-                                BlockPos cornerOff = corner.offset(dir2);
-                                if (!isEntityIntersecting(cornerOff))
-                                {
-                                    temp.add(cornerOff);
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    temp.add(off);
-                }
-            }
-            surround = temp;
+            surround = getSurroundPositions(pos);
             for (BlockPos p : surround)
             {
                 if (mc.world.isAir(p))
@@ -197,7 +132,7 @@ public class SurroundModule extends ToggleModule
             }
             if (!placements.isEmpty())
             {
-                int slot = getSurroundBlockItem();
+                int slot = getResistantBlockItem();
                 if (slot == -1)
                 {
                     return;
@@ -210,12 +145,7 @@ public class SurroundModule extends ToggleModule
                 }
                 for (BlockPos p : placements)
                 {
-                    double dist = mc.player.squaredDistanceTo(p.toCenterPos());
-                    if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue())
-                    {
-                        continue;
-                    }
-                    Managers.INTERACT.placeBlock(pos, rotateConfig.getValue(),
+                    Managers.INTERACT.placeBlock(p, rotateConfig.getValue(),
                             strictDirectionConfig.getValue());
                 }
                 if (prev != slot)
@@ -225,6 +155,85 @@ public class SurroundModule extends ToggleModule
                 }
             }
         }
+    }
+
+    /**
+     *
+     *
+     * @param pos
+     * @return
+     */
+    public List<BlockPos> getSurroundPositions(BlockPos pos)
+    {
+        final List<BlockPos> entities = new ArrayList<>();
+        entities.add(pos);
+        if (extendConfig.getValue())
+        {
+            for (Direction dir : Direction.values())
+            {
+                if (!dir.getAxis().isHorizontal())
+                {
+                    continue;
+                }
+                BlockPos pos1 = pos.add(dir.getVector());
+                //
+                List<Entity> box = mc.world.getOtherEntities(null, new Box(pos1));
+                if (box.isEmpty())
+                {
+                    continue;
+                }
+                for (Entity entity : box)
+                {
+                    entities.addAll(getAllInBox(entity.getBoundingBox()));
+                }
+            }
+        }
+        List<BlockPos> blocks = new ArrayList<>();
+        Vec3d playerPos = Managers.POSITION.getEyePos();
+        for (BlockPos epos : entities)
+        {
+            for (Direction dir2 : Direction.values())
+            {
+                if (!dir2.getAxis().isHorizontal())
+                {
+                    continue;
+                }
+                BlockPos pos2 = epos.add(dir2.getVector());
+                if (entities.contains(pos2) || blocks.contains(pos2))
+                {
+                    continue;
+                }
+                double dist = playerPos.squaredDistanceTo(pos2.toCenterPos());
+                if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue())
+                {
+                    continue;
+                }
+                blocks.add(pos2);
+            }
+        }
+        if (floorConfig.getValue())
+        {
+            for (BlockPos epos1 : entities)
+            {
+                BlockPos floor = epos1.down();
+                double dist = playerPos.squaredDistanceTo(floor.toCenterPos());
+                if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue())
+                {
+                    continue;
+                }
+                blocks.add(floor);
+            }
+        }
+        return blocks;
+    }
+
+    private List<BlockPos> getAllInBox(Box box)
+    {
+
+        double x = Math.ceil(box.maxX - box.minX);
+        double z = Math.ceil(box.maxZ - box.minZ);
+
+
     }
 
     /**
@@ -244,7 +253,7 @@ public class SurroundModule extends ToggleModule
             final BlockPos pos = packet.getPos();
             if (surround.contains(pos) && state.isAir())
             {
-                int slot = getSurroundBlockItem();
+                int slot = getResistantBlockItem();
                 if (slot == -1)
                 {
                     return;
@@ -273,7 +282,7 @@ public class SurroundModule extends ToggleModule
                     packet.getY(), packet.getZ());
             if (surround.contains(pos))
             {
-                int slot = getSurroundBlockItem();
+                int slot = getResistantBlockItem();
                 if (slot == -1)
                 {
                     return;
@@ -298,33 +307,9 @@ public class SurroundModule extends ToggleModule
 
     /**
      *
-     * @param pos
      * @return
      */
-    private boolean isEntityIntersecting(BlockPos pos)
-    {
-        for (Entity e : mc.world.getEntities())
-        {
-            if (e == null || e instanceof ExperienceOrbEntity
-                    || e instanceof ItemEntity
-                    || e instanceof EndCrystalEntity)
-            {
-                continue;
-            }
-            final Box p = new Box(pos);
-            if (e.getBoundingBox().intersects(p))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     *
-     * @return
-     */
-    private int getSurroundBlockItem()
+    public int getResistantBlockItem()
     {
         int slot = -1;
         for (int i = 0; i < 9; i++)

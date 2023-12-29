@@ -110,6 +110,7 @@ public class NoSlowModule extends ToggleModule
                     ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         }
         sneaking = false;
+        Managers.TICK.setClientTick(1.0f);
     }
 
     /**
@@ -196,12 +197,17 @@ public class NoSlowModule extends ToggleModule
                     mc.player.setPitch(MathHelper.clamp(pitch, -90.0f, 90.0f));
                 }
             }
-            final BlockPos pos = Managers.POSITION.getBlockPos();
-            final BlockState state = mc.world.getBlockState(pos);
-            if (state.getBlock() == Blocks.COBWEB && websConfig.getValue()
-                    && !Managers.POSITION.isOnGround())
+            final BlockState state = mc.world.getBlockState(BlockPos.ofFloored(mc.player.getPos()));
+            if (state.getBlock() == Blocks.COBWEB && websConfig.getValue())
             {
-
+                if (mc.player.isOnGround())
+                {
+                    Managers.TICK.setClientTick(1.0f);
+                }
+                else
+                {
+                    Managers.TICK.setClientTick(webSpeedConfig.getValue() / 2.0f);
+                }
             }
         }
     }

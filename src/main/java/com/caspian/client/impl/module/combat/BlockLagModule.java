@@ -10,6 +10,7 @@ import com.caspian.client.impl.event.ScreenOpenEvent;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.init.Modules;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DeathScreen;
@@ -117,7 +118,7 @@ public class BlockLagModule extends ToggleModule
                         mc.player.getZ(), true));
                 Managers.POSITION.setPosition(mc.player.getX(),
                         mc.player.getY() + 1.16610926093821, mc.player.getZ());
-                int slot = getLagBlockItem();
+                int slot = Modules.SURROUND.getResistantBlockItem();
                 if (slot == -1)
                 {
                     return;
@@ -174,38 +175,5 @@ public class BlockLagModule extends ToggleModule
     public double getLagOffset()
     {
         return 3.5;
-    }
-
-    /**
-     *
-     * @return
-     */
-    private int getLagBlockItem()
-    {
-        int slot = -1;
-        for (int i = 0; i < 9; i++)
-        {
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.getItem() instanceof BlockItem block
-                    && block.getBlock() == Blocks.OBSIDIAN)
-            {
-                slot = i;
-                break;
-            }
-        }
-        if (slot == -1)
-        {
-            for (int i = 0; i < 9; i++)
-            {
-                ItemStack stack = mc.player.getInventory().getStack(i);
-                if (stack.getItem() instanceof BlockItem block
-                        && block.getBlock() == Blocks.ENDER_CHEST)
-                {
-                    slot = i;
-                    break;
-                }
-            }
-        }
-        return slot;
     }
 }

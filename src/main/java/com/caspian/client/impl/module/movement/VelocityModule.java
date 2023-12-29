@@ -5,23 +5,28 @@ import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.EnumConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.config.NumberDisplay;
+import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
+import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.entity.player.PushEntityEvent;
 import com.caspian.client.impl.event.entity.player.PushFluidsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.network.PushOutOfBlocksEvent;
+import com.caspian.client.init.Managers;
 import com.caspian.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
 import com.caspian.client.mixin.accessor.AccessorExplosionS2CPacket;
+import com.caspian.client.util.math.timer.Timer;
 import com.caspian.client.util.string.EnumFormatter;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 import java.text.DecimalFormat;
 import java.util.HashSet;
@@ -54,7 +59,6 @@ public class VelocityModule extends ToggleModule
             "Prevents being pulled by fishing rod hooks", true);
     //
     private boolean cancelVelocity;
-    private final Set<Integer> velocityTransactions = new HashSet<>();
 
     /**
      *
@@ -129,7 +133,12 @@ public class VelocityModule extends ToggleModule
                     }
                     case STRICT ->
                     {
-
+                        if (!Managers.NCP.passed(100))
+                        {
+                            return;
+                        }
+                        event.cancel();
+                        cancelVelocity = true;
                     }
                 }
             }
@@ -154,7 +163,12 @@ public class VelocityModule extends ToggleModule
                     }
                     case STRICT ->
                     {
-
+                        if (!Managers.NCP.passed(100))
+                        {
+                            return;
+                        }
+                        event.cancel();
+                        cancelVelocity = true;
                     }
                 }
             }
@@ -170,13 +184,29 @@ public class VelocityModule extends ToggleModule
                     }
                 }
             }
-            else if (event.getPacket() instanceof ScreenHandlerSlotUpdateS2CPacket packet)
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onTick(TickEvent event)
+    {
+        if (event.getStage() == EventStage.PRE
+                && modeConfig.getValue() == VelocityMode.STRICT)
+        {
+            if (cancelVelocity)
             {
-                // TODO: check if this is the equivalent to 1.8 C0F
-                if (modeConfig.getValue() == VelocityMode.STRICT && cancelVelocity)
+                if (Managers.NCP.passed(100))
                 {
-                    velocityTransactions.add(packet.getRevision());
+                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
+                            mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround()));
+                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                            BlockPos.ofFloored(mc.player.getPos()), Direction.DOWN));
                 }
+                cancelVelocity = false;
             }
         }
     }
