@@ -101,7 +101,7 @@ public class StepModule extends ToggleModule
                 return;
             }
             //
-            double[] offs = getStepOffsets(stepHeight);
+            final double[] offs = getStepOffsets(stepHeight);
             if (useTimerConfig.getValue())
             {
                 Managers.TICK.setClientTick(stepHeight > 1.0 ? 0.15f : 0.35f);

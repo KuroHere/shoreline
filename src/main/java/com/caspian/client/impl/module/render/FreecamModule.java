@@ -143,6 +143,10 @@ public class FreecamModule extends ToggleModule
         CAMERA
     }
 
+    //
+    // TODO: FIX
+    //
+    //
     public static class FreecamEntity extends ClientPlayerEntity
     {
         /**

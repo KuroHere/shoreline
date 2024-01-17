@@ -79,16 +79,14 @@ public class BlockHighlightModule extends ToggleModule
             if (entitiesConfig.getValue()
                     && result.getType() == HitResult.Type.ENTITY)
             {
-                final EntityHitResult entityHit = (EntityHitResult) result;
-                final Entity entity = entityHit.getEntity();
+                final Entity entity = ((EntityHitResult) result).getEntity();
                 render = entity.getBoundingBox();
                 distance = pos.distanceTo(entity.getPos());
             }
             else if (result.getType() == HitResult.Type.BLOCK)
             {
-                final BlockHitResult blockHit = (BlockHitResult) result;
-                BlockPos hpos = blockHit.getBlockPos();
                 //
+                BlockPos hpos = ((BlockHitResult) result).getBlockPos();
                 final VoxelShape shape = mc.world.getBlockState(hpos)
                         .getOutlineShape(mc.world, hpos);
                 if (!shape.isEmpty())

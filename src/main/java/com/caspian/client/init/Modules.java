@@ -56,6 +56,7 @@ public class Modules
     // Exploit
     public static AntiHungerModule ANTI_HUNGER;
     public static ChorusControlModule CHORUS_CONTROL;
+    public static ClickTPModule CLICK_TP;
     public static ColorSignsModule COLOR_SIGNS;
     public static CrasherModule CRASHER;
     public static FakeLatencyModule FAKE_LATENCY;
@@ -198,6 +199,7 @@ public class Modules
                     "antihunger-module");
             CHORUS_CONTROL = (ChorusControlModule) getRegisteredModule(
                     "choruscontrol-module");
+            CLICK_TP = (ClickTPModule) getRegisteredModule("clicktp-module");
             COLOR_SIGNS = (ColorSignsModule) getRegisteredModule(
                     "colorsigns-module");
             CRASHER = (CrasherModule) getRegisteredModule("crasher-module");

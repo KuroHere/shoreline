@@ -280,7 +280,7 @@ public class SpeedModule extends ToggleModule
      * @param speed
      * @return
      */
-    private Vec2f handleStrafeMotion(final float speed)
+    public Vec2f handleStrafeMotion(final float speed)
     {
         float forward = mc.player.input.movementForward;
         float strafe = mc.player.input.movementSideways;

@@ -7,15 +7,19 @@ import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
+import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import com.caspian.client.util.player.MovementUtil;
 import com.caspian.client.util.string.EnumFormatter;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.math.Vec2f;
 
 /**
  *
@@ -31,7 +35,9 @@ public class LongJumpModule extends ToggleModule
     Config<Float> boostConfig = new NumberConfig<>("Boost", "The jump boost " +
             "speed", 0.1f, 4.5f, 10.0f, () -> modeConfig.getValue() == JumpMode.NORMAL);
     //
+    private int stage;
     private double distance;
+    private double speed;
     //
     private int airTicks;
     private int groundTicks;
@@ -62,6 +68,85 @@ public class LongJumpModule extends ToggleModule
     public void onEnable()
     {
         groundTicks = 0;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onDisable()
+    {
+        stage = 0;
+        distance = 0.0;
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onTick(TickEvent event)
+    {
+        if (event.getStage() != EventStage.PRE)
+        {
+            return;
+        }
+        double dx = mc.player.getX() - mc.player.prevX;
+        double dz = mc.player.getZ() - mc.player.prevZ;
+        distance = Math.sqrt(dx * dx + dz * dz);
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPlayerMove(PlayerMoveEvent event)
+    {
+        if (modeConfig.getValue() == JumpMode.NORMAL)
+        {
+            if (mc.player == null || mc.world == null
+                    || Modules.FLIGHT.isEnabled()
+                    || Modules.PACKET_FLY.isEnabled()
+                    || !MovementUtil.isInputtingMovement())
+            {
+                return;
+            }
+            //
+            final double base = 0.2873f;
+            if (stage == 0)
+            {
+                stage = 1;
+                speed = boostConfig.getValue() * base - 0.01;
+            }
+            else if (stage == 1)
+            {
+                stage = 2;
+                Managers.MOVEMENT.setMotionY(0.42);
+                event.setY(0.42);
+                speed *= 2.149;
+            }
+            else if (stage == 2)
+            {
+                stage = 3;
+                double moveSpeed = 0.66 * (distance - base);
+                speed = distance - moveSpeed;
+            }
+            else
+            {
+                if (!mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0,
+                        mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision)
+                {
+                    stage = 0;
+                }
+                speed = distance - distance / 159.0;
+            }
+            speed = Math.max(speed, base);
+            event.cancel();
+            Vec2f motion = Modules.SPEED.handleStrafeMotion((float) speed);
+            event.setX(motion.x);
+            event.setZ(motion.y);
+        }
     }
 
     /**

@@ -8,5 +8,8 @@ package com.caspian.client.api.manager.client;
  */
 public class DiscordManager
 {
+    public void startRPC()
+    {
 
+    }
 }

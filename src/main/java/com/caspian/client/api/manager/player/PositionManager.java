@@ -40,6 +40,15 @@ public class PositionManager implements Globals
 
     /**
      *
+     * @param vec3d
+     */
+    public void setPosition(Vec3d vec3d)
+    {
+        setPosition(vec3d.getX(), vec3d.getY(), vec3d.getZ());
+    }
+
+    /**
+     *
      *
      * @param x
      * @param y

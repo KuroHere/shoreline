@@ -24,7 +24,6 @@ import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.Random;
 
@@ -119,37 +118,34 @@ public class CriticalsModule extends ToggleModule
             }
             // Attacked entity
             final Entity e = packet.getEntity();
-            if (e != null && e.isAlive())
+            if (e == null || !e.isAlive() || e instanceof EndCrystalEntity)
             {
-                if (e instanceof EndCrystalEntity)
+                return;
+            }
+            if (attackTimer.passed(500))
+            {
+                event.cancel();
+                if (EntityUtil.isVehicle(e))
                 {
-                    return;
+                    for (int i = 0; i < 5; ++i)
+                    {
+                        Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(e,
+                                Managers.POSITION.isSneaking()));
+                        Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                    }
                 }
-                if (attackTimer.passed(500))
+                else
                 {
-                    event.cancel();
-                    if (EntityUtil.isVehicle(e))
+                    attackPacket = (PlayerInteractEntityC2SPacket) packet;
+                    preAttackPacket();
+                    if (!packetSyncConfig.getValue())
                     {
-                        for (int i = 0; i < 5; ++i)
-                        {
-                            Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(e,
-                                    Managers.POSITION.isSneaking()));
-                            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-                        }
+                        Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(
+                                e, Managers.POSITION.isSneaking()));
                     }
-                    else
-                    {
-                        attackPacket = (PlayerInteractEntityC2SPacket) packet;
-                        preAttackPacket();
-                        if (!packetSyncConfig.getValue())
-                        {
-                            Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(
-                                    e, Managers.POSITION.isSneaking()));
-                        }
-                        mc.player.addCritParticles(e);
-                    }
-                    attackTimer.reset();
+                    mc.player.addCritParticles(e);
                 }
+                attackTimer.reset();
             }
         }
         else if (event.getPacket() instanceof HandSwingC2SPacket packet)

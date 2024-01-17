@@ -5,28 +5,20 @@ import net.minecraft.util.math.Vec3d;
 
 /**
  *
+ *
+ * @author linus
+ * @since 1.0
  */
-public class TimedVec3d implements Position
+public record TimedVec3d(Vec3d pos, long time) implements Position
 {
-    //
-    private final Vec3d pos;
-    //
-    private final long time;
-
     /**
      *
      * @param pos
      * @param time
      */
-    public TimedVec3d(Vec3d pos, long time)
+    public TimedVec3d
     {
-        this.pos = pos;
-        this.time = time;
-    }
 
-    public Vec3d getPos()
-    {
-        return pos;
     }
 
     /**
@@ -54,10 +46,5 @@ public class TimedVec3d implements Position
     public double getZ()
     {
         return pos.getZ();
-    }
-
-    public long getTime()
-    {
-        return time;
     }
 }

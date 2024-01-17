@@ -6,6 +6,7 @@ import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
+import com.caspian.client.api.module.PlaceBlockModule;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.ScreenOpenEvent;
 import com.caspian.client.impl.event.TickEvent;
@@ -37,7 +38,7 @@ import java.util.List;
  * @author linus
  * @since 1.0
  */
-public class SurroundModule extends ToggleModule
+public class SurroundModule extends PlaceBlockModule
 {
     //
     Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange", "The " +
@@ -132,27 +133,8 @@ public class SurroundModule extends ToggleModule
             }
             if (!placements.isEmpty())
             {
-                int slot = getResistantBlockItem();
-                if (slot == -1)
-                {
-                    return;
-                }
-                int prev = mc.player.getInventory().selectedSlot;
-                if (prev != slot)
-                {
-                    mc.player.getInventory().selectedSlot = slot;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
-                }
-                for (BlockPos p : placements)
-                {
-                    Managers.INTERACT.placeBlock(p, rotateConfig.getValue(),
-                            strictDirectionConfig.getValue());
-                }
-                if (prev != slot)
-                {
-                    mc.player.getInventory().selectedSlot = prev;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
-                }
+                placeBlocks(placements, rotateConfig.getValue(),
+                        strictDirectionConfig.getValue());
             }
         }
     }
@@ -227,6 +209,11 @@ public class SurroundModule extends ToggleModule
         return blocks;
     }
 
+    /**
+     *
+     * @param box
+     * @return
+     */
     private List<BlockPos> getAllInBox(Box box)
     {
 
@@ -253,25 +240,8 @@ public class SurroundModule extends ToggleModule
             final BlockPos pos = packet.getPos();
             if (surround.contains(pos) && state.isAir())
             {
-                int slot = getResistantBlockItem();
-                if (slot == -1)
-                {
-                    return;
-                }
-                int prev = mc.player.getInventory().selectedSlot;
-                if (prev != slot)
-                {
-                    mc.player.getInventory().selectedSlot = slot;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
-                }
-                //
-                Managers.INTERACT.placeBlock(pos, rotateConfig.getValue(),
+                placeBlock(pos, rotateConfig.getValue(),
                         strictDirectionConfig.getValue());
-                if (prev != slot)
-                {
-                    mc.player.getInventory().selectedSlot = prev;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
-                }
             }
         }
         else if (event.getPacket() instanceof PlaySoundS2CPacket packet
@@ -282,59 +252,10 @@ public class SurroundModule extends ToggleModule
                     packet.getY(), packet.getZ());
             if (surround.contains(pos))
             {
-                int slot = getResistantBlockItem();
-                if (slot == -1)
-                {
-                    return;
-                }
-                int prev = mc.player.getInventory().selectedSlot;
-                if (prev != slot)
-                {
-                    mc.player.getInventory().selectedSlot = slot;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
-                }
-                //
-                Managers.INTERACT.placeBlock(pos, rotateConfig.getValue(),
+                placeBlock(pos, rotateConfig.getValue(),
                         strictDirectionConfig.getValue());
-                if (prev != slot)
-                {
-                    mc.player.getInventory().selectedSlot = prev;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
-                }
             }
         }
     }
 
-    /**
-     *
-     * @return
-     */
-    public int getResistantBlockItem()
-    {
-        int slot = -1;
-        for (int i = 0; i < 9; i++)
-        {
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.getItem() instanceof BlockItem block
-                    && block.getBlock() == Blocks.OBSIDIAN)
-            {
-                slot = i;
-                break;
-            }
-        }
-        if (slot == -1)
-        {
-            for (int i = 0; i < 9; i++)
-            {
-                ItemStack stack = mc.player.getInventory().getStack(i);
-                if (stack.getItem() instanceof BlockItem block
-                        && block.getBlock() == Blocks.ENDER_CHEST)
-                {
-                    slot = i;
-                    break;
-                }
-            }
-        }
-        return slot;
-    }
 }

@@ -1,5 +1,6 @@
 package com.caspian.client.impl.module.misc;
 
+import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
@@ -67,6 +68,10 @@ public class AntiVanishModule extends ToggleModule
     @EventListener
     public void onTick(TickEvent event)
     {
+        if (event.getStage() != EventStage.PRE)
+        {
+            return;
+        }
         if (!vanishTimer.passed(1000))
         {
             return;

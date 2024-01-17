@@ -5,6 +5,7 @@ import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
+import com.caspian.client.api.module.PlaceBlockModule;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.ScreenOpenEvent;
 import com.caspian.client.impl.event.TickEvent;
@@ -26,13 +27,15 @@ import net.minecraft.util.math.BlockPos;
  * @author linus
  * @since 1.0
  */
-public class BlockLagModule extends ToggleModule
+public class BlockLagModule extends PlaceBlockModule
 {
     //
     Config<Boolean> selfFillConfig = new BooleanConfig("SelfFill", "Fills in " +
             "the block beneath you", false);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates " +
             "before placing the block", false);
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "NCP-Updated " +
+            "bypass for lagging", false);
     Config<Boolean> attackConfig = new BooleanConfig("Attack", "crystals in " +
             "the way of block", true);
     Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable",
@@ -118,19 +121,7 @@ public class BlockLagModule extends ToggleModule
                         mc.player.getZ(), true));
                 Managers.POSITION.setPosition(mc.player.getX(),
                         mc.player.getY() + 1.16610926093821, mc.player.getZ());
-                int slot = Modules.SURROUND.getResistantBlockItem();
-                if (slot == -1)
-                {
-                    return;
-                }
-                int prev = mc.player.getInventory().selectedSlot;
-                if (prev != slot)
-                {
-                    mc.player.getInventory().selectedSlot = slot;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
-                }
-                //
-                Managers.INTERACT.placeBlock(pos, rotateConfig.getValue());
+                placeBlock(pos, rotateConfig.getValue());
                 if (selfFillConfig.getValue())
                 {
                     Managers.POSITION.setPosition(mc.player.getX(),
@@ -144,11 +135,6 @@ public class BlockLagModule extends ToggleModule
                     Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                             mc.player.getX(), mc.player.getY() + getLagOffset(),
                             mc.player.getZ(), false));
-                }
-                if (prev != slot)
-                {
-                    mc.player.getInventory().selectedSlot = prev;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
                 }
             }
             if (autoDisableConfig.getValue())

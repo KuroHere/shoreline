@@ -59,6 +59,7 @@ public class ModuleManager
                 // Exploit
                 new AntiHungerModule(),
                 new ChorusControlModule(),
+                new ClickTPModule(),
                 new ColorSignsModule(),
                 new CrasherModule(),
                 new FakeLatencyModule(),
