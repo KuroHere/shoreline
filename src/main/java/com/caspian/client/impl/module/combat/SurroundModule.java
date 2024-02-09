@@ -220,7 +220,7 @@ public class SurroundModule extends PlaceBlockModule
         double x = Math.ceil(box.maxX - box.minX);
         double z = Math.ceil(box.maxZ - box.minZ);
 
-
+        return null;
     }
 
     /**
