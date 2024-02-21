@@ -106,7 +106,8 @@ public class BowAimModule extends ToggleModule
         float bowHeldTime = (float) (mc.player.getActiveItem().getMaxUseTime()
                 - mc.player.getItemUseTime()) / 20.0f;
         bowHeldTime = (bowHeldTime * bowHeldTime + bowHeldTime * 2.0f) / 3.0f;
-        if (bowHeldTime >= 1.0f) {
+        if (bowHeldTime >= 1.0f)
+        {
             bowHeldTime = 1.0f;
         }
         double duration = bowHeldTime * 3.0f;

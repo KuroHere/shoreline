@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class PlaceBlockModule extends ToggleModule
 {
+    // TODO: series of blocks
 
     public PlaceBlockModule(String name, String desc, ModuleCategory category)
     {
@@ -32,6 +33,11 @@ public class PlaceBlockModule extends ToggleModule
 
     }
 
+    /**
+     *
+     * @param placements
+     * @param rotate
+     */
     protected void placeBlocks(List<BlockPos> placements, boolean rotate)
     {
         placeBlocks(placements, rotate, false);
@@ -47,6 +53,20 @@ public class PlaceBlockModule extends ToggleModule
                                boolean strictDirection)
     {
         int slot = getResistantBlockItem();
+        placeBlocks(slot, placements, rotate, strictDirection);
+    }
+
+    /**
+     *
+     * @param slot
+     * @param placements
+     * @param rotate
+     * @param strictDirection
+     */
+    protected void placeBlocks(int slot, List<BlockPos> placements,
+                               boolean rotate,
+                               boolean strictDirection)
+    {
         if (slot == -1)
         {
             return;
@@ -82,6 +102,18 @@ public class PlaceBlockModule extends ToggleModule
     protected void placeBlock(BlockPos pos, boolean rotate, boolean strictDirection)
     {
         int slot = getResistantBlockItem();
+        placeBlock(slot, pos, rotate, strictDirection);
+    }
+
+    /**
+     *
+     * @param slot
+     * @param pos
+     * @param rotate
+     * @param strictDirection
+     */
+    protected void placeBlock(int slot, BlockPos pos, boolean rotate, boolean strictDirection)
+    {
         if (slot == -1)
         {
             return;

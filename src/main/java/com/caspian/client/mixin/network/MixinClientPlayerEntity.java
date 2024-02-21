@@ -7,6 +7,7 @@ import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.impl.event.network.*;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
+import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.Input;
@@ -143,6 +144,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                 {
                     yaw = request.getYaw();
                     pitch = request.getPitch();
+                    ChatUtil.clientSendMessage("yaw: " + yaw + " pitch: " + pitch);
                 }
                 //
                 double d = x - lastX;
@@ -354,7 +356,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         if (mountJumpStrengthEvent.isCanceled())
         {
             cir.cancel();
-            cir.setReturnValue(1.0f);
+            cir.setReturnValue(mountJumpStrengthEvent.getJumpStrength());
         }
     }
 }

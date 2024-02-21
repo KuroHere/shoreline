@@ -5,6 +5,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.mixin.accessor.AccessorClientPlayerInteractionManager;
 import com.caspian.client.util.Globals;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
@@ -99,6 +100,25 @@ public class InventoryManager implements Globals
     public void syncSelectedSlot()
     {
         ((AccessorClientPlayerInteractionManager) mc.interactionManager).hookSyncSelectedSlot();
+    }
+
+    /**
+     *
+     * @param item
+     * @return
+     */
+    public int count(Item item)
+    {
+        int itemCount = 0;
+        for (int i = 9; i < 45; i++)
+        {
+            ItemStack slot = mc.player.getInventory().getStack(i);
+            if (slot.getItem() == item)
+            {
+                itemCount += slot.getCount();
+            }
+        }
+        return itemCount;
     }
 
     /**

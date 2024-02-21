@@ -4,9 +4,11 @@ import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.EnumConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
+import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
+import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.entity.player.TravelEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
@@ -31,6 +33,8 @@ public class ElytraFlyModule extends ToggleModule
             "flight speed", 0.1f, 2.5f, 10.0f);
     Config<Float> vspeedConfig = new NumberConfig<>("VerticalSpeed", "The " +
             "vertical flight speed", 0.1f, 1.0f, 5.0f);
+    Config<Boolean> instantFlyConfig = new BooleanConfig("InstantFly",
+            "Automatically activates elytra from the ground", false);
     Config<Boolean> fireworkConfig = new BooleanConfig("Fireworks", "Uses " +
             "fireworks when flying", false, () -> modeConfig.getValue() != FlyMode.PACKET);
     //
@@ -52,50 +56,61 @@ public class ElytraFlyModule extends ToggleModule
     @EventListener
     public void onTravel(TravelEvent event)
     {
-        if (mc.player == null || mc.world == null)
+        if (mc.player == null || mc.world == null
+                || !mc.player.isFallFlying())
         {
             return;
         }
-        if (mc.player.isFallFlying())
+        switch (modeConfig.getValue())
         {
-            switch (modeConfig.getValue())
+            case CONTROL ->
             {
-                case CONTROL ->
+                event.cancel();
+                float forward = mc.player.input.movementForward;
+                float strafe = mc.player.input.movementSideways;
+                float yaw = mc.player.getYaw();
+                if (forward == 0.0f && strafe == 0.0f)
                 {
-                    event.cancel();
-                    float forward = mc.player.input.movementForward;
-                    float strafe = mc.player.input.movementSideways;
-                    float yaw = mc.player.getYaw();
-                    if (forward == 0.0f && strafe == 0.0f)
-                    {
-                        Managers.MOVEMENT.setMotionXZ(0.0, 0.0);
-                    }
-                    else
-                    {
-                        pitch = 12;
-                        double rx = Math.cos(Math.toRadians(yaw + 90.0f));
-                        double rz = Math.sin(Math.toRadians(yaw + 90.0f));
-                        Managers.MOVEMENT.setMotionXZ(((forward * speedConfig.getValue() * rx)
-                                + (strafe * speedConfig.getValue() * rz)), (forward * speedConfig.getValue() * rz)
-                                - (strafe * speedConfig.getValue() * rx));
-                    }
-                    Managers.MOVEMENT.setMotionY(0.0);
-                    pitch = 0;
-                    if (mc.options.jumpKey.isPressed())
-                    {
-                        pitch = -51;
-                        Managers.MOVEMENT.setMotionY(vspeedConfig.getValue());
-                    }
-                    else if (mc.options.sneakKey.isPressed())
-                    {
-                        Managers.MOVEMENT.setMotionY(-vspeedConfig.getValue());
-                    }
+                    Managers.MOVEMENT.setMotionXZ(0.0, 0.0);
                 }
-                case BOOST ->
+                else
                 {
-
+                    pitch = 12;
+                    double rx = Math.cos(Math.toRadians(yaw + 90.0f));
+                    double rz = Math.sin(Math.toRadians(yaw + 90.0f));
+                    Managers.MOVEMENT.setMotionXZ(((forward * speedConfig.getValue() * rx)
+                            + (strafe * speedConfig.getValue() * rz)), (forward * speedConfig.getValue() * rz)
+                            - (strafe * speedConfig.getValue() * rx));
+                }
+                Managers.MOVEMENT.setMotionY(0.0);
+                pitch = 0;
+                if (mc.options.jumpKey.isPressed())
+                {
+                    pitch = -51;
+                    Managers.MOVEMENT.setMotionY(vspeedConfig.getValue());
+                }
+                else if (mc.options.sneakKey.isPressed())
+                {
+                    Managers.MOVEMENT.setMotionY(-vspeedConfig.getValue());
                 }
             }
+            case BOOST ->
+            {
+
+            }
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onTick(TickEvent event)
+    {
+        if (event.getStage() != EventStage.PRE)
+        {
+            return;
         }
     }
 

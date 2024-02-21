@@ -56,6 +56,8 @@ public class HUDModule extends ToggleModule
             VanillaHud.values());
     Config<Boolean> potionEffectsConfig = new BooleanConfig("PotionEffects",
             "Displays active potion effects", true);
+    Config<Boolean> durabilityConfig = new BooleanConfig("Durability",
+            "Displays the current held items durability", false);
     Config<Boolean> coordsConfig = new BooleanConfig("Coords",
             "Displays world coordinates", true);
     Config<Boolean> netherCoordsConfig = new BooleanConfig(

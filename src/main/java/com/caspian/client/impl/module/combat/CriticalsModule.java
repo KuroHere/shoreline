@@ -162,7 +162,7 @@ public class CriticalsModule extends ToggleModule
      * Callback method for pre attack stage, must be called before the attack
      * packet or else the movements will not be registered
      *
-     * @see AuraModule#preAttack()
+     * @see AuraModule#postAttackTarget()
      */
     public void preAttackPacket()
     {

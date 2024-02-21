@@ -105,7 +105,7 @@ public class InteractionManager implements Globals
      * @param strictDirection
      */
     public void placeBlock(BlockPos pos, boolean rotate,
-                                  boolean strictDirection)
+                           boolean strictDirection)
     {
         placeBlock(pos, Hand.MAIN_HAND, rotate, strictDirection);
     }
@@ -164,7 +164,7 @@ public class InteractionManager implements Globals
                     + mc.player.getStandingEyeHeight());
             int z = blockPos.getZ();
             BlockPos off = pos.offset(dir);
-            Set<Direction> strictDirections = DirectionChecks.getPlaceDirectionsNCP(
+            Set<Direction> strictDirections = Managers.NCP.getPlaceDirectionsNCP(
                     x, y, z, off.getX(), off.getY(), off.getZ());
             if (strictDirection && !strictDirections.contains(dir.getOpposite()))
             {

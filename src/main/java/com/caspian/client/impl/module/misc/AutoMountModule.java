@@ -65,47 +65,44 @@ public class AutoMountModule extends ToggleModule
         {
             return;
         }
-        if (mc.player.getVehicle() != null)
+        if (mc.player.getVehicle() != null || !mountTimer.passed(delayConfig.getValue() * 1000.0f))
         {
             return;
         }
-        if (mountTimer.passed(delayConfig.getValue() * 1000.0f))
+        for (Entity entity : mc.world.getEntities())
         {
-            for (Entity entity : mc.world.getEntities())
+            double dist = mc.player.distanceTo(entity);
+            if (dist > 4.0)
             {
-                double dist = mc.player.distanceTo(entity);
-                if (dist > 4.0)
+                continue;
+            }
+            if (checkMount(entity))
+            {
+                boolean sprint = Managers.POSITION.isSprinting();
+                boolean sneak = Managers.POSITION.isSneaking();
+                if (sprint)
                 {
-                    continue;
+                    Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                            ClientCommandC2SPacket.Mode.STOP_SPRINTING));
                 }
-                if (checkMount(entity))
+                if (sneak)
                 {
-                    boolean sprint = Managers.POSITION.isSprinting();
-                    boolean sneak = Managers.POSITION.isSneaking();
-                    if (sprint)
-                    {
-                        Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                                ClientCommandC2SPacket.Mode.STOP_SPRINTING));
-                    }
-                    if (sneak)
-                    {
-                        Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                                ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-                    }
-                    Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.interact(entity, false, Hand.MAIN_HAND));
-                    if (sprint)
-                    {
-                        Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                                ClientCommandC2SPacket.Mode.START_SPRINTING));
-                    }
-                    if (sneak)
-                    {
-                        Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                                ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
-                    }
-                    mountTimer.reset();
-                    break;
+                    Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                            ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
                 }
+                Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.interact(entity, false, Hand.MAIN_HAND));
+                if (sprint)
+                {
+                    Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                            ClientCommandC2SPacket.Mode.START_SPRINTING));
+                }
+                if (sneak)
+                {
+                    Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                            ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+                }
+                mountTimer.reset();
+                break;
             }
         }
     }

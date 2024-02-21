@@ -35,7 +35,7 @@ import java.util.Set;
 /**
  *
  *
- * @author Gavin
+ * @author Gavin, linus
  * @since 1.0
  */
 public class VelocityModule extends ToggleModule

@@ -136,14 +136,10 @@ public class JesusModule extends ToggleModule
             }
             if (modeConfig.getValue() == JesusMode.SOLID)
             {
-                if (!strictConfig.getValue())
-                {
-                    floatOffset = floatOffset == 0.05 ? 0.0 : 0.05;
-                }
                 if (isInFluid() || mc.player.fallDistance > 3.0f
                         || mc.player.isSneaking())
                 {
-                    floatOffset = 0.0;
+                    // floatOffset = 0.0;
                 }
                 if (!mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed())
                 {
@@ -237,6 +233,10 @@ public class JesusModule extends ToggleModule
                 && isOnFluid() && mc.player.fallDistance <= 3.0f)
         {
             double y = packet.getY(mc.player.getY());
+            if (!strictConfig.getValue())
+            {
+                floatOffset = mc.player.age % 2 == 0 ? 0.0 : 0.05;
+            }
             ((AccessorPlayerMoveC2SPacket) packet).hookSetY(y - floatOffset);
             if (strictConfig.getValue())
             {

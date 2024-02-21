@@ -8,11 +8,15 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.PlaceBlockModule;
 import com.caspian.client.api.module.ToggleModule;
+import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.ScreenOpenEvent;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.init.Modules;
+import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DeathScreen;
@@ -49,12 +53,19 @@ public class SurroundModule extends PlaceBlockModule
             "Places on visible sides only", false);
     Config<Boolean> attackConfig = new BooleanConfig("Attack", "Attacks " +
             "crystals in the way of surround", true);
+    Config<Boolean> centerConfig = new BooleanConfig("Center", "Centers the" +
+            " player before placing blocks", false);
     Config<Boolean> extendConfig = new BooleanConfig("Extend", "Extends " +
-            "surround if the player is not in the center of a block", true);
+            "surround if the player is not in the center of a block", true,
+            () -> !centerConfig.getValue());
     Config<Boolean> floorConfig = new BooleanConfig("Floor", "Creates a " +
             "floor for the surround if there is none", false);
+    Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The" +
+            " number of blocks to place per tick", 1, 2, 5);
     Config<Boolean> jumpDisableConfig = new BooleanConfig("AutoDisable",
             "Disables after moving out of the hole", true);
+    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders" +
+            " block placements of the surround", false);
     //
     private List<BlockPos> surround = new ArrayList<>();
     private final List<BlockPos> placements = new ArrayList<>();
@@ -75,10 +86,18 @@ public class SurroundModule extends PlaceBlockModule
     @Override
     public void onEnable()
     {
-        if (mc.player != null)
+        if (mc.player == null)
         {
-            prevY = mc.player.getY();
+            return;
         }
+        if (centerConfig.getValue())
+        {
+            double x = Math.floor(mc.player.getX()) + 0.5;
+            double z = Math.floor(mc.player.getZ()) + 0.5;
+            Managers.POSITION.setPositionXZ(x, z);
+        }
+        // mc.inGameHud.getChatHud().addMessage();
+        prevY = mc.player.getY();
     }
 
     /**
@@ -166,7 +185,7 @@ public class SurroundModule extends PlaceBlockModule
                 }
                 for (Entity entity : box)
                 {
-                    entities.addAll(getAllInBox(entity.getBoundingBox()));
+                    entities.addAll(getAllInBox(entity.getBoundingBox(), pos));
                 }
             }
         }
@@ -210,17 +229,24 @@ public class SurroundModule extends PlaceBlockModule
     }
 
     /**
+     * Returns a {@link List} of all the {@link BlockPos} positions in the
+     * given {@link Box} that match the player position level
      *
      * @param box
+     * @param pos The player position
      * @return
      */
-    private List<BlockPos> getAllInBox(Box box)
+    private List<BlockPos> getAllInBox(Box box, BlockPos pos)
     {
-
-        double x = Math.ceil(box.maxX - box.minX);
-        double z = Math.ceil(box.maxZ - box.minZ);
-
-
+        final List<BlockPos> intersections = new ArrayList<>();
+        for (int x = (int) Math.floor(box.minX); x < Math.ceil(box.maxX); x++)
+        {
+            for (int z = (int) Math.floor(box.minZ); z < Math.ceil(box.maxZ); z++)
+            {
+                intersections.add(new BlockPos(x, pos.getY(), z));
+            }
+        }
+        return intersections;
     }
 
     /**
@@ -258,4 +284,22 @@ public class SurroundModule extends PlaceBlockModule
         }
     }
 
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onRenderWorld(RenderWorldEvent event)
+    {
+        if (renderConfig.getValue())
+        {
+            for (BlockPos pos : getSurroundPositions(mc.player.getBlockPos()))
+            {
+                RenderManager.renderBox(event.getMatrices(),
+                        pos, Modules.COLORS.getRGB(60));
+            }
+        }
+    }
+
+    // Burrow support???
 }

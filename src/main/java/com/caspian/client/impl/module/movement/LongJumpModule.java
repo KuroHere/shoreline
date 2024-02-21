@@ -1,6 +1,7 @@
 package com.caspian.client.impl.module.movement;
 
 import com.caspian.client.api.config.Config;
+import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.EnumConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.event.EventStage;
@@ -34,6 +35,8 @@ public class LongJumpModule extends ToggleModule
             "long jump", JumpMode.NORMAL, JumpMode.values());
     Config<Float> boostConfig = new NumberConfig<>("Boost", "The jump boost " +
             "speed", 0.1f, 4.5f, 10.0f, () -> modeConfig.getValue() == JumpMode.NORMAL);
+    Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable", "Automatically" +
+            " disables when rubberband is detected", true);
     //
     private int stage;
     private double distance;
@@ -390,7 +393,8 @@ public class LongJumpModule extends ToggleModule
         {
             return;
         }
-        if (event.getPacket() instanceof PlayerPositionLookS2CPacket)
+        if (event.getPacket() instanceof PlayerPositionLookS2CPacket
+                && autoDisableConfig.getValue())
         {
             disable();
         }
@@ -422,7 +426,7 @@ public class LongJumpModule extends ToggleModule
             d = bb.maxY;
         }
         return player.getY() - d;
-         */
+        */
         return 1.0;
     }
 

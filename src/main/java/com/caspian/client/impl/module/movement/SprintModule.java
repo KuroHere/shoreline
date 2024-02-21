@@ -50,31 +50,32 @@ public class SprintModule extends ToggleModule
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (event.getStage() == EventStage.PRE)
+        if (event.getStage() != EventStage.PRE)
         {
-            if (!Managers.POSITION.isSprinting()
-                    && !Managers.POSITION.isSneaking()
-                    && MovementUtil.isInputtingMovement()
-                    && !mc.player.isRiding()
-                    && !mc.player.isTouchingWater()
-                    && !mc.player.isInLava()
-                    && !mc.player.isHoldingOntoLadder()
-                    && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
-                    && mc.player.getHungerManager().getFoodLevel() > 6.0F)
+            return;
+        }
+        if (!Managers.POSITION.isSprinting()
+                && !Managers.POSITION.isSneaking()
+                && MovementUtil.isInputtingMovement()
+                && !mc.player.isRiding()
+                && !mc.player.isTouchingWater()
+                && !mc.player.isInLava()
+                && !mc.player.isHoldingOntoLadder()
+                && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
+                && mc.player.getHungerManager().getFoodLevel() > 6.0F)
+        {
+            switch (modeConfig.getValue())
             {
-                switch (modeConfig.getValue())
+                case LEGIT ->
                 {
-                    case LEGIT ->
+                    if (mc.player.input.hasForwardMovement()
+                            && (!mc.player.horizontalCollision
+                            || mc.player.collidedSoftly))
                     {
-                        if (mc.player.input.hasForwardMovement()
-                                && (!mc.player.horizontalCollision
-                                || mc.player.collidedSoftly))
-                        {
-                            mc.player.setSprinting(true);
-                        }
+                        mc.player.setSprinting(true);
                     }
-                    case RAGE -> mc.player.setSprinting(true);
                 }
+                case RAGE -> mc.player.setSprinting(true);
             }
         }
     }

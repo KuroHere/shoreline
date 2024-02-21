@@ -3460,7 +3460,7 @@ public class AutoCrystalModule extends RotationModule
          *
          * @return A valid interact direction
          *
-         * @see DirectionChecks#getPlaceDirectionsNCP(int, int, int, int, int, int, boolean)
+         * @see com.caspian.client.api.manager.anticheat.NCPManager#getPlaceDirectionsNCP(int, int, int, int, int, int, boolean)
          */
         public Direction getInteractDirection()
         {
@@ -3482,7 +3482,7 @@ public class AutoCrystalModule extends RotationModule
                     int z = blockPos.getZ();
                     if (x != dx && y != dy && z != dz)
                     {
-                        Set<Direction> dirs = DirectionChecks.getPlaceDirectionsNCP(
+                        Set<Direction> dirs = Managers.NCP.getPlaceDirectionsNCP(
                                 x, y, z, dx, dy, dz, exposedDirectionConfig.getValue());
                         if (!dirs.isEmpty())
                         {

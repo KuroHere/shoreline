@@ -46,6 +46,7 @@ public class Modules
     public static AutoArmorModule AUTO_ARMOR;
     public static AutoBowReleaseModule AUTO_BOW_RELEASE;
     public static AutoCrystalModule AUTO_CRYSTAL;
+    public static AutoLogModule AUTO_LOG;
     public static AutoPotModule AUTO_POT;
     public static AutoTotemModule AUTO_TOTEM;
     public static BlockLagModule BLOCK_LAG;
@@ -187,6 +188,7 @@ public class Modules
                     "autobowrelease-module");
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
                     "autocrystal-module");
+            AUTO_LOG = (AutoLogModule) getRegisteredModule("autolog-module");
             AUTO_POT = (AutoPotModule) getRegisteredModule("autopot-module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(
                     "autototem-module");

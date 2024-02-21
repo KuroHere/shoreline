@@ -7,6 +7,9 @@ import com.caspian.client.util.Globals;
 import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.string.StringUtil;
 
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * General client feature that will appear in the ClickGui. Module have a
  * unique name which is also used as the module identifier. Modules are
@@ -32,6 +35,7 @@ public class Module extends ConfigContainer implements Globals
     // to the user.
     private final ModuleCategory category;
     //
+    public static final Random RANDOM = ThreadLocalRandom.current();
     public static final String MODULE_ID_FORMAT = "%s-module";
 
     /**

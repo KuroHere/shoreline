@@ -19,7 +19,7 @@ import java.util.UUID;
 public class AntiSpamModule extends ToggleModule
 {
     //
-    private final Map<UUID, String> lastPlayerMessages = new HashMap<>();
+    private final Map<UUID, String> messages = new HashMap<>();
 
     /**
      *
@@ -45,18 +45,18 @@ public class AntiSpamModule extends ToggleModule
         {
             final UUID sender = packet.sender();
             final String chatMessage = packet.body().content();
-            String lastMessage = lastPlayerMessages.get(sender);
+            String lastMessage = messages.get(sender);
             if (chatMessage.equalsIgnoreCase(lastMessage))
             {
                 event.cancel();
             }
             else if (lastMessage != null)
             {
-                lastPlayerMessages.replace(sender, chatMessage);
+                messages.replace(sender, chatMessage);
             }
             else
             {
-                lastPlayerMessages.put(sender, chatMessage);
+                messages.put(sender, chatMessage);
             }
         }
     }

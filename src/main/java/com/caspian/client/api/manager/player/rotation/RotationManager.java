@@ -48,14 +48,15 @@ public class RotationManager implements Globals
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
-        if (mc.player != null && mc.world != null)
+        if (mc.player == null || mc.world == null)
         {
-            if (event.getPacket() instanceof PlayerMoveC2SPacket packet
-                    && packet.changesLook())
-            {
-                yaw = packet.getYaw(yaw);
-                pitch = packet.getPitch(pitch);
-            }
+            return;
+        }
+        if (event.getPacket() instanceof PlayerMoveC2SPacket packet
+                && packet.changesLook())
+        {
+            yaw = packet.getYaw(yaw);
+            pitch = packet.getPitch(pitch);
         }
     }
 
