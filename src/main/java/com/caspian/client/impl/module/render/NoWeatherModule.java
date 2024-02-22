@@ -10,6 +10,7 @@ import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.config.ConfigUpdateEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.util.string.EnumFormatter;
 import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 
@@ -36,6 +37,16 @@ public class NoWeatherModule extends ToggleModule
     public NoWeatherModule()
     {
         super("NoWeather", "Prevents weather rendering", ModuleCategory.RENDER);
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public String getModuleData()
+    {
+        return EnumFormatter.formatEnum(weatherConfig.getValue());
     }
 
     /**

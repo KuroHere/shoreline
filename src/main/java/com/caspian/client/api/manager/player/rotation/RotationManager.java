@@ -3,12 +3,12 @@ package com.caspian.client.api.manager.player.rotation;
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.RotationModule;
+import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.render.entity.RenderPlayerEvent;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.Globals;
 import com.caspian.client.util.math.timer.CacheTimer;
-import com.caspian.client.util.math.timer.TickTimer;
 import com.caspian.client.util.math.timer.Timer;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.MathHelper;
@@ -28,7 +28,14 @@ public class RotationManager implements Globals
     //
     private RotationRequest rotation;
     private final PriorityQueue<RotationRequest> requests =
-            new PriorityQueue<>();
+            new PriorityQueue<>((r1, r2) ->
+            {
+                if (r1.getPriority() == r2.getPriority())
+                {
+                    return Long.compare(r1.getTime(), r2.getTime());
+                }
+                return Integer.compare(r1.getPriority(), r2.getPriority());
+            });
     private final Timer rotateTimer = new CacheTimer();
 
     /**
@@ -57,6 +64,22 @@ public class RotationManager implements Globals
         {
             yaw = packet.getYaw(yaw);
             pitch = packet.getPitch(pitch);
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onMovementPackets(MovementPacketsEvent event)
+    {
+        rotation = getRotationActive();
+        if (rotation != null)
+        {
+            event.cancel();
+            event.setYaw(rotation.getYaw());
+            event.setPitch(rotation.getPitch());
         }
     }
 
@@ -147,6 +170,7 @@ public class RotationManager implements Globals
         }
         mc.player.setYaw(yaw);
         mc.player.setHeadYaw(yaw);
+        mc.player.setBodyYaw(yaw);
         mc.player.setPitch(pitch);
     }
 
@@ -157,7 +181,7 @@ public class RotationManager implements Globals
      */
     public boolean isRotating()
     {
-        return !rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks() * 50);
+        return !rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks() * 50.0f);
     }
 
     /**
@@ -165,23 +189,16 @@ public class RotationManager implements Globals
      *
      * @return
      */
-    public RotationRequest getCurrentRotation()
+    public RotationRequest getRotationActive()
     {
-        if (requests.size() <= 1 && isRotating())
+        if (requests.isEmpty())
         {
-            return rotation;
+            return null;
         }
-        else if (requests.size() > 1)
-        {
-            rotateTimer.reset();
-            rotation = requests.poll();
-            return rotation;
-        }
-        return null;
+        return requests.poll();
     }
 
     /**
-     *
      *
      * @return
      */
@@ -196,7 +213,6 @@ public class RotationManager implements Globals
 
     /**
      *
-     *
      * @return
      */
     public float getYaw()
@@ -205,7 +221,6 @@ public class RotationManager implements Globals
     }
 
     /**
-     *
      *
      * @return
      */

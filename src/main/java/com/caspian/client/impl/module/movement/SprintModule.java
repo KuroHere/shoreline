@@ -39,7 +39,7 @@ public class SprintModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }

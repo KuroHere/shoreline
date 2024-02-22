@@ -122,7 +122,7 @@ public class AutoTotemModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return Integer.toString(totems);
     }
@@ -235,7 +235,7 @@ public class AutoTotemModule extends ToggleModule
                     }
                     if (lethalConfig.getValue())
                     {
-                        int fall = getFallDamage(mc.player.fallDistance);
+                        int fall = computeFallDamage(mc.player.fallDistance);
                         if (health + 0.5 <= fall)
                         {
                             offhand = Items.TOTEM_OF_UNDYING;
@@ -486,7 +486,7 @@ public class AutoTotemModule extends ToggleModule
      * @param fallDistance
      * @return
      */
-    private int getFallDamage(float fallDistance)
+    private int computeFallDamage(float fallDistance)
     {
         StatusEffectInstance statusEffectInstance = mc.player.getStatusEffect(StatusEffects.JUMP_BOOST);
         float f = statusEffectInstance == null ? 0.0f :

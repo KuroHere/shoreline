@@ -12,6 +12,7 @@ import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.player.MovementUtil;
@@ -59,7 +60,7 @@ public class LongJumpModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
@@ -157,7 +158,7 @@ public class LongJumpModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         // Direkt LongJump
         if (event.getStage() == EventStage.PRE

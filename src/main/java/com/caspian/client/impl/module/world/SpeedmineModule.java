@@ -93,7 +93,7 @@ public class SpeedmineModule extends RotationModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(damage);
@@ -180,18 +180,18 @@ public class SpeedmineModule extends RotationModule
                         Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                                 PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
                                 mining, direction));
-                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                                PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
-                                mining, Direction.UP));
                         if (fastConfig.getValue())
                         {
                             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
+                                    mining, Direction.UP));
+                            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                                     PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
                                     mining, direction));
+                            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                                    PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                                    mining, direction));
                         }
-                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                                PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                                mining, direction));
                         if (swapConfig.getValue() == Swap.SILENT)
                         {
                             if (prev != -1)

@@ -10,6 +10,7 @@ import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.impl.event.render.entity.RenderPlayerEvent;
 import com.caspian.client.init.Managers;
 import net.minecraft.util.math.Vec2f;
@@ -69,7 +70,7 @@ public class AntiAimModule extends RotationModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (event.getStage() != EventStage.PRE)
         {

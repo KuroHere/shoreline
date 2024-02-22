@@ -130,6 +130,7 @@ public class Modules
     public static ViewClipModule VIEW_CLIP;
     // public static ViewModelModule VIEW_MODEL;
     // World
+    public static AntiInteractModule ANTI_INTERACT;
     public static AvoidModule AVOID;
     public static FastDropModule FAST_DROP;
     public static FastPlaceModule FAST_PLACE;
@@ -298,6 +299,8 @@ public class Modules
                     "viewclip-module");
             // VIEW_MODEL = (ViewModelModule) getRegisteredModule(
             //        "viewmodel-module");
+            ANTI_INTERACT = (AntiInteractModule) getRegisteredModule(
+                    "antiinteract-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");
             FAST_DROP = (FastDropModule) getRegisteredModule("fastdrop-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule(

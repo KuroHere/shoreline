@@ -14,6 +14,7 @@ import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
@@ -94,11 +95,11 @@ public class AuraModule extends RotationModule
     Config<Boolean> swordCheckConfig = new BooleanConfig("Sword-Check",
             "Checks if a weapon is in the hand before attacking", true);
     // ROTATE
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
-            "before attacking", false);
     Config<Vector> hitVectorConfig = new EnumConfig<>("HitVector", "The " +
             "vector to aim for when attacking entities", Vector.FEET,
             Vector.values());
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
+            "before attacking", false);
     Config<Boolean> strictRotateConfig = new BooleanConfig("RotateStrict",
             "Rotates yaw over multiple ticks to prevent certain rotation  " +
                     "flags in NCP", false, () -> rotateConfig.getValue());
@@ -156,7 +157,7 @@ public class AuraModule extends RotationModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
@@ -176,7 +177,7 @@ public class AuraModule extends RotationModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (event.getStage() != EventStage.PRE)
         {
@@ -184,7 +185,8 @@ public class AuraModule extends RotationModule
         }
         if (Modules.AUTO_CRYSTAL.isAttacking()
                 || Modules.AUTO_CRYSTAL.isPlacing()
-                || Modules.AUTO_CRYSTAL.isRotating())
+                || Modules.AUTO_CRYSTAL.isRotating()
+                || isRotationBlocked())
         {
             return;
         }
@@ -205,13 +207,18 @@ public class AuraModule extends RotationModule
         {
             return;
         }
+        if (rotateConfig.getValue())
+        {
+            float[] rot = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+                    getAttackRotateVec(entityTarget));
+            setRotation(rot[0], rot[1]);
+        }
         if (attackDelayConfig.getValue())
         {
             float ticks = 20.0f - Managers.TICK.getTickSync(tpsSyncConfig.getValue());
             float progress = mc.player.getAttackCooldownProgress(ticks);
-            if (progress >= 1.0f)
+            if (progress >= 1.0f && attackTarget(entityTarget))
             {
-                attackTarget(entityTarget);
                 mc.player.resetLastAttackedTicks();
             }
         }
@@ -219,13 +226,13 @@ public class AuraModule extends RotationModule
         {
             if (randomDelay < 0)
             {
-                randomDelay = RANDOM.nextLong((long)
-                        (randomSpeedConfig.getValue() * 10.0f + 1.0f));
+                randomDelay = (long) RANDOM.nextFloat(
+                        (randomSpeedConfig.getValue() * 10.0f) + 1.0f);
             }
-            float delay = attackSpeedConfig.getValue() * 50.0f + randomDelay;
-            if (attackTimer.passed(2000.0f - delay))
+            float delay = (attackSpeedConfig.getValue() * 50.0f) + randomDelay;
+            if (attackTimer.passed(2000.0f - delay)
+                    && attackTarget(entityTarget))
             {
-                attackTarget(entityTarget);
                 randomDelay = -1;
                 attackTimer.reset();
             }
@@ -272,13 +279,14 @@ public class AuraModule extends RotationModule
     /**
      *
      * @param entity
+     * @return
      */
-    private void attackTarget(Entity entity)
+    private boolean attackTarget(Entity entity)
     {
         if (mc.options.useKey.isPressed() || mc.options.attackKey.isPressed())
         {
             autoSwapTimer.reset();
-            return;
+            return false;
         }
         // END PRE
         boolean sword = mc.player.getMainHandStack().getItem() instanceof SwordItem;
@@ -306,7 +314,9 @@ public class AuraModule extends RotationModule
                 Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             postAttackTarget(entity);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -383,18 +393,15 @@ public class AuraModule extends RotationModule
             Managers.NETWORK.sendSequencedPacket(s ->
                     new PlayerInteractItemC2SPacket(Hand.OFF_HAND, s));
         }
-        if (stopSprintConfig.getValue())
+        if (sneaking)
         {
-            if (sneaking)
-            {
-                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                        ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
-            }
-            if (sprinting)
-            {
-                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                        ClientCommandC2SPacket.Mode.START_SPRINTING));
-            }
+            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                    ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+        }
+        if (sprinting)
+        {
+            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                    ClientCommandC2SPacket.Mode.START_SPRINTING));
         }
         if (Modules.CRITICALS.isEnabled() && critTimer.passed(500))
         {
@@ -409,8 +416,8 @@ public class AuraModule extends RotationModule
                 return;
             }
             Modules.CRITICALS.preAttackPacket();
-            mc.player.addCritParticles(entity);
             critTimer.reset();
+            mc.player.addCritParticles(entity);
         }
     }
 
@@ -559,6 +566,18 @@ public class AuraModule extends RotationModule
     public boolean isHoldingSword()
     {
         return !swordCheckConfig.getValue() || mc.player.getMainHandStack().getItem() instanceof SwordItem;
+    }
+
+    private Vec3d getAttackRotateVec(Entity entity)
+    {
+        Vec3d feetPos = entity.getPos();
+        return switch (hitVectorConfig.getValue())
+        {
+            case FEET -> feetPos;
+            case TORSO -> feetPos.add(0.0, entity.getHeight() / 2.0f, 0.0);
+            case EYES -> feetPos.add(0.0,
+                    entity.getStandingEyeHeight(), 0.0);
+        };
     }
 
     /**

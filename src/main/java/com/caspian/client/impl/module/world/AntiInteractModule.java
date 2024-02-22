@@ -9,7 +9,9 @@ import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.network.InteractBlockEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.util.world.SneakBlocks;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.math.BlockPos;
@@ -48,8 +50,8 @@ public class AntiInteractModule extends ToggleModule
     public void onInteractBlock(InteractBlockEvent event)
     {
         BlockPos pos = event.getHitResult().getBlockPos();
-        Block block = mc.world.getBlockState(pos).getBlock();
-        if (((ListConfig<?>) blocksConfig).contains(block))
+        BlockState state = mc.world.getBlockState(pos);
+        if (cancelInteract(state.getBlock()))
         {
             event.cancel();
             if (packetsConfig.getValue())
@@ -76,11 +78,17 @@ public class AntiInteractModule extends ToggleModule
                 && packetsConfig.getValue())
         {
             BlockPos pos = packet.getBlockHitResult().getBlockPos();
-            Block block = mc.world.getBlockState(pos).getBlock();
-            if (((ListConfig<?>) blocksConfig).contains(block))
+            BlockState state = mc.world.getBlockState(pos);
+            if (cancelInteract(state.getBlock()))
             {
                 event.cancel();
             }
         }
+    }
+
+    private boolean cancelInteract(Block block)
+    {
+        return SneakBlocks.isSneakBlock(block)
+                && ((ListConfig<?>) blocksConfig).contains(block);
     }
 }

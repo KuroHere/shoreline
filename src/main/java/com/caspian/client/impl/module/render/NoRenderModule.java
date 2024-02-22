@@ -80,6 +80,8 @@ public class NoRenderModule extends ToggleModule
             "Prevents unicode characters from being rendered in chat", false);
     Config<Boolean> worldBorderConfig = new BooleanConfig("WorldBorder",
             "Prevents world border from rendering", false);
+    Config<Boolean> interpolationConfig = new BooleanConfig("Interpolation",
+            "Entities will be rendered at their server positions", false);
     Config<FogRender> fogConfig = new EnumConfig<>("Fog", "Prevents fog from " +
             "rendering in the world", FogRender.OFF, FogRender.values());
     Config<ItemRender> itemsConfig = new EnumConfig<>("Items",

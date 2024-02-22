@@ -45,7 +45,7 @@ public class TickShiftModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return String.valueOf(packets);
     }

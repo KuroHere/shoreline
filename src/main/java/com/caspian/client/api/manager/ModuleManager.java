@@ -140,6 +140,7 @@ public class ModuleManager
                 new ViewClipModule(),
                 // new ViewModelModule(),
                 // World
+                new AntiInteractModule(),
                 new AvoidModule(),
                 new FastDropModule(),
                 new FastPlaceModule(),

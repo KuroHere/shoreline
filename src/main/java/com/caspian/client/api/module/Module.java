@@ -5,7 +5,6 @@ import com.caspian.client.api.config.ConfigContainer;
 import com.caspian.client.api.config.Serializable;
 import com.caspian.client.util.Globals;
 import com.caspian.client.util.chat.ChatUtil;
-import com.caspian.client.util.string.StringUtil;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -109,7 +108,7 @@ public class Module extends ConfigContainer implements Globals
      *
      * @return
      */
-    public String getMetaData()
+    public String getModuleData()
     {
         return "ARRAYLIST_INFO";
     }

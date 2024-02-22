@@ -7,6 +7,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.world.EntityUtil;
@@ -50,7 +51,7 @@ public class BowAimModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (event.getStage() != EventStage.PRE)
         {

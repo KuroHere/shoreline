@@ -17,6 +17,7 @@ import com.caspian.client.impl.event.ScreenOpenEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
@@ -599,7 +600,7 @@ public class AutoCrystalModule extends RotationModule
      * @return The crystal latency in ms
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return String.format("%dms", (int) getLatency(breakTimes));
     }
@@ -723,7 +724,7 @@ public class AutoCrystalModule extends RotationModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (mc.player != null && mc.world != null)
         {

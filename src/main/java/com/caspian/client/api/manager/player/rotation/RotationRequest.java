@@ -8,7 +8,7 @@ import com.caspian.client.api.module.RotationModule;
  * @author linus, bon55
  * @since 1.0
  */
-public class RotationRequest implements Comparable<RotationRequest>
+public class RotationRequest
 {
     //
     private final RotationModule requester;
@@ -51,33 +51,12 @@ public class RotationRequest implements Comparable<RotationRequest>
         this(requester, RotationPriority.NORMAL, yaw, pitch);
     }
 
-    /**
-     * Compares this object with the specified object for order.  Returns a
-     * negative integer, zero, or a positive integer as this object is less
-     * than, equal to, or greater than the specified object.
-     *
-     * @return a negative integer, zero, or a positive integer as this object
-     * is less than, equal to, or greater than the specified object.
-     * @throws NullPointerException if the specified object is null
-     * @throws ClassCastException   if the specified object's type prevents it
-     */
-    @Override
-    public int compareTo(RotationRequest other)
-    {
-        if (priority == other.getPriority())
-        {
-            return Long.compare(time, other.getTime());
-        }
-        return Integer.compare(priority, other.getPriority());
-    }
-
     public RotationModule getRequester()
     {
         return requester;
     }
 
     /**
-     *
      *
      * @return
      */

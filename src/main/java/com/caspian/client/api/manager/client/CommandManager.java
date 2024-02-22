@@ -34,7 +34,7 @@ public class CommandManager implements Globals
     //
     private final List<Command> commands = new ArrayList<>();
     //
-    private StringBuilder chat = new StringBuilder();
+    private StringBuilder chatAutocomplete = new StringBuilder();
     // Command prefix, used to identify a command in the chat
     private String prefix = ".";
     private int prefixKey = GLFW.GLFW_KEY_PERIOD;
@@ -85,46 +85,47 @@ public class CommandManager implements Globals
     @EventListener
     public void onChatInput(ChatInputEvent event)
     {
-        chat = new StringBuilder();
+        chatAutocomplete = new StringBuilder();
         final String text = event.getChatText().trim();
-        if (text.startsWith(prefix))
+        if (!text.startsWith(prefix))
         {
-            String literal = text.substring(1);
-            String[] args = literal.split(" ");
-            //
-            for (Command command : getCommands())
+            return;
+        }
+        String literal = text.substring(1);
+        String[] args = literal.split(" ");
+        //
+        for (Command command : getCommands())
+        {
+            String name = command.getName();
+            if (name.equals(args[0]))
             {
-                String name = command.getName();
-                if (name.equals(args[0]))
+                chatAutocomplete.append(args[0]);
+                chatAutocomplete.append(" ");
+                for (int i = 1; i < args.length; i++)
                 {
-                    chat.append(args[0]);
-                    chat.append(" ");
-                    for (int i = 1; i < args.length; i++)
+                    Argument<?> arg = command.getArg(i - 1);
+                    if (arg == null)
                     {
-                        Argument<?> arg = command.getArg(i - 1);
-                        if (arg == null)
-                        {
-                            // ChatUtil.error("Too many arguments!");
-                            break;
-                        }
-                        arg.setLiteral(args[i]);
-                        if (i < args.length - 1)
-                        {
-                            chat.append(arg.getLiteral());
-                        }
-                        else
-                        {
-                            chat.append(arg.getSuggestion());
-                        }
-                        chat.append(" ");
+                        // ChatUtil.error("Too many arguments!");
+                        break;
                     }
-                    break;
+                    arg.setLiteral(args[i]);
+                    if (i < args.length - 1)
+                    {
+                        chatAutocomplete.append(arg.getLiteral());
+                    }
+                    else
+                    {
+                        chatAutocomplete.append(arg.getSuggestion());
+                    }
+                    chatAutocomplete.append(" ");
                 }
-                else if (name.startsWith(args[0]))
-                {
-                    chat.append(command.getName());
-                    break;
-                }
+                break;
+            }
+            else if (name.startsWith(args[0]))
+            {
+                chatAutocomplete.append(command.getName());
+                break;
             }
         }
     }
@@ -159,7 +160,7 @@ public class CommandManager implements Globals
                     try
                     {
                         command.onCommandInput();
-                        chat = new StringBuilder();
+                        chatAutocomplete = new StringBuilder();
                     }
                     catch (ArgumentParseException e)
                     {
@@ -240,7 +241,7 @@ public class CommandManager implements Globals
     public void onChatRender(ChatRenderEvent event)
     {
         mc.textRenderer.drawWithShadow(event.getMatrices(),
-                chat.toString(), event.getX(), event.getY(), 0xff808080);
+                chatAutocomplete.toString(), event.getX(), event.getY(), 0xff808080);
     }
 
     /**

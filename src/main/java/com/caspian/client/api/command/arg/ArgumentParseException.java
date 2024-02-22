@@ -9,9 +9,14 @@ import com.caspian.client.util.chat.ChatUtil;
  * @since 1.0
  *
  * @see Argument
+ * @see RuntimeException
  */
 public class ArgumentParseException extends RuntimeException
 {
+    /**
+     *
+     * @param message
+     */
     public ArgumentParseException(String message)
     {
         super(message);

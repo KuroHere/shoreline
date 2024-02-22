@@ -75,7 +75,7 @@ public class VelocityModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         if (modeConfig.getValue() == VelocityMode.NORMAL)
         {

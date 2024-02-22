@@ -52,7 +52,7 @@ public class EntitySpeedModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(speedConfig.getValue());

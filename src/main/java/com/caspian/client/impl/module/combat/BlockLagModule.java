@@ -20,6 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 /**
  *
@@ -134,9 +135,9 @@ public class BlockLagModule extends PlaceBlockModule
             {
                 Managers.POSITION.setPosition(mc.player.getX(),
                         mc.player.getY() - 1.16610926093821, mc.player.getZ());
+                final Vec3d dist = getLagOffsetVec();
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        mc.player.getX(), mc.player.getY() + getLagOffset(),
-                        mc.player.getZ(), false));
+                        dist.x, dist.y, dist.z, false));
             }
         }
         if (autoDisableConfig.getValue())
@@ -159,8 +160,9 @@ public class BlockLagModule extends PlaceBlockModule
      *
      * @return
      */
-    public double getLagOffset()
+    public Vec3d getLagOffsetVec()
     {
-        return 3.5;
+        return new Vec3d(mc.player.getX(), mc.player.getY() + 3.5,
+                mc.player.getZ());
     }
 }

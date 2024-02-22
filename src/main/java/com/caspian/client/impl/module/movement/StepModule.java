@@ -11,6 +11,7 @@ import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.entity.EntityPositionEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.math.timer.CacheTimer;
@@ -63,7 +64,7 @@ public class StepModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
@@ -87,7 +88,7 @@ public class StepModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (event.getStage() != EventStage.POST)
         {

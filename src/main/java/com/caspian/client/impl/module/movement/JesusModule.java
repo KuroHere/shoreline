@@ -11,6 +11,7 @@ import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.entity.player.PlayerJumpEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.impl.event.world.BlockCollisionEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
@@ -62,7 +63,7 @@ public class JesusModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
@@ -173,7 +174,7 @@ public class JesusModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled())
         {

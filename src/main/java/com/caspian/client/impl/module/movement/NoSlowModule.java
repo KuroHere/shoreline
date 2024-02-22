@@ -45,6 +45,8 @@ public class NoSlowModule extends ToggleModule
             "bypass for ground slowdowns", false);
     Config<Boolean> airStrictConfig = new BooleanConfig("AirStrict",  "Strict" +
             " NCP bypass for air slowdowns", false);
+    Config<Boolean> grimConfig = new BooleanConfig("Grim", "Strict" +
+            " Grim bypass for slowdown", false);
     Config<Boolean> inventoryMoveConfig = new BooleanConfig("InventoryMove",
             "Allows the player to move while in inventories or screens", false);
     Config<Boolean> arrowMoveConfig = new BooleanConfig("ArrowMove", "Allows " +
@@ -220,7 +222,7 @@ public class NoSlowModule extends ToggleModule
     @EventListener
     public void onMovementSlowdown(MovementSlowdownEvent event)
     {
-        final Input input = event.getInput();
+        Input input = event.getInput();
         if (checkSlowed())
         {
             input.movementForward *= 5.0f;
@@ -281,39 +283,36 @@ public class NoSlowModule extends ToggleModule
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
-        if (mc.player != null && mc.world != null)
+        if (mc.player == null || mc.world == null || mc.isInSingleplayer())
         {
-            if (mc.isInSingleplayer())
+            return;
+        }
+        if (event.getPacket() instanceof PlayerMoveC2SPacket packet)
+        {
+            if (strictConfig.getValue() && checkSlowed()
+                    && packet.changesPosition())
             {
-                return;
+                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(0));
+                // Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
+                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
             }
-            if (event.getPacket() instanceof PlayerMoveC2SPacket packet)
+        }
+        else if (event.getPacket() instanceof ClickSlotC2SPacket
+                && strictConfig.getValue())
+        {
+            if (mc.player.isUsingItem())
             {
-                if (strictConfig.getValue() && checkSlowed()
-                        && packet.changesPosition())
-                {
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(0));
-                    // Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
-                }
+                mc.player.stopUsingItem();
             }
-            else if (event.getPacket() instanceof ClickSlotC2SPacket
-                    && strictConfig.getValue())
+            if (sneaking || Managers.POSITION.isSneaking())
             {
-                if (mc.player.isUsingItem())
-                {
-                    mc.player.stopUsingItem();
-                }
-                if (sneaking || Managers.POSITION.isSneaking())
-                {
-                    Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                            ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-                }
-                if (Managers.POSITION.isSprinting())
-                {
-                    Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                            ClientCommandC2SPacket.Mode.STOP_SPRINTING));
-                }
+                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                        ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            }
+            if (Managers.POSITION.isSprinting())
+            {
+                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                        ClientCommandC2SPacket.Mode.STOP_SPRINTING));
             }
         }
     }
