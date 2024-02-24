@@ -54,6 +54,20 @@ public class ClickGuiModule extends ToggleModule
 
     /**
      *
+     */
+    @Override
+    public void onDisable()
+    {
+        if (mc.player == null || mc.world == null)
+        {
+            toggle();
+            return;
+        }
+        mc.player.closeScreen();
+    }
+
+    /**
+     *
      *
      * @return
      */

@@ -90,6 +90,10 @@ public class AutoFishModule extends ToggleModule
         if (mc.currentScreen == null || mc.currentScreen instanceof ChatScreen
                 || openInventoryConfig.getValue())
         {
+            if (mc.player.getMainHandStack().getItem() != Items.FISHING_ROD)
+            {
+                return;
+            }
             FishingBobberEntity fishHook = mc.player.fishHook;
             if ((fishHook == null || fishHook.getHookedEntity() != null)
                     && autoCastTicks <= 0)

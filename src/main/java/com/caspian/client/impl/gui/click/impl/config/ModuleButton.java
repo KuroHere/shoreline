@@ -11,6 +11,7 @@ import com.caspian.client.init.Modules;
 import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
 
+import java.awt.*;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -85,6 +86,11 @@ public class ModuleButton extends Button
             {
                 configComponents.add(new BindButton(frame,
                         (Config<Macro>) config, x, y));
+            }
+            else if (config.getValue() instanceof Color)
+            {
+                configComponents.add(new ColorButton(frame,
+                        (Config<Color>) config, x, y));
             }
         }
         open = false;

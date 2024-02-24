@@ -74,11 +74,13 @@ public class Modules
     public static AntiBookBanModule ANTI_BOOK_BAN;
     public static AntiSpamModule ANTI_SPAM;
     public static AutoAcceptModule AUTO_ACCEPT;
+    public static AutoEatModule AUTO_EAT;
     public static AntiVanishModule ANTI_VANISH;
     public static AutoFishModule AUTO_FISH;
     public static AutoMountModule AUTO_MOUNT;
     public static AutoReconnectModule AUTO_RECONNECT;
     public static AutoRespawnModule AUTO_RESPAWN;
+    public static BeaconSelectorModule BEACON_SELECTOR;
     public static ChestAuraModule CHEST_AURA;
     public static FakePlayerModule FAKE_PLAYER;
     public static InvCleanerModule INV_CLEANER;
@@ -228,6 +230,7 @@ public class Modules
             ANTI_SPAM = (AntiSpamModule) getRegisteredModule("antispam-module");
             AUTO_ACCEPT = (AutoAcceptModule) getRegisteredModule(
                     "autoaccept-module");
+            AUTO_EAT = (AutoEatModule) getRegisteredModule("autoeat-module");
             ANTI_VANISH = (AntiVanishModule) getRegisteredModule(
                     "antivanish-module");
             AUTO_FISH = (AutoFishModule) getRegisteredModule("autofish-module");
@@ -236,6 +239,8 @@ public class Modules
                     "autoreconnect-module");
             AUTO_RESPAWN = (AutoRespawnModule) getRegisteredModule(
                     "autorespawn-module");
+            BEACON_SELECTOR = (BeaconSelectorModule) getRegisteredModule(
+                    "beaconselector-module");
             CHEST_AURA = (ChestAuraModule) getRegisteredModule("chestaura-module");
             FAKE_PLAYER = (FakePlayerModule) getRegisteredModule(
                     "fakeplayer-module");

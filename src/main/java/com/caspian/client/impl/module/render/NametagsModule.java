@@ -11,11 +11,13 @@ import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.impl.event.render.entity.RenderLabelEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.mixin.accessor.AccessorTextRenderer;
 import com.caspian.client.util.world.FakePlayerEntity;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
@@ -23,6 +25,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -160,17 +163,31 @@ public class NametagsModule extends ToggleModule
         VertexConsumerProvider.Immediate vertexConsumers =
                 mc.getBufferBuilders().getEntityVertexConsumers();
         mc.textRenderer.draw(info, -width, 0.0f, getNametagColor(entity),
-                true, matrices.peek().getPositionMatrix(), vertexConsumers,
+                false, matrices.peek().getPositionMatrix(), vertexConsumers,
                 TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
-        // matrices.translate(1.0, 1.0, 0.0);
-        // mc.textRenderer.draw(matrices, info, -width, 0.0f, 0x151515);
+        matrices.translate(1.0, 1.0, 0.0);
+
+        mc.textRenderer.draw(matrices, Formatting.strip(info), -width, 0.0f, 0x151515);
+        // matrices.translate(0.1f, 0.1f, 0.0f);
+        VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+        drawInternal(info, -width, 0.0f, getNametagColor(entity), false,
+                matrices.peek().getPositionMatrix(), immediate,
+                TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
+        immediate.draw();
         vertexConsumers.draw();
         RenderSystem.disableBlend();
         matrices.pop();
         GL11.glDepthFunc(GL11.GL_LEQUAL);
     }
 
-
+    private void drawInternal(String text, float x, float y, int color, boolean shadow,
+                              Matrix4f matrix, VertexConsumerProvider vertexConsumers,
+                              TextRenderer.TextLayerType layerType, int backgroundColor, int light)
+    {
+        color = TextRenderer.tweakTransparency(color);
+        ((AccessorTextRenderer) mc.textRenderer).hookDrawLayer(text, x, y, color, shadow, matrix,
+                vertexConsumers, layerType, backgroundColor, light);
+    }
 
     /**
      *

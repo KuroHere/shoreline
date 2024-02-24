@@ -3,16 +3,19 @@ package com.caspian.client.impl.module.misc;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
+import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
-import com.caspian.client.impl.event.TickEvent;
-import com.caspian.client.impl.event.network.InventoryEvent;
+import com.caspian.client.impl.event.ScreenOpenEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
+import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.world.BlockUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -41,6 +44,7 @@ public class ChestAuraModule extends RotationModule
             "before opening chests", false);
     //
     private int openDelay;
+    private boolean openedChest;
     //
     private final List<BlockPos> openedBlocks = new ArrayList<>();
 
@@ -59,6 +63,7 @@ public class ChestAuraModule extends RotationModule
     @Override
     public void onEnable()
     {
+        openedChest = false;
         openDelay = 0;
         openedBlocks.clear();
     }
@@ -68,16 +73,25 @@ public class ChestAuraModule extends RotationModule
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
-        if (openDelay > 0 || isRotationBlocked()
-                || onGroundConfig.getValue() && !mc.player.isOnGround())
+        if (event.getStage() != EventStage.PRE)
+        {
+            return;
+        }
+        openDelay--;
+        if (isRotationBlocked() || onGroundConfig.getValue()
+                && !mc.player.isOnGround())
         {
             return;
         }
         // BlockEntity blockEntity = null;
         for (BlockEntity block : BlockUtil.blockEntities())
         {
+            if (openDelay > 0)
+            {
+                break;
+            }
             if (block.getType() != BlockEntityType.CHEST)
             {
                 continue;
@@ -90,9 +104,16 @@ public class ChestAuraModule extends RotationModule
             }
             if (!openedBlocks.contains(pos))
             {
+                if (rotateConfig.getValue())
+                {
+                    float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+                            pos.toCenterPos());
+                    setRotation(rots[0], rots[1]);
+                }
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
                         new BlockHitResult(new Vec3d(pos.getX(), pos.getY(),
                                 pos.getZ()), Direction.UP, pos, false));
+                openedChest = true;
                 BlockState state = block.getCachedState();
                 if (state.contains(ChestBlock.CHEST_TYPE))
                 {
@@ -107,7 +128,6 @@ public class ChestAuraModule extends RotationModule
                 openDelay = delayConfig.getValue().intValue();
             }
         }
-        openDelay--;
     }
 
     /**
@@ -115,11 +135,12 @@ public class ChestAuraModule extends RotationModule
      * @param event
      */
     @EventListener
-    public void onInventory(InventoryEvent event)
+    public void onScreenOpen(ScreenOpenEvent event)
     {
-        if (event.getPacket().getSyncId() == mc.player.currentScreenHandler.syncId)
+        if (openedChest && event.getScreen() instanceof GenericContainerScreen)
         {
             mc.player.closeHandledScreen();
+            openedChest = false;
         }
     }
 }

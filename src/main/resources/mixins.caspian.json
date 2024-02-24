@@ -25,6 +25,7 @@
     "accessor.AccessorPlayerPositionLookS2CPacket",
     "accessor.AccessorPlayerSkinProvider",
     "accessor.AccessorTextFieldWidget",
+    "accessor.AccessorTextRenderer",
     "accessor.AccessorWorldRenderer",
     "block.MixinBlock",
     "block.MixinSlimeBlock",

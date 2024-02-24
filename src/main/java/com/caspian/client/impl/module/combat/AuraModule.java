@@ -185,7 +185,7 @@ public class AuraModule extends RotationModule
         }
         if (Modules.AUTO_CRYSTAL.isAttacking()
                 || Modules.AUTO_CRYSTAL.isPlacing()
-                || Modules.AUTO_CRYSTAL.isRotating()
+                || Modules.SURROUND.isPlacing()
                 || isRotationBlocked())
         {
             return;
@@ -283,7 +283,8 @@ public class AuraModule extends RotationModule
      */
     private boolean attackTarget(Entity entity)
     {
-        if (mc.options.useKey.isPressed() || mc.options.attackKey.isPressed())
+        if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
+                || mc.options.attackKey.isPressed())
         {
             autoSwapTimer.reset();
             return false;

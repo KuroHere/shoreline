@@ -77,6 +77,7 @@ public class RotationManager implements Globals
         rotation = getRotationActive();
         if (rotation != null)
         {
+            rotateTimer.reset();
             event.cancel();
             event.setYaw(rotation.getYaw());
             event.setPitch(rotation.getPitch());
@@ -91,10 +92,11 @@ public class RotationManager implements Globals
     @EventListener
     public void onRenderPlayer(RenderPlayerEvent event)
     {
-        if (event.getEntity() == mc.player && rotation != null)
+        if (event.getEntity() == mc.player)
         {
-            event.setYaw(rotation.getYaw());
-            event.setPitch(rotation.getPitch());
+            // Match packet server rotations
+            event.setYaw(getWrappedYaw());
+            event.setPitch(getPitch());
             event.cancel();
         }
     }
