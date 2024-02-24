@@ -18,13 +18,11 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterials;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.TreeSet;
 
 /**
  *
@@ -83,6 +81,32 @@ public class AutoArmorModule extends ToggleModule
         chestplate.clear();
         leggings.clear();
         boots.clear();
+        for (int j = 9; j < 45; j++)
+        {
+            ItemStack stack = mc.player.getInventory().getStack(j);
+            if (stack.isEmpty() || !(stack.getItem() instanceof ArmorItem armor))
+            {
+                continue;
+            }
+            if (noBindingConfig.getValue() && EnchantmentHelper.hasBindingCurse(stack))
+            {
+                continue;
+            }
+            int index = armor.getSlotType().getEntitySlotId();
+            float dura = (stack.getMaxDamage() - stack.getDamage()) / (float) stack.getMaxDamage();
+            if (dura < minDurabilityConfig.getValue())
+            {
+                continue;
+            }
+            ArmorSlot data = new ArmorSlot(index, j, stack);
+            switch (index)
+            {
+                case 0 -> helmet.add(data);
+                case 1 -> chestplate.add(data);
+                case 2 -> leggings.add(data);
+                case 3 -> boots.add(data);
+            }
+        }
         for (int i = 0; i < 4; i++)
         {
             ItemStack armorStack = mc.player.getInventory().getArmorStack(i);
@@ -95,62 +119,49 @@ public class AutoArmorModule extends ToggleModule
             {
                 continue;
             }
-            for (int j = 9; j < 45; j++)
+            switch (i)
             {
-                ItemStack stack = mc.player.getInventory().getStack(j);
-                if (stack.isEmpty() || !(stack.getItem() instanceof ArmorItem armor))
+                case 0 ->
                 {
-                    continue;
+                    if (!helmet.isEmpty())
+                    {
+                        ArmorSlot helmetSlot = helmet.poll();
+                        swapArmor(helmetSlot.getType(), helmetSlot.getSlot());
+                    }
                 }
-                if (noBindingConfig.getValue() && EnchantmentHelper.hasBindingCurse(stack))
+                case 1 ->
                 {
-                    continue;
+                    if (!chestplate.isEmpty())
+                    {
+                        ArmorSlot chestSlot = chestplate.poll();
+                        swapArmor(chestSlot.getType(), chestSlot.getSlot());
+                    }
                 }
-                int index = armor.getSlotType().getEntitySlotId();
-                if (index != i)
+                case 2 ->
                 {
-                    continue;
+                    if (!leggings.isEmpty())
+                    {
+                        ArmorSlot leggingsSlot = leggings.poll();
+                        swapArmor(leggingsSlot.getType(), leggingsSlot.getSlot());
+                    }
                 }
-                float dura = (stack.getMaxDamage() - stack.getDamage()) / (float) stack.getMaxDamage();
-                if (dura < minDurabilityConfig.getValue())
+                case 3 ->
                 {
-                    continue;
-                }
-                ArmorSlot data = new ArmorSlot(i, j, stack);
-                switch (i)
-                {
-                    case 0 -> helmet.add(data);
-                    case 1 -> chestplate.add(data);
-                    case 2 -> leggings.add(data);
-                    case 3 -> boots.add(data);
+                    if (!boots.isEmpty())
+                    {
+                        ArmorSlot bootsSlot = boots.poll();
+                        swapArmor(bootsSlot.getType(), bootsSlot.getSlot());
+                    }
                 }
             }
-        }
-        if (!helmet.isEmpty())
-        {
-            ArmorSlot helmetSlot = helmet.poll();
-            swapArmor(helmetSlot.getType(), helmetSlot.getSlot());
-        }
-        if (!chestplate.isEmpty())
-        {
-            ArmorSlot chestSlot = chestplate.poll();
-            swapArmor(chestSlot.getType(), chestSlot.getSlot());
-        }
-        if (!leggings.isEmpty())
-        {
-            ArmorSlot leggingsSlot = leggings.poll();
-            swapArmor(leggingsSlot.getType(), leggingsSlot.getSlot());
-        }
-        if (!boots.isEmpty())
-        {
-            ArmorSlot bootsSlot = boots.poll();
-            swapArmor(bootsSlot.getType(), bootsSlot.getSlot());
         }
     }
 
     public void swapArmor(int armorSlot, int slot)
     {
         ItemStack stack = mc.player.getInventory().getArmorStack(armorSlot);
+        //
+        armorSlot = 8 - armorSlot;
         Managers.INVENTORY.pickupSlot(slot);
         boolean rt = !stack.isEmpty();
         Managers.INVENTORY.pickupSlot(armorSlot);
@@ -204,6 +215,7 @@ public class AutoArmorModule extends ToggleModule
         }
     }
 
+    //
     public class ArmorSlot implements Comparable<ArmorSlot>
     {
         //
