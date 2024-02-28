@@ -3,10 +3,12 @@ package com.caspian.client.mixin.render;
 import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.network.ReachEvent;
 import com.caspian.client.impl.event.render.*;
+import com.caspian.client.init.Programs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.resource.ResourceFactory;
 import net.minecraft.util.hit.HitResult;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -18,14 +20,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see GameRenderer
+ * @since 1.0
  */
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer
@@ -36,7 +36,6 @@ public class MixinGameRenderer
     MinecraftClient client;
 
     /**
-     *
      * @param tickDelta
      * @param limitTime
      * @param matrices
@@ -55,7 +54,6 @@ public class MixinGameRenderer
     }
 
     /**
-     *
      * @param matrices
      * @param tickDelta
      * @param ci
@@ -74,7 +72,6 @@ public class MixinGameRenderer
     }
 
     /**
-     *
      * @param floatingItem
      * @param ci
      */
@@ -85,18 +82,16 @@ public class MixinGameRenderer
         RenderFloatingItemEvent renderFloatingItemEvent =
                 new RenderFloatingItemEvent(floatingItem);
         Caspian.EVENT_HANDLER.dispatch(renderFloatingItemEvent);
-        if (renderFloatingItemEvent.isCanceled())
-        {
+        if (renderFloatingItemEvent.isCanceled()) {
             ci.cancel();
         }
     }
 
     /**
-     *
      * @param distortionStrength
      * @param ci
      */
-    @Inject(method = "renderNausea", at = @At(value = "HEAD"),  cancellable = true)
+    @Inject(method = "renderNausea", at = @At(value = "HEAD"), cancellable = true)
     private void hookRenderNausea(float distortionStrength, CallbackInfo ci)
     {
         RenderNauseaEvent renderNauseaEvent = new RenderNauseaEvent();
@@ -108,7 +103,6 @@ public class MixinGameRenderer
     }
 
     /**
-     *
      * @param cir
      */
     @Inject(method = "shouldRenderBlockOutline", at = @At(value = "HEAD"),
@@ -126,7 +120,6 @@ public class MixinGameRenderer
     }
 
     /**
-     *
      * @param tickDelta
      * @param info
      */
@@ -148,7 +141,6 @@ public class MixinGameRenderer
     }
 
     /**
-     *
      * @param d
      * @return
      */
@@ -161,7 +153,6 @@ public class MixinGameRenderer
     }
 
     /**
-     *
      * @param d
      * @return
      */
@@ -176,7 +167,6 @@ public class MixinGameRenderer
 
 
     /**
-     *
      * @param matrices
      * @param tickDelta
      * @param ci
@@ -191,5 +181,14 @@ public class MixinGameRenderer
         {
             ci.cancel();
         }
+    }
+
+    @Inject(method = "loadPrograms", at = @At(value = "INVOKE",
+            target = "Ljava/util/List;add(Ljava/lang/Object;)Z",
+            ordinal = 0),
+            locals = LocalCapture.CAPTURE_FAILHARD)
+    private void initPrograms(ResourceFactory factory, CallbackInfo ci)
+    {
+        Programs.renderInit();
     }
 }
