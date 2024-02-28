@@ -216,6 +216,7 @@ public class StepModule extends ToggleModule
     public enum StepMode
     {
         VANILLA,
-        NORMAL
+        NORMAL,
+        A_A_C
     }
 }

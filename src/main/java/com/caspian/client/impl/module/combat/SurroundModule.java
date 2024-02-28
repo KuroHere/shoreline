@@ -167,7 +167,7 @@ public class SurroundModule extends PlaceBlockModule
                     // This may not work on all servers
                     if (blocksPlaced == 0)
                     {
-                        setRotation(RotationPriority.LOW, rots[0], rots[1]);
+                        setRotation(RotationPriority.SURROUND, rots[0], rots[1]);
                     }
                     else
                     {
@@ -175,7 +175,8 @@ public class SurroundModule extends PlaceBlockModule
                                 rots[0], rots[1], mc.player.isOnGround()));
                     }
                 }
-                placeBlock(targetPos, strictDirectionConfig.getValue());
+                placeBlockResistant(targetPos,
+                        strictDirectionConfig.getValue());
                 blocksPlaced++;
                 shiftDelay = 0;
             }
@@ -301,7 +302,8 @@ public class SurroundModule extends PlaceBlockModule
                     Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
                             rots[0], rots[1], mc.player.isOnGround()));
                 }
-                placeBlock(targetPos, strictDirectionConfig.getValue());
+                placeBlockResistant(targetPos,
+                        strictDirectionConfig.getValue());
                 blocksPlaced++;
                 // shiftDelay = 0;
             }
@@ -321,7 +323,8 @@ public class SurroundModule extends PlaceBlockModule
                     Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
                             rots[0], rots[1], mc.player.isOnGround()));
                 }
-                placeBlock(targetPos, strictDirectionConfig.getValue());
+                placeBlockResistant(targetPos,
+                        strictDirectionConfig.getValue());
                 blocksPlaced++;
                 // shiftDelay = 0;
             }

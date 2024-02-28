@@ -74,7 +74,7 @@ public class MiddleClickModule extends ToggleModule
                     }
                 }
             }
-            else if (mc.crosshairTarget == null && pearlConfig.getValue())
+            else if (pearlConfig.getValue())
             {
                 int slot = -1;
                 for (int i = 0; i < 9; i++)

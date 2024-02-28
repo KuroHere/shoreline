@@ -34,7 +34,7 @@ public class RotationManager implements Globals
                 {
                     return Long.compare(r1.getTime(), r2.getTime());
                 }
-                return Integer.compare(r1.getPriority(), r2.getPriority());
+                return -Integer.compare(r1.getPriority(), r2.getPriority());
             });
     private final Timer rotateTimer = new CacheTimer();
 
@@ -118,6 +118,7 @@ public class RotationManager implements Globals
         {
             if (requester == r.getRequester())
             {
+                // r.setPriority();
                 r.setYaw(yaw);
                 r.setPitch(pitch);
                 return;
@@ -187,7 +188,6 @@ public class RotationManager implements Globals
     }
 
     /**
-     *
      *
      * @return
      */

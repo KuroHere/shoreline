@@ -122,11 +122,12 @@ public class ModuleManager
                 // Render
                 new BlockHighlightModule(),
                 new BreakHighlightModule(),
+                new ChamsModule(),
                 new ESPModule(),
                 new ExtraTabModule(),
                 // new FreecamModule(),
                 new FullbrightModule(),
-                // new HoleESPModule(),
+                new HoleESPModule(),
                 new NameProtectModule(),
                 new NametagsModule(),
                 new NoBobModule(),

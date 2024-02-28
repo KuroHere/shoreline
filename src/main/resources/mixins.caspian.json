@@ -63,6 +63,7 @@
     "render.MixinWorldRenderer",
     "render.block.MixinEnchantingTableBlockEntityRenderer",
     "render.entity.MixinArmorFeatureRenderer",
+    "render.entity.MixinEndCrystalEntityRenderer",
     "render.entity.MixinEntityRenderer",
     "render.entity.MixinFireworkRocketEntityRenderer",
     "render.entity.MixinItemEntityRenderer",

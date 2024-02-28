@@ -67,7 +67,7 @@ public class AutoTotemModule extends ToggleModule
             "GOLDEN_APPLE when trying to use an item", false);
     Config<Boolean> offhandPotionConfig = new BooleanConfig("Offhand-Potions",
             "Uses potions in the inventory before gapples", false);
-    Config<Boolean> hotbarConfig = new BooleanConfig("HotbarItem",
+    Config<Boolean> hotbarConfig = new BooleanConfig("AllowHotbar",
             "Allow offhand items to be taken from the hotbar", false);
     Config<Boolean> noCollisionConfig = new BooleanConfig("CollisionTotem",
             "If the mainhand is already holding the item in the offhand, " +
@@ -75,7 +75,7 @@ public class AutoTotemModule extends ToggleModule
     Config<Boolean> crappleConfig = new BooleanConfig("Crapple",
             "Attempts to take an advantage of a glitch in older versions to " +
                     "fully restore absorption hearts", false);
-    Config<Boolean> crystalCheckConfig = new BooleanConfig("CrystalCheck",
+    Config<Boolean> crystalCheckConfig = new BooleanConfig("Crystal-Check",
             "Checks if a crystal is needed in the offhand", false);
     Config<Boolean> hotbarTotemConfig = new BooleanConfig("HotbarTotem",
             "Attempts to swap totems into the offhand from the hotbar", false);

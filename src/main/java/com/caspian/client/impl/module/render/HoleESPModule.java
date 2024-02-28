@@ -12,7 +12,9 @@ import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.init.Modules;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 
@@ -52,7 +54,7 @@ public class HoleESPModule extends ToggleModule
      */
     public HoleESPModule()
     {
-        super("HoleESP", "Displays nearby blast-resistant holes",
+        super("HoleESP", "Displays nearby blast resistant holes",
                 ModuleCategory.RENDER);
     }
 
@@ -70,7 +72,7 @@ public class HoleESPModule extends ToggleModule
         for (Hole hole : Managers.HOLE.getHoles())
         {
             double dist = hole.squaredDistanceTo(mc.player);
-            if (dist > rangeConfig.getValue() * rangeConfig.getValue())
+            if (dist > getRangeSq())
             {
                 continue;
             }
@@ -79,35 +81,48 @@ public class HoleESPModule extends ToggleModule
             double z = hole.getZ();
             Color color = getHoleColor(hole);
             //
-            Box render;
-            if (voidConfig.getValue() && hole.getSafety() == HoleSafety.VOID)
+            Box render = null;
+            if (hole.getSafety() == HoleSafety.VOID && voidConfig.getValue())
             {
                 render = new Box(x, y, z, x + 1.0, y + 1.0, z + 1.0);
             }
-            else if (doubleConfig.getValue() && hole.isDoubleX())
+            else if (hole.isDoubleX() && doubleConfig.getValue())
             {
                render = new Box(x, y, z, x + 2.0,
                        y + heightConfig.getValue(), z + 1.0);
             }
-            else if (doubleConfig.getValue() && hole.isDoubleZ())
+            else if (hole.isDoubleZ() && doubleConfig.getValue())
             {
                 render = new Box(x, y, z, x + 1.0,
                         y + heightConfig.getValue(), z + 2.0);
             }
-            else if (quadConfig.getValue() && hole.isQuad())
+            else if (hole.isQuad() && quadConfig.getValue())
             {
                 render = new Box(x, y, z, x + 2.0,
                         y + heightConfig.getValue(), z + 2.0);
             }
-            else
+            else if (hole.isStandard())
             {
                 render = new Box(x, y, z, x + 1.0,
                         y + heightConfig.getValue(), z + 1.0);
             }
+            if (render == null)
+            {
+                return;
+            }
+            double alpha = 1.0;
+            if (fadeConfig.getValue())
+            {
+                double fadeRange = rangeConfig.getValue() - 1.0;
+                double fadeRangeSq = fadeRange * fadeRange;
+                alpha = (fadeRangeSq + 9.0 - mc.player.squaredDistanceTo(hole.getX(),
+                        hole.getY(), hole.getZ())) / fadeRangeSq;
+                alpha = MathHelper.clamp(alpha, 0.0, 1.0);
+            }
             RenderManager.renderBox(event.getMatrices(), render,
-                    color.getRGB());
+                    Modules.COLORS.getRGB((int) (alpha * 60.0f)));
             RenderManager.renderBoundingBox(event.getMatrices(), render, 1.5f,
-                    color.getRGB());
+                    Modules.COLORS.getRGB((int) (alpha * 125.0f)));
         }
     }
 
@@ -125,5 +140,15 @@ public class HoleESPModule extends ToggleModule
             case UNBREAKABLE -> bedrockConfig.getValue();
             case VOID -> Color.RED;
         };
+    }
+
+    public double getRangeSq()
+    {
+        return rangeConfig.getValue() * rangeConfig.getValue();
+    }
+
+    public double getRange()
+    {
+        return rangeConfig.getValue();
     }
 }

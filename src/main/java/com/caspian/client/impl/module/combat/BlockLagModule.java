@@ -124,7 +124,7 @@ public class BlockLagModule extends PlaceBlockModule
                     mc.player.getZ(), true));
             Managers.POSITION.setPosition(mc.player.getX(),
                     mc.player.getY() + 1.16610926093821, mc.player.getZ());
-            placeBlock(pos, rotateConfig.getValue());
+            placeBlockResistant(pos);
             if (selfFillConfig.getValue())
             {
                 Managers.POSITION.setPosition(mc.player.getX(),

@@ -1,18 +1,18 @@
 package com.caspian.client.impl.module.combat;
 
 import com.caspian.client.api.config.Config;
+import com.caspian.client.api.config.NumberDisplay;
 import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.EnumConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
-import com.caspian.client.api.config.NumberDisplay;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.api.manager.player.rotation.RotationPriority;
 import com.caspian.client.api.manager.world.tick.TickSync;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.network.DisconnectEvent;
-import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
 import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
@@ -143,6 +143,8 @@ public class AuraModule extends RotationModule
     private final Timer autoSwapTimer = new CacheTimer();
     private final Timer switchTimer = new CacheTimer();
     private long randomDelay = -1;
+    //
+    private int rotating;
 
     /**
      *
@@ -185,7 +187,7 @@ public class AuraModule extends RotationModule
         }
         if (Modules.AUTO_CRYSTAL.isAttacking()
                 || Modules.AUTO_CRYSTAL.isPlacing()
-                || Modules.SURROUND.isPlacing()
+                || rotating > 0
                 || isRotationBlocked())
         {
             return;
@@ -211,7 +213,7 @@ public class AuraModule extends RotationModule
         {
             float[] rot = RotationUtil.getRotationsTo(mc.player.getEyePos(),
                     getAttackRotateVec(entityTarget));
-            setRotation(rot[0], rot[1]);
+            setRotation(RotationPriority.AURA, rot[0], rot[1]);
         }
         if (attackDelayConfig.getValue())
         {
@@ -300,24 +302,24 @@ public class AuraModule extends RotationModule
                 Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
             }
         }
-        if (isHoldingSword())
+        if (!isHoldingSword())
         {
-            preAttackTarget();
-            // preMotionAttackTarget();
-            Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(entity,
-                    Managers.POSITION.isSneaking()));
-            if (swingConfig.getValue())
-            {
-                mc.player.swingHand(Hand.MAIN_HAND);
-            }
-            else
-            {
-                Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-            }
-            postAttackTarget(entity);
-            return true;
+            return false;
         }
-        return false;
+        preAttackTarget();
+        // preMotionAttackTarget();
+        Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(entity,
+                Managers.POSITION.isSneaking()));
+        if (swingConfig.getValue())
+        {
+            mc.player.swingHand(Hand.MAIN_HAND);
+        }
+        else
+        {
+            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        }
+        postAttackTarget(entity);
+        return true;
     }
 
     /**
@@ -579,6 +581,67 @@ public class AuraModule extends RotationModule
             case EYES -> feetPos.add(0.0,
                     entity.getStandingEyeHeight(), 0.0);
         };
+    }
+
+    /**
+     * Returns the number of ticks the rotation will last after setting the
+     * player rotations to the dest rotations. Yaws are only calculated in
+     * this method, the yaw will not be updated until the main
+     * loop runs.
+     *
+     * @param dest The rotation
+     * @return
+     */
+    private float[] getLimitRotation(float dest)
+    {
+        int tick;
+        float[] yawLimits;
+        if (strictRotateConfig.getValue())
+        {
+            float diff = dest - Managers.ROTATION.getWrappedYaw(); // yaw diff
+            float magnitude = Math.abs(diff);
+            if (magnitude > 180.0f)
+            {
+                diff += diff > 0.0f ? -360.0f : 360.0f;
+            }
+            final int dir = diff > 0.0f ? 1 : -1;
+            tick = yawTicksConfig.getValue();
+            // partition yaw
+            float deltaYaw = magnitude / tick;
+            if (deltaYaw > rotateLimitConfig.getValue())
+            {
+                tick = MathHelper.ceil(magnitude / rotateLimitConfig.getValue());
+                deltaYaw = magnitude / tick;
+            }
+            deltaYaw *= dir;
+            int yawCount = tick;
+            tick += rotateTimeoutConfig.getValue();
+            yawLimits = new float[tick];
+            int off = tick - 1;
+            float yawTotal = 0.0f;
+            for (int i = 0; i < tick; ++i)
+            {
+                if (i > yawCount)
+                {
+                    yawLimits[off - i] = 0.0f;
+                    continue;
+                }
+                yawTotal += deltaYaw;
+                yawLimits[off - i] = yawTotal;
+            }
+        }
+        else
+        {
+            tick = rotateTimeoutConfig.getValue() + 1;
+            yawLimits = new float[tick];
+            int off = tick - 1;
+            yawLimits[off] = dest;
+            for (int i = 1; i < tick; ++i)
+            {
+                yawLimits[off - i] = 0.0f;
+            }
+        }
+        return yawLimits;
     }
 
     /**

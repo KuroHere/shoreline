@@ -115,6 +115,7 @@ public class Modules
     // Render
     public static BlockHighlightModule BLOCK_HIGHLIGHT;
     public static BreakHighlightModule BREAK_HIGHLIGHT;
+    public static ChamsModule CHAMS;
     public static ESPModule ESP;
     public static ExtraTabModule EXTRA_TAB;
     public static FullbrightModule FULLBRIGHT;
@@ -284,10 +285,12 @@ public class Modules
                     "blockhighlight-module");
             BREAK_HIGHLIGHT = (BreakHighlightModule) getRegisteredModule(
                     "breakhighlight-module");
+            CHAMS = (ChamsModule) getRegisteredModule("chams-module");
             ESP = (ESPModule) getRegisteredModule("esp-module");
             EXTRA_TAB = (ExtraTabModule) getRegisteredModule("extratab-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");
+            HOLE_ESP = (HoleESPModule) getRegisteredModule("holeesp-module");
             NAME_PROTECT = (NameProtectModule) getRegisteredModule(
                     "nameprotect-module");
             NAMETAGS = (NametagsModule) getRegisteredModule("nametags-module");

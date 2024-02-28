@@ -79,16 +79,12 @@ public class NoFallModule extends ToggleModule
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
-        if (mc.player == null)
+        if (mc.player == null || mc.player.fallDistance <= mc.player.getSafeFallDistance())
         {
             return;
         }
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet)
         {
-            if (mc.player.fallDistance <= mc.player.getSafeFallDistance())
-            {
-                return;
-            }
             if (modeConfig.getValue() == NoFallMode.VANILLA)
             {
                 ((AccessorPlayerMoveC2SPacket) packet).hookSetOnGround(true);

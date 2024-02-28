@@ -1,16 +1,20 @@
 package com.caspian.client.api.manager.combat.hole;
 
+import com.caspian.client.Caspian;
+import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
-import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.init.Modules;
 import com.caspian.client.util.Globals;
 import com.caspian.client.util.world.BlastResistantBlocks;
 import com.caspian.client.util.world.BlockUtil;
-import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  *
@@ -19,64 +23,58 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class HoleManager implements Globals
 {
+    private final ExecutorService executor = Executors.newFixedThreadPool(1);
     //
-    private final List<Hole> holes = new CopyOnWriteArrayList<>();
+    private List<Hole> holes = new CopyOnWriteArrayList<>();
+
+    public HoleManager()
+    {
+        Caspian.EVENT_HANDLER.subscribe(this);
+    }
 
     /**
      *
      * @param event
      */
     @EventListener
-    public void onPacketInbound(PacketEvent.Inbound event)
+    public void onTickEvent(TickEvent event)
     {
-        if (mc.player == null || mc.world == null)
+        if (event.getStage() != EventStage.PRE)
         {
             return;
         }
-        if (event.getPacket() instanceof ChunkDataS2CPacket packet)
+        HoleTask runnable = new HoleTask(getSphere(mc.player.getPos()));
+        //
+        Future<List<Hole>> result = executor.submit(runnable);
+        try
         {
-            final Set<BlockPos> checked = new HashSet<>();
-            //
-            int x = packet.getX() << 4;
-            int z = packet.getZ() << 4;
-            for (int i = 0; i < 16; i++)
+            holes = result.get();
+        }
+        catch (ExecutionException | InterruptedException e)
+        {
+
+        }
+    }
+
+    public List<BlockPos> getSphere(Vec3d start)
+    {
+        List<BlockPos> sphere = new ArrayList<>();
+        double rad = Math.ceil(Math.max(5.0, Modules.HOLE_ESP.getRange()));
+        for (double x = -rad; x <= rad; ++x)
+        {
+            for (double y = -rad; y <= rad; ++y)
             {
-                for (int j = -64; j < 256; j++)
+                for (double z = -rad; z <= rad; ++z)
                 {
-                    for (int k = 0; k < 16; k++)
-                    {
-                        BlockPos pos = new BlockPos(x + i, j, z + k);
-                        //
-                        if (checked.contains(pos))
-                        {
-                            continue;
-                        }
-                        Hole hole = checkHole(pos);
-                        if (hole != null)
-                        {
-                            checked.addAll(hole.getHoleOffsets());
-                            holes.add(hole);
-                        }
-                    }
+                    Vec3i pos = new Vec3i((int) (start.getX() + x),
+                            (int) (start.getY() + y), (int) (start.getZ() + z));
+                    final BlockPos p = new BlockPos(pos);
+                    //
+                    sphere.add(p);
                 }
             }
         }
-        else if (event.getPacket() instanceof BlockUpdateS2CPacket packet)
-        {
-            for (Hole hole : holes)
-            {
-                List<BlockPos> offs = hole.getHoleOffsets();
-                if (offs.contains(packet.getPos()))
-                {
-                    Hole check = checkHole(packet.getPos());
-                    if (check == null)
-                    {
-                        holes.remove(hole);
-                        return;
-                    }
-                }
-            }
-        }
+        return sphere;
     }
 
     /**
@@ -95,7 +93,7 @@ public class HoleManager implements Globals
         if (BlockUtil.isBlockAccessible(pos))
         {
             BlockPos pos1 = pos.add(-1, 0, 0);
-            BlockPos pos2 = pos.add(0, 0, 1);
+            BlockPos pos2 = pos.add(0, 0, -1);
             if (BlastResistantBlocks.isBlastResistant(pos1))
             {
                 resistant++;
@@ -116,7 +114,7 @@ public class HoleManager implements Globals
             {
                 return null;
             }
-            BlockPos pos3 = pos.add(0, 0, -1);
+            BlockPos pos3 = pos.add(0, 0, 1);
             BlockPos pos4 = pos.add(1, 0, 0);
             boolean air3 = mc.world.isAir(pos3);
             boolean air4 = mc.world.isAir(pos4);
@@ -124,19 +122,19 @@ public class HoleManager implements Globals
             // to prevent placements on these blocks
             if (air3 && air4)
             {
-                BlockPos pos5 = pos.add(1, 0, -1);
+                BlockPos pos5 = pos.add(1, 0, 1);
                 if (!mc.world.isAir(pos5))
                 {
                     return null;
                 }
                 BlockPos[] quad = new BlockPos[]
                         {
-                                pos3.add(-1, 0, 0),
-                                pos3.add(0, 0, -1),
-                                pos4.add(1, 0, 0),
-                                pos4.add(0, 0, 1),
-                                pos5.add(1, 0, 0),
-                                pos5.add(0, 0, -1)
+                                pos.add(-1, 0, 1),
+                                pos.add(0, 0, 2),
+                                pos.add(1, 0, 2),
+                                pos.add(2, 0, 1),
+                                pos.add(2, 0, 0),
+                                pos.add(1, 0, -1)
                         };
                 for (BlockPos p : quad)
                 {
@@ -165,10 +163,10 @@ public class HoleManager implements Globals
             {
                 BlockPos[] doubleZ = new BlockPos[]
                         {
-                                pos.add(1, 0, 0),
-                                pos3.add(-1, 0, 0),
-                                pos3.add(1, 0, 0),
-                                pos3.add(0, 0, -1)
+                                pos.add(-1, 0, 1),
+                                pos.add(0, 0, 2),
+                                pos.add(1, 0, 1),
+                                pos.add(1, 0, 0)
                         };
                 for (BlockPos p : doubleZ)
                 {
@@ -197,10 +195,10 @@ public class HoleManager implements Globals
             {
                 BlockPos[] doubleX = new BlockPos[]
                         {
-                                pos.add(0, 0, -1),
-                                pos4.add(1, 0, 0),
-                                pos4.add(0, 0, 1),
-                                pos4.add(0, 0, -1)
+                                pos.add(0, 0, 1),
+                                pos.add(1, 0, 1),
+                                pos.add(2, 0, 0),
+                                pos.add(1, 0, -1)
                         };
                 for (BlockPos p : doubleX)
                 {
@@ -262,5 +260,30 @@ public class HoleManager implements Globals
     public List<Hole> getHoles()
     {
         return holes;
+    }
+
+    public class HoleTask implements Callable<List<Hole>>
+    {
+        private final List<BlockPos> blocks;
+
+        public HoleTask(List<BlockPos> blocks)
+        {
+            this.blocks = blocks;
+        }
+
+        @Override
+        public List<Hole> call() throws Exception
+        {
+            List<Hole> holes1 = new ArrayList<>();
+            for (BlockPos blockPos : blocks)
+            {
+                Hole hole = checkHole(blockPos);
+                if (hole != null)
+                {
+                    holes1.add(hole);
+                }
+            }
+            return holes1;
+        }
     }
 }

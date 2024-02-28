@@ -5,19 +5,25 @@ package com.caspian.client.api.manager.player.rotation;
  *
  * @author linus
  * @since 1.0
+ *
+ * @see RotationRequest
+ * @see RotationManager
  */
 public enum RotationPriority
 {
-    HIGHEST(1000),
-    HIGH(750),
-    NORMAL(500),
-    LOW(100);
+    // MAINTAINS MODULE PRIORITY/COMPATIBILITY
+    SURROUND(1000),
+    SPEEDMINE(980),
+    AUTO_CRYSTAL(970),
+    AURA(950),
+    //
+    NORMAL(0),
+    ANTI_AIM(-999);
 
     //
     private final int priority;
 
     /**
-     *
      *
      * @param priority
      */
