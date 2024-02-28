@@ -166,6 +166,16 @@ public class AuraModule extends RotationModule
 
     /**
      *
+     */
+    @Override
+    public void onDisable()
+    {
+        entityTarget = null;
+        rotating = 0;
+    }
+
+    /**
+     *
      * @param event
      */
     @EventListener

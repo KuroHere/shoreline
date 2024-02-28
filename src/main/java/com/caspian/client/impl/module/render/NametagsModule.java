@@ -10,23 +10,25 @@ import com.caspian.client.api.render.Interpolation;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.impl.event.render.entity.RenderLabelEvent;
+import com.caspian.client.init.Fonts;
 import com.caspian.client.init.Managers;
-import com.caspian.client.mixin.accessor.AccessorTextRenderer;
 import com.caspian.client.util.world.FakePlayerEntity;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *
@@ -76,43 +78,47 @@ public class NametagsModule extends ToggleModule
     @EventListener
     public void onRenderWorld(RenderWorldEvent event)
     {
-        if (mc.gameRenderer != null && mc.getCameraEntity() != null)
+        if (mc.gameRenderer == null || mc.getCameraEntity() == null)
         {
-            Vec3d interpolate = Interpolation.getRenderPosition(
-                    mc.getCameraEntity(), mc.getTickDelta());
-            Camera camera = mc.gameRenderer.getCamera();
-            for (Entity entity : mc.world.getEntities())
+            return;
+        }
+        Vec3d interpolate = Interpolation.getRenderPosition(
+                mc.getCameraEntity(), mc.getTickDelta());
+        Camera camera = mc.gameRenderer.getCamera();
+        for (Entity entity : mc.world.getEntities())
+        {
+            if (entity instanceof PlayerEntity player)
             {
-                if (entity instanceof PlayerEntity player)
+                if (!player.isAlive() || player == mc.player
+                        || !invisiblesConfig.getValue() && player.isInvisible())
                 {
-                    if (!player.isAlive() || player == mc.player
-                            || !invisiblesConfig.getValue() && player.isInvisible())
-                    {
-                        continue;
-                    }
-                    String info = getNametagInfo(player);
-                    Vec3d pinterpolate = Interpolation.getRenderPosition(
-                            player, mc.getTickDelta());
-                    double rx = player.getX() - pinterpolate.getX();
-                    double ry = player.getY() - pinterpolate.getY();
-                    double rz = player.getZ() - pinterpolate.getZ();
-                    int width = RenderManager.textWidth(info);
-                    float hwidth = width / 2.0f;
-                    //
-                    double dx = (mc.player.getX() - interpolate.getX()) - rx;
-                    double dy = (mc.player.getY() - interpolate.getY()) - ry;
-                    double dz = (mc.player.getZ() - interpolate.getZ()) - rz;
-                    double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                    if (dist > 4096.0)
-                    {
-                        continue;
-                    }
-                    float sdist = (float) Math.max(dist - 8.0, 0.0);
-                    float scaling = 0.0245f + scalingConfig.getValue() * sdist;
-                    Vec3d render = new Vec3d(rx, ry, rz);
-                    renderInfo(info, hwidth, player, render, camera, scaling);
-                    renderItems(render, camera);
+                    continue;
                 }
+                String info = getNametagInfo(player);
+                Vec3d pinterpolate = Interpolation.getRenderPosition(
+                        player, mc.getTickDelta());
+                double rx = player.getX() - pinterpolate.getX();
+                double ry = player.getY() - pinterpolate.getY();
+                double rz = player.getZ() - pinterpolate.getZ();
+                int width = RenderManager.textWidth(info);
+                float hwidth = width / 2.0f;
+                //
+                double dx = (mc.player.getX() - interpolate.getX()) - rx;
+                double dy = (mc.player.getY() - interpolate.getY()) - ry;
+                double dz = (mc.player.getZ() - interpolate.getZ()) - rz;
+                double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                if (dist > 4096.0)
+                {
+                    continue;
+                }
+                float scaling = 0.0018f + scalingConfig.getValue() * (float) dist;
+                if (dist <= 8.0)
+                {
+                    scaling = 0.0245f;
+                }
+                renderInfo(info, hwidth, player,
+                        new Vec3d(rx, ry, rz), camera, scaling);
+                // renderItems(render, camera);
             }
         }
     }
@@ -139,12 +145,9 @@ public class NametagsModule extends ToggleModule
      * @param camera
      * @param scaling
      */
-    private void renderInfo(final String info,
-                            final float width,
-                            final PlayerEntity entity,
-                            final Vec3d rv,
-                            final Camera camera,
-                            final float scaling)
+    private void renderInfo(final String info, final float width,
+                            final PlayerEntity entity, final Vec3d rv,
+                            final Camera camera, final float scaling)
     {
         final Vec3d pos = camera.getPos();
         MatrixStack matrices = new MatrixStack();
@@ -161,43 +164,95 @@ public class NametagsModule extends ToggleModule
         matrices.scale(-scaling, -scaling, -1.0f);
         GL11.glDepthFunc(GL11.GL_ALWAYS);
         VertexConsumerProvider.Immediate vertexConsumers =
-                mc.getBufferBuilders().getEntityVertexConsumers();
-        mc.textRenderer.draw(info, -width, 0.0f, getNametagColor(entity),
-                false, matrices.peek().getPositionMatrix(), vertexConsumers,
-                TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
-        matrices.translate(1.0, 1.0, 0.0);
-
-        mc.textRenderer.draw(matrices, Formatting.strip(info), -width, 0.0f, 0x151515);
-        // matrices.translate(0.1f, 0.1f, 0.0f);
-        VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-        drawInternal(info, -width, 0.0f, getNametagColor(entity), false,
-                matrices.peek().getPositionMatrix(), immediate,
-                TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
-        immediate.draw();
+                VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+        if (borderedConfig.getValue())
+        {
+            RenderManager.rect(matrices, -width - 1.0f, -1.0f, width * 2.0f + 2.0f,
+                    mc.textRenderer.fontHeight + 1.0f, 0.0, 0x55000400);
+        }
+        // ANNOYING HACK
+        int color = getNametagColor(entity);
+        Fonts.VANILLA.draw(matrices, info, -width + 1.0f, 1.0f, color, true);
+        Fonts.VANILLA.draw(matrices, info, -width, 0.0f, color, false);
+        // drawInternal(info, -width + 1.0f, 1.0f, getNametagColor(entity),
+        //        true, matrices.peek().getPositionMatrix(), vertexConsumers,
+        //        TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
+        // drawInternal(info, -width, 0.0f, getNametagColor(entity),
+        //        false, matrices.peek().getPositionMatrix(), vertexConsumers,
+        //        TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
+        // matrices.translate(1.0, 1.0, 0.0);
         vertexConsumers.draw();
+        renderItems(matrices, entity);
         RenderSystem.disableBlend();
-        matrices.pop();
         GL11.glDepthFunc(GL11.GL_LEQUAL);
-    }
-
-    private void drawInternal(String text, float x, float y, int color, boolean shadow,
-                              Matrix4f matrix, VertexConsumerProvider vertexConsumers,
-                              TextRenderer.TextLayerType layerType, int backgroundColor, int light)
-    {
-        color = TextRenderer.tweakTransparency(color);
-        ((AccessorTextRenderer) mc.textRenderer).hookDrawLayer(text, x, y, color, shadow, matrix,
-                vertexConsumers, layerType, backgroundColor, light);
+        matrices.pop();
     }
 
     /**
      *
-     * @param rv
-     * @param camera
+     * @param player
      */
-    private void renderItems(final Vec3d rv,
-                             final Camera camera)
+    private void renderItems(MatrixStack matrixStack, PlayerEntity player)
+    {
+        List<ItemStack> displayItems = new CopyOnWriteArrayList<>();
+        if (!player.getOffHandStack().isEmpty())
+        {
+            displayItems.add(player.getOffHandStack());
+        }
+        player.getInventory().armor.forEach(armorStack ->
+        {
+            if (!armorStack.isEmpty())
+            {
+                displayItems.add(armorStack);
+            }
+        });
+        if (!player.getMainHandStack().isEmpty())
+        {
+            displayItems.add(player.getMainHandStack());
+        }
+        Collections.reverse(displayItems);
+        //
+        int n10 = 0;
+        int n11 = 0;
+        for (ItemStack stack : displayItems)
+        {
+            n10 -= 8;
+            if (stack.getEnchantments().size() > n11)
+            {
+                n11 = stack.getEnchantments().size();
+            }
+        }
+        int m2 = enchantOffset(n11);
+        matrixStack.translate(n10, m2, 0.0f);
+        for (ItemStack stack : displayItems)
+        {
+            // matrixStack.push();
+            DiffuseLighting.disableGuiDepthLighting();
+            // int n4 = (n11 > 4) ? ((n11 - 4) * 8 / 2) : 0;
+            // mc.getItemRenderer().renderItem(stack, ModelTransformationMode.GUI, 0xf000f0,
+            //        OverlayTexture.DEFAULT_UV, matrixStack, mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
+            // mc.getItemRenderer().renderGuiItemOverlay(matrixStack, mc.textRenderer, stack, n10, m2);
+            // mc.getBufferBuilders().getEntityVertexConsumers().draw();
+            // matrixStack.pop();
+            renderEnchants(stack, n10, m2);
+            n10 += 16;
+            matrixStack.translate(16.0f, 0.0f, 0.0f);
+        }
+    }
+
+    private void renderEnchants(ItemStack itemStack, int x, int y)
     {
 
+    }
+
+    private int enchantOffset(final int n)
+    {
+        int n2 = armorConfig.getValue() ? -26 : -27;
+        if (n > 4)
+        {
+            n2 -= (n - 4) * 8;
+        }
+        return n2;
     }
 
     /**

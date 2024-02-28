@@ -33,10 +33,10 @@ public class HoleESPModule extends ToggleModule
             "of holes", 0.0f, 1.0f, 1.0f);
     Config<Boolean> doubleConfig = new BooleanConfig("Double", "Displays " +
             "double holes where the player can stand in the middle of two " +
-            "blocks to nullify explosion damage", true);
+            "blocks to block explosion damage", true);
     Config<Boolean> quadConfig = new BooleanConfig("Quad", "Displays " +
             "quad holes where the player can stand in the middle of four " +
-            "blocks to nullify explosion damage", true);
+            "blocks to block explosion damage", true);
     Config<Boolean> voidConfig = new BooleanConfig("Void", "Displays " +
             "void holes in the world", false);
     Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades the opacity" +
