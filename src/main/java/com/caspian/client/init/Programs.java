@@ -1,6 +1,6 @@
 package com.caspian.client.init;
 
-import com.caspian.client.api.render.shader.shaders.GradientProgram;
+import com.caspian.client.impl.shaders.GradientProgram;
 
 public class Programs
 {

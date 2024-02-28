@@ -183,10 +183,14 @@ public class MixinGameRenderer
         }
     }
 
+    /**
+     *
+     * @param factory
+     * @param ci
+     */
     @Inject(method = "loadPrograms", at = @At(value = "INVOKE",
             target = "Ljava/util/List;add(Ljava/lang/Object;)Z",
-            ordinal = 0),
-            locals = LocalCapture.CAPTURE_FAILHARD)
+            ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     private void initPrograms(ResourceFactory factory, CallbackInfo ci)
     {
         Programs.renderInit();

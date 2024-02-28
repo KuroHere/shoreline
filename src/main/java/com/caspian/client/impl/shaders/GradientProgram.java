@@ -1,4 +1,4 @@
-package com.caspian.client.api.render.shader.shaders;
+package com.caspian.client.impl.shaders;
 
 import com.caspian.client.api.render.shader.Program;
 import com.caspian.client.api.render.shader.Shader;

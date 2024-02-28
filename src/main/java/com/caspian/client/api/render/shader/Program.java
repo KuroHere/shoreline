@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 public abstract class Program
 {
     protected final int id;
-
     private boolean isInitialisedUniforms = false;
 
     public Program(Shader @NotNull ... shaders)
@@ -33,7 +32,7 @@ public abstract class Program
             isInitialisedUniforms = true;
         }
         updateUniforms();
-
+        //
         GlStateManager._glUseProgram(id);
     }
 }
