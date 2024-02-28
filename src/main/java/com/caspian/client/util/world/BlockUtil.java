@@ -5,7 +5,9 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.chunk.ChunkManager;
+import net.minecraft.world.chunk.WorldChunk;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +24,36 @@ public class BlockUtil implements Globals
      */
     public static List<BlockEntity> blockEntities()
     {
-        return null;
+        List<BlockEntity> list = new ArrayList<>();
+        for (WorldChunk chunk : loadedChunks())
+        {
+            list.addAll(chunk.getBlockEntities().values());
+        }
+        return list;
+    }
+
+    /**
+     * Credit https://github.com/BleachDev/BleachHack/blob/1.19.4/src/main/java/org/bleachhack/util/world/WorldUtils.java#L83
+     *
+     * @return
+     */
+    public static List<WorldChunk> loadedChunks()
+    {
+        List<WorldChunk> chunks = new ArrayList<>();
+        int viewDist = mc.options.getViewDistance().getValue();
+        for (int x = -viewDist; x <= viewDist; x++)
+        {
+            for (int z = -viewDist; z <= viewDist; z++)
+            {
+                WorldChunk chunk = mc.world.getChunkManager().getWorldChunk(
+                        (int) mc.player.getX() / 16 + x, (int) mc.player.getZ() / 16 + z);
+                if (chunk != null)
+                {
+                    chunks.add(chunk);
+                }
+            }
+        }
+        return chunks;
     }
 
     /**

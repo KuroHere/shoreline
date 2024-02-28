@@ -7,6 +7,7 @@ import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.world.EntityUtil;
@@ -15,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
+import net.minecraft.util.math.Vec3d;
 
 /**
  *
@@ -50,7 +52,7 @@ public class BowAimModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (event.getStage() != EventStage.PRE)
         {
@@ -66,7 +68,6 @@ public class BowAimModule extends ToggleModule
                 if (entity == null || entity == mc.player || !entity.isAlive()
                         || !isValidAimTarget(entity)
                         || Managers.SOCIAL.isFriend(entity.getUuid())
-                        || entity instanceof FakePlayerEntity
                         || entity instanceof PlayerEntity player && Modules.ANTI_BOTS.contains(player))
                 {
                     continue;
@@ -81,9 +82,7 @@ public class BowAimModule extends ToggleModule
             if (aimTarget instanceof LivingEntity target)
             {
                 float[] rots = getBowRotationsTo(target);
-                mc.player.setYaw(rots[0]);
-                mc.player.setHeadYaw(rots[0]);
-                mc.player.setPitch(rots[1]);
+                Managers.ROTATION.setRotationClient(rots[0], rots[1]);
             }
         }
     }
@@ -95,64 +94,24 @@ public class BowAimModule extends ToggleModule
      */
     private float[] getBowRotationsTo(LivingEntity target)
     {
-        double iX = target.getX() - target.prevX;
-        double iZ = target.getZ() - target.prevZ;
-        double d = mc.player.distanceTo(target);
-        d -= d % 2.0;
-        iX = d / 2.0 * iX * (mc.player.isSprinting() ? 1.3 : 1.1);
-        iZ = d / 2.0 * iZ * (mc.player.isSprinting() ? 1.3 : 1.1);
-        float yaw = (float) Math.toDegrees(Math.atan2(target.getZ() + iZ - mc.player.getY(),
-                target.getX() + iX - mc.player.getX())) - 90.0f;
-        float bowHeldTime = (float) (mc.player.getActiveItem().getMaxUseTime()
-                - mc.player.getItemUseTime()) / 20.0f;
-        bowHeldTime = (bowHeldTime * bowHeldTime + bowHeldTime * 2.0f) / 3.0f;
-        if (bowHeldTime >= 1.0f) {
-            bowHeldTime = 1.0f;
-        }
-        double duration = bowHeldTime * 3.0f;
-        double coeff = 0.05000000074505806;
-        float pitch = (float) (-Math.toDegrees(getArc(target, duration, coeff)));
+        float velocity = (72000.0f - mc.player.getItemUseTimeLeft()) / 20.0f;
+        velocity = Math.min(1.0f, (velocity * velocity + velocity * 2) / 3.0f);
+        Vec3d newTargetVec = target.getPos().add(target.getVelocity());
+        double d = mc.player.getEyePos().distanceTo(target.getBoundingBox().offset(target.getVelocity()).getCenter());
+        double x = newTargetVec.x + (newTargetVec.x - target.getX()) * d - mc.player.getX();
+        double y = newTargetVec.y + (newTargetVec.y - target.getY()) * d + target.getHeight() * 0.5 - mc.player.getY() - mc.player.getEyeHeight(mc.player.getPose());
+        double z = newTargetVec.z + (newTargetVec.z - target.getZ()) * d - mc.player.getZ();
+        double hDistance = Math.sqrt(x * x + z * z);
+        double hDistanceSq = hDistance * hDistance;
+        float g = 0.006f;
+        float velocitySq = velocity * velocity;
+        float velocityPow4 = velocitySq * velocitySq;
+        float yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90.0f;
+        float pitch = (float) -Math.toDegrees(Math.atan((velocitySq - Math.sqrt(velocityPow4 - g * (g * hDistanceSq + 2.0f * y * velocitySq))) / (g * hDistance)));
         return new float[]
                 {
-                        yaw, pitch
+                       yaw , pitch
                 };
-    }
-
-    /**
-     *
-     * @param target
-     * @param duration
-     * @param coeff
-     * @return
-     */
-    private float getArc(LivingEntity target, double duration, double coeff)
-    {
-        double arc = target.getY() + (double) (target.getStandingEyeHeight() / 2.0f)
-                        - (mc.player.getY() + (double) mc.player.getStandingEyeHeight());
-        double dX = target.getX() - mc.player.getX();
-        double dZ = target.getZ() - mc.player.getZ();
-        double dir = Math.sqrt(dX * dX + dZ * dZ);
-        return getArrowArc(duration, coeff, dir, arc);
-    }
-
-    /**
-     *
-     * @param duration
-     * @param coeff
-     * @param dir
-     * @param arc
-     * @return
-     */
-    private float getArrowArc(double duration, double coeff, double dir, double arc)
-    {
-        double dirCoeff = coeff * (dir * dir);
-        arc = 2.0 * arc * (duration * duration);
-        arc = coeff * (dirCoeff + arc);
-        arc = Math.sqrt(duration * duration * duration * duration - arc);
-        duration = duration * duration - arc;
-        arc = Math.atan2(duration * duration + arc, coeff * dir);
-        duration = Math.atan2(duration, coeff * dir);
-        return (float) Math.min(arc, duration);
     }
 
     /**

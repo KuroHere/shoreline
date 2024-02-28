@@ -7,6 +7,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -23,7 +24,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinPlayerEntityRenderer
 {
     //
+    @Unique
     private float yaw, prevYaw, bodyYaw, prevBodyYaw, headYaw, prevHeadYaw;
+    @Unique
     private float pitch, prevPitch;
 
     /**
@@ -40,8 +43,7 @@ public class MixinPlayerEntityRenderer
     @Inject(method = "render(Lnet/minecraft/client/network/" +
             "AbstractClientPlayerEntity;FFLnet/minecraft/client/util/" +
             "math/MatrixStack;Lnet/minecraft/client/render " +
-            "/VertexConsumerProvider;I)V", at = @At(value = "HEAD"),
-            cancellable = true)
+            "/VertexConsumerProvider;I)V", at = @At(value = "HEAD"))
     private void onRenderHead(AbstractClientPlayerEntity abstractClientPlayerEntity,
                               float f, float g, MatrixStack matrixStack,
                               VertexConsumerProvider vertexConsumerProvider,
@@ -85,8 +87,7 @@ public class MixinPlayerEntityRenderer
     @Inject(method = "render(Lnet/minecraft/client/network/" +
             "AbstractClientPlayerEntity;FFLnet/minecraft/client/util/" +
             "math/MatrixStack;Lnet/minecraft/client/render " +
-            "/VertexConsumerProvider;I)V", at = @At(value = "TAIL"),
-            cancellable = true)
+            "/VertexConsumerProvider;I)V", at = @At(value = "TAIL"))
     private void onRenderTail(AbstractClientPlayerEntity abstractClientPlayerEntity,
                               float f, float g, MatrixStack matrixStack,
                               VertexConsumerProvider vertexConsumerProvider,

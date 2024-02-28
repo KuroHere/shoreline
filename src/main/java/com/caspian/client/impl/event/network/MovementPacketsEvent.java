@@ -1,7 +1,7 @@
 package com.caspian.client.impl.event.network;
 
 import com.caspian.client.api.event.Cancelable;
-import com.caspian.client.api.event.StageEvent;
+import com.caspian.client.api.event.Event;
 
 /**
  *
@@ -12,7 +12,7 @@ import com.caspian.client.api.event.StageEvent;
  *
  */
 @Cancelable
-public class MovementPacketsEvent extends StageEvent
+public class MovementPacketsEvent extends Event
 {
     //
     private double x, y, z;

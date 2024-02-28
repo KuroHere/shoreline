@@ -1,37 +1,31 @@
 package com.caspian.client.impl.module.combat;
 
 import com.caspian.client.api.config.Config;
+import com.caspian.client.api.config.NumberDisplay;
 import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.EnumConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
-import com.caspian.client.api.config.NumberDisplay;
+import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.api.manager.player.rotation.RotationPriority;
 import com.caspian.client.api.manager.world.tick.TickSync;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.render.RenderManager;
-import com.caspian.client.impl.event.ScreenOpenEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
-import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.math.timer.CacheTimer;
-import com.caspian.client.util.math.timer.TickTimer;
 import com.caspian.client.util.math.timer.Timer;
-import com.caspian.client.util.player.InventoryUtil;
-import com.caspian.client.util.player.PlayerUtil;
 import com.caspian.client.util.player.RotationUtil;
 import com.caspian.client.util.string.EnumFormatter;
 import com.caspian.client.util.world.EntityUtil;
-import com.caspian.client.util.world.FakePlayerEntity;
-import com.caspian.client.util.world.VecUtil;
-import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
@@ -41,21 +35,14 @@ import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.MiningToolItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.*;
-import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
-
-import java.security.SecureRandom;
-import java.util.Random;
-import java.util.TreeSet;
 
 /**
  *
@@ -108,11 +95,11 @@ public class AuraModule extends RotationModule
     Config<Boolean> swordCheckConfig = new BooleanConfig("Sword-Check",
             "Checks if a weapon is in the hand before attacking", true);
     // ROTATE
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
-            "before attacking", false);
     Config<Vector> hitVectorConfig = new EnumConfig<>("HitVector", "The " +
             "vector to aim for when attacking entities", Vector.FEET,
             Vector.values());
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
+            "before attacking", false);
     Config<Boolean> strictRotateConfig = new BooleanConfig("RotateStrict",
             "Rotates yaw over multiple ticks to prevent certain rotation  " +
                     "flags in NCP", false, () -> rotateConfig.getValue());
@@ -128,6 +115,10 @@ public class AuraModule extends RotationModule
             "reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted",
             "The minimum age of the entity to be considered for attack", 0, 50, 200);
+    Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck",
+            "Checks if target has armor before attacking", false);
+    Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock",
+            "Automatically blocks after attack", false);
     Config<Boolean> stopSprintConfig = new BooleanConfig("StopSprint",
             "Stops sprinting before attacking to maintain vanilla behavior", false);
     Config<Boolean> stopShieldConfig = new BooleanConfig("StopShield",
@@ -141,34 +132,21 @@ public class AuraModule extends RotationModule
             "Target neutrals", false);
     Config<Boolean> animalsConfig = new BooleanConfig("Animals",
             "Target animals", false);
+    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles",
+            "Target invisible entities", true);
     Config<Boolean> renderConfig = new BooleanConfig("Render",
             "Renders an indicator over the target", true);
     //
-    private AuraTarget target;
-    //
-    private int packets;
+    private Entity entityTarget;
     private final Timer attackTimer = new CacheTimer();
     private final Timer critTimer = new CacheTimer();
-    //
     private final Timer autoSwapTimer = new CacheTimer();
     private final Timer switchTimer = new CacheTimer();
+    private long randomDelay = -1;
     //
-    private boolean crit;
-    private boolean sprinting;
-    private boolean shielding;
-    private boolean sneaking;
-    // RANDOM
-    private final Random random = new SecureRandom();
-    private long randomTime = -1;
-    // ROTATIONS
-    private final Timer rotateTimer = new TickTimer();
     private int rotating;
-    //
-    private float[] yawLimits;
-    private float yaw, pitch;
 
     /**
-     *
      *
      */
     public AuraModule()
@@ -178,27 +156,25 @@ public class AuraModule extends RotationModule
 
     /**
      *
-     *
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
     /**
      *
-     *
      */
     @Override
     public void onDisable()
     {
-        clear();
+        entityTarget = null;
+        rotating = 0;
     }
 
     /**
-     *
      *
      * @param event
      */
@@ -213,295 +189,181 @@ public class AuraModule extends RotationModule
      * @param event
      */
     @EventListener
-    public void onScreenOpen(ScreenOpenEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
-        if (event.getScreen() instanceof DeathScreen)
+        if (event.getStage() != EventStage.PRE)
         {
-            disable();
+            return;
+        }
+        if (Modules.AUTO_CRYSTAL.isAttacking()
+                || Modules.AUTO_CRYSTAL.isPlacing()
+                || rotating > 0
+                || isRotationBlocked())
+        {
+            return;
+        }
+        final Vec3d eyepos = Managers.POSITION.getEyePos();
+        switch (modeConfig.getValue())
+        {
+            case SWITCH -> entityTarget = getAttackTarget(eyepos);
+            case SINGLE ->
+            {
+                if (entityTarget == null || !entityTarget.isAlive()
+                        || !isInAttackRange(eyepos, entityTarget))
+                {
+                    entityTarget = getAttackTarget(eyepos);
+                }
+            }
+        }
+        if (entityTarget == null || !switchTimer.passed(swapDelayConfig.getValue() * 25.0f))
+        {
+            return;
+        }
+        if (rotateConfig.getValue())
+        {
+            float[] rot = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+                    getAttackRotateVec(entityTarget));
+            setRotation(RotationPriority.AURA, rot[0], rot[1]);
+        }
+        if (attackDelayConfig.getValue())
+        {
+            float ticks = 20.0f - Managers.TICK.getTickSync(tpsSyncConfig.getValue());
+            float progress = mc.player.getAttackCooldownProgress(ticks);
+            if (progress >= 1.0f && attackTarget(entityTarget))
+            {
+                mc.player.resetLastAttackedTicks();
+            }
+        }
+        else
+        {
+            if (randomDelay < 0)
+            {
+                randomDelay = (long) RANDOM.nextFloat(
+                        (randomSpeedConfig.getValue() * 10.0f) + 1.0f);
+            }
+            float delay = (attackSpeedConfig.getValue() * 50.0f) + randomDelay;
+            if (attackTimer.passed(2000.0f - delay)
+                    && attackTarget(entityTarget))
+            {
+                randomDelay = -1;
+                attackTimer.reset();
+            }
         }
     }
 
     /**
-     *
-     *
-     * @param event
-     */
-    @EventListener
-    public void onRenderWorld(RenderWorldEvent event)
-    {
-        if (renderConfig.getValue() && target != null
-                && (!swordCheckConfig.getValue() || isHoldingSword()))
-        {
-            final Box box = target.getBoundingBox();
-            RenderManager.renderBox(event.getMatrices(), box,
-                    Modules.COLORS.getRGB(60));
-            RenderManager.renderBoundingBox(event.getMatrices(), box, 1.5f,
-                    Modules.COLORS.getRGB(145));
-        }
-    }
-
-    /**
-     *
      *
      * @param event
      */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
+        if (mc.player == null)
+        {
+            return;
+        }
         if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket)
         {
+            switchTimer.reset();
             if (!event.isClientPacket())
             {
                 autoSwapTimer.reset();
             }
-            switchTimer.reset();
         }
     }
 
     /**
-     *
      *
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onRenderWorld(RenderWorldEvent event)
     {
-        if (mc.player != null && mc.world != null)
+        if (entityTarget != null && renderConfig.getValue() && isHoldingSword())
         {
-            if (Modules.AUTO_CRYSTAL.isAttacking()
-                    || Modules.AUTO_CRYSTAL.isPlacing()
-                    || Modules.AUTO_CRYSTAL.isRotating())
-            {
-                return;
-            }
-            if (isRotationBlocked())
-            {
-                return;
-            }
-            final Vec3d eyepos = Managers.POSITION.getEyePos();
-            if (rotating > 0)
-            {
-                yaw = yawLimits[--rotating];
-            }
-            //
-            if (!rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks()))
-            {
-                setRotation(yaw, pitch);
-                event.cancel();
-            }
-            if (rotating != 0)
-            {
-                return;
-            }
-            // Search delegated to main thread
-            switch (modeConfig.getValue())
-            {
-                case SWITCH -> target = getAuraTarget(eyepos,
-                        mc.world.getEntities());
-                case SINGLE ->
-                {
-                    if (target == null || !target.isValid())
-                    {
-                        target = getAuraTarget(eyepos, mc.world.getEntities());
-                    }
-                }
-            }
-            if (target != null)
-            {
-                if (rotateConfig.getValue() && checkFacing(target.getBoundingBox()))
-                {
-                    float[] rots = RotationUtil.getRotationsTo(eyepos,
-                            target.getHitVec());
-                    rotating = setRotation(rots);
-                    rotateTimer.reset();
-                    return;
-                }
-                if (switchTimer.passed(swapDelayConfig.getValue()))
-                {
-                    crit = Modules.CRITICALS.isEnabled() && critTimer.passed(500);
-                    float dist = mc.player.fallDistance;
-                    if (attackDelayConfig.getValue())
-                    {
-                        float ticks = 20.0f - Managers.TICK.getTickSync(tpsSyncConfig.getValue());
-                        float progress = mc.player.getAttackCooldownProgress(ticks);
-                        if (progress >= 1.0f)
-                        {
-                            if (crit)
-                            {
-                                mc.player.fallDistance = 0.1f;
-                                event.setOnGround(false);
-                                event.cancel();
-                            }
-                            while (packets < packetsConfig.getValue())
-                            {
-                                attack(target.getEntity());
-                                packets++;
-                            }
-                            critTimer.reset();
-                            mc.player.resetLastAttackedTicks();
-                            mc.player.fallDistance = dist;
-                        }
-                    }
-                    else
-                    {
-                        if (randomTime < 0)
-                        {
-                            randomTime = random.nextLong((long)
-                                    (randomSpeedConfig.getValue() * 10.0f + 1.0f));
-                        }
-                        float delay = attackSpeedConfig.getValue() * 50.0f + randomTime;
-                        if (attackTimer.passed(delay))
-                        {
-                            if (crit)
-                            {
-                                mc.player.fallDistance = 0.1f;
-                                event.setOnGround(false);
-                                event.cancel();
-                            }
-                            while (packets < packetsConfig.getValue())
-                            {
-                                attack(target.getEntity());
-                                packets++;
-                            }
-                            attackTimer.reset();
-                            critTimer.reset();
-                            randomTime = -1;
-                            mc.player.fallDistance = dist;
-                        }
-                    }
-                }
-            }
+            RenderManager.renderBox(event.getMatrices(),
+                    entityTarget.getBoundingBox(), Modules.COLORS.getRGB(60));
+            RenderManager.renderBoundingBox(event.getMatrices(),
+                    entityTarget.getBoundingBox(), 1.5f, Modules.COLORS.getRGB(145));
         }
     }
 
     /**
-     *
-     *
-     * @param event
-     */
-    @EventListener
-    public void onPacketInbound(PacketEvent.Inbound event)
-    {
-        if (mc.player != null && mc.world != null)
-        {
-            if (event.getPacket() instanceof EntityStatusS2CPacket packet)
-            {
-                if (packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING)
-                {
-
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     * @return
-     */
-    public boolean isAttacking()
-    {
-        return target != null;
-    }
-
-    /**
-     *
-     *
-     */
-    public void clear()
-    {
-        target = null;
-        rotating = 0;
-        packets = 0;
-        randomTime = -1;
-        sprinting = false;
-        shielding = false;
-        sneaking = false;
-        crit = false;
-    }
-
-    /**
-     *
      *
      * @param entity
      * @return
      */
-    private void attack(Entity entity)
+    private boolean attackTarget(Entity entity)
     {
-        if (autoSwapConfig.getValue() && !isHoldingSword())
+        if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
+                || mc.options.attackKey.isPressed())
         {
-            int slot = getWeaponSlot();
-            if (slot != -1 && preSwapCheck())
+            autoSwapTimer.reset();
+            return false;
+        }
+        // END PRE
+        boolean sword = mc.player.getMainHandStack().getItem() instanceof SwordItem;
+        if (autoSwapConfig.getValue() && autoSwapTimer.passed(500) && !sword)
+        {
+            int slot = getSwordSlot();
+            if (slot != -1)
             {
                 mc.player.getInventory().selectedSlot = slot;
                 Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
             }
         }
-        if (swordCheckConfig.getValue() && !isHoldingSword())
+        if (!isHoldingSword())
         {
-            return;
+            return false;
         }
-        preAttack();
+        preAttackTarget();
+        // preMotionAttackTarget();
         Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(entity,
                 Managers.POSITION.isSneaking()));
-        swingDirect(Hand.MAIN_HAND);
-        postAttack();
-    }
-
-    /**
-     *
-     *
-     * @return
-     */
-    private boolean preSwapCheck()
-    {
-        if (mc.options.useKey.isPressed() || mc.options.attackKey.isPressed())
+        if (swingConfig.getValue())
         {
-            autoSwapTimer.reset();
-            return !autoSwapConfig.getValue();
+            mc.player.swingHand(Hand.MAIN_HAND);
         }
-        if (autoSwapConfig.getValue())
+        else
         {
-            return autoSwapTimer.passed(500);
+            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
         }
+        postAttackTarget(entity);
         return true;
     }
 
     /**
      *
-     *
      * @return
      */
-    public boolean isHoldingSword()
+    private int getSwordSlot()
     {
-        final ItemStack mainhand = mc.player.getMainHandStack();
-        return mainhand.getItem() instanceof SwordItem
-                || mainhand.getItem() instanceof MiningToolItem;
-    }
-
-    /**
-     *
-     *
-     * @param hand
-     */
-    private void swingDirect(Hand hand)
-    {
-        if (swingConfig.getValue() && !mc.player.handSwinging
-                || mc.player.handSwingTicks >= PlayerUtil.getHandSwingDuration() / 2
-                || mc.player.handSwingTicks < 0)
+        float sharp = 0.0f;
+        int slot = -1;
+        // Maximize item attack damage
+        for (int i = 0; i < 9; i++)
         {
-            mc.player.handSwinging = true;
-            mc.player.handSwingTicks = -1;
-            mc.player.preferredHand = Modules.SWING.isEnabled() ?
-                    Modules.SWING.getSwingHand() : hand;
+            final ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.getItem() instanceof SwordItem swordItem)
+            {
+                float sharpness = EnchantmentHelper.getLevel(
+                        Enchantments.SHARPNESS, stack) * 0.5f + 0.5f;
+                float dmg = swordItem.getAttackDamage() + sharpness;
+                if (dmg > sharp)
+                {
+                    sharp = dmg;
+                    slot = i;
+                }
+            }
         }
-        Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
+        return slot;
     }
 
-    /**
-     *
-     *
-     */
-    private void preAttack()
+    private boolean shielding;
+    private boolean sneaking;
+    private boolean sprinting;
+
+    private void preAttackTarget()
     {
         final ItemStack offhand = mc.player.getOffHandStack();
         // Shield state
@@ -514,7 +376,7 @@ public class AuraModule extends RotationModule
             {
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.RELEASE_USE_ITEM,
                         Managers.POSITION.getBlockPos(), Direction.getFacing(mc.player.getX(),
-                                mc.player.getY(), mc.player.getZ())));
+                        mc.player.getY(), mc.player.getZ())));
             }
         }
         sneaking = false;
@@ -534,9 +396,29 @@ public class AuraModule extends RotationModule
                         ClientCommandC2SPacket.Mode.STOP_SPRINTING));
             }
         }
-        if (Modules.CRITICALS.isEnabled())
+    }
+
+    // RELEASE
+    private void postAttackTarget(Entity entity)
+    {
+        if (shielding)
         {
-            if (!Managers.POSITION.isOnGround()
+            Managers.NETWORK.sendSequencedPacket(s ->
+                    new PlayerInteractItemC2SPacket(Hand.OFF_HAND, s));
+        }
+        if (sneaking)
+        {
+            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                    ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+        }
+        if (sprinting)
+        {
+            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                    ClientCommandC2SPacket.Mode.START_SPRINTING));
+        }
+        if (Modules.CRITICALS.isEnabled() && critTimer.passed(500))
+        {
+            if (!mc.player.isOnGround()
                     || mc.player.isRiding()
                     || mc.player.isSubmergedInWater()
                     || mc.player.isInLava()
@@ -546,151 +428,169 @@ public class AuraModule extends RotationModule
             {
                 return;
             }
-            if (crit)
-            {
-                Modules.CRITICALS.preAttackPacket();
-            }
+            Modules.CRITICALS.preAttackPacket();
+            critTimer.reset();
+            mc.player.addCritParticles(entity);
         }
     }
 
     /**
-     *
-     *
-     */
-    private void postAttack()
-    {
-        if (shielding)
-        {
-            Managers.NETWORK.sendSequencedPacket(s ->
-                    new PlayerInteractItemC2SPacket(Hand.OFF_HAND, s));
-        }
-        if (stopSprintConfig.getValue())
-        {
-            if (sneaking)
-            {
-                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                        ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
-            }
-            if (sprinting)
-            {
-                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                        ClientCommandC2SPacket.Mode.START_SPRINTING));
-            }
-        }
-    }
-
-    /**
-     *
      *
      * @param pos
-     * @param entities
      * @return
      */
-    private AuraTarget getAuraTarget(final Vec3d pos,
-                                     final Iterable<Entity> entities)
+    private Entity getAttackTarget(Vec3d pos)
     {
-        TreeSet<AuraTarget> targets = new TreeSet<>();
-        for (Entity e : entities)
+        double min = Double.MAX_VALUE;
+        Entity attackTarget = null;
+        for (Entity entity : mc.world.getEntities())
         {
-            if (e != null && e.isAlive() && e != mc.player && !Managers.SOCIAL.isFriend(e.getUuid()))
+            if (entity == null || entity == mc.player
+                    || !entity.isAlive() || !isEnemy(entity)
+                    || Managers.SOCIAL.isFriend(entity.getUuid())
+                    || entity instanceof EndCrystalEntity
+                    || entity instanceof ItemEntity
+                    || entity instanceof ArrowEntity
+                    || entity instanceof ExperienceBottleEntity
+                    || entity instanceof PlayerEntity player && player.isCreative())
             {
-                if (e instanceof EndCrystalEntity
-                        || e instanceof ItemEntity
-                        || e instanceof ArrowEntity
-                        || e instanceof ExperienceBottleEntity)
+                continue;
+            }
+            if (armorCheckConfig.getValue()
+                    && entity instanceof LivingEntity
+                    && !entity.getArmorItems().iterator().hasNext())
+            {
+                continue;
+            }
+            double dist = pos.distanceTo(entity.getPos());
+            if (isInAttackRange(dist, pos, entity))
+            {
+                if (entity.age < ticksExistedConfig.getValue())
                 {
                     continue;
                 }
-                if (mc.player.isRiding() && e == mc.player.getVehicle())
+                switch (priorityConfig.getValue())
                 {
-                    continue;
-                }
-                if (e instanceof PlayerEntity player && player.isCreative())
-                {
-                    continue;
-                }
-                // Range check
-                if (isEnemy(e))
-                {
-                    if (e.age < ticksExistedConfig.getValue())
+                    case DISTANCE ->
                     {
-                        continue;
-                    }
-                    Entity target = e;
-                    if (e instanceof PlayerEntity player
-                            && latencyPositionConfig.getValue())
-                    {
-                        FakePlayerEntity t = Managers.LATENCY.getTrackedPlayer(pos,
-                                player, maxLatencyConfig.getValue());
-                        if (t != null)
+                        if (dist < min)
                         {
-                            target = t;
+                            min = dist;
+                            attackTarget = entity;
                         }
                     }
-                    //
-                    final AuraTarget auraTarget = new AuraTarget(target);
-                    if (auraTarget.isInRange(pos))
+                    case HEALTH ->
                     {
-                        targets.add(auraTarget);
+                        if (entity instanceof LivingEntity e)
+                        {
+                            float health = e.getHealth() + e.getAbsorptionAmount();
+                            if (health < min)
+                            {
+                                min = health;
+                                attackTarget = entity;
+                            }
+                        }
+                    }
+                    case ARMOR ->
+                    {
+                        if (entity instanceof LivingEntity e)
+                        {
+                            float armor = getArmorDurability(e);
+                            if (armor < min)
+                            {
+                                min = armor;
+                                attackTarget = entity;
+                            }
+                        }
                     }
                 }
             }
         }
-        if (!targets.isEmpty())
-        {
-            return targets.last();
-        }
-        return null;
+        return attackTarget;
     }
 
     /**
      *
+     * @param e
+     * @return
+     */
+    private float getArmorDurability(LivingEntity e)
+    {
+        float edmg = 0.0f;
+        float emax = 0.0f;
+        for (ItemStack armor : e.getArmorItems())
+        {
+            if (armor != null && !armor.isEmpty())
+            {
+                edmg += armor.getDamage();
+                emax += armor.getMaxDamage();
+            }
+        }
+        return 100.0f - edmg / emax;
+    }
+
+    /**
+     *
+     * @param pos
+     * @param entity
+     * @return
+     */
+    public boolean isInAttackRange(Vec3d pos, Entity entity)
+    {
+        double dist = pos.distanceTo(entity.getPos());
+        return isInAttackRange(dist, pos, entity);
+    }
+
+    /**
+     *
+     * @param dist
+     * @param pos
+     * @param entity
+     * @return
+     */
+    public boolean isInAttackRange(double dist, Vec3d pos, Entity entity)
+    {
+        if (dist > rangeConfig.getValue())
+        {
+            return false;
+        }
+        BlockHitResult result = mc.world.raycast(new RaycastContext(
+                pos, entity.getPos(),
+                RaycastContext.ShapeType.COLLIDER,
+                RaycastContext.FluidHandling.NONE, mc.player));
+        if (result != null && dist > wallRangeConfig.getValue())
+        {
+            return false;
+        }
+        if (fovConfig.getValue() != 180.0f)
+        {
+            float[] rots = RotationUtil.getRotationsTo(pos, entity.getPos());
+            float diff = MathHelper.wrapDegrees(mc.player.getYaw()) - rots[0];
+            float magnitude = Math.abs(diff);
+            return magnitude <= fovConfig.getValue();
+        }
+        return true;
+    }
+
+    /**
      *
      * @return
      */
-    private int getWeaponSlot()
+    public boolean isHoldingSword()
     {
-        int sharp = -1;
-        int slot = -1;
-        // Maximize item attack damage
-        for (int i = 0; i < 9; i++)
-        {
-            final ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.getItem() instanceof SwordItem
-                    || stack.getItem() instanceof MiningToolItem)
-            {
-                int lvl = EnchantmentHelper.getLevel(Enchantments.SHARPNESS,
-                        stack);
-                if (lvl > sharp)
-                {
-                    sharp = lvl;
-                    slot = i;
-                }
-            }
-        }
-        return slot;
+        return !swordCheckConfig.getValue() || mc.player.getMainHandStack().getItem() instanceof SwordItem;
     }
 
-    /**
-     * Returns <tt>true</tt> if the player rotation vector is facing the param
-     * bounding {@link Box} of the target.
-     *
-     * @param dest The bounding box of the target
-     * @return <tt>true</tt> if the player is facing the target
-     */
-    private boolean checkFacing(final Box dest)
+    private Vec3d getAttackRotateVec(Entity entity)
     {
-        float yaw = Managers.ROTATION.getYaw();
-        float pitch = Managers.ROTATION.getPitch();
-        final Vec3d pos = Managers.POSITION.getCameraPosVec(1.0f);
-        final Vec3d rot = Vec3d.fromPolar(pitch, yaw);
-        final double maxReach = pos.distanceTo(dest.getCenter());
-        BlockHitResult result = mc.world.raycast(new RaycastContext(pos,
-                pos.add(rot.getX() * maxReach, rot.getY() * maxReach,
-                        rot.getZ() * maxReach),
-                RaycastContext.ShapeType.VISUAL,
-                RaycastContext.FluidHandling.ANY, mc.player));
-        return result != null && dest.contains(result.getPos());
+        Vec3d feetPos = entity.getPos();
+        return switch (hitVectorConfig.getValue())
+        {
+            case FEET -> feetPos;
+            case TORSO -> feetPos.add(0.0, entity.getHeight() / 2.0f, 0.0);
+            case EYES -> feetPos.add(0.0,
+                    entity.getStandingEyeHeight(), 0.0);
+        };
     }
 
     /**
@@ -700,13 +600,15 @@ public class AuraModule extends RotationModule
      * loop runs.
      *
      * @param dest The rotation
+     * @return
      */
-    private int setRotation(float[] dest)
+    private float[] getLimitRotation(float dest)
     {
         int tick;
+        float[] yawLimits;
         if (strictRotateConfig.getValue())
         {
-            float diff = dest[0] - Managers.ROTATION.getYaw(); // yaw diff
+            float diff = dest - Managers.ROTATION.getWrappedYaw(); // yaw diff
             float magnitude = Math.abs(diff);
             if (magnitude > 180.0f)
             {
@@ -743,14 +645,13 @@ public class AuraModule extends RotationModule
             tick = rotateTimeoutConfig.getValue() + 1;
             yawLimits = new float[tick];
             int off = tick - 1;
-            yawLimits[off] = dest[0];
+            yawLimits[off] = dest;
             for (int i = 1; i < tick; ++i)
             {
                 yawLimits[off - i] = 0.0f;
             }
         }
-        pitch = dest[1];
-        return yawLimits.length;
+        return yawLimits;
     }
 
     /**
@@ -763,7 +664,8 @@ public class AuraModule extends RotationModule
      */
     private boolean isEnemy(Entity e)
     {
-        return e instanceof PlayerEntity && playersConfig.getValue()
+        return (!e.isInvisible() || invisiblesConfig.getValue())
+                && e instanceof PlayerEntity && playersConfig.getValue()
                 || EntityUtil.isMonster(e) && monstersConfig.getValue()
                 || EntityUtil.isNeutral(e) && neutralsConfig.getValue()
                 || EntityUtil.isPassive(e) && animalsConfig.getValue();
@@ -787,181 +689,5 @@ public class AuraModule extends RotationModule
         HEALTH,
         DISTANCE,
         ARMOR
-    }
-
-    /**
-     *
-     *
-     *
-     */
-    public class AuraTarget implements Comparable<Entity>
-    {
-        //
-        private final Entity entity;
-
-        /**
-         *
-         *
-         * @param entity
-         */
-        public AuraTarget(Entity entity)
-        {
-            this.entity = entity;
-        }
-
-        /**
-         *
-         * @return
-         */
-        public boolean isValid()
-        {
-            return entity != null && entity.isAlive()
-                    && isInRange(Managers.POSITION.getEyePos());
-        }
-
-        /**
-         * Compares this object with the specified object for order.  Returns a
-         * negative integer, zero, or a positive integer as this object is less
-         * than, equal to, or greater than the specified object.
-         *
-         * @param o the object to be compared.
-         * @return a negative integer, zero, or a positive integer as this object
-         * is less than, equal to, or greater than the specified object.
-         * @throws NullPointerException if the specified object is null
-         * @throws ClassCastException   if the specified object's type prevents it
-         *                              from being compared to this object.
-         */
-        @Override
-        public int compareTo(Entity o)
-        {
-            Priority prio = priorityConfig.getValue();
-            if (InventoryUtil.isHolding32k())
-            {
-                prio = Priority.DISTANCE;
-            }
-            return switch (prio)
-            {
-                case HEALTH ->
-                {
-                    if (entity instanceof LivingEntity e
-                            && o instanceof LivingEntity other)
-                    {
-                        yield Float.compare(e.getHealth() + e.getAbsorptionAmount(),
-                                other.getHealth() + other.getAbsorptionAmount());
-                    }
-                    yield 0;
-                }
-                case DISTANCE ->
-                {
-                    Vec3d eyepos = Managers.POSITION.getEyePos();
-                    yield Double.compare(eyepos.distanceTo(entity.getPos()),
-                            eyepos.distanceTo(o.getPos()));
-                }
-                case ARMOR ->
-                {
-                    if (entity instanceof LivingEntity e
-                            && o instanceof LivingEntity other)
-                    {
-                        float edmg = 0.0f;
-                        float odmg = 0.0f;
-                        //
-                        float emax = 0.0f;
-                        float omax = 0.0f;
-                        for (ItemStack armor : e.getArmorItems())
-                        {
-                            if (armor != null && !armor.isEmpty())
-                            {
-                                edmg += armor.getDamage();
-                                emax += armor.getMaxDamage();
-                            }
-                        }
-                        for (ItemStack armor : other.getArmorItems())
-                        {
-                            if (armor != null && !armor.isEmpty())
-                            {
-                                odmg += armor.getDamage();
-                                omax = armor.getMaxDamage();
-                            }
-                        }
-                        float earmor = 100.0f - edmg / emax;
-                        float oarmor = 100.0f - odmg / omax;
-                        yield Float.compare(earmor, oarmor);
-                    }
-                    yield 0;
-                }
-            };
-        }
-
-        /**
-         *
-         *
-         * @param pos
-         * @return
-         */
-        public boolean isInRange(final Vec3d pos)
-        {
-            final Vec3d hitVec = getHitVec();
-            //
-            double dist = pos.distanceTo(hitVec);
-            if (dist > rangeConfig.getValue())
-            {
-                return false;
-            }
-            BlockHitResult result = mc.world.raycast(new RaycastContext(
-                    Managers.POSITION.getCameraPosVec(1.0f),
-                    hitVec, RaycastContext.ShapeType.COLLIDER,
-                    RaycastContext.FluidHandling.NONE, mc.player));
-            if (result != null && dist > wallRangeConfig.getValue())
-            {
-                return false;
-            }
-            if (fovConfig.getValue() != 180.0f)
-            {
-                float[] rots = RotationUtil.getRotationsTo(pos,
-                        target.getHitVec());
-                float diff = Managers.ROTATION.getWrappedYaw() - rots[0];
-                float magnitude = Math.abs(diff);
-                if (magnitude > fovConfig.getValue())
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /**
-         *
-         *
-         * @return
-         */
-        public Vec3d getHitVec()
-        {
-            return switch (hitVectorConfig.getValue())
-                    {
-                        case EYES -> VecUtil.toEyePos(entity);
-                        case FEET -> entity.getPos();
-                        case TORSO -> VecUtil.toTorsoPos(entity);
-                    };
-        }
-
-        /**
-         *
-         *
-         * @return
-         */
-        public Entity getEntity()
-        {
-            return entity;
-        }
-
-        /**
-         *
-         *
-         * @return
-         */
-        public Box getBoundingBox()
-        {
-            return entity.getBoundingBox();
-        }
     }
 }

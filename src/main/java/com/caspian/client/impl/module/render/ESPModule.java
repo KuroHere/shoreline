@@ -11,6 +11,7 @@ import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.config.ConfigUpdateEvent;
 import com.caspian.client.impl.event.entity.decoration.TeamColorEvent;
+import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.world.EntityUtil;
 import net.minecraft.block.entity.*;
 import net.minecraft.entity.Entity;
@@ -151,6 +152,7 @@ public class ESPModule extends ToggleModule
         {
             return;
         }
+        ChatUtil.clientSendMessage("lol");
         if (event.getConfig() == modeConfig && event.getStage() == EventStage.POST)
         {
             if (modeConfig.getValue() == ESPMode.GLOW)

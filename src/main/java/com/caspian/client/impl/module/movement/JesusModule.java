@@ -11,6 +11,7 @@ import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.entity.player.PlayerJumpEvent;
 import com.caspian.client.impl.event.network.MovementPacketsEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.impl.event.world.BlockCollisionEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
@@ -62,7 +63,7 @@ public class JesusModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
@@ -136,14 +137,10 @@ public class JesusModule extends ToggleModule
             }
             if (modeConfig.getValue() == JesusMode.SOLID)
             {
-                if (!strictConfig.getValue())
-                {
-                    floatOffset = floatOffset == 0.05 ? 0.0 : 0.05;
-                }
                 if (isInFluid() || mc.player.fallDistance > 3.0f
                         || mc.player.isSneaking())
                 {
-                    floatOffset = 0.0;
+                    // floatOffset = 0.0;
                 }
                 if (!mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed())
                 {
@@ -177,7 +174,7 @@ public class JesusModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled())
         {
@@ -237,6 +234,10 @@ public class JesusModule extends ToggleModule
                 && isOnFluid() && mc.player.fallDistance <= 3.0f)
         {
             double y = packet.getY(mc.player.getY());
+            if (!strictConfig.getValue())
+            {
+                floatOffset = mc.player.age % 2 == 0 ? 0.0 : 0.05;
+            }
             ((AccessorPlayerMoveC2SPacket) packet).hookSetY(y - floatOffset);
             if (strictConfig.getValue())
             {

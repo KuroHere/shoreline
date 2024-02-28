@@ -20,6 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 /**
  *
@@ -95,52 +96,53 @@ public class BlockLagModule extends PlaceBlockModule
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (event.getStage() == EventStage.PRE)
+        if (event.getStage() != EventStage.PRE)
         {
-            if (prevPos != mc.player.getBlockPos() || !mc.player.isOnGround())
+            return;
+        }
+        if (prevPos != mc.player.getBlockPos() || !mc.player.isOnGround())
+        {
+            disable();
+            return;
+        }
+        final BlockPos pos = BlockPos.ofFloored(mc.player.getX(),
+                mc.player.getY(), mc.player.getZ());
+        final BlockState state = mc.world.getBlockState(pos);
+        if (!isInsideBlock(state))
+        {
+            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                    mc.player.getX(), mc.player.getY() + 0.41999998688698,
+                    mc.player.getZ(), true));
+            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                    mc.player.getX(), mc.player.getY() + 0.7531999805211997,
+                    mc.player.getZ(), true));
+            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                    mc.player.getX(), mc.player.getY() + 1.00133597911214,
+                    mc.player.getZ(), true));
+            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                    mc.player.getX(), mc.player.getY() + 1.16610926093821,
+                    mc.player.getZ(), true));
+            Managers.POSITION.setPosition(mc.player.getX(),
+                    mc.player.getY() + 1.16610926093821, mc.player.getZ());
+            placeBlockResistant(pos);
+            if (selfFillConfig.getValue())
             {
-                disable();
-                return;
-            }
-            BlockPos pos = BlockPos.ofFloored(mc.player.getX(),
-                    mc.player.getY(), mc.player.getZ());
-            BlockState state = mc.world.getBlockState(pos);
-            if (!isInsideBlock(state))
-            {
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        mc.player.getX(), mc.player.getY() + 0.41999998688698,
-                        mc.player.getZ(), true));
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        mc.player.getX(), mc.player.getY() + 0.7531999805211997,
-                        mc.player.getZ(), true));
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        mc.player.getX(), mc.player.getY() + 1.00133597911214,
-                        mc.player.getZ(), true));
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        mc.player.getX(), mc.player.getY() + 1.16610926093821,
-                        mc.player.getZ(), true));
                 Managers.POSITION.setPosition(mc.player.getX(),
-                        mc.player.getY() + 1.16610926093821, mc.player.getZ());
-                placeBlock(pos, rotateConfig.getValue());
-                if (selfFillConfig.getValue())
-                {
-                    Managers.POSITION.setPosition(mc.player.getX(),
-                            mc.player.getY() - 0.16610926093821,
-                            mc.player.getZ());
-                }
-                else
-                {
-                    Managers.POSITION.setPosition(mc.player.getX(),
-                            mc.player.getY() - 1.16610926093821, mc.player.getZ());
-                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                            mc.player.getX(), mc.player.getY() + getLagOffset(),
-                            mc.player.getZ(), false));
-                }
+                        mc.player.getY() - 0.16610926093821,
+                        mc.player.getZ());
             }
-            if (autoDisableConfig.getValue())
+            else
             {
-                disable();
+                Managers.POSITION.setPosition(mc.player.getX(),
+                        mc.player.getY() - 1.16610926093821, mc.player.getZ());
+                final Vec3d dist = getLagOffsetVec();
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        dist.x, dist.y, dist.z, false));
             }
+        }
+        if (autoDisableConfig.getValue())
+        {
+            disable();
         }
     }
 
@@ -158,8 +160,9 @@ public class BlockLagModule extends PlaceBlockModule
      *
      * @return
      */
-    public double getLagOffset()
+    public Vec3d getLagOffsetVec()
     {
-        return 3.5;
+        return new Vec3d(mc.player.getX(), mc.player.getY() + 3.5,
+                mc.player.getZ());
     }
 }

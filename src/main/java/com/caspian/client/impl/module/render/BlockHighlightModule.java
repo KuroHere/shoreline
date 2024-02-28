@@ -12,6 +12,8 @@ import com.caspian.client.impl.event.render.RenderBlockOutlineEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -53,7 +55,7 @@ public class BlockHighlightModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(distance);
@@ -87,12 +89,9 @@ public class BlockHighlightModule extends ToggleModule
             {
                 //
                 BlockPos hpos = ((BlockHitResult) result).getBlockPos();
-                final VoxelShape shape = mc.world.getBlockState(hpos)
-                        .getOutlineShape(mc.world, hpos);
-                if (!shape.isEmpty())
-                {
-                    render = shape.getBoundingBox();
-                }
+                BlockState state = mc.world.getBlockState(hpos);
+                VoxelShape shape = state.getOutlineShape(mc.world, hpos);
+                render = shape.getBoundingBox();
                 // render = new Box(hpos);
                 distance = pos.distanceTo(hpos.toCenterPos());
             }

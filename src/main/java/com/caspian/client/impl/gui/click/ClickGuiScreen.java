@@ -205,6 +205,11 @@ public class ClickGuiScreen extends Screen implements Globals
     public void close()
     {
         module.disable();
+        //
+        MOUSE_LEFT_CLICK = false;
+        MOUSE_LEFT_HOLD = false;
+        MOUSE_RIGHT_CLICK = false;
+        MOUSE_RIGHT_HOLD = false;
         super.close();
     }
 }

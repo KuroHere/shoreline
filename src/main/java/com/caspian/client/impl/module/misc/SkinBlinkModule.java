@@ -80,6 +80,7 @@ public class SkinBlinkModule extends ToggleModule
                 mc.options.togglePlayerModelPart(modelPart, randomConfig.getValue() ?
                         Math.random() < 0.5 : !currentModelParts.contains(modelPart));
             }
+            blinkTimer.reset();
         }
     }
 }

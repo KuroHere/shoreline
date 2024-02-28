@@ -46,6 +46,7 @@ public class Modules
     public static AutoArmorModule AUTO_ARMOR;
     public static AutoBowReleaseModule AUTO_BOW_RELEASE;
     public static AutoCrystalModule AUTO_CRYSTAL;
+    public static AutoLogModule AUTO_LOG;
     public static AutoPotModule AUTO_POT;
     public static AutoTotemModule AUTO_TOTEM;
     public static BlockLagModule BLOCK_LAG;
@@ -73,11 +74,13 @@ public class Modules
     public static AntiBookBanModule ANTI_BOOK_BAN;
     public static AntiSpamModule ANTI_SPAM;
     public static AutoAcceptModule AUTO_ACCEPT;
+    public static AutoEatModule AUTO_EAT;
     public static AntiVanishModule ANTI_VANISH;
     public static AutoFishModule AUTO_FISH;
     public static AutoMountModule AUTO_MOUNT;
     public static AutoReconnectModule AUTO_RECONNECT;
     public static AutoRespawnModule AUTO_RESPAWN;
+    public static BeaconSelectorModule BEACON_SELECTOR;
     public static ChestAuraModule CHEST_AURA;
     public static FakePlayerModule FAKE_PLAYER;
     public static InvCleanerModule INV_CLEANER;
@@ -112,6 +115,7 @@ public class Modules
     // Render
     public static BlockHighlightModule BLOCK_HIGHLIGHT;
     public static BreakHighlightModule BREAK_HIGHLIGHT;
+    public static ChamsModule CHAMS;
     public static ESPModule ESP;
     public static ExtraTabModule EXTRA_TAB;
     public static FullbrightModule FULLBRIGHT;
@@ -129,6 +133,7 @@ public class Modules
     public static ViewClipModule VIEW_CLIP;
     // public static ViewModelModule VIEW_MODEL;
     // World
+    public static AntiInteractModule ANTI_INTERACT;
     public static AvoidModule AVOID;
     public static FastDropModule FAST_DROP;
     public static FastPlaceModule FAST_PLACE;
@@ -187,6 +192,7 @@ public class Modules
                     "autobowrelease-module");
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
                     "autocrystal-module");
+            AUTO_LOG = (AutoLogModule) getRegisteredModule("autolog-module");
             AUTO_POT = (AutoPotModule) getRegisteredModule("autopot-module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(
                     "autototem-module");
@@ -225,6 +231,7 @@ public class Modules
             ANTI_SPAM = (AntiSpamModule) getRegisteredModule("antispam-module");
             AUTO_ACCEPT = (AutoAcceptModule) getRegisteredModule(
                     "autoaccept-module");
+            AUTO_EAT = (AutoEatModule) getRegisteredModule("autoeat-module");
             ANTI_VANISH = (AntiVanishModule) getRegisteredModule(
                     "antivanish-module");
             AUTO_FISH = (AutoFishModule) getRegisteredModule("autofish-module");
@@ -233,6 +240,8 @@ public class Modules
                     "autoreconnect-module");
             AUTO_RESPAWN = (AutoRespawnModule) getRegisteredModule(
                     "autorespawn-module");
+            BEACON_SELECTOR = (BeaconSelectorModule) getRegisteredModule(
+                    "beaconselector-module");
             CHEST_AURA = (ChestAuraModule) getRegisteredModule("chestaura-module");
             FAKE_PLAYER = (FakePlayerModule) getRegisteredModule(
                     "fakeplayer-module");
@@ -276,10 +285,12 @@ public class Modules
                     "blockhighlight-module");
             BREAK_HIGHLIGHT = (BreakHighlightModule) getRegisteredModule(
                     "breakhighlight-module");
+            CHAMS = (ChamsModule) getRegisteredModule("chams-module");
             ESP = (ESPModule) getRegisteredModule("esp-module");
             EXTRA_TAB = (ExtraTabModule) getRegisteredModule("extratab-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule(
                     "fullbright-module");
+            HOLE_ESP = (HoleESPModule) getRegisteredModule("holeesp-module");
             NAME_PROTECT = (NameProtectModule) getRegisteredModule(
                     "nameprotect-module");
             NAMETAGS = (NametagsModule) getRegisteredModule("nametags-module");
@@ -296,6 +307,8 @@ public class Modules
                     "viewclip-module");
             // VIEW_MODEL = (ViewModelModule) getRegisteredModule(
             //        "viewmodel-module");
+            ANTI_INTERACT = (AntiInteractModule) getRegisteredModule(
+                    "antiinteract-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");
             FAST_DROP = (FastDropModule) getRegisteredModule("fastdrop-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule(

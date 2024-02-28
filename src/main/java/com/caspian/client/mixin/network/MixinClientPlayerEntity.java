@@ -7,6 +7,7 @@ import com.caspian.client.impl.event.entity.player.PlayerMoveEvent;
 import com.caspian.client.impl.event.network.*;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.Globals;
+import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.Input;
@@ -108,12 +109,14 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
             cancellable = true)
     private void hookSendMovementPackets(CallbackInfo ci)
     {
-
+        PlayerUpdateEvent playerUpdateEvent = new PlayerUpdateEvent();
+        playerUpdateEvent.setStage(EventStage.PRE);
+        Caspian.EVENT_HANDLER.dispatch(playerUpdateEvent);
+        //
         MovementPacketsEvent movementPacketsEvent =
                 new MovementPacketsEvent(mc.player.getX(), mc.player.getY(),
                         mc.player.getZ(), mc.player.getYaw(),
                         mc.player.getPitch(), mc.player.isOnGround());
-        movementPacketsEvent.setStage(EventStage.PRE);
         Caspian.EVENT_HANDLER.dispatch(movementPacketsEvent);
         if (movementPacketsEvent.isCanceled())
         {
@@ -136,14 +139,6 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                 float yaw = movementPacketsEvent.getYaw();
                 float pitch = movementPacketsEvent.getPitch();
                 boolean ground = movementPacketsEvent.getOnGround();
-                //
-                final RotationRequest request =
-                        Managers.ROTATION.getCurrentRotation();
-                if (request != null)
-                {
-                    yaw = request.getYaw();
-                    pitch = request.getPitch();
-                }
                 //
                 double d = x - lastX;
                 double e = y - lastBaseY;
@@ -198,8 +193,8 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                 autoJumpEnabled = client.options.getAutoJump().getValue();
             }
         }
-        movementPacketsEvent.setStage(EventStage.POST);
-        Caspian.EVENT_HANDLER.dispatch(movementPacketsEvent);
+        playerUpdateEvent.setStage(EventStage.POST);
+        Caspian.EVENT_HANDLER.dispatch(playerUpdateEvent);
     }
 
     //
@@ -354,7 +349,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         if (mountJumpStrengthEvent.isCanceled())
         {
             cir.cancel();
-            cir.setReturnValue(1.0f);
+            cir.setReturnValue(mountJumpStrengthEvent.getJumpStrength());
         }
     }
 }

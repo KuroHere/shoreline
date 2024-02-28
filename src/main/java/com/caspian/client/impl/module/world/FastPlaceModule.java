@@ -68,23 +68,24 @@ public class FastPlaceModule extends ToggleModule
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (event.getStage() == EventStage.PRE)
+        if (event.getStage() != EventStage.PRE)
         {
-            if (!mc.options.useKey.isPressed())
+            return;
+        }
+        if (!mc.options.useKey.isPressed())
+        {
+            startTimer.reset();
+        }
+        else if (startTimer.passed(startDelayConfig.getValue(), TimeUnit.SECONDS)
+                && ((AccessorMinecraftClient) mc).hookGetItemUseCooldown() > delayConfig.getValue()
+                && placeCheck(mc.player.getMainHandStack()))
+        {
+            if (ghostFixConfig.getValue())
             {
-                startTimer.reset();
+                Managers.NETWORK.sendSequencedPacket(id ->
+                        new PlayerInteractItemC2SPacket(mc.player.getActiveHand(), id));
             }
-            else if (placeCheck(mc.player.getMainHandStack())
-                    && startTimer.passed(startDelayConfig.getValue(), TimeUnit.SECONDS)
-                    && ((AccessorMinecraftClient) mc).hookGetItemUseCooldown() > delayConfig.getValue())
-            {
-                if (ghostFixConfig.getValue())
-                {
-                    Managers.NETWORK.sendSequencedPacket(id ->
-                            new PlayerInteractItemC2SPacket(mc.player.getActiveHand(), id));
-                }
-                ((AccessorMinecraftClient) mc).hookSetItemUseCooldown(delayConfig.getValue());
-            }
+            ((AccessorMinecraftClient) mc).hookSetItemUseCooldown(delayConfig.getValue());
         }
     }
 
@@ -96,18 +97,19 @@ public class FastPlaceModule extends ToggleModule
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
-        if (mc.player != null && mc.world != null)
+        if (mc.player == null || mc.world == null)
         {
-            if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet
-                    && ghostFixConfig.getValue() && !event.isClientPacket()
-                    && placeCheck(mc.player.getStackInHand(packet.getHand())))
+            return;
+        }
+        if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet
+                && ghostFixConfig.getValue() && !event.isClientPacket()
+                && placeCheck(mc.player.getStackInHand(packet.getHand())))
+        {
+            final BlockState state = mc.world.getBlockState(
+                    packet.getBlockHitResult().getBlockPos());
+            if (!SneakBlocks.isSneakBlock(state))
             {
-                final BlockState state = mc.world.getBlockState(
-                        packet.getBlockHitResult().getBlockPos());
-                if (!SneakBlocks.isSneakBlock(state))
-                {
-                    event.cancel();
-                }
+                event.cancel();
             }
         }
     }

@@ -5,6 +5,7 @@ import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
 import com.caspian.client.impl.event.ScreenOpenEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.gui.beacon.BeaconSelectorScreen;
 import com.caspian.client.mixin.accessor.AccessorUpdateBeaconC2SPacket;
 import net.minecraft.client.gui.screen.ingame.BeaconScreen;
 import net.minecraft.entity.effect.StatusEffect;
@@ -64,42 +65,9 @@ public class BeaconSelectorModule extends ToggleModule
         {
             event.cancel();
             customBeacon = true;
-            mc.setScreen(new CustomBeaconScreen(screen.getScreenHandler(),
+            mc.setScreen(new BeaconSelectorScreen(screen.getScreenHandler(),
                     mc.player.getInventory(), screen.getTitle()));
             customBeacon = false;
         }
-    }
-
-    /**
-     *
-     */
-    public class CustomBeaconScreen extends BeaconScreen
-    {
-
-        public CustomBeaconScreen(BeaconScreenHandler handler,
-                                  PlayerInventory inventory,
-                                  Text title)
-        {
-            super(handler, inventory, title);
-        }
-
-        /**
-         *
-         */
-        @Override
-        public void init()
-        {
-            super.init();
-        }
-
-        /**
-         *
-         */
-        @Override
-        public void handledScreenTick()
-        {
-            super.handledScreenTick();
-        }
-
     }
 }

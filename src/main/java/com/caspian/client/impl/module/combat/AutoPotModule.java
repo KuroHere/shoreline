@@ -6,8 +6,8 @@ import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
-import com.caspian.client.api.module.ToggleModule;
-import com.caspian.client.impl.event.network.MovementPacketsEvent;
+import com.caspian.client.api.module.RotationModule;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import com.caspian.client.util.math.timer.CacheTimer;
@@ -31,7 +31,7 @@ import java.util.List;
  * @author linus
  * @since 1.0
  */
-public class AutoPotModule extends ToggleModule
+public class AutoPotModule extends RotationModule
 {
     //
     Config<Float> healthConfig = new NumberConfig<>("Health", "The minimum " +
@@ -76,7 +76,7 @@ public class AutoPotModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (!mc.player.isOnGround() && onGroundConfig.getValue())
         {
@@ -127,7 +127,7 @@ public class AutoPotModule extends ToggleModule
                 }
                 else
                 {
-                    event.setPitch(90.0f);
+                    setRotation(mc.player.getYaw(), 90.0f);
                     potion = true;
                     // potionTimer.reset();
                 }

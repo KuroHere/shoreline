@@ -79,20 +79,21 @@ public class AutoEatModule extends ToggleModule
         if (hungerManager.getFoodLevel() <= hungerConfig.getValue())
         {
             int slot = getFoodSlot();
-            if (slot != -1)
+            if (slot == -1)
             {
-                if (slot == 45)
-                {
-                    mc.player.setCurrentHand(Hand.OFF_HAND);
-                }
-                else
-                {
-                    prevSlot = mc.player.getInventory().selectedSlot;
-                    mc.player.getInventory().selectedSlot = slot;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
-                }
-                KeyBinding.setKeyPressed(((AccessorKeyBinding) mc.options.useKey).getBoundKey(), true);
+                return;
             }
+            if (slot == 45)
+            {
+                mc.player.setCurrentHand(Hand.OFF_HAND);
+            }
+            else
+            {
+                prevSlot = mc.player.getInventory().selectedSlot;
+                mc.player.getInventory().selectedSlot = slot;
+                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+            }
+            KeyBinding.setKeyPressed(((AccessorKeyBinding) mc.options.useKey).getBoundKey(), true);
         }
     }
 

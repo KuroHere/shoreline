@@ -35,7 +35,7 @@ import java.util.Set;
 /**
  *
  *
- * @author Gavin
+ * @author Gavin, linus
  * @since 1.0
  */
 public class VelocityModule extends ToggleModule
@@ -75,7 +75,7 @@ public class VelocityModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         if (modeConfig.getValue() == VelocityMode.NORMAL)
         {

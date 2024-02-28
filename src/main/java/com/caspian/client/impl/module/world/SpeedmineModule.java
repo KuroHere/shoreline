@@ -12,6 +12,7 @@ import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.AttackBlockEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
@@ -93,7 +94,7 @@ public class SpeedmineModule extends RotationModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(damage);
@@ -119,7 +120,7 @@ public class SpeedmineModule extends RotationModule
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (event.getStage() == EventStage.PRE && !mc.player.isCreative())
         {
@@ -146,74 +147,70 @@ public class SpeedmineModule extends RotationModule
                     damage = 0.0f;
                     remines = 0;
                 }
-                else if (damage > 1.0f)
+                else if (damage > 1.0f && !Modules.AUTO_CRYSTAL.isAttacking()
+                        && !Modules.AUTO_CRYSTAL.isPlacing())
                 {
-                    if (!Modules.AUTO_CRYSTAL.isAttacking()
-                            && !Modules.AUTO_CRYSTAL.isPlacing()
-                            && !Modules.AUTO_CRYSTAL.isRotating())
+                    if (swapConfig.getValue() == Swap.NORMAL)
                     {
-                        if (swapConfig.getValue() == Swap.NORMAL)
+                        swap(slot);
+                    }
+                    else if (swapConfig.getValue() == Swap.SILENT)
+                    {
+                        if (strictConfig.getValue())
+                        {
+                            // Managers.NETWORK.sendPacket(new ClickSlotC2SPacket(
+                            //        mc.player.getInventory(),
+                            //        mc.player.getInventory().selectedSlot,
+                            //        SlotActionType.SWAP,
+                            //        mc.player));
+                        }
+                        else
                         {
                             swap(slot);
                         }
-                        else if (swapConfig.getValue() == Swap.SILENT)
-                        {
-                            if (strictConfig.getValue())
-                            {
-                                // Managers.NETWORK.sendPacket(new ClickSlotC2SPacket(
-                                //        mc.player.getInventory(),
-                                //        mc.player.getInventory().selectedSlot,
-                                //        SlotActionType.SWAP,
-                                //        mc.player));
-                            }
-                            else
-                            {
-                                swap(slot);
-                            }
-                        }
-                        if (rotateConfig.getValue())
-                        {
-                            float[] rots = RotationUtil.getRotationsTo(Managers.POSITION.getCameraPosVec(1.0f),
-                                    mining.toCenterPos());
-                            setRotation(RotationPriority.HIGH, rots[0], rots[1]);
-                        }
-                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                                PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                                mining, direction));
+                    }
+                    if (rotateConfig.getValue())
+                    {
+                        float[] rots = RotationUtil.getRotationsTo(Managers.POSITION.getCameraPosVec(1.0f),
+                                mining.toCenterPos());
+                        setRotation(RotationPriority.SPEEDMINE, rots[0], rots[1]);
+                    }
+                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                            PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                            mining, direction));
+                    if (fastConfig.getValue())
+                    {
                         Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                                 PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
                                 mining, Direction.UP));
-                        if (fastConfig.getValue())
-                        {
-                            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                                    PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
-                                    mining, direction));
-                        }
+                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                                PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
+                                mining, direction));
                         Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                                 PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
                                 mining, direction));
-                        if (swapConfig.getValue() == Swap.SILENT)
+                    }
+                    if (swapConfig.getValue() == Swap.SILENT)
+                    {
+                        if (prev != -1)
                         {
-                            if (prev != -1)
+                            if (strictConfig.getValue())
                             {
-                                if (strictConfig.getValue())
-                                {
 
-                                }
-                                else
-                                {
-                                    swap(prev);
-                                }
+                            }
+                            else
+                            {
+                                swap(prev);
                             }
                         }
-                        // reset, this position needs to be remined if we
-                        // attempt to mine again
-                        if (remineFullConfig.getValue())
-                        {
-                            damage = 0.0f;
-                        }
-                        remines++;
                     }
+                    // reset, this position needs to be remined if we
+                    // attempt to mine again
+                    if (remineFullConfig.getValue())
+                    {
+                        damage = 0.0f;
+                    }
+                    remines++;
                 }
                 else
                 {

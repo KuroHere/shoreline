@@ -19,6 +19,7 @@ public class ColorConfig extends Config<Color>
 {
     // RGB value of the current Color value
     private int rgb;
+    private int alpha;
     //
     private boolean global;
     public static final Integer GLOBAL_COLOR = -0xffffffff;

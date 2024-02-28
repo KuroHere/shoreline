@@ -48,6 +48,11 @@ public class Hole implements Position
         return entity.squaredDistanceTo(getCenter());
     }
 
+    public boolean isStandard()
+    {
+        return holeOffsets.size() == 5;
+    }
+
     public boolean isDouble()
     {
         return holeOffsets.size() == 8;
@@ -55,12 +60,12 @@ public class Hole implements Position
 
     public boolean isDoubleX()
     {
-        return isDouble() && holeOffsets.contains(origin.add(1, 0, 0));
+        return isDouble() && holeOffsets.contains(origin.add(2, 0, 0));
     }
 
     public boolean isDoubleZ()
     {
-        return isDouble() && holeOffsets.contains(origin.add(0, 0, -1));
+        return isDouble() && holeOffsets.contains(origin.add(0, 0, 2));
     }
 
     public boolean isQuad()

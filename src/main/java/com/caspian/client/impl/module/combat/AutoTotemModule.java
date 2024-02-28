@@ -67,7 +67,7 @@ public class AutoTotemModule extends ToggleModule
             "GOLDEN_APPLE when trying to use an item", false);
     Config<Boolean> offhandPotionConfig = new BooleanConfig("Offhand-Potions",
             "Uses potions in the inventory before gapples", false);
-    Config<Boolean> hotbarConfig = new BooleanConfig("HotbarItem",
+    Config<Boolean> hotbarConfig = new BooleanConfig("AllowHotbar",
             "Allow offhand items to be taken from the hotbar", false);
     Config<Boolean> noCollisionConfig = new BooleanConfig("CollisionTotem",
             "If the mainhand is already holding the item in the offhand, " +
@@ -75,7 +75,7 @@ public class AutoTotemModule extends ToggleModule
     Config<Boolean> crappleConfig = new BooleanConfig("Crapple",
             "Attempts to take an advantage of a glitch in older versions to " +
                     "fully restore absorption hearts", false);
-    Config<Boolean> crystalCheckConfig = new BooleanConfig("CrystalCheck",
+    Config<Boolean> crystalCheckConfig = new BooleanConfig("Crystal-Check",
             "Checks if a crystal is needed in the offhand", false);
     Config<Boolean> hotbarTotemConfig = new BooleanConfig("HotbarTotem",
             "Attempts to swap totems into the offhand from the hotbar", false);
@@ -122,7 +122,7 @@ public class AutoTotemModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         return Integer.toString(totems);
     }
@@ -235,7 +235,7 @@ public class AutoTotemModule extends ToggleModule
                     }
                     if (lethalConfig.getValue())
                     {
-                        int fall = getFallDamage(mc.player.fallDistance);
+                        int fall = computeFallDamage(mc.player.fallDistance);
                         if (health + 0.5 <= fall)
                         {
                             offhand = Items.TOTEM_OF_UNDYING;
@@ -486,7 +486,7 @@ public class AutoTotemModule extends ToggleModule
      * @param fallDistance
      * @return
      */
-    private int getFallDamage(float fallDistance)
+    private int computeFallDamage(float fallDistance)
     {
         StatusEffectInstance statusEffectInstance = mc.player.getStatusEffect(StatusEffects.JUMP_BOOST);
         float f = statusEffectInstance == null ? 0.0f :

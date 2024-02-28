@@ -52,7 +52,7 @@ public class EntitySpeedModule extends ToggleModule
      * @return
      */
     @Override
-    public String getMetaData()
+    public String getModuleData()
     {
         DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(speedConfig.getValue());
@@ -138,13 +138,16 @@ public class EntitySpeedModule extends ToggleModule
         {
             return;
         }
-        if (event.getPacket() instanceof EntityPassengersSetS2CPacket && strictConfig.getValue())
+        if (strictConfig.getValue())
         {
-            event.cancel();
-        }
-        else if (event.getPacket() instanceof PlayerPositionLookS2CPacket && strictConfig.getValue())
-        {
-            event.cancel();
+            if (event.getPacket() instanceof EntityPassengersSetS2CPacket)
+            {
+                event.cancel();
+            }
+            else if (event.getPacket() instanceof PlayerPositionLookS2CPacket)
+            {
+                event.cancel();
+            }
         }
     }
 

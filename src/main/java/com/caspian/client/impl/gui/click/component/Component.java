@@ -313,22 +313,19 @@ public abstract class Component implements Drawable, Globals
                                    TextRenderer textRenderer, String text,
                                    double x, double y, int color)
     {
-        textRenderer.drawWithShadow(matrices, text, (float) x, (float) y,
-                color);
+        textRenderer.drawWithShadow(matrices, text, (float) x, (float) y, color);
     }
 
     public void drawTextWithShadow(MatrixStack matrices, TextRenderer textRenderer,
                                    OrderedText text, double x, double y, int color)
     {
-        textRenderer.drawWithShadow(matrices, text, (float) x, (float) y,
-                color);
+        textRenderer.drawWithShadow(matrices, text, (float) x, (float) y, color);
     }
 
     public void drawTextWithShadow(MatrixStack matrices, TextRenderer textRenderer,
                                    Text text, double x, double y, int color)
     {
-        textRenderer.drawWithShadow(matrices, text, (float) x, (float) y,
-                color);
+        textRenderer.drawWithShadow(matrices, text, (float) x, (float) y, color);
     }
 
     public void drawWithOutline(int x, int y, BiConsumer<Integer, Integer> renderAction)

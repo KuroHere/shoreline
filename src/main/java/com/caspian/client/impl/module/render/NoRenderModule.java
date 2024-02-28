@@ -76,10 +76,12 @@ public class NoRenderModule extends ToggleModule
             "Prevents campfire particles from rendering", false);
     Config<Boolean> totemConfig = new BooleanConfig("Totems",
             "Prevents totem particles from rendering", false);
-    Config<Boolean> unicodeConfig = new BooleanConfig("UnicodeChat",
+    Config<Boolean> unicodeConfig = new BooleanConfig("Chat-Unicode",
             "Prevents unicode characters from being rendered in chat", false);
     Config<Boolean> worldBorderConfig = new BooleanConfig("WorldBorder",
             "Prevents world border from rendering", false);
+    Config<Boolean> interpolationConfig = new BooleanConfig("Interpolation",
+            "Entities will be rendered at their server positions", false);
     Config<FogRender> fogConfig = new EnumConfig<>("Fog", "Prevents fog from " +
             "rendering in the world", FogRender.OFF, FogRender.values());
     Config<ItemRender> itemsConfig = new EnumConfig<>("Items",

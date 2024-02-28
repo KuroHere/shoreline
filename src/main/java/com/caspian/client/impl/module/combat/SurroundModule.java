@@ -5,21 +5,22 @@ import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
+import com.caspian.client.api.manager.player.rotation.RotationPriority;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.PlaceBlockModule;
-import com.caspian.client.api.module.ToggleModule;
+import com.caspian.client.api.render.RenderManager;
 import com.caspian.client.impl.event.ScreenOpenEvent;
-import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.DisconnectEvent;
 import com.caspian.client.impl.event.network.PacketEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
+import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
+import com.caspian.client.init.Modules;
+import com.caspian.client.util.player.RotationUtil;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.entity.Entity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundCategory;
@@ -27,7 +28,6 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,15 +49,26 @@ public class SurroundModule extends PlaceBlockModule
             "Places on visible sides only", false);
     Config<Boolean> attackConfig = new BooleanConfig("Attack", "Attacks " +
             "crystals in the way of surround", true);
+    Config<Boolean> centerConfig = new BooleanConfig("Center", "Centers the" +
+            " player before placing blocks", false);
     Config<Boolean> extendConfig = new BooleanConfig("Extend", "Extends " +
-            "surround if the player is not in the center of a block", true);
+            "surround if the player is not in the center of a block", true,
+            () -> !centerConfig.getValue());
     Config<Boolean> floorConfig = new BooleanConfig("Floor", "Creates a " +
             "floor for the surround if there is none", false);
+    Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The" +
+            " number of blocks to place per tick", 1, 2, 5);
+    Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay",
+            "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> jumpDisableConfig = new BooleanConfig("AutoDisable",
             "Disables after moving out of the hole", true);
+    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders" +
+            " block placements of the surround", false);
     //
     private List<BlockPos> surround = new ArrayList<>();
-    private final List<BlockPos> placements = new ArrayList<>();
+    private List<BlockPos> placements = new ArrayList<>();
+    private int blocksPlaced;
+    private int shiftDelay;
     //
     private double prevY;
 
@@ -75,10 +86,18 @@ public class SurroundModule extends PlaceBlockModule
     @Override
     public void onEnable()
     {
-        if (mc.player != null)
+        if (mc.player == null)
         {
-            prevY = mc.player.getY();
+            return;
         }
+        if (centerConfig.getValue())
+        {
+            double x = Math.floor(mc.player.getX()) + 0.5;
+            double z = Math.floor(mc.player.getZ()) + 0.5;
+            Managers.POSITION.setPositionXZ(x, z);
+        }
+        // mc.inGameHud.getChatHud().addMessage();
+        prevY = mc.player.getY();
     }
 
     /**
@@ -109,10 +128,12 @@ public class SurroundModule extends PlaceBlockModule
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
+        // Do we need this check?? Surround is always highest prio
         if (event.getStage() == EventStage.PRE)
         {
+            blocksPlaced = 0;
             if (jumpDisableConfig.getValue() && mc.player.getY() > prevY)
             {
                 disable();
@@ -120,23 +141,51 @@ public class SurroundModule extends PlaceBlockModule
             }
             BlockPos pos = BlockPos.ofFloored(mc.player.getX(),
                     mc.player.getY(), mc.player.getZ());
+            if (shiftDelay < shiftDelayConfig.getValue())
+            {
+                shiftDelay++;
+                return;
+            }
             //
             // surround.clear();
-            placements.clear();
+            // placements.clear();
             surround = getSurroundPositions(pos);
-            for (BlockPos p : surround)
+            placements = surround.stream().filter(p -> mc.world.isAir(p)).toList();
+            while (blocksPlaced < shiftTicksConfig.getValue()
+                    && !placements.isEmpty())
             {
-                if (mc.world.isAir(p))
+                if (blocksPlaced >= placements.size())
                 {
-                    placements.add(p);
+                    break;
                 }
-            }
-            if (!placements.isEmpty())
-            {
-                placeBlocks(placements, rotateConfig.getValue(),
+                BlockPos targetPos = placements.get(blocksPlaced);
+                if (rotateConfig.getValue())
+                {
+                    float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+                            targetPos.toCenterPos());
+                    // All rotations for shift ticks must send extra packet
+                    // This may not work on all servers
+                    if (blocksPlaced == 0)
+                    {
+                        setRotation(RotationPriority.SURROUND, rots[0], rots[1]);
+                    }
+                    else
+                    {
+                        Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
+                                rots[0], rots[1], mc.player.isOnGround()));
+                    }
+                }
+                placeBlockResistant(targetPos,
                         strictDirectionConfig.getValue());
+                blocksPlaced++;
+                shiftDelay = 0;
             }
         }
+    }
+
+    public boolean isPlacing()
+    {
+        return isEnabled() && !placements.isEmpty();
     }
 
     /**
@@ -147,7 +196,7 @@ public class SurroundModule extends PlaceBlockModule
      */
     public List<BlockPos> getSurroundPositions(BlockPos pos)
     {
-        final List<BlockPos> entities = new ArrayList<>();
+        List<BlockPos> entities = new ArrayList<>();
         entities.add(pos);
         if (extendConfig.getValue())
         {
@@ -166,12 +215,11 @@ public class SurroundModule extends PlaceBlockModule
                 }
                 for (Entity entity : box)
                 {
-                    entities.addAll(getAllInBox(entity.getBoundingBox()));
+                    entities.addAll(getAllInBox(entity.getBoundingBox(), pos));
                 }
             }
         }
         List<BlockPos> blocks = new ArrayList<>();
-        Vec3d playerPos = Managers.POSITION.getEyePos();
         for (BlockPos epos : entities)
         {
             for (Direction dir2 : Direction.values())
@@ -185,7 +233,7 @@ public class SurroundModule extends PlaceBlockModule
                 {
                     continue;
                 }
-                double dist = playerPos.squaredDistanceTo(pos2.toCenterPos());
+                double dist = mc.player.squaredDistanceTo(pos2.toCenterPos());
                 if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue())
                 {
                     continue;
@@ -198,7 +246,7 @@ public class SurroundModule extends PlaceBlockModule
             for (BlockPos epos1 : entities)
             {
                 BlockPos floor = epos1.down();
-                double dist = playerPos.squaredDistanceTo(floor.toCenterPos());
+                double dist = mc.player.squaredDistanceTo(floor.toCenterPos());
                 if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue())
                 {
                     continue;
@@ -210,17 +258,24 @@ public class SurroundModule extends PlaceBlockModule
     }
 
     /**
+     * Returns a {@link List} of all the {@link BlockPos} positions in the
+     * given {@link Box} that match the player position level
      *
      * @param box
+     * @param pos The player position
      * @return
      */
-    private List<BlockPos> getAllInBox(Box box)
+    private List<BlockPos> getAllInBox(Box box, BlockPos pos)
     {
-
-        double x = Math.ceil(box.maxX - box.minX);
-        double z = Math.ceil(box.maxZ - box.minZ);
-
-        return null;
+        final List<BlockPos> intersections = new ArrayList<>();
+        for (int x = (int) Math.floor(box.minX); x < Math.ceil(box.maxX); x++)
+        {
+            for (int z = (int) Math.floor(box.minZ); z < Math.ceil(box.maxZ); z++)
+            {
+                intersections.add(new BlockPos(x, pos.getY(), z));
+            }
+        }
+        return intersections;
     }
 
     /**
@@ -237,25 +292,64 @@ public class SurroundModule extends PlaceBlockModule
         if (event.getPacket() instanceof BlockUpdateS2CPacket packet)
         {
             final BlockState state = packet.getState();
-            final BlockPos pos = packet.getPos();
-            if (surround.contains(pos) && state.isAir())
+            final BlockPos targetPos = packet.getPos();
+            if (surround.contains(targetPos) && state.isAir())
             {
-                placeBlock(pos, rotateConfig.getValue(),
+                if (rotateConfig.getValue())
+                {
+                    float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+                            targetPos.toCenterPos());
+                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
+                            rots[0], rots[1], mc.player.isOnGround()));
+                }
+                placeBlockResistant(targetPos,
                         strictDirectionConfig.getValue());
+                blocksPlaced++;
+                // shiftDelay = 0;
             }
         }
         else if (event.getPacket() instanceof PlaySoundS2CPacket packet
                 && packet.getCategory() == SoundCategory.BLOCKS
                 && packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE)
         {
-            final BlockPos pos = BlockPos.ofFloored(packet.getX(),
+            final BlockPos targetPos = BlockPos.ofFloored(packet.getX(),
                     packet.getY(), packet.getZ());
-            if (surround.contains(pos))
+            if (surround.contains(targetPos))
             {
-                placeBlock(pos, rotateConfig.getValue(),
+                if (rotateConfig.getValue())
+                {
+                    float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+                            targetPos.toCenterPos());
+                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
+                            rots[0], rots[1], mc.player.isOnGround()));
+                }
+                placeBlockResistant(targetPos,
                         strictDirectionConfig.getValue());
+                blocksPlaced++;
+                // shiftDelay = 0;
             }
         }
     }
 
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onRenderWorld(RenderWorldEvent event)
+    {
+        if (renderConfig.getValue())
+        {
+            if (surround.isEmpty() || placements.isEmpty())
+            {
+                return;
+            }
+            for (BlockPos pos : surround)
+            {
+                RenderManager.renderBox(event.getMatrices(),
+                        pos, Modules.COLORS.getRGB(60));
+            }
+        }
+    }
+    // Burrow support???
 }

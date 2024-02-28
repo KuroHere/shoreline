@@ -1,18 +1,14 @@
 package com.caspian.client.impl.module.misc;
 
 import com.caspian.client.api.config.Config;
+import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.EnumConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
-import com.caspian.client.api.manager.player.rotation.RotationPriority;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
-import com.caspian.client.api.module.ToggleModule;
-import com.caspian.client.impl.event.network.MovementPacketsEvent;
-import com.caspian.client.impl.event.render.entity.RenderPlayerEvent;
-import com.caspian.client.init.Managers;
-import net.minecraft.util.math.Vec2f;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 
 /**
  *
@@ -28,13 +24,15 @@ public class AntiAimModule extends RotationModule
     Config<PitchMode> pitchModeConfig = new EnumConfig<>("Pitch", "The mode " +
             "for the rotation pitch spin", PitchMode.DOWN, PitchMode.values());
     Config<Float> yawAddConfig = new NumberConfig<>("YawAdd", "The yaw to add" +
-            " during each rotation", -180.0f, 0.0f, 180.0f);
+            " during each rotation", -180.0f, 20.0f, 180.0f);
     Config<Float> pitchAddConfig = new NumberConfig<>("PitchAdd", "The pitch " +
-            "to add during each rotation", -90.0f, 0.0f, 90.0f);
+            "to add during each rotation", -90.0f, 20.0f, 90.0f);
     Config<Float> spinSpeedConfig = new NumberConfig<>("SpinSpeed", "The yaw " +
-            "speed to rotate", 1.0f, 40.0f, 40.0f);
+            "speed to rotate", 1.0f, 16.0f, 40.0f);
     Config<Integer> flipTicksConfig = new NumberConfig<>("FlipTicks", "The " +
             "number of ticks to wait between jitter", 2, 2, 20);
+    Config<Boolean> illegalAnglesConfig = new BooleanConfig("IllegalAngles",
+            "", false);
     //
     private float yaw;
     private float pitch;
@@ -69,17 +67,14 @@ public class AntiAimModule extends RotationModule
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (event.getStage() != EventStage.PRE)
         {
             return;
         }
-        if (mc.options.attackKey.isPressed() || mc.options.useKey.isPressed())
-        {
-            return;
-        }
-        if (isRotationBlocked())
+        if (isRotationBlocked() || mc.options.attackKey.isPressed()
+                || mc.options.useKey.isPressed())
         {
             return;
         }
@@ -122,7 +117,7 @@ public class AntiAimModule extends RotationModule
                     }
                 };
         //
-        Managers.ROTATION.setRotation(this, RotationPriority.LOW, yaw, pitch);
+        setRotation(yaw, pitch);
     }
 
     public enum YawMode
