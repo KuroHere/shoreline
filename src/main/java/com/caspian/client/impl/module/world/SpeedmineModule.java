@@ -10,17 +10,13 @@ import com.caspian.client.api.manager.player.rotation.RotationPriority;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.RotationModule;
 import com.caspian.client.api.render.RenderManager;
-import com.caspian.client.impl.event.TickEvent;
 import com.caspian.client.impl.event.network.AttackBlockEvent;
 import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
-import com.caspian.client.util.chat.ChatUtil;
 import com.caspian.client.util.player.RotationUtil;
-import com.caspian.client.util.world.BlastResistantBlocks;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.effect.StatusEffectUtil;
@@ -35,6 +31,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 
 import java.text.DecimalFormat;
@@ -304,8 +301,7 @@ public class SpeedmineModule extends RotationModule
             if (!stack.isEmpty() && stack.getItem() instanceof ToolItem)
             {
                 float speed = stack.getMiningSpeedMultiplier(state);
-                int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY,
-                        stack);
+                int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, stack);
                 if (efficiency > 0)
                 {
                     speed += efficiency * efficiency + 1.0f;
@@ -359,8 +355,8 @@ public class SpeedmineModule extends RotationModule
         float f = mc.player.getInventory().getStack(tool).getMiningSpeedMultiplier(block);
         if (f > 1.0F)
         {
-            int i = EnchantmentHelper.getEfficiency(mc.player);
             ItemStack stack = mc.player.getInventory().getStack(tool);
+            int i = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, stack);
             if (i > 0 && !stack.isEmpty())
             {
                 f += (float) (i * i + 1);
@@ -425,7 +421,17 @@ public class SpeedmineModule extends RotationModule
         {
             if (mining != null && !mc.player.isCreative())
             {
-                Vec3d center = new Box(mining).getCenter();
+                BlockState state = mc.world.getBlockState(mining);
+                VoxelShape outlineShape = state.getOutlineShape(mc.world, mining);
+                if (outlineShape.isEmpty())
+                {
+                    return;
+                }
+                Box render1 = outlineShape.getBoundingBox();
+                Box render = new Box(mining.getX() + render1.minX, mining.getY() + render1.minY,
+                        mining.getZ() + render1.minZ, mining.getX() + render1.maxX,
+                        mining.getY() + render1.maxY, mining.getZ() + render1.maxZ);
+                Vec3d center = render.getCenter();
                 float scale = damage;
                 if (scale > 1.0f)
                 {

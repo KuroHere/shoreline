@@ -90,6 +90,10 @@ public class BlockHighlightModule extends ToggleModule
                 BlockPos hpos = ((BlockHitResult) result).getBlockPos();
                 BlockState state = mc.world.getBlockState(hpos);
                 VoxelShape outlineShape = state.getOutlineShape(mc.world, hpos);
+                if (outlineShape.isEmpty())
+                {
+                    return;
+                }
                 // WHY DOESNT THIS WORK
                 Box render1 = outlineShape.getBoundingBox();
                 render = new Box(hpos.getX() + render1.minX, hpos.getY() + render1.minY,
