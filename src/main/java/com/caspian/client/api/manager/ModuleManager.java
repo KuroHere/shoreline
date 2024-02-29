@@ -53,6 +53,7 @@ public class ModuleManager
                 new BowAimModule(),
                 new CriticalsModule(),
                 // new HoleFillModule(),
+                new NoHitDelayModule(),
                 // new SelfBowModule(),
                 // new SelfTrapModule(),
                 new SurroundModule(),

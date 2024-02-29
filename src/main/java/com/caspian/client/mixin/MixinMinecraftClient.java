@@ -43,8 +43,16 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
     @Shadow
     protected abstract void doItemUse();
 
-    @Shadow protected abstract boolean doAttack();
+    /**
+     *
+     * @return
+     */
+    @Shadow
+    protected abstract boolean doAttack();
 
+    //
+    @Shadow
+    protected int attackCooldown;
     @Unique
     private boolean leftClick;
     // https://github.com/MeteorDevelopment/meteor-client/blob/master/src/main/java/meteordevelopment/meteorclient/mixin/MinecraftClientMixin.java#L54
@@ -165,6 +173,12 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
     private void hookDoAttack(CallbackInfoReturnable<Boolean> cir)
     {
         doAttackCalled = true;
+        AttackCooldownEvent attackCooldownEvent = new AttackCooldownEvent();
+        Caspian.EVENT_HANDLER.dispatch(attackCooldownEvent);
+        if (attackCooldownEvent.isCanceled())
+        {
+            attackCooldown = 0;
+        }
     }
 
     /**

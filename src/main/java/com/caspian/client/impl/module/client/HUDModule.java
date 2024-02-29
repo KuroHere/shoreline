@@ -13,6 +13,7 @@ import com.caspian.client.api.render.anim.Animation;
 import com.caspian.client.impl.event.gui.hud.RenderOverlayEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
+import com.caspian.client.util.render.ColorUtil;
 import com.caspian.client.util.string.EnumFormatter;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.Window;
@@ -27,6 +28,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
+import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.List;
@@ -101,6 +103,10 @@ public class HUDModule extends ToggleModule
     @EventListener
     public void onRenderOverlayPost(RenderOverlayEvent.Post event)
     {
+        if (mc.options.debugEnabled)
+        {
+            return;
+        }
         if (mc.player != null && mc.world != null)
         {
             Window res = mc.getWindow();
@@ -231,6 +237,31 @@ public class HUDModule extends ToggleModule
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
                         Modules.COLORS.getRGB());
+                if (renderingUp)
+                {
+                    bottomRight -= 10.0f;
+                }
+                else
+                {
+                    topRight += 10.0f;
+                }
+                Modules.COLORS.setRainbowOffset();
+            }
+            if (durabilityConfig.getValue() && mc.player.getMainHandStack().isDamageable())
+            {
+                int n = mc.player.getMainHandStack().getMaxDamage();
+                int n2 = mc.player.getMainHandStack().getDamage();
+                String text1 = "Durability ";
+                String text2 = String.valueOf(n - n2);
+                int width = RenderManager.textWidth(text1);
+                int width2 = RenderManager.textWidth(text2);
+                Color color = ColorUtil.hslToColor((float) (n - n2) / (float) n * 120.0f, 100.0f, 50.0f, 1.0f);
+                RenderManager.renderText(event.getMatrices(), text1,
+                        res.getScaledWidth() - width - width2 - 1.0f, renderingUp ? bottomRight : topRight,
+                        Modules.COLORS.getRGB());
+                RenderManager.renderText(event.getMatrices(), text2,
+                        res.getScaledWidth() - width2 - 1.0f, renderingUp ? bottomRight : topRight,
+                        color.getRGB());
                 if (renderingUp)
                 {
                     bottomRight -= 10.0f;

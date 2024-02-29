@@ -52,6 +52,7 @@ public class Modules
     public static BlockLagModule BLOCK_LAG;
     public static BowAimModule BOW_AIM;
     public static CriticalsModule CRITICALS;
+    public static NoHitDelayModule NO_HIT_DELAY;
     public static SurroundModule SURROUND;
     public static TriggerModule TRIGGER;
     // Exploit
@@ -199,6 +200,8 @@ public class Modules
             BLOCK_LAG = (BlockLagModule) getRegisteredModule("blocklag-module");
             BOW_AIM = (BowAimModule) getRegisteredModule("bowaim-module");
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
+            NO_HIT_DELAY = (NoHitDelayModule) getRegisteredModule(
+                    "nohitdelay-module");
             SURROUND = (SurroundModule) getRegisteredModule("surround-module");
             TRIGGER = (TriggerModule) getRegisteredModule("trigger-module");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(

@@ -49,7 +49,7 @@ public class SpeedmineModule extends RotationModule
             "Instantly removes the mining block", false);
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range for mine",
             1.0f, 4.5f, 5.0f);
-    Config<Swap> swapConfig = new EnumConfig<>("Swap", "Swaps to the best " +
+    Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best " +
             "tool once the mining is complete", Swap.SILENT, Swap.values());
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates" +
             " when mining the block", true);
