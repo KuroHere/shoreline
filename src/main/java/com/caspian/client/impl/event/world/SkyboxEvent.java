@@ -23,7 +23,7 @@ public class SkyboxEvent extends Event
 
     public void setColor(Color color)
     {
-        setColor(new Vec3d(color.getRed(), color.getGreen(), color.getBlue()));
+        setColor(new Vec3d(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0));
     }
 
     public void setColor(Vec3d color)
@@ -41,5 +41,21 @@ public class SkyboxEvent extends Event
     public static class Cloud extends SkyboxEvent
     {
 
+    }
+
+    @Cancelable
+    public static class Fog extends SkyboxEvent
+    {
+        private final float tickDelta;
+
+        public Fog(float tickDelta)
+        {
+            this.tickDelta = tickDelta;
+        }
+
+        public float getTickDelta()
+        {
+            return tickDelta;
+        }
     }
 }

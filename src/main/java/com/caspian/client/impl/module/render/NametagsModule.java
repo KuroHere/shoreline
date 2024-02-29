@@ -182,30 +182,44 @@ public class NametagsModule extends ToggleModule
         //        TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
         // matrices.translate(1.0, 1.0, 0.0);
         vertexConsumers.draw();
-        renderItems(matrices, entity);
         RenderSystem.disableBlend();
         GL11.glDepthFunc(GL11.GL_LEQUAL);
         matrices.pop();
+        // renderItems(rv, camera, entity);
     }
 
     /**
      *
      * @param player
      */
-    private void renderItems(MatrixStack matrixStack, PlayerEntity player)
+    private void renderItems(Vec3d rv, Camera camera,
+                             PlayerEntity player)
     {
+        final Vec3d pos = camera.getPos();
+        MatrixStack matrices = new MatrixStack();
+        matrices.push();
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0f));
+        matrices.translate(rv.getX() - pos.getX(),
+                rv.getY() + (double) player.getHeight() + (player.isSneaking() ? 0.4f : 0.43f) - pos.getY(),
+                rv.getZ() - pos.getZ());
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-camera.getYaw()));
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
         List<ItemStack> displayItems = new CopyOnWriteArrayList<>();
         if (!player.getOffHandStack().isEmpty())
         {
             displayItems.add(player.getOffHandStack());
         }
-        player.getInventory().armor.forEach(armorStack ->
+        if (armorConfig.getValue())
         {
-            if (!armorStack.isEmpty())
+            player.getInventory().armor.forEach(armorStack ->
             {
-                displayItems.add(armorStack);
-            }
-        });
+                if (!armorStack.isEmpty())
+                {
+                    displayItems.add(armorStack);
+                }
+            });
+        }
         if (!player.getMainHandStack().isEmpty())
         {
             displayItems.add(player.getMainHandStack());
@@ -223,21 +237,23 @@ public class NametagsModule extends ToggleModule
             }
         }
         int m2 = enchantOffset(n11);
-        matrixStack.translate(n10, m2, 0.0f);
+        mc.getBufferBuilders().getEntityVertexConsumers().draw();
+        DiffuseLighting.disableGuiDepthLighting();
+        GL11.glDepthFunc(GL11.GL_ALWAYS);
+        matrices.translate(n10, m2, 0.0f);
+        DiffuseLighting.disableGuiDepthLighting();
         for (ItemStack stack : displayItems)
         {
-            // matrixStack.push();
-            DiffuseLighting.disableGuiDepthLighting();
             // int n4 = (n11 > 4) ? ((n11 - 4) * 8 / 2) : 0;
-            // mc.getItemRenderer().renderItem(stack, ModelTransformationMode.GUI, 0xf000f0,
-            //        OverlayTexture.DEFAULT_UV, matrixStack, mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
+            mc.getItemRenderer().renderItem(stack, ModelTransformationMode.GUI, 0xf000f0,
+                    OverlayTexture.DEFAULT_UV, matrices, mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
             // mc.getItemRenderer().renderGuiItemOverlay(matrixStack, mc.textRenderer, stack, n10, m2);
-            // mc.getBufferBuilders().getEntityVertexConsumers().draw();
-            // matrixStack.pop();
+            mc.getBufferBuilders().getEntityVertexConsumers().draw();
             renderEnchants(stack, n10, m2);
             n10 += 16;
-            matrixStack.translate(16.0f, 0.0f, 0.0f);
+            matrices.translate(16.0f, 0.0f, 0.0f);
         }
+        GL11.glDepthFunc(GL11.GL_LEQUAL);
     }
 
     private void renderEnchants(ItemStack itemStack, int x, int y)

@@ -71,6 +71,12 @@ public class HoleESPModule extends ToggleModule
         }
         for (Hole hole : Managers.HOLE.getHoles())
         {
+            if ((hole.isDoubleX() || hole.isDoubleZ()) && !doubleConfig.getValue()
+                    || hole.isQuad() && !quadConfig.getValue()
+                    || hole.getSafety() == HoleSafety.VOID && !voidConfig.getValue())
+            {
+                continue;
+            }
             double dist = hole.squaredDistanceTo(mc.player);
             if (dist > getRangeSq())
             {
@@ -82,21 +88,21 @@ public class HoleESPModule extends ToggleModule
             Color color = getHoleColor(hole);
             //
             Box render = null;
-            if (hole.getSafety() == HoleSafety.VOID && voidConfig.getValue())
+            if (hole.getSafety() == HoleSafety.VOID)
             {
                 render = new Box(x, y, z, x + 1.0, y + 1.0, z + 1.0);
             }
-            else if (hole.isDoubleX() && doubleConfig.getValue())
+            else if (hole.isDoubleX())
             {
                render = new Box(x, y, z, x + 2.0,
                        y + heightConfig.getValue(), z + 1.0);
             }
-            else if (hole.isDoubleZ() && doubleConfig.getValue())
+            else if (hole.isDoubleZ())
             {
                 render = new Box(x, y, z, x + 1.0,
                         y + heightConfig.getValue(), z + 2.0);
             }
-            else if (hole.isQuad() && quadConfig.getValue())
+            else if (hole.isQuad())
             {
                 render = new Box(x, y, z, x + 2.0,
                         y + heightConfig.getValue(), z + 2.0);

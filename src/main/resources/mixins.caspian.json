@@ -57,6 +57,7 @@
     "particle.MixinParticleManager",
     "render.MixinBackgroundRenderer",
     "render.MixinCamera",
+    "render.MixinDimensionEffects",
     "render.MixinGameRenderer",
     "render.MixinLightmapTextureManager",
     "render.MixinRenderTickCounter",
@@ -67,8 +68,10 @@
     "render.entity.MixinEntityRenderer",
     "render.entity.MixinFireworkRocketEntityRenderer",
     "render.entity.MixinItemEntityRenderer",
+    "render.entity.MixinLivingEntityRenderer",
     "render.entity.MixinPlayerEntityRenderer",
     "render.entity.MixinWitherSkullEntityRenderer",
+    "render.item.MixinHeldItemRenderer",
     "text.MixinTextVisitFactory",
     "world.MixinBlockCollisionSpliterator",
     "world.MixinClientWorld"

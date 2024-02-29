@@ -8,7 +8,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 
 @Cancelable
-public class RenderCrystalEvent extends StageEvent
+public class RenderCrystalEvent extends Event
 {
     // ??
     public final EndCrystalEntity endCrystalEntity;

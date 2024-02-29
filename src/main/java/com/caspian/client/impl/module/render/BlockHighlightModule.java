@@ -13,7 +13,6 @@ import com.caspian.client.impl.event.render.RenderWorldEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.init.Modules;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -90,9 +89,12 @@ public class BlockHighlightModule extends ToggleModule
                 //
                 BlockPos hpos = ((BlockHitResult) result).getBlockPos();
                 BlockState state = mc.world.getBlockState(hpos);
-                VoxelShape shape = state.getOutlineShape(mc.world, hpos);
-                render = shape.getBoundingBox();
-                // render = new Box(hpos);
+                VoxelShape outlineShape = state.getOutlineShape(mc.world, hpos);
+                // WHY DOESNT THIS WORK
+                Box render1 = outlineShape.getBoundingBox();
+                render = new Box(hpos.getX() + render1.minX, hpos.getY() + render1.minY,
+                        hpos.getZ() + render1.minZ, hpos.getX() + render1.maxX,
+                        hpos.getY() + render1.maxY, hpos.getZ() + render1.maxZ);
                 distance = pos.distanceTo(hpos.toCenterPos());
             }
         }

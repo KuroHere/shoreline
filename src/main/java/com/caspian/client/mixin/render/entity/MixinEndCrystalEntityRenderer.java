@@ -3,6 +3,7 @@ package com.caspian.client.mixin.render.entity;
 import com.caspian.client.Caspian;
 import com.caspian.client.api.event.EventStage;
 import com.caspian.client.impl.event.render.entity.RenderCrystalEvent;
+import com.caspian.client.util.chat.ChatUtil;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EndCrystalEntityRenderer;
@@ -37,20 +38,20 @@ public class MixinEndCrystalEntityRenderer
      * @param i
      * @param ci
      */
-    @Inject(method = "render*", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "render(Lnet/minecraft/entity/decoration/EndCrystalEntity;" +
+            "FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/" +
+            "render/VertexConsumerProvider;I)V", at = @At(value = "HEAD"), cancellable = true)
     private void hookRender(EndCrystalEntity endCrystalEntity, float f, float g,
                             MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider,
                             int i, CallbackInfo ci)
     {
         RenderCrystalEvent renderCrystalEvent = new RenderCrystalEvent(endCrystalEntity,
                 f, g, matrixStack, i, core, frame);
-        renderCrystalEvent.setStage(EventStage.PRE);
+        // Does it matter if render comes before cancelling?
         Caspian.EVENT_HANDLER.dispatch(renderCrystalEvent);
         if (renderCrystalEvent.isCanceled())
         {
             ci.cancel();
-            renderCrystalEvent.setStage(EventStage.POST);
-            Caspian.EVENT_HANDLER.dispatch(renderCrystalEvent);
         }
     }
 }

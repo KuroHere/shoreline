@@ -152,7 +152,6 @@ public class ESPModule extends ToggleModule
         {
             return;
         }
-        ChatUtil.clientSendMessage("lol");
         if (event.getConfig() == modeConfig && event.getStage() == EventStage.POST)
         {
             if (modeConfig.getValue() == ESPMode.GLOW)

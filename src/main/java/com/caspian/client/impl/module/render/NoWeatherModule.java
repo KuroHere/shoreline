@@ -91,19 +91,12 @@ public class NoWeatherModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onConfigUpdate(ConfigUpdateEvent event)
+    public void onTick(TickEvent event)
     {
-        if (mc.world != null && event.getStage() == EventStage.POST)
+        if (event.getStage() == EventStage.POST)
         {
-            Config<?> config = event.getConfig();
-            if (config == weatherConfig)
-            {
-                setWeather(weatherConfig.getValue());
-            }
-            else if (config == dayTimeConfig)
-            {
-                mc.world.setTimeOfDay(dayTimeConfig.getValue());
-            }
+            setWeather(weatherConfig.getValue());
+            mc.world.setTimeOfDay(dayTimeConfig.getValue());
         }
     }
 

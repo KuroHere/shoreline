@@ -118,7 +118,7 @@ public class SkyboxModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onSkybox(SkyboxEvent.Sky event)
+    public void onSkyboxSky(SkyboxEvent.Sky event)
     {
         if (skyConfig.getValue())
         {
@@ -132,12 +132,26 @@ public class SkyboxModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onSkybox(SkyboxEvent.Cloud event)
+    public void onSkyboxCloud(SkyboxEvent.Cloud event)
     {
         if (cloudConfig.getValue())
         {
             event.cancel();
             event.setColor(cloudColorConfig.getValue());
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onSkyboxFog(SkyboxEvent.Fog event)
+    {
+        if (fogConfig.getValue())
+        {
+            event.cancel();
+            event.setColor(fogColorConfig.getValue());
         }
     }
 

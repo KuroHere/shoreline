@@ -27,9 +27,8 @@ public class MixinClientWorld
      * @param removalReason
      * @param ci
      */
-    @Inject(method = "removeEntity", at = @At(value = "HEAD"), cancellable = true)
-    private void hookRemoveEntity(int entityId,
-                                  Entity.RemovalReason removalReason,
+    @Inject(method = "removeEntity", at = @At(value = "HEAD"))
+    private void hookRemoveEntity(int entityId, Entity.RemovalReason removalReason,
                                   CallbackInfo ci)
     {
         final RemoveEntityEvent removeEntityEvent = new RemoveEntityEvent(
