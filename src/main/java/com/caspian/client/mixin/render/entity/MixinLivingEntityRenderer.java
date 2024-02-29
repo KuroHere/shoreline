@@ -4,14 +4,19 @@ import com.caspian.client.Caspian;
 import com.caspian.client.impl.event.render.entity.RenderEntityEvent;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.List;
 
 @Mixin(LivingEntityRenderer.class)
 public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>>
@@ -19,6 +24,10 @@ public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityM
     //
     @Shadow
     protected M model;
+    //
+    @Shadow
+    @Final
+    protected List<FeatureRenderer<T, M>> features;
 
     /**
      *
@@ -38,7 +47,7 @@ public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityM
                             VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci)
     {
         RenderEntityEvent renderEntityEvent = new RenderEntityEvent(livingEntity,
-                f, g, matrixStack, i, model);
+                f, g, matrixStack, vertexConsumerProvider, i, model, features);
         Caspian.EVENT_HANDLER.dispatch(renderEntityEvent);
         if (renderEntityEvent.isCanceled())
         {

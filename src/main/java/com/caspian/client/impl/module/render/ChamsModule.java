@@ -14,6 +14,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EndCrystalEntityRenderer;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.client.render.entity.feature.FeatureRenderer;
+import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
@@ -144,6 +146,14 @@ public class ChamsModule extends ToggleModule
         boolean bl2 = !bl && !((Entity) event.entity).isInvisibleTo(mc.player);
         int p = LivingEntityRenderer.getOverlay(event.entity, 0);
         event.model.render(event.matrixStack, vertexConsumer, event.i, p, 1.0f, 1.0f, 1.0f, bl2 ? 0.15f : 1.0f);
+        if (!((Entity) event.entity).isSpectator())
+        {
+            for (Object featureRenderer : event.features)
+            {
+                ((FeatureRenderer) featureRenderer).render(event.matrixStack, event.vertexConsumerProvider, event.i,
+                        event.entity, o, n, event.g, l, k, m);
+            }
+        }
         tessellator.draw();
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableBlend();

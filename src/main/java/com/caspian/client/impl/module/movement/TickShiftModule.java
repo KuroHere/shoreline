@@ -3,14 +3,16 @@ package com.caspian.client.impl.module.movement;
 import com.caspian.client.api.config.Config;
 import com.caspian.client.api.config.setting.BooleanConfig;
 import com.caspian.client.api.config.setting.NumberConfig;
+import com.caspian.client.api.event.EventStage;
 import com.caspian.client.api.event.listener.EventListener;
 import com.caspian.client.api.module.ModuleCategory;
 import com.caspian.client.api.module.ToggleModule;
-import com.caspian.client.impl.event.TickEvent;
+import com.caspian.client.impl.event.network.PlayerUpdateEvent;
 import com.caspian.client.impl.event.network.SetCurrentHandEvent;
 import com.caspian.client.init.Managers;
 import com.caspian.client.util.player.MovementUtil;
-import net.minecraft.item.*;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.PotionItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 /**
@@ -55,8 +57,12 @@ public class TickShiftModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
+        if (event.getStage() != EventStage.PRE)
+        {
+            return;
+        }
         if (MovementUtil.isMoving() || !mc.player.isOnGround())
         {
             packets--;
@@ -94,17 +100,18 @@ public class TickShiftModule extends ToggleModule
             {
                 return;
             }
-            int use = stack.getMaxUseTime();
-            if (packets >= use)
+            int maxUseTime = stack.getMaxUseTime();
+            if (packets < maxUseTime)
             {
-                for (int i = 0; i < use; i++)
-                {
-                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(),
-                            mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
-                    event.cancel();
-                    stack.getItem().finishUsing(stack, mc.world, mc.player);
-                    packets -= use;
-                }
+                return;
+            }
+            for (int i = 0; i < maxUseTime; i++)
+            {
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(),
+                        mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
+                event.cancel();
+                stack.getItem().finishUsing(stack, mc.world, mc.player);
+                packets -= maxUseTime;
             }
         }
     }

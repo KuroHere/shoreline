@@ -156,6 +156,16 @@ public class NumberConfig<T extends Number> extends Config<T>
 
     /**
      *
+     * @return
+     */
+    public double getValueSq()
+    {
+        T val = getValue();
+        return val.doubleValue() * val.doubleValue();
+    }
+
+    /**
+     *
      *
      * @param val The param value
      */

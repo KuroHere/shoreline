@@ -125,99 +125,94 @@ public class SpeedmineModule extends RotationModule
             {
                 return;
             }
-            if (mining != null)
+            if (mining == null)
             {
-                state = mc.world.getBlockState(mining);
-                int prev = mc.player.getInventory().selectedSlot;
-                int slot = getBestTool(state);
-                //
-                double dist = mc.player.squaredDistanceTo(mining.toCenterPos());
-                if (dist > rangeConfig.getValue() * rangeConfig.getValue()
-                        || state.isAir() || damage > 3.0f
-                        || !remineConfig.getValue()
-                        || !remineInfiniteConfig.getValue()
-                        && remines > maxRemineConfig.getValue())
+                damage = 0.0f;
+                return;
+            }
+            state = mc.world.getBlockState(mining);
+            int prev = mc.player.getInventory().selectedSlot;
+            int slot = getBestTool(state);
+            //
+            double dist = mc.player.squaredDistanceTo(mining.toCenterPos());
+            if (dist > ((NumberConfig<?>) rangeConfig).getValueSq() // walked out of range
+                    || state.isAir() // mining is done
+                    || damage > 3.0f // waited too long
+                    || !remineConfig.getValue()
+                    || !remineInfiniteConfig.getValue()
+                    && remines > maxRemineConfig.getValue())
+            {
+                mining = null;
+                state = null;
+                direction = null;
+                damage = 0.0f;
+                remines = 0;
+            }
+            else if (damage > 1.0f && !Modules.AUTO_CRYSTAL.isAttacking()
+                    && !Modules.AUTO_CRYSTAL.isPlacing())
+            {
+                if (swapConfig.getValue() == Swap.NORMAL)
                 {
-                    mining = null;
-                    state = null;
-                    direction = null;
-                    damage = 0.0f;
-                    remines = 0;
+                    swap(slot);
                 }
-                else if (damage > 1.0f && !Modules.AUTO_CRYSTAL.isAttacking()
-                        && !Modules.AUTO_CRYSTAL.isPlacing())
+                else if (swapConfig.getValue() == Swap.SILENT)
                 {
-                    if (swapConfig.getValue() == Swap.NORMAL)
+                    if (strictConfig.getValue())
+                    {
+                        // Managers.NETWORK.sendPacket(new ClickSlotC2SPacket(
+                        //        mc.player.getInventory(),
+                        //        mc.player.getInventory().selectedSlot,
+                        //        SlotActionType.SWAP,
+                        //        mc.player));
+                    }
+                    else
                     {
                         swap(slot);
                     }
-                    else if (swapConfig.getValue() == Swap.SILENT)
-                    {
-                        if (strictConfig.getValue())
-                        {
-                            // Managers.NETWORK.sendPacket(new ClickSlotC2SPacket(
-                            //        mc.player.getInventory(),
-                            //        mc.player.getInventory().selectedSlot,
-                            //        SlotActionType.SWAP,
-                            //        mc.player));
-                        }
-                        else
-                        {
-                            swap(slot);
-                        }
-                    }
-                    if (rotateConfig.getValue())
-                    {
-                        float[] rots = RotationUtil.getRotationsTo(Managers.POSITION.getCameraPosVec(1.0f),
-                                mining.toCenterPos());
-                        setRotation(RotationPriority.SPEEDMINE, rots[0], rots[1]);
-                    }
+                }
+                if (rotateConfig.getValue())
+                {
+                    float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+                            mining.toCenterPos());
+                    setRotation(RotationPriority.SPEEDMINE, rots[0], rots[1]);
+                }
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                        PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                        mining, direction));
+                if (fastConfig.getValue())
+                {
+                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                            PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
+                            mining, Direction.UP));
+                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                            PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
+                            mining, direction));
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
                             mining, direction));
-                    if (fastConfig.getValue())
-                    {
-                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                                PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
-                                mining, Direction.UP));
-                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                                PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
-                                mining, direction));
-                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                                PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                                mining, direction));
-                    }
-                    if (swapConfig.getValue() == Swap.SILENT)
-                    {
-                        if (prev != -1)
-                        {
-                            if (strictConfig.getValue())
-                            {
-
-                            }
-                            else
-                            {
-                                swap(prev);
-                            }
-                        }
-                    }
-                    // reset, this position needs to be remined if we
-                    // attempt to mine again
-                    if (remineFullConfig.getValue())
-                    {
-                        damage = 0.0f;
-                    }
-                    remines++;
                 }
-                else
+                if (swapConfig.getValue() == Swap.SILENT && prev != -1)
                 {
-                    damage += calcBlockBreakingDelta(state, mc.world,
-                            mining);
+                    if (strictConfig.getValue())
+                    {
+
+                    }
+                    else
+                    {
+                        swap(prev);
+                    }
                 }
+                // reset, this position needs to be remined if we
+                // attempt to mine again
+                if (remineFullConfig.getValue())
+                {
+                    damage = 0.0f;
+                }
+                remines++;
             }
             else
             {
-                damage = 0.0f;
+                damage += calcBlockBreakingDelta(state, mc.world, mining);
             }
         }
     }
@@ -254,32 +249,31 @@ public class SpeedmineModule extends RotationModule
     @EventListener
     public void onAttackBlock(AttackBlockEvent event)
     {
-        if (mc.player == null || mc.world == null)
+        if (mc.player == null || mc.world == null
+                || mc.player.isCreative())
         {
             return;
         }
-        if (!mc.player.isCreative())
+        if (mining != null && event.getPos() == mining)
         {
-            if (mining == null || mining != event.getPos())
+            return;
+        }
+        mining = event.getPos();
+        direction = event.getDirection();
+        damage = 0.0f;
+        remines = 0;
+        if (mining != null && direction != null)
+        {
+            event.cancel();
+            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                    PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
+                    mining, direction));
+            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
+                    mining, Direction.UP));
+            if (instantConfig.getValue())
             {
-                mining = event.getPos();
-                direction = event.getDirection();
-                damage = 0.0f;
-                remines = 0;
-                if (mining != null && direction != null)
-                {
-                    event.cancel();
-                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                            PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
-                            mining, direction));
-                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                            PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
-                            mining, Direction.UP));
-                    if (instantConfig.getValue())
-                    {
-                        mc.world.removeBlock(mining, false);
-                    }
-                }
+                mc.world.removeBlock(mining, false);
             }
         }
     }
@@ -298,19 +292,20 @@ public class SpeedmineModule extends RotationModule
         for (int i = 0; i < 9; i++)
         {
             ItemStack stack = mc.player.getInventory().getStack(i);
-            if (!stack.isEmpty() && stack.getItem() instanceof ToolItem)
+            if (stack.isEmpty() || !(stack.getItem() instanceof ToolItem))
             {
-                float speed = stack.getMiningSpeedMultiplier(state);
-                int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, stack);
-                if (efficiency > 0)
-                {
-                    speed += efficiency * efficiency + 1.0f;
-                }
-                if (speed > bestTool)
-                {
-                    bestTool = speed;
-                    slot = i;
-                }
+                continue;
+            }
+            float speed = stack.getMiningSpeedMultiplier(state);
+            int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, stack);
+            if (efficiency > 0)
+            {
+                speed += efficiency * efficiency + 1.0f;
+            }
+            if (speed > bestTool)
+            {
+                bestTool = speed;
+                slot = i;
             }
         }
         return slot;
@@ -417,33 +412,30 @@ public class SpeedmineModule extends RotationModule
     @EventListener
     public void onRenderWorld(RenderWorldEvent event)
     {
-        if (mc.player != null && mc.world != null)
+        if (mining == null || state == null || mc.player.isCreative())
         {
-            if (mining != null && !mc.player.isCreative())
-            {
-                BlockState state = mc.world.getBlockState(mining);
-                VoxelShape outlineShape = state.getOutlineShape(mc.world, mining);
-                if (outlineShape.isEmpty())
-                {
-                    return;
-                }
-                Box render1 = outlineShape.getBoundingBox();
-                Box render = new Box(mining.getX() + render1.minX, mining.getY() + render1.minY,
-                        mining.getZ() + render1.minZ, mining.getX() + render1.maxX,
-                        mining.getY() + render1.maxY, mining.getZ() + render1.maxZ);
-                Vec3d center = render.getCenter();
-                float scale = damage;
-                if (scale > 1.0f)
-                {
-                    scale = 1.0f;
-                }
-                final Box scaled = new Box(center, center).expand(0.5 * scale);
-                RenderManager.renderBox(event.getMatrices(), scaled,
-                        damage > 0.95f ? 0x6000ff00 : 0x60ff0000);
-                RenderManager.renderBoundingBox(event.getMatrices(), scaled,
-                        2.5f, damage > 0.95f ? 0x6000ff00 : 0x60ff0000);
-            }
+            return;
         }
+        VoxelShape outlineShape = state.getOutlineShape(mc.world, mining);
+        if (outlineShape.isEmpty())
+        {
+            return;
+        }
+        Box render1 = outlineShape.getBoundingBox();
+        Box render = new Box(mining.getX() + render1.minX, mining.getY() + render1.minY,
+                mining.getZ() + render1.minZ, mining.getX() + render1.maxX,
+                mining.getY() + render1.maxY, mining.getZ() + render1.maxZ);
+        Vec3d center = render.getCenter();
+        float scale = damage;
+        if (scale > 1.0f)
+        {
+            scale = 1.0f;
+        }
+        final Box scaled = new Box(center, center).expand(0.5 * scale);
+        RenderManager.renderBox(event.getMatrices(), scaled,
+                damage > 0.95f ? 0x6000ff00 : 0x60ff0000);
+        RenderManager.renderBoundingBox(event.getMatrices(), scaled,
+                2.5f, damage > 0.95f ? 0x6000ff00 : 0x60ff0000);
     }
 
     public enum Swap

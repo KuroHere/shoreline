@@ -20,6 +20,10 @@ import com.caspian.client.util.player.RotationUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ExperienceOrbEntity;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
@@ -208,7 +212,8 @@ public class SurroundModule extends PlaceBlockModule
                 }
                 BlockPos pos1 = pos.add(dir.getVector());
                 //
-                List<Entity> box = mc.world.getOtherEntities(null, new Box(pos1));
+                List<Entity> box = mc.world.getOtherEntities(null, new Box(pos1))
+                        .stream().filter(e -> !checkSurroundEntity(e)).toList();
                 if (box.isEmpty())
                 {
                     continue;
@@ -234,7 +239,7 @@ public class SurroundModule extends PlaceBlockModule
                     continue;
                 }
                 double dist = mc.player.squaredDistanceTo(pos2.toCenterPos());
-                if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue())
+                if (dist > ((NumberConfig) placeRangeConfig).getValueSq())
                 {
                     continue;
                 }
@@ -247,7 +252,7 @@ public class SurroundModule extends PlaceBlockModule
             {
                 BlockPos floor = epos1.down();
                 double dist = mc.player.squaredDistanceTo(floor.toCenterPos());
-                if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue())
+                if (dist > ((NumberConfig) placeRangeConfig).getValueSq())
                 {
                     continue;
                 }
@@ -255,6 +260,12 @@ public class SurroundModule extends PlaceBlockModule
             }
         }
         return blocks;
+    }
+
+    private boolean checkSurroundEntity(Entity entity)
+    {
+        return entity instanceof ItemEntity || entity instanceof ExperienceOrbEntity
+                || (entity instanceof EndCrystalEntity && attackConfig.getValue());
     }
 
     /**

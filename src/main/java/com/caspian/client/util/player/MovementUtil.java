@@ -42,9 +42,9 @@ public class MovementUtil implements Globals
      */
     public static boolean isMoving()
     {
-        double d = mc.player.getX() - ((AccessorClientPlayerEntity) mc.player).getLastX();
-        double e = mc.player.getY() - ((AccessorClientPlayerEntity) mc.player).getLastBaseY();
-        double f = mc.player.getZ() - ((AccessorClientPlayerEntity) mc.player).getLastZ();
+        double d = mc.player.getX() - mc.player.lastX;
+        double e = mc.player.getY() - mc.player.lastBaseY;
+        double f = mc.player.getZ() - mc.player.lastZ;
         return MathHelper.squaredMagnitude(d, e, f) > MathHelper.square(2.0e-4);
     }
 }
