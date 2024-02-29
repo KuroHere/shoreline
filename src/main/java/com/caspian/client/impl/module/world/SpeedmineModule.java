@@ -431,7 +431,10 @@ public class SpeedmineModule extends RotationModule
         {
             scale = 1.0f;
         }
-        final Box scaled = new Box(center, center).expand(0.5 * scale);
+        double dx = (render1.maxX - render1.minX) / 2.0;
+        double dy = (render1.maxY - render1.minY) / 2.0;
+        double dz = (render1.maxZ - render1.minZ) / 2.0;
+        final Box scaled = new Box(center, center).expand(dx * scale, dy * scale, dz * scale);
         RenderManager.renderBox(event.getMatrices(), scaled,
                 damage > 0.95f ? 0x6000ff00 : 0x60ff0000);
         RenderManager.renderBoundingBox(event.getMatrices(), scaled,

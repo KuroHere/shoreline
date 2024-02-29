@@ -78,7 +78,7 @@ public class HoleESPModule extends ToggleModule
                 continue;
             }
             double dist = hole.squaredDistanceTo(mc.player);
-            if (dist > getRangeSq())
+            if (dist > ((NumberConfig) rangeConfig).getValueSq())
             {
                 continue;
             }
@@ -146,11 +146,6 @@ public class HoleESPModule extends ToggleModule
             case UNBREAKABLE -> bedrockConfig.getValue();
             case VOID -> Color.RED;
         };
-    }
-
-    public double getRangeSq()
-    {
-        return rangeConfig.getValue() * rangeConfig.getValue();
     }
 
     public double getRange()
