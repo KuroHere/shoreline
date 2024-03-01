@@ -1,3 +1,3 @@
-![client_icon](https://user-images.githubusercontent.com/68214996/234266241-451285dc-aaae-4087-bcb8-a52306959b95.png)
+![client_icon](https://github.com/pastimee/caspian/assets/68214996/dc5704a7-d7d2-47d1-9793-0ab32f8b59b1)
 ---
 Work in progress 1.19.4 utility mod for 2b2t
