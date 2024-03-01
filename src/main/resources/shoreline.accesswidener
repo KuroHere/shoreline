@@ -1,0 +1,13 @@
+accessWidener v1 named
+accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
+accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
+accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
+accessible class net/minecraft/client/font/TextRenderer$Drawer
+accessible method net/minecraft/client/font/TextRenderer tweakTransparency (I)I
+accessible method net/minecraft/client/font/TextRenderer drawLayer (Ljava/lang/String;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/client/font/TextRenderer$TextLayerType;II)F
+accessible field net/minecraft/client/font/TextRenderer validateAdvance Z
+accessible method net/minecraft/client/font/TextRenderer getFontStorage (Lnet/minecraft/util/Identifier;)Lnet/minecraft/client/font/FontStorage;
+accessible field net/minecraft/client/network/ClientPlayerEntity lastX D
+accessible field net/minecraft/client/network/ClientPlayerEntity lastBaseY D
+accessible field net/minecraft/client/network/ClientPlayerEntity lastZ D
+accessible field com/mojang/blaze3d/systems/RenderSystem shaderLightDirections [Lorg/joml/Vector3f;

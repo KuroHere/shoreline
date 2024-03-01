@@ -15,11 +15,11 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.caspian.client.CaspianMod"
+      "net.shoreline.client.ShorelineMod"
     ]
   },
   "mixins": [
-    "mixins.caspian.json"
+    "mixins.shoreline.json"
   ],
   "depends": {
     "java": ">=17",
