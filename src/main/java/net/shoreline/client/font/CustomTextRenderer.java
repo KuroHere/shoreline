@@ -1,5 +1,6 @@
 package net.shoreline.client.font;
 
+import net.shoreline.client.init.Fonts;
 import net.shoreline.client.mixin.accessor.AccessorTextRenderer;
 import net.shoreline.client.util.Globals;
 import net.minecraft.client.font.*;
@@ -18,6 +19,13 @@ import java.util.List;
 
 public class CustomTextRenderer implements Globals
 {
+    // Autism
+    public void drawWithShadow(MatrixStack matrices, String text, float x, float y, int color)
+    {
+        draw(matrices, text, x + 1.0f, y + 1.0f, color, true);
+        draw(matrices, text, x, y, color, false);
+    }
+
     public void draw(MatrixStack matrices, String text, float x, float y, int color, boolean shadow)
     {
         this.draw(text, x, y, color, matrices.peek().getPositionMatrix(), shadow);
@@ -47,7 +55,7 @@ public class CustomTextRenderer implements Globals
                               Matrix4f matrix, VertexConsumerProvider vertexConsumers,
                               TextRenderer.TextLayerType layerType, int backgroundColor, int light)
     {
-        color = TextRenderer.tweakTransparency(color);
+        // color = TextRenderer.tweakTransparency(color);
         Matrix4f matrix4f = new Matrix4f(matrix);
         drawLayer(text, x, y, color, shadow, matrix4f, vertexConsumers, layerType, backgroundColor, light);
     }
@@ -102,7 +110,7 @@ public class CustomTextRenderer implements Globals
             float h;
             float g;
             FontStorage fontStorage = ((AccessorTextRenderer) mc.textRenderer).hookGetFontStorage(style.getFont());
-            Glyph glyph = fontStorage.getGlyph(j, mc.textRenderer.validateAdvance);
+            Glyph glyph = fontStorage.getGlyph(j, ((AccessorTextRenderer) mc.textRenderer).hookGetValidateAdvance());
             GlyphRenderer glyphRenderer = style.isObfuscated() && j != 32 ? fontStorage.getObfuscatedGlyphRenderer(glyph) : fontStorage.getGlyphRenderer(j);
             boolean bl = style.isBold();
             float f = this.alpha;

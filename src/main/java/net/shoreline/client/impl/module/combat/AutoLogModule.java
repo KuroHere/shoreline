@@ -58,7 +58,7 @@ public class AutoLogModule extends ToggleModule
         }
         if (onRenderConfig.getValue())
         {
-            AbstractClientPlayerEntity player = Globals.mc.world.getPlayers().stream()
+            AbstractClientPlayerEntity player = mc.world.getPlayers().stream()
                     .filter(p -> checkEnemy(p)).findFirst().orElse(null);
             if (player != null)
             {
@@ -66,7 +66,7 @@ public class AutoLogModule extends ToggleModule
                 return;
             }
         }
-        float health = Globals.mc.player.getHealth() + Globals.mc.player.getAbsorptionAmount();
+        float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
         int totems = Managers.INVENTORY.count(Items.TOTEM_OF_UNDYING);
         boolean b2 = totems <= totemsConfig.getValue();
         if (health <= healthConfig.getValue())
@@ -95,12 +95,12 @@ public class AutoLogModule extends ToggleModule
      */
     private void playerDisconnect(String disconnectReason, Object... args)
     {
-        if (Globals.mc.getNetworkHandler() == null)
+        if (mc.getNetworkHandler() == null)
         {
-            Globals.mc.world.disconnect();
+            mc.world.disconnect();
             return;
         }
-        Globals.mc.getNetworkHandler().getConnection().disconnect(
+        mc.getNetworkHandler().getConnection().disconnect(
                 Text.of(String.format(disconnectReason, args)));
         disable();
     }

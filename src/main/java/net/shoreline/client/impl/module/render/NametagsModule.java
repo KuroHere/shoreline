@@ -1,5 +1,19 @@
 package net.shoreline.client.impl.module.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.render.*;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.EnchantedGoldenAppleItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -12,21 +26,14 @@ import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.render.entity.RenderLabelEvent;
 import net.shoreline.client.init.Fonts;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.util.render.ColorUtil;
 import net.shoreline.client.util.world.FakePlayerEntity;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -42,6 +49,8 @@ public class NametagsModule extends ToggleModule
             "the player's armor", true);
     Config<Boolean> enchantmentsConfig = new BooleanConfig("Enchantments",
             "Displays a list of the item's enchantments", true);
+    Config<Boolean> durabilityConfig = new BooleanConfig("Durability",
+            "Displays item durability", true);
     Config<Boolean> itemNameConfig = new BooleanConfig("ItemName", "Displays " +
             "the player's current held item name", false);
     Config<Boolean> entityIdConfig = new BooleanConfig("EntityId", "Displays " +
@@ -172,8 +181,8 @@ public class NametagsModule extends ToggleModule
         }
         // ANNOYING HACK
         int color = getNametagColor(entity);
-        Fonts.VANILLA.draw(matrices, info, -width + 1.0f, 1.0f, color, true);
-        Fonts.VANILLA.draw(matrices, info, -width, 0.0f, color, false);
+        // Fonts.VANILLA.draw(matrices, info, -width + 1.0f, 1.0f, color, true);
+        Fonts.VANILLA.drawWithShadow(matrices, info, -width, 0.0f, color);
         // drawInternal(info, -width + 1.0f, 1.0f, getNametagColor(entity),
         //        true, matrices.peek().getPositionMatrix(), vertexConsumers,
         //        TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
@@ -182,7 +191,10 @@ public class NametagsModule extends ToggleModule
         //        TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
         // matrices.translate(1.0, 1.0, 0.0);
         vertexConsumers.draw();
-        renderItems(matrices, entity);
+        if (armorConfig.getValue())
+        {
+            renderItems(matrices, vertexConsumers, entity);
+        }
         RenderSystem.disableBlend();
         GL11.glDepthFunc(GL11.GL_LEQUAL);
         matrices.pop();
@@ -192,23 +204,20 @@ public class NametagsModule extends ToggleModule
      *
      * @param player
      */
-    private void renderItems(MatrixStack matrixStack, PlayerEntity player)
+    private void renderItems(MatrixStack matrixStack, VertexConsumerProvider.Immediate vertexConsumers, PlayerEntity player)
     {
         List<ItemStack> displayItems = new CopyOnWriteArrayList<>();
         if (!player.getOffHandStack().isEmpty())
         {
             displayItems.add(player.getOffHandStack());
         }
-        if (armorConfig.getValue())
+        player.getInventory().armor.forEach(armorStack ->
         {
-            player.getInventory().armor.forEach(armorStack ->
+            if (!armorStack.isEmpty())
             {
-                if (!armorStack.isEmpty())
-                {
-                    displayItems.add(armorStack);
-                }
-            });
-        }
+                displayItems.add(armorStack);
+            }
+        });
         if (!player.getMainHandStack().isEmpty())
         {
             displayItems.add(player.getMainHandStack());
@@ -226,27 +235,96 @@ public class NametagsModule extends ToggleModule
             }
         }
         int m2 = enchantOffset(n11);
+        // RenderSystem.disableDepthTest();
         for (ItemStack stack : displayItems)
         {
+            matrixStack.push();
+            matrixStack.translate(n10, m2, 0.0f);
+            matrixStack.translate(8.0f, 8.0f, 0.0f);
+            matrixStack.scale(16.0f, 16.0f, 0.0f);
+            matrixStack.multiplyPositionMatrix(new Matrix4f().scaling(1.0f, -1.0f, 0.0f));
             DiffuseLighting.disableGuiDepthLighting();
-            mc.getItemRenderer().renderInGui(matrixStack, stack, n10, m2);
+            mc.getItemRenderer().renderItem(stack, ModelTransformationMode.GUI, 0xf000f0,
+                    OverlayTexture.DEFAULT_UV, matrixStack, mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
+            mc.getBufferBuilders().getEntityVertexConsumers().draw();
+            matrixStack.pop();
             mc.getItemRenderer().renderGuiItemOverlay(matrixStack, mc.textRenderer, stack, n10, m2);
             // int n4 = (n11 > 4) ? ((n11 - 4) * 8 / 2) : 0;
             // drawGuiItem(camera, player, x, y, z, n10, m2, scaling, stack);
             // mc.getItemRenderer().renderGuiItemOverlay(matrixStack, mc.textRenderer, stack, n10, m2);
-            renderEnchants(stack, n10, m2);
+            matrixStack.scale(0.5f, 0.5f, 0.5f);
+            if (durabilityConfig.getValue())
+            {
+                renderDurability(matrixStack, stack, n10 + 1, m2 - 5);
+            }
+            if (enchantmentsConfig.getValue())
+            {
+                renderEnchants(matrixStack, stack, n10 + 1, m2);
+            }
+            matrixStack.scale(2.0f, 2.0f, 2.0f);
             n10 += 16;
         }
+        // RenderSystem.enableDepthTest();
     }
 
-    private void renderEnchants(ItemStack itemStack, int x, int y)
+    private void renderDurability(MatrixStack matrixStack, ItemStack itemStack, int x, int y)
     {
+        if (!itemStack.isDamageable())
+        {
+            return;
+        }
+        int n = itemStack.getMaxDamage();
+        int n2 = itemStack.getDamage();
+        int durability = (int) ((n - n2) / ((float) n) * 100.0f);
+        Fonts.VANILLA.drawWithShadow(matrixStack, durability + "%", x * 2, y * 2,
+                ColorUtil.hslToColor((float) (n - n2) / (float) n * 120.0f, 100.0f, 50.0f, 1.0f).getRGB());
+    }
 
+    private void renderEnchants(MatrixStack matrixStack, ItemStack itemStack, int x, int y)
+    {
+        if (itemStack.getItem() instanceof EnchantedGoldenAppleItem)
+        {
+            Fonts.VANILLA.drawWithShadow(matrixStack, "God", x * 2, y * 2, 0xc34e41);
+            return;
+        }
+        if (!itemStack.hasEnchantments())
+        {
+            return;
+        }
+        Map<Enchantment, Integer> enchants = EnchantmentHelper.get(itemStack);
+        //
+        int n2 = 0;
+        for (Enchantment enchantment : enchants.keySet())
+        {
+            int lvl = enchants.get(enchantment);
+            StringBuilder enchantString = new StringBuilder();
+            String translatedName = enchantment.getName(lvl).getString();
+            if (translatedName.contains("Vanish"))
+            {
+                enchantString.append("Van");
+            }
+            else if (translatedName.contains("Bind"))
+            {
+                enchantString.append("Bind");
+            }
+            else
+            {
+                int maxLen = lvl > 1 ? 2 : 3;
+                if (translatedName.length() > maxLen)
+                {
+                    translatedName = translatedName.substring(0, maxLen);
+                }
+                enchantString.append(translatedName);
+                enchantString.append(lvl);
+            }
+            Fonts.VANILLA.drawWithShadow(matrixStack, enchantString.toString(), x * 2, (y + n2) * 2, -1);
+            n2 += 5;
+        }
     }
 
     private int enchantOffset(final int n)
     {
-        int n2 = armorConfig.getValue() ? -26 : -27;
+        int n2 = armorConfig.getValue() ? -14 : -15;
         if (n > 4)
         {
             n2 -= (n - 4) * 8;

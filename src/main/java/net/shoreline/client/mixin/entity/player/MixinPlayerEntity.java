@@ -1,6 +1,7 @@
 package net.shoreline.client.mixin.entity.player;
 
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.impl.event.entity.player.PlayerJumpEvent;
 import net.shoreline.client.impl.event.entity.player.PushFluidsEvent;
 import net.shoreline.client.impl.event.entity.player.TravelEvent;
@@ -12,6 +13,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -26,6 +28,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PlayerEntity.class)
 public abstract class MixinPlayerEntity extends LivingEntity implements Globals
 {
+    @Shadow public abstract void travel(Vec3d movementInput);
+
     /**
      *
      * @param entityType
@@ -42,15 +46,30 @@ public abstract class MixinPlayerEntity extends LivingEntity implements Globals
      * @param ci
      */
     @Inject(method = "travel", at = @At(value = "HEAD"), cancellable = true)
-    private void hookTravel(Vec3d movementInput, CallbackInfo ci)
+    private void hookTravelHead(Vec3d movementInput, CallbackInfo ci)
     {
         TravelEvent travelEvent = new TravelEvent(movementInput);
+        travelEvent.setStage(EventStage.PRE);
         Shoreline.EVENT_HANDLER.dispatch(travelEvent);
         if (travelEvent.isCanceled())
         {
             move(MovementType.SELF, getVelocity());
             ci.cancel();
         }
+    }
+
+
+    /**
+     *
+     * @param movementInput
+     * @param ci
+     */
+    @Inject(method = "travel", at = @At(value = "RETURN"), cancellable = true)
+    private void hookTravelTail(Vec3d movementInput, CallbackInfo ci)
+    {
+        TravelEvent travelEvent = new TravelEvent(movementInput);
+        travelEvent.setStage(EventStage.POST);
+        Shoreline.EVENT_HANDLER.dispatch(travelEvent);
     }
 
     /**

@@ -1,8 +1,16 @@
 package net.shoreline.client.api.manager.player.rotation;
 
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.RotationModule;
+import net.shoreline.client.impl.event.entity.UpdateVelocityEvent;
+import net.shoreline.client.impl.event.entity.player.TravelEvent;
+import net.shoreline.client.impl.event.keyboard.KeyboardInputEvent;
+import net.shoreline.client.impl.event.keyboard.KeyboardTickEvent;
 import net.shoreline.client.impl.event.network.MovementPacketsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.render.entity.RenderPlayerEvent;
@@ -10,8 +18,6 @@ import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.Globals;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.PriorityQueue;
 
@@ -59,8 +65,7 @@ public class RotationManager implements Globals
         {
             return;
         }
-        if (event.getPacket() instanceof PlayerMoveC2SPacket packet
-                && packet.changesLook())
+        if (event.getPacket() instanceof PlayerMoveC2SPacket packet && packet.changesLook())
         {
             yaw = packet.getYaw(yaw);
             pitch = packet.getPitch(pitch);
@@ -83,6 +88,23 @@ public class RotationManager implements Globals
             event.setPitch(rotation.getPitch());
         }
     }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onUpdateVelocity(UpdateVelocityEvent event)
+    {
+        if (rotation != null && mc.player != null
+                && Modules.ROTATIONS.getMovementFix())
+        {
+            event.cancel();
+            event.setYaw(rotation.getYaw());
+        }
+    }
+
+    // public void onJump
 
     /**
      *
@@ -109,10 +131,8 @@ public class RotationManager implements Globals
      * @param yaw
      * @param pitch
      */
-    public void setRotation(final RotationModule requester,
-                            final RotationPriority priority,
-                            final float yaw,
-                            final float pitch)
+    public void setRotation(RotationModule requester, RotationPriority priority,
+                            float yaw, float pitch)
     {
         for (RotationRequest r : requests)
         {

@@ -56,7 +56,7 @@ public class FakeLagModule extends ToggleModule
     {
         if (renderConfig.getValue())
         {
-            serverModel = new FakePlayerEntity(Globals.mc.player);
+            serverModel = new FakePlayerEntity(mc.player);
             serverModel.spawnPlayer();
         }
     }
@@ -67,7 +67,7 @@ public class FakeLagModule extends ToggleModule
     @Override
     public void onDisable()
     {
-        if (Globals.mc.player == null)
+        if (mc.player == null)
         {
             return;
         }
@@ -75,7 +75,7 @@ public class FakeLagModule extends ToggleModule
         {
             for (Packet<?> p : packets)
             {
-                Globals.mc.player.networkHandler.sendPacket(p);
+                mc.player.networkHandler.sendPacket(p);
             }
             packets.clear();
         }
@@ -112,7 +112,7 @@ public class FakeLagModule extends ToggleModule
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
-        if (Globals.mc.player.isRiding())
+        if (mc.player == null || mc.player.isRiding())
         {
             return;
         }

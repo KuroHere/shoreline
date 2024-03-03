@@ -1,5 +1,8 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.Direction;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -11,10 +14,7 @@ import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.block.BlockSlipperinessEvent;
 import net.shoreline.client.impl.event.block.SteppedOnSlimeBlockEvent;
 import net.shoreline.client.impl.event.entity.VelocityMultiplierEvent;
-import net.shoreline.client.impl.event.network.GameJoinEvent;
-import net.shoreline.client.impl.event.network.MovementSlowdownEvent;
-import net.shoreline.client.impl.event.network.PacketEvent;
-import net.shoreline.client.impl.event.network.SetCurrentHandEvent;
+import net.shoreline.client.impl.event.network.*;
 import net.shoreline.client.init.Managers;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -24,10 +24,6 @@ import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.util.Globals;
@@ -92,10 +88,10 @@ public class NoSlowModule extends ToggleModule
         {
             MOVE_KEYBINDS = new KeyBinding[]
                     {
-                            Globals.mc.options.forwardKey,
-                            Globals.mc.options.backKey,
-                            Globals.mc.options.rightKey,
-                            Globals.mc.options.leftKey
+                            mc.options.forwardKey,
+                            mc.options.backKey,
+                            mc.options.rightKey,
+                            mc.options.leftKey
                     };
         }
     }
@@ -109,7 +105,7 @@ public class NoSlowModule extends ToggleModule
     {
         if (airStrictConfig.getValue() && sneaking)
         {
-            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(Globals.mc.player,
+            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                     ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         }
         sneaking = false;
@@ -128,7 +124,6 @@ public class NoSlowModule extends ToggleModule
     
     /**
      *
-     *
      * @param event
      */
     @EventListener
@@ -137,13 +132,36 @@ public class NoSlowModule extends ToggleModule
         if (airStrictConfig.getValue() && !sneaking && checkSlowed())
         {
             sneaking = true;
-            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(Globals.mc.player,
+            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                     ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPlayerUpdate(PlayerUpdateEvent event)
+    {
+        if (event.getStage() == EventStage.PRE && grimConfig.getValue()
+                && mc.player.isUsingItem() && itemsConfig.getValue())
+        {
+            if (mc.player.getActiveHand() == Hand.OFF_HAND)
+            {
+                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
+                        mc.player.getInventory().selectedSlot % 8 + 1));
+                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
+                        mc.player.getInventory().selectedSlot));
+            }
+            else
+            {
+                Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
+            }
         }
     }
     
     /**
-     *
      *
      * @param event
      */
@@ -153,10 +171,10 @@ public class NoSlowModule extends ToggleModule
         if (event.getStage() == EventStage.PRE)
         {
             if (airStrictConfig.getValue() && sneaking
-                    && !Globals.mc.player.isUsingItem())
+                    && !mc.player.isUsingItem())
             {
                 sneaking = false;
-                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(Globals.mc.player,
+                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                         ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
             }
             if (checkSlowed())
@@ -170,7 +188,7 @@ public class NoSlowModule extends ToggleModule
             if (inventoryMoveConfig.getValue() && checkScreen()
                     && MOVE_KEYBINDS != null)
             {
-                final long handle = Globals.mc.getWindow().getHandle();
+                final long handle = mc.getWindow().getHandle();
                 for (KeyBinding binding : MOVE_KEYBINDS)
                 {
                     binding.setPressed(InputUtil.isKeyPressed(handle,
@@ -178,8 +196,8 @@ public class NoSlowModule extends ToggleModule
                 }
                 if (arrowMoveConfig.getValue())
                 {
-                    float yaw = Globals.mc.player.getYaw();
-                    float pitch = Globals.mc.player.getPitch();
+                    float yaw = mc.player.getYaw();
+                    float pitch = mc.player.getPitch();
                     if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_UP))
                     {
                         pitch -= 3.0f;
@@ -196,14 +214,14 @@ public class NoSlowModule extends ToggleModule
                     {
                         yaw += 3.0f;
                     }
-                    Globals.mc.player.setYaw(yaw);
-                    Globals.mc.player.setPitch(MathHelper.clamp(pitch, -90.0f, 90.0f));
+                    mc.player.setYaw(yaw);
+                    mc.player.setPitch(MathHelper.clamp(pitch, -90.0f, 90.0f));
                 }
             }
-            final BlockState state = Globals.mc.world.getBlockState(BlockPos.ofFloored(Globals.mc.player.getPos()));
+            final BlockState state = mc.world.getBlockState(BlockPos.ofFloored(mc.player.getPos()));
             if (state.getBlock() == Blocks.COBWEB && websConfig.getValue())
             {
-                if (Globals.mc.player.isOnGround())
+                if (mc.player.isOnGround())
                 {
                     Managers.TICK.setClientTick(1.0f);
                 }
@@ -284,35 +302,31 @@ public class NoSlowModule extends ToggleModule
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
-        if (Globals.mc.player == null || Globals.mc.world == null || Globals.mc.isInSingleplayer())
+        if (mc.player == null || mc.world == null || mc.isInSingleplayer())
         {
             return;
         }
-        if (event.getPacket() instanceof PlayerMoveC2SPacket packet)
+        if (event.getPacket() instanceof PlayerMoveC2SPacket packet && packet.changesPosition()
+                && strictConfig.getValue() && checkSlowed())
         {
-            if (strictConfig.getValue() && checkSlowed()
-                    && packet.changesPosition())
-            {
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(0));
-                // Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(Globals.mc.player.getInventory().selectedSlot));
-            }
+            // Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(0));
+            // Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
+            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
         }
-        else if (event.getPacket() instanceof ClickSlotC2SPacket
-                && strictConfig.getValue())
+        else if (event.getPacket() instanceof ClickSlotC2SPacket && strictConfig.getValue())
         {
-            if (Globals.mc.player.isUsingItem())
+            if (mc.player.isUsingItem())
             {
-                Globals.mc.player.stopUsingItem();
+                mc.player.stopUsingItem();
             }
             if (sneaking || Managers.POSITION.isSneaking())
             {
-                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(Globals.mc.player,
+                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                         ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
             }
             if (Managers.POSITION.isSprinting())
             {
-                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(Globals.mc.player,
+                Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                         ClientCommandC2SPacket.Mode.STOP_SPRINTING));
             }
         }
@@ -325,9 +339,9 @@ public class NoSlowModule extends ToggleModule
      */
     public boolean checkSlowed()
     {
-        return !Globals.mc.player.isRiding() && !Globals.mc.player.isFallFlying()
-                && (Globals.mc.player.isUsingItem() && itemsConfig.getValue())
-                || (Globals.mc.player.isBlocking() && shieldsConfig.getValue());
+        return !mc.player.isRiding() && !mc.player.isFallFlying()
+                && (mc.player.isUsingItem() && itemsConfig.getValue())
+                || (mc.player.isBlocking() && shieldsConfig.getValue());
     }
     
     /**
@@ -337,9 +351,9 @@ public class NoSlowModule extends ToggleModule
      */
     public boolean checkScreen()
     {
-        return Globals.mc.currentScreen != null
-                && !(Globals.mc.currentScreen instanceof ChatScreen
-                || Globals.mc.currentScreen instanceof SignEditScreen
-                || Globals.mc.currentScreen instanceof DeathScreen);
+        return mc.currentScreen != null
+                && !(mc.currentScreen instanceof ChatScreen
+                || mc.currentScreen instanceof SignEditScreen
+                || mc.currentScreen instanceof DeathScreen);
     }
 }

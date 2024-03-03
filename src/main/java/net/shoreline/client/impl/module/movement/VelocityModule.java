@@ -104,11 +104,11 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
-        if (Globals.mc.player != null && Globals.mc.world != null)
+        if (mc.player != null && mc.world != null)
         {
             if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet)
             {
-                if (packet.getId() != Globals.mc.player.getId())
+                if (packet.getId() != mc.player.getId())
                 {
                     return;
                 }
@@ -174,9 +174,9 @@ public class VelocityModule extends ToggleModule
             {
                 if (pushFishhookConfig.getValue() && packet.getStatus() == EntityStatuses.PULL_HOOKED_ENTITY)
                 {
-                    Entity entity = packet.getEntity(Globals.mc.world);
+                    Entity entity = packet.getEntity(mc.world);
                     if (entity instanceof FishingBobberEntity hook
-                            && hook.getHookedEntity() == Globals.mc.player)
+                            && hook.getHookedEntity() == mc.player)
                     {
                         event.cancel();
                     }
@@ -199,10 +199,10 @@ public class VelocityModule extends ToggleModule
             {
                 if (Managers.NCP.passed(100))
                 {
-                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(Globals.mc.player.getX(),
-                            Globals.mc.player.getY(), Globals.mc.player.getZ(), Globals.mc.player.getYaw(), Globals.mc.player.getPitch(), Globals.mc.player.isOnGround()));
+                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
+                            mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround()));
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                            BlockPos.ofFloored(Globals.mc.player.getPos()), Direction.DOWN));
+                            BlockPos.ofFloored(mc.player.getPos()), Direction.DOWN));
                 }
                 cancelVelocity = false;
             }

@@ -135,10 +135,10 @@ public class InteractionManager implements Globals
             hitVec.add(sideHit.getOffsetX() * 0.5,
                 sideHit.getOffsetY() * 0.5, sideHit.getOffsetZ() * 0.5);
         }
-        // mc.interactionManager.interactBlock()
-        BlockHitResult result = new BlockHitResult(hitVec, sideHit, pos, false);
-        Managers.NETWORK.sendSequencedPacket(id ->
-                new PlayerInteractBlockC2SPacket(hand, result, id));
+        BlockHitResult result = new BlockHitResult(hitVec, sideHit.getOpposite(), neighbor, false);
+        mc.interactionManager.interactBlock(mc.player, hand, result);
+        // Managers.NETWORK.sendSequencedPacket(id ->
+        //        new PlayerInteractBlockC2SPacket(hand, result, id));
         Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
     }
 

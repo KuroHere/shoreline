@@ -57,8 +57,8 @@ public class ElytraFlyModule extends ToggleModule
     @EventListener
     public void onTravel(TravelEvent event)
     {
-        if (Globals.mc.player == null || Globals.mc.world == null
-                || !Globals.mc.player.isFallFlying())
+        if (event.getStage() != EventStage.PRE || mc.player == null
+                || mc.world == null || !mc.player.isFallFlying())
         {
             return;
         }
@@ -67,9 +67,9 @@ public class ElytraFlyModule extends ToggleModule
             case CONTROL ->
             {
                 event.cancel();
-                float forward = Globals.mc.player.input.movementForward;
-                float strafe = Globals.mc.player.input.movementSideways;
-                float yaw = Globals.mc.player.getYaw();
+                float forward = mc.player.input.movementForward;
+                float strafe = mc.player.input.movementSideways;
+                float yaw = mc.player.getYaw();
                 if (forward == 0.0f && strafe == 0.0f)
                 {
                     Managers.MOVEMENT.setMotionXZ(0.0, 0.0);
@@ -85,12 +85,12 @@ public class ElytraFlyModule extends ToggleModule
                 }
                 Managers.MOVEMENT.setMotionY(0.0);
                 pitch = 0;
-                if (Globals.mc.options.jumpKey.isPressed())
+                if (mc.options.jumpKey.isPressed())
                 {
                     pitch = -51;
                     Managers.MOVEMENT.setMotionY(vspeedConfig.getValue());
                 }
-                else if (Globals.mc.options.sneakKey.isPressed())
+                else if (mc.options.sneakKey.isPressed())
                 {
                     Managers.MOVEMENT.setMotionY(-vspeedConfig.getValue());
                 }
@@ -122,12 +122,12 @@ public class ElytraFlyModule extends ToggleModule
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
-        if (Globals.mc.player == null)
+        if (mc.player == null)
         {
             return;
         }
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet
-                && packet.changesLook() && Globals.mc.player.isFallFlying())
+                && packet.changesLook() && mc.player.isFallFlying())
         {
             ((AccessorPlayerMoveC2SPacket) packet).hookSetPitch(pitch);
         }
@@ -136,20 +136,20 @@ public class ElytraFlyModule extends ToggleModule
     private void glideElytraVec(float pitch)
     {
         double d = 0.08;
-        boolean bl = Globals.mc.player.getVelocity().y <= 0.0;
-        if (bl && Globals.mc.player.hasStatusEffect(StatusEffects.SLOW_FALLING))
+        boolean bl = mc.player.getVelocity().y <= 0.0;
+        if (bl && mc.player.hasStatusEffect(StatusEffects.SLOW_FALLING))
         {
             d = 0.01;
         }
-        Vec3d vec3d4 = Globals.mc.player.getVelocity();
-        Vec3d vec3d5 = getRotationVector(pitch, Globals.mc.player.getYaw());
+        Vec3d vec3d4 = mc.player.getVelocity();
+        Vec3d vec3d5 = getRotationVector(pitch, mc.player.getYaw());
         float f = pitch * 0.017453292f;
         double i = Math.sqrt(vec3d5.x * vec3d5.x + vec3d5.z * vec3d5.z);
         double j = vec3d4.horizontalLength();
         double k = vec3d5.length();
         double l = Math.cos(f);
         l = l * l * Math.min(1.0, k / 0.4);
-        vec3d4 = Globals.mc.player.getVelocity().add(0.0, d * (-1.0 + l * 0.75), 0.0);
+        vec3d4 = mc.player.getVelocity().add(0.0, d * (-1.0 + l * 0.75), 0.0);
         double m;
         // if (vec3d4.y < 0.0 && i > 0.0)
         // {
@@ -165,7 +165,7 @@ public class ElytraFlyModule extends ToggleModule
         // {
         //     vec3d4 = vec3d4.add((vec3d5.x / i * j - vec3d4.x) * 0.1, 0.0, (vec3d5.z / i * j - vec3d4.z) * 0.1);
         // }
-        Globals.mc.player.setVelocity(vec3d4.multiply(0.9900000095367432, 0.9800000190734863, 0.9900000095367432));
+        mc.player.setVelocity(vec3d4.multiply(0.9900000095367432, 0.9800000190734863, 0.9900000095367432));
     }
 
     protected final Vec3d getRotationVector(float pitch, float yaw)

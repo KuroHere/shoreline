@@ -114,7 +114,6 @@ public class EndCrystalUtil implements Globals
 
     /**
      *
-     *
      * @param damage
      * @return
      */
@@ -122,7 +121,7 @@ public class EndCrystalUtil implements Globals
     {
         return switch (mc.world.getDifficulty())
                 {
-                    case PEACEFUL -> 0;
+                    // case PEACEFUL -> 0;
                     case EASY -> Math.min(damage / 2.0f + 1.0f, damage);
                     case HARD -> damage * 3.0f / 2.0f;
                     default -> damage;

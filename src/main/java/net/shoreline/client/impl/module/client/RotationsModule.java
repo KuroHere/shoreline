@@ -3,8 +3,11 @@ package net.shoreline.client.impl.module.client;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
+import net.shoreline.client.api.event.EventStage;
+import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ConcurrentModule;
 import net.shoreline.client.api.module.ModuleCategory;
+import net.shoreline.client.impl.event.entity.player.TravelEvent;
 
 /**
  *
@@ -19,7 +22,9 @@ public class RotationsModule extends ConcurrentModule
             "Time to preserve rotations after reaching the target rotations",
             0.0f, 20.0f, 20.0f);
     Config<Boolean> movementFixConfig = new BooleanConfig("MovementFix",
-            "Fixes movement on NCP when rotating", false);
+            "Fixes movement on Grim when rotating", false);
+    //
+    private float prevYaw;
 
     /**
      *
@@ -30,8 +35,12 @@ public class RotationsModule extends ConcurrentModule
                 ModuleCategory.CLIENT);
     }
 
+    public boolean getMovementFix()
+    {
+        return movementFixConfig.getValue();
+    }
+
     /**
-     *
      *
      * @return
      */

@@ -8,6 +8,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.util.Identifier;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 /**
@@ -19,6 +20,13 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(TextRenderer.class)
 public interface AccessorTextRenderer
 {
+    /**
+     *
+     * @return
+     */
+    @Accessor("validateAdvance")
+    boolean hookGetValidateAdvance();
+
     /**
      *
      * @param id
