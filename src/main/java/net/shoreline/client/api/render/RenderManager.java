@@ -74,8 +74,8 @@ public class RenderManager implements Globals
         {
             return;
         }
-        preRenderWorld();
         matrices.push();
+        preRenderWorld();
         Color c = new Color(color, true);
         RenderSystem.setShaderColor(c.getRed() / 255.0f, c.getGreen() / 255.0f,
                 c.getBlue() / 255.0f, c.getAlpha() / 255.0f);
@@ -178,8 +178,8 @@ public class RenderManager implements Globals
         {
             return;
         }
-        preRenderWorld();
         matrices.push();
+        preRenderWorld();
         Color c = new Color(color, true);
         RenderSystem.setShaderColor(c.getRed() / 255.0f, c.getGreen() / 255.0f,
                 c.getBlue() / 255.0f, c.getAlpha() / 255.0f);
@@ -278,8 +278,8 @@ public class RenderManager implements Globals
                                   double z1, double x2, double y2, double z2,
                                   float width, int color)
     {
-        preRenderWorld();
         matrices.push();
+        preRenderWorld();
         Color c = new Color(color, true);
         RenderSystem.setShaderColor(c.getRed() / 255.0f, c.getGreen() / 255.0f,
                 c.getBlue() / 255.0f, c.getAlpha() / 255.0f);
@@ -344,7 +344,6 @@ public class RenderManager implements Globals
     }
 
     /**
-     *
      *
      * @param box
      * @return

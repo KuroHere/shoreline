@@ -58,25 +58,25 @@ public class SprintModule extends ToggleModule
         if (!Managers.POSITION.isSprinting()
                 && !Managers.POSITION.isSneaking()
                 && MovementUtil.isInputtingMovement()
-                && !Globals.mc.player.isRiding()
-                && !Globals.mc.player.isTouchingWater()
-                && !Globals.mc.player.isInLava()
-                && !Globals.mc.player.isHoldingOntoLadder()
-                && !Globals.mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
-                && Globals.mc.player.getHungerManager().getFoodLevel() > 6.0F)
+                && !mc.player.isRiding()
+                && !mc.player.isTouchingWater()
+                && !mc.player.isInLava()
+                && !mc.player.isHoldingOntoLadder()
+                && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
+                && mc.player.getHungerManager().getFoodLevel() > 6.0F)
         {
             switch (modeConfig.getValue())
             {
                 case LEGIT ->
                 {
-                    if (Globals.mc.player.input.hasForwardMovement()
-                            && (!Globals.mc.player.horizontalCollision
-                            || Globals.mc.player.collidedSoftly))
+                    if (mc.player.input.hasForwardMovement()
+                            && (!mc.player.horizontalCollision
+                            || mc.player.collidedSoftly))
                     {
-                        Globals.mc.player.setSprinting(true);
+                        mc.player.setSprinting(true);
                     }
                 }
-                case RAGE -> Globals.mc.player.setSprinting(true);
+                case RAGE -> mc.player.setSprinting(true);
             }
         }
     }
@@ -91,12 +91,12 @@ public class SprintModule extends ToggleModule
     {
         if (!Managers.POSITION.isSneaking()
                 && MovementUtil.isInputtingMovement()
-                && !Globals.mc.player.isRiding()
-                && !Globals.mc.player.isTouchingWater()
-                && !Globals.mc.player.isInLava()
-                && !Globals.mc.player.isHoldingOntoLadder()
-                && !Globals.mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
-                && Globals.mc.player.getHungerManager().getFoodLevel() > 6.0F
+                && !mc.player.isRiding()
+                && !mc.player.isTouchingWater()
+                && !mc.player.isInLava()
+                && !mc.player.isHoldingOntoLadder()
+                && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
+                && mc.player.getHungerManager().getFoodLevel() > 6.0F
                 && modeConfig.getValue() == SprintMode.RAGE)
         {
             event.cancel();

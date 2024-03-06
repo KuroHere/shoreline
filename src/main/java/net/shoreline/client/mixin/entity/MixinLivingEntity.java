@@ -1,8 +1,10 @@
 package net.shoreline.client.mixin.entity;
 
+import net.minecraft.util.Hand;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.entity.ConsumeItemEvent;
 import net.shoreline.client.impl.event.entity.LevitationEvent;
+import net.shoreline.client.impl.event.entity.SwingEvent;
 import net.shoreline.client.util.Globals;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;

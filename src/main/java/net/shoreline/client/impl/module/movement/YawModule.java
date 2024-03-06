@@ -35,8 +35,8 @@ public class YawModule extends ToggleModule
     {
         if (event.getStage() == EventStage.PRE)
         {
-            float yaw = Math.round(Globals.mc.player.getYaw() / 90.0f) * 90.0f;
-            Entity vehicle = Globals.mc.player.getVehicle();
+            float yaw = Math.round(mc.player.getYaw() / 90.0f) * 90.0f;
+            Entity vehicle = mc.player.getVehicle();
             if (vehicle != null)
             {
                 vehicle.setYaw(yaw);
@@ -46,8 +46,8 @@ public class YawModule extends ToggleModule
                 }
                 return;
             }
-            Globals.mc.player.setYaw(yaw);
-            Globals.mc.player.setHeadYaw(yaw);
+            mc.player.setYaw(yaw);
+            mc.player.setHeadYaw(yaw);
         }
     }
 }

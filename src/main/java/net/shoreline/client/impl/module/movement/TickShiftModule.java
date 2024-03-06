@@ -24,11 +24,14 @@ import net.shoreline.client.util.Globals;
  */
 public class TickShiftModule extends ToggleModule
 {
+    // Basically auto timer for NCP
     //
     Config<Integer> ticksConfig = new NumberConfig<>("MaxTicks", "Maximum " +
-            "charge ticks", 1, 20, 120);
-    Config<Float> packetsConfig = new NumberConfig<>("Packets", "Packets" +
-            " to release from storage every tick", 1.0f, 1.0f, 5.0f);
+            "charge ticks", 1, 20, 40);
+    Config<Integer> packetsConfig = new NumberConfig<>("Packets", "Packets" +
+            " to release from storage every tick", 1, 1, 5);
+    Config<Integer> chargeSpeedConfig = new NumberConfig<>("ChargeSpeed",
+            "The speed to charge the stored packets", 1, 1, 5);
     Config<Boolean> consumablesConfig = new BooleanConfig("Consumables",
             "Allows player to consume items faster", false);
     //
@@ -64,22 +67,20 @@ public class TickShiftModule extends ToggleModule
         {
             return;
         }
-        if (MovementUtil.isMoving() || !Globals.mc.player.isOnGround())
+        if (MovementUtil.isMoving() || !mc.player.isOnGround())
         {
-            packets--;
+            packets -= packetsConfig.getValue();
             if (packets <= 0)
             {
                 packets = 0;
                 Managers.TICK.setClientTick(1.0f);
+                return;
             }
-            else if (packets >= ticksConfig.getValue() - 1)
-            {
-                Managers.TICK.setClientTick(packetsConfig.getValue() + 1.0f);
-            }
+            Managers.TICK.setClientTick(packetsConfig.getValue() + 1.0f);
         }
         else
         {
-            packets++;
+            packets += chargeSpeedConfig.getValue();
             if (packets > ticksConfig.getValue())
             {
                 packets = ticksConfig.getValue();
@@ -108,10 +109,10 @@ public class TickShiftModule extends ToggleModule
             }
             for (int i = 0; i < maxUseTime; i++)
             {
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(Globals.mc.player.getX(),
-                        Globals.mc.player.getY(), Globals.mc.player.getZ(), Globals.mc.player.isOnGround()));
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(),
+                        mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
                 event.cancel();
-                stack.getItem().finishUsing(stack, Globals.mc.world, Globals.mc.player);
+                stack.getItem().finishUsing(stack, mc.world, mc.player);
                 packets -= maxUseTime;
             }
         }

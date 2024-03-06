@@ -1,5 +1,8 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.world.explosion.Explosion;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -15,6 +18,7 @@ import net.shoreline.client.impl.event.entity.player.PushFluidsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PushOutOfBlocksEvent;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.mixin.accessor.AccessorClientWorld;
 import net.shoreline.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
 import net.shoreline.client.mixin.accessor.AccessorExplosionS2CPacket;
 import net.shoreline.client.util.string.EnumFormatter;
@@ -150,14 +154,16 @@ public class VelocityModule extends ToggleModule
                                 && verticalConfig.getValue() == 0.0f)
                         {
                             event.cancel();
-                            return;
                         }
-                        ((AccessorExplosionS2CPacket) packet).setPlayerVelocityX(packet.getPlayerVelocityX()
-                                * (horizontalConfig.getValue() / 100.0f));
-                        ((AccessorExplosionS2CPacket) packet).setPlayerVelocityY(packet.getPlayerVelocityY()
-                                * (verticalConfig.getValue() / 100.0f));
-                        ((AccessorExplosionS2CPacket) packet).setPlayerVelocityZ(packet.getPlayerVelocityZ()
-                                * (horizontalConfig.getValue() / 100.0f));
+                        else
+                        {
+                            ((AccessorExplosionS2CPacket) packet).setPlayerVelocityX(packet.getPlayerVelocityX()
+                                    * (horizontalConfig.getValue() / 100.0f));
+                            ((AccessorExplosionS2CPacket) packet).setPlayerVelocityY(packet.getPlayerVelocityY()
+                                    * (verticalConfig.getValue() / 100.0f));
+                            ((AccessorExplosionS2CPacket) packet).setPlayerVelocityZ(packet.getPlayerVelocityZ()
+                                    * (horizontalConfig.getValue() / 100.0f));
+                        }
                     }
                     case STRICT ->
                     {
@@ -168,6 +174,13 @@ public class VelocityModule extends ToggleModule
                         event.cancel();
                         cancelVelocity = true;
                     }
+                }
+                if (event.isCanceled())
+                {
+                    // Dumb fix bc canceling explosion velocity removes explosion sound in 1.19
+                    ((AccessorClientWorld) mc.world).hookPlaySound(packet.getX(), packet.getY(), packet.getZ(),
+                            SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
+                            4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false, RANDOM.nextLong());
                 }
             }
             else if (event.getPacket() instanceof EntityStatusS2CPacket packet)
@@ -202,7 +215,7 @@ public class VelocityModule extends ToggleModule
                     Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
                             mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround()));
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                            BlockPos.ofFloored(mc.player.getPos()), Direction.DOWN));
+                            mc.player.getBlockPos(), mc.player.getHorizontalFacing().getOpposite()));
                 }
                 cancelVelocity = false;
             }

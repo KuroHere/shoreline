@@ -68,16 +68,16 @@ public class FastFallModule extends ToggleModule
     {
         if (event.getStage() == EventStage.PRE)
         {
-            prevOnGround = Globals.mc.player.isOnGround();
+            prevOnGround = mc.player.isOnGround();
             if (fallModeConfig.getValue() == FallMode.STEP)
             {
-                if (Globals.mc.player.isRiding()
-                        || Globals.mc.player.isFallFlying()
-                        || Globals.mc.player.isHoldingOntoLadder()
-                        || Globals.mc.player.isInLava()
-                        || Globals.mc.player.isTouchingWater()
-                        || Globals.mc.player.input.jumping
-                        || Globals.mc.player.input.sneaking)
+                if (mc.player.isRiding()
+                        || mc.player.isFallFlying()
+                        || mc.player.isHoldingOntoLadder()
+                        || mc.player.isInLava()
+                        || mc.player.isTouchingWater()
+                        || mc.player.input.jumping
+                        || mc.player.input.sneaking)
                 {
                     return;
                 }
@@ -86,7 +86,7 @@ public class FastFallModule extends ToggleModule
                 {
                     return;
                 }
-                if (Globals.mc.player.isOnGround() && isNearestBlockWithinHeight(heightConfig.getValue()))
+                if (mc.player.isOnGround() && isNearestBlockWithinHeight(heightConfig.getValue()))
                 {
                     Managers.MOVEMENT.setMotionY(-3.0);
                     // Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
@@ -105,13 +105,13 @@ public class FastFallModule extends ToggleModule
     {
         if (fallModeConfig.getValue() == FallMode.SHIFT)
         {
-            if (Globals.mc.player.isRiding()
-                    || Globals.mc.player.isFallFlying()
-                    || Globals.mc.player.isHoldingOntoLadder()
-                    || Globals.mc.player.isInLava()
-                    || Globals.mc.player.isTouchingWater()
-                    || Globals.mc.player.input.jumping
-                    || Globals.mc.player.input.sneaking)
+            if (mc.player.isRiding()
+                    || mc.player.isFallFlying()
+                    || mc.player.isHoldingOntoLadder()
+                    || mc.player.isInLava()
+                    || mc.player.isTouchingWater()
+                    || mc.player.input.jumping
+                    || mc.player.input.sneaking)
             {
                 return;
             }
@@ -123,7 +123,7 @@ public class FastFallModule extends ToggleModule
             {
                 return;
             }
-            if (Globals.mc.player.getVelocity().y < 0 && prevOnGround && !Globals.mc.player.isOnGround()
+            if (mc.player.getVelocity().y < 0 && prevOnGround && !mc.player.isOnGround()
                     && isNearestBlockWithinHeight(heightConfig.getValue() + 0.01))
             {
                 fallTimer.reset();
@@ -167,10 +167,10 @@ public class FastFallModule extends ToggleModule
      */
     private boolean isNearestBlockWithinHeight(double height)
     {
-        Box bb = Globals.mc.player.getBoundingBox();
+        Box bb = mc.player.getBoundingBox();
         for (double i = 0; i < height + 0.5; i += 0.01)
         {
-            if (!Globals.mc.world.isSpaceEmpty(Globals.mc.player, bb.offset(0, -i, 0)))
+            if (!mc.world.isSpaceEmpty(mc.player, bb.offset(0, -i, 0)))
             {
                 return true;
             }

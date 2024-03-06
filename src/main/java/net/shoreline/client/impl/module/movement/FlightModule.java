@@ -98,19 +98,19 @@ public class FlightModule extends ToggleModule
         if (modeConfig.getValue() == FlightMode.CREATIVE)
         {
             event.setY(0.0);
-            if (Globals.mc.options.jumpKey.isPressed())
+            if (mc.options.jumpKey.isPressed())
             {
                 event.setY(vspeedConfig.getValue());
             }
-            else if (Globals.mc.options.sneakKey.isPressed())
+            else if (mc.options.sneakKey.isPressed())
             {
                 event.setY(-vspeedConfig.getValue());
             }
             float speed = getFlySpeed();
             //
-            float forward = Globals.mc.player.input.movementForward;
-            float strafe = Globals.mc.player.input.movementSideways;
-            float yaw = Globals.mc.player.getYaw();
+            float forward = mc.player.input.movementForward;
+            float strafe = mc.player.input.movementSideways;
+            float yaw = mc.player.getYaw();
             if (forward == 0.0f && strafe == 0.0f)
             {
                 event.setX(0.0);
@@ -146,19 +146,19 @@ public class FlightModule extends ToggleModule
 
     private void enableVanillaFly()
     {
-        Globals.mc.player.getAbilities().allowFlying = true;
-        Globals.mc.player.getAbilities().flying = true;
-        Globals.mc.player.getAbilities().setFlySpeed(speedConfig.getValue() * 0.05f);
+        mc.player.getAbilities().allowFlying = true;
+        mc.player.getAbilities().flying = true;
+        mc.player.getAbilities().setFlySpeed(speedConfig.getValue() * 0.05f);
     }
 
     private void disableVanillaFly()
     {
-        if (!Globals.mc.player.isCreative())
+        if (!mc.player.isCreative())
         {
-            Globals.mc.player.getAbilities().allowFlying = false;
+            mc.player.getAbilities().allowFlying = false;
         }
-        Globals.mc.player.getAbilities().flying = false;
-        Globals.mc.player.getAbilities().setFlySpeed(0.05f);
+        mc.player.getAbilities().flying = false;
+        mc.player.getAbilities().setFlySpeed(0.05f);
     }
 
     /**

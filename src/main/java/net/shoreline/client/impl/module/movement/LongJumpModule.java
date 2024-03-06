@@ -95,8 +95,8 @@ public class LongJumpModule extends ToggleModule
         {
             return;
         }
-        double dx = Globals.mc.player.getX() - Globals.mc.player.prevX;
-        double dz = Globals.mc.player.getZ() - Globals.mc.player.prevZ;
+        double dx = mc.player.getX() - mc.player.prevX;
+        double dz = mc.player.getZ() - mc.player.prevZ;
         distance = Math.sqrt(dx * dx + dz * dz);
     }
 
@@ -109,7 +109,7 @@ public class LongJumpModule extends ToggleModule
     {
         if (modeConfig.getValue() == JumpMode.NORMAL)
         {
-            if (Globals.mc.player == null || Globals.mc.world == null
+            if (mc.player == null || mc.world == null
                     || Modules.FLIGHT.isEnabled()
                     || Modules.PACKET_FLY.isEnabled()
                     || !MovementUtil.isInputtingMovement())
@@ -138,8 +138,8 @@ public class LongJumpModule extends ToggleModule
             }
             else
             {
-                if (!Globals.mc.world.isSpaceEmpty(Globals.mc.player, Globals.mc.player.getBoundingBox().offset(0,
-                        Globals.mc.player.getVelocity().getY(), 0)) || Globals.mc.player.verticalCollision)
+                if (!mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0,
+                        mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision)
                 {
                     stage = 0;
                 }
@@ -164,156 +164,156 @@ public class LongJumpModule extends ToggleModule
         if (event.getStage() == EventStage.PRE
                 && modeConfig.getValue() == JumpMode.COWABUNGA)
         {
-            if (Modules.FLIGHT.isEnabled() || Globals.mc.player.isFallFlying()
-                    || Globals.mc.player.isHoldingOntoLadder()
-                    || Globals.mc.player.isTouchingWater())
+            if (Modules.FLIGHT.isEnabled() || mc.player.isFallFlying()
+                    || mc.player.isHoldingOntoLadder()
+                    || mc.player.isTouchingWater())
             {
                 return;
             }
-            if (Globals.mc.player.isOnGround())
+            if (mc.player.isOnGround())
             {
                 distance = 0.0;
             }
-            final float direction = Globals.mc.player.getYaw() +
-                    ((Globals.mc.player.forwardSpeed < 0.0f) ? 180 : 0) +
-                    ((Globals.mc.player.sidewaysSpeed > 0.0f) ? (-90.0f *
-                            ((Globals.mc.player.forwardSpeed < 0.0f) ? -0.5f :
-                                    ((Globals.mc.player.forwardSpeed > 0f) ? 0.5f : 1.0f)))
-                            : 0.0f) - ((Globals.mc.player.sidewaysSpeed < 0.0f) ? (-90.0f *
-                    ((Globals.mc.player.forwardSpeed < 0.0f) ? -0.5f :
-                            ((Globals.mc.player.forwardSpeed > 0.0f) ? 0.5f : 1.0f))) : 0.0f);
+            final float direction = mc.player.getYaw() +
+                    ((mc.player.forwardSpeed < 0.0f) ? 180 : 0) +
+                    ((mc.player.sidewaysSpeed > 0.0f) ? (-90.0f *
+                            ((mc.player.forwardSpeed < 0.0f) ? -0.5f :
+                                    ((mc.player.forwardSpeed > 0f) ? 0.5f : 1.0f)))
+                            : 0.0f) - ((mc.player.sidewaysSpeed < 0.0f) ? (-90.0f *
+                    ((mc.player.forwardSpeed < 0.0f) ? -0.5f :
+                            ((mc.player.forwardSpeed > 0.0f) ? 0.5f : 1.0f))) : 0.0f);
             final float dx = (float) Math.cos((direction + 90.0f) * Math.PI / 180.0);
             final float dz = (float) Math.sin((direction + 90.0f) * Math.PI / 180.0);
-            if (!Globals.mc.player.verticalCollision)
+            if (!mc.player.verticalCollision)
             {
                 airTicks++;
-                if (Globals.mc.player.input.sneaking)
+                if (mc.player.input.sneaking)
                 {
-                    Globals.mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                             0.0, 2.147483647e9, 0.0, false));
                 }
                 groundTicks = 0;
-                if (!Globals.mc.player.verticalCollision)
+                if (!mc.player.verticalCollision)
                 {
-                    if (Globals.mc.player.getVelocity().y == -0.07190068807140403)
+                    if (mc.player.getVelocity().y == -0.07190068807140403)
                     {
-                        Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.35f);
+                        Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.35f);
                     }
-                    if (Globals.mc.player.getVelocity().y == -0.10306193759436909)
+                    if (mc.player.getVelocity().y == -0.10306193759436909)
                     {
-                        Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.55f);
+                        Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.55f);
                     }
-                    if (Globals.mc.player.getVelocity().y == -0.13395038817442878)
+                    if (mc.player.getVelocity().y == -0.13395038817442878)
                     {
-                        Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.67f);
+                        Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.67f);
                     }
-                    if (Globals.mc.player.getVelocity().y == -0.16635183030382)
+                    if (mc.player.getVelocity().y == -0.16635183030382)
                     {
-                        Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.69f);
+                        Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.69f);
                     }
-                    if (Globals.mc.player.getVelocity().y == -0.19088711097794803)
+                    if (mc.player.getVelocity().y == -0.19088711097794803)
                     {
-                        Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.71f);
+                        Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.71f);
                     }
-                    if (Globals.mc.player.getVelocity().y == -0.21121925191528862)
+                    if (mc.player.getVelocity().y == -0.21121925191528862)
                     {
-                        Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.2f);
+                        Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.2f);
                     }
-                    if (Globals.mc.player.getVelocity().y == -0.11979897632390576)
+                    if (mc.player.getVelocity().y == -0.11979897632390576)
                     {
-                        Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.93f);
+                        Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.93f);
                     }
-                    if (Globals.mc.player.getVelocity().y == -0.18758479151225355)
+                    if (mc.player.getVelocity().y == -0.18758479151225355)
                     {
-                        Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.72f);
+                        Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.72f);
                     }
-                    if (Globals.mc.player.getVelocity().y == -0.21075983825251726)
+                    if (mc.player.getVelocity().y == -0.21075983825251726)
                     {
-                        Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.76f);
+                        Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.76f);
                     }
-                    if (getJumpCollisions(Globals.mc.player, 70.0) < 0.5)
+                    if (getJumpCollisions(mc.player, 70.0) < 0.5)
                     {
-                        if (Globals.mc.player.getVelocity().y == -0.23537393014173347)
+                        if (mc.player.getVelocity().y == -0.23537393014173347)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.03f);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.03f);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.08531999505205401)
+                        if (mc.player.getVelocity().y == -0.08531999505205401)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * -0.5);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * -0.5);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.03659320313669756)
+                        if (mc.player.getVelocity().y == -0.03659320313669756)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * -0.1f);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * -0.1f);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.07481386749524899)
+                        if (mc.player.getVelocity().y == -0.07481386749524899)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * -0.07f);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * -0.07f);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.0732677700939672)
+                        if (mc.player.getVelocity().y == -0.0732677700939672)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * -0.05f);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * -0.05f);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.07480988066790395)
+                        if (mc.player.getVelocity().y == -0.07480988066790395)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * -0.04f);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * -0.04f);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.0784000015258789)
+                        if (mc.player.getVelocity().y == -0.0784000015258789)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.1f);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.1f);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.08608320193943977)
+                        if (mc.player.getVelocity().y == -0.08608320193943977)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.1f);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.1f);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.08683615560584318)
+                        if (mc.player.getVelocity().y == -0.08683615560584318)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.05f);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.05f);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.08265497329678266)
+                        if (mc.player.getVelocity().y == -0.08265497329678266)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.05f);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.05f);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.08245009535659828)
+                        if (mc.player.getVelocity().y == -0.08245009535659828)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.05f);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.05f);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.08244005633718426)
+                        if (mc.player.getVelocity().y == -0.08244005633718426)
                         {
                             Managers.MOVEMENT.setMotionY(-0.08243956442521608);
                         }
-                        if (Globals.mc.player.getVelocity().y == -0.08243956442521608)
+                        if (mc.player.getVelocity().y == -0.08243956442521608)
                         {
                             Managers.MOVEMENT.setMotionY(-0.08244005590677261);
                         }
-                        if (Globals.mc.player.getVelocity().y > -0.1
-                                && Globals.mc.player.getVelocity().y < -0.08
-                                && !Globals.mc.player.isOnGround()
-                                && Globals.mc.player.input.pressingForward)
+                        if (mc.player.getVelocity().y > -0.1
+                                && mc.player.getVelocity().y < -0.08
+                                && !mc.player.isOnGround()
+                                && mc.player.input.pressingForward)
                         {
                             Managers.MOVEMENT.setMotionY(-1.0e-4f);
                         }
                     }
                     else
                     {
-                        if (Globals.mc.player.getVelocity().y < -0.2
-                                && Globals.mc.player.getVelocity().y > -0.24)
+                        if (mc.player.getVelocity().y < -0.2
+                                && mc.player.getVelocity().y > -0.24)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.7);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.7);
                         }
-                        if (Globals.mc.player.getVelocity().y < -0.25
-                                && Globals.mc.player.getVelocity().y > -0.32)
+                        if (mc.player.getVelocity().y < -0.25
+                                && mc.player.getVelocity().y > -0.32)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.8);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.8);
                         }
-                        if (Globals.mc.player.getVelocity().y < -0.35
-                                && Globals.mc.player.getVelocity().y > -0.8)
+                        if (mc.player.getVelocity().y < -0.35
+                                && mc.player.getVelocity().y > -0.8)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.98);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.98);
                         }
-                        if (Globals.mc.player.getVelocity().y < -0.8
-                                && Globals.mc.player.getVelocity().y > -1.6)
+                        if (mc.player.getVelocity().y < -0.8
+                                && mc.player.getVelocity().y > -1.6)
                         {
-                            Managers.MOVEMENT.setMotionY(Globals.mc.player.getVelocity().y * 0.99);
+                            Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y * 0.99);
                         }
                     }
                 }
@@ -334,7 +334,7 @@ public class LongJumpModule extends ToggleModule
                                 0.261, 0.259, 0.257, 0.255, 0.253, 0.251, 0.249,
                                 0.247, 0.245, 0.243, 0.241, 0.239, 0.237
                         };
-                if (Globals.mc.player.input.pressingForward)
+                if (mc.player.input.pressingForward)
                 {
                     try
                     {
@@ -353,25 +353,25 @@ public class LongJumpModule extends ToggleModule
             Managers.TICK.setClientTick(1.0f);
             airTicks = 0;
             groundTicks++;
-            Managers.MOVEMENT.setMotionXZ(Globals.mc.player.getVelocity().x / 13.0,
-                    Globals.mc.player.getVelocity().z / 13.0);
+            Managers.MOVEMENT.setMotionXZ(mc.player.getVelocity().x / 13.0,
+                    mc.player.getVelocity().z / 13.0);
             if (groundTicks == 1) 
             {
-                Globals.mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        Globals.mc.player.getX(), Globals.mc.player.getY(),
-                        Globals.mc.player.getZ(), Globals.mc.player.isOnGround()));
-                Globals.mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        Globals.mc.player.getX() + 0.0624, Globals.mc.player.getY(),
-                        Globals.mc.player.getZ(), Globals.mc.player.isOnGround()));
-                Globals.mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        Globals.mc.player.getX(), Globals.mc.player.getY() + 0.419,
-                        Globals.mc.player.getZ(), Globals.mc.player.isOnGround()));
-                Globals.mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        Globals.mc.player.getX() + 0.0624, Globals.mc.player.getY(),
-                        Globals.mc.player.getZ(), Globals.mc.player.isOnGround()));
-                Globals.mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        Globals.mc.player.getX(), Globals.mc.player.getY() + 0.419,
-                        Globals.mc.player.getZ(), Globals.mc.player.isOnGround()));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        mc.player.getX(), mc.player.getY(),
+                        mc.player.getZ(), mc.player.isOnGround()));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        mc.player.getX() + 0.0624, mc.player.getY(),
+                        mc.player.getZ(), mc.player.isOnGround()));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        mc.player.getX(), mc.player.getY() + 0.419,
+                        mc.player.getZ(), mc.player.isOnGround()));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        mc.player.getX() + 0.0624, mc.player.getY(),
+                        mc.player.getZ(), mc.player.isOnGround()));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        mc.player.getX(), mc.player.getY() + 0.419,
+                        mc.player.getZ(), mc.player.isOnGround()));
             }
             if (groundTicks > 2)
             {
@@ -389,8 +389,8 @@ public class LongJumpModule extends ToggleModule
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
-        if (Globals.mc.player == null || Globals.mc.world == null
-                || Globals.mc.currentScreen instanceof DownloadingTerrainScreen)
+        if (mc.player == null || mc.world == null
+                || mc.currentScreen instanceof DownloadingTerrainScreen)
         {
             return;
         }

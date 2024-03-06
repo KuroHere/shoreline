@@ -126,7 +126,7 @@ public class HoleESPModule extends ToggleModule
                 alpha = MathHelper.clamp(alpha, 0.0, 1.0);
             }
             RenderManager.renderBox(event.getMatrices(), render,
-                    Modules.COLORS.getRGB((int) (alpha * 60.0f)));
+                    Modules.COLORS.getRGB((int) (alpha * 80.0f)));
             RenderManager.renderBoundingBox(event.getMatrices(), render, 1.5f,
                     Modules.COLORS.getRGB((int) (alpha * 125.0f)));
         }

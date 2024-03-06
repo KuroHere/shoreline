@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.module.render;
 
+import net.minecraft.client.render.Camera;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.ColorConfig;
@@ -85,11 +86,13 @@ public class TracersModule extends ToggleModule
         {
             return;
         }
-        float eyeHeight = mc.player.getEyeHeight(EntityPose.STANDING);
+        boolean prevBobView = mc.options.getBobView().getValue();
+        mc.options.getBobView().setValue(false);
+        Camera cameraPos = mc.gameRenderer.getCamera();
         Vec3d pos = new Vec3d(0.0, 0.0, 1.0)
-                .rotateX(-((float) Math.toRadians(mc.player.getPitch())))
-                .rotateY(-((float) Math.toRadians(mc.player.getYaw())))
-                .add(0.0, eyeHeight, 0.0);
+                .rotateX(-(float) Math.toRadians(cameraPos.getPitch()))
+                .rotateY(-(float) Math.toRadians(cameraPos.getYaw()))
+                .add(mc.cameraEntity.getEyePos());
         for (Entity entity : mc.world.getEntities())
         {
             if (entity == null || !entity.isAlive() || entity == mc.player)
@@ -100,15 +103,12 @@ public class TracersModule extends ToggleModule
             //
             if (color != null)
             {
-                Vec3d entityPos = Interpolation.getRenderPosition(entity,
-                        event.getTickDelta());
-                Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
-                entityPos = entityPos.subtract(cameraPos).add(0.0,
-                        getTargetY(entity), 0.0);
-                RenderManager.renderLine(event.getMatrices(), pos, entityPos,
-                        widthConfig.getValue(), color.getRGB());
+                // Vec3d entityPos = Interpolation.getRenderPosition(entity.getPos().add(0.0, getTargetY(entity), 0.0), event.getTickDelta());
+                // RenderManager.renderLine(event.getMatrices(), pos, entityPos,
+                //        widthConfig.getValue(), color.getRGB());
             }
         }
+        mc.options.getBobView().setValue(prevBobView);
     }
 
     /**
@@ -161,7 +161,7 @@ public class TracersModule extends ToggleModule
         {
             case FEET -> 0.0;
             case TORSO -> entity.getHeight() / 2.0;
-            case HEAD -> entity.getEyeHeight(EntityPose.STANDING);
+            case HEAD -> entity.getStandingEyeHeight();
         };
     }
 

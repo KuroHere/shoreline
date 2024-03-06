@@ -43,15 +43,15 @@ public class EntityControlModule extends ToggleModule
     @EventListener
     public void onTick(TickEvent event)
     {
-        Entity vehicle = Globals.mc.player.getVehicle();
+        Entity vehicle = mc.player.getVehicle();
         if (vehicle == null)
         {
             return;
         }
-        vehicle.setYaw(Globals.mc.player.getYaw());
+        vehicle.setYaw(mc.player.getYaw());
         if (vehicle instanceof LlamaEntity llama)
         {
-            llama.headYaw = Globals.mc.player.getYaw();
+            llama.headYaw = mc.player.getYaw();
         }
     }
 

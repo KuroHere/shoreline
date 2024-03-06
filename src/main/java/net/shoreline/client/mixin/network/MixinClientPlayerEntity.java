@@ -2,6 +2,7 @@ package net.shoreline.client.mixin.network;
 
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.EventStage;
+import net.shoreline.client.impl.event.entity.SwingEvent;
 import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.util.Globals;
 import net.minecraft.client.MinecraftClient;
@@ -92,7 +93,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     public MixinClientPlayerEntity() 
     {
         // Treating this class as ClientPlayerEntity with mc.player info works
-        // Need a better solution with less bullshit
+        // Need a better solution
         super(MinecraftClient.getInstance().world,
                 MinecraftClient.getInstance().player.getGameProfile());
     }
@@ -197,6 +198,19 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     //
     @Unique
     private boolean ticking;
+
+    /**
+     *
+     * @param ci
+     */
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/" +
+            "minecraft/client/network/AbstractClientPlayerEntity;tick()V",
+            shift = At.Shift.BEFORE, ordinal = 0), cancellable = true)
+    private void hookTickPre(CallbackInfo ci)
+    {
+        PlayerTickEvent playerTickEvent = new PlayerTickEvent();
+        Shoreline.EVENT_HANDLER.dispatch(playerTickEvent);
+    }
 
     /**
      *
@@ -347,6 +361,23 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         {
             cir.cancel();
             cir.setReturnValue(mountJumpStrengthEvent.getJumpStrength());
+        }
+    }
+
+    /**
+     *
+     * @param hand
+     * @param ci
+     */
+    @Inject(method = "swingHand", at = @At(value = "RETURN"))
+    private void hookSwingHand(Hand hand, CallbackInfo ci)
+    {
+        SwingEvent swingEvent = new SwingEvent(hand);
+        Shoreline.EVENT_HANDLER.dispatch(swingEvent);
+        if (swingEvent.isCanceled())
+        {
+            mc.player.handSwinging = false;
+            mc.player.handSwingTicks = 0;
         }
     }
 }

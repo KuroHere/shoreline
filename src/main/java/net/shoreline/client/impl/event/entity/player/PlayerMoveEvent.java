@@ -57,4 +57,19 @@ public class PlayerMoveEvent extends Event
     {
         return new Vec3d(x, y, z);
     }
+
+    public double getX()
+    {
+        return x;
+    }
+
+    public double getY()
+    {
+        return y;
+    }
+
+    public double getZ()
+    {
+        return z;
+    }
 }

@@ -39,12 +39,12 @@ public class HighJumpModule extends ToggleModule
     @EventListener
     public void onPlayerMove(PlayerMoveEvent event)
     {
-        if (Globals.mc.options.jumpKey.isPressed() && (Globals.mc.player.isOnGround()
+        if (mc.options.jumpKey.isPressed() && (mc.player.isOnGround()
                 || airJumpConfig.getValue()))
         {
             Managers.MOVEMENT.setMotionY(heightConfig.getValue());
             event.cancel();
-            event.setY(Globals.mc.player.getVelocity().y);
+            event.setY(mc.player.getVelocity().y);
         }
     }
 }

@@ -201,10 +201,10 @@ public class CriticalsModule extends ToggleModule
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                         x, y, z, false));
             }
-            case LOW_JUMP ->
+            case LOW_HOP ->
             {
-                mc.player.jump();
-                Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y / 2.0);
+                // mc.player.jump();
+                Managers.MOVEMENT.setMotionY(0.3425);
             }
         }
     }
@@ -214,6 +214,6 @@ public class CriticalsModule extends ToggleModule
         PACKET,
         PACKET_STRICT,
         VANILLA,
-        LOW_JUMP
+        LOW_HOP
     }
 }

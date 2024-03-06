@@ -242,8 +242,7 @@ public class AuraModule extends RotationModule
                         (randomSpeedConfig.getValue() * 10.0f) + 1.0f);
             }
             float delay = (attackSpeedConfig.getValue() * 50.0f) + randomDelay;
-            if (attackTimer.passed(2000.0f - delay)
-                    && attackTarget(entityTarget))
+            if (attackTimer.passed(1000.0f - delay) && attackTarget(entityTarget))
             {
                 randomDelay = -1;
                 attackTimer.reset();

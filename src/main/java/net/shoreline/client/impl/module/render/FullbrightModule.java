@@ -1,16 +1,20 @@
 package net.shoreline.client.impl.module.render;
 
+import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.config.ConfigUpdateEvent;
 import net.shoreline.client.impl.event.network.GameJoinEvent;
+import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.render.LightmapGammaEvent;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.shoreline.client.impl.event.world.AddEntityEvent;
 
 /**
  *
@@ -39,13 +43,11 @@ public class FullbrightModule extends ToggleModule
     @Override
     public void onEnable()
     {
-        if (mc.player != null && mc.world != null)
+        if (mc.player != null && mc.world != null
+                && brightnessConfig.getValue() == Brightness.POTION)
         {
-            if (brightnessConfig.getValue() == Brightness.POTION)
-            {
-                mc.player.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.NIGHT_VISION, -1, 0)); // INFINITE
-            }
+            mc.player.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.NIGHT_VISION, -1, 0)); // INFINITE
         }
     }
 
@@ -56,12 +58,10 @@ public class FullbrightModule extends ToggleModule
     @Override
     public void onDisable()
     {
-        if (mc.player != null && mc.world != null)
+        if (mc.player != null && mc.world != null
+                && brightnessConfig.getValue() == Brightness.POTION)
         {
-            if (brightnessConfig.getValue() == Brightness.POTION)
-            {
-                mc.player.removeStatusEffect(StatusEffects.NIGHT_VISION);
-            }
+            mc.player.removeStatusEffect(StatusEffects.NIGHT_VISION);
         }
     }
 
@@ -93,22 +93,31 @@ public class FullbrightModule extends ToggleModule
 
     /**
      *
-     *
      * @param event
      */
     @EventListener
     public void onConfigUpdate(ConfigUpdateEvent event)
     {
         if (mc.player != null && brightnessConfig == event.getConfig()
-                && event.getStage() == EventStage.POST)
+                && event.getStage() == EventStage.POST
+                && brightnessConfig.getValue() != Brightness.POTION)
         {
-            if (brightnessConfig.getValue() == Brightness.POTION)
-            {
-                mc.player.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.NIGHT_VISION, -1, 0));
-                return;
-            }
             mc.player.removeStatusEffect(StatusEffects.NIGHT_VISION);
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onTick(TickEvent event)
+    {
+        if (brightnessConfig.getValue() == Brightness.POTION
+                && !mc.player.hasStatusEffect(StatusEffects.NIGHT_VISION))
+        {
+            mc.player.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.NIGHT_VISION, -1, 0));
         }
     }
 

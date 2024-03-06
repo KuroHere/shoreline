@@ -63,6 +63,7 @@ public class NCPManager implements Timer, Globals
 
     /**
      *
+     *
      * @param x
      * @param y
      * @param z
@@ -77,29 +78,6 @@ public class NCPManager implements Timer, Globals
                                                 final int dx,
                                                 final int dy,
                                                 final int dz)
-    {
-        return getPlaceDirectionsNCP(x, y, z, dx, dy, dz, false);
-    }
-
-    /**
-     *
-     *
-     * @param x
-     * @param y
-     * @param z
-     * @param dx
-     * @param dy
-     * @param dz
-     * @param exposed
-     * @return
-     */
-    public Set<Direction> getPlaceDirectionsNCP(final int x,
-                                                final int y,
-                                                final int z,
-                                                final int dx,
-                                                final int dy,
-                                                final int dz,
-                                                final boolean exposed)
     {
         // directly from NCP src
         final BlockPos pos = new BlockPos(dx, dy, dz);
@@ -148,15 +126,7 @@ public class NCPManager implements Timer, Globals
             dirs.add(Direction.NORTH);
             dirs.add(Direction.SOUTH);
         }
-        if (exposed)
-        {
-            dirs.removeIf(d ->
-            {
-                final BlockPos off = pos.offset(d);
-                final BlockState state1 = mc.world.getBlockState(off);
-                return state1.isFullCube(mc.world, off);
-            });
-        }
+
         return dirs;
     }
 

@@ -35,7 +35,7 @@ public class AutoWalkModule extends ToggleModule
     @Override
     public void onDisable()
     {
-        Globals.mc.options.forwardKey.setPressed(false);
+        mc.options.forwardKey.setPressed(false);
     }
 
     /**
@@ -46,9 +46,9 @@ public class AutoWalkModule extends ToggleModule
     {
         if (event.getStage() == EventStage.PRE)
         {
-            Globals.mc.options.forwardKey.setPressed(!Globals.mc.options.sneakKey.isPressed()
-                    && (!lockConfig.getValue() || (!Globals.mc.options.jumpKey.isPressed()
-                    && Globals.mc.player.isOnGround())));
+            mc.options.forwardKey.setPressed(!mc.options.sneakKey.isPressed()
+                    && (!lockConfig.getValue() || (!mc.options.jumpKey.isPressed()
+                    && mc.player.isOnGround())));
         }
     }
 }

@@ -35,10 +35,10 @@ public class ParkourModule extends ToggleModule
         {
             return;
         }
-        if (Globals.mc.player.isOnGround() && !Globals.mc.player.isSneaking()
-                && Globals.mc.world.isSpaceEmpty(Globals.mc.player.getBoundingBox().offset(0.0, -0.5, 0.0).expand(-0.001, 0.0, -0.001)))
+        if (mc.player.isOnGround() && !mc.player.isSneaking()
+                && mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, -0.5, 0.0).expand(-0.001, 0.0, -0.001)))
         {
-            Globals.mc.player.jump();
+            mc.player.jump();
         }
     }
 }

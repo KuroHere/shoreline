@@ -29,7 +29,7 @@ public class IceSpeedModule extends ToggleModule
     @Override
     public void onEnable()
     {
-        if (Globals.mc.world == null)
+        if (mc.world == null)
         {
             return;
         }
@@ -45,7 +45,7 @@ public class IceSpeedModule extends ToggleModule
     @Override
     public void onDisable()
     {
-        if (Globals.mc.world == null)
+        if (mc.world == null)
         {
             return;
         }

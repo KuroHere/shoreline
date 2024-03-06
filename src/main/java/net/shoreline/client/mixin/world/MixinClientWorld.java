@@ -1,6 +1,7 @@
 package net.shoreline.client.mixin.world;
 
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.impl.event.world.SkyboxEvent;
 import net.minecraft.client.world.ClientWorld;
@@ -21,6 +22,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientWorld.class)
 public class MixinClientWorld
 {
+    /**
+     *
+     * @param id
+     * @param entity
+     * @param ci
+     */
+    @Inject(method = "addEntity", at = @At(value = "HEAD"))
+    private void hookAddEntity(int id, Entity entity, CallbackInfo ci)
+    {
+        AddEntityEvent addEntityEvent = new AddEntityEvent(id, entity);
+        Shoreline.EVENT_HANDLER.dispatch(addEntityEvent);
+    }
+
     /**
      *
      * @param entityId

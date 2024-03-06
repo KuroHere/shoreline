@@ -1,5 +1,8 @@
 package net.shoreline.client.util.math;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 /**
  *
  *
@@ -8,6 +11,14 @@ package net.shoreline.client.util.math;
  */
 public class MathUtil
 {
+    // ANCIENT TECHNOLOGY
+    public static double round(double value, int places)
+    {
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
     private static final int EXP_INT_TABLE_MAX_INDEX = 750;
     private static final int EXP_INT_TABLE_LEN = EXP_INT_TABLE_MAX_INDEX * 2;
     private static final int EXP_FRAC_TABLE_LEN = 1025;

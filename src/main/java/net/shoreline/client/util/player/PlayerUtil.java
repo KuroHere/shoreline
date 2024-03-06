@@ -12,17 +12,5 @@ import net.minecraft.entity.effect.StatusEffects;
  */
 public class PlayerUtil implements Globals
 {
-    /**
-     *
-     * @return
-     */
-    public static int getHandSwingDuration()
-    {
-        if (StatusEffectUtil.hasHaste(mc.player))
-        {
-            return 6 - (1 + StatusEffectUtil.getHasteAmplifier(mc.player));
-        }
-        return mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE) ?
-                6 + (1 + mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) * 2 : 6;
-    }
+
 }

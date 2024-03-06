@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "caspian",
+  "id": "shoreline",
   "version": "${version}",
-  "name": "Caspian",
-  "description": "Named after the Caspian Sea.",
+  "name": "Shoreline",
+  "description": "",
   "authors": [
     "linus"
   ],
@@ -11,7 +11,7 @@
     "homepage": "https://fabricmc.net/"
   },
   "license": "None",
-  "icon": "assets/caspian/icon/client_icon.png",
+  "icon": "assets/shoreline/icon/client_icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
