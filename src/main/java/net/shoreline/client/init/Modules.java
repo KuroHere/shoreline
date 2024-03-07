@@ -53,6 +53,7 @@ public class Modules
     public static BowAimModule BOW_AIM;
     public static CriticalsModule CRITICALS;
     public static NoHitDelayModule NO_HIT_DELAY;
+    public static ReplenishModule REPLENISH;
     public static SurroundModule SURROUND;
     public static TriggerModule TRIGGER;
     // Exploit
@@ -202,6 +203,7 @@ public class Modules
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
             NO_HIT_DELAY = (NoHitDelayModule) getRegisteredModule(
                     "nohitdelay-module");
+            REPLENISH = (ReplenishModule) getRegisteredModule("replenish-module");
             SURROUND = (SurroundModule) getRegisteredModule("surround-module");
             TRIGGER = (TriggerModule) getRegisteredModule("trigger-module");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(

@@ -1,8 +1,17 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.gui.screen.ingame.SignEditScreen;
+import net.minecraft.client.input.Input;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -16,17 +25,6 @@ import net.shoreline.client.impl.event.block.SteppedOnSlimeBlockEvent;
 import net.shoreline.client.impl.event.entity.VelocityMultiplierEvent;
 import net.shoreline.client.impl.event.network.*;
 import net.shoreline.client.init.Managers;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.client.gui.screen.ingame.SignEditScreen;
-import net.minecraft.client.input.Input;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.shoreline.client.util.Globals;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -79,7 +77,6 @@ public class NoSlowModule extends ToggleModule
 
     /**
      *
-     *
      */
     @Override
     public void onEnable()
@@ -97,7 +94,6 @@ public class NoSlowModule extends ToggleModule
     }
     
     /**
-     *
      *
      */
     @Override

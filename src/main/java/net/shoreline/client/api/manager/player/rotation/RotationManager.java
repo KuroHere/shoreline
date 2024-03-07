@@ -1,11 +1,16 @@
 package net.shoreline.client.api.manager.player.rotation;
 
+import net.minecraft.client.input.KeyboardInput;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.impl.event.entity.UpdateVelocityEvent;
+import net.shoreline.client.impl.event.entity.player.PlayerJumpEvent;
+import net.shoreline.client.impl.event.keyboard.KeyboardInputEvent;
+import net.shoreline.client.impl.event.keyboard.KeyboardTickEvent;
 import net.shoreline.client.impl.event.network.MovementPacketsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.render.entity.RenderPlayerEvent;
@@ -145,13 +150,56 @@ public class RotationManager implements Globals
      * @param event
      */
     @EventListener
-    public void onUpdateVelocity(UpdateVelocityEvent event)
+    public void onKeyboardTick(KeyboardTickEvent event)
     {
         if (rotation != null && mc.player != null
                 && Modules.ROTATIONS.getMovementFix())
         {
             event.cancel();
+            float forward = mc.player.input.movementForward;
+            float strafe = mc.player.input.movementSideways;
+            float offset = (getWrappedYaw() - rotation.getYaw()) * MathHelper.RADIANS_PER_DEGREE;
+            double cosValue = MathHelper.cos(offset);
+            double sinValue = MathHelper.sin(offset);
+            mc.player.input.movementForward = Math.round(forward * cosValue + strafe * sinValue);
+            mc.player.input.movementSideways = Math.round(strafe * cosValue - forward * sinValue);
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onUpdateVelocity(UpdateVelocityEvent event)
+    {
+        if (rotation != null && Modules.ROTATIONS.getMovementFix())
+        {
+            event.cancel();
             event.setYaw(rotation.getYaw());
+        }
+    }
+
+    private float prevYaw;
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPlayerJump(PlayerJumpEvent event)
+    {
+        if (rotation != null && Modules.ROTATIONS.getMovementFix())
+        {
+            if (event.getStage() == EventStage.PRE)
+            {
+                prevYaw = mc.player.getYaw();
+                mc.player.setYaw(rotation.getYaw());
+            }
+            else
+            {
+                mc.player.setYaw(prevYaw);
+            }
         }
     }
 

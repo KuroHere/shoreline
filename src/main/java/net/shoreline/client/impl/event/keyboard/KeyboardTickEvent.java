@@ -1,16 +1,40 @@
 package net.shoreline.client.impl.event.keyboard;
 
-import net.minecraft.client.input.KeyboardInput;
 import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
 
 @Cancelable
 public class KeyboardTickEvent extends Event
 {
-    public final KeyboardInput input;
+    /*
+    private float movementForward;
+    private float movementSideways;
 
-    public KeyboardTickEvent(KeyboardInput input)
+    public KeyboardTickEvent(float movementForward, float movementSideways)
     {
-        this.input = input;
+        this.movementForward = movementForward;
+        this.movementSideways = movementSideways;
     }
+
+    public float getMovementForward()
+    {
+        return movementForward;
+    }
+
+    public float getMovementSideways()
+    {
+        return movementSideways;
+    }
+
+    public void setMovementForward(float movementForward)
+    {
+        this.movementForward = movementForward;
+    }
+
+    public void setMovementSideways(float movementSideways)
+    {
+        this.movementSideways = movementSideways;
+    }
+
+     */
 }

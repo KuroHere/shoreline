@@ -33,6 +33,7 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.api.render.Interpolation;
+import net.shoreline.client.api.render.RenderLayersClient;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.render.entity.RenderLabelEvent;
@@ -340,7 +341,7 @@ public class NametagsModule extends ToggleModule
     {
         if (glint)
         {
-            return VertexConsumers.union(vertexConsumers.getBuffer(Programs.GLINT), vertexConsumers.getBuffer(layer));
+            return VertexConsumers.union(vertexConsumers.getBuffer(RenderLayersClient.GLINT), vertexConsumers.getBuffer(layer));
         }
         return vertexConsumers.getBuffer(layer);
     }

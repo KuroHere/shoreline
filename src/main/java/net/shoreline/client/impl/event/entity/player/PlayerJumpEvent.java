@@ -1,10 +1,10 @@
 package net.shoreline.client.impl.event.entity.player;
 
 import net.shoreline.client.api.event.Cancelable;
-import net.shoreline.client.api.event.Event;
+import net.shoreline.client.api.event.StageEvent;
 
 @Cancelable
-public class PlayerJumpEvent extends Event
+public class PlayerJumpEvent extends StageEvent
 {
 
 }

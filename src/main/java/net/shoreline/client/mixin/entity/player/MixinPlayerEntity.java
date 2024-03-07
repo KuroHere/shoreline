@@ -98,17 +98,34 @@ public abstract class MixinPlayerEntity extends LivingEntity implements Globals
      * @param ci
      */
     @Inject(method = "jump", at = @At(value = "HEAD"), cancellable = true)
-    private void hookJump(CallbackInfo ci)
+    private void hookJumpPre(CallbackInfo ci)
     {
         if ((Object) this != mc.player)
         {
             return;
         }
         PlayerJumpEvent playerJumpEvent = new PlayerJumpEvent();
+        playerJumpEvent.setStage(EventStage.PRE);
         Shoreline.EVENT_HANDLER.dispatch(playerJumpEvent);
         if (playerJumpEvent.isCanceled())
         {
             ci.cancel();
         }
+    }
+
+    /**
+     *
+     * @param ci
+     */
+    @Inject(method = "jump", at = @At(value = "RETURN"), cancellable = true)
+    private void hookJumpPost(CallbackInfo ci)
+    {
+        if ((Object) this != mc.player)
+        {
+            return;
+        }
+        PlayerJumpEvent playerJumpEvent = new PlayerJumpEvent();
+        playerJumpEvent.setStage(EventStage.POST);
+        Shoreline.EVENT_HANDLER.dispatch(playerJumpEvent);
     }
 }

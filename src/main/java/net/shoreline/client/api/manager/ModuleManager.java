@@ -54,6 +54,7 @@ public class ModuleManager
                 new CriticalsModule(),
                 // new HoleFillModule(),
                 new NoHitDelayModule(),
+                new ReplenishModule(),
                 // new SelfBowModule(),
                 // new SelfTrapModule(),
                 new SurroundModule(),

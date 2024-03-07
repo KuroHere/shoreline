@@ -153,7 +153,7 @@ public class SpeedmineModule extends RotationModule
                     if (strictConfig.getValue())
                     {
                         mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
-                                prev, slot + 36, SlotActionType.SWAP, mc.player);
+                                slot + 36, prev, SlotActionType.SWAP, mc.player);
                     }
                     else
                     {
@@ -189,7 +189,7 @@ public class SpeedmineModule extends RotationModule
                     if (strictConfig.getValue())
                     {
                         mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
-                                prev, slot + 36, SlotActionType.SWAP, mc.player);
+                                slot + 36, prev, SlotActionType.SWAP, mc.player);
                     }
                     else
                     {

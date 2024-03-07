@@ -1,15 +1,16 @@
 package net.shoreline.client.mixin.render;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.network.ReachEvent;
-import net.shoreline.client.init.Programs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.util.hit.HitResult;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.render.RenderLayersClient;
+import net.shoreline.client.impl.event.network.ReachEvent;
 import net.shoreline.client.impl.event.render.*;
+import net.shoreline.client.init.Programs;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -193,6 +194,8 @@ public class MixinGameRenderer
             ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     private void initPrograms(ResourceFactory factory, CallbackInfo ci)
     {
-        Programs.renderInit();
+        Programs.initPrograms();
+        // Initialize client layers
+        RenderLayersClient.initLayers();
     }
 }

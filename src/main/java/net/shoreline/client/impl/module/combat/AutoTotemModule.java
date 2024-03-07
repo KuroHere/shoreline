@@ -379,7 +379,6 @@ public class AutoTotemModule extends ToggleModule
     
     /**
      *
-     *
      * @param event
      */
     @EventListener
@@ -493,7 +492,6 @@ public class AutoTotemModule extends ToggleModule
     }
 
     /**
-     *
      *
      * @param stack
      * @return

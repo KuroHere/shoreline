@@ -15,6 +15,7 @@ import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.MathUtil;
 import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.string.EnumFormatter;
@@ -142,6 +143,10 @@ public class SpeedModule extends ToggleModule
         if (event.getStage() == EventStage.PRE)
         {
             boostTicks++;
+            if (boostTicks > boostTicksConfig.getValue())
+            {
+                boostSpeed = 0.0;
+            }
             double dx = mc.player.getX() - mc.player.prevX;
             double dz = mc.player.getZ() - mc.player.prevZ;
             distance = Math.sqrt(dx * dx + dz * dz);
@@ -174,10 +179,6 @@ public class SpeedModule extends ToggleModule
                 return;
             }
             event.cancel();
-            if (!strafeBoostConfig.getValue() || boostTicks > boostTicksConfig.getValue())
-            {
-                boostSpeed = 0.0;
-            }
             //
             double speedEffect = 1.0;
             double slowEffect = 1.0;
@@ -238,7 +239,11 @@ public class SpeedModule extends ToggleModule
                     }
                     speed = distance - distance / 159.0;
                 }
-                speed = Math.max(speed, base) + boostSpeed;
+                speed = Math.max(speed, base);
+                if (strafeBoostConfig.getValue())
+                {
+                    speed += boostSpeed;
+                }
                 final Vec2f motion = handleStrafeMotion((float) speed);
                 event.setX(motion.x);
                 event.setZ(motion.y);
@@ -290,7 +295,11 @@ public class SpeedModule extends ToggleModule
                 }
                 double baseMax = 0.465 * speedEffect / slowEffect;
                 double baseMin = 0.44 * speedEffect / slowEffect;
-                speed = Math.min(speed, strictTicks > 25 ? baseMax : baseMin) + boostSpeed;
+                speed = Math.min(speed, strictTicks > 25 ? baseMax : baseMin);
+                if (strafeBoostConfig.getValue())
+                {
+                    speed += boostSpeed;
+                }
                 if (strictTicks > 50)
                 {
                     strictTicks = 0;
@@ -665,11 +674,6 @@ public class SpeedModule extends ToggleModule
                 }
             }
         }
-    }
-
-    public boolean canBoostStrafe()
-    {
-        return strafeBoostConfig.getValue() && boostTicks < boostTicksConfig.getValue();
     }
 
     public boolean isBoxColliding()
