@@ -37,6 +37,12 @@ public class SpeedModule extends ToggleModule
             "Allows player to move in all directions", true);
     Config<Speed> speedModeConfig = new EnumConfig<>("Mode", "Speed mode",
             Speed.STRAFE, Speed.values());
+    Config<Boolean> bhopStrafeConfig = new BooleanConfig("Strafe-BHop",
+            "Applies NCP magic bhop number", false,
+            () -> speedModeConfig.getValue() == Speed.STRAFE);
+    Config<Boolean> vanillaStrafeConfig = new BooleanConfig("Strafe-Vanilla",
+            "Applies strafe speeds to vanilla speed", false,
+            () -> speedModeConfig.getValue() == Speed.VANILLA);
     Config<Float> speedConfig = new NumberConfig<>("Speed", "The" +
             " speed for alternative modes", 0.1f, 4.0f, 10.0f);
     Config<Boolean> strictJumpConfig = new BooleanConfig("StrictJump", "Use " +
@@ -51,9 +57,7 @@ public class SpeedModule extends ToggleModule
             () -> strafeBoostConfig.getValue());
     Config<Boolean> speedWaterConfig = new BooleanConfig("SpeedInWater",
             "Applies speed even in water and lava", false);
-    Config<Boolean> vanillaStrafeConfig = new BooleanConfig("Vanilla-Strafe",
-            "Applies strafe speeds to vanilla speed", false,
-            () -> speedModeConfig.getValue() == Speed.VANILLA);
+
     //
     private int strafe = 4;
     private boolean accel;
@@ -196,6 +200,10 @@ public class SpeedModule extends ToggleModule
             // ~29 kmh
             if (speedModeConfig.getValue() == Speed.STRAFE)
             {
+                if (!Managers.NCP.passed(100))
+                {
+                    return;
+                }
                 if (timerConfig.getValue())
                 {
                     Modules.TIMER.setTimer(1.0888f);
@@ -210,10 +218,10 @@ public class SpeedModule extends ToggleModule
                     {
                         return;
                     }
-                    float jump = 0.3999999463558197f + jumpEffect;
+                    float jump = (bhopStrafeConfig.getValue() ? 0.4000000059604645f : 0.3999999463558197f) + jumpEffect;
                     event.setY(jump);
                     Managers.MOVEMENT.setMotionY(jump);
-                    speed *= accel ? 1.6835 : 1.395;
+                    speed *= bhopStrafeConfig.getValue() ? 1.535 : (accel ? 1.6835 : 1.395);
                 }
                 else if (strafe == 3)
                 {
@@ -239,6 +247,10 @@ public class SpeedModule extends ToggleModule
             // ~26-27 kmh
             else if (speedModeConfig.getValue() == Speed.STRAFE_STRICT)
             {
+                if (!Managers.NCP.passed(100))
+                {
+                    return;
+                }
                 if (strafe == 1)
                 {
                     speed = 1.35f * base - 0.01f;
@@ -290,6 +302,14 @@ public class SpeedModule extends ToggleModule
             }
             else if (speedModeConfig.getValue() == Speed.LOW_HOP)
             {
+                if (!Managers.NCP.passed(100))
+                {
+                    return;
+                }
+                if (timerConfig.getValue())
+                {
+                    Modules.TIMER.setTimer(1.0888f);
+                }
                 if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.4, 3)) 
                 {
                     Managers.MOVEMENT.setMotionY(0.31 + jumpEffect);
@@ -351,6 +371,11 @@ public class SpeedModule extends ToggleModule
             }
             else if (speedModeConfig.getValue() == Speed.GAY_HOP)
             {
+                if (!Managers.NCP.passed(100))
+                {
+                    strafe = 1;
+                    return;
+                }
                 if (strafe == 1 && mc.player.verticalCollision
                         && MovementUtil.isInputtingMovement())
                 {
@@ -395,6 +420,11 @@ public class SpeedModule extends ToggleModule
             }
             else if (speedModeConfig.getValue() == Speed.V_HOP)
             {
+                if (!Managers.NCP.passed(100))
+                {
+                    strafe = 1;
+                    return;
+                }
                 if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.4, 3))
                 {
                     Managers.MOVEMENT.setMotionY(0.31 + jumpEffect);
@@ -467,6 +497,11 @@ public class SpeedModule extends ToggleModule
             }
             else if (speedModeConfig.getValue() == Speed.B_HOP)
             {
+                if (!Managers.NCP.passed(100))
+                {
+                    strafe = 4;
+                    return;
+                }
                 if (MathUtil.round(mc.player.getY() - ((int) mc.player.getY()), 3) == MathUtil.round(0.138, 3)) 
                 {
                     Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y - (0.08 + jumpEffect));

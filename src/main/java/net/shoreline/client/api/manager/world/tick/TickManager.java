@@ -99,7 +99,7 @@ public class TickManager implements Globals
     public float getTpsAverage()
     {
         float avg = 0.0f;
-        if (ticks.size() > 0)
+        if (!ticks.isEmpty())
         {
             for (float t : ticks)
             {

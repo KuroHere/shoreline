@@ -12,13 +12,12 @@ public class RotationRequest
 {
     //
     private final RotationModule requester;
-    private final long time;
     private final int priority;
+    private long time;
     //
     private float yaw, pitch;
 
     /**
-     *
      *
      * @param requester
      * @param priority
@@ -26,32 +25,28 @@ public class RotationRequest
      * @param pitch
      */
     public RotationRequest(RotationModule requester,
-                           RotationPriority priority,
-                           float yaw,
-                           float pitch)
+                           int priority, float yaw, float pitch)
     {
         this.requester = requester;
         this.time = System.currentTimeMillis();
-        this.priority = priority.getPriority();
+        this.priority = priority;
         this.yaw = yaw;
         this.pitch = pitch;
     }
 
     /**
      *
-     *
      * @param requester
      * @param yaw
      * @param pitch
      */
     public RotationRequest(RotationModule requester,
-                           float yaw,
-                           float pitch)
+                           float yaw, float pitch)
     {
-        this(requester, RotationPriority.NORMAL, yaw, pitch);
+        this(requester, 100, yaw, pitch);
     }
 
-    public RotationModule getRequester()
+    public RotationModule getModule()
     {
         return requester;
     }
@@ -62,7 +57,12 @@ public class RotationRequest
      */
     public long getTime()
     {
-        return System.currentTimeMillis() - time;
+        return time;
+    }
+
+    public void setTime(long time)
+    {
+        this.time = time;
     }
 
     public int getPriority()

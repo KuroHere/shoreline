@@ -1,12 +1,12 @@
 package net.shoreline.client.impl.module.world;
 
+import net.minecraft.screen.slot.SlotActionType;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.manager.player.rotation.RotationPriority;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.render.RenderManager;
@@ -15,6 +15,7 @@ import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.mixin.accessor.AccessorClientPlayerInteractionManager;
 import net.shoreline.client.util.player.RotationUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -25,7 +26,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -113,7 +113,6 @@ public class SpeedmineModule extends RotationModule
 
     /**
      *
-     *
      * @param event
      */
     @EventListener
@@ -121,10 +120,6 @@ public class SpeedmineModule extends RotationModule
     {
         if (event.getStage() == EventStage.PRE && !mc.player.isCreative())
         {
-            if (isRotationBlocked())
-            {
-                return;
-            }
             if (mining == null)
             {
                 damage = 0.0f;
@@ -142,6 +137,8 @@ public class SpeedmineModule extends RotationModule
                     || !remineInfiniteConfig.getValue()
                     && remines > maxRemineConfig.getValue())
             {
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                        PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, mining, Direction.DOWN));
                 mining = null;
                 state = null;
                 direction = null;
@@ -151,19 +148,12 @@ public class SpeedmineModule extends RotationModule
             else if (damage > 1.0f && !Modules.AUTO_CRYSTAL.isAttacking()
                     && !Modules.AUTO_CRYSTAL.isPlacing())
             {
-                if (swapConfig.getValue() == Swap.NORMAL)
-                {
-                    swap(slot);
-                }
-                else if (swapConfig.getValue() == Swap.SILENT)
+                if (swapConfig.getValue() != Swap.OFF)
                 {
                     if (strictConfig.getValue())
                     {
-                        // Managers.NETWORK.sendPacket(new ClickSlotC2SPacket(
-                        //        mc.player.getInventory(),
-                        //        mc.player.getInventory().selectedSlot,
-                        //        SlotActionType.SWAP,
-                        //        mc.player));
+                        mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
+                                prev, slot + 36, SlotActionType.SWAP, mc.player);
                     }
                     else
                     {
@@ -172,18 +162,21 @@ public class SpeedmineModule extends RotationModule
                 }
                 if (rotateConfig.getValue())
                 {
-                    float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(),
-                            mining.toCenterPos());
-                    setRotation(RotationPriority.SPEEDMINE, rots[0], rots[1]);
+                    float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), mining.toCenterPos());
+                    setRotation(rotations[0], rotations[1]);
                 }
+                if (isRotationBlocked())
+                {
+                    return;
+                }
+                // break current block
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                        PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                        mining, direction));
+                        PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mining, direction));
                 if (fastConfig.getValue())
                 {
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
-                            mining, Direction.UP));
+                            mining, direction.getOpposite()));
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
                             mining, direction));
@@ -191,11 +184,12 @@ public class SpeedmineModule extends RotationModule
                             PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
                             mining, direction));
                 }
-                if (swapConfig.getValue() == Swap.SILENT && prev != -1)
+                if (swapConfig.getValue() == Swap.SILENT)
                 {
                     if (strictConfig.getValue())
                     {
-
+                        mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
+                                prev, slot + 36, SlotActionType.SWAP, mc.player);
                     }
                     else
                     {
@@ -229,7 +223,6 @@ public class SpeedmineModule extends RotationModule
 
     /**
      *
-     *
      * @param slot
      */
     private void swap(int slot)
@@ -237,7 +230,7 @@ public class SpeedmineModule extends RotationModule
         if (PlayerInventory.isValidHotbarIndex(slot))
         {
             mc.player.getInventory().selectedSlot = slot;
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+            ((AccessorClientPlayerInteractionManager) mc.interactionManager).hookSyncSelectedSlot();
         }
     }
 
@@ -250,13 +243,15 @@ public class SpeedmineModule extends RotationModule
     public void onAttackBlock(AttackBlockEvent event)
     {
         if (mc.player == null || mc.world == null
-                || mc.player.isCreative())
+                || mc.player.isCreative() || mining != null && event.getPos() == mining)
         {
             return;
         }
-        if (mining != null && event.getPos() == mining)
+        if (mining != null)
         {
-            return;
+            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
+                    mining, Direction.DOWN));
         }
         mining = event.getPos();
         direction = event.getDirection();
@@ -268,9 +263,9 @@ public class SpeedmineModule extends RotationModule
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                     PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
                     mining, direction));
-            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
-                    mining, Direction.UP));
+            // Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+            //        PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
+            //        mining, Direction.UP));
             if (instantConfig.getValue())
             {
                 mc.world.removeBlock(mining, false);

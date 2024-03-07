@@ -1,10 +1,5 @@
 package net.shoreline.client.mixin.network;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.event.EventStage;
-import net.shoreline.client.impl.event.entity.SwingEvent;
-import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
-import net.shoreline.client.util.Globals;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.Input;
@@ -17,7 +12,12 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.event.EventStage;
+import net.shoreline.client.impl.event.entity.SwingEvent;
+import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.impl.event.network.*;
+import net.shoreline.client.util.Globals;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -125,8 +125,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
             {
                 ClientCommandC2SPacket.Mode mode = bl ? ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY :
                         ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY;
-                networkHandler.sendPacket(new ClientCommandC2SPacket(this,
-                        mode));
+                networkHandler.sendPacket(new ClientCommandC2SPacket(this, mode));
                 lastSneaking = bl;
             }
             if (isCamera())
@@ -151,29 +150,24 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                 {
                     Vec3d vec3d = getVelocity();
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(
-                            vec3d.x, -999.0, vec3d.z, getYaw(),
-                            getPitch(), ground));
+                            vec3d.x, -999.0, vec3d.z, getYaw(), getPitch(), ground));
                     bl2 = false;
                 }
                 else if (bl2 && bl3)
                 {
-                    networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(
-                            x, y, z, yaw, pitch, ground));
+                    networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(x, y, z, yaw, pitch, ground));
                 }
                 else if (bl2)
                 {
-                    networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                            x, y, z, ground));
+                    networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, ground));
                 }
                 else if (bl3)
                 {
-                    networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-                            yaw, pitch, ground));
+                    networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, ground));
                 }
                 else if (lastOnGround != onGround)
                 {
-                    networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(
-                           ground));
+                    networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(ground));
                 }
                 if (bl2)
                 {
@@ -374,10 +368,5 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     {
         SwingEvent swingEvent = new SwingEvent(hand);
         Shoreline.EVENT_HANDLER.dispatch(swingEvent);
-        if (swingEvent.isCanceled())
-        {
-            mc.player.handSwinging = false;
-            mc.player.handSwingTicks = 0;
-        }
     }
 }

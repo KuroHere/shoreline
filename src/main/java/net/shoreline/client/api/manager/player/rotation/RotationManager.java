@@ -2,59 +2,58 @@ package net.shoreline.client.api.manager.player.rotation;
 
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.impl.event.entity.UpdateVelocityEvent;
-import net.shoreline.client.impl.event.entity.player.TravelEvent;
-import net.shoreline.client.impl.event.keyboard.KeyboardInputEvent;
-import net.shoreline.client.impl.event.keyboard.KeyboardTickEvent;
 import net.shoreline.client.impl.event.network.MovementPacketsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.render.entity.RenderPlayerEvent;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.mixin.accessor.AccessorPlayerMoveC2SPacket;
 import net.shoreline.client.util.Globals;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.PriorityQueue;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
  *
- * @author linus
+ * @author linus, bon55
  * @since 1.0
  */
 public class RotationManager implements Globals
 {
+    private static final Map<String, Integer> ROTATE_PRIORITY = new HashMap<>();
     //
     private float yaw, pitch;
     //
     private RotationRequest rotation;
-    private final PriorityQueue<RotationRequest> requests =
-            new PriorityQueue<>((r1, r2) ->
-            {
-                if (r1.getPriority() == r2.getPriority())
-                {
-                    return Long.compare(r1.getTime(), r2.getTime());
-                }
-                return -Integer.compare(r1.getPriority(), r2.getPriority());
-            });
+    private RotationModule rotateModule;
+    private final List<RotationRequest> requests = new ArrayList<>();
     private final Timer rotateTimer = new CacheTimer();
 
     /**
-     *
      *
      */
     public RotationManager()
     {
         Shoreline.EVENT_HANDLER.subscribe(this);
+        //
+        ROTATE_PRIORITY.put("Surround", 1000);
+        ROTATE_PRIORITY.put("Speedmine", 950);
+        ROTATE_PRIORITY.put("AutoCrystal", 900);
+        ROTATE_PRIORITY.put("Aura", 800);
+        // AntiAim should always have lowest prio?
+        ROTATE_PRIORITY.put("AntiAim", 50);
     }
 
     /**
-     *
      *
      * @param event
      */
@@ -67,8 +66,8 @@ public class RotationManager implements Globals
         }
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet && packet.changesLook())
         {
-            yaw = packet.getYaw(yaw);
-            pitch = packet.getPitch(pitch);
+            yaw = packet.getYaw(0.0f);
+            pitch = packet.getPitch(0.0f);
         }
     }
 
@@ -79,14 +78,66 @@ public class RotationManager implements Globals
     @EventListener
     public void onMovementPackets(MovementPacketsEvent event)
     {
-        rotation = getRotationActive();
-        if (rotation != null)
+        requests.removeIf(r -> System.currentTimeMillis() - r.getTime() > 500);
+        float vanillaYaw = mc.player.getYaw();
+        float vanillaPitch = mc.player.getPitch();
+        if (requests.isEmpty())
         {
-            rotateTimer.reset();
-            event.cancel();
-            event.setYaw(rotation.getYaw());
-            event.setPitch(rotation.getPitch());
+            rotation = null;
+            rotateModule = null;
+            return;
         }
+        RotationRequest request = getRotationRequest();
+        if (request == null)
+        {
+            if (isDoneRotating())
+            {
+                rotation = null;
+                rotateModule = null;
+                return;
+            }
+        }
+        else
+        {
+            rotation = request;
+            rotateModule = rotation.getModule();
+        }
+        // fixes flags for aim % 360
+        float serverYawChange = rotation.getYaw() - getWrappedYaw();
+        float serverPitchChange = rotation.getPitch() - getPitch();
+        float yaw1 = yaw + serverYawChange;
+        float pitch1 = pitch + serverPitchChange;
+        rotateTimer.reset();
+        event.cancel();
+        event.setYaw(yaw1);
+        event.setPitch(pitch1);
+    }
+
+    @Nullable
+    private RotationRequest getRotationRequest()
+    {
+        if (requests.isEmpty())
+        {
+            return null;
+        }
+        RotationRequest rotationRequest = null;
+        int priority = 0;
+        long time = 0;
+        for (RotationRequest request : requests)
+        {
+            if (!request.getModule().isEnabled())
+            {
+                continue;
+            }
+            if (request.getPriority() > priority ||
+                    request.getPriority() == priority && request.getTime() > time)
+            {
+                rotationRequest = request;
+                priority = request.getPriority();
+                time = request.getTime();
+            }
+        }
+        return rotationRequest;
     }
 
     /**
@@ -123,61 +174,50 @@ public class RotationManager implements Globals
         }
     }
 
+    public void setRotation(float yaw, float pitch)
+    {
+
+    }
+
     /**
      *
-     *
      * @param requester
-     * @param priority
      * @param yaw
      * @param pitch
      */
-    public void setRotation(RotationModule requester, RotationPriority priority,
-                            float yaw, float pitch)
+    public void setRotation(RotationModule requester, float yaw, float pitch)
     {
         for (RotationRequest r : requests)
         {
-            if (requester == r.getRequester())
+            if (requester == r.getModule())
             {
                 // r.setPriority();
+                r.setTime(System.currentTimeMillis());
                 r.setYaw(yaw);
                 r.setPitch(pitch);
                 return;
             }
         }
-        requests.add(new RotationRequest(requester, priority, yaw, pitch));
-    }
-    /**
-     *
-     *
-     * @param requester
-     * @param yaw
-     * @param pitch
-     */
-    public void setRotation(final RotationModule requester,
-                            final float yaw,
-                            final float pitch)
-    {
-        setRotation(requester, RotationPriority.NORMAL, yaw, pitch);
+        requests.add(new RotationRequest(requester,
+                ROTATE_PRIORITY.getOrDefault(requester.getName(), 100), yaw, pitch));
     }
 
     /**
      *
-     *
      * @param request
      */
-    public boolean removeRotation(final RotationRequest request)
+    public boolean removeRotation(RotationRequest request)
     {
         return requests.remove(request);
     }
 
     /**
      *
-     *
      * @param requester
      */
-    public void removeRotation(final RotationModule requester)
+    public void removeRotation(RotationModule requester)
     {
-        requests.removeIf(r -> requester == r.getRequester());
+        requests.removeIf(r -> requester == r.getModule());
     }
 
     /**
@@ -199,25 +239,11 @@ public class RotationManager implements Globals
 
     /**
      *
-     *
      * @return
      */
-    public boolean isRotating()
+    public boolean isDoneRotating()
     {
-        return !rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks() * 50.0f);
-    }
-
-    /**
-     *
-     * @return
-     */
-    public RotationRequest getRotationActive()
-    {
-        if (requests.isEmpty())
-        {
-            return null;
-        }
-        return requests.poll();
+        return rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks() * 50.0f);
     }
 
     /**
@@ -226,11 +252,7 @@ public class RotationManager implements Globals
      */
     public RotationModule getRotatingModule()
     {
-        if (rotation == null)
-        {
-            return null;
-        }
-        return rotation.getRequester();
+        return rotateModule;
     }
 
     /**

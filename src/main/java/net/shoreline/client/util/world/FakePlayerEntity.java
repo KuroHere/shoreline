@@ -50,6 +50,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity implements Globals
         // setBoundingBox(player.getBoundingBox());
         getInventory().clone(player.getInventory());
         setId(CURRENT_ID.incrementAndGet());
+        this.age = 100;
     }
 
     /**

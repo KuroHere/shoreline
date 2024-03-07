@@ -1,19 +1,31 @@
 package net.shoreline.client.impl.module.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.block.Block;
+import net.minecraft.block.StainedGlassPaneBlock;
+import net.minecraft.block.TransparentBlock;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.EnchantedGoldenAppleItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.MatrixUtil;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -26,9 +38,14 @@ import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.render.entity.RenderLabelEvent;
 import net.shoreline.client.init.Fonts;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.init.Programs;
+import net.shoreline.client.mixin.accessor.AccessorBufferBuilderStorage;
+import net.shoreline.client.mixin.accessor.AccessorItemRenderer;
 import net.shoreline.client.util.render.ColorUtil;
 import net.shoreline.client.util.world.FakePlayerEntity;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
@@ -181,7 +198,6 @@ public class NametagsModule extends ToggleModule
         }
         // ANNOYING HACK
         int color = getNametagColor(entity);
-        // Fonts.VANILLA.draw(matrices, info, -width + 1.0f, 1.0f, color, true);
         Fonts.VANILLA.drawWithShadow(matrices, info, -width, 0.0f, color);
         // drawInternal(info, -width + 1.0f, 1.0f, getNametagColor(entity),
         //        true, matrices.peek().getPositionMatrix(), vertexConsumers,
@@ -223,7 +239,7 @@ public class NametagsModule extends ToggleModule
             displayItems.add(player.getMainHandStack());
         }
         Collections.reverse(displayItems);
-        int n10 = 0;
+        float n10 = 0;
         int n11 = 0;
         for (ItemStack stack : displayItems)
         {
@@ -233,44 +249,103 @@ public class NametagsModule extends ToggleModule
                 n11 = stack.getEnchantments().size();
             }
         }
-        int m2 = enchantOffset(n11);
-        // RenderSystem.disableDepthTest();
+        float m2 = enchantOffset(n11);
         for (ItemStack stack : displayItems)
         {
-            mc.getBufferBuilders().getEntityVertexConsumers().draw();
+            // mc.getBufferBuilders().getEntityVertexConsumers().draw();
             matrixStack.push();
             matrixStack.translate(n10, m2, 0.0f);
             matrixStack.translate(8.0f, 8.0f, 0.0f);
             matrixStack.scale(16.0f, 16.0f, 0.0f);
             matrixStack.multiplyPositionMatrix(new Matrix4f().scaling(1.0f, -1.0f, 0.0f));
             DiffuseLighting.disableGuiDepthLighting();
-            matrixStack.push();
-            mc.getItemRenderer().renderItem(stack, ModelTransformationMode.GUI, 0xf000f0,
-                    OverlayTexture.DEFAULT_UV, matrixStack, mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
+            renderItem(stack, ModelTransformationMode.GUI, 0xf000f0, OverlayTexture.DEFAULT_UV,
+                    matrixStack, mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
             mc.getBufferBuilders().getEntityVertexConsumers().draw();
-            matrixStack.pop();
             DiffuseLighting.enableGuiDepthLighting();
             matrixStack.pop();
-            mc.getItemRenderer().renderGuiItemOverlay(matrixStack, mc.textRenderer, stack, n10, m2);
+            mc.getItemRenderer().renderGuiItemOverlay(matrixStack, mc.textRenderer, stack, (int) n10, (int) m2);
+            if (stack.getCount() != 1)
+            {
+                String string = String.valueOf(stack.getCount());
+                Fonts.VANILLA.drawWithShadow(matrixStack, string, n10 + 17 - mc.textRenderer.getWidth(string), m2 + 9.0f, -1);
+            }
             // int n4 = (n11 > 4) ? ((n11 - 4) * 8 / 2) : 0;
-            // drawGuiItem(camera, player, x, y, z, n10, m2, scaling, stack);
-            // mc.getItemRenderer().renderGuiItemOverlay(matrixStack, mc.textRenderer, stack, n10, m2);
+            // mc.getItemRenderer().renderInGui(matrixStack, mc.textRenderer, stack, n10, m2);
             matrixStack.scale(0.5f, 0.5f, 0.5f);
             if (durabilityConfig.getValue())
             {
-                renderDurability(matrixStack, stack, n10 + 1, m2 - 5);
+                renderDurability(matrixStack, stack, n10 + 2.0f, m2 - 4.5f);
             }
             if (enchantmentsConfig.getValue())
             {
-                renderEnchants(matrixStack, stack, n10 + 1, m2);
+                renderEnchants(matrixStack, stack, n10 + 2.0f, m2);
             }
             matrixStack.scale(2.0f, 2.0f, 2.0f);
             n10 += 16;
         }
-        // RenderSystem.enableDepthTest();
+        //
+        ItemStack heldItem = player.getMainHandStack();
+        if (heldItem.isEmpty())
+        {
+            return;
+        }
+        matrixStack.scale(0.5f, 0.5f, 0.5f);
+        if (itemNameConfig.getValue())
+        {
+            renderItemName(matrixStack, heldItem, 0, durabilityConfig.getValue() ? m2 - 9.0f : m2 - 4.5f);
+        }
+        matrixStack.scale(2.0f, 2.0f, 2.0f);
     }
 
-    private void renderDurability(MatrixStack matrixStack, ItemStack itemStack, int x, int y)
+    private void renderItem(ItemStack stack, ModelTransformationMode renderMode,
+                            int light, int overlay, MatrixStack matrices,
+                            VertexConsumerProvider vertexConsumers, World world, int seed)
+    {
+        BakedModel bakedModel = mc.getItemRenderer().getModel(stack, world, null, seed);
+        boolean bl;
+        if (stack.isEmpty())
+        {
+            return;
+        }
+        matrices.push();
+        boolean bl2 = bl = renderMode == ModelTransformationMode.GUI || renderMode == ModelTransformationMode.GROUND || renderMode == ModelTransformationMode.FIXED;
+        if (bl) {
+            if (stack.isOf(Items.TRIDENT))
+            {
+                bakedModel = mc.getItemRenderer().getModels().getModelManager().getModel(ModelIdentifier.ofVanilla("trident", "inventory"));
+            }
+            else if (stack.isOf(Items.SPYGLASS))
+            {
+                bakedModel = mc.getItemRenderer().getModels().getModelManager().getModel(ModelIdentifier.ofVanilla("spyglass", "inventory"));
+            }
+        }
+        bakedModel.getTransformation().getTransformation(renderMode).apply(false, matrices);
+        matrices.translate(-0.5f, -0.5f, -0.5f);
+        if (bakedModel.isBuiltin() || stack.isOf(Items.TRIDENT) && !bl)
+        {
+            ((AccessorItemRenderer) mc.getItemRenderer()).hookGetBuiltinModelItemRenderer().render(stack, renderMode,
+                    matrices, vertexConsumers, light, overlay);
+        }
+        else
+        {
+            ((AccessorItemRenderer) mc.getItemRenderer()).hookRenderBakedItemModel(bakedModel, stack, light,
+                    overlay, matrices, getItemGlintConsumer(vertexConsumers, RenderLayers.getItemLayer(stack, false), stack.hasGlint()));
+        }
+        matrices.pop();
+    }
+
+    public static VertexConsumer getItemGlintConsumer(VertexConsumerProvider vertexConsumers,
+                                                      RenderLayer layer, boolean glint)
+    {
+        if (glint)
+        {
+            return VertexConsumers.union(vertexConsumers.getBuffer(Programs.GLINT), vertexConsumers.getBuffer(layer));
+        }
+        return vertexConsumers.getBuffer(layer);
+    }
+
+    private void renderDurability(MatrixStack matrixStack, ItemStack itemStack, float x, float y)
     {
         if (!itemStack.isDamageable())
         {
@@ -283,11 +358,11 @@ public class NametagsModule extends ToggleModule
                 ColorUtil.hslToColor((float) (n - n2) / (float) n * 120.0f, 100.0f, 50.0f, 1.0f).getRGB());
     }
 
-    private void renderEnchants(MatrixStack matrixStack, ItemStack itemStack, int x, int y)
+    private void renderEnchants(MatrixStack matrixStack, ItemStack itemStack, float x, float y)
     {
         if (itemStack.getItem() instanceof EnchantedGoldenAppleItem)
         {
-            Fonts.VANILLA.drawWithShadow(matrixStack, "God", x * 2, y * 2, 0xc34e41);
+            Fonts.VANILLA.drawWithShadow(matrixStack, "God", x * 2, y * 2, 0xffc34e41);
             return;
         }
         if (!itemStack.hasEnchantments())
@@ -296,7 +371,7 @@ public class NametagsModule extends ToggleModule
         }
         Map<Enchantment, Integer> enchants = EnchantmentHelper.get(itemStack);
         //
-        int n2 = 0;
+        float n2 = 0;
         for (Enchantment enchantment : enchants.keySet())
         {
             int lvl = enchants.get(enchantment);
@@ -321,22 +396,33 @@ public class NametagsModule extends ToggleModule
                 enchantString.append(lvl);
             }
             Fonts.VANILLA.drawWithShadow(matrixStack, enchantString.toString(), x * 2, (y + n2) * 2, -1);
-            n2 += 5;
+            n2 += 4.5f;
         }
     }
 
-    private int enchantOffset(final int n)
+    private float enchantOffset(final int n)
     {
-        if (!armorConfig.getValue())
+        if (!enchantmentsConfig.getValue() || n <= 3)
         {
-            return -18;
+            return -18.0f;
         }
-        int n2 = -17;
-        if (n > 4)
-        {
-            n2 -= (n - 4) * 8;
-        }
+        float n2 = -14.0f;
+        n2 -= (n - 3) * 4.5f;
         return n2;
+    }
+
+    /**
+     *
+     * @param matrixStack
+     * @param itemStack
+     * @param x
+     * @param y
+     */
+    private void renderItemName(MatrixStack matrixStack, ItemStack itemStack, float x, float y)
+    {
+        String itemName = itemStack.getName().getString();
+        float width = mc.textRenderer.getWidth(itemName) / 4.0f;
+        Fonts.VANILLA.drawWithShadow(matrixStack, itemName, (x - width) * 2, y * 2, -1);
     }
 
     /**

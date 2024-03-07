@@ -7,7 +7,6 @@ import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.manager.player.rotation.RotationPriority;
 import net.shoreline.client.api.manager.world.tick.TickSync;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
@@ -197,8 +196,7 @@ public class AuraModule extends RotationModule
         }
         if (Modules.AUTO_CRYSTAL.isAttacking()
                 || Modules.AUTO_CRYSTAL.isPlacing()
-                || rotating > 0
-                || isRotationBlocked())
+                || rotating > 0)
         {
             return;
         }
@@ -221,9 +219,13 @@ public class AuraModule extends RotationModule
         }
         if (rotateConfig.getValue())
         {
-            float[] rot = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+            float[] rotation = RotationUtil.getRotationsTo(mc.player.getEyePos(),
                     getAttackRotateVec(entityTarget));
-            setRotation(RotationPriority.AURA, rot[0], rot[1]);
+            setRotation(rotation[0], rotation[1]);
+        }
+        if (isRotationBlocked())
+        {
+            return;
         }
         if (attackDelayConfig.getValue())
         {

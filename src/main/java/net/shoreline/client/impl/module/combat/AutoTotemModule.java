@@ -227,8 +227,7 @@ public class AutoTotemModule extends ToggleModule
                 }
                 if (!mc.player.isCreative())
                 {
-                    float health = mc.player.getHealth()
-                            + mc.player.getAbsorptionAmount();
+                    float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
                     if (health + 0.5 < healthConfig.getValue())
                     {
                         offhand = Items.TOTEM_OF_UNDYING;
@@ -252,8 +251,7 @@ public class AutoTotemModule extends ToggleModule
                                 {
                                     continue;
                                 }
-                                double potential = EndCrystalUtil.getDamageTo(mc.player,
-                                        crystal.getPos());
+                                double potential = EndCrystalUtil.getDamageTo(mc.player, crystal.getPos());
                                 if (health + 0.5 > potential)
                                 {
                                     continue;

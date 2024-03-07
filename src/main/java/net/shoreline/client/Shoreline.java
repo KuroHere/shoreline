@@ -42,7 +42,7 @@ public class Shoreline
      */
     public static void preInit()
     {
-        LOGGER = LogManager.getLogger("Caspian");
+        LOGGER = LogManager.getLogger("Shoreline");
         info("Starting preInit ...");
         EXECUTOR = Executors.newFixedThreadPool(1);
         // Create event handler instance
@@ -85,7 +85,7 @@ public class Shoreline
      */
     public static void info(String message)
     {
-        LOGGER.info(String.format("[Caspian] %s", message));
+        LOGGER.info(String.format("[Shoreline] %s", message));
     }
 
     /**
@@ -96,7 +96,7 @@ public class Shoreline
      */
     public static void info(String message, Object... params)
     {
-        LOGGER.info(String.format("[Caspian] %s", message), params);
+        LOGGER.info(String.format("[Shoreline] %s", message), params);
     }
 
     /**

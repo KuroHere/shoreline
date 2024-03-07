@@ -45,7 +45,7 @@ public class HUDModule extends ToggleModule
     // private static final HudScreen HUD_SCREEN = new HudScreen();
     //
     Config<Boolean> watermarkConfig = new BooleanConfig("Watermark",
-                    "Displays client name and version watermark", true);
+            "Displays client name and version watermark", true);
     Config<Boolean> directionConfig = new BooleanConfig("Direction",
             "Displays facing direction", true);
     Config<Boolean> armorConfig = new BooleanConfig("Armor",
@@ -134,7 +134,7 @@ public class HUDModule extends ToggleModule
                                 ShorelineMod.MOD_NAME, ShorelineMod.MOD_VER,
                                 ShorelineMod.MOD_BUILD_NUMBER), 2.0f,
                         topLeft, Modules.COLORS.getRGB());
-                // topLeft += 10.0f;
+                // topLeft += 9.0f;
             }
             if (arraylistConfig.getValue())
             {
@@ -165,11 +165,11 @@ public class HUDModule extends ToggleModule
                                 renderingUp ? topRight : bottomRight, Modules.COLORS.getRGB());
                         if (renderingUp)
                         {
-                            topRight += 10.0f;
+                            topRight += 9.0f;
                         }
                         else
                         {
-                            bottomRight -= 10.0f;
+                            bottomRight -= 9.0f;
                         }
                         Modules.COLORS.setRainbowOffset();
                     }
@@ -196,11 +196,11 @@ public class HUDModule extends ToggleModule
                             effect.getColor());
                     if (renderingUp)
                     {
-                        bottomRight -= 10.0f;
+                        bottomRight -= 9.0f;
                     }
                     else
                     {
-                        topRight += 10.0f;
+                        topRight += 9.0f;
                     }
                     Modules.COLORS.setRainbowOffset();
                 }
@@ -214,11 +214,11 @@ public class HUDModule extends ToggleModule
                         Modules.COLORS.getRGB());
                 if (renderingUp)
                 {
-                    bottomRight -= 10.0f;
+                    bottomRight -= 9.0f;
                 }
                 else
                 {
-                    topRight += 10.0f;
+                    topRight += 9.0f;
                 }
                 Modules.COLORS.setRainbowOffset();
             }
@@ -239,11 +239,11 @@ public class HUDModule extends ToggleModule
                         Modules.COLORS.getRGB());
                 if (renderingUp)
                 {
-                    bottomRight -= 10.0f;
+                    bottomRight -= 9.0f;
                 }
                 else
                 {
-                    topRight += 10.0f;
+                    topRight += 9.0f;
                 }
                 Modules.COLORS.setRainbowOffset();
             }
@@ -264,15 +264,15 @@ public class HUDModule extends ToggleModule
                         color.getRGB());
                 if (renderingUp)
                 {
-                    bottomRight -= 10.0f;
+                    bottomRight -= 9.0f;
                 }
                 else
                 {
-                    topRight += 10.0f;
+                    topRight += 9.0f;
                 }
                 Modules.COLORS.setRainbowOffset();
             }
-            if (pingConfig.getValue())
+            if (pingConfig.getValue() && !mc.isInSingleplayer())
             {
                 int latency = Managers.NETWORK.getClientLatency();
                 String text = String.format("Ping §f%dms", latency);
@@ -282,11 +282,11 @@ public class HUDModule extends ToggleModule
                         Modules.COLORS.getRGB());
                 if (renderingUp)
                 {
-                    bottomRight -= 10.0f;
+                    bottomRight -= 9.0f;
                 }
                 else
                 {
-                    topRight += 10.0f;
+                    topRight += 9.0f;
                 }
                 Modules.COLORS.setRainbowOffset();
             }
@@ -303,11 +303,11 @@ public class HUDModule extends ToggleModule
                         Modules.COLORS.getRGB());
                 if (renderingUp)
                 {
-                    bottomRight -= 10.0f;
+                    bottomRight -= 9.0f;
                 }
                 else
                 {
-                    topRight += 10.0f;
+                    topRight += 9.0f;
                 }
                 Modules.COLORS.setRainbowOffset();
             }
@@ -318,7 +318,7 @@ public class HUDModule extends ToggleModule
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
                         Modules.COLORS.getRGB());
-                // bottomRight -= 10.0f;
+                // bottomRight -= 9.0f;
                 Modules.COLORS.setRainbowOffset();
             }
             if (coordsConfig.getValue())
@@ -340,7 +340,7 @@ public class HUDModule extends ToggleModule
                                 nether ? decimal.format(x) : decimal.format(nx),
                                 nether ? decimal.format(z) : decimal.format(nz)),
                         2, bottomLeft, Modules.COLORS.getRGB());
-                bottomLeft -= 10.0f;
+                bottomLeft -= 9.0f;
                 Modules.COLORS.setRainbowOffset();
             }
             if (directionConfig.getValue())
@@ -353,7 +353,7 @@ public class HUDModule extends ToggleModule
                         String.format("%s §7[§f%s%s§7]", dir, axis,
                                 pos ? "+" : "-"), 2, bottomLeft,
                         Modules.COLORS.getRGB());
-                // bottomLeft -= 10.0f;
+                // bottomLeft -= 9.0f;
                 Modules.COLORS.setRainbowOffset();
             }
             if (armorConfig.getValue())

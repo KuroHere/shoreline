@@ -83,7 +83,6 @@ public class TriggerModule extends ToggleModule
             triggerTimer.reset();
         }
     }
-
     public enum TriggerMode
     {
         MOUSE_BUTTON,

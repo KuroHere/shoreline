@@ -5,7 +5,6 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.manager.player.rotation.RotationPriority;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.PlaceBlockModule;
 import net.shoreline.client.api.render.RenderManager;
@@ -170,7 +169,7 @@ public class SurroundModule extends PlaceBlockModule
                     // This may not work on all servers
                     if (blocksPlaced == 0)
                     {
-                        setRotation(RotationPriority.SURROUND, rots[0], rots[1]);
+                        setRotation(rots[0], rots[1]);
                     }
                     else
                     {

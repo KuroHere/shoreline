@@ -16,7 +16,7 @@ public class ShutdownHook extends Thread
      */
     public ShutdownHook()
     {
-        setName("Caspian-ShutdownHook");
+        setName("Shoreline-ShutdownHook");
     }
 
     /**

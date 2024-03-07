@@ -73,8 +73,7 @@ public class AntiAimModule extends RotationModule
         {
             return;
         }
-        if (isRotationBlocked() || mc.options.attackKey.isPressed()
-                || mc.options.useKey.isPressed())
+        if (mc.options.attackKey.isPressed() || mc.options.useKey.isPressed())
         {
             return;
         }

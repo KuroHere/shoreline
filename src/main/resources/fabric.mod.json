@@ -18,6 +18,7 @@
       "net.shoreline.client.ShorelineMod"
     ]
   },
+  "accessWidener": "shoreline.accesswidener",
   "mixins": [
     "mixins.shoreline.json"
   ],
