@@ -92,6 +92,7 @@ public class SkeletonModule extends ToggleModule
                 ModelPart rightArm = playerEntityModel.rightArm;
                 ModelPart leftLeg = playerEntityModel.leftLeg;
                 ModelPart rightLeg = playerEntityModel.rightLeg;
+                event.getMatrices().push();
                 event.getMatrices().translate(skeletonPos.x, skeletonPos.y, skeletonPos.z);
                 if (swimming) 
                 {
@@ -179,8 +180,8 @@ public class SkeletonModule extends ToggleModule
                     event.getMatrices().translate(0, -0.35f, 0);
                 }
                 event.getMatrices().multiply(new Quaternionf().setAngleAxis((h + 180) * Math.PI / 180.0f, 0, 1, 0));
-                event.getMatrices().translate(-skeletonPos.x, -skeletonPos.y,
-                        -skeletonPos.z);
+                event.getMatrices().translate(-skeletonPos.x, -skeletonPos.y, -skeletonPos.z);
+                event.getMatrices().pop();
             }
         }
         RenderSystem.disableCull();

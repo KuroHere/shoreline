@@ -4,20 +4,36 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MovementType;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.RaycastContext;
+import net.minecraft.world.World;
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.entity.SlowMovementEvent;
+import net.shoreline.client.impl.event.entity.StepEvent;
 import net.shoreline.client.impl.event.entity.UpdateVelocityEvent;
 import net.shoreline.client.impl.event.entity.VelocityMultiplierEvent;
+import net.shoreline.client.impl.event.entity.decoration.TeamColorEvent;
 import net.shoreline.client.impl.event.entity.player.PushEntityEvent;
+import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.List;
 
 /**
  *
@@ -38,9 +54,64 @@ public abstract class MixinEntity implements Globals
      * @return
      */
     @Shadow
-    protected static Vec3d movementInputToVelocity(Vec3d movementInput, float speed, float yaw)
+    private static Vec3d movementInputToVelocity(Vec3d movementInput, float speed, float yaw)
     {
         return null;
+    }
+
+    @Shadow
+    public abstract Box getBoundingBox();
+
+    @Shadow
+    protected abstract Vec3d adjustMovementForCollisions(Vec3d movement);
+
+    @Shadow
+    protected abstract Vec3d adjustMovementForSneaking(Vec3d movement, MovementType type);
+
+    /**
+     *
+     * @param movementType
+     * @param movement
+     * @param ci
+     */
+    @Inject(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;pop()V",
+            shift = At.Shift.BEFORE, ordinal = 0))
+    public void hookMove(MovementType movementType, Vec3d movement, CallbackInfo ci)
+    {
+        if ((Object) this != mc.player)
+        {
+            return;
+        }
+        Vec3d vec3d;
+        double stepHeight = 0.0;
+        vec3d = adjustMovementForCollisions(adjustMovementForSneaking(movement, movementType));
+        if (vec3d.lengthSquared() > 1.0E-7)
+        {
+            stepHeight = vec3d.y;
+        }
+        StepEvent stepEvent = new StepEvent(stepHeight);
+        Shoreline.EVENT_HANDLER.dispatch(stepEvent);
+    }
+
+    /**
+     *
+     * @param state
+     * @param multiplier
+     * @param ci
+     */
+    @Inject(method = "slowMovement", at = @At(value = "HEAD"), cancellable = true)
+    private void hookSlowMovement(BlockState state, Vec3d multiplier, CallbackInfo ci)
+    {
+        if ((Object) this != mc.player)
+        {
+            return;
+        }
+        SlowMovementEvent slowMovementEvent = new SlowMovementEvent(state);
+        Shoreline.EVENT_HANDLER.dispatch(slowMovementEvent);
+        if (slowMovementEvent.isCanceled())
+        {
+            ci.cancel();
+        }
     }
 
     /**
@@ -103,6 +174,37 @@ public abstract class MixinEntity implements Globals
         if (pushEntityEvent.isCanceled())
         {
             ci.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param removalReason
+     * @param ci
+     */
+    @Inject(method = "remove", at = @At(value = "HEAD"))
+    private void hookRemove(Entity.RemovalReason removalReason, CallbackInfo ci)
+    {
+        RemoveEntityEvent removeEntityEvent = new RemoveEntityEvent(
+                (Entity) (Object) this, removalReason);
+        Shoreline.EVENT_HANDLER.dispatch(removeEntityEvent);
+    }
+
+    /**
+     *
+     * @param cir
+     */
+    @Inject(method = "getTeamColorValue", at = @At(value = "HEAD"),
+            cancellable = true)
+    private void hookGetTeamColorValue(CallbackInfoReturnable<Integer> cir)
+    {
+        TeamColorEvent teamColorEvent =
+                new TeamColorEvent((Entity) (Object) this);
+        Shoreline.EVENT_HANDLER.dispatch(teamColorEvent);
+        if (teamColorEvent.isCanceled())
+        {
+            cir.setReturnValue(teamColorEvent.getColor());
+            cir.cancel();
         }
     }
 }

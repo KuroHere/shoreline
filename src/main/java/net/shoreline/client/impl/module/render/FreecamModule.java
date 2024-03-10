@@ -64,20 +64,6 @@ public class FreecamModule extends ToggleModule
             return;
         }
         freecamEntity = new FreecamEntity(mc.world);
-        freecamEntity.setHealth(mc.player.getHealth());
-        freecamEntity.setAbsorptionAmount(mc.player.getAbsorptionAmount());
-        freecamEntity.setBoundingBox(mc.player.getBoundingBox());
-        freecamEntity.setPosition(mc.player.getPos());
-        freecamEntity.prevX = mc.player.prevX;
-        freecamEntity.prevY = mc.player.prevY;
-        freecamEntity.prevZ = mc.player.prevZ;
-        freecamEntity.prevYaw = mc.player.prevYaw;
-        freecamEntity.prevPitch = mc.player.prevPitch;
-        freecamEntity.prevHeadYaw = mc.player.prevHeadYaw;
-        freecamEntity.prevBodyYaw = mc.player.prevBodyYaw;
-        freecamEntity.getInventory().clone(mc.player.getInventory());
-        freecamEntity.hurtTime = mc.player.hurtTime;
-        freecamEntity.maxHurtTime = mc.player.maxHurtTime;
         Input input = new KeyboardInput(mc.options);
         input.tick(false, 0.3f);
         freecamInput = input;

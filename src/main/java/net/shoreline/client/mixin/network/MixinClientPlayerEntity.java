@@ -18,6 +18,7 @@ import net.shoreline.client.impl.event.entity.SwingEvent;
 import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.impl.event.network.*;
 import net.shoreline.client.util.Globals;
+import net.shoreline.client.util.chat.ChatUtil;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -183,6 +184,8 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                 }
                 lastOnGround = ground;
                 autoJumpEnabled = client.options.getAutoJump().getValue();
+                playerUpdateEvent.setYaw(yaw);
+                playerUpdateEvent.setPitch(pitch);
             }
         }
         playerUpdateEvent.setStage(EventStage.POST);

@@ -1,5 +1,7 @@
 package net.shoreline.client.mixin.network;
 
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.packet.Packet;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.network.AttackBlockEvent;
 import net.shoreline.client.impl.event.network.BreakBlockEvent;
@@ -19,6 +21,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
@@ -100,12 +103,23 @@ public class MixinClientPlayerInteractionManager implements Globals
 
     /**
      *
+     * @param instance
+     * @param packet
+     */
+    @Redirect(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/" +
+            "client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
+    private void hookInteractItem(ClientPlayNetworkHandler instance, Packet<?> packet)
+    {
+
+    }
+
+    /**
+     *
      * @param pos
      * @param cir
      */
     @Inject(method = "breakBlock", at = @At(value = "HEAD"), cancellable = true)
-    private void hookBreakBlock(BlockPos pos,
-                                CallbackInfoReturnable<Boolean> cir)
+    private void hookBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir)
     {
         BreakBlockEvent breakBlockEvent = new BreakBlockEvent(pos);
         Shoreline.EVENT_HANDLER.dispatch(breakBlockEvent);

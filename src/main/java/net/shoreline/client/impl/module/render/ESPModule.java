@@ -9,6 +9,7 @@ import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.impl.event.EntityOutlineEvent;
 import net.shoreline.client.impl.event.config.ConfigUpdateEvent;
 import net.shoreline.client.impl.event.entity.decoration.TeamColorEvent;
 import net.shoreline.client.util.world.EntityUtil;
@@ -98,85 +99,16 @@ public class ESPModule extends ToggleModule
         super("ESP", "See entities and objects through walls", ModuleCategory.RENDER);
     }
 
-    @Override
-    public void onEnable()
-    {
-        if (mc.world == null)
-        {
-            return;
-        }
-        if (modeConfig.getValue() == ESPMode.GLOW)
-        {
-            for (Entity e : mc.world.getEntities())
-            {
-                if (e == null)
-                {
-                    continue;
-                }
-                if (!e.isGlowing() && checkESP(e))
-                {
-                    e.setGlowing(true);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onDisable()
-    {
-        if (mc.world == null)
-        {
-            return;
-        }
-        if (modeConfig.getValue() == ESPMode.GLOW)
-        {
-            for (Entity e : mc.world.getEntities())
-            {
-                if (e != null && e.isGlowing())
-                {
-                    e.setGlowing(false);
-                }
-            }
-        }
-    }
-
     /**
      *
      * @param event
      */
     @EventListener
-    public void onConfigUpdate(ConfigUpdateEvent event)
+    public void onEntityOutline(EntityOutlineEvent event)
     {
-        if (mc.world == null)
+        if (modeConfig.getValue() == ESPMode.GLOW && checkESP(event.getEntity()))
         {
-            return;
-        }
-        if (event.getConfig() == modeConfig && event.getStage() == EventStage.POST)
-        {
-            if (modeConfig.getValue() == ESPMode.GLOW)
-            {
-                for (Entity e : mc.world.getEntities())
-                {
-                    if (e == null)
-                    {
-                        continue;
-                    }
-                    if (!e.isGlowing() && checkESP(e))
-                    {
-                        e.setGlowing(true);
-                    }
-                }
-            }
-            else
-            {
-                for (Entity e : mc.world.getEntities())
-                {
-                    if (e != null && e.isGlowing())
-                    {
-                        e.setGlowing(false);
-                    }
-                }
-            }
+            event.cancel();
         }
     }
 

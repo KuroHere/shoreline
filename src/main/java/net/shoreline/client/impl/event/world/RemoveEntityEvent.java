@@ -6,18 +6,13 @@ import net.minecraft.entity.Entity;
 
 public class RemoveEntityEvent extends Event implements Globals
 {
-    private final int entityId;
+    private final Entity entity;
     private final Entity.RemovalReason removalReason;
 
-    public RemoveEntityEvent(int entityId, Entity.RemovalReason removalReason)
+    public RemoveEntityEvent(Entity entity, Entity.RemovalReason removalReason)
     {
-        this.entityId = entityId;
+        this.entity = entity;
         this.removalReason = removalReason;
-    }
-
-    public int getEntityId()
-    {
-        return entityId;
     }
 
     /**
@@ -26,7 +21,7 @@ public class RemoveEntityEvent extends Event implements Globals
      */
     public Entity getEntity()
     {
-        return mc.world.getEntityById(entityId);
+        return entity;
     }
 
     public Entity.RemovalReason getRemovalReason()

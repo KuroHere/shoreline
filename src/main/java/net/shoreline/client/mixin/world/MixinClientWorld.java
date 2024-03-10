@@ -37,21 +37,6 @@ public class MixinClientWorld
 
     /**
      *
-     * @param entityId
-     * @param removalReason
-     * @param ci
-     */
-    @Inject(method = "removeEntity", at = @At(value = "HEAD"))
-    private void hookRemoveEntity(int entityId, Entity.RemovalReason removalReason,
-                                  CallbackInfo ci)
-    {
-        final RemoveEntityEvent removeEntityEvent = new RemoveEntityEvent(
-                entityId, removalReason);
-        Shoreline.EVENT_HANDLER.dispatch(removeEntityEvent);
-    }
-
-    /**
-     *
      * @param cameraPos
      * @param tickDelta
      * @param cir

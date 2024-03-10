@@ -9,8 +9,10 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
+import net.shoreline.client.impl.event.entity.StepEvent;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.string.EnumFormatter;
@@ -69,11 +71,11 @@ public class StepModule extends ToggleModule
     @Override
     public void onDisable()
     {
-        if (Globals.mc.player == null)
+        if (mc.player == null)
         {
             return;
         }
-        setStepHeight(isAbstractHorse(Globals.mc.player.getVehicle()) ? 1.0f : 0.6f);
+        setStepHeight(isAbstractHorse(mc.player.getVehicle()) ? 1.0f : 0.6f);
         Managers.TICK.setClientTick(1.0f);
     }
 
@@ -84,13 +86,13 @@ public class StepModule extends ToggleModule
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event)
     {
-        if (event.getStage() != EventStage.POST)
+        if (event.getStage() != EventStage.PRE)
         {
             return;
         }
         if (modeConfig.getValue() == StepMode.NORMAL)
         {
-            double stepHeight = Globals.mc.player.getY() - Globals.mc.player.prevY;
+            double stepHeight = mc.player.getY() - mc.player.prevY;
             if (stepHeight <= 0.5 || stepHeight > heightConfig.getValue())
             {
                 return;
@@ -104,13 +106,13 @@ public class StepModule extends ToggleModule
             }
             for (int i = 0; i < (stepHeight > 1.0 ? offs.length : 2); i++)
             {
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(Globals.mc.player.prevX,
-                        Globals.mc.player.prevY + offs[i], Globals.mc.player.prevZ, false));
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.prevX,
+                        mc.player.prevY + offs[i], mc.player.prevZ, false));
             }
             if (strictConfig.getValue())
             {
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(Globals.mc.player.prevX,
-                        Globals.mc.player.prevY + stepHeight, Globals.mc.player.prevZ, false));
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.prevX,
+                        mc.player.prevY + stepHeight, mc.player.prevZ, false));
             }
             stepTimer.reset();
         }
@@ -127,26 +129,26 @@ public class StepModule extends ToggleModule
         {
             return;
         }
-        if (Globals.mc.player.isTouchingWater()
-                || Globals.mc.player.isInLava()
-                || Globals.mc.player.isFallFlying())
+        if (mc.player.isTouchingWater()
+                || mc.player.isInLava()
+                || mc.player.isFallFlying())
         {
             Managers.TICK.setClientTick(1.0f);
-            setStepHeight(isAbstractHorse(Globals.mc.player.getVehicle()) ? 1.0f : 0.6f);
+            setStepHeight(isAbstractHorse(mc.player.getVehicle()) ? 1.0f : 0.6f);
             return;
         }
-        if (cancelTimer && Globals.mc.player.isOnGround())
+        if (cancelTimer && mc.player.isOnGround())
         {
             Managers.TICK.setClientTick(1.0f);
             cancelTimer = false;
         }
-        if (Globals.mc.player.isOnGround() && stepTimer.passed(200))
+        if (mc.player.isOnGround() && stepTimer.passed(200))
         {
             setStepHeight(heightConfig.getValue());
         }
         else
         {
-            setStepHeight(isAbstractHorse(Globals.mc.player.getVehicle()) ? 1.0f : 0.6f);
+            setStepHeight(isAbstractHorse(mc.player.getVehicle()) ? 1.0f : 0.6f);
         }
     }
 
@@ -156,13 +158,13 @@ public class StepModule extends ToggleModule
      */
     private void setStepHeight(float stepHeight)
     {
-        if (entityStepConfig.getValue() && Globals.mc.player.getVehicle() != null)
+        if (entityStepConfig.getValue() && mc.player.getVehicle() != null)
         {
-            Globals.mc.player.getVehicle().setStepHeight(stepHeight);
+            mc.player.getVehicle().setStepHeight(stepHeight);
         }
         else
         {
-            Globals.mc.player.setStepHeight(stepHeight);
+            mc.player.setStepHeight(stepHeight);
         }
     }
 
@@ -178,7 +180,7 @@ public class StepModule extends ToggleModule
                         0.42, stepHeight <= 1.0 && stepHeight > 0.8 ? 0.753 :
                         0.75, 1.0, 1.16, 1.23, 1.2
                 };
-        if (stepHeight >= 2.5)
+        if (stepHeight == 2.5)
         {
             packets = new double[]
                     {
@@ -186,7 +188,7 @@ public class StepModule extends ToggleModule
                             1.869, 2.019, 1.907
                     };
         }
-        else if (stepHeight >= 2.0)
+        else if (stepHeight == 2.0)
         {
             packets = new double[]
                     {

@@ -142,6 +142,7 @@ public class ModuleManager
                 new TracersModule(),
                 new ViewClipModule(),
                 // new ViewModelModule(),
+                new WaypointsModule(),
                 // World
                 new AntiInteractModule(),
                 new AvoidModule(),

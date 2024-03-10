@@ -561,4 +561,9 @@ public class NametagsModule extends ToggleModule
         }
         return 0xffffffff;
     }
+
+    public float getScaling()
+    {
+        return scalingConfig.getValue();
+    }
 }

@@ -35,7 +35,6 @@
     "chunk.light.MixinChunkSkylightProvider",
     "entity.MixinEntity",
     "entity.MixinLivingEntity",
-    "entity.decoration.MixinDisplayEntity",
     "entity.passive.MixinAbstractHorseEntity",
     "entity.passive.MixinPigEntity",
     "entity.passive.MixinStriderEntity",

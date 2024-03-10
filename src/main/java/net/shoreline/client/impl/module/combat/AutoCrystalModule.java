@@ -16,6 +16,7 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
@@ -36,6 +37,7 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.RunTickEvent;
+import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
@@ -44,12 +46,14 @@ import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorClientPlayerInteractionManager;
+import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.world.EndCrystalUtil;
 import net.shoreline.client.util.world.EntityUtil;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -339,10 +343,10 @@ public class AutoCrystalModule extends RotationModule
     Config<Boolean> renderConfig = new BooleanConfig("Render",
             "Renders the current placement", true);
     Config<Boolean> renderAttackConfig = new BooleanConfig(
-            "RenderAttack", "Renders the current attack", false);
-    Config<Boolean> renderSpawnConfig = new BooleanConfig("RenderSpawn",
+            "Render-Attack", "Renders the current attack", false);
+    Config<Boolean> renderSpawnConfig = new BooleanConfig("Render-Spawn",
             "Indicates if the current placement was spawned", false);
-    Config<Boolean> damageNametagConfig = new BooleanConfig("DamageNametag",
+    Config<Boolean> damageNametagConfig = new BooleanConfig("Render-Damage",
             "Renders the current expected damage of a place/attack", false,
             () -> renderConfig.getValue());
     //
@@ -365,7 +369,7 @@ public class AutoCrystalModule extends RotationModule
     private BlockPos renderPos;
     private BlockPos renderSpawnPos;
     //
-    private float[] crystalRotation;
+    private Vec3d crystalRotation;
 
     /**
      *
@@ -433,26 +437,25 @@ public class AutoCrystalModule extends RotationModule
             placeCrystal = calculatePlaceCrystal(blocks, entities);
         }
         final Hand hand = getCrystalHand();
-        crystalRotation = null;
-        if (attackCrystal != null)
+        if (attackCrystal != null && attackDelayConfig.getValue() <= 0.0
+                && lastAttackTimer.passed(1000.0f - breakSpeedConfig.getValue() * 50.0f))
         {
-            crystalRotation = RotationUtil.getRotationsTo(mc.player.getEyePos(),
-                    attackCrystal.getRotationVec());
-            if (lastAttackTimer.passed(1000.0f - breakSpeedConfig.getValue() * 50.0f)
-                    && attackDelayConfig.getValue() <= 0.0)
-            {
-                attackCrystal(attackCrystal.getDamageData(), hand);
-                attacking = true;
-                lastAttackTimer.reset();
-            }
+            crystalRotation = attackCrystal.getRotationVec();
+            float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
+            setRotation(rotations[0], rotations[1]);
+            attackCrystal(attackCrystal.getDamageData(), hand);
+            attacking = true;
+            lastAttackTimer.reset();
+            // ChatUtil.clientSendMessage("yaw: " + rotations[0] + ", pitch: " + rotations[1]);
         }
         if (placeCrystal != null)
         {
             renderPos = placeCrystal.getDamageData();
-            crystalRotation = RotationUtil.getRotationsTo(mc.player.getEyePos(),
-                    placeCrystal.getRotationVec());
             if (lastPlaceTimer.passed(1000.0f - placeSpeedConfig.getValue() * 50.0f))
             {
+                crystalRotation = placeCrystal.getRotationVec();
+                float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
+                setRotation(rotations[0], rotations[1]);
                 placeCrystal(placeCrystal.getDamageData(), hand);
                 placing = true;
                 lastPlaceTimer.reset();
@@ -460,7 +463,7 @@ public class AutoCrystalModule extends RotationModule
         }
         if (rotateConfig.getValue() && crystalRotation != null)
         {
-            setRotation(crystalRotation[0], crystalRotation[1]);
+
         }
     }
 
@@ -496,6 +499,12 @@ public class AutoCrystalModule extends RotationModule
                     Modules.COLORS.getRGB(renderSpawnPos != null && renderSpawnPos == renderPos ? 80 : 100));
             RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
                     Modules.COLORS.getRGB(145));
+            if (damageNametagConfig.getValue() && placeCrystal != null)
+            {
+                DecimalFormat format = new DecimalFormat("0.0");
+                RenderManager.renderSign(event.getMatrices(),
+                        format.format(placeCrystal.getDamage()), renderPos.toCenterPos());
+            }
         }
     }
 
@@ -545,11 +554,9 @@ public class AutoCrystalModule extends RotationModule
             Long time = placePackets.remove(blockPos);
             if (time != null)
             {
-                if (rotateConfig.getValue())
-                {
-                    crystalRotation = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalPos);
-                    setRotation(crystalRotation[0], crystalRotation[1]);
-                }
+                crystalRotation = crystalPos;
+                float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
+                setRotation(rotations[0], rotations[1]);
                 //
                 attackInternal(event.getEntityId(), getCrystalHand());
                 renderSpawnPos = blockPos;
@@ -592,11 +599,9 @@ public class AutoCrystalModule extends RotationModule
                             && damage >= attackCrystal.getDamage() && instantMaxConfig.getValue()
                             || entity instanceof LivingEntity entity1 && isCrystalLethalTo(damage, entity1))
                     {
-                        if (rotateConfig.getValue())
-                        {
-                            crystalRotation = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalPos);
-                            setRotation(crystalRotation[0], crystalRotation[1]);
-                        }
+                        crystalRotation = crystalPos;
+                        float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
+                        setRotation(rotations[0], rotations[1]);
                         //
                         renderSpawnPos = blockPos;
                         attackInternal(event.getEntityId(), getCrystalHand());
@@ -678,7 +683,7 @@ public class AutoCrystalModule extends RotationModule
                 if (antiWeaknessConfig.getValue() == Swap.SILENT
                         || antiWeaknessConfig.getValue() == Swap.SILENT_ALT)
                 {
-                    swapTo(prev);
+                    swapTo(autoSwapConfig.getValue() == Swap.SILENT_ALT ? slot : prev);
                 }
             }
         }
@@ -740,7 +745,7 @@ public class AutoCrystalModule extends RotationModule
                 if (autoSwapConfig.getValue() == Swap.SILENT
                         || autoSwapConfig.getValue() == Swap.SILENT_ALT)
                 {
-                    swapTo(prev);
+                    swapTo(autoSwapConfig.getValue() == Swap.SILENT_ALT ? crystalSlot : prev);
                 }
             }
         }
@@ -752,17 +757,20 @@ public class AutoCrystalModule extends RotationModule
 
     private void placeInternal(BlockHitResult result, Hand hand)
     {
-        Hand hand1 = hand == null ? Hand.MAIN_HAND : hand;
+        if (hand == null)
+        {
+            return;
+        }
         Managers.NETWORK.sendSequencedPacket(id ->
-                new PlayerInteractBlockC2SPacket(hand1, result, id));
+                new PlayerInteractBlockC2SPacket(hand, result, id));
         placePackets.put(result.getBlockPos(), System.currentTimeMillis());
         if (swingConfig.getValue())
         {
-            mc.player.swingHand(hand1);
+            mc.player.swingHand(hand);
         }
         else
         {
-            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand1));
+            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
         }
     }
 
@@ -774,13 +782,14 @@ public class AutoCrystalModule extends RotationModule
         }
         if (autoSwapConfig.getValue() == Swap.SILENT_ALT)
         {
-
+            mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
+                    slot + 36, mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
         }
         else
         {
             mc.player.getInventory().selectedSlot = slot;
-            ((AccessorClientPlayerInteractionManager) mc.interactionManager).hookSyncSelectedSlot();
-            // Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+            // ((AccessorClientPlayerInteractionManager) mc.interactionManager).hookSyncSelectedSlot();
+            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
         }
     }
 
@@ -944,10 +953,10 @@ public class AutoCrystalModule extends RotationModule
             return true;
         }
         BlockHitResult result = mc.world.raycast(new RaycastContext(
-                mc.player.getEyePos(), entity.getPos(),
+                mc.player.getEyePos(), entity.getEyePos(),
                 RaycastContext.ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE, mc.player));
-        return result != null && dist > breakWallRangeConfig.getValue();
+        return result.getType() != HitResult.Type.MISS && dist > breakWallRangeConfig.getValue();
     }
 
     /**
@@ -969,7 +978,7 @@ public class AutoCrystalModule extends RotationModule
         Entity attackTarget = null;
         for (BlockPos pos : placeBlocks)
         {
-            if (placeRangeCheck(pos))
+            if (!canUseCrystalOnBlock(pos) || placeRangeCheck(pos))
             {
                 continue;
             }
@@ -1116,6 +1125,10 @@ public class AutoCrystalModule extends RotationModule
 
     private boolean isHoldingCrystal()
     {
+        if (autoSwapConfig.getValue() == Swap.SILENT || autoSwapConfig.getValue() == Swap.SILENT_ALT)
+        {
+            return true;
+        }
         return mc.player.getMainHandStack().getItem() instanceof EndCrystalItem;
     }
 
@@ -1204,7 +1217,7 @@ public class AutoCrystalModule extends RotationModule
                 entities.remove(entity);
             }
             else if (entity instanceof EndCrystalEntity entity1
-                    && intersectingCrystalCheck(entity1) // TODO: More advanced check for intersecting crystals
+                    && !intersectingCrystalCheck(entity1) // TODO: More advanced check for intersecting crystals
                     && entity.getPos().squaredDistanceTo(box.minX, box.minY, box.minZ) <= 1.0)
             {
                 entities.remove(entity);
@@ -1219,7 +1232,7 @@ public class AutoCrystalModule extends RotationModule
         // {
         //    return false;
         // }
-        return !attackRangeCheck(entity);
+        return attackRangeCheck(entity);
     }
 
     private List<BlockPos> getSphere(Vec3d origin)
@@ -1235,11 +1248,7 @@ public class AutoCrystalModule extends RotationModule
                     Vec3i pos = new Vec3i((int) (origin.getX() + x),
                             (int) (origin.getY() + y), (int) (origin.getZ() + z));
                     final BlockPos p = new BlockPos(pos);
-                    //
-                    if (canUseCrystalOnBlock(p))
-                    {
-                        sphere.add(p);
-                    }
+                    sphere.add(p);
                 }
             }
         }

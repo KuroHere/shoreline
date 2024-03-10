@@ -1,5 +1,6 @@
 package net.shoreline.client.mixin;
 
+import net.minecraft.entity.Entity;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.impl.imixin.IMinecraftClient;
@@ -222,6 +223,23 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
         {
             cir.cancel();
             cir.setReturnValue(framerateLimitEvent.getFramerateLimit());
+        }
+    }
+
+    /**
+     *
+     * @param entity
+     * @param cir
+     */
+    @Inject(method = "hasOutline", at = @At(value = "HEAD"), cancellable = true)
+    private void hookHasOutline(Entity entity, CallbackInfoReturnable<Boolean> cir)
+    {
+        EntityOutlineEvent entityOutlineEvent = new EntityOutlineEvent(entity);
+        Shoreline.EVENT_HANDLER.dispatch(entityOutlineEvent);
+        if (entityOutlineEvent.isCanceled())
+        {
+            cir.cancel();
+            cir.setReturnValue(true);
         }
     }
 }

@@ -589,8 +589,7 @@ public class AuraModule extends RotationModule
         {
             case FEET -> feetPos;
             case TORSO -> feetPos.add(0.0, entity.getHeight() / 2.0f, 0.0);
-            case EYES -> feetPos.add(0.0,
-                    entity.getStandingEyeHeight(), 0.0);
+            case EYES -> feetPos.add(0.0, entity.getStandingEyeHeight(), 0.0);
         };
     }
 

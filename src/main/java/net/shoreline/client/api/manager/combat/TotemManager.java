@@ -4,6 +4,7 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
+import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.util.Globals;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
@@ -28,7 +29,6 @@ public class TotemManager implements Globals
 
     /**
      *
-     *
      */
     public TotemManager()
     {
@@ -36,7 +36,6 @@ public class TotemManager implements Globals
     }
 
     /**
-     *
      *
      * @param event
      */
@@ -60,6 +59,15 @@ public class TotemManager implements Globals
 
     /**
      *
+     * @param event
+     */
+    @EventListener
+    public void onEntityRemove(RemoveEntityEvent event)
+    {
+        totems.remove(event.getEntity().getUuid());
+    }
+
+    /**
      *
      * @param event
      */

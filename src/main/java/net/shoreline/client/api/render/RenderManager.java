@@ -1,15 +1,14 @@
 package net.shoreline.client.api.render;
 
+import net.minecraft.util.math.*;
+import net.shoreline.client.init.Fonts;
+import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorWorldRenderer;
 import net.shoreline.client.util.Globals;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
@@ -323,8 +322,7 @@ public class RenderManager implements Globals
      * @param text
      * @param pos
      */
-    public static void renderSign(MatrixStack matrices, String text,
-                                  Vec3d pos)
+    public static void renderSign(MatrixStack matrices, String text, Vec3d pos)
     {
         renderSign(matrices, text, pos.getX(), pos.getY(), pos.getZ());
     }
@@ -340,7 +338,32 @@ public class RenderManager implements Globals
     public static void renderSign(MatrixStack matrices, String text,
                                   double x1, double x2, double x3)
     {
-
+        double dist = Math.sqrt(mc.player.squaredDistanceTo(x1, x2, x3));
+        float scaling = 0.0018f + Modules.NAMETAGS.getScaling() * (float) dist;
+        if (dist <= 8.0)
+        {
+            scaling = 0.0245f;
+        }
+        Camera camera = mc.gameRenderer.getCamera();
+        final Vec3d pos = camera.getPos();
+        MatrixStack matrixStack = new MatrixStack();
+        matrixStack.push();
+        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
+        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0f));
+        matrixStack.translate(x1 - pos.getX(), x2 - pos.getY(), x3 - pos.getZ());
+        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-camera.getYaw()));
+        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        matrixStack.scale(-scaling, -scaling, -1.0f);
+        GL11.glDepthFunc(GL11.GL_ALWAYS);
+        VertexConsumerProvider.Immediate vertexConsumers =
+                VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+        Fonts.VANILLA.drawWithShadow(matrixStack, text, 0.0f, 0.0f, -1);
+        vertexConsumers.draw();
+        RenderSystem.disableBlend();
+        GL11.glDepthFunc(GL11.GL_LEQUAL);
+        matrixStack.pop();
     }
 
     /**

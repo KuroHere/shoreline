@@ -1,5 +1,11 @@
 package net.shoreline.client.impl.module.render;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket;
+import net.minecraft.util.math.Box;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.event.listener.EventListener;
@@ -12,13 +18,6 @@ import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
-import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.Box;
 
 import java.util.UUID;
 
@@ -79,16 +78,17 @@ public class WaypointsModule extends ToggleModule
             }
         }
         else if (event.getPacket() instanceof PlayerRemoveS2CPacket packet
-                && logoutsConfig.getValue())
+                && logoutsConfig.getValue() && mc.player.getServer() != null)
         {
-            final MinecraftServer server = mc.world.getServer();
+            String ip = mc.player.getServer().getServerIp();
+            String serverIp = mc.isInSingleplayer() ? "Singleplayer" : ip;
             for (UUID id : packet.profileIds())
             {
                 PlayerEntity player = mc.world.getPlayerByUuid(id);
                 if (player != null)
                 {
                     Managers.WAYPOINT.register(new Waypoint(String.format("%s's Logout",
-                            player.getEntityName()), server.getServerIp(),
+                            player.getEntityName()), serverIp,
                             player.prevX, player.prevY, player.prevZ));
                 }
             }
@@ -105,10 +105,10 @@ public class WaypointsModule extends ToggleModule
         if (event.getRemovalReason() == Entity.RemovalReason.KILLED &&
                 event.getEntity() == mc.player && deathsConfig.getValue())
         {
-            final MinecraftServer server = mc.world.getServer();
+            String serverIp = mc.isInSingleplayer() ? "Singleplayer" : mc.world.getServer().getServerIp();
             Managers.WAYPOINT.remove("Last Death");
-            Managers.WAYPOINT.register(new Waypoint("Last Death", server.getServerIp(),
-                    mc.player.getX(), mc.player.getY(), mc.player.getZ()));
+            Managers.WAYPOINT.register(new Waypoint("Last Death", serverIp,
+                    mc.player.lastX, mc.player.lastBaseY, mc.player.lastZ));
         }
     }
 

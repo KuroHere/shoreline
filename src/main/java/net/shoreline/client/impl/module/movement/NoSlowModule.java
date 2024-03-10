@@ -1,7 +1,6 @@
 package net.shoreline.client.impl.module.movement;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
@@ -11,6 +10,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
@@ -22,6 +22,7 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.block.BlockSlipperinessEvent;
 import net.shoreline.client.impl.event.block.SteppedOnSlimeBlockEvent;
+import net.shoreline.client.impl.event.entity.SlowMovementEvent;
 import net.shoreline.client.impl.event.entity.VelocityMultiplierEvent;
 import net.shoreline.client.impl.event.network.*;
 import net.shoreline.client.init.Managers;
@@ -52,6 +53,8 @@ public class NoSlowModule extends ToggleModule
     Config<Boolean> shieldsConfig = new BooleanConfig("Shields", "Removes the" +
             " slowdown effect caused by shields", true);
     Config<Boolean> websConfig = new BooleanConfig("Webs", "Removes the " +
+            "slowdown caused when moving through webs", false);
+    Config<Boolean> berryBushConfig = new BooleanConfig("BerryBush", "Removes the " +
             "slowdown caused when moving through webs", false);
     Config<Float> webSpeedConfig = new NumberConfig<>("WebSpeed", "Speed to " +
             "fall through webs", 0.0f, 3.5f, 20.0f, () -> websConfig.getValue());
@@ -214,8 +217,27 @@ public class NoSlowModule extends ToggleModule
                     mc.player.setPitch(MathHelper.clamp(pitch, -90.0f, 90.0f));
                 }
             }
-            final BlockState state = mc.world.getBlockState(BlockPos.ofFloored(mc.player.getPos()));
-            if (state.getBlock() == Blocks.COBWEB && websConfig.getValue())
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onSlowMovement(SlowMovementEvent event)
+    {
+        Block block = event.getState().getBlock();
+        if (block instanceof CobwebBlock && websConfig.getValue()
+                || block instanceof SweetBerryBushBlock && berryBushConfig.getValue())
+        {
+            if (grimConfig.getValue())
+            {
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                        mc.player.getBlockPos(), Direction.DOWN));
+                event.cancel();
+            }
+            else
             {
                 if (mc.player.isOnGround())
                 {

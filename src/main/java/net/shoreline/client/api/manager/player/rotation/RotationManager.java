@@ -1,6 +1,5 @@
 package net.shoreline.client.api.manager.player.rotation;
 
-import net.minecraft.client.input.KeyboardInput;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.Shoreline;
@@ -9,7 +8,6 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.impl.event.entity.UpdateVelocityEvent;
 import net.shoreline.client.impl.event.entity.player.PlayerJumpEvent;
-import net.shoreline.client.impl.event.keyboard.KeyboardInputEvent;
 import net.shoreline.client.impl.event.keyboard.KeyboardTickEvent;
 import net.shoreline.client.impl.event.network.MovementPacketsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
@@ -71,6 +69,18 @@ public class RotationManager implements Globals
         }
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet && packet.changesLook())
         {
+            if (rotation != null && !event.isClientPacket())
+            {
+                float serverYawChange = rotation.getYaw() - getWrappedYaw();
+                float serverPitchChange = rotation.getPitch() - getPitch();
+                float yaw1 = yaw + serverYawChange;
+                float pitch1 = pitch + serverPitchChange;
+                ((AccessorPlayerMoveC2SPacket) packet).hookSetYaw(yaw1);
+                ((AccessorPlayerMoveC2SPacket) packet).hookSetPitch(pitch1);
+                yaw = yaw1;
+                pitch = pitch1;
+                return;
+            }
             yaw = packet.getYaw(0.0f);
             pitch = packet.getPitch(0.0f);
         }
@@ -203,10 +213,7 @@ public class RotationManager implements Globals
         }
     }
 
-    // public void onJump
-
     /**
-     *
      *
      * @param event
      */

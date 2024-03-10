@@ -13,6 +13,7 @@ import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.world.EndCrystalUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
@@ -208,172 +209,163 @@ public class AutoTotemModule extends ToggleModule
             }
         }
         totems = totemCount;
-        if (mc.currentScreen == null)
+        if (mc.currentScreen != null)
         {
-            if (!popTick)
+            return;
+        }
+        if (!popTick)
+        {
+            OffhandItem offhandItem = offhandConfig.getValue();
+            offhand = crystalCheckConfig.getValue()
+                    && Modules.AUTO_CRYSTAL.isPlacing() ?
+                    Items.END_CRYSTAL : offhandItem.getItem();
+            //
+            final ItemStack mainhand = mc.player.getMainHandStack();
+            if (mainhand.getItem() instanceof SwordItem
+                    && mc.options.useKey.isPressed()
+                    && offhandOverrideConfig.getValue())
             {
-                OffhandItem offhandItem = offhandConfig.getValue();
-                offhand = crystalCheckConfig.getValue()
-                        && Modules.AUTO_CRYSTAL.isPlacing() ?
-                        Items.END_CRYSTAL : offhandItem.getItem();
-                //
-                final ItemStack mainhand = mc.player.getMainHandStack();
-                if (mainhand.getItem() instanceof SwordItem
-                        && mc.options.useKey.isPressed()
-                        && offhandOverrideConfig.getValue())
-                {
-                    offhand = calcPotion != -1 ? Items.POTION :
-                            Items.GOLDEN_APPLE;
-                }
-                if (!mc.player.isCreative())
-                {
-                    float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
-                    if (health + 0.5 < healthConfig.getValue())
-                    {
-                        offhand = Items.TOTEM_OF_UNDYING;
-                    }
-                    if (lethalConfig.getValue())
-                    {
-                        int fall = computeFallDamage(mc.player.fallDistance);
-                        if (health + 0.5 <= fall)
-                        {
-                            offhand = Items.TOTEM_OF_UNDYING;
-                        }
-                        for (Entity e : mc.world.getEntities())
-                        {
-                            if (e == null || !e.isAlive())
-                            {
-                                continue;
-                            }
-                            if (e instanceof EndCrystalEntity crystal)
-                            {
-                                if (Managers.POSITION.squaredDistanceTo(e) > 144.0)
-                                {
-                                    continue;
-                                }
-                                double potential = EndCrystalUtil.getDamageTo(mc.player, crystal.getPos());
-                                if (health + 0.5 > potential)
-                                {
-                                    continue;
-                                }
-                                offhand = Items.TOTEM_OF_UNDYING;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (noCollisionConfig.getValue() && mainhand.getItem() == offhand)
+                offhand = calcPotion != -1 ? Items.POTION :
+                        Items.GOLDEN_APPLE;
+            }
+            if (!mc.player.isCreative())
+            {
+                float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+                if (health + 0.5 < healthConfig.getValue())
                 {
                     offhand = Items.TOTEM_OF_UNDYING;
                 }
-            }
-            else
-            {
-                offhand = Items.TOTEM_OF_UNDYING;
-                popTick = false;
-            }
-            // TOTEM SECTION
-            if (offhand == Items.TOTEM_OF_UNDYING)
-            {
-                if (calcTotem == -1)
+                int fall = computeFallDamage(mc.player.fallDistance);
+                if (health + 0.5 <= fall)
                 {
-                    // ChatUtil.error("No TOTEM_OF_UNDYING left in inventory!");
-                    if (fallbackCrystalConfig.getValue())
-                    {
-                        offhand = Items.END_CRYSTAL;
-                    }
+                    offhand = Items.TOTEM_OF_UNDYING;
                 }
-                else if (off.isEmpty() || off.getItem() != Items.TOTEM_OF_UNDYING)
+                if (lethalConfig.getValue())
                 {
-                    if (hotbarTotemConfig.getValue())
+                    for (Entity e : mc.world.getEntities())
                     {
-                        int prev = mc.player.getInventory().selectedSlot;
-                        mc.player.getInventory().selectedSlot = calcTotem;
-                        Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(calcTotem));
-                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                                PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND,
-                                mc.player.getBlockPos(), Direction.UP));
-                        mc.player.getInventory().selectedSlot = prev;
-                        Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
-                    }
-                    else
-                    {
-                        preClickSlot();
-                        Managers.INVENTORY.pickupSlot(calcTotem);
-                        boolean rt = !off.isEmpty();
-                        Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
-                        if (rt)
+                        if (e == null || !e.isAlive() || !(e instanceof EndCrystalEntity crystal))
                         {
-                            Managers.INVENTORY.pickupSlot(calcTotem);
+                            continue;
                         }
-                        postClickSlot();
-                    }
-                    calcTotem = -1;
-                }
-                return;
-            }
-            // OFFHAND SECTION
-            int calcOffhand = -1;
-            if (offhand == Items.POTION)
-            {
-                calcOffhand = calcPotion;
-            }
-            else
-            {
-                // Glint state boolean. For GOLDEN_APPLE, the loop will
-                // exit when the preferred glint state is found
-                boolean glint = false;
-                for (int i = 9; i < (hotbarConfig.getValue() ? 45 : 36); i++)
-                {
-                    final ItemStack slot = mc.player.getInventory().getStack(i);
-                    if (offhand == Items.GOLDEN_APPLE)
-                    {
-                        if (glint)
+                        if (Managers.POSITION.squaredDistanceTo(e) > 144.0)
                         {
-                            break;
+                            continue;
                         }
-                        // in 1.12.2 we can restore all of our absorption
-                        // hearts using crapples when the absorption
-                        // effect is active
-                        if (slot.getItem() == Items.GOLDEN_APPLE)
+                        double potential = EndCrystalUtil.getDamageTo(mc.player, crystal.getPos());
+                        if (health + 0.5 > potential)
                         {
-                            if (crappleConfig.getValue() && mc.player.hasStatusEffect(StatusEffects.ABSORPTION))
-                            {
-                                glint = true;
-                            }
-                            calcOffhand = i;
+                            continue;
                         }
-                        else if (slot.getItem() == Items.ENCHANTED_GOLDEN_APPLE)
-                        {
-                            glint = true;
-                            calcOffhand = i;
-                        }
-                    }
-                    else if (slot.getItem() == offhand)
-                    {
-                        calcOffhand = i;
+                        offhand = Items.TOTEM_OF_UNDYING;
                         break;
                     }
                 }
             }
-            if (calcOffhand == -1)
+            if (noCollisionConfig.getValue() && mainhand.getItem() == offhand)
             {
-                // ChatUtil.error("No %s left in inventory!", offhand.getName());
-                return;
+                offhand = Items.TOTEM_OF_UNDYING;
             }
-            final ItemStack cSlot = mc.player.getInventory().getStack(calcOffhand);
-            if (!isStackInOffhand(cSlot))
+        }
+        else
+        {
+            offhand = Items.TOTEM_OF_UNDYING;
+            popTick = false;
+        }
+        // TOTEM SECTION
+        if (offhand == Items.TOTEM_OF_UNDYING)
+        {
+            if (calcTotem == -1)
             {
-                preClickSlot();
-                Managers.INVENTORY.pickupSlot(calcOffhand);
-                boolean rt = !off.isEmpty();
-                Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
-                if (rt)
+                // ChatUtil.error("No TOTEM_OF_UNDYING left in inventory!");
+                if (fallbackCrystalConfig.getValue())
                 {
-                    Managers.INVENTORY.pickupSlot(calcOffhand);
+                    offhand = Items.END_CRYSTAL;
                 }
-                postClickSlot();
             }
+            else if (off.isEmpty() || off.getItem() != Items.TOTEM_OF_UNDYING)
+            {
+                if (hotbarTotemConfig.getValue())
+                {
+                    int prev = mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = calcTotem;
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(calcTotem));
+                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                            PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND,
+                            mc.player.getBlockPos(), Direction.UP));
+                    mc.player.getInventory().selectedSlot = prev;
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+                }
+                else
+                {
+                    preClickSlot();
+                    Managers.INVENTORY.pickupSlot(calcTotem);
+                    // boolean rt = !off.isEmpty();
+                    Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
+                    Managers.INVENTORY.pickupSlot(calcTotem);
+                    postClickSlot();
+                }
+                calcTotem = -1;
+            }
+            return;
+        }
+        // OFFHAND SECTION
+        int calcOffhand = -1;
+        if (offhand == Items.POTION)
+        {
+            calcOffhand = calcPotion;
+        }
+        else
+        {
+            // Glint state boolean. For GOLDEN_APPLE, the loop will
+            // exit when the preferred glint state is found
+            boolean glint = false;
+            for (int i = 9; i < (hotbarConfig.getValue() ? 45 : 36); i++)
+            {
+                final ItemStack slot = mc.player.getInventory().getStack(i);
+                if (offhand == Items.GOLDEN_APPLE)
+                {
+                    if (glint)
+                    {
+                        break;
+                    }
+                    // in 1.12.2 we can restore all of our absorption
+                    // hearts using crapples when the absorption
+                    // effect is active
+                    if (slot.getItem() == Items.GOLDEN_APPLE)
+                    {
+                        if (crappleConfig.getValue() && mc.player.hasStatusEffect(StatusEffects.ABSORPTION))
+                        {
+                            glint = true;
+                        }
+                        calcOffhand = i;
+                    }
+                    else if (slot.getItem() == Items.ENCHANTED_GOLDEN_APPLE)
+                    {
+                        glint = true;
+                        calcOffhand = i;
+                    }
+                }
+                else if (slot.getItem() == offhand)
+                {
+                    calcOffhand = i;
+                    break;
+                }
+            }
+        }
+        if (calcOffhand == -1)
+        {
+            // ChatUtil.error("No %s left in inventory!", offhand.getName());
+            return;
+        }
+        if (off.isEmpty() || off.getItem() != offhand)
+        {
+            preClickSlot();
+            Managers.INVENTORY.pickupSlot(calcOffhand);
+            // boolean rt = !off.isEmpty();
+            Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
+            Managers.INVENTORY.pickupSlot(calcOffhand);
+            postClickSlot();
         }
     }
     
@@ -403,12 +395,9 @@ public class AutoTotemModule extends ToggleModule
                     }
                     preClickSlot();
                     Managers.INVENTORY.pickupSlot(calcTotem);
-                    boolean rt = !off.isEmpty();
+                    // boolean rt = !off.isEmpty();
                     Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
-                    if (rt)
-                    {
-                        Managers.INVENTORY.pickupSlot(calcTotem);
-                    }
+                    Managers.INVENTORY.pickupSlot(calcTotem);
                     postClickSlot();
                 }
             }
@@ -431,8 +420,7 @@ public class AutoTotemModule extends ToggleModule
                 double x = Managers.POSITION.getX();
                 double y = Managers.POSITION.getY();
                 double z = Managers.POSITION.getZ();
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        x, y, z, true));
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true));
             }
         }
         if (strictActionsConfig.getValue())
@@ -478,7 +466,6 @@ public class AutoTotemModule extends ToggleModule
     }
 
     /**
-     *
      *
      * @param fallDistance
      * @return

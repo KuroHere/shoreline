@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.item.SpectralArrowItem;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.EventStage;
@@ -35,7 +36,6 @@ public class SprintModule extends ToggleModule
     }
 
     /**
-     *
      *
      * @return
      */
@@ -82,7 +82,6 @@ public class SprintModule extends ToggleModule
     }
 
     /**
-     *
      *
      * @param event
      */
