@@ -253,7 +253,6 @@ public class NoSlowModule extends ToggleModule
     
     /**
      *
-     *
      * @param event
      */
     @EventListener
@@ -269,7 +268,6 @@ public class NoSlowModule extends ToggleModule
     
     /**
      *
-     *
      * @param event
      */
     @EventListener
@@ -284,7 +282,6 @@ public class NoSlowModule extends ToggleModule
     
     /**
      *
-     *
      * @param event
      */
     @EventListener
@@ -297,7 +294,6 @@ public class NoSlowModule extends ToggleModule
     }
     
     /**
-     *
      *
      * @param event
      */
@@ -313,7 +309,6 @@ public class NoSlowModule extends ToggleModule
     }
     
     /**
-     *
      *
      * @param event
      */
@@ -352,7 +347,6 @@ public class NoSlowModule extends ToggleModule
     
     /**
      *
-     *
      * @return
      */
     public boolean checkSlowed()
@@ -363,7 +357,6 @@ public class NoSlowModule extends ToggleModule
     }
     
     /**
-     *
      *
      * @return
      */

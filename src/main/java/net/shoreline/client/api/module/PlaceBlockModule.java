@@ -54,16 +54,16 @@ public class PlaceBlockModule extends RotationModule
      */
     protected void placeBlock(int slot, BlockPos pos, boolean strictDirection)
     {
-        int prev = Globals.mc.player.getInventory().selectedSlot;
+        int prev = mc.player.getInventory().selectedSlot;
         if (prev != slot)
         {
-            Globals.mc.player.getInventory().selectedSlot = slot;
+            mc.player.getInventory().selectedSlot = slot;
             Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
         }
         Managers.INTERACT.placeBlock(pos, strictDirection);
         if (prev != slot)
         {
-            Globals.mc.player.getInventory().selectedSlot = prev;
+            mc.player.getInventory().selectedSlot = prev;
             Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
         }
     }
@@ -91,7 +91,7 @@ public class PlaceBlockModule extends RotationModule
         int slot = -1;
         for (int i = 0; i < 9; i++)
         {
-            ItemStack stack = Globals.mc.player.getInventory().getStack(i);
+            ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.getItem() instanceof BlockItem block1
                     && block1.getBlock() == block)
             {

@@ -175,7 +175,7 @@ public class SpeedmineModule extends RotationModule
                 remines = 0;
             }
             else if (damage > 1.0f && !Modules.AUTO_CRYSTAL.isAttacking()
-                    && !Modules.AUTO_CRYSTAL.isPlacing())
+                    && !Modules.AUTO_CRYSTAL.isPlacing() && !mc.player.isUsingItem())
             {
                 if (isRotationBlocked())
                 {

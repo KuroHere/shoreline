@@ -103,18 +103,6 @@ public class MixinClientPlayerInteractionManager implements Globals
 
     /**
      *
-     * @param instance
-     * @param packet
-     */
-    @Redirect(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/" +
-            "client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
-    private void hookInteractItem(ClientPlayNetworkHandler instance, Packet<?> packet)
-    {
-
-    }
-
-    /**
-     *
      * @param pos
      * @param cir
      */

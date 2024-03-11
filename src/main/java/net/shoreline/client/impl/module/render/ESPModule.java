@@ -1,23 +1,21 @@
 package net.shoreline.client.impl.module.render;
 
-import net.shoreline.client.api.config.Config;
-import net.shoreline.client.api.config.setting.BooleanConfig;
-import net.shoreline.client.api.config.setting.ColorConfig;
-import net.shoreline.client.api.config.setting.EnumConfig;
-import net.shoreline.client.api.config.setting.NumberConfig;
-import net.shoreline.client.api.event.EventStage;
-import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.ToggleModule;
-import net.shoreline.client.impl.event.EntityOutlineEvent;
-import net.shoreline.client.impl.event.config.ConfigUpdateEvent;
-import net.shoreline.client.impl.event.entity.decoration.TeamColorEvent;
-import net.shoreline.client.util.world.EntityUtil;
 import net.minecraft.block.entity.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.shoreline.client.api.config.Config;
+import net.shoreline.client.api.config.setting.BooleanConfig;
+import net.shoreline.client.api.config.setting.ColorConfig;
+import net.shoreline.client.api.config.setting.EnumConfig;
+import net.shoreline.client.api.config.setting.NumberConfig;
+import net.shoreline.client.api.event.listener.EventListener;
+import net.shoreline.client.api.module.ModuleCategory;
+import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.impl.event.EntityOutlineEvent;
+import net.shoreline.client.impl.event.entity.decoration.TeamColorEvent;
+import net.shoreline.client.util.world.EntityUtil;
 
 import java.awt.*;
 
@@ -31,7 +29,7 @@ public class ESPModule extends ToggleModule
 {
     //
     Config<ESPMode> modeConfig = new EnumConfig<>("Mode", "ESP rendering " +
-            "mode", ESPMode.OUTLINE, ESPMode.values());
+            "mode", ESPMode.GLOW, ESPMode.values());
     Config<Float> widthConfig = new NumberConfig<>("Linewidth", "ESP " +
             "rendering line width", 0.1f, 1.25f, 5.0f);
     Config<Boolean> playersConfig = new BooleanConfig("Players",
@@ -192,7 +190,7 @@ public class ESPModule extends ToggleModule
      */
     public boolean checkESP(Entity entity)
     {
-        return entity instanceof PlayerEntity && playersConfig.getValue()
+        return entity != mc.player && entity instanceof PlayerEntity && playersConfig.getValue()
                 || EntityUtil.isMonster(entity) && monstersConfig.getValue()
                 || (EntityUtil.isNeutral(entity)
                 || EntityUtil.isPassive(entity)) && animalsConfig.getValue()
@@ -203,7 +201,7 @@ public class ESPModule extends ToggleModule
     
     public enum ESPMode 
     {
-        OUTLINE,
+        // OUTLINE,
         GLOW
     }
 }

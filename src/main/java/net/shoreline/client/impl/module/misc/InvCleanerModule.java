@@ -10,6 +10,7 @@ import net.shoreline.client.api.file.ConfigFile;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import com.google.gson.JsonArray;
@@ -75,10 +76,9 @@ public class InvCleanerModule extends ToggleModule
                 }
                 if (stack.getItem() == item && invCleanTimer.passed(delayConfig.getValue() * 1000))
                 {
-                    mc.interactionManager.clickSlot(0, i, 0,
-                            SlotActionType.PICKUP, mc.player);
-                    mc.interactionManager.clickSlot(0, ScreenHandler.EMPTY_SPACE_SLOT_INDEX,
-                            0, SlotActionType.PICKUP, mc.player);
+                    Managers.INVENTORY.throwSlot(i);
+                    // mc.interactionManager.clickSlot(0, ScreenHandler.EMPTY_SPACE_SLOT_INDEX,
+                    //         0, SlotActionType.PICKUP, mc.player);
                     invCleanTimer.reset();
                 }
             }

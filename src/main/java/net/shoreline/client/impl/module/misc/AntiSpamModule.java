@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.module.misc;
 
+import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
@@ -7,6 +8,7 @@ import net.shoreline.client.impl.event.network.PacketEvent;
 import net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 

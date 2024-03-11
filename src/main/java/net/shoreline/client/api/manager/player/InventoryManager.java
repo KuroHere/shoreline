@@ -1,8 +1,11 @@
 package net.shoreline.client.api.manager.player;
 
+import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.network.PacketEvent;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.mixin.accessor.AccessorClientPlayerInteractionManager;
 import net.shoreline.client.util.Globals;
 import net.minecraft.item.Item;
@@ -18,6 +21,7 @@ import net.minecraft.screen.slot.SlotActionType;
  */
 public class InventoryManager implements Globals
 {
+
     // The serverside selected hotbar slot. This will determine the held item
     // serverside
     private int slot;
@@ -34,7 +38,6 @@ public class InventoryManager implements Globals
 
     /**
      *
-     *
      * @param event
      */
     @EventListener
@@ -48,16 +51,20 @@ public class InventoryManager implements Globals
 
     /**
      *
-     *
      * @return
      */
     public int getServerSlot()
     {
         return slot;
     }
+
+    //
+    public void closeScreen()
+    {
+        Managers.NETWORK.sendPacket(new CloseHandledScreenC2SPacket(mc.player.currentScreenHandler.syncId));
+    }
     
     /**
-     *
      *
      * @param slot
      */
@@ -68,7 +75,6 @@ public class InventoryManager implements Globals
 
     /**
      *
-     *
      * @param slot
      */
     public void throwSlot(final int slot)
@@ -78,7 +84,6 @@ public class InventoryManager implements Globals
     
     /**
      *
-     *
      * @param slot
      * @param type
      * @param tick
@@ -87,10 +92,10 @@ public class InventoryManager implements Globals
                        final SlotActionType type,
                        final boolean tick)
     {
-        mc.interactionManager.clickSlot(0, slot, 0, type, mc.player);
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, 0, type, mc.player);
         if (tick)
         {
-            syncSelectedSlot();
+            // syncSelectedSlot();
         }
     }
 
@@ -122,7 +127,6 @@ public class InventoryManager implements Globals
     }
 
     /**
-     *
      *
      * @return
      */

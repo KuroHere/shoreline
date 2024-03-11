@@ -17,7 +17,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.shoreline.client.util.Globals;
 
 /**
  *

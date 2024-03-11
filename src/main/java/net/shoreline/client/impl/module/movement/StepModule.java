@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -10,6 +11,7 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.entity.StepEvent;
+import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.chat.ChatUtil;
@@ -149,6 +151,19 @@ public class StepModule extends ToggleModule
         else
         {
             setStepHeight(isAbstractHorse(mc.player.getVehicle()) ? 1.0f : 0.6f);
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPacketInbound(PacketEvent event)
+    {
+        if (event.getPacket() instanceof PlayerPositionLookS2CPacket)
+        {
+            disable();
         }
     }
 

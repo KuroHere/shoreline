@@ -29,8 +29,8 @@ public class HoleESPModule extends ToggleModule
     //
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to " +
             "display holes", 3.0f, 5.0f, 25.0f);
-    Config<Float> heightConfig = new NumberConfig<>("Height", "Render height " +
-            "of holes", 0.0f, 1.0f, 1.0f);
+    Config<Float> heightConfig = new NumberConfig<>("Size", "Render height " +
+            "of holes", -1.0f, 1.0f, 1.0f);
     Config<Boolean> doubleConfig = new BooleanConfig("Double", "Displays " +
             "double holes where the player can stand in the middle of two " +
             "blocks to block explosion damage", true);

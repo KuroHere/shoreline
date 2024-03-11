@@ -1,20 +1,5 @@
 package net.shoreline.client.impl.module.combat;
 
-import net.shoreline.client.api.config.Config;
-import net.shoreline.client.api.config.setting.BooleanConfig;
-import net.shoreline.client.api.config.setting.EnumConfig;
-import net.shoreline.client.api.config.setting.NumberConfig;
-import net.shoreline.client.api.event.EventStage;
-import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.ToggleModule;
-import net.shoreline.client.impl.event.RunTickEvent;
-import net.shoreline.client.impl.event.TickEvent;
-import net.shoreline.client.impl.event.network.PacketEvent;
-import net.shoreline.client.init.Managers;
-import net.shoreline.client.init.Modules;
-import net.shoreline.client.util.chat.ChatUtil;
-import net.shoreline.client.util.world.EndCrystalUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.decoration.EndCrystalEntity;
@@ -30,8 +15,26 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.potion.PotionUtil;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.shoreline.client.api.config.Config;
+import net.shoreline.client.api.config.setting.BooleanConfig;
+import net.shoreline.client.api.config.setting.EnumConfig;
+import net.shoreline.client.api.config.setting.NumberConfig;
+import net.shoreline.client.api.event.EventStage;
+import net.shoreline.client.api.event.listener.EventListener;
+import net.shoreline.client.api.module.ModuleCategory;
+import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.impl.event.RunTickEvent;
+import net.shoreline.client.impl.event.TickEvent;
+import net.shoreline.client.impl.event.network.PacketEvent;
+import net.shoreline.client.init.Managers;
+import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.chat.ChatUtil;
+import net.shoreline.client.util.world.EndCrystalUtil;
 
 import java.util.List;
 
@@ -59,7 +62,7 @@ public class AutoTotemModule extends ToggleModule
     Config<Boolean> fallbackCrystalConfig = new BooleanConfig(
             "FallbackCrystal", "Fallback to END_CRYSTAL when there are no " +
             "totems", true);
-    Config<Boolean> strictActionsConfig = new BooleanConfig("StrictActions",
+    Config<Boolean> strictActionConfig = new BooleanConfig("StrictActions",
             "Stops actions before clicking slots", false);
     Config<Boolean> strictMoveConfig = new BooleanConfig("StrictMove",
             "Stops motion before clicking slots", false);
@@ -83,6 +86,8 @@ public class AutoTotemModule extends ToggleModule
     Config<Integer> totemSlotConfig = new NumberConfig<>("TotemSlot", "Slot " +
             "in the hotbar that is dedicated for hotbar totem swaps", 0, 8, 8,
             () -> hotbarTotemConfig.getValue());
+    Config<Boolean> debugConfig = new BooleanConfig("Offhand-Debug",
+            "Displays the current item in the offhand", false);
     //
     private Item offhand;
     //
@@ -105,7 +110,6 @@ public class AutoTotemModule extends ToggleModule
 
     /**
      *
-     *
      */
     @Override
     public void onDisable()
@@ -125,11 +129,14 @@ public class AutoTotemModule extends ToggleModule
     @Override
     public String getModuleData()
     {
+        if (offhand != null && debugConfig.getValue())
+        {
+            return offhand.getName().getString();
+        }
         return Integer.toString(totems);
     }
 
     /**
-     *
      *
      * @param event
      */
@@ -145,7 +152,6 @@ public class AutoTotemModule extends ToggleModule
     }
 
     /**
-     *
      *
      * @param event
      */
@@ -213,64 +219,56 @@ public class AutoTotemModule extends ToggleModule
         {
             return;
         }
-        if (!popTick)
+        OffhandItem offhandItem = offhandConfig.getValue();
+        offhand = crystalCheckConfig.getValue()
+                && Modules.AUTO_CRYSTAL.isPlacing() ?
+                Items.END_CRYSTAL : offhandItem.getItem();
+        //
+        final ItemStack mainhand = mc.player.getMainHandStack();
+        if (mainhand.getItem() instanceof SwordItem
+                && mc.options.useKey.isPressed()
+                && offhandOverrideConfig.getValue())
         {
-            OffhandItem offhandItem = offhandConfig.getValue();
-            offhand = crystalCheckConfig.getValue()
-                    && Modules.AUTO_CRYSTAL.isPlacing() ?
-                    Items.END_CRYSTAL : offhandItem.getItem();
-            //
-            final ItemStack mainhand = mc.player.getMainHandStack();
-            if (mainhand.getItem() instanceof SwordItem
-                    && mc.options.useKey.isPressed()
-                    && offhandOverrideConfig.getValue())
-            {
-                offhand = calcPotion != -1 ? Items.POTION :
-                        Items.GOLDEN_APPLE;
-            }
-            if (!mc.player.isCreative())
-            {
-                float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
-                if (health + 0.5 < healthConfig.getValue())
-                {
-                    offhand = Items.TOTEM_OF_UNDYING;
-                }
-                int fall = computeFallDamage(mc.player.fallDistance);
-                if (health + 0.5 <= fall)
-                {
-                    offhand = Items.TOTEM_OF_UNDYING;
-                }
-                if (lethalConfig.getValue())
-                {
-                    for (Entity e : mc.world.getEntities())
-                    {
-                        if (e == null || !e.isAlive() || !(e instanceof EndCrystalEntity crystal))
-                        {
-                            continue;
-                        }
-                        if (Managers.POSITION.squaredDistanceTo(e) > 144.0)
-                        {
-                            continue;
-                        }
-                        double potential = EndCrystalUtil.getDamageTo(mc.player, crystal.getPos());
-                        if (health + 0.5 > potential)
-                        {
-                            continue;
-                        }
-                        offhand = Items.TOTEM_OF_UNDYING;
-                        break;
-                    }
-                }
-            }
-            if (noCollisionConfig.getValue() && mainhand.getItem() == offhand)
+            offhand = calcPotion != -1 ? Items.POTION :
+                    Items.GOLDEN_APPLE;
+        }
+        if (!mc.player.isCreative())
+        {
+            float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+            if (health + 0.5 < healthConfig.getValue())
             {
                 offhand = Items.TOTEM_OF_UNDYING;
             }
+            int fall = computeFallDamage(mc.player.fallDistance);
+            if (health + 0.5 <= fall)
+            {
+                offhand = Items.TOTEM_OF_UNDYING;
+            }
+            if (lethalConfig.getValue())
+            {
+                for (Entity e : mc.world.getEntities())
+                {
+                    if (e == null || !e.isAlive() || !(e instanceof EndCrystalEntity crystal))
+                    {
+                        continue;
+                    }
+                    if (Managers.POSITION.squaredDistanceTo(e) > 144.0)
+                    {
+                        continue;
+                    }
+                    double potential = EndCrystalUtil.getDamageTo(mc.player, crystal.getPos());
+                    if (health + 0.5 > potential)
+                    {
+                        continue;
+                    }
+                    offhand = Items.TOTEM_OF_UNDYING;
+                    break;
+                }
+            }
         }
-        else
+        if (noCollisionConfig.getValue() && mainhand.getItem() == offhand)
         {
             offhand = Items.TOTEM_OF_UNDYING;
-            popTick = false;
         }
         // TOTEM SECTION
         if (offhand == Items.TOTEM_OF_UNDYING)
@@ -292,17 +290,21 @@ public class AutoTotemModule extends ToggleModule
                     Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(calcTotem));
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND,
-                            mc.player.getBlockPos(), Direction.UP));
+                            BlockPos.ORIGIN, Direction.DOWN));
                     mc.player.getInventory().selectedSlot = prev;
                     Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
                 }
                 else
                 {
                     preClickSlot();
+                    boolean returnClick = !off.isEmpty();
+                    if (returnClick)
+                    {
+                        Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
+                    }
                     Managers.INVENTORY.pickupSlot(calcTotem);
-                    // boolean rt = !off.isEmpty();
                     Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
-                    Managers.INVENTORY.pickupSlot(calcTotem);
+                    // Managers.INVENTORY.closeScreen();
                     postClickSlot();
                 }
                 calcTotem = -1;
@@ -361,10 +363,15 @@ public class AutoTotemModule extends ToggleModule
         if (off.isEmpty() || off.getItem() != offhand)
         {
             preClickSlot();
+            boolean returnClick = !off.isEmpty();
+            if (returnClick)
+            {
+                Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
+            }
             Managers.INVENTORY.pickupSlot(calcOffhand);
-            // boolean rt = !off.isEmpty();
             Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
-            Managers.INVENTORY.pickupSlot(calcOffhand);
+
+            // Managers.INVENTORY.closeScreen();
             postClickSlot();
         }
     }
@@ -376,31 +383,34 @@ public class AutoTotemModule extends ToggleModule
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
-        if (mc.player != null && mc.world != null)
+        if (mc.player == null || mc.world == null)
         {
-            if (event.getPacket() instanceof EntityStatusS2CPacket packet)
+            return;
+        }
+        // PLAYER POPPED TOTEM! attempt to instantly replace
+        if (event.getPacket() instanceof EntityStatusS2CPacket packet
+                && packet.getEntity(mc.world) == mc.player
+                && packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING
+                && instantConfig.getValue())
+        {
+            popTick = true;
+            ItemStack off = mc.player.getOffHandStack();
+            if (calcTotem == -1)
             {
-                // PLAYER POPPED TOTEM! attempt to instantly replace
-                if (packet.getEntity(mc.world) == mc.player
-                        && packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING
-                        && instantConfig.getValue())
-                {
-                    popTick = true;
-                    ItemStack off = mc.player.getOffHandStack();
-                    if (calcTotem == -1)
-                    {
-                        // ChatUtil.error("No TOTEM_OF_UNDYING left in " +
-                        //        "inventory!");
-                        return;
-                    }
-                    preClickSlot();
-                    Managers.INVENTORY.pickupSlot(calcTotem);
-                    // boolean rt = !off.isEmpty();
-                    Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
-                    Managers.INVENTORY.pickupSlot(calcTotem);
-                    postClickSlot();
-                }
+                // ChatUtil.error("No TOTEM_OF_UNDYING left in " +
+                //        "inventory!");
+                return;
             }
+            preClickSlot();
+            boolean returnClick = !off.isEmpty();
+            Managers.INVENTORY.pickupSlot(calcTotem);
+            Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
+            if (returnClick)
+            {
+                Managers.INVENTORY.pickupSlot(calcTotem);
+            }
+            // Managers.INVENTORY.closeScreen();
+            postClickSlot();
         }
     }
     
@@ -413,17 +423,14 @@ public class AutoTotemModule extends ToggleModule
         sneaking = Managers.POSITION.isSneaking();
         sprinting = Managers.POSITION.isSprinting();
         // INV_MOVE checks
-        if (strictMoveConfig.getValue())
+        if (strictMoveConfig.getValue() && Managers.POSITION.isOnGround())
         {
-            if (Managers.POSITION.isOnGround())
-            {
-                double x = Managers.POSITION.getX();
-                double y = Managers.POSITION.getY();
-                double z = Managers.POSITION.getZ();
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true));
-            }
+            double x = Managers.POSITION.getX();
+            double y = Managers.POSITION.getY();
+            double z = Managers.POSITION.getZ();
+            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true));
         }
-        if (strictActionsConfig.getValue())
+        if (strictActionConfig.getValue())
         {
             if (mc.player.isUsingItem())
             {
@@ -448,7 +455,7 @@ public class AutoTotemModule extends ToggleModule
      */
     private void postClickSlot()
     {
-        if (strictActionsConfig.getValue())
+        if (strictActionConfig.getValue())
         {
             if (sneaking)
             {
@@ -510,6 +517,7 @@ public class AutoTotemModule extends ToggleModule
         TOTEM(Items.TOTEM_OF_UNDYING),
         CRYSTAL(Items.END_CRYSTAL),
         GAPPLE(Items.GOLDEN_APPLE);
+        // POTION(Items.POTION);
 
         //
         private final Item item;

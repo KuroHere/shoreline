@@ -73,7 +73,6 @@ public class VelocityModule extends ToggleModule
 
     /**
      *
-     *
      * @return
      */
     @Override
@@ -108,92 +107,98 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
-        if (mc.player != null && mc.world != null)
+        if (mc.player == null || mc.world == null)
         {
-            if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet)
+            return;
+        }
+        if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet)
+        {
+            if (packet.getId() != mc.player.getId())
             {
-                if (packet.getId() != mc.player.getId())
+                return;
+            }
+            switch (modeConfig.getValue())
+            {
+                case NORMAL ->
                 {
-                    return;
-                }
-                switch (modeConfig.getValue())
-                {
-                    case NORMAL ->
+                    if (horizontalConfig.getValue() == 0.0f
+                            && verticalConfig.getValue() == 0.0f)
                     {
-                        if (horizontalConfig.getValue() == 0.0f
-                                && verticalConfig.getValue() == 0.0f)
-                        {
-                            event.cancel();
-                            return;
-                        }
-                        ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityX((int) (packet.getVelocityX()
-                                * (horizontalConfig.getValue() / 100.0f)));
-                        ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityY((int) (packet.getVelocityY()
-                                * (verticalConfig.getValue() / 100.0f)));
-                        ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityZ((int) (packet.getVelocityZ()
-                                * (horizontalConfig.getValue() / 100.0f)));
-                    }
-                    case STRICT ->
-                    {
-                        if (!Managers.NCP.passed(100))
-                        {
-                            return;
-                        }
                         event.cancel();
-                        cancelVelocity = true;
+                        return;
                     }
+                    ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityX((int) (packet.getVelocityX()
+                            * (horizontalConfig.getValue() / 100.0f)));
+                    ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityY((int) (packet.getVelocityY()
+                            * (verticalConfig.getValue() / 100.0f)));
+                    ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityZ((int) (packet.getVelocityZ()
+                            * (horizontalConfig.getValue() / 100.0f)));
+                }
+                case STRICT ->
+                {
+                    if (!Managers.NCP.passed(100))
+                    {
+                        return;
+                    }
+                    event.cancel();
+                    cancelVelocity = true;
                 }
             }
-            else if (event.getPacket() instanceof ExplosionS2CPacket packet)
+        }
+        else if (event.getPacket() instanceof ExplosionS2CPacket packet)
+        {
+            switch (modeConfig.getValue())
             {
-                switch (modeConfig.getValue())
+                case NORMAL ->
                 {
-                    case NORMAL ->
+                    if (horizontalConfig.getValue() == 0.0f
+                            && verticalConfig.getValue() == 0.0f)
                     {
-                        if (horizontalConfig.getValue() == 0.0f
-                                && verticalConfig.getValue() == 0.0f)
-                        {
-                            event.cancel();
-                        }
-                        else
-                        {
-                            ((AccessorExplosionS2CPacket) packet).setPlayerVelocityX(packet.getPlayerVelocityX()
-                                    * (horizontalConfig.getValue() / 100.0f));
-                            ((AccessorExplosionS2CPacket) packet).setPlayerVelocityY(packet.getPlayerVelocityY()
-                                    * (verticalConfig.getValue() / 100.0f));
-                            ((AccessorExplosionS2CPacket) packet).setPlayerVelocityZ(packet.getPlayerVelocityZ()
-                                    * (horizontalConfig.getValue() / 100.0f));
-                        }
-                    }
-                    case STRICT ->
-                    {
-                        if (!Managers.NCP.passed(100))
-                        {
-                            return;
-                        }
                         event.cancel();
-                        cancelVelocity = true;
+                    }
+                    else
+                    {
+                        ((AccessorExplosionS2CPacket) packet).setPlayerVelocityX(packet.getPlayerVelocityX()
+                                * (horizontalConfig.getValue() / 100.0f));
+                        ((AccessorExplosionS2CPacket) packet).setPlayerVelocityY(packet.getPlayerVelocityY()
+                                * (verticalConfig.getValue() / 100.0f));
+                        ((AccessorExplosionS2CPacket) packet).setPlayerVelocityZ(packet.getPlayerVelocityZ()
+                                * (horizontalConfig.getValue() / 100.0f));
                     }
                 }
-                if (event.isCanceled())
+                case STRICT ->
                 {
-                    // Dumb fix bc canceling explosion velocity removes explosion sound in 1.19
+                    if (!Managers.NCP.passed(100))
+                    {
+                        return;
+                    }
+                    event.cancel();
+                    cancelVelocity = true;
+                }
+            }
+            if (event.isCanceled())
+            {
+                // Dumb fix bc canceling explosion velocity removes explosion sound in 1.19
+                try
+                {
                     ((AccessorClientWorld) mc.world).hookPlaySound(packet.getX(), packet.getY(), packet.getZ(),
                             SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
                             4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false, RANDOM.nextLong());
                 }
-            }
-            else if (event.getPacket() instanceof EntityStatusS2CPacket packet)
-            {
-                if (pushFishhookConfig.getValue() && packet.getStatus() == EntityStatuses.PULL_HOOKED_ENTITY)
+                catch (Exception ignored)
                 {
-                    Entity entity = packet.getEntity(mc.world);
-                    if (entity instanceof FishingBobberEntity hook
-                            && hook.getHookedEntity() == mc.player)
-                    {
-                        event.cancel();
-                    }
+
                 }
+            }
+        }
+        else if (event.getPacket() instanceof EntityStatusS2CPacket packet
+                && packet.getStatus() == EntityStatuses.PULL_HOOKED_ENTITY && pushFishhookConfig.getValue())
+        {
+            Entity entity = packet.getEntity(mc.world);
+            if (entity instanceof FishingBobberEntity hook
+                    && hook.getHookedEntity() == mc.player)
+            {
+                event.cancel();
             }
         }
     }
@@ -206,19 +211,16 @@ public class VelocityModule extends ToggleModule
     public void onTick(TickEvent event)
     {
         if (event.getStage() == EventStage.PRE
-                && modeConfig.getValue() == VelocityMode.STRICT)
+                && modeConfig.getValue() == VelocityMode.STRICT && cancelVelocity)
         {
-            if (cancelVelocity)
+            if (Managers.NCP.passed(100))
             {
-                if (Managers.NCP.passed(100))
-                {
-                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
-                            mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround()));
-                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                            mc.player.getBlockPos(), mc.player.getHorizontalFacing().getOpposite()));
-                }
-                cancelVelocity = false;
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
+                        mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround()));
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                        mc.player.getBlockPos(), mc.player.getHorizontalFacing().getOpposite()));
             }
+            cancelVelocity = false;
         }
     }
 
@@ -229,7 +231,7 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPushEntity(PushEntityEvent event)
     {
-        if (pushEntitiesConfig.getValue())
+        if (pushEntitiesConfig.getValue() && modeConfig.getValue() != VelocityMode.STRICT)
         {
             event.cancel();
         }
@@ -242,7 +244,7 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPushOutOfBlocks(PushOutOfBlocksEvent event)
     {
-        if (pushBlocksConfig.getValue())
+        if (pushBlocksConfig.getValue() && modeConfig.getValue() != VelocityMode.STRICT)
         {
             event.cancel();
         }
@@ -255,7 +257,7 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPushFluid(PushFluidsEvent event)
     {
-        if (pushLiquidsConfig.getValue())
+        if (pushLiquidsConfig.getValue() && modeConfig.getValue() != VelocityMode.STRICT)
         {
             event.cancel();
         }

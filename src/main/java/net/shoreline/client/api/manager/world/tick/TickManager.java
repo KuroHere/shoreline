@@ -34,9 +34,7 @@ public class TickManager implements Globals
 
     /**
      *
-     *
      * @param event
-     *
      * @see WorldTimeUpdateS2CPacket
      */
     @EventListener
@@ -83,7 +81,6 @@ public class TickManager implements Globals
 
     /**
      *
-     *
      * @return
      */
     public Queue<Float> getTicks()
@@ -92,7 +89,6 @@ public class TickManager implements Globals
     }
 
     /**
-     *
      *
      * @return
      */
@@ -107,11 +103,10 @@ public class TickManager implements Globals
             }
             avg /= ticks.size();
         }
-        return avg;
+        return Math.min(100.0f, avg); // Server may compensate
     }
 
     /**
-     *
      *
      * @return
      */
@@ -125,7 +120,6 @@ public class TickManager implements Globals
     }
 
     /**
-     *
      *
      * @return
      */
@@ -143,7 +137,6 @@ public class TickManager implements Globals
     }
 
     /**
-     *
      *
      * @param tps
      * @return

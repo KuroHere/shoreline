@@ -25,7 +25,7 @@ public class AntiAimModule extends RotationModule
             "for the rotation pitch spin", PitchMode.DOWN, PitchMode.values());
     Config<Float> yawAddConfig = new NumberConfig<>("YawAdd", "The yaw to add" +
             " during each rotation", -180.0f, 20.0f, 180.0f);
-    Config<Float> pitchAddConfig = new NumberConfig<>("PitchAdd", "The pitch " +
+    Config<Float> pitchAddConfig = new NumberConfig<>("CustomPitch", "The pitch " +
             "to add during each rotation", -90.0f, 20.0f, 90.0f);
     Config<Float> spinSpeedConfig = new NumberConfig<>("SpinSpeed", "The yaw " +
             "speed to rotate", 1.0f, 16.0f, 40.0f);

@@ -98,12 +98,11 @@ public class SelfBowModule extends ToggleModule
     private void prioritizeArrow(int slot)
     {
         ItemStack stack = mc.player.getInventory().getStack(9);
-        Managers.INVENTORY.pickupSlot(slot);
-        boolean rt = !stack.isEmpty();
-        Managers.INVENTORY.pickupSlot(9);
-        if (rt)
+        if (!stack.isEmpty())
         {
-            Managers.INVENTORY.pickupSlot(slot);
+            Managers.INVENTORY.pickupSlot(9);
         }
+        Managers.INVENTORY.pickupSlot(slot);
+        Managers.INVENTORY.pickupSlot(slot);
     }
 }

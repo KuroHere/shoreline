@@ -80,10 +80,10 @@ public class ChamsModule extends ToggleModule
         RenderSystem.disableCull();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder vertexConsumer = tessellator.getBuffer();
-        RenderSystem.setShader(GameRenderer::getPositionProgram);
+        RenderSystem.setShader(modeConfig.getValue() == ChamsMode.NORMAL ? GameRenderer::getPositionProgram : GameRenderer::getRenderTypeLinesProgram);
         RenderSystem.lineWidth(2.0f);
         vertexConsumer.begin(modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormat.DrawMode.QUADS :
-                VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION);
+                VertexFormat.DrawMode.LINES, modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormats.POSITION : VertexFormats.LINES);
         Color color = Modules.COLORS.getColor();
         float n;
         Direction direction;
@@ -231,10 +231,10 @@ public class ChamsModule extends ToggleModule
         float j = ((float) event.endCrystalEntity.endCrystalAge + event.g) * 3.0f;
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder vertexConsumer = tessellator.getBuffer();
-        RenderSystem.setShader(GameRenderer::getPositionProgram);
+        RenderSystem.setShader(modeConfig.getValue() == ChamsMode.NORMAL ? GameRenderer::getPositionProgram : GameRenderer::getRenderTypeLinesProgram);
         RenderSystem.lineWidth(2.0f);
         vertexConsumer.begin(modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormat.DrawMode.QUADS :
-                VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION);
+                VertexFormat.DrawMode.LINES, modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormats.POSITION : VertexFormats.LINES);
         event.matrixStack.push();
         Color color = Modules.COLORS.getColor();
         RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f,

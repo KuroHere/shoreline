@@ -30,7 +30,7 @@ public class FlightModule extends ToggleModule
             "flight speed", 0.1f, 2.5f, 10.0f);
     Config<Float> vspeedConfig = new NumberConfig<>("VerticalSpeed", "The " +
             "vertical flight speed", 0.1f, 1.0f, 5.0f);
-    Config<Boolean> airStrictConfig = new BooleanConfig("AirStrict",
+    Config<Boolean> airStrictConfig = new BooleanConfig("StrictAccel",
             "Accounts for air friction when flying", false);
     Config<Boolean> antiKickConfig = new BooleanConfig("AntiKick", "Prevents " +
             "vanilla flight detection", true);

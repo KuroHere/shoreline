@@ -359,7 +359,8 @@ public class RenderManager implements Globals
         GL11.glDepthFunc(GL11.GL_ALWAYS);
         VertexConsumerProvider.Immediate vertexConsumers =
                 VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-        Fonts.VANILLA.drawWithShadow(matrixStack, text, 0.0f, 0.0f, -1);
+        float hwidth = mc.textRenderer.getWidth(text) / 2.0f;
+        Fonts.VANILLA.drawWithShadow(matrixStack, text, -hwidth, 0.0f, -1);
         vertexConsumers.draw();
         RenderSystem.disableBlend();
         GL11.glDepthFunc(GL11.GL_LEQUAL);
