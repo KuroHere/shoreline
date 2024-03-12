@@ -502,7 +502,7 @@ public class AutoCrystalModule extends RotationModule
     @EventListener
     public void onRenderWorld(RenderWorldEvent event)
     {
-        if (renderPos != null)
+        if (renderPos != null && InventoryUtil.getCrystalHand() != null)
         {
             RenderManager.renderBox(event.getMatrices(), renderPos,
                     Modules.COLORS.getRGB(renderSpawnPos != null && renderSpawnPos == renderPos ? 80 : 100));
@@ -520,7 +520,7 @@ public class AutoCrystalModule extends RotationModule
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event)
     {
-       if (isNull()) return;
+       if (mc.player == null || mc.world == null) return;
 
         if (event.getPacket() instanceof PlaySoundS2CPacket packet
                 && packet.getCategory() == SoundCategory.BLOCKS
