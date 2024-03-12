@@ -175,4 +175,5 @@ public class Shoreline
     {
         LOGGER.error(String.format("[%s] %s", feature.getId(), message), params);
     }
+
 }

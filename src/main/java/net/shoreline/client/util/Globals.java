@@ -12,4 +12,5 @@ public interface Globals
 {
     // Minecraft game instance
     MinecraftClient mc = MinecraftClient.getInstance();
+
 }
