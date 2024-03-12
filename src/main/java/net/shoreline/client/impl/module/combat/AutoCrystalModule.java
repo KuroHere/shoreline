@@ -236,7 +236,7 @@ public class AutoCrystalModule extends RotationModule
             "Always breaks manually placed crystals", false);
     Config<Boolean> setDeadConfig = new BooleanConfig("SetDead",
             "Removes crystals faster client-side for faster placing", false);
-    Config<Boolean> hasBrokenCheck = new BooleanConfig("BreakCheck",
+    Config<Boolean> hasBrokenConfig = new BooleanConfig("BreakCheck",
             "only if we broke a crystal", false);
     // PLACE SETTINGS
     Config<Boolean> placeConfig = new BooleanConfig("Place", "Places crystals" +
@@ -1144,7 +1144,7 @@ public class AutoCrystalModule extends RotationModule
 
     private void handleSetDead(EndCrystalEntity crystal) {
         if (setDeadConfig.getValue()) {
-            if (hasBrokenCheck.getValue() && !attackRangeCheck(crystal) && attackPackets.isEmpty()) {
+            if (hasBrokenConfig.getValue() && !attackRangeCheck(crystal) && attackPackets.isEmpty()) {
                 return;
             }
             crystal.setRemoved(Entity.RemovalReason.KILLED);
