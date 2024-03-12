@@ -12,4 +12,7 @@ public interface Globals
 {
     // Minecraft game instance
     MinecraftClient mc = MinecraftClient.getInstance();
+    default boolean isNull() {
+        return mc.player == null || mc.world == null;
+    }
 }
