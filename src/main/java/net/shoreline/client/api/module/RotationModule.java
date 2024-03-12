@@ -37,7 +37,7 @@ public class RotationModule extends ToggleModule
      *
      * @return
      */
-    public boolean isRotationBlocked() //this is probably what's causing weird ass rotation cancelling -ZANE
+    public boolean isRotationBlocked()
     {
         RotationModule head = Managers.ROTATION.getRotatingModule();
         if (head != null)

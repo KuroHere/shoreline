@@ -43,7 +43,6 @@ public class ClientConfiguration implements Globals
      */
     public ClientConfiguration() 
     {
-        if (mc == null) return; //fix crash -ZANE remove when u find the actual problem bcs that's like everywher
         final Path runningDir = mc.runDirectory.toPath();
         try
         {

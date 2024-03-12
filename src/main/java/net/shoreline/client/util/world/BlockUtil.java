@@ -1,7 +1,5 @@
 package net.shoreline.client.util.world;
 
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.shoreline.client.util.Globals;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
@@ -85,24 +83,5 @@ public class BlockUtil implements Globals
                     ChunkSectionPos.getSectionCoord(z));
         }
         return false;
-    }
-    public static List<BlockPos> getSphere(Vec3d origin, float range)
-    {
-        List<BlockPos> sphere = new ArrayList<>();
-        double rad = Math.ceil(range);
-        for (double x = -rad; x <= rad; ++x)
-        {
-            for (double y = -rad; y <= rad; ++y)
-            {
-                for (double z = -rad; z <= rad; ++z)
-                {
-                    Vec3i pos = new Vec3i((int) (origin.getX() + x),
-                            (int) (origin.getY() + y), (int) (origin.getZ() + z));
-                    final BlockPos p = new BlockPos(pos);
-                    sphere.add(p);
-                }
-            }
-        }
-        return sphere;
     }
 }

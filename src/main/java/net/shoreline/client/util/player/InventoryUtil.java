@@ -1,7 +1,5 @@
 package net.shoreline.client.util.player;
 
-import net.minecraft.item.EndCrystalItem;
-import net.minecraft.util.Hand;
 import net.shoreline.client.util.Globals;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -35,33 +33,5 @@ public class InventoryUtil implements Globals
     {
         final ItemStack mainhand = mc.player.getMainHandStack();
         return EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mainhand) >= lvl;
-    }
-    public static int getCrystalSlot()
-    {
-        int slot = -1;
-        for (int i = 0; i < 9; i++)
-        {
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.getItem() instanceof EndCrystalItem)
-            {
-                slot = i;
-                break;
-            }
-        }
-        return slot;
-    }
-    public static Hand getCrystalHand()
-    {
-        final ItemStack offhand = mc.player.getOffHandStack();
-        final ItemStack mainhand = mc.player.getMainHandStack();
-        if (offhand.getItem() instanceof EndCrystalItem)
-        {
-            return Hand.OFF_HAND;
-        }
-        else if (mainhand.getItem() instanceof EndCrystalItem)
-        {
-            return Hand.MAIN_HAND;
-        }
-        return null;
     }
 }
