@@ -1,5 +1,10 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.item.FireworkRocketItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.Hand;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -65,6 +70,7 @@ public class ElytraFlyModule extends ToggleModule
         {
             case CONTROL ->
             {
+                mc.player.limbAnimator.setSpeed(0.0f);
                 event.cancel();
                 float forward = mc.player.input.movementForward;
                 float strafe = mc.player.input.movementSideways;
@@ -96,7 +102,17 @@ public class ElytraFlyModule extends ToggleModule
             }
             case BOOST ->
             {
-
+                mc.player.limbAnimator.setSpeed(0.0f);
+                glideElytraVec(mc.player.getPitch());
+                boolean boost = mc.options.jumpKey.isPressed();
+                float yaw = mc.player.getYaw() * 0.017453292f;
+                if (boost)
+                {
+                    double sin = -MathHelper.sin(yaw);
+                    double cos = MathHelper.cos(yaw);
+                    Managers.MOVEMENT.setMotionXZ(sin * speedConfig.getValue() / 20.0f,
+                            cos * speedConfig.getValue() / 20.0f);
+                }
             }
         }
     }
@@ -129,6 +145,51 @@ public class ElytraFlyModule extends ToggleModule
                 && packet.changesLook() && mc.player.isFallFlying())
         {
             ((AccessorPlayerMoveC2SPacket) packet).hookSetPitch(pitch);
+        }
+    }
+
+    /**
+     *
+     * @param event
+     */
+    @EventListener
+    public void onPacketInbound(PacketEvent.Inbound event)
+    {
+        if (mc.player == null)
+        {
+            return;
+        }
+        if (event.getPacket() instanceof PlayerPositionLookS2CPacket
+                && fireworkConfig.getValue())
+        {
+            boostFirework();
+        }
+    }
+
+    private void boostFirework()
+    {
+        int slot = -1;
+        for (int i = 0; i < 9; i++)
+        {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.isEmpty())
+            {
+                continue;
+            }
+            if (stack.getItem() instanceof FireworkRocketItem)
+            {
+                slot = i;
+                break;
+            }
+        }
+        if (slot != -1)
+        {
+            int prev = mc.player.getInventory().selectedSlot;
+            mc.player.getInventory().selectedSlot = slot;
+            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+            mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+            mc.player.getInventory().selectedSlot = prev;
+            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
         }
     }
 
@@ -182,7 +243,6 @@ public class ElytraFlyModule extends ToggleModule
     {
         CONTROL,
         CONTROL_STRICT,
-        ACCEL,
         BOOST,
         FACTORIZE,
         PACKET,

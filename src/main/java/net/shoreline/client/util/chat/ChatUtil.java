@@ -14,7 +14,7 @@ import net.minecraft.util.Formatting;
 public class ChatUtil implements Globals
 {
     //
-    private static final String PREFIX = "§7[§fCaspian§7] §f";
+    private static final String PREFIX = "§7[§fShoreline§7] §f";
 
     /**
      * Sends a message in the {@link net.minecraft.client.gui.hud.ChatHud}
