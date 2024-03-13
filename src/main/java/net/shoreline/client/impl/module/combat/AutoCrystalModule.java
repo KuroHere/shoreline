@@ -1,9 +1,11 @@
 package net.shoreline.client.impl.module.combat;
 
 import com.google.common.collect.Lists;
+import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
@@ -15,6 +17,7 @@ import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
@@ -364,6 +367,7 @@ public class AutoCrystalModule extends RotationModule
             Collections.synchronizedMap(new ConcurrentHashMap<>());
     private final Map<BlockPos, Long> placePackets =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
+    private ArrayList<Integer> attackedCrystals = new ArrayList<>();
     //
     private final ExecutorService executor = Executors.newFixedThreadPool(2);
     //
@@ -395,6 +399,7 @@ public class AutoCrystalModule extends RotationModule
         crystalRotation = null;
         attackPackets.clear();
         placePackets.clear();
+        attackedCrystals.clear();
     }
 
     @EventListener
@@ -510,6 +515,18 @@ public class AutoCrystalModule extends RotationModule
         {
             return;
         }
+        if (event.getPacket() instanceof EntitySpawnS2CPacket crystalSpawnPacket && crystalSpawnPacket.getEntityType() == EntityType.END_CRYSTAL && instantConfig.getValue())
+        {
+            if (mc.player.squaredDistanceTo(crystalSpawnPacket.getX(), crystalSpawnPacket.getY(), crystalSpawnPacket.getZ()) <= breakRangeConfig.getValue() * breakRangeConfig.getValue());
+            {
+                if (isHoldingCrystal())
+                {
+                    if (inhibitConfig.getValue() == Inhibit.FULL && attackedCrystals.contains(crystalSpawnPacket.getId())) return;
+                    attackInternal(crystalSpawnPacket.getId(), getCrystalHand());
+                    attackedCrystals.add(crystalSpawnPacket.getId());
+                }
+            }
+        }
         if (event.getPacket() instanceof PlaySoundS2CPacket packet
                 && packet.getCategory() == SoundCategory.BLOCKS
                 && packet.getSound() == SoundEvents.ENTITY_GENERIC_EXPLODE)
@@ -592,6 +609,7 @@ public class AutoCrystalModule extends RotationModule
                         //
                         renderSpawnPos = blockPos;
                         attackInternal(event.getEntityId(), getCrystalHand());
+                        attackedCrystals.add(event.getEntityId());
                         lastAttackTimer.reset();
                         break;
                     }
@@ -635,10 +653,8 @@ public class AutoCrystalModule extends RotationModule
 
     private void attackCrystal(EndCrystalEntity entity, Hand hand)
     {
-        if (attackCheckPre(hand))
-        {
-            return;
-        }
+        if (attackCheckPre(hand) || inhibitConfig.getValue() == Inhibit.FULL && attackedCrystals.contains(entity.getId())) return;
+
         StatusEffectInstance weakness =
                 mc.player.getStatusEffect(StatusEffects.WEAKNESS);
         StatusEffectInstance strength =
@@ -662,7 +678,7 @@ public class AutoCrystalModule extends RotationModule
             if (slot != -1)
             {
                 swapTo(slot);
-                attackInternal(entity, hand);
+                attackInternal(entity.getId(), hand);
                 if (antiWeaknessConfig.getValue() == Swap.SILENT
                         || antiWeaknessConfig.getValue() == Swap.SILENT_ALT)
                 {
@@ -672,8 +688,9 @@ public class AutoCrystalModule extends RotationModule
         }
         else
         {
-            attackInternal(entity, hand);
+            attackInternal(entity.getId(), hand);
         }
+        attackedCrystals.add(entity.getId());
     }
 
     private void attackInternal(EndCrystalEntity entity, Hand hand)
@@ -683,6 +700,9 @@ public class AutoCrystalModule extends RotationModule
 
     private void attackInternal(int id, Hand hand)
     {
+        if (inhibitConfig.getValue() == Inhibit.FULL && attackedCrystals.contains(id)) {
+            return; // Skip attacking this crystal as it's already been attacked
+        }
         hand = hand != null ? hand : Hand.MAIN_HAND;
         EndCrystalEntity crystalEntity = new EndCrystalEntity(mc.world, 0.0, 0.0, 0.0);
         // ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(id);
@@ -690,16 +710,16 @@ public class AutoCrystalModule extends RotationModule
         PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(
                 crystalEntity, mc.player.isSneaking()); // id checks?
         Managers.NETWORK.sendPacket(packet);
+        attackedCrystals.add(id);
         attackPackets.put(id, System.currentTimeMillis());
         handleSetDead(crystalEntity, id);
         if (swingConfig.getValue())
-        {
             mc.player.swingHand(hand);
-        }
+
         else
-        {
+
             Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
-        }
+
     }
 
     private void placeCrystal(BlockPos blockPos, Hand hand)
