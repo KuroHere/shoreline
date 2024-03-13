@@ -89,9 +89,6 @@ public class AutoCrystalModule extends RotationModule
     Config<Float> instantDamageConfig = new NumberConfig<>("InstantDamage",
             "Minimum damage to attack crystals instantly", 1.0f, 6.0f, 10.0f,
             () -> instantConfig.getValue() && instantCalcConfig.getValue());
-    Config<Float> calcSleepConfig = new NumberConfig<>("CalcTimeout", "Time " +
-            "to sleep and pause calculation directly after completing a " +
-            "calculation", 0.00f, 0.03f, 0.05f);
     Config<Boolean> latencyPositionConfig = new BooleanConfig(
             "LatencyPosition", "Targets the latency positions of enemies", false);
     Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency",
@@ -434,7 +431,7 @@ public class AutoCrystalModule extends RotationModule
                 placeCrystal = placeCrystal1.get();
             } catch (InterruptedException | ExecutionException e) {
                 Shoreline.error(Modules.AUTO_CRYSTAL, "Failed calc!");
-                e.printStackTrace();
+               // e.printStackTrace();
             }
         } else {
             attackCrystal = calculateAttackCrystal(entities);
