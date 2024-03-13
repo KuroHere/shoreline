@@ -62,6 +62,7 @@ public class Modules
     public static ClickTPModule CLICK_TP;
     public static ColorSignsModule COLOR_SIGNS;
     public static CrasherModule CRASHER;
+    public static ExtendedFireworkModule EXTENDED_FIREWORK;
     public static FakeLatencyModule FAKE_LATENCY;
     public static FastProjectileModule FAST_PROJECTILE;
     public static NoMineAnimationModule NO_MINE_ANIMATION;
@@ -215,6 +216,8 @@ public class Modules
             COLOR_SIGNS = (ColorSignsModule) getRegisteredModule(
                     "colorsigns-module");
             CRASHER = (CrasherModule) getRegisteredModule("crasher-module");
+            EXTENDED_FIREWORK = (ExtendedFireworkModule)
+                    getRegisteredModule("extendedfirework-module");
             FAKE_LATENCY = (FakeLatencyModule) getRegisteredModule(
                     "fakelatency-module");
             FAST_PROJECTILE = (FastProjectileModule) getRegisteredModule(
