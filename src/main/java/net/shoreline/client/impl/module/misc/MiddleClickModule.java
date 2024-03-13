@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.module.misc;
 
+import net.minecraft.item.Items;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -27,8 +28,8 @@ public class MiddleClickModule extends ToggleModule
     //
     Config<Action> actionConfig = new EnumConfig<>("Action", "The action to " +
             "perform when middle-clicking", Action.FRIEND, Action.values());
-    Config<Boolean> pearlConfig = new BooleanConfig("Pearl", "Throws a pearl " +
-            "if looking at air", false);
+    Config<MissAction> missActionConfig = new EnumConfig<>("MissAction", "Throws a pearl " +
+            "if looking at air", MissAction.PEARL, MissAction.values());
 
     /**
      *
@@ -74,13 +75,13 @@ public class MiddleClickModule extends ToggleModule
                     }
                 }
             }
-            else if (pearlConfig.getValue())
+            else if (mc.targetedEntity == null)
             {
                 int slot = -1;
                 for (int i = 0; i < 9; i++)
                 {
                     ItemStack stack = mc.player.getInventory().getStack(i);
-                    if (stack.getItem() instanceof EnderPearlItem)
+                    if (stack.getItem() == (missActionConfig.getValue() == MissAction.PEARL ? Items.ENDER_PEARL : Items.FIREWORK_ROCKET))
                     {
                         slot = i;
                         break;
@@ -91,8 +92,7 @@ public class MiddleClickModule extends ToggleModule
                     int prev = mc.player.getInventory().selectedSlot;
                     mc.player.getInventory().selectedSlot = slot;
                     Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
-                    mc.interactionManager.interactItem(mc.player,
-                            Hand.MAIN_HAND);
+                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
                     mc.player.getInventory().selectedSlot = prev;
                     Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
                 }
@@ -104,5 +104,12 @@ public class MiddleClickModule extends ToggleModule
     {
         FRIEND,
         DUEL
+    }
+
+    public enum MissAction
+    {
+        PEARL,
+        FIREWORK,
+        OFF
     }
 }

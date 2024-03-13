@@ -65,6 +65,7 @@ public class ModuleManager
                 new ClickTPModule(),
                 new ColorSignsModule(),
                 new CrasherModule(),
+                new ExtendedFireworkModule(),
                 new FakeLatencyModule(),
                 new FastProjectileModule(),
                 new NoMineAnimationModule(),

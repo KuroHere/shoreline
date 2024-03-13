@@ -44,9 +44,9 @@ public class EventBus implements EventHandler
         for (Method method : obj.getClass().getMethods())
         {
             method.trySetAccessible();
-            if (method.isAnnotationPresent(net.shoreline.client.api.event.listener.EventListener.class))
+            if (method.isAnnotationPresent(EventListener.class))
             {
-                net.shoreline.client.api.event.listener.EventListener listener = method.getAnnotation(net.shoreline.client.api.event.listener.EventListener.class);
+                EventListener listener = method.getAnnotation(EventListener.class);
                 if (method.getReturnType() == Void.TYPE)
                 {
                     Class<?>[] params = method.getParameterTypes();
