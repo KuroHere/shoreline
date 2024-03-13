@@ -63,8 +63,6 @@ public class NoSlowModule extends ToggleModule
             "the slowdown effect caused by walking over Honey blocks", false);
     Config<Boolean> slimeblockConfig = new BooleanConfig("SlimeBlock",  "Removes " +
             "the slowdown effect caused by walking over Slime blocks", false);
-    Config<Boolean> sneakConfig = new BooleanConfig("Sneak", "Removes the " +
-            "slowdown caused when sneaking", false);
     //
     private boolean sneaking;
     //
@@ -146,7 +144,7 @@ public class NoSlowModule extends ToggleModule
     {
         if (event.getStage() == EventStage.PRE && grimConfig.getValue()
                 && mc.player.isUsingItem() && itemsConfig.getValue())
-            if (!sneakConfig.getValue() && sneaking) return; //when sneakin normally. it doesn't noslow. but if you are sneaking and eating it does noslow. this fixes it
+            if (mc.player.isSneaking()) return; //when sneakin normally. it doesn't noslow. but if you are sneaking and eating it does noslow. this fixes it
         {
             if (mc.player.getActiveHand() == Hand.OFF_HAND)
             {
