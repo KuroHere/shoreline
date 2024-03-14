@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
@@ -16,7 +15,6 @@ import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
@@ -350,8 +348,8 @@ public class AutoCrystalModule extends RotationModule
     //
     private DamageData<EndCrystalEntity> attackCrystal;
     private DamageData<BlockPos> placeCrystal;
-    //
-    private boolean attacking, placing;
+    // This is retarded
+    private CrystalAction crystalPhase;
     private final Timer lastAttackTimer = new CacheTimer();
     private final Timer lastPlaceTimer = new CacheTimer();
     private final Timer lastSwapTimer = new CacheTimer();
@@ -384,14 +382,13 @@ public class AutoCrystalModule extends RotationModule
     @Override
     public void onDisable()
     {
-        attacking = false;
-        placing = false;
         renderPos = null;
         attackCrystal = null;
         placeCrystal = null;
         crystalRotation = null;
         attackPackets.clear();
         placePackets.clear();
+        crystalPhase = CrystalAction.NONE;
     }
 
     @EventListener
@@ -450,7 +447,7 @@ public class AutoCrystalModule extends RotationModule
                     && lastAttackTimer.passed(1000.0f - breakSpeedConfig.getValue() * 50.0f))
             {
                 attackCrystal(attackCrystal.getDamageData(), hand);
-                attacking = true;
+                crystalPhase = CrystalAction.ATTACKING;
                 lastAttackTimer.reset();
             }
         }
@@ -461,7 +458,7 @@ public class AutoCrystalModule extends RotationModule
             if (lastPlaceTimer.passed(1000.0f - placeSpeedConfig.getValue() * 50.0f))
             {
                 placeCrystal(placeCrystal.getDamageData(), hand);
-                placing = true;
+                crystalPhase = CrystalAction.PLACING;
                 lastPlaceTimer.reset();
             }
         }
@@ -496,13 +493,8 @@ public class AutoCrystalModule extends RotationModule
     {
         if (renderPos != null && getCrystalHand() != null)
         {
-            if (renderSpawnPos != null)
-            {
-                RenderManager.renderBox(event.getMatrices(), renderSpawnPos,
-                        Modules.COLORS.getRGB(35));
-            }
             RenderManager.renderBox(event.getMatrices(), renderPos,
-                    Modules.COLORS.getRGB(80));
+                    Modules.COLORS.getRGB(crystalPhase == CrystalAction.ATTACKING ? 105 : 80));
             RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
                     Modules.COLORS.getRGB(145));
             if (damageNametagConfig.getValue() && placeCrystal != null)
@@ -549,7 +541,7 @@ public class AutoCrystalModule extends RotationModule
     @EventListener
     public void onAddEntity(AddEntityEvent event)
     {
-        if (!instantConfig.getValue())
+        if (!instantConfig.getValue() || !(event.getEntity() instanceof EndCrystalEntity))
         {
             return;
         }
@@ -562,6 +554,7 @@ public class AutoCrystalModule extends RotationModule
             crystalRotation = crystalPos;
             //
             attackInternal(event.getEntityId(), getCrystalHand());
+            crystalPhase = CrystalAction.ATTACKING;
             lastAttackTimer.reset();
         }
         else if (instantCalcConfig.getValue())
@@ -603,6 +596,7 @@ public class AutoCrystalModule extends RotationModule
                 {
                     crystalRotation = crystalPos;
                     attackInternal(event.getEntityId(), getCrystalHand());
+                    crystalPhase = CrystalAction.ATTACKING;
                     lastAttackTimer.reset();
                     break;
                 }
@@ -1414,5 +1408,13 @@ public class AutoCrystalModule extends RotationModule
         {
             return calculatePlaceCrystal(threadSafeBlocks, threadSafeEntities);
         }
+    }
+
+    // Momentum type code :skull:
+    public enum CrystalAction
+    {
+        PLACING,
+        ATTACKING,
+        NONE
     }
 }
