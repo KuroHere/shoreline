@@ -1,7 +1,6 @@
 package net.shoreline.client.impl.module.combat;
 
 import com.google.common.collect.Lists;
-import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -44,7 +43,6 @@ import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
-import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.math.timer.CacheTimer;
@@ -198,9 +196,7 @@ public class AutoCrystalModule extends RotationModule
     // shortterm:
     //        ticks: 8
     Config<Boolean> setDeadConfig = new BooleanConfig("SetDead",
-            "Removes crystals faster client-side for faster placing", false);
-    Config<Boolean> hasBrokenConfig = new BooleanConfig("BreakCheck",
-            "only if we broke a crystal", false);
+            "Removes crystals faster client-side", false);
     Config<Boolean> breakCommitConfig = new BooleanConfig("BreakCommit",
             "Completes the pre-check calculations for crystals and " +
                     "skips the \"post processing\" of calculations", false);
@@ -364,7 +360,6 @@ public class AutoCrystalModule extends RotationModule
             Collections.synchronizedMap(new ConcurrentHashMap<>());
     private final Map<BlockPos, Long> placePackets =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
-    private ArrayList<Integer> attackedCrystals = new ArrayList<>();
     //
     private final ExecutorService executor = Executors.newFixedThreadPool(2);
     //
@@ -396,7 +391,6 @@ public class AutoCrystalModule extends RotationModule
         crystalRotation = null;
         attackPackets.clear();
         placePackets.clear();
-        attackedCrystals.clear();
     }
 
     @EventListener
@@ -410,55 +404,68 @@ public class AutoCrystalModule extends RotationModule
      * @param event
      */
     @EventListener
-    public void onPlayerUpdate(PlayerUpdateEvent event) {
-        if (event.getStage() != EventStage.PRE) {
+    public void onPlayerUpdate(PlayerUpdateEvent event)
+    {
+        if (event.getStage() != EventStage.PRE)
+        {
             return;
         }
         renderPos = null;
         if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
-                || mc.options.attackKey.isPressed()) {
+                || mc.options.attackKey.isPressed())
+        {
             autoSwapTimer.reset();
         }
         ArrayList<Entity> entities = Lists.newArrayList(mc.world.getEntities());
         List<BlockPos> blocks = getSphere(mc.player.getPos());
-        if (multithreadConfig.getValue()) {
+        if (multithreadConfig.getValue())
+        {
             Future<DamageData<EndCrystalEntity>> attackCrystal1 = executor.submit(
                     new AttackCrystalTask(entities));
             Future<DamageData<BlockPos>> placeCrystal1 = executor.submit(
                     new PlaceCrystalTask(blocks, entities));
-            try {
+            try
+            {
                 attackCrystal = attackCrystal1.get();
                 placeCrystal = placeCrystal1.get();
-            } catch (InterruptedException | ExecutionException e) {
+            }
+            catch (InterruptedException | ExecutionException e)
+            {
                 Shoreline.error(Modules.AUTO_CRYSTAL, "Failed calc!");
                // e.printStackTrace();
             }
-        } else {
+        }
+        else
+        {
             attackCrystal = calculateAttackCrystal(entities);
             placeCrystal = calculatePlaceCrystal(blocks, entities);
         }
         final Hand hand = getCrystalHand();
-        if (attackCrystal != null) {
+        if (attackCrystal != null)
+        {
             crystalRotation = attackCrystal.getRotationVec();
             // ChatUtil.clientSendMessage("yaw: " + rotations[0] + ", pitch: " + rotations[1]);
             if (attackDelayConfig.getValue() <= 0.0
-                    && lastAttackTimer.passed(1000.0f - breakSpeedConfig.getValue() * 50.0f)) {
+                    && lastAttackTimer.passed(1000.0f - breakSpeedConfig.getValue() * 50.0f))
+            {
                 attackCrystal(attackCrystal.getDamageData(), hand);
                 attacking = true;
                 lastAttackTimer.reset();
             }
         }
-        if (placeCrystal != null) {
+        if (placeCrystal != null)
+        {
             renderPos = placeCrystal.getDamageData();
             crystalRotation = placeCrystal.getRotationVec();
-            if (lastPlaceTimer.passed(1000.0f - placeSpeedConfig.getValue() * 50.0f)) {
+            if (lastPlaceTimer.passed(1000.0f - placeSpeedConfig.getValue() * 50.0f))
+            {
                 placeCrystal(placeCrystal.getDamageData(), hand);
                 placing = true;
                 lastPlaceTimer.reset();
             }
         }
-
-        if (rotateConfig.getValue() && crystalRotation != null) {
+        if (rotateConfig.getValue() && crystalRotation != null)
+        {
             float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
             setRotation(rotations[0], rotations[1]);
         }
@@ -512,15 +519,64 @@ public class AutoCrystalModule extends RotationModule
         {
             return;
         }
-        if (event.getPacket() instanceof EntitySpawnS2CPacket crystalSpawnPacket && crystalSpawnPacket.getEntityType() == EntityType.END_CRYSTAL && instantConfig.getValue())
+        if (event.getPacket() instanceof EntitySpawnS2CPacket packet
+                && packet.getEntityType() == EntityType.END_CRYSTAL && instantConfig.getValue())
         {
-            if (mc.player.squaredDistanceTo(crystalSpawnPacket.getX(), crystalSpawnPacket.getY(), crystalSpawnPacket.getZ()) <= breakRangeConfig.getValue() * breakRangeConfig.getValue());
+            Vec3d crystalPos = new Vec3d(packet.getX(), packet.getY(), packet.getZ());
+            BlockPos blockPos = BlockPos.ofFloored(crystalPos.add(0.0, -1.0, 0.0));
+            Long time = placePackets.remove(blockPos);
+            if (time != null)
             {
-                if (isHoldingCrystal())
+                crystalRotation = crystalPos;
+                //
+                attackInternal(packet.getId(), getCrystalHand());
+                renderSpawnPos = blockPos;
+                lastAttackTimer.reset();
+            }
+            else if (instantCalcConfig.getValue())
+            {
+                if (attackRangeCheck(crystalPos))
                 {
-                    if (inhibitConfig.getValue() == Inhibit.FULL && attackedCrystals.contains(crystalSpawnPacket.getId())) return;
-                    attackInternal(crystalSpawnPacket.getId(), getCrystalHand());
-                    attackedCrystals.add(crystalSpawnPacket.getId());
+                    return;
+                }
+                double selfDamage = EndCrystalUtil.getDamageTo(mc.player,
+                        crystalPos, blockDestructionConfig.getValue());
+                if (playerDamageCheck(selfDamage))
+                {
+                    return;
+                }
+                for (Entity entity : mc.world.getEntities())
+                {
+                    if (entity == null || !entity.isAlive() || entity == mc.player
+                            || !isValidTarget(entity)
+                            || Managers.SOCIAL.isFriend(entity.getUuid()))
+                    {
+                        continue;
+                    }
+                    double crystalDist = crystalPos.squaredDistanceTo(entity.getPos());
+                    if (crystalDist > 144.0f)
+                    {
+                        continue;
+                    }
+                    double dist = mc.player.squaredDistanceTo(entity);
+                    if (dist > targetRangeConfig.getValue() * targetRangeConfig.getValue())
+                    {
+                        continue;
+                    }
+                    double damage = EndCrystalUtil.getDamageTo(entity,
+                            crystalPos, blockDestructionConfig.getValue());
+                    // WTFRICK
+                    if (damage > instantDamageConfig.getValue() || attackCrystal != null
+                            && damage >= attackCrystal.getDamage() && instantMaxConfig.getValue()
+                            || entity instanceof LivingEntity entity1 && isCrystalLethalTo(damage, entity1))
+                    {
+                        crystalRotation = crystalPos;
+                        //
+                        renderSpawnPos = blockPos;
+                        attackInternal(packet.getId(), getCrystalHand());
+                        lastAttackTimer.reset();
+                        break;
+                    }
                 }
             }
         }
@@ -534,82 +590,8 @@ public class AutoCrystalModule extends RotationModule
                         && crystal.squaredDistanceTo(packet.getX(), packet.getY(), packet.getZ()) < 144.0f)
                 {
                     // crystal.kill();
-                    crystal.remove(Entity.RemovalReason.KILLED);
+                    mc.world.removeEntity(e.getId(), Entity.RemovalReason.KILLED);
                     // crystal.onRemoved();
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     * @param event
-     */
-    @EventListener
-    public void onAddEntity(AddEntityEvent event)
-    {
-        if (mc.player == null)
-        {
-            return;
-        }
-        if (instantConfig.getValue() && event.getEntity() instanceof EndCrystalEntity crystal1)
-        {
-            Vec3d crystalPos = event.getEntity().getPos();
-            BlockPos blockPos = BlockPos.ofFloored(crystalPos.add(0.0, -1.0, 0.0));
-            Long time = placePackets.remove(blockPos);
-            if (time != null)
-            {
-                crystalRotation = crystalPos;
-                //
-                attackInternal(event.getEntityId(), getCrystalHand());
-                renderSpawnPos = blockPos;
-                lastAttackTimer.reset();
-            }
-            else if (instantCalcConfig.getValue())
-            {
-                if (attackRangeCheck(crystal1))
-                {
-                    return;
-                }
-                double selfDamage = EndCrystalUtil.getDamageTo(mc.player,
-                        crystal1.getPos(), blockDestructionConfig.getValue());
-                if (playerDamageCheck(selfDamage))
-                {
-                    return;
-                }
-                for (Entity entity : mc.world.getEntities())
-                {
-                    if (entity == null || !entity.isAlive() || entity == mc.player
-                            || !isValidTarget(entity)
-                            || Managers.SOCIAL.isFriend(entity.getUuid()))
-                    {
-                        continue;
-                    }
-                    double crystalDist = crystal1.squaredDistanceTo(entity);
-                    if (crystalDist > 144.0f)
-                    {
-                        continue;
-                    }
-                    double dist = mc.player.squaredDistanceTo(entity);
-                    if (dist > targetRangeConfig.getValue() * targetRangeConfig.getValue())
-                    {
-                        continue;
-                    }
-                    double damage = EndCrystalUtil.getDamageTo(entity,
-                            crystal1.getPos(), blockDestructionConfig.getValue());
-                    // WTFRICK
-                    if (damage > instantDamageConfig.getValue() || attackCrystal != null
-                            && damage >= attackCrystal.getDamage() && instantMaxConfig.getValue()
-                            || entity instanceof LivingEntity entity1 && isCrystalLethalTo(damage, entity1))
-                    {
-                        crystalRotation = crystalPos;
-                        //
-                        renderSpawnPos = blockPos;
-                        attackInternal(event.getEntityId(), getCrystalHand());
-                        attackedCrystals.add(event.getEntityId());
-                        lastAttackTimer.reset();
-                        break;
-                    }
                 }
             }
         }
@@ -636,8 +618,6 @@ public class AutoCrystalModule extends RotationModule
         }
     }
 
-
-
     public boolean isAttacking()
     {
         return attackCrystal != null;
@@ -650,8 +630,10 @@ public class AutoCrystalModule extends RotationModule
 
     private void attackCrystal(EndCrystalEntity entity, Hand hand)
     {
-        if (attackCheckPre(hand) || inhibitConfig.getValue() == Inhibit.FULL && attackedCrystals.contains(entity.getId())) return;
-
+        if (attackCheckPre(hand))
+        {
+            return;
+        }
         StatusEffectInstance weakness =
                 mc.player.getStatusEffect(StatusEffects.WEAKNESS);
         StatusEffectInstance strength =
@@ -675,7 +657,7 @@ public class AutoCrystalModule extends RotationModule
             if (slot != -1)
             {
                 swapTo(slot);
-                attackInternal(entity.getId(), hand);
+                attackInternal(entity, hand);
                 if (antiWeaknessConfig.getValue() == Swap.SILENT
                         || antiWeaknessConfig.getValue() == Swap.SILENT_ALT)
                 {
@@ -685,9 +667,8 @@ public class AutoCrystalModule extends RotationModule
         }
         else
         {
-            attackInternal(entity.getId(), hand);
+            attackInternal(entity, hand);
         }
-        attackedCrystals.add(entity.getId());
     }
 
     private void attackInternal(EndCrystalEntity entity, Hand hand)
@@ -697,9 +678,6 @@ public class AutoCrystalModule extends RotationModule
 
     private void attackInternal(int id, Hand hand)
     {
-        if (inhibitConfig.getValue() == Inhibit.FULL && attackedCrystals.contains(id)) {
-            return; // Skip attacking this crystal as it's already been attacked
-        }
         hand = hand != null ? hand : Hand.MAIN_HAND;
         EndCrystalEntity crystalEntity = new EndCrystalEntity(mc.world, 0.0, 0.0, 0.0);
         // ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(id);
@@ -707,16 +685,19 @@ public class AutoCrystalModule extends RotationModule
         PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(
                 crystalEntity, mc.player.isSneaking()); // id checks?
         Managers.NETWORK.sendPacket(packet);
-        attackedCrystals.add(id);
+        if (setDeadConfig.getValue())
+        {
+            mc.world.removeEntity(id, Entity.RemovalReason.KILLED);
+        }
         attackPackets.put(id, System.currentTimeMillis());
-        handleSetDead(crystalEntity, id);
         if (swingConfig.getValue())
+        {
             mc.player.swingHand(hand);
-
+        }
         else
-
+        {
             Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
-
+        }
     }
 
     private void placeCrystal(BlockPos blockPos, Hand hand)
@@ -930,28 +911,34 @@ public class AutoCrystalModule extends RotationModule
                 bestDamage, playerDamage);
     }
 
-    /**
-     *
-     * @param entity
-     * @return
-     */
     private boolean attackRangeCheck(EndCrystalEntity entity)
     {
-        double dist = mc.player.distanceTo(entity);
+        return attackRangeCheck(entity.getPos());
+    }
+
+    /**
+     *
+     * @param entityPos
+     * @return
+     */
+    private boolean attackRangeCheck(Vec3d entityPos)
+    {
+        double dist = mc.player.squaredDistanceTo(entityPos);
         if (dist > breakRangeConfig.getValue() * breakRangeConfig.getValue())
         {
             return true;
         }
-        double yOff = Math.abs(entity.getY() - mc.player.getY());
+        double yOff = Math.abs(entityPos.getY() - mc.player.getY());
         if (yOff > maxYOffsetConfig.getValue())
         {
             return true;
         }
         BlockHitResult result = mc.world.raycast(new RaycastContext(
-                mc.player.getEyePos(), entity.getEyePos(),
+                mc.player.getEyePos(), entityPos,
                 RaycastContext.ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE, mc.player));
-        return result.getType() != HitResult.Type.MISS && dist > breakWallRangeConfig.getValue();
+        return result.getType() != HitResult.Type.MISS
+                && dist > breakWallRangeConfig.getValue() * breakWallRangeConfig.getValue();
     }
 
     /**
@@ -977,11 +964,6 @@ public class AutoCrystalModule extends RotationModule
             {
                 continue;
             }
-            if (placeCrystal != null && attackCrystal != null) {
-                if (isCrystalBlockingPos(placeCrystal.toCenterPos(), attackCrystal.getDamageData()) && hasBrokenConfig.getValue())
-                    continue;
-            } //after thinking about it.. there's a canUseCrystal method. but there's probarly a use case for this one. maybe strict servers idk. this gets better damages
-
             double selfDamage = EndCrystalUtil.getDamageTo(mc.player,
                     crystalDamageVec(pos), blockDestructionConfig.getValue());
             if (playerDamageCheck(selfDamage))
@@ -1218,7 +1200,7 @@ public class AutoCrystalModule extends RotationModule
                 entities.remove(entity);
             }
             else if (entity instanceof EndCrystalEntity entity1
-                    && !intersectingCrystalCheck(entity1) // TODO: More advanced check for intersecting crystals
+                    // && !intersectingCrystalCheck(entity1) // TODO: More advanced check for intersecting crystals
                     && entity.getPos().squaredDistanceTo(box.minX, box.minY, box.minZ) <= 1.0)
             {
                 entities.remove(entity);
@@ -1271,25 +1253,6 @@ public class AutoCrystalModule extends RotationModule
         return null;
     }
 
-    private void handleSetDead(EndCrystalEntity crystal, int id) {
-        if (setDeadConfig.getValue()) {
-            if (hasBrokenConfig.getValue() && !attackPackets.containsKey(id)) {
-                return;
-            }
-            mc.world.removeEntity(id, Entity.RemovalReason.KILLED);
-            mc.world.removeEntity(crystal.getId(), Entity.RemovalReason.KILLED); //ik this look like too much but is good
-            crystal.remove(Entity.RemovalReason.KILLED);
-            crystal.setRemoved(Entity.RemovalReason.KILLED);
-            attackPackets.clear();
-        }
-    }
-    private boolean isCrystalBlockingPos(Vec3d pos, EndCrystalEntity crystal) {
-        if (placeCrystal != null && crystal != null) {
-            if (crystal.getBlockPos() != placeCrystal.getDamageData()) {
-                return crystal.getBoundingBox().intersects(Box.from(placeCrystal.getDamageData().toCenterPos()));
-            }
-        }
-    return false;}
     public enum Swap
     {
         NORMAL,

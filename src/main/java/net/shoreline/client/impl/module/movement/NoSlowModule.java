@@ -143,8 +143,7 @@ public class NoSlowModule extends ToggleModule
     public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (event.getStage() == EventStage.PRE && grimConfig.getValue()
-                && mc.player.isUsingItem() && itemsConfig.getValue())
-            if (mc.player.isSneaking()) return; //when sneakin normally. it doesn't noslow. but if you are sneaking and eating it does noslow. this fixes it
+                && mc.player.isUsingItem() && !mc.player.isSneaking() && itemsConfig.getValue())
         {
             if (mc.player.getActiveHand() == Hand.OFF_HAND)
             {
