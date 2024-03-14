@@ -9,7 +9,6 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.api.config.Config;
@@ -145,6 +144,7 @@ public class NoSlowModule extends ToggleModule
     {
         if (event.getStage() == EventStage.PRE && grimConfig.getValue()
                 && mc.player.isUsingItem() && itemsConfig.getValue())
+            if (mc.player.isSneaking()) return; //when sneakin normally. it doesn't noslow. but if you are sneaking and eating it does noslow. this fixes it
         {
             if (mc.player.getActiveHand() == Hand.OFF_HAND)
             {
