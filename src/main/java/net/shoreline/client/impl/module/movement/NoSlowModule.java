@@ -350,9 +350,9 @@ public class NoSlowModule extends ToggleModule
      */
     public boolean checkSlowed()
     {
-        return !mc.player.isRiding() && !mc.player.isFallFlying()
+        return !mc.player.isRiding() && !mc.player.isSneaking() && !mc.player.isFallFlying()
                 && (mc.player.isUsingItem() && itemsConfig.getValue())
-                || (mc.player.isBlocking() && shieldsConfig.getValue());
+                || (mc.player.isBlocking() && shieldsConfig.getValue() && !grimConfig.getValue());
     }
     
     /**
