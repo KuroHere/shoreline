@@ -9,6 +9,7 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.api.config.Config;
@@ -26,6 +27,11 @@ import net.shoreline.client.impl.event.entity.VelocityMultiplierEvent;
 import net.shoreline.client.impl.event.network.*;
 import net.shoreline.client.init.Managers;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -216,6 +222,20 @@ public class NoSlowModule extends ToggleModule
                     mc.player.setPitch(MathHelper.clamp(pitch, -90.0f, 90.0f));
                 }
             }
+            if (grimConfig.getValue() && websConfig.getValue())
+            {
+                for (BlockPos pos : getSphere(5))
+                {
+                    BlockState state = mc.world.getBlockState(pos);
+                    if (state.getBlock() instanceof CobwebBlock)
+                    {
+                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                                PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, pos, Direction.DOWN));
+                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                                PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, pos, Direction.DOWN));
+                    }
+                }
+            }
         }
     }
 
@@ -232,8 +252,6 @@ public class NoSlowModule extends ToggleModule
         {
             if (grimConfig.getValue())
             {
-                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                        mc.player.getBlockPos(), Direction.DOWN));
                 event.cancel();
             }
             else
@@ -365,5 +383,22 @@ public class NoSlowModule extends ToggleModule
                 && !(mc.currentScreen instanceof ChatScreen
                 || mc.currentScreen instanceof SignEditScreen
                 || mc.currentScreen instanceof DeathScreen);
+    }
+
+    public List<BlockPos> getSphere(int radius)
+    {
+        final List<BlockPos> blocks = new ArrayList<>();
+        for (int x = radius; x > -radius; --x)
+        {
+            for (int y = radius; y > -radius; --y)
+            {
+                for (int z = radius; z > -radius; --z)
+                {
+                    final BlockPos blockPos = BlockPos.ofFloored(mc.player.getX() + x, mc.player.getY() + y, mc.player.getZ() + z);
+                    blocks.add(blockPos);
+                }
+            }
+        }
+        return blocks;
     }
 }
