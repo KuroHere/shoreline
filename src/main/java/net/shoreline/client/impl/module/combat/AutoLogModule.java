@@ -13,6 +13,7 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.shoreline.client.util.Globals;
+import net.shoreline.client.util.world.FakePlayerEntity;
 
 /**
  *
@@ -112,6 +113,6 @@ public class AutoLogModule extends ToggleModule
      */
     private boolean checkEnemy(AbstractClientPlayerEntity player)
     {
-        return !Managers.SOCIAL.isFriend(player.getUuid());
+        return !Managers.SOCIAL.isFriend(player.getUuid()) && !(player instanceof FakePlayerEntity);
     }
 }

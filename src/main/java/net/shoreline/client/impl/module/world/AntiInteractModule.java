@@ -26,8 +26,6 @@ import java.util.List;
 public class AntiInteractModule extends ToggleModule
 {
     //
-    Config<Boolean> packetsConfig = new BooleanConfig("Packets", "Prevents" +
-            " player interact packets", false);
     Config<List<Block>> blocksConfig = new ListConfig<>("Blocks",
             "The blocks to prevent player interact", Blocks.ENDER_CHEST,
             Blocks.ANVIL);
@@ -53,10 +51,6 @@ public class AntiInteractModule extends ToggleModule
         if (cancelInteract(state.getBlock()))
         {
             event.cancel();
-            if (packetsConfig.getValue())
-            {
-                return;
-            }
             // Managers.NETWORK.sendSequencedPacket(sequence -> new PlayerInteractBlockC2SPacket(
             //        event.getHand(), event.getHitResult(), sequence));
         }
@@ -73,8 +67,7 @@ public class AntiInteractModule extends ToggleModule
         {
             return;
         }
-        if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet
-                && packetsConfig.getValue())
+        if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet)
         {
             BlockPos pos = packet.getBlockHitResult().getBlockPos();
             BlockState state = mc.world.getBlockState(pos);
@@ -87,7 +80,6 @@ public class AntiInteractModule extends ToggleModule
 
     private boolean cancelInteract(Block block)
     {
-        return SneakBlocks.isSneakBlock(block)
-                && ((ListConfig<?>) blocksConfig).contains(block);
+        return ((ListConfig<?>) blocksConfig).contains(block);
     }
 }

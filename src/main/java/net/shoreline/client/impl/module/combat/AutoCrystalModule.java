@@ -521,7 +521,8 @@ public class AutoCrystalModule extends RotationModule
                 && packet.getCategory() == SoundCategory.BLOCKS
                 && packet.getSound() == SoundEvents.ENTITY_GENERIC_EXPLODE)
         {
-            for (Entity e : mc.world.getEntities())
+            List<Entity> entitiesCopy = Lists.newArrayList(mc.world.getEntities());
+            for (Entity e : entitiesCopy)
             {
                 if (e != null && e.isAlive() && e instanceof EndCrystalEntity crystal
                         && crystal.squaredDistanceTo(packet.getX(), packet.getY(), packet.getZ()) < 144.0f)

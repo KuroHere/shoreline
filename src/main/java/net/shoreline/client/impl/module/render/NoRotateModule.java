@@ -1,5 +1,7 @@
 package net.shoreline.client.impl.module.render;
 
+import net.shoreline.client.api.config.Config;
+import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
@@ -19,6 +21,8 @@ import net.minecraft.network.packet.s2c.play.PositionFlag;
  */
 public class NoRotateModule extends ToggleModule
 {
+    Config<Boolean> positionAdjustConfig = new BooleanConfig("PositionAdjust",
+            "Adjusts rotation packets", false);
     //
     private float yaw, pitch;
     private boolean cancelRotate;
@@ -65,8 +69,11 @@ public class NoRotateModule extends ToggleModule
     {
         if (event.getPacket() instanceof PlayerMoveC2SPacket.Full packet && cancelRotate)
         {
-            ((AccessorPlayerMoveC2SPacket) packet).hookSetYaw(yaw);
-            ((AccessorPlayerMoveC2SPacket) packet).hookSetPitch(pitch);
+            if (positionAdjustConfig.getValue())
+            {
+                ((AccessorPlayerMoveC2SPacket) packet).hookSetYaw(yaw);
+                ((AccessorPlayerMoveC2SPacket) packet).hookSetPitch(pitch);
+            }
             cancelRotate = false;
         }
     }

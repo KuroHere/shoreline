@@ -1,5 +1,15 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -15,15 +25,9 @@ import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
-import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.MathUtil;
 import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.string.EnumFormatter;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
-import net.minecraft.util.math.Vec2f;
 
 /**
  *
@@ -150,6 +154,27 @@ public class SpeedModule extends ToggleModule
             double dx = mc.player.getX() - mc.player.prevX;
             double dz = mc.player.getZ() - mc.player.prevZ;
             distance = Math.sqrt(dx * dx + dz * dz);
+            if (speedModeConfig.getValue() == Speed.GRIM_COLLIDE)
+            {
+                boolean collidesWithAnother = false;
+                for (Entity entity : mc.world.getEntities())
+                {
+                    if (checkIsCollidingEntity(entity) && MathHelper.sqrt((float) mc.player.squaredDistanceTo(entity)) <= 1.5)
+                    {
+                        collidesWithAnother = true;
+                        break;
+                    }
+                }
+                if (collidesWithAnother)
+                {
+                    Vec3d velocity = mc.player.getVelocity();
+                    // double COLLISION_DISTANCE = 1.5;
+                    double factor = 1.19;
+                    double velocityX = velocity.x * factor;
+                    double velocityZ = velocity.z * factor;
+                    mc.player.setVelocity(velocityX, velocity.y, velocityZ);
+                }
+            }
         }
     }
 
@@ -681,6 +706,11 @@ public class SpeedModule extends ToggleModule
         return !mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0.0, 0.21, 0.0));
     }
 
+    public boolean checkIsCollidingEntity(Entity entity)
+    {
+        return entity != null && entity != mc.player && entity instanceof LivingEntity && !(entity instanceof ArmorStandEntity);
+    }
+
     /**
      *
      */
@@ -718,6 +748,7 @@ public class SpeedModule extends ToggleModule
         GAY_HOP,
         V_HOP,
         B_HOP,
-        VANILLA
+        VANILLA,
+        GRIM_COLLIDE
     }
 }

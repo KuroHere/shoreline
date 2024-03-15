@@ -231,7 +231,7 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPushEntity(PushEntityEvent event)
     {
-        if (pushEntitiesConfig.getValue() && modeConfig.getValue() != VelocityMode.STRICT)
+        if (pushEntitiesConfig.getValue())
         {
             event.cancel();
         }
@@ -244,7 +244,7 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPushOutOfBlocks(PushOutOfBlocksEvent event)
     {
-        if (pushBlocksConfig.getValue() && modeConfig.getValue() != VelocityMode.STRICT)
+        if (pushBlocksConfig.getValue())
         {
             event.cancel();
         }
@@ -257,7 +257,7 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPushFluid(PushFluidsEvent event)
     {
-        if (pushLiquidsConfig.getValue() && modeConfig.getValue() != VelocityMode.STRICT)
+        if (pushLiquidsConfig.getValue())
         {
             event.cancel();
         }

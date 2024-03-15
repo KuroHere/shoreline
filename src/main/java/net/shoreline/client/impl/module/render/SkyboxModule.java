@@ -36,10 +36,10 @@ public class SkyboxModule extends ToggleModule
             "fog color", false);
     Config<Color> fogColorConfig = new ColorConfig("FogColor", "The color for" +
             " the world fog", ColorConfig.GLOBAL_COLOR);
-    Config<Boolean> ambientConfig = new BooleanConfig("Ambient", "Changes the" +
-            " world ambient color overlay", true);
-    Config<Color> ambientColorConfig = new ColorConfig("AmbientColor", "The " +
-            "color for the game overlay", ColorConfig.GLOBAL_COLOR);
+    // Config<Boolean> ambientConfig = new BooleanConfig("Ambient", "Changes the" +
+    //        " world ambient color overlay", true);
+    // Config<Color> ambientColorConfig = new ColorConfig("AmbientColor", "The " +
+    //       "color for the game overlay", ColorConfig.GLOBAL_COLOR);
 
     /**
      *
@@ -53,65 +53,65 @@ public class SkyboxModule extends ToggleModule
     /**
      *
      */
-    @Override
-    public void onEnable()
-    {
-        if (mc.player == null || mc.worldRenderer == null)
-        {
-            return;
-        }
-        if (ambientConfig.getValue())
-        {
-            ((AccessorLightmapTextureManager) mc.gameRenderer.getLightmapTextureManager()).setUpdateLightmap(true);
-            RenderUtil.reloadRenders(true);
-        }
-    }
+//    @Override
+//    public void onEnable()
+//    {
+//        if (mc.player == null || mc.worldRenderer == null)
+//        {
+//            return;
+//        }
+//        if (ambientConfig.getValue())
+//        {
+//            ((AccessorLightmapTextureManager) mc.gameRenderer.getLightmapTextureManager()).setUpdateLightmap(true);
+//            RenderUtil.reloadRenders(true);
+//        }
+//    }
 
     /**
      *
      */
-    @Override
-    public void onDisable()
-    {
-        if (mc.player == null || mc.worldRenderer == null)
-        {
-            return;
-        }
-        if (ambientConfig.getValue())
-        {
-            RenderUtil.reloadRenders(true);
-        }
-    }
+//    @Override
+//    public void onDisable()
+//    {
+//        if (mc.player == null || mc.worldRenderer == null)
+//        {
+//            return;
+//        }
+//        if (ambientConfig.getValue())
+//        {
+//            RenderUtil.reloadRenders(true);
+//        }
+//    }
 
     /**
      *
      * @param event
      */
-    @EventListener
-    public void onConfigUpdate(ConfigUpdateEvent event)
-    {
-        if (event.getStage() != EventStage.POST || mc.player == null
-                || mc.worldRenderer == null)
-        {
-            return;
-        }
-        if (event.getConfig() == ambientConfig)
-        {
-            if (ambientConfig.getValue())
-            {
-                ((AccessorLightmapTextureManager) mc.gameRenderer.getLightmapTextureManager()).setUpdateLightmap(true);
-                RenderUtil.reloadRenders(true);
-            }
-            else
-            {
-                RenderUtil.reloadRenders(true);
-            }
-        }
-        else if (event.getConfig() == ambientColorConfig)
-        {
-            RenderUtil.reloadRenders(true);
-        }
-    }
+//    @EventListener
+//    public void onConfigUpdate(ConfigUpdateEvent event)
+//    {
+//        if (event.getStage() != EventStage.POST || mc.player == null
+//                || mc.worldRenderer == null)
+//        {
+//            return;
+//        }
+//        if (event.getConfig() == ambientConfig)
+//        {
+//            if (ambientConfig.getValue())
+//            {
+//                ((AccessorLightmapTextureManager) mc.gameRenderer.getLightmapTextureManager()).setUpdateLightmap(true);
+//                RenderUtil.reloadRenders(true);
+//            }
+//            else
+//            {
+//                RenderUtil.reloadRenders(true);
+//            }
+//        }
+//        else if (event.getConfig() == ambientColorConfig)
+//        {
+//            RenderUtil.reloadRenders(true);
+//        }
+//    }
 
     /**
      *
@@ -159,13 +159,13 @@ public class SkyboxModule extends ToggleModule
      *
      * @param event
      */
-    @EventListener
-    public void onAmbientColor(AmbientColorEvent event)
-    {
-        if (ambientConfig.getValue())
-        {
-            event.cancel();
-            event.setColor(ambientColorConfig.getValue());
-        }
-    }
+//    @EventListener
+//    public void onAmbientColor(AmbientColorEvent event)
+//    {
+//        if (ambientConfig.getValue())
+//        {
+//            event.cancel();
+//            event.setColor(ambientColorConfig.getValue());
+//        }
+//    }
 }
