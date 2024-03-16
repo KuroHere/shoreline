@@ -44,6 +44,7 @@ import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.player.RotationUtil;
@@ -932,7 +933,8 @@ public class AutoCrystalModule extends RotationModule
      */
     private boolean attackRangeCheck(Vec3d entityPos)
     {
-        double dist = mc.player.squaredDistanceTo(entityPos);
+        Vec3d playerPos = mc.player.getEyePos();
+        double dist = playerPos.squaredDistanceTo(entityPos);
         if (dist > breakRangeConfig.getValue() * breakRangeConfig.getValue())
         {
             return true;
@@ -943,8 +945,7 @@ public class AutoCrystalModule extends RotationModule
             return true;
         }
         BlockHitResult result = mc.world.raycast(new RaycastContext(
-                mc.player.getEyePos(), entityPos,
-                RaycastContext.ShapeType.COLLIDER,
+                playerPos, entityPos, RaycastContext.ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE, mc.player));
         return result.getType() != HitResult.Type.MISS
                 && dist > breakWallRangeConfig.getValue() * breakWallRangeConfig.getValue();

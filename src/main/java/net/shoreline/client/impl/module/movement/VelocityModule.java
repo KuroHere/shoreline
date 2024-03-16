@@ -181,9 +181,9 @@ public class VelocityModule extends ToggleModule
                 // Dumb fix bc canceling explosion velocity removes explosion sound in 1.19
                 try
                 {
-                    ((AccessorClientWorld) mc.world).hookPlaySound(packet.getX(), packet.getY(), packet.getZ(),
+                    mc.world.playSound(packet.getX(), packet.getY(), packet.getZ(),
                             SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
-                            4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false, RANDOM.nextLong());
+                            4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false);
                 }
                 catch (Exception ignored)
                 {

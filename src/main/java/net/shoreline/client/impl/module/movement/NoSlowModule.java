@@ -9,6 +9,7 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -48,6 +49,8 @@ public class NoSlowModule extends ToggleModule
             " NCP bypass for air slowdowns", false);
     Config<Boolean> grimConfig = new BooleanConfig("Grim", "Strict" +
             " Grim bypass for slowdown", false);
+    Config<Boolean> strafeFixConfig = new BooleanConfig("StrafeFix", "Old NCP" +
+            " bypass for strafe", false);
     Config<Boolean> inventoryMoveConfig = new BooleanConfig("InventoryMove",
             "Allows the player to move while in inventories or screens", false);
     Config<Boolean> arrowMoveConfig = new BooleanConfig("ArrowMove", "Allows " +
@@ -181,13 +184,13 @@ public class NoSlowModule extends ToggleModule
                 Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                         ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
             }
-            if (checkSlowed())
+            if (strafeFixConfig.getValue() && checkSlowed())
             {
                 // Old NCP
-                // Managers.NETWORK.sendSequencedPacket(id ->
-                //        new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND,
-                //                new BlockHitResult(mc.player.getPos(),
-                //                Direction.UP, BlockPos.ORIGIN, false), id));
+                Managers.NETWORK.sendSequencedPacket(id ->
+                        new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND,
+                                new BlockHitResult(mc.player.getPos(),
+                                Direction.UP, BlockPos.ORIGIN, false), id));
             }
             if (inventoryMoveConfig.getValue() && checkScreen()
                     && MOVE_KEYBINDS != null)
@@ -222,12 +225,13 @@ public class NoSlowModule extends ToggleModule
                     mc.player.setPitch(MathHelper.clamp(pitch, -90.0f, 90.0f));
                 }
             }
-            if (grimConfig.getValue() && websConfig.getValue())
+            if (grimConfig.getValue() && (websConfig.getValue() || berryBushConfig.getValue()))
             {
                 for (BlockPos pos : getSphere(5))
                 {
                     BlockState state = mc.world.getBlockState(pos);
-                    if (state.getBlock() instanceof CobwebBlock)
+                    if (state.getBlock() instanceof CobwebBlock && websConfig.getValue()
+                            || state.getBlock() instanceof SweetBerryBushBlock && berryBushConfig.getValue())
                     {
                         Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                                 PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, pos, Direction.DOWN));
