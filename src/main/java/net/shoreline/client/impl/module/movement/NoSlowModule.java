@@ -11,6 +11,7 @@ import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.api.config.Config;
@@ -92,16 +93,11 @@ public class NoSlowModule extends ToggleModule
     @Override
     public void onEnable()
     {
-        if (MOVE_KEYBINDS == null)
+        if (MOVE_KEYBINDS != null)
         {
-            MOVE_KEYBINDS = new KeyBinding[]
-                    {
-                            mc.options.forwardKey,
-                            mc.options.backKey,
-                            mc.options.rightKey,
-                            mc.options.leftKey
-                    };
+            return;
         }
+        MOVE_KEYBINDS = new KeyBinding[]{mc.options.forwardKey, mc.options.backKey, mc.options.rightKey, mc.options.leftKey};
     }
     
     /**
@@ -227,17 +223,12 @@ public class NoSlowModule extends ToggleModule
             }
             if (grimConfig.getValue() && (websConfig.getValue() || berryBushConfig.getValue()))
             {
-                for (BlockPos pos : getSphere(5))
+                for (BlockPos pos : getIntersectingWebs())
                 {
-                    BlockState state = mc.world.getBlockState(pos);
-                    if (state.getBlock() instanceof CobwebBlock && websConfig.getValue()
-                            || state.getBlock() instanceof SweetBerryBushBlock && berryBushConfig.getValue())
-                    {
-                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                                PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, pos, Direction.DOWN));
-                        Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                                PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, pos, Direction.DOWN));
-                    }
+                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                            PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, pos, Direction.DOWN));
+                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                            PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, pos, Direction.DOWN));
                 }
             }
         }
@@ -389,8 +380,9 @@ public class NoSlowModule extends ToggleModule
                 || mc.currentScreen instanceof DeathScreen);
     }
 
-    public List<BlockPos> getSphere(int radius)
+    public List<BlockPos> getIntersectingWebs()
     {
+        int radius = 5;
         final List<BlockPos> blocks = new ArrayList<>();
         for (int x = radius; x > -radius; --x)
         {
@@ -398,8 +390,14 @@ public class NoSlowModule extends ToggleModule
             {
                 for (int z = radius; z > -radius; --z)
                 {
-                    final BlockPos blockPos = BlockPos.ofFloored(mc.player.getX() + x, mc.player.getY() + y, mc.player.getZ() + z);
-                    blocks.add(blockPos);
+                    final BlockPos blockPos = BlockPos.ofFloored(mc.player.getX() + x,
+                            mc.player.getY() + y, mc.player.getZ() + z);
+                    BlockState state = mc.world.getBlockState(blockPos);
+                    if (state.getBlock() instanceof CobwebBlock && websConfig.getValue()
+                            || state.getBlock() instanceof SweetBerryBushBlock && berryBushConfig.getValue())
+                    {
+                        blocks.add(blockPos);
+                    }
                 }
             }
         }

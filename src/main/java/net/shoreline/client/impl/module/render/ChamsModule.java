@@ -83,7 +83,7 @@ public class ChamsModule extends ToggleModule
         RenderSystem.setShader(modeConfig.getValue() == ChamsMode.NORMAL ? GameRenderer::getPositionProgram : GameRenderer::getRenderTypeLinesProgram);
         RenderSystem.lineWidth(2.0f);
         vertexConsumer.begin(modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormat.DrawMode.QUADS :
-                VertexFormat.DrawMode.LINES, modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormats.POSITION : VertexFormats.LINES);
+                VertexFormat.DrawMode.LINES, VertexFormats.POSITION);
         Color color = Modules.COLORS.getColor();
         float n;
         Direction direction;
@@ -158,6 +158,7 @@ public class ChamsModule extends ToggleModule
         RenderSystem.disableBlend();
         RenderSystem.enableCull();
         event.matrixStack.pop();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         event.cancel();
     }
 

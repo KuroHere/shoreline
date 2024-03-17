@@ -1,7 +1,9 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.network.NetworkThreadUtils;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
@@ -134,7 +136,7 @@ public class VelocityModule extends ToggleModule
                     ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityZ((int) (packet.getVelocityZ()
                             * (horizontalConfig.getValue() / 100.0f)));
                 }
-                case STRICT ->
+                case GRIM ->
                 {
                     if (!Managers.NCP.passed(100))
                     {
@@ -166,7 +168,7 @@ public class VelocityModule extends ToggleModule
                                 * (horizontalConfig.getValue() / 100.0f));
                     }
                 }
-                case STRICT ->
+                case GRIM ->
                 {
                     if (!Managers.NCP.passed(100))
                     {
@@ -176,14 +178,15 @@ public class VelocityModule extends ToggleModule
                     cancelVelocity = true;
                 }
             }
-            if (event.isCanceled())
+            if (event.isCanceled() && mc.world.getServer() != null)
             {
-                // Dumb fix bc canceling explosion velocity removes explosion sound in 1.19
+                // Dumb fix bc canceling explosion velocity removes explosion handling in 1.19
                 try
                 {
-                    mc.world.playSound(packet.getX(), packet.getY(), packet.getZ(),
-                            SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
-                            4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false);
+                    mc.world.getServer().executeSync(() ->
+                        mc.world.playSound(packet.getX(), packet.getY(), packet.getZ(),
+                                SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
+                                4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false));
                 }
                 catch (Exception ignored)
                 {
@@ -211,7 +214,7 @@ public class VelocityModule extends ToggleModule
     public void onTick(TickEvent event)
     {
         if (event.getStage() == EventStage.PRE
-                && modeConfig.getValue() == VelocityMode.STRICT && cancelVelocity)
+                && modeConfig.getValue() == VelocityMode.GRIM && cancelVelocity)
         {
             if (Managers.NCP.passed(100))
             {
@@ -266,6 +269,6 @@ public class VelocityModule extends ToggleModule
     private enum VelocityMode
     {
         NORMAL,
-        STRICT
+        GRIM
     }
 }

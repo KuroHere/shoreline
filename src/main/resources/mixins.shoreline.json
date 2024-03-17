@@ -75,7 +75,6 @@
     "render.entity.MixinPlayerEntityRenderer",
     "render.entity.MixinWitherSkullEntityRenderer", ,
     "render.item.MixinHeldItemRenderer",
-    "sound.MixinSoundSystem",
     "text.MixinTextVisitFactory",
     "world.MixinBlockCollisionSpliterator",
     "world.MixinClientWorld"

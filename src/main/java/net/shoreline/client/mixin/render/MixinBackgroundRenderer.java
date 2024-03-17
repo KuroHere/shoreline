@@ -1,5 +1,6 @@
 package net.shoreline.client.mixin.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.render.RenderFogEvent;
 import net.minecraft.client.render.BackgroundRenderer;
@@ -27,17 +28,21 @@ public class MixinBackgroundRenderer
      * @param tickDelta
      * @param ci
      */
-    @Inject(method = "applyFog", at = @At(value = "HEAD"), cancellable = true)
-    private static void hookApplyFog(Camera camera,
-                                     BackgroundRenderer.FogType fogType,
+    @Inject(method = "applyFog", at = @At(value = "TAIL"))
+    private static void hookApplyFog(Camera camera, BackgroundRenderer.FogType fogType,
                                      float viewDistance, boolean thickFog,
                                      float tickDelta, CallbackInfo ci)
     {
+        if (fogType != BackgroundRenderer.FogType.FOG_TERRAIN)
+        {
+            return;
+        }
         RenderFogEvent renderFogEvent = new RenderFogEvent();
         Shoreline.EVENT_HANDLER.dispatch(renderFogEvent);
         if (renderFogEvent.isCanceled())
         {
-            ci.cancel();
+            RenderSystem.setShaderFogStart(viewDistance * 4.0f);
+            RenderSystem.setShaderFogEnd(viewDistance * 4.25f);
         }
     }
 }

@@ -28,6 +28,7 @@ import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.math.MathUtil;
 import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.string.EnumFormatter;
+import net.shoreline.client.util.world.FakePlayerEntity;
 
 /**
  *
@@ -101,7 +102,8 @@ public class SpeedModule extends ToggleModule
     public void onEnable()
     {
         prevTimer = Modules.TIMER.isEnabled();
-        if (timerConfig.getValue() && !prevTimer)
+        if (timerConfig.getValue() && !prevTimer
+                && speedModeConfig.getValue() != Speed.GRIM_COLLIDE)
         {
             Modules.TIMER.enable();
         }
@@ -679,7 +681,8 @@ public class SpeedModule extends ToggleModule
     @EventListener
     public void onConfigUpdate(ConfigUpdateEvent event)
     {
-        if (event.getConfig() == timerConfig && event.getStage() == EventStage.POST)
+        if (event.getConfig() == timerConfig && event.getStage() == EventStage.POST
+                && speedModeConfig.getValue() != Speed.GRIM_COLLIDE)
         {
             if (timerConfig.getValue())
             {
@@ -708,7 +711,8 @@ public class SpeedModule extends ToggleModule
 
     public boolean checkIsCollidingEntity(Entity entity)
     {
-        return entity != null && entity != mc.player && entity instanceof LivingEntity && !(entity instanceof ArmorStandEntity);
+        return entity != null && entity != mc.player && entity instanceof LivingEntity
+                && !(entity instanceof FakePlayerEntity) && !(entity instanceof ArmorStandEntity);
     }
 
     /**

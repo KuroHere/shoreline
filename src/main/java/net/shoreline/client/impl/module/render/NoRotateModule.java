@@ -22,7 +22,7 @@ import net.minecraft.network.packet.s2c.play.PositionFlag;
 public class NoRotateModule extends ToggleModule
 {
     Config<Boolean> positionAdjustConfig = new BooleanConfig("PositionAdjust",
-            "Adjusts rotation packets", false);
+            "Adjusts outgoing rotation packets", false);
     //
     private float yaw, pitch;
     private boolean cancelRotate;
