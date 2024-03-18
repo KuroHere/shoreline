@@ -27,7 +27,7 @@ public class FastFallModule extends ToggleModule
 {
     //
     Config<Float> heightConfig = new NumberConfig<>("Height", "The maximum " +
-            "fall height", 1.0f, 2.0f, 10.0f);
+            "fall height", 1.0f, 3.0f, 10.0f);
     Config<FallMode> fallModeConfig = new EnumConfig<>("Mode", "The mode for " +
             "falling down blocks", FallMode.STEP, FallMode.values());
     Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks",
