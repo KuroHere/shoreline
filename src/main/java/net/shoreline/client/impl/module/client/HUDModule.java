@@ -4,6 +4,7 @@ import net.shoreline.client.ShorelineMod;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
+import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -81,25 +82,28 @@ public class HUDModule extends ToggleModule
             () -> arraylistConfig.getValue());
     Config<Rendering> renderingConfig = new EnumConfig<>("Rendering",
             "The rendering mode of the HUD", Rendering.UP, Rendering.values());
+    // Rainbow settings
+    Config<RainbowMode> rainbowModeConfig = new EnumConfig<>("Rainbow", "The " +
+            "rendering mode for rainbow", RainbowMode.OFF, RainbowMode.values());
+    Config<Float> rainbowSpeedConfig = new NumberConfig<>("Rainbow-Speed",
+            "The speed for the rainbow color cycling", 0.1f, 50.0f, 100.0f);
+    Config<Integer> rainbowSaturationConfig = new NumberConfig<>("Rainbow-Saturation",
+            "The saturation of rainbow colors", 0, 35, 100);
+    Config<Integer> rainbowBrightnessConfig = new NumberConfig<>("Rainbow-Brightness",
+            "The brightness of rainbow colors", 0, 100, 100);
+    Config<Float> rainbowDifferenceConfig = new NumberConfig<>("Rainbow-Difference",
+            "The difference offset for rainbow colors", 0.1f, 40.0f, 100.0f);
     //
     private final DecimalFormat decimal = new DecimalFormat("0.0");
+    //
+    private int rainbowOffset;
 
-    /**
-     *
-     *
-     */
     public HUDModule()
     {
         super("HUD", "Displays the HUD (heads up display) screen.",
                 ModuleCategory.CLIENT);
     }
 
-    /**
-     * Called directly after the screen overlay is rendered in
-     * {@link net.minecraft.client.gui.hud.InGameHud}.
-     *
-     * @param event The render overlay event
-     */
     @EventListener
     public void onRenderOverlayPost(RenderOverlayEvent.Post event)
     {
@@ -110,7 +114,7 @@ public class HUDModule extends ToggleModule
         if (mc.player != null && mc.world != null)
         {
             Window res = mc.getWindow();
-            Modules.COLORS.resetRainbowOffset();
+            rainbowOffset = 0;
             // Render offsets for each corner of the screen.
             float topLeft = 2.0f;
             float topRight = topLeft;
@@ -133,7 +137,7 @@ public class HUDModule extends ToggleModule
                 RenderManager.renderText(event.getMatrices(), String.format("%s §f%s-%s",
                                 ShorelineMod.MOD_NAME, ShorelineMod.MOD_VER,
                                 ShorelineMod.MOD_BUILD_NUMBER), 2.0f,
-                        topLeft, Modules.COLORS.getRGB());
+                        topLeft, getHudColor(rainbowOffset));
                 // topLeft += 9.0f;
             }
             if (arraylistConfig.getValue())
@@ -162,7 +166,7 @@ public class HUDModule extends ToggleModule
                         int width = RenderManager.textWidth(text);
                         RenderManager.renderText(event.getMatrices(), text,
                                 res.getScaledWidth() - width * factor - 1.0f,
-                                renderingUp ? topRight : bottomRight, Modules.COLORS.getRGB());
+                                renderingUp ? topRight : bottomRight, getHudColor(rainbowOffset));
                         if (renderingUp)
                         {
                             topRight += 9.0f;
@@ -171,7 +175,7 @@ public class HUDModule extends ToggleModule
                         {
                             bottomRight -= 9.0f;
                         }
-                        Modules.COLORS.setRainbowOffset();
+                        rainbowOffset++;
                     }
                 }
             }
@@ -202,7 +206,7 @@ public class HUDModule extends ToggleModule
                     {
                         topRight += 9.0f;
                     }
-                    Modules.COLORS.setRainbowOffset();
+                    rainbowOffset++;
                 }
             }
             if (serverBrandConfig.getValue())
@@ -211,7 +215,7 @@ public class HUDModule extends ToggleModule
                 int width = RenderManager.textWidth(brand);
                 RenderManager.renderText(event.getMatrices(), brand,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
-                        Modules.COLORS.getRGB());
+                        getHudColor(rainbowOffset));
                 if (renderingUp)
                 {
                     bottomRight -= 9.0f;
@@ -220,7 +224,7 @@ public class HUDModule extends ToggleModule
                 {
                     topRight += 9.0f;
                 }
-                Modules.COLORS.setRainbowOffset();
+                rainbowOffset++;
             }
             if (speedConfig.getValue())
             {
@@ -236,7 +240,7 @@ public class HUDModule extends ToggleModule
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
-                        Modules.COLORS.getRGB());
+                        getHudColor(rainbowOffset));
                 if (renderingUp)
                 {
                     bottomRight -= 9.0f;
@@ -245,7 +249,7 @@ public class HUDModule extends ToggleModule
                 {
                     topRight += 9.0f;
                 }
-                Modules.COLORS.setRainbowOffset();
+                rainbowOffset++;
             }
             if (durabilityConfig.getValue() && mc.player.getMainHandStack().isDamageable())
             {
@@ -258,7 +262,7 @@ public class HUDModule extends ToggleModule
                 Color color = ColorUtil.hslToColor((float) (n - n2) / (float) n * 120.0f, 100.0f, 50.0f, 1.0f);
                 RenderManager.renderText(event.getMatrices(), text1,
                         res.getScaledWidth() - width - width2 - 1.0f, renderingUp ? bottomRight : topRight,
-                        Modules.COLORS.getRGB());
+                        getHudColor(rainbowOffset));
                 RenderManager.renderText(event.getMatrices(), text2,
                         res.getScaledWidth() - width2 - 1.0f, renderingUp ? bottomRight : topRight,
                         color.getRGB());
@@ -270,7 +274,7 @@ public class HUDModule extends ToggleModule
                 {
                     topRight += 9.0f;
                 }
-                Modules.COLORS.setRainbowOffset();
+                rainbowOffset++;
             }
             if (pingConfig.getValue() && !mc.isInSingleplayer())
             {
@@ -279,7 +283,7 @@ public class HUDModule extends ToggleModule
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
-                        Modules.COLORS.getRGB());
+                        getHudColor(rainbowOffset));
                 if (renderingUp)
                 {
                     bottomRight -= 9.0f;
@@ -288,7 +292,7 @@ public class HUDModule extends ToggleModule
                 {
                     topRight += 9.0f;
                 }
-                Modules.COLORS.setRainbowOffset();
+                rainbowOffset++;
             }
             if (tpsConfig.getValue())
             {
@@ -300,7 +304,7 @@ public class HUDModule extends ToggleModule
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
-                        Modules.COLORS.getRGB());
+                        getHudColor(rainbowOffset));
                 if (renderingUp)
                 {
                     bottomRight -= 9.0f;
@@ -309,7 +313,7 @@ public class HUDModule extends ToggleModule
                 {
                     topRight += 9.0f;
                 }
-                Modules.COLORS.setRainbowOffset();
+                rainbowOffset++;
             }
             if (fpsConfig.getValue())
             {
@@ -317,9 +321,9 @@ public class HUDModule extends ToggleModule
                 int width = RenderManager.textWidth(text);
                 RenderManager.renderText(event.getMatrices(), text,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
-                        Modules.COLORS.getRGB());
+                        getHudColor(rainbowOffset));
                 // bottomRight -= 9.0f;
-                Modules.COLORS.setRainbowOffset();
+                rainbowOffset++;
             }
             if (coordsConfig.getValue())
             {
@@ -339,9 +343,9 @@ public class HUDModule extends ToggleModule
                                 nether ? decimal.format(nz) : decimal.format(z),
                                 nether ? decimal.format(x) : decimal.format(nx),
                                 nether ? decimal.format(z) : decimal.format(nz)),
-                        2, bottomLeft, Modules.COLORS.getRGB());
+                        2, bottomLeft, getHudColor(rainbowOffset));
                 bottomLeft -= 9.0f;
-                Modules.COLORS.setRainbowOffset();
+                rainbowOffset++;
             }
             if (directionConfig.getValue())
             {
@@ -352,9 +356,9 @@ public class HUDModule extends ToggleModule
                 RenderManager.renderText(event.getMatrices(),
                         String.format("%s §7[§f%s%s§7]", dir, axis,
                                 pos ? "+" : "-"), 2, bottomLeft,
-                        Modules.COLORS.getRGB());
+                        getHudColor(rainbowOffset));
                 // bottomLeft -= 9.0f;
-                Modules.COLORS.setRainbowOffset();
+                rainbowOffset++;
             }
             if (armorConfig.getValue())
             {
@@ -392,10 +396,6 @@ public class HUDModule extends ToggleModule
         }
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
     public void onRenderOverlayStatusEffect(RenderOverlayEvent.StatusEffect event)
     {
@@ -405,10 +405,6 @@ public class HUDModule extends ToggleModule
         }
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
     public void onRenderOverlayItemName(RenderOverlayEvent.ItemName event)
     {
@@ -435,12 +431,16 @@ public class HUDModule extends ToggleModule
         }
     }
 
-    /**
-     *
-     *
-     * @param module
-     * @return
-     */
+    private int getHudColor(int rainbowOffset)
+    {
+        return switch (rainbowModeConfig.getValue())
+        {
+            case OFF -> Modules.COLORS.getRGB();
+            case STATIC -> rainbow(1L);
+            case GRADIENT -> rainbow(rainbowOffset);
+        };
+    }
+
     private String getFormattedModule(final Module module)
     {
         final String metadata = module.getModuleData();
@@ -469,5 +469,21 @@ public class HUDModule extends ToggleModule
     {
         UP,
         DOWN
+    }
+
+    public enum RainbowMode
+    {
+        OFF,
+        GRADIENT,
+        STATIC
+    }
+
+    private int rainbow(long offset)
+    {
+        float hue = (float) (((double) System.currentTimeMillis() * (rainbowSpeedConfig.getValue() / 10)
+                + (double) (offset * 500L)) % (30000 / (rainbowDifferenceConfig.getValue() / 100))
+                / (30000 / (rainbowDifferenceConfig.getValue() / 20.0f)));
+        return Color.HSBtoRGB(hue, rainbowSaturationConfig.getValue() / 100.0f,
+                rainbowBrightnessConfig.getValue() / 100.0f);
     }
 }

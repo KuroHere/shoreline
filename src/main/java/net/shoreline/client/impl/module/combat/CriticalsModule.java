@@ -3,6 +3,7 @@ package net.shoreline.client.impl.module.combat;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
+import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
@@ -25,8 +26,6 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 
-import java.util.Random;
-
 /**
  *
  *
@@ -38,7 +37,7 @@ public class CriticalsModule extends ToggleModule
     //
     Config<CritMode> modeConfig = new EnumConfig<>("Mode", "Mode for critical" +
             " attack modifier", CritMode.PACKET, CritMode.values());
-    Config<Boolean> packetSyncConfig = new BooleanConfig("Packet-Sync",
+    Config<Boolean> packetSyncConfig = new BooleanConfig("Tick-Sync",
             "Syncs the cached packet interaction to the MC tick", false);
     //
     private final Timer attackTimer = new CacheTimer();
@@ -46,8 +45,6 @@ public class CriticalsModule extends ToggleModule
     // player position packets
     private PlayerInteractEntityC2SPacket attackPacket;
     private HandSwingC2SPacket swingPacket;
-    // RANDOM
-    private final Random random = new Random();
 
     /**
      *
@@ -61,7 +58,6 @@ public class CriticalsModule extends ToggleModule
 
     /**
      *
-     *
      * @return
      */
     @Override
@@ -72,14 +68,16 @@ public class CriticalsModule extends ToggleModule
 
     /**
      *
-     *
      * @param event
      */
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (packetSyncConfig.getValue() && attackPacket != null
-                && swingPacket != null)
+        if (event.getStage() != EventStage.POST)
+        {
+            return;
+        }
+        if (packetSyncConfig.getValue() && attackPacket != null && swingPacket != null)
         {
             Managers.NETWORK.sendPacket(attackPacket);
             Managers.NETWORK.sendPacket(swingPacket);
@@ -102,7 +100,7 @@ public class CriticalsModule extends ToggleModule
             return;
         }
         if (event.getPacket() instanceof IPlayerInteractEntityC2SPacket packet
-                && packet.getType() == InteractType.ATTACK)
+                && packet.getType() == InteractType.ATTACK && !event.isClientPacket())
         {
             if (!Managers.POSITION.isOnGround()
                     || mc.player.isRiding()
@@ -127,24 +125,24 @@ public class CriticalsModule extends ToggleModule
                 event.cancel();
                 if (EntityUtil.isVehicle(e))
                 {
-                    for (int i = 0; i < 5; ++i)
+                    if (modeConfig.getValue() == CritMode.PACKET)
                     {
-                        Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(e,
-                                Managers.POSITION.isSneaking()));
-                        Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                        for (int i = 0; i < 5; ++i)
+                        {
+                            Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(e,
+                                    Managers.POSITION.isSneaking()));
+                            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                        }
                     }
+                    return;
                 }
-                else
+                attackPacket = PlayerInteractEntityC2SPacket.attack(e, Managers.POSITION.isSneaking());
+                preAttackPacket();
+                if (!packetSyncConfig.getValue())
                 {
-                    attackPacket = (PlayerInteractEntityC2SPacket) packet;
-                    preAttackPacket();
-                    if (!packetSyncConfig.getValue())
-                    {
-                        Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(
-                                e, Managers.POSITION.isSneaking()));
-                    }
-                    mc.player.addCritParticles(e);
+                    Managers.NETWORK.sendPacket(attackPacket);
                 }
+                mc.player.addCritParticles(e);
                 attackTimer.reset();
             }
         }
@@ -162,7 +160,7 @@ public class CriticalsModule extends ToggleModule
      * Callback method for pre attack stage, must be called before the attack
      * packet or else the movements will not be registered
      *
-     * @see AuraModule#postAttackTarget()
+     * @see AuraModule#postAttackTarget(Entity) 
      */
     public void preAttackPacket()
     {
@@ -171,15 +169,26 @@ public class CriticalsModule extends ToggleModule
         double z = Managers.POSITION.getZ();
         switch (modeConfig.getValue())
         {
-            case PACKET ->
+            case VANILLA ->
             {
-                double d = 1.0e-7 + 1.0e-7 * (1.0 + random.nextInt(random.nextBoolean() ? 34 : 43));
+                double d = 1.0e-7 + 1.0e-7 * (1.0 + RANDOM.nextInt(RANDOM.nextBoolean() ? 34 : 43));
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                         x, y + 0.1016f + d * 3.0f, z, false));
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                         x, y + 0.0202f + d * 2.0f, z, false));
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                         x, y + 3.239e-4 + d, z, false));
+            }
+            case PACKET ->
+            {
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        x, y + 0.05f, z, false));
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        x, y, z, false));
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        x, y + 0.03f, z, false));
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                        x, y, z, false));
             }
             case PACKET_STRICT ->
             {
@@ -190,16 +199,13 @@ public class CriticalsModule extends ToggleModule
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                         x, y + 0.0000013579f, z, false));
             }
-            case VANILLA ->
+            case GRIM ->
             {
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        x, y + 0.0626024016927725f, z, false));
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        x, y + 0.0726023996066094f, z, false));
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        x, y, z, false));
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        x, y, z, false));
+                if (!mc.player.isOnGround())
+                {
+                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                            x, y - 0.000001, z, false));
+                }
             }
             case LOW_HOP ->
             {
@@ -214,6 +220,7 @@ public class CriticalsModule extends ToggleModule
         PACKET,
         PACKET_STRICT,
         VANILLA,
+        GRIM,
         LOW_HOP
     }
 }

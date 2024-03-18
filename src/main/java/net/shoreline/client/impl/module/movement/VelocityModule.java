@@ -1,13 +1,20 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityStatuses;
+import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.world.explosion.Explosion;
 import net.shoreline.client.api.config.Config;
+import net.shoreline.client.api.config.NumberDisplay;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
-import net.shoreline.client.api.config.NumberDisplay;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -18,19 +25,9 @@ import net.shoreline.client.impl.event.entity.player.PushFluidsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PushOutOfBlocksEvent;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.mixin.accessor.AccessorClientWorld;
 import net.shoreline.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
 import net.shoreline.client.mixin.accessor.AccessorExplosionS2CPacket;
 import net.shoreline.client.util.string.EnumFormatter;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityStatuses;
-import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.shoreline.client.util.Globals;
 
 import java.text.DecimalFormat;
 
@@ -134,7 +131,7 @@ public class VelocityModule extends ToggleModule
                     ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityZ((int) (packet.getVelocityZ()
                             * (horizontalConfig.getValue() / 100.0f)));
                 }
-                case STRICT ->
+                case GRIM ->
                 {
                     if (!Managers.NCP.passed(100))
                     {
@@ -166,7 +163,7 @@ public class VelocityModule extends ToggleModule
                                 * (horizontalConfig.getValue() / 100.0f));
                     }
                 }
-                case STRICT ->
+                case GRIM ->
                 {
                     if (!Managers.NCP.passed(100))
                     {
@@ -176,14 +173,15 @@ public class VelocityModule extends ToggleModule
                     cancelVelocity = true;
                 }
             }
-            if (event.isCanceled())
+            if (event.isCanceled() && mc.world.getServer() != null)
             {
-                // Dumb fix bc canceling explosion velocity removes explosion sound in 1.19
+                // Dumb fix bc canceling explosion velocity removes explosion handling in 1.19
                 try
                 {
-                    ((AccessorClientWorld) mc.world).hookPlaySound(packet.getX(), packet.getY(), packet.getZ(),
-                            SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
-                            4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false, RANDOM.nextLong());
+                    mc.world.getServer().executeSync(() ->
+                        mc.world.playSound(packet.getX(), packet.getY(), packet.getZ(),
+                                SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
+                                4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false));
                 }
                 catch (Exception ignored)
                 {
@@ -211,7 +209,7 @@ public class VelocityModule extends ToggleModule
     public void onTick(TickEvent event)
     {
         if (event.getStage() == EventStage.PRE
-                && modeConfig.getValue() == VelocityMode.STRICT && cancelVelocity)
+                && modeConfig.getValue() == VelocityMode.GRIM && cancelVelocity)
         {
             if (Managers.NCP.passed(100))
             {
@@ -231,7 +229,7 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPushEntity(PushEntityEvent event)
     {
-        if (pushEntitiesConfig.getValue() && modeConfig.getValue() != VelocityMode.STRICT)
+        if (pushEntitiesConfig.getValue())
         {
             event.cancel();
         }
@@ -244,7 +242,7 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPushOutOfBlocks(PushOutOfBlocksEvent event)
     {
-        if (pushBlocksConfig.getValue() && modeConfig.getValue() != VelocityMode.STRICT)
+        if (pushBlocksConfig.getValue())
         {
             event.cancel();
         }
@@ -257,7 +255,7 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onPushFluid(PushFluidsEvent event)
     {
-        if (pushLiquidsConfig.getValue() && modeConfig.getValue() != VelocityMode.STRICT)
+        if (pushLiquidsConfig.getValue())
         {
             event.cancel();
         }
@@ -266,6 +264,6 @@ public class VelocityModule extends ToggleModule
     private enum VelocityMode
     {
         NORMAL,
-        STRICT
+        GRIM
     }
 }

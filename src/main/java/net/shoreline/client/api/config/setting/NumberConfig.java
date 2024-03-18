@@ -21,6 +21,8 @@ public class NumberConfig<T extends Number> extends Config<T>
     // Number display format. Used to determine the format of the number in
     // the ClickGui when displaying the value.
     private final NumberDisplay format;
+    //
+    private final int roundingScale;
 
     /**
      *
@@ -39,6 +41,30 @@ public class NumberConfig<T extends Number> extends Config<T>
         this.min = min;
         this.max = max;
         this.format = format;
+        // equal to number of decimal places in value
+        String strValue = String.valueOf(getValue());
+        this.roundingScale = strValue.substring(strValue.indexOf(".") + 1).length();
+    }
+
+    /**
+     *
+     *
+     * @param name
+     * @param desc
+     * @param min
+     * @param value
+     * @param max
+     * @param format
+     * @param roundingScale
+     */
+    public NumberConfig(String name, String desc, T min, T value, T max,
+                        NumberDisplay format, int roundingScale)
+    {
+        super(name, desc, value);
+        this.min = min;
+        this.max = max;
+        this.format = format;
+        this.roundingScale = roundingScale;
     }
 
     /**
@@ -59,6 +85,8 @@ public class NumberConfig<T extends Number> extends Config<T>
         this.min = min;
         this.max = max;
         this.format = format;
+        String strValue = String.valueOf(getValue());
+        this.roundingScale = strValue.substring(strValue.indexOf(".") + 1).length();
     }
 
     /**
@@ -94,7 +122,6 @@ public class NumberConfig<T extends Number> extends Config<T>
 
     /**
      *
-     *
      * @return
      */
     public T getMin()
@@ -103,7 +130,6 @@ public class NumberConfig<T extends Number> extends Config<T>
     }
 
     /**
-     *
      *
      * @return
      */
@@ -114,7 +140,6 @@ public class NumberConfig<T extends Number> extends Config<T>
 
     /**
      *
-     *
      * @return
      */
     public boolean isMin()
@@ -123,7 +148,6 @@ public class NumberConfig<T extends Number> extends Config<T>
     }
 
     /**
-     *
      *
      * @return
      */
@@ -134,18 +158,14 @@ public class NumberConfig<T extends Number> extends Config<T>
 
     /**
      *
-     *
      * @return
      */
     public int getRoundingScale()
     {
-        // equal to number of decimal places in value
-        String strValue = String.valueOf(getValue());
-        return strValue.substring(strValue.indexOf(".") + 1).length();
+        return roundingScale;
     }
 
     /**
-     *
      *
      * @return
      */

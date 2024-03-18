@@ -170,7 +170,7 @@ public class NoRenderModule extends ToggleModule
                 event.cancel();
             }
             else if (event.getPacket() instanceof ParticleS2CPacket packet
-                && packet.getCount() > 800)
+                && packet.getCount() > 500)
             {
                 event.cancel();
             }

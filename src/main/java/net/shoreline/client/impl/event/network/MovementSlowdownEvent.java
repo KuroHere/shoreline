@@ -12,7 +12,7 @@ import net.minecraft.client.input.Input;
 public class MovementSlowdownEvent extends Event
 {
     //
-    private final Input input;
+    public final Input input;
     
     /**
      *
@@ -25,7 +25,6 @@ public class MovementSlowdownEvent extends Event
     }
     
     /**
-     *
      *
      * @return
      */

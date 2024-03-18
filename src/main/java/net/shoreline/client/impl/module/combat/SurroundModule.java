@@ -163,22 +163,21 @@ public class SurroundModule extends PlaceBlockModule
                 BlockPos targetPos = placements.get(blocksPlaced);
                 if (rotateConfig.getValue())
                 {
-                    float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+                    float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(),
                             targetPos.toCenterPos());
                     // All rotations for shift ticks must send extra packet
                     // This may not work on all servers
                     if (blocksPlaced == 0)
                     {
-                        setRotation(rots[0], rots[1]);
+                        setRotation(rotations[0], rotations[1]);
                     }
                     else
                     {
                         Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-                                rots[0], rots[1], mc.player.isOnGround()));
+                                rotations[0], rotations[1], mc.player.isOnGround()));
                     }
                 }
-                placeBlockResistant(targetPos,
-                        strictDirectionConfig.getValue());
+                placeBlockResistant(targetPos, strictDirectionConfig.getValue());
                 blocksPlaced++;
                 shiftDelay = 0;
             }
@@ -306,13 +305,12 @@ public class SurroundModule extends PlaceBlockModule
             {
                 if (rotateConfig.getValue())
                 {
-                    float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+                    float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(),
                             targetPos.toCenterPos());
                     Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-                            rots[0], rots[1], mc.player.isOnGround()));
+                            rotations[0], rotations[1], mc.player.isOnGround()));
                 }
-                placeBlockResistant(targetPos,
-                        strictDirectionConfig.getValue());
+                placeBlockResistant(targetPos, strictDirectionConfig.getValue());
                 blocksPlaced++;
                 // shiftDelay = 0;
             }
@@ -327,13 +325,12 @@ public class SurroundModule extends PlaceBlockModule
             {
                 if (rotateConfig.getValue())
                 {
-                    float[] rots = RotationUtil.getRotationsTo(mc.player.getEyePos(),
+                    float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(),
                             targetPos.toCenterPos());
                     Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-                            rots[0], rots[1], mc.player.isOnGround()));
+                            rotations[0], rotations[1], mc.player.isOnGround()));
                 }
-                placeBlockResistant(targetPos,
-                        strictDirectionConfig.getValue());
+                placeBlockResistant(targetPos, strictDirectionConfig.getValue());
                 blocksPlaced++;
                 // shiftDelay = 0;
             }

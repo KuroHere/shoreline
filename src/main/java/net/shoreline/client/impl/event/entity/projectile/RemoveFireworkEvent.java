@@ -1,20 +1,21 @@
 package net.shoreline.client.impl.event.entity.projectile;
 
+import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
 
 @Cancelable
 public class RemoveFireworkEvent extends Event
 {
-    private final int entityId;
+    private final FireworkRocketEntity rocketEntity;
 
-    public RemoveFireworkEvent(int entityId)
+    public RemoveFireworkEvent(FireworkRocketEntity rocketEntity)
     {
-        this.entityId = entityId;
+        this.rocketEntity = rocketEntity;
     }
 
-    public int getEntityId()
+    public FireworkRocketEntity getRocketEntity()
     {
-        return entityId;
+        return rocketEntity;
     }
 }

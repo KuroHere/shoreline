@@ -15,8 +15,6 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.potion.PotionUtil;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -33,7 +31,6 @@ import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
-import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.world.EndCrystalUtil;
 
 import java.util.List;
@@ -94,7 +91,7 @@ public class AutoTotemModule extends ToggleModule
     private boolean sneaking, sprinting;
     //
     private boolean popTick;
-    private int calcTotem;
+    private int slotTotem;
     private int totems;
     //
     private static final int OFFHAND_SLOT = 45;
@@ -115,7 +112,7 @@ public class AutoTotemModule extends ToggleModule
     public void onDisable()
     {
         offhand = null;
-        calcTotem = -1;
+        slotTotem = -1;
         totems = 0;
         sneaking = false;
         sprinting = false;
@@ -172,9 +169,9 @@ public class AutoTotemModule extends ToggleModule
     private void placeOffhand()
     {
         int totemCount = 0;
-        calcTotem = -1;
+        slotTotem = -1;
         //
-        int calcPotion = -1;
+        int slotPotion = -1;
         final ItemStack off = mc.player.getOffHandStack();
         if (hotbarTotemConfig.getValue())
         {
@@ -183,7 +180,7 @@ public class AutoTotemModule extends ToggleModule
             if (slot.getItem() == Items.TOTEM_OF_UNDYING)
             {
                 totemCount++;
-                calcTotem = totemSlotConfig.getValue();
+                slotTotem = totemSlotConfig.getValue();
             }
         }
         else
@@ -194,11 +191,11 @@ public class AutoTotemModule extends ToggleModule
                 if (slot.getItem() == Items.TOTEM_OF_UNDYING)
                 {
                     totemCount++;
-                    if (calcTotem != -1)
+                    if (slotTotem != -1)
                     {
                        continue;
                     }
-                    calcTotem = i;
+                    slotTotem = i;
                 }
                 else if (offhandPotionConfig.getValue()
                         && slot.getItem() == Items.POTION)
@@ -206,10 +203,10 @@ public class AutoTotemModule extends ToggleModule
                     final List<StatusEffectInstance> list =
                             PotionUtil.getPotionEffects(slot);
                     boolean harm = list.stream().anyMatch(p -> !p.getEffectType().isBeneficial());
-                    if (calcPotion == -1 && !harm
+                    if (slotPotion == -1 && !harm
                             && !mc.player.getStatusEffects().containsAll(list))
                     {
-                        calcPotion = i;
+                        slotPotion = i;
                     }
                 }
             }
@@ -229,7 +226,7 @@ public class AutoTotemModule extends ToggleModule
                 && mc.options.useKey.isPressed()
                 && offhandOverrideConfig.getValue())
         {
-            offhand = calcPotion != -1 ? Items.POTION :
+            offhand = slotPotion != -1 ? Items.POTION :
                     Items.GOLDEN_APPLE;
         }
         if (!mc.player.isCreative())
@@ -273,7 +270,7 @@ public class AutoTotemModule extends ToggleModule
         // TOTEM SECTION
         if (offhand == Items.TOTEM_OF_UNDYING)
         {
-            if (calcTotem == -1)
+            if (slotTotem == -1)
             {
                 // ChatUtil.error("No TOTEM_OF_UNDYING left in inventory!");
                 if (fallbackCrystalConfig.getValue())
@@ -286,8 +283,8 @@ public class AutoTotemModule extends ToggleModule
                 if (hotbarTotemConfig.getValue())
                 {
                     int prev = mc.player.getInventory().selectedSlot;
-                    mc.player.getInventory().selectedSlot = calcTotem;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(calcTotem));
+                    mc.player.getInventory().selectedSlot = slotTotem;
+                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slotTotem));
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND,
                             BlockPos.ORIGIN, Direction.DOWN));
@@ -302,20 +299,20 @@ public class AutoTotemModule extends ToggleModule
                     {
                         Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
                     }
-                    Managers.INVENTORY.pickupSlot(calcTotem);
+                    Managers.INVENTORY.pickupSlot(slotTotem);
                     Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
                     // Managers.INVENTORY.closeScreen();
                     postClickSlot();
                 }
-                calcTotem = -1;
+                slotTotem = -1;
             }
             return;
         }
         // OFFHAND SECTION
-        int calcOffhand = -1;
+        int slotOffhand = -1;
         if (offhand == Items.POTION)
         {
-            calcOffhand = calcPotion;
+            slotOffhand = slotPotion;
         }
         else
         {
@@ -340,27 +337,27 @@ public class AutoTotemModule extends ToggleModule
                         {
                             glint = true;
                         }
-                        calcOffhand = i;
+                        slotOffhand = i;
                     }
                     else if (slot.getItem() == Items.ENCHANTED_GOLDEN_APPLE)
                     {
                         glint = true;
-                        calcOffhand = i;
+                        slotOffhand = i;
                     }
                 }
                 else if (slot.getItem() == offhand)
                 {
-                    calcOffhand = i;
+                    slotOffhand = i;
                     break;
                 }
             }
         }
-        if (calcOffhand == -1)
+        if (slotOffhand == -1)
         {
             // ChatUtil.error("No %s left in inventory!", offhand.getName());
-            return;
+            slotOffhand = slotTotem;
         }
-        if (off.isEmpty() || off.getItem() != offhand)
+        if (slotOffhand != -1 && (off.isEmpty() || off.getItem() != offhand))
         {
             preClickSlot();
             boolean returnClick = !off.isEmpty();
@@ -368,7 +365,7 @@ public class AutoTotemModule extends ToggleModule
             {
                 Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
             }
-            Managers.INVENTORY.pickupSlot(calcOffhand);
+            Managers.INVENTORY.pickupSlot(slotOffhand);
             Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
 
             // Managers.INVENTORY.closeScreen();
@@ -395,7 +392,7 @@ public class AutoTotemModule extends ToggleModule
         {
             popTick = true;
             ItemStack off = mc.player.getOffHandStack();
-            if (calcTotem == -1)
+            if (slotTotem == -1)
             {
                 // ChatUtil.error("No TOTEM_OF_UNDYING left in " +
                 //        "inventory!");
@@ -403,11 +400,11 @@ public class AutoTotemModule extends ToggleModule
             }
             preClickSlot();
             boolean returnClick = !off.isEmpty();
-            Managers.INVENTORY.pickupSlot(calcTotem);
+            Managers.INVENTORY.pickupSlot(slotTotem);
             Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
             if (returnClick)
             {
-                Managers.INVENTORY.pickupSlot(calcTotem);
+                Managers.INVENTORY.pickupSlot(slotTotem);
             }
             // Managers.INVENTORY.closeScreen();
             postClickSlot();

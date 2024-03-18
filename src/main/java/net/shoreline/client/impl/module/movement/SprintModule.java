@@ -1,19 +1,17 @@
 package net.shoreline.client.impl.module.movement;
 
-import net.minecraft.item.SpectralArrowItem;
+import net.minecraft.entity.effect.StatusEffects;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.api.module.ModuleCategory;
+import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.SprintCancelEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.string.EnumFormatter;
-import net.minecraft.entity.effect.StatusEffects;
-import net.shoreline.client.util.Globals;
 
 /**
  *

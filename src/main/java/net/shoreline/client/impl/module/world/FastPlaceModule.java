@@ -38,7 +38,7 @@ public class FastPlaceModule extends ToggleModule
             "selection of items to apply fast placements", Selection.WHITELIST,
             Selection.values());
     Config<Integer> delayConfig = new NumberConfig<>("Delay", "Fast place " +
-            "delay", 0, 1, 4);
+            "click delay", 0, 1, 4);
     Config<Float> startDelayConfig = new NumberConfig<>("StartDelay", "Fast" +
             " place start delay", 0.0f, 0.0f, 1.0f);
     Config<Boolean> ghostFixConfig = new BooleanConfig("GhostFix", "Fixes " +

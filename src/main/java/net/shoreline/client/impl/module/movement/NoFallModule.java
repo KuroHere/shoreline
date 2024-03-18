@@ -15,6 +15,7 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
+import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.mixin.accessor.AccessorPlayerMoveC2SPacket;
 import net.shoreline.client.util.string.EnumFormatter;
@@ -57,15 +58,14 @@ public class NoFallModule extends ToggleModule
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
+    public void onPlayerUpdate(PlayerUpdateEvent event)
     {
-        if (event.getStage() == EventStage.PRE
-                && modeConfig.getValue() == NoFallMode.LATENCY)
+        if (event.getStage() != EventStage.PRE || mc.player.fallDistance <= mc.player.getSafeFallDistance())
         {
-            if (mc.player.fallDistance <= mc.player.getSafeFallDistance())
-            {
-                return;
-            }
+            return;
+        }
+        if (modeConfig.getValue() == NoFallMode.LATENCY)
+        {
             if (mc.world.getRegistryKey() == World.NETHER)
             {
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
@@ -77,6 +77,12 @@ public class NoFallModule extends ToggleModule
                         0, 64, 0, true));
             }
             mc.player.fallDistance = 0.0f;
+        }
+        else if (modeConfig.getValue() == NoFallMode.GRIM)
+        {
+            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(), mc.player.getY() + 1.0e-9,
+                    mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), true));
+            mc.player.onLanding();
         }
     }
 
