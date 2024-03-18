@@ -21,7 +21,7 @@ public class ShorelineMod implements ClientModInitializer
     // Build number - updated every time a major change happens
     // This is more of debug information and could be formatted as:
     // Name 1.0.{BUILD_NUMBER}-{GIT_HASH}
-    public static final String MOD_BUILD_NUMBER = "b2";
+    public static final String MOD_BUILD_NUMBER = "b5";
     // Mod mc version
     public static final String MOD_MC_VER = "1.19.4";
 

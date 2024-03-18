@@ -60,7 +60,8 @@ public class NoFallModule extends ToggleModule
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event)
     {
-        if (event.getStage() != EventStage.PRE || mc.player.fallDistance <= mc.player.getSafeFallDistance())
+        if (event.getStage() != EventStage.PRE || mc.player.fallDistance <= mc.player.getSafeFallDistance()
+                || mc.player.isFallFlying())
         {
             return;
         }

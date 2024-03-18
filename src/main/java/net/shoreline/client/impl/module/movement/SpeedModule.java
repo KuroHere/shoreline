@@ -7,6 +7,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
@@ -154,25 +155,24 @@ public class SpeedModule extends ToggleModule
             double dx = mc.player.getX() - mc.player.prevX;
             double dz = mc.player.getZ() - mc.player.prevZ;
             distance = Math.sqrt(dx * dx + dz * dz);
-            if (speedModeConfig.getValue() == Speed.GRIM_COLLIDE)
+            if (speedModeConfig.getValue() == Speed.GRIM_COLLIDE && MovementUtil.isInputtingMovement())
             {
-                boolean collidesWithAnother = false;
+                int collisions = 0;
+                Box box = mc.player.getBoundingBox().expand(1.0);
                 for (Entity entity : mc.world.getEntities())
                 {
-                    if (checkIsCollidingEntity(entity) && MathHelper.sqrt((float) mc.player.squaredDistanceTo(entity)) <= 1.5)
+                    if (checkIsCollidingEntity(entity) && entity.getBoundingBox().intersects(box))
                     {
-                        collidesWithAnother = true;
-                        break;
+                        collisions++;
                     }
                 }
-                if (collidesWithAnother)
+                if (collisions > 0)
                 {
                     Vec3d velocity = mc.player.getVelocity();
                     // double COLLISION_DISTANCE = 1.5;
-                    double factor = 1.19;
-                    double velocityX = velocity.x * factor;
-                    double velocityZ = velocity.z * factor;
-                    mc.player.setVelocity(velocityX, velocity.y, velocityZ);
+                    double factor = 0.08 * collisions;
+                    Vec2f strafe = handleStrafeMotion((float) factor);
+                    mc.player.setVelocity(velocity.x + strafe.x, velocity.y, velocity.z + strafe.y);
                 }
             }
         }
