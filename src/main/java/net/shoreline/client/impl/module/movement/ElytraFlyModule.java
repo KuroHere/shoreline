@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.FireworkRocketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
@@ -38,8 +39,11 @@ public class ElytraFlyModule extends ToggleModule
             "flight speed", 0.1f, 2.5f, 10.0f);
     Config<Float> vspeedConfig = new NumberConfig<>("VerticalSpeed", "The " +
             "vertical flight speed", 0.1f, 1.0f, 5.0f);
-    Config<Boolean> instantFlyConfig = new BooleanConfig("InstantFly",
+
+    /*Config<Boolean> instantFlyConfig = new BooleanConfig("InstantFly",
             "Automatically activates elytra from the ground", false);
+     */
+
     Config<Boolean> fireworkConfig = new BooleanConfig("Fireworks", "Uses " +
             "fireworks when flying", false, () -> modeConfig.getValue() != FlyMode.PACKET);
     //
@@ -124,9 +128,8 @@ public class ElytraFlyModule extends ToggleModule
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (event.getStage() != EventStage.PRE)
-        {
-            return;
+        if (fireworkConfig.getValue()) {
+            boostFirework();
         }
     }
 
@@ -158,11 +161,6 @@ public class ElytraFlyModule extends ToggleModule
         if (mc.player == null)
         {
             return;
-        }
-        if (event.getPacket() instanceof PlayerPositionLookS2CPacket
-                && fireworkConfig.getValue())
-        {
-            boostFirework();
         }
     }
 
@@ -242,7 +240,6 @@ public class ElytraFlyModule extends ToggleModule
     public enum FlyMode
     {
         CONTROL,
-        CONTROL_STRICT,
         BOOST,
         FACTORIZE,
         PACKET,
