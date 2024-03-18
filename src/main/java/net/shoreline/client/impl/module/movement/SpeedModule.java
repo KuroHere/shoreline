@@ -86,7 +86,6 @@ public class SpeedModule extends ToggleModule
 
     /**
      *
-     *
      * @return
      */
     @Override
@@ -128,7 +127,6 @@ public class SpeedModule extends ToggleModule
     }
 
     /**
-     *
      *
      * @param event
      */
@@ -346,29 +344,29 @@ public class SpeedModule extends ToggleModule
                 {
                     Modules.TIMER.setTimer(1.0888f);
                 }
-                if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.4, 3)) 
+                if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.4, 3))
                 {
                     Managers.MOVEMENT.setMotionY(0.31 + jumpEffect);
                     event.setY(0.31 + jumpEffect);
-                } 
-                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.71, 3)) 
+                }
+                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.71, 3))
                 {
                     Managers.MOVEMENT.setMotionY(0.04 + jumpEffect);
                     event.setY(0.04 + jumpEffect);
-                } 
-                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.75, 3)) 
+                }
+                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.75, 3))
                 {
                     Managers.MOVEMENT.setMotionY(-0.2 - jumpEffect);
                     event.setY(-0.2 - jumpEffect);
-                } 
-                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.55, 3)) 
+                }
+                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.55, 3))
                 {
                     Managers.MOVEMENT.setMotionY(-0.14 + jumpEffect);
                     event.setY(-0.14 + jumpEffect);
-                } 
-                else 
+                }
+                else
                 {
-                    if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.41, 3)) 
+                    if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.41, 3))
                     {
                         Managers.MOVEMENT.setMotionY(-0.2 + jumpEffect);
                         event.setY(-0.2 + jumpEffect);
@@ -538,7 +536,7 @@ public class SpeedModule extends ToggleModule
                     strafe = 4;
                     return;
                 }
-                if (MathUtil.round(mc.player.getY() - ((int) mc.player.getY()), 3) == MathUtil.round(0.138, 3)) 
+                if (MathUtil.round(mc.player.getY() - ((int) mc.player.getY()), 3) == MathUtil.round(0.138, 3))
                 {
                     Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y - (0.08 + jumpEffect));
                     event.setY(event.getY() - (0.0931 + jumpEffect));

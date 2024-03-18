@@ -121,24 +121,24 @@ public class InteractionManager implements Globals
         {
             return;
         }
-        BlockPos neighbor;
         Direction sideHit = getInteractDirection(pos, strictDirection);
         Vec3d hitVec = Vec3d.ofCenter(pos);
         if (sideHit == null)
         {
-            neighbor = pos;
             sideHit = Direction.UP;
         }
         else
         {
-            neighbor = pos.offset(sideHit);
             hitVec.add(sideHit.getOffsetX() * 0.5,
                 sideHit.getOffsetY() * 0.5, sideHit.getOffsetZ() * 0.5);
         }
-        BlockHitResult result = new BlockHitResult(hitVec, sideHit.getOpposite(), pos, false);
-        mc.interactionManager.interactBlock(mc.player, hand, result);
-        // Managers.NETWORK.sendSequencedPacket(id ->
-        //        new PlayerInteractBlockC2SPacket(hand, result, id));
+        Vec3d eyes = mc.player.getEyePos();
+        boolean inside = eyes.x > pos.getX() && eyes.x < pos.getX() + 1 &&
+                        eyes.y > pos.getY() && eyes.y < pos.getY() + 1 &&
+                        eyes.z > pos.getZ() && eyes.z < pos.getZ() + 1;
+        BlockHitResult result = new BlockHitResult(hitVec, sideHit, pos, inside);
+        Managers.NETWORK.sendSequencedPacket(id ->
+                new PlayerInteractBlockC2SPacket(hand, result, id));
         Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
     }
 
@@ -150,6 +150,8 @@ public class InteractionManager implements Globals
      */
     private Direction getInteractDirection(BlockPos blockPos, boolean strictDirection)
     {
+        Direction interactDirection = null;
+        double interactDist = 0.0;
         for (Direction dir : Direction.values())
         {
             BlockPos pos1 = blockPos.offset(dir);
@@ -172,9 +174,14 @@ public class InteractionManager implements Globals
                     continue;
                 }
             }
-            return dir;
+            double dist = mc.player.getEyePos().squaredDistanceTo(pos1.toCenterPos());
+            if (dist > interactDist)
+            {
+                interactDirection = dir;
+                interactDist = dist;
+            }
         }
-        return null;
+        return interactDirection;
     }
 
     /**

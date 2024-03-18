@@ -26,8 +26,6 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 
-import java.util.Random;
-
 /**
  *
  *
@@ -201,6 +199,14 @@ public class CriticalsModule extends ToggleModule
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                         x, y + 0.0000013579f, z, false));
             }
+            case GRIM ->
+            {
+                if (!mc.player.isOnGround())
+                {
+                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                            x, y - 0.000001, z, false));
+                }
+            }
             case LOW_HOP ->
             {
                 // mc.player.jump();
@@ -214,6 +220,7 @@ public class CriticalsModule extends ToggleModule
         PACKET,
         PACKET_STRICT,
         VANILLA,
+        GRIM,
         LOW_HOP
     }
 }

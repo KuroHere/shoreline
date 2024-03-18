@@ -57,9 +57,9 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
                     }
                 });
         addDrawableChild(reconnectButton.dimensions(width / 2 - 100,
-                height / 2 + reasonHeight / 2 + mc.textRenderer.fontHeight + 72, 200, 20).build());
+                height / 2 + reasonHeight / 2 + mc.textRenderer.fontHeight + 24, 200, 20).build());
         addDrawableChild(autoReconnectButton.dimensions(width / 2 - 100,
-                height / 2 + reasonHeight / 2 + mc.textRenderer.fontHeight + 96, 200, 20).build());
+                height / 2 + reasonHeight / 2 + mc.textRenderer.fontHeight + 48, 200, 20).build());
         if (Modules.AUTO_RECONNECT.isEnabled())
         {
             reconnectSeconds = Math.round(Modules.AUTO_RECONNECT.getDelay() * 20.0f);

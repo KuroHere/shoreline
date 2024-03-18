@@ -4,14 +4,12 @@ import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
-import net.minecraft.client.input.Input;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.api.config.Config;
@@ -31,9 +29,7 @@ import net.shoreline.client.init.Managers;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -77,7 +73,7 @@ public class NoSlowModule extends ToggleModule
     private boolean sneaking;
     //
     private static KeyBinding[] MOVE_KEYBINDS;
-    
+
     /**
      *
      */
@@ -87,9 +83,6 @@ public class NoSlowModule extends ToggleModule
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable()
     {
@@ -99,10 +92,7 @@ public class NoSlowModule extends ToggleModule
         }
         MOVE_KEYBINDS = new KeyBinding[]{mc.options.forwardKey, mc.options.backKey, mc.options.rightKey, mc.options.leftKey};
     }
-    
-    /**
-     *
-     */
+
     @Override
     public void onDisable()
     {
@@ -115,20 +105,12 @@ public class NoSlowModule extends ToggleModule
         Managers.TICK.setClientTick(1.0f);
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
     public void onGameJoin(GameJoinEvent event)
     {
         onEnable();
     }
-    
-    /**
-     *
-     * @param event
-     */
+
     @EventListener
     public void onSetCurrentHand(SetCurrentHandEvent event)
     {
@@ -140,10 +122,6 @@ public class NoSlowModule extends ToggleModule
         }
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event)
     {
@@ -163,11 +141,7 @@ public class NoSlowModule extends ToggleModule
             }
         }
     }
-    
-    /**
-     *
-     * @param event
-     */
+
     @EventListener
     public void onTick(TickEvent event)
     {
@@ -234,10 +208,6 @@ public class NoSlowModule extends ToggleModule
         }
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
     public void onSlowMovement(SlowMovementEvent event)
     {
@@ -248,40 +218,29 @@ public class NoSlowModule extends ToggleModule
             if (grimConfig.getValue())
             {
                 event.cancel();
+                return;
+            }
+            if (mc.player.isOnGround())
+            {
+                Managers.TICK.setClientTick(1.0f);
             }
             else
             {
-                if (mc.player.isOnGround())
-                {
-                    Managers.TICK.setClientTick(1.0f);
-                }
-                else
-                {
-                    Managers.TICK.setClientTick(webSpeedConfig.getValue() / 2.0f);
-                }
+                Managers.TICK.setClientTick(webSpeedConfig.getValue() / 2.0f);
             }
         }
     }
-    
-    /**
-     *
-     * @param event
-     */
+
     @EventListener
     public void onMovementSlowdown(MovementSlowdownEvent event)
     {
-        Input input = event.getInput();
         if (checkSlowed())
         {
-            input.movementForward *= 5.0f;
-            input.movementSideways *= 5.0f;
+            event.input.movementForward *= 5.0f;
+            event.input.movementSideways *= 5.0f;
         }
     }
-    
-    /**
-     *
-     * @param event
-     */
+
     @EventListener
     public void onVelocityMultiplier(VelocityMultiplierEvent event)
     {
@@ -291,11 +250,7 @@ public class NoSlowModule extends ToggleModule
             event.cancel();
         }
     }
-    
-    /**
-     *
-     * @param event
-     */
+
     @EventListener
     public void onSteppedOnSlimeBlock(SteppedOnSlimeBlockEvent event)
     {
@@ -304,11 +259,7 @@ public class NoSlowModule extends ToggleModule
             event.cancel();
         }
     }
-    
-    /**
-     *
-     * @param event
-     */
+
     @EventListener
     public void onBlockSlipperiness(BlockSlipperinessEvent event)
     {
@@ -319,11 +270,7 @@ public class NoSlowModule extends ToggleModule
             event.setSlipperiness(0.6f);
         }
     }
-    
-    /**
-     *
-     * @param event
-     */
+
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
@@ -356,28 +303,17 @@ public class NoSlowModule extends ToggleModule
             }
         }
     }
-    
-    /**
-     *
-     * @return
-     */
+
     public boolean checkSlowed()
     {
         return !mc.player.isRiding() && !mc.player.isSneaking() && !mc.player.isFallFlying()
-                && (mc.player.isUsingItem() && itemsConfig.getValue())
-                || (mc.player.isBlocking() && shieldsConfig.getValue() && !grimConfig.getValue());
+                && (mc.player.isUsingItem() && itemsConfig.getValue() || mc.player.isBlocking() && shieldsConfig.getValue() && !grimConfig.getValue());
     }
-    
-    /**
-     *
-     * @return
-     */
+
     public boolean checkScreen()
     {
-        return mc.currentScreen != null
-                && !(mc.currentScreen instanceof ChatScreen
-                || mc.currentScreen instanceof SignEditScreen
-                || mc.currentScreen instanceof DeathScreen);
+        return mc.currentScreen != null && !(mc.currentScreen instanceof ChatScreen
+                || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof DeathScreen);
     }
 
     public List<BlockPos> getIntersectingWebs()

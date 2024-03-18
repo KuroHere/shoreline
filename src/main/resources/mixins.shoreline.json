@@ -19,6 +19,7 @@
     "accessor.AccessorEntity",
     "accessor.AccessorEntityVelocityUpdateS2CPacket",
     "accessor.AccessorExplosionS2CPacket",
+    "accessor.AccessorFireworkRocketEntity",
     "accessor.AccessorGameOptions",
     "accessor.AccessorItemRenderer",
     "accessor.AccessorKeyBinding",
