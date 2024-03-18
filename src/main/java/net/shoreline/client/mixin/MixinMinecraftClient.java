@@ -32,8 +32,10 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
     //
     @Shadow
     public ClientWorld world;
+    //
     @Shadow
     public ClientPlayerEntity player;
+    //
     @Shadow
     @Nullable
     public ClientPlayerInteractionManager interactionManager;
@@ -54,6 +56,7 @@ public abstract class MixinMinecraftClient implements IMinecraftClient
     //
     @Shadow
     protected int attackCooldown;
+
     @Unique
     private boolean leftClick;
     // https://github.com/MeteorDevelopment/meteor-client/blob/master/src/main/java/meteordevelopment/meteorclient/mixin/MinecraftClientMixin.java#L54

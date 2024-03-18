@@ -4,6 +4,7 @@ import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.shoreline.client.api.event.StageEvent;
 
 /**
  *
@@ -12,9 +13,9 @@ import net.minecraft.item.ItemStack;
  * @since 1.0
  */
 @Cancelable
-public class RenderTooltipEvent extends Event
+public class RenderTooltipEvent extends StageEvent
 {
-    private final MatrixStack matrices;
+    public final MatrixStack matrices;
     private final ItemStack stack;
     //
     private final int x, y;
@@ -25,11 +26,6 @@ public class RenderTooltipEvent extends Event
         this.stack = stack;
         this.x = x;
         this.y = y;
-    }
-
-    public MatrixStack getMatrices()
-    {
-        return matrices;
     }
 
     public ItemStack getStack()

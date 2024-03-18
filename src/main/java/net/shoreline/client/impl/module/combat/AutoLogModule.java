@@ -74,12 +74,12 @@ public class AutoLogModule extends ToggleModule
         {
             if (!healthTotemConfig.getValue())
             {
-                playerDisconnect("[AutoLog] logged out with %d hearts remaining.", health);
+                playerDisconnect("[AutoLog] logged out with %d hearts remaining.", (int) health);
                 return;
             }
             else if (b2)
             {
-                playerDisconnect("[AutoLog] logged out with %d totems and %d hearts remaining.", totems, health);
+                playerDisconnect("[AutoLog] logged out with %d totems and %d hearts remaining.", totems, (int) health);
                 return;
             }
         }
@@ -101,8 +101,8 @@ public class AutoLogModule extends ToggleModule
             mc.world.disconnect();
             return;
         }
-        mc.getNetworkHandler().getConnection().disconnect(
-                Text.of(String.format(disconnectReason, args)));
+        disconnectReason = String.format(disconnectReason, args);
+        mc.getNetworkHandler().getConnection().disconnect(Text.of(disconnectReason));
         disable();
     }
 

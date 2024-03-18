@@ -1,5 +1,7 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.LlamaEntity;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -9,9 +11,6 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.entity.passive.EntitySteerEvent;
 import net.shoreline.client.impl.event.network.MountJumpStrengthEvent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.LlamaEntity;
-import net.shoreline.client.util.Globals;
 
 /**
  *
@@ -36,10 +35,6 @@ public class EntityControlModule extends ToggleModule
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event)
     {
@@ -55,20 +50,12 @@ public class EntityControlModule extends ToggleModule
         }
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
     public void onEntitySteer(EntitySteerEvent event)
     {
         event.cancel();
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
     public void onMountJumpStrength(MountJumpStrengthEvent event)
     {

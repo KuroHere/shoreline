@@ -43,25 +43,17 @@ public class NoFallModule extends ToggleModule
         super("NoFall", "Prevents all fall damage", ModuleCategory.MOVEMENT);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String getModuleData()
     {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event)
     {
         if (event.getStage() != EventStage.PRE || mc.player.fallDistance <= mc.player.getSafeFallDistance()
-                || mc.player.isFallFlying())
+                || mc.player.isOnGround() || mc.player.isFallFlying())
         {
             return;
         }
@@ -87,14 +79,11 @@ public class NoFallModule extends ToggleModule
         }
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event)
     {
-        if (mc.player == null || mc.player.fallDistance <= mc.player.getSafeFallDistance())
+        if (mc.player == null || mc.player.fallDistance <= mc.player.getSafeFallDistance()
+                || mc.player.isOnGround() || mc.player.isFallFlying())
         {
             return;
         }

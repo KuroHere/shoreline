@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.entity.effect.StatusEffects;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -117,7 +118,19 @@ public class LongJumpModule extends ToggleModule
                 return;
             }
             //
-            final double base = 0.2873f;
+            double speedEffect = 1.0;
+            double slowEffect = 1.0;
+            if (mc.player.hasStatusEffect(StatusEffects.SPEED))
+            {
+                double amplifier = mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier();
+                speedEffect = 1 + (0.2 * (amplifier + 1));
+            }
+            if (mc.player.hasStatusEffect(StatusEffects.SLOWNESS))
+            {
+                double amplifier = mc.player.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier();
+                slowEffect = 1 + (0.2 * (amplifier + 1));
+            }
+            final double base = 0.2873f * speedEffect / slowEffect;
             if (stage == 0)
             {
                 stage = 1;

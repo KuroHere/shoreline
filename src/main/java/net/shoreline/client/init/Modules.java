@@ -135,7 +135,7 @@ public class Modules
     public static TracersModule TRACERS;
     public static ViewClipModule VIEW_CLIP;
     // public static ViewModelModule VIEW_MODEL;
-    public static WaypointsModule WAYPOINTS;
+    // public static WaypointsModule WAYPOINTS;
     // World
     public static AntiInteractModule ANTI_INTERACT;
     public static AvoidModule AVOID;
@@ -317,7 +317,7 @@ public class Modules
                     "viewclip-module");
             // VIEW_MODEL = (ViewModelModule) getRegisteredModule(
             //        "viewmodel-module");
-            WAYPOINTS = (WaypointsModule) getRegisteredModule("waypoints-module");
+            // WAYPOINTS = (WaypointsModule) getRegisteredModule("waypoints-module");
             ANTI_INTERACT = (AntiInteractModule) getRegisteredModule(
                     "antiinteract-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");

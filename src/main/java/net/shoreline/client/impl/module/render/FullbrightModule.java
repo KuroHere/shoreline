@@ -1,6 +1,7 @@
 package net.shoreline.client.impl.module.render;
 
-import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.EventStage;
@@ -10,11 +11,7 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.config.ConfigUpdateEvent;
 import net.shoreline.client.impl.event.network.GameJoinEvent;
-import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.render.LightmapGammaEvent;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.shoreline.client.impl.event.world.AddEntityEvent;
 
 /**
  *
@@ -26,7 +23,7 @@ public class FullbrightModule extends ToggleModule
 {
     //
     Config<Brightness> brightnessConfig = new EnumConfig<>("Mode", "Mode for " +
-            "world brightness", Brightness.POTION, Brightness.values());
+            "world brightness", Brightness.GAMMA, Brightness.values());
 
     /**
      *

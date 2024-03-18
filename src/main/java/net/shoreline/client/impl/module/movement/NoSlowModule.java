@@ -90,7 +90,7 @@ public class NoSlowModule extends ToggleModule
         {
             return;
         }
-        MOVE_KEYBINDS = new KeyBinding[]{mc.options.forwardKey, mc.options.backKey, mc.options.rightKey, mc.options.leftKey};
+        MOVE_KEYBINDS = new KeyBinding[]{mc.options.jumpKey, mc.options.sneakKey, mc.options.forwardKey, mc.options.backKey, mc.options.rightKey, mc.options.leftKey};
     }
 
     @Override

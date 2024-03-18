@@ -1,11 +1,14 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.FireworkRocketItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -14,15 +17,12 @@ import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
-import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.entity.player.TravelEvent;
+import net.shoreline.client.impl.event.entity.projectile.RemoveFireworkEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.mixin.accessor.AccessorPlayerMoveC2SPacket;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.shoreline.client.util.string.EnumFormatter;
 
 /**
  *
@@ -39,15 +39,13 @@ public class ElytraFlyModule extends ToggleModule
             "flight speed", 0.1f, 2.5f, 10.0f);
     Config<Float> vspeedConfig = new NumberConfig<>("VerticalSpeed", "The " +
             "vertical flight speed", 0.1f, 1.0f, 5.0f);
-
-    /*Config<Boolean> instantFlyConfig = new BooleanConfig("InstantFly",
+    Config<Boolean> instantFlyConfig = new BooleanConfig("InstantFly",
             "Automatically activates elytra from the ground", false);
-     */
-
     Config<Boolean> fireworkConfig = new BooleanConfig("Fireworks", "Uses " +
             "fireworks when flying", false, () -> modeConfig.getValue() != FlyMode.PACKET);
     //
     private float pitch;
+    private FireworkRocketEntity fireworkRocketEntity;
 
     /**
      *
@@ -58,10 +56,12 @@ public class ElytraFlyModule extends ToggleModule
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     *
-     * @param event
-     */
+    @Override
+    public String getModuleData()
+    {
+        return EnumFormatter.formatEnum(modeConfig.getValue());
+    }
+
     @EventListener
     public void onTravel(TravelEvent event)
     {
@@ -74,7 +74,6 @@ public class ElytraFlyModule extends ToggleModule
         {
             case CONTROL ->
             {
-                mc.player.limbAnimator.setSpeed(0.0f);
                 event.cancel();
                 float forward = mc.player.input.movementForward;
                 float strafe = mc.player.input.movementSideways;
@@ -106,6 +105,7 @@ public class ElytraFlyModule extends ToggleModule
             }
             case BOOST ->
             {
+                event.cancel();
                 mc.player.limbAnimator.setSpeed(0.0f);
                 glideElytraVec(mc.player.getPitch());
                 boolean boost = mc.options.jumpKey.isPressed();
@@ -114,22 +114,26 @@ public class ElytraFlyModule extends ToggleModule
                 {
                     double sin = -MathHelper.sin(yaw);
                     double cos = MathHelper.cos(yaw);
-                    Managers.MOVEMENT.setMotionXZ(sin * speedConfig.getValue() / 20.0f,
-                            cos * speedConfig.getValue() / 20.0f);
+                    double motionX = sin * speedConfig.getValue() / 20.0f;
+                    double motionZ = cos * speedConfig.getValue() / 20.0f;
+                    Managers.MOVEMENT.setMotionXZ(mc.player.getVelocity().x + motionX,
+                            mc.player.getVelocity().z + motionZ);
                 }
             }
         }
     }
 
-    /**
-     *
-     * @param event
-     */
     @EventListener
-    public void onTick(TickEvent event)
+    public void onRemoveFirework(RemoveFireworkEvent event)
     {
-        if (fireworkConfig.getValue()) {
-            boostFirework();
+        if (mc.player == null)
+        {
+            return;
+        }
+        if (mc.player.isFallFlying() && fireworkConfig.getValue())
+        {
+            // fireworkRocketEntity = event.getRocketEntity();
+            // boostFirework();
         }
     }
 
@@ -148,19 +152,6 @@ public class ElytraFlyModule extends ToggleModule
                 && packet.changesLook() && mc.player.isFallFlying())
         {
             ((AccessorPlayerMoveC2SPacket) packet).hookSetPitch(pitch);
-        }
-    }
-
-    /**
-     *
-     * @param event
-     */
-    @EventListener
-    public void onPacketInbound(PacketEvent.Inbound event)
-    {
-        if (mc.player == null)
-        {
-            return;
         }
     }
 

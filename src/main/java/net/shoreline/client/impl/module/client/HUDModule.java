@@ -59,6 +59,8 @@ public class HUDModule extends ToggleModule
             VanillaHud.values());
     Config<Boolean> potionEffectsConfig = new BooleanConfig("PotionEffects",
             "Displays active potion effects", true);
+    Config<Boolean> potionColorsConfig = new BooleanConfig("PotionColors",
+            "Displays active potion colors", true);
     Config<Boolean> durabilityConfig = new BooleanConfig("Durability",
             "Displays the current held items durability", false);
     Config<Boolean> coordsConfig = new BooleanConfig("Coords",
@@ -197,7 +199,7 @@ public class HUDModule extends ToggleModule
                     int width = RenderManager.textWidth(text);
                     RenderManager.renderText(event.getMatrices(), text,
                             res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
-                            effect.getColor());
+                            potionColorsConfig.getValue() ? effect.getColor() : getHudColor(rainbowOffset));
                     if (renderingUp)
                     {
                         bottomRight -= 9.0f;
@@ -366,7 +368,7 @@ public class HUDModule extends ToggleModule
                 //
                 int x = res.getScaledWidth() / 2 + 15;
                 int y = res.getScaledHeight();
-                if (mc.player.isSubmergedInWater() && mc.player.getAir() > 0)
+                if (mc.player.isTouchingWater() && mc.player.getAir() > 0)
                 {
                     y -= 65;
                 }

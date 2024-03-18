@@ -3,6 +3,7 @@ package net.shoreline.client.impl.module.movement;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.network.NetworkThreadUtils;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
@@ -85,16 +86,11 @@ public class VelocityModule extends ToggleModule
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
-    /**
-     *
-     *
-     * @param event
-     */
-    // @EventListener
-    // public void onPacketOutbound(PacketEvent.Outbound event)
-    // {
-    //
-    // }
+    @Override
+    public void onEnable()
+    {
+        cancelVelocity = false;
+    }
 
     /**
      *
@@ -208,10 +204,9 @@ public class VelocityModule extends ToggleModule
     @EventListener
     public void onTick(TickEvent event)
     {
-        if (event.getStage() == EventStage.PRE
-                && modeConfig.getValue() == VelocityMode.GRIM && cancelVelocity)
+        if (event.getStage() == EventStage.PRE && cancelVelocity)
         {
-            if (Managers.NCP.passed(100))
+            if (modeConfig.getValue() == VelocityMode.GRIM && Managers.NCP.passed(100))
             {
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
                         mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround()));

@@ -64,7 +64,8 @@ public class SpeedModule extends ToggleModule
             () -> strafeBoostConfig.getValue());
     Config<Boolean> speedWaterConfig = new BooleanConfig("SpeedInWater",
             "Applies speed even in water and lava", false);
-
+    Config<Boolean> factorConfig = new BooleanConfig("Entity-Factor",
+            "Factors entity collisions in speed", false);
     //
     private int strafe = 4;
     private boolean accel;
@@ -139,7 +140,6 @@ public class SpeedModule extends ToggleModule
 
     /**
      *
-     *
      * @param event
      */
     @EventListener
@@ -170,7 +170,7 @@ public class SpeedModule extends ToggleModule
                 {
                     Vec3d velocity = mc.player.getVelocity();
                     // double COLLISION_DISTANCE = 1.5;
-                    double factor = 0.08 * collisions;
+                    double factor = factorConfig.getValue() ? 0.08 * collisions : 0.08;
                     Vec2f strafe = handleStrafeMotion((float) factor);
                     mc.player.setVelocity(velocity.x + strafe.x, velocity.y, velocity.z + strafe.y);
                 }
@@ -179,7 +179,6 @@ public class SpeedModule extends ToggleModule
     }
 
     /**
-     *
      *
      * @param event
      */
@@ -713,9 +712,6 @@ public class SpeedModule extends ToggleModule
                 && !(entity instanceof FakePlayerEntity) && !(entity instanceof ArmorStandEntity);
     }
 
-    /**
-     *
-     */
     public void setPrevTimer()
     {
         prevTimer = !prevTimer;

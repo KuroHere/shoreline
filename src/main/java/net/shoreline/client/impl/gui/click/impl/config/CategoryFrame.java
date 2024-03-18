@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Configuration {@link Frame} (commonly referred to as the "ClickGui") which
+ * Configuration {@link Frame} (aka the "ClickGui" frames) which
  * allows the user to configure a {@link Module}'s {@link Config} values.
  *
  * @author linus
