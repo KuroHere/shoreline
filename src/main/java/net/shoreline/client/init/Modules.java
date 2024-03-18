@@ -270,6 +270,7 @@ public class Modules
             ANTI_LEVITATION = (AntiLevitationModule) getRegisteredModule(
                     "antilevitation-module");
             AUTO_WALK = (AutoWalkModule) getRegisteredModule("autowalk-module");
+            ELYTRA_FLY = (ElytraFlyModule) getRegisteredModule("elytrafly-module");
             ENTITY_CONTROL = (EntityControlModule) getRegisteredModule(
                     "entitycontrol-module");
             ENTITY_SPEED = (EntitySpeedModule) getRegisteredModule(
