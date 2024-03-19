@@ -37,6 +37,7 @@ import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.RunTickEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
+import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.world.AddEntityEvent;
@@ -398,10 +399,7 @@ public class AutoCrystalModule extends RotationModule {
      * @param event
      */
     @EventListener
-    public void onPlayerUpdate(PlayerUpdateEvent event) {
-        if (event.getStage() != EventStage.PRE) {
-            return;
-        }
+    public void onPlayerUpdate(PlayerTickEvent event) {
         renderPos = null;
         if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
                 || mc.options.attackKey.isPressed()) {
