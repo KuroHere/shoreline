@@ -10,17 +10,11 @@ import net.shoreline.client.impl.event.ItemMultitaskEvent;
  * @since 1.0
  */
 public class MultitaskModule extends ToggleModule {
-    /**
-     *
-     */
+
     public MultitaskModule() {
-        super("MultiTask", "Allows you to mine and use items simultaneously",
-                ModuleCategory.WORLD);
+        super("MultiTask", "Allows you to mine and use items simultaneously", ModuleCategory.WORLD);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onItemMultitask(ItemMultitaskEvent event) {
         event.cancel();

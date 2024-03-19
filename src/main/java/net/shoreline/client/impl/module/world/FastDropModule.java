@@ -17,15 +17,11 @@ import net.shoreline.client.init.Managers;
  * @since 1.0
  */
 public class FastDropModule extends ToggleModule {
-    //
-    Config<Integer> delayConfig = new NumberConfig<>("Delay", "The delay for " +
-            "dropping items", 0, 0, 4);
-    //
+
+    Config<Integer> delayConfig = new NumberConfig<>("Delay", "The delay for dropping items", 0, 0, 4);
+
     private int dropTicks;
 
-    /**
-     *
-     */
     public FastDropModule() {
         super("FastDrop", "Drops items from the hotbar faster", ModuleCategory.WORLD);
     }

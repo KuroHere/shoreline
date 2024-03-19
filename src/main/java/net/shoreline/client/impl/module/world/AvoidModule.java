@@ -19,7 +19,6 @@ import net.shoreline.client.util.world.BlockUtil;
  * @since 1.0
  */
 public class AvoidModule extends ToggleModule {
-    //
     Config<Boolean> voidConfig = new BooleanConfig("Void", "Prevents player " +
             "from falling into the void", true);
     Config<Boolean> fireConfig = new BooleanConfig("Fire", "Prevents player " +
@@ -31,17 +30,11 @@ public class AvoidModule extends ToggleModule {
     Config<Boolean> unloadedConfig = new BooleanConfig("Unloaded", "Prevents " +
             "player from entering chunks that haven't been loaded", false);
 
-    /**
-     *
-     */
     public AvoidModule() {
         super("Avoid", "Prevents player from entering harmful areas",
                 ModuleCategory.WORLD);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE && voidConfig.getValue()
@@ -53,9 +46,6 @@ public class AvoidModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onBlockCollision(BlockCollisionEvent event) {
         BlockPos pos = event.getPos();

@@ -21,21 +21,12 @@ import java.util.List;
  */
 public class AntiInteractModule extends ToggleModule {
     //
-    Config<List<Block>> blocksConfig = new ListConfig<>("Blocks",
-            "The blocks to prevent player interact", Blocks.ENDER_CHEST,
-            Blocks.ANVIL);
+    Config<List<Block>> blocksConfig = new ListConfig<>("Blocks", "The blocks to prevent player interact", Blocks.ENDER_CHEST, Blocks.ANVIL);
 
-    /**
-     *
-     */
     public AntiInteractModule() {
-        super("AntiInteract", "Prevents player from " +
-                "interacting with certain objects", ModuleCategory.WORLD);
+        super("AntiInteract", "Prevents player from interacting with certain objects", ModuleCategory.WORLD);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onInteractBlock(InteractBlockEvent event) {
         BlockPos pos = event.getHitResult().getBlockPos();
@@ -47,9 +38,6 @@ public class AntiInteractModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (mc.player == null || mc.world == null) {

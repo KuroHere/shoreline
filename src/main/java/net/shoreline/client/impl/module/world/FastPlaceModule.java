@@ -36,29 +36,16 @@ public class FastPlaceModule extends ToggleModule {
     Config<Selection> selectionConfig = new EnumConfig<>("Selection", "The " +
             "selection of items to apply fast placements", Selection.WHITELIST,
             Selection.values());
-    Config<Integer> delayConfig = new NumberConfig<>("Delay", "Fast place " +
-            "click delay", 0, 1, 4);
-    Config<Float> startDelayConfig = new NumberConfig<>("StartDelay", "Fast" +
-            " place start delay", 0.0f, 0.0f, 1.0f);
-    Config<Boolean> ghostFixConfig = new BooleanConfig("GhostFix", "Fixes " +
-            "item ghosting issue on some servers", false);
-    Config<List<Item>> whitelistConfig = new ListConfig<>("Whitelist",
-            "Valid item whitelist", Items.EXPERIENCE_BOTTLE,
-            Items.SNOWBALL, Items.EGG);
-    Config<List<Item>> blacklistConfig = new ListConfig<>("Blacklist",
-            "Valid item blacklist", Items.ENDER_PEARL, Items.ENDER_EYE);
+    Config<Integer> delayConfig = new NumberConfig<>("Delay", "Fast place click delay", 0, 1, 4);
+    Config<Float> startDelayConfig = new NumberConfig<>("StartDelay", "Fast place start delay", 0.0f, 0.0f, 1.0f);
+    Config<Boolean> ghostFixConfig = new BooleanConfig("GhostFix", "Fixes item ghosting issue on some servers", false);
+    Config<List<Item>> whitelistConfig = new ListConfig<>("Whitelist", "Valid item whitelist", Items.EXPERIENCE_BOTTLE, Items.SNOWBALL, Items.EGG);
+    Config<List<Item>> blacklistConfig = new ListConfig<>("Blacklist", "Valid item blacklist", Items.ENDER_PEARL, Items.ENDER_EYE);
 
-    /**
-     *
-     */
     public FastPlaceModule() {
-        super("FastPlace", "Place items and blocks faster",
-                ModuleCategory.WORLD);
+        super("FastPlace", "Place items and blocks faster", ModuleCategory.WORLD);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -77,9 +64,6 @@ public class FastPlaceModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (mc.player == null || mc.world == null) {
@@ -96,10 +80,6 @@ public class FastPlaceModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param held
-     * @return
-     */
     private boolean placeCheck(ItemStack held) {
         return switch (selectionConfig.getValue()) {
             case WHITELIST -> ((ListConfig<?>) whitelistConfig)
