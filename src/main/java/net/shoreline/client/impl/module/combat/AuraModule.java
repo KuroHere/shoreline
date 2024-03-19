@@ -54,7 +54,6 @@ public class AuraModule extends RotationModule {
     private final Timer switchTimer = new CacheTimer();
     Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swings the " +
             "hand after attacking", true);
-    // RANGES
     Config<TargetMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
             "targeting entities to attack", TargetMode.SWITCH,
             TargetMode.values());

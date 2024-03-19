@@ -26,36 +26,26 @@ import java.util.Set;
  * @since 1.0
  */
 public class AntiBotsModule extends ToggleModule {
-    //
-    private final Set<PlayerEntity> botPlayers = new HashSet<>();
-    //
-    Config<Boolean> pingConfig = new BooleanConfig("Ping", "Checks the ping " +
-            "of the bot", true);
-    Config<Boolean> invisibleConfig = new BooleanConfig("Invisibles", "Checks" +
-            " if the bot is invisible", true);
-    Config<Boolean> nameConfig = new BooleanConfig("Name", "Checks the " +
-            "username of the bot", true);
-    Config<Boolean> uuidConfig = new BooleanConfig("UUID", "Checks the UUID " +
-            "of the bot", true);
 
-    /**
-     *
-     */
+    private final Set<PlayerEntity> botPlayers = new HashSet<>();
+
+    Config<Boolean> pingConfig = new BooleanConfig("Ping", "Checks the ping of the bot", true);
+    Config<Boolean> invisibleConfig = new BooleanConfig("Invisibles", "Checks if the bot is invisible", true);
+    Config<Boolean> nameConfig = new BooleanConfig("Name", "Checks the username of the bot", true);
+    Config<Boolean> uuidConfig = new BooleanConfig("UUID", "Checks the UUID of the bot", true);
+
     public AntiBotsModule() {
         super("AntiBots", "Prevents player from interacting with bots",
                 ModuleCategory.COMBAT);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.POST || mc.player.isDead()
                 || mc.player.isSpectator()) {
             return;
         }
-        //
+
         List<AbstractClientPlayerEntity> players = mc.world.getPlayers();
         players.remove(mc.player);
         if (uuidConfig.getValue()) {
@@ -80,9 +70,6 @@ public class AntiBotsModule extends ToggleModule {
                 .forEach(p -> botPlayers.add(p));
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (event.getPacket() instanceof IPlayerInteractEntityC2SPacket packet
@@ -92,18 +79,11 @@ public class AntiBotsModule extends ToggleModule {
             event.cancel();
         }
     }
-
-    /**
-     * @param event
-     */
     @EventListener
     public void onDisconnect(DisconnectEvent event) {
         botPlayers.clear();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onScreenOpen(ScreenOpenEvent event) {
         if (event.getScreen() instanceof DownloadingTerrainScreen) {
@@ -111,36 +91,20 @@ public class AntiBotsModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param player
-     * @return
-     */
     public boolean contains(PlayerEntity player) {
         return botPlayers.contains(player);
     }
 
-    /**
-     * @param player
-     * @return
-     */
     private boolean checkInvisibility(PlayerEntity player) {
         return invisibleConfig.getValue() && player.isInvisible()
                 && !player.hasStatusEffect(StatusEffects.INVISIBILITY);
     }
 
-    /**
-     * @param player
-     * @return
-     */
     private boolean checkPing(PlayerEntity player) {
         return pingConfig.getValue() && mc.getNetworkHandler() != null
                 && mc.getNetworkHandler().getPlayerListEntry(player.getUuid()) == null;
     }
 
-    /**
-     * @param player
-     * @return
-     */
     private boolean checkName(PlayerEntity player) {
         return nameConfig.getValue() && player.getDisplayName().getString().equalsIgnoreCase(
                 new StringBuilder().insert(0, player.getName()).append("§r").toString())
