@@ -1,5 +1,10 @@
 package net.shoreline.client.impl.module.world;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.FluidBlock;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -11,20 +16,12 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.world.BlastResistantBlocks;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FluidBlock;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class NukerModule extends ToggleModule
-{
+public class NukerModule extends ToggleModule {
     //
     Config<BreakMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
             "breaking blocks", BreakMode.SURVIVAL, BreakMode.values());
@@ -46,54 +43,41 @@ public class NukerModule extends ToggleModule
     /**
      *
      */
-    public NukerModule()
-    {
+    public NukerModule() {
         super("Nuker", "Destroys all blocks around the player", ModuleCategory.WORLD);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPlayerUpdate(PlayerUpdateEvent event)
-    {
-        if (timingConfig.getValue() == Timing.SEQUENTIAL)
-        {
+    public void onPlayerUpdate(PlayerUpdateEvent event) {
+        if (timingConfig.getValue() == Timing.SEQUENTIAL) {
             BlockPos mineBlock = null;
             BlockState mineState = null;
-            if (event.getStage() == EventStage.PRE)
-            {
+            if (event.getStage() == EventStage.PRE) {
                 mineBlock = getNukerBlock();
                 mineState = mc.world.getBlockState(mineBlock);
-            }
-            else if (event.getStage() == EventStage.POST)
-            {
+            } else if (event.getStage() == EventStage.POST) {
                 if (mineBlock != null && mineState != null
-                        && isNukerBlock(mineState.getBlock()))
-                {
+                        && isNukerBlock(mineState.getBlock())) {
                     Managers.INTERACT.breakBlock(mineBlock, Direction.UP);
                 }
             }
         }
     }
 
-    public BlockPos getNukerBlock()
-    {
+    public BlockPos getNukerBlock() {
         BlockPos nukerBlock = null;
         float range = rangeConfig.getValue();
-        for (float x = range; x >= -range; x--)
-        {
-            for (float y = range; y >= -range; y--)
-            {
-                for (float z = range; z >= -range; z--)
-                {
+        for (float x = range; x >= -range; x--) {
+            for (float y = range; y >= -range; y--) {
+                for (float z = range; z >= -range; z--) {
                     BlockPos pos = BlockPos.ofFloored(x, y, z);
                     BlockState state = mc.world.getBlockState(pos);
                     if (state.isAir() || state.getBlock() instanceof FluidBlock
                             || mc.player.squaredDistanceTo(pos.toCenterPos()) > range * range
-                            || !isNukerBlock(state.getBlock()))
-                    {
+                            || !isNukerBlock(state.getBlock())) {
                         continue;
                     }
                     nukerBlock = pos;
@@ -104,22 +88,18 @@ public class NukerModule extends ToggleModule
     }
 
     /**
-     *
      * @param block
      * @return
      */
-    public boolean isNukerBlock(Block block)
-    {
+    public boolean isNukerBlock(Block block) {
         return BlastResistantBlocks.isBreakable(block);
     }
 
-    public enum Timing
-    {
+    public enum Timing {
         SEQUENTIAL, VANILLA
     }
 
-    public enum BreakMode
-    {
+    public enum BreakMode {
         SURVIVAL, CREATIVE
     }
 }

@@ -3,19 +3,14 @@ package net.shoreline.client;
 import net.shoreline.client.api.file.ClientConfiguration;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class ShutdownHook extends Thread
-{
+public class ShutdownHook extends Thread {
     /**
      *
-     *
      */
-    public ShutdownHook()
-    {
+    public ShutdownHook() {
         setName("Shoreline-ShutdownHook");
     }
 
@@ -26,8 +21,7 @@ public class ShutdownHook extends Thread
      * @see ClientConfiguration#saveClient()
      */
     @Override
-    public void run()
-    {
+    public void run() {
         Shoreline.info("Saving configurations and shutting down!");
         Shoreline.CONFIG.saveClient();
     }

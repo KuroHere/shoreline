@@ -12,13 +12,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public abstract class Command extends ConfigContainer implements Globals
-{
+public abstract class Command extends ConfigContainer implements Globals {
     //
     private final String desc;
     // The command arguments, For reference: If the command line (chat) is
@@ -27,32 +24,25 @@ public abstract class Command extends ConfigContainer implements Globals
     private final List<Argument<?>> arguments = new ArrayList<>();
 
     /**
-     *
-     *
      * @param name
      * @param desc
      */
-    public Command(String name, String desc)
-    {
+    public Command(String name, String desc) {
         super(name.toLowerCase());
         this.desc = desc;
     }
 
     /**
-     *
      * @param arg
      */
-    protected void register(Argument<?> arg)
-    {
+    protected void register(Argument<?> arg) {
         arguments.add(arg);
     }
 
     /**
-     *
      * @param args
      */
-    protected void register(Argument<?>... args)
-    {
+    protected void register(Argument<?>... args) {
         arguments.addAll(Arrays.asList(args));
     }
 
@@ -60,17 +50,13 @@ public abstract class Command extends ConfigContainer implements Globals
      *
      */
     @Override
-    public void reflectConfigs()
-    {
+    public void reflectConfigs() {
         final ArgumentFactory factory = new ArgumentFactory(this);
         // populate container using reflection
-        for (Field field : getClass().getDeclaredFields())
-        {
-            if (Argument.class.isAssignableFrom(field.getType()))
-            {
+        for (Field field : getClass().getDeclaredFields()) {
+            if (Argument.class.isAssignableFrom(field.getType())) {
                 Argument<?> argument = factory.build(field);
-                if (argument == null)
-                {
+                if (argument == null) {
                     // failsafe for debugging purposes
                     Shoreline.error("Value for field {} is null!", field);
                     continue;
@@ -81,20 +67,16 @@ public abstract class Command extends ConfigContainer implements Globals
     }
 
     /**
-     *
      * @param length
      * @return
      */
-    public boolean isValidArgLength(int length)
-    {
+    public boolean isValidArgLength(int length) {
         int min = 0;
         int max = 0;
-        for (Argument<?> arg : arguments)
-        {
+        for (Argument<?> arg : arguments) {
             max++;
             // Count required args
-            if (arg.isOptional())
-            {
+            if (arg.isOptional()) {
                 continue;
             }
             min++;
@@ -109,21 +91,17 @@ public abstract class Command extends ConfigContainer implements Globals
     public abstract void onCommandInput();
 
     /**
-     *
      * @param prefix
      * @return
      */
-    public String getLiteral(String prefix)
-    {
+    public String getLiteral(String prefix) {
         final StringBuilder literal = new StringBuilder(prefix);
         literal.append(getName());
         literal.append(" ");
-        for (Argument<?> arg : arguments)
-        {
+        for (Argument<?> arg : arguments) {
             String l = arg.getLiteral().trim();
             literal.append(l);
-            if (!l.isBlank())
-            {
+            if (!l.isBlank()) {
                 literal.append(" ");
             }
         }
@@ -133,14 +111,12 @@ public abstract class Command extends ConfigContainer implements Globals
     /**
      * Returns the unique command identifier, used to identify the command in
      * the chat. Ex: help, prefix, openfolder, etc.
-     * 
+     *
      * @return
      */
-    public String getUsage()
-    {
+    public String getUsage() {
         StringBuilder usage = new StringBuilder();
-        for (Argument<?> arg : arguments)
-        {
+        for (Argument<?> arg : arguments) {
             usage.append("<");
             usage.append(arg.getName());
             usage.append("> ");
@@ -149,12 +125,9 @@ public abstract class Command extends ConfigContainer implements Globals
     }
 
     /**
-     * 
-     * 
      * @return
      */
-    public String getDescription()
-    {
+    public String getDescription() {
         return desc;
     }
 
@@ -165,21 +138,17 @@ public abstract class Command extends ConfigContainer implements Globals
      * @param i The index of the arg
      * @return Returns the arg at the param index
      */
-    public Argument<?> getArg(int i)
-    {
-        if (i >= 0 && i < arguments.size())
-        {
+    public Argument<?> getArg(int i) {
+        if (i >= 0 && i < arguments.size()) {
             return arguments.get(i);
         }
         return null;
     }
 
     /**
-     *
      * @return
      */
-    public List<Argument<?>> getArgs()
-    {
+    public List<Argument<?>> getArgs() {
         return arguments;
     }
 }

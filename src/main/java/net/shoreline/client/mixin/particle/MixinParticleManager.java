@@ -1,11 +1,11 @@
 package net.shoreline.client.mixin.particle;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.particle.ParticleEvent;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.particle.ParticleEffect;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.particle.ParticleEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,17 +13,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Mixin(ParticleManager.class)
-public class MixinParticleManager
-{
+public class MixinParticleManager {
     /**
-     *
-     *
      * @param parameters
      * @param x
      * @param y
@@ -39,19 +34,16 @@ public class MixinParticleManager
     private void hookAddParticle(ParticleEffect parameters, double x,
                                  double y, double z, double velocityX,
                                  double velocityY, double velocityZ,
-                                 CallbackInfoReturnable<Particle> cir)
-    {
+                                 CallbackInfoReturnable<Particle> cir) {
         ParticleEvent particleEvent = new ParticleEvent(parameters);
         Shoreline.EVENT_HANDLER.dispatch(particleEvent);
-        if (particleEvent.isCanceled())
-        {
+        if (particleEvent.isCanceled()) {
             cir.setReturnValue(null);
             cir.cancel();
         }
     }
 
     /**
-     *
      * @param entity
      * @param parameters
      * @param maxAge
@@ -60,13 +52,11 @@ public class MixinParticleManager
     @Inject(method = "addEmitter(Lnet/minecraft/entity/Entity;Lnet/minecraft" +
             "/particle/ParticleEffect;I)V", at = @At(value = "HEAD"), cancellable = true)
     private void hookAddEmitter(Entity entity, ParticleEffect parameters,
-                                int maxAge, CallbackInfo ci)
-    {
+                                int maxAge, CallbackInfo ci) {
         ParticleEvent.Emitter particleEvent =
                 new ParticleEvent.Emitter(parameters);
         Shoreline.EVENT_HANDLER.dispatch(particleEvent);
-        if (particleEvent.isCanceled())
-        {
+        if (particleEvent.isCanceled()) {
             ci.cancel();
         }
     }

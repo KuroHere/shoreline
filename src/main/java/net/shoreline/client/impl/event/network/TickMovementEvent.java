@@ -4,32 +4,25 @@ import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Cancelable
-public class TickMovementEvent extends Event
-{
+public class TickMovementEvent extends Event {
     //
     private int iterations;
 
     /**
-     *
-     * @param iterations
+     * @return
      */
-    public void setIterations(int iterations)
-    {
-        this.iterations = iterations;
+    public int getIterations() {
+        return iterations;
     }
 
     /**
-     *
-     * @return
+     * @param iterations
      */
-    public int getIterations()
-    {
-        return iterations;
+    public void setIterations(int iterations) {
+        this.iterations = iterations;
     }
 }

@@ -4,17 +4,14 @@ import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
 
 @Cancelable
-public class ReachEvent extends Event
-{
+public class ReachEvent extends Event {
     private float reach;
 
-    public float getReach()
-    {
+    public float getReach() {
         return reach;
     }
 
-    public void setReach(float reach)
-    {
+    public void setReach(float reach) {
         this.reach = reach;
     }
 }

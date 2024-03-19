@@ -1,14 +1,13 @@
 package net.shoreline.client.impl.event.render.entity;
 
-import net.shoreline.client.api.event.Cancelable;
-import net.shoreline.client.api.event.Event;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.shoreline.client.api.event.Cancelable;
+import net.shoreline.client.api.event.Event;
 
 @Cancelable
-public class RenderCrystalEvent extends Event
-{
+public class RenderCrystalEvent extends Event {
     // ??
     public final EndCrystalEntity endCrystalEntity;
     public final float f;
@@ -19,7 +18,6 @@ public class RenderCrystalEvent extends Event
     public final ModelPart frame;
 
     /**
-     *
      * @param endCrystalEntity
      * @param f
      * @param g
@@ -29,8 +27,7 @@ public class RenderCrystalEvent extends Event
      * @param frame
      */
     public RenderCrystalEvent(EndCrystalEntity endCrystalEntity, float f, float g,
-                              MatrixStack matrixStack, int i, ModelPart core, ModelPart frame)
-    {
+                              MatrixStack matrixStack, int i, ModelPart core, ModelPart frame) {
         this.endCrystalEntity = endCrystalEntity;
         this.f = f;
         this.g = g;

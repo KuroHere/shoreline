@@ -37,8 +37,7 @@ import java.util.SortedMap;
  * @since 1.0
  */
 @Mixin(GameRenderer.class)
-public class MixinGameRenderer implements Globals
-{
+public class MixinGameRenderer implements Globals {
     //
     @Shadow
     @Final
@@ -54,8 +53,7 @@ public class MixinGameRenderer implements Globals
             "/minecraft/client/render/GameRenderer;renderHand:Z",
             opcode = Opcodes.GETFIELD, ordinal = 0))
     private void hookRenderWorld(float tickDelta, long limitTime,
-                                 MatrixStack matrices, CallbackInfo ci)
-    {
+                                 MatrixStack matrices, CallbackInfo ci) {
         // final RenderWorldEvent renderWorldEvent =
         //         new RenderWorldEvent(matrices, tickDelta);
         // MSAAFramebuffer.use(() ->
@@ -70,12 +68,10 @@ public class MixinGameRenderer implements Globals
     @Inject(method = "tiltViewWhenHurt", at = @At(value = "HEAD"),
             cancellable = true)
     private void hookTiltViewWhenHurt(MatrixStack matrices, float tickDelta,
-                                      CallbackInfo ci)
-    {
+                                      CallbackInfo ci) {
         HurtCamEvent hurtCamEvent = new HurtCamEvent();
         Shoreline.EVENT_HANDLER.dispatch(hurtCamEvent);
-        if (hurtCamEvent.isCanceled())
-        {
+        if (hurtCamEvent.isCanceled()) {
             ci.cancel();
         }
     }
@@ -86,8 +82,7 @@ public class MixinGameRenderer implements Globals
      */
     @Inject(method = "showFloatingItem", at = @At(value = "HEAD"),
             cancellable = true)
-    private void hookShowFloatingItem(ItemStack floatingItem, CallbackInfo ci)
-    {
+    private void hookShowFloatingItem(ItemStack floatingItem, CallbackInfo ci) {
         RenderFloatingItemEvent renderFloatingItemEvent =
                 new RenderFloatingItemEvent(floatingItem);
         Shoreline.EVENT_HANDLER.dispatch(renderFloatingItemEvent);
@@ -101,12 +96,10 @@ public class MixinGameRenderer implements Globals
      * @param ci
      */
     @Inject(method = "renderNausea", at = @At(value = "HEAD"), cancellable = true)
-    private void hookRenderNausea(DrawContext context, float distortionStrength, CallbackInfo ci)
-    {
+    private void hookRenderNausea(DrawContext context, float distortionStrength, CallbackInfo ci) {
         RenderNauseaEvent renderNauseaEvent = new RenderNauseaEvent();
         Shoreline.EVENT_HANDLER.dispatch(renderNauseaEvent);
-        if (renderNauseaEvent.isCanceled())
-        {
+        if (renderNauseaEvent.isCanceled()) {
             ci.cancel();
         }
     }
@@ -116,13 +109,11 @@ public class MixinGameRenderer implements Globals
      */
     @Inject(method = "shouldRenderBlockOutline", at = @At(value = "HEAD"),
             cancellable = true)
-    private void hookShouldRenderBlockOutline(CallbackInfoReturnable<Boolean> cir)
-    {
+    private void hookShouldRenderBlockOutline(CallbackInfoReturnable<Boolean> cir) {
         RenderBlockOutlineEvent renderBlockOutlineEvent =
                 new RenderBlockOutlineEvent();
         Shoreline.EVENT_HANDLER.dispatch(renderBlockOutlineEvent);
-        if (renderBlockOutlineEvent.isCanceled())
-        {
+        if (renderBlockOutlineEvent.isCanceled()) {
             cir.setReturnValue(false);
             cir.cancel();
         }
@@ -138,12 +129,10 @@ public class MixinGameRenderer implements Globals
                     "Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/" +
                     "math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/" +
                     "util/hit/EntityHitResult;"), cancellable = true)
-    private void hookUpdateTargetedEntity(float tickDelta, CallbackInfo info)
-    {
+    private void hookUpdateTargetedEntity(float tickDelta, CallbackInfo info) {
         TargetEntityEvent targetEntityEvent = new TargetEntityEvent();
         Shoreline.EVENT_HANDLER.dispatch(targetEntityEvent);
-        if (targetEntityEvent.isCanceled() && client.crosshairTarget.getType() == HitResult.Type.BLOCK)
-        {
+        if (targetEntityEvent.isCanceled() && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
             client.getProfiler().pop();
             info.cancel();
         }
@@ -154,8 +143,7 @@ public class MixinGameRenderer implements Globals
      * @return
      */
     @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 9))
-    private double updateTargetedEntityModifySquaredMaxReach(double d)
-    {
+    private double updateTargetedEntityModifySquaredMaxReach(double d) {
         ReachEvent reachEvent = new ReachEvent();
         Shoreline.EVENT_HANDLER.dispatch(reachEvent);
         double reach = reachEvent.getReach() + 3.0;
@@ -170,26 +158,22 @@ public class MixinGameRenderer implements Globals
      */
     @Inject(method = "bobView", at = @At(value = "HEAD"), cancellable = true)
     private void hookBobView(MatrixStack matrices, float tickDelta,
-                             CallbackInfo ci)
-    {
+                             CallbackInfo ci) {
         BobViewEvent bobViewEvent = new BobViewEvent();
         Shoreline.EVENT_HANDLER.dispatch(bobViewEvent);
-        if (bobViewEvent.isCanceled())
-        {
+        if (bobViewEvent.isCanceled()) {
             ci.cancel();
         }
     }
 
     /**
-     *
      * @param factory
      * @param ci
      */
     @Inject(method = "loadPrograms", at = @At(value = "INVOKE",
             target = "Ljava/util/List;add(Ljava/lang/Object;)Z",
             ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void initPrograms(ResourceFactory factory, CallbackInfo ci)
-    {
+    private void initPrograms(ResourceFactory factory, CallbackInfo ci) {
         Programs.initPrograms();
         SortedMap sortedMap = Util.make(new Object2ObjectLinkedOpenHashMap(), map -> {
             map.put(TexturedRenderLayers.getEntitySolid(), mc.getBufferBuilders().getBlockBufferBuilders().get(RenderLayer.getSolid()));

@@ -3,32 +3,21 @@ package net.shoreline.client.impl.gui.click.impl.config.setting;
 import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
-import net.minecraft.client.util.math.MatrixStack;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
- *
- *
  */
-public class TextButton extends ConfigButton<String>
-{
+public class TextButton extends ConfigButton<String> {
     /**
-     *
-     *
      * @param frame
      * @param config
      */
-    public TextButton(CategoryFrame frame, Config<String> config, float x, float y)
-    {
+    public TextButton(CategoryFrame frame, Config<String> config, float x, float y) {
         super(frame, config, x, y);
     }
 
     /**
-     *
-     *
      * @param context
      * @param ix
      * @param iy
@@ -38,8 +27,7 @@ public class TextButton extends ConfigButton<String>
      */
     @Override
     public void render(DrawContext context, float ix, float iy, float mouseX,
-                       float mouseY, float delta)
-    {
+                       float mouseY, float delta) {
 
     }
 
@@ -49,8 +37,7 @@ public class TextButton extends ConfigButton<String>
      * @param button
      */
     @Override
-    public void mouseClicked(double mouseX, double mouseY, int button)
-    {
+    public void mouseClicked(double mouseX, double mouseY, int button) {
 
     }
 
@@ -60,8 +47,7 @@ public class TextButton extends ConfigButton<String>
      * @param button
      */
     @Override
-    public void mouseReleased(double mouseX, double mouseY, int button)
-    {
+    public void mouseReleased(double mouseX, double mouseY, int button) {
 
     }
 
@@ -71,8 +57,7 @@ public class TextButton extends ConfigButton<String>
      * @param modifiers
      */
     @Override
-    public void keyPressed(int keyCode, int scanCode, int modifiers)
-    {
+    public void keyPressed(int keyCode, int scanCode, int modifiers) {
 
     }
 }

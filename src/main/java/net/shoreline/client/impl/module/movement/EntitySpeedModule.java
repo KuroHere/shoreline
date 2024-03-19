@@ -22,13 +22,12 @@ import net.shoreline.client.util.math.timer.Timer;
 import java.text.DecimalFormat;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class EntitySpeedModule extends ToggleModule
-{
+public class EntitySpeedModule extends ToggleModule {
+    //
+    private final Timer entityJumpTimer = new CacheTimer();
     //
     Config<Float> speedConfig = new NumberConfig<>("Speed", "The speed of the" +
             " entity while moving", 0.1f, 0.5f, 4.0f);
@@ -36,41 +35,32 @@ public class EntitySpeedModule extends ToggleModule
             "Prevents entities from getting stuck when moving up", false);
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "The NCP" +
             "-Updated bypass for speeding up entity movement", false);
-    //
-    private final Timer entityJumpTimer = new CacheTimer();
 
     /**
      *
      */
-    public EntitySpeedModule()
-    {
+    public EntitySpeedModule() {
         super("EntitySpeed", "Increases riding entity speeds", ModuleCategory.MOVEMENT);
     }
 
     /**
-     *
      * @return
      */
     @Override
-    public String getModuleData()
-    {
+    public String getModuleData() {
         DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(speedConfig.getValue());
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() != EventStage.PRE)
-        {
+    public void onTick(TickEvent event) {
+        if (event.getStage() != EventStage.PRE) {
             return;
         }
-        if (mc.player.isRiding() && mc.player.getVehicle() != null)
-        {
+        if (mc.player.isRiding() && mc.player.getVehicle() != null) {
             double d = Math.cos(Math.toRadians(mc.player.getYaw() + 90.0f));
             double d2 = Math.sin(Math.toRadians(mc.player.getYaw() + 90.0f));
             BlockPos pos1 = BlockPos.ofFloored(mc.player.getX() + (2.0 * d),
@@ -79,44 +69,36 @@ public class EntitySpeedModule extends ToggleModule
                     mc.player.getY() - 2.0, mc.player.getZ() + (2.0 * d2));
             if (antiStuckConfig.getValue() && !mc.player.getVehicle().isOnGround()
                     && !mc.world.getBlockState(pos1).blocksMovement()
-                    && !mc.world.getBlockState(pos2).blocksMovement())
-            {
+                    && !mc.world.getBlockState(pos2).blocksMovement()) {
                 entityJumpTimer.reset();
                 return;
             }
             BlockPos pos3 = BlockPos.ofFloored(mc.player.getX() + (2.0 * d),
                     mc.player.getY(), mc.player.getZ() + (2.0 * d2));
-            if (antiStuckConfig.getValue() && mc.world.getBlockState(pos3).blocksMovement())
-            {
+            if (antiStuckConfig.getValue() && mc.world.getBlockState(pos3).blocksMovement()) {
                 entityJumpTimer.reset();
                 return;
             }
             BlockPos pos4 = BlockPos.ofFloored(mc.player.getX() + d,
                     mc.player.getY() + 1.0, mc.player.getZ() + d2);
-            if (antiStuckConfig.getValue() && mc.world.getBlockState(pos4).blocksMovement())
-            {
+            if (antiStuckConfig.getValue() && mc.world.getBlockState(pos4).blocksMovement()) {
                 entityJumpTimer.reset();
                 return;
             }
-            if (mc.player.input.jumping)
-            {
+            if (mc.player.input.jumping) {
                 entityJumpTimer.reset();
             }
-            if (entityJumpTimer.passed(10000) || !antiStuckConfig.getValue())
-            {
+            if (entityJumpTimer.passed(10000) || !antiStuckConfig.getValue()) {
                 if (!mc.player.getVehicle().isTouchingWater() || mc.player.input.jumping
-                        || !entityJumpTimer.passed(1000))
-                {
-                    if (mc.player.getVehicle().isOnGround())
-                    {
+                        || !entityJumpTimer.passed(1000)) {
+                    if (mc.player.getVehicle().isOnGround()) {
                         mc.player.getVehicle().setVelocity(mc.player.getVelocity().x,
                                 0.4, mc.player.getVelocity().z);
                     }
                     mc.player.getVehicle().setVelocity(mc.player.getVelocity().x,
                             -0.4, mc.player.getVelocity().z);
                 }
-                if (strictConfig.getValue())
-                {
+                if (strictConfig.getValue()) {
                     Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.interact(
                             mc.player.getVehicle(), false, Hand.MAIN_HAND));
                 }
@@ -127,44 +109,34 @@ public class EntitySpeedModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPacketInbound(PacketEvent.Inbound event)
-    {
+    public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null || !mc.player.isRiding() || mc.options.sneakKey.isPressed()
-                || mc.player.getVehicle() == null)
-        {
+                || mc.player.getVehicle() == null) {
             return;
         }
-        if (strictConfig.getValue())
-        {
-            if (event.getPacket() instanceof EntityPassengersSetS2CPacket)
-            {
+        if (strictConfig.getValue()) {
+            if (event.getPacket() instanceof EntityPassengersSetS2CPacket) {
                 event.cancel();
-            }
-            else if (event.getPacket() instanceof PlayerPositionLookS2CPacket)
-            {
+            } else if (event.getPacket() instanceof PlayerPositionLookS2CPacket) {
                 event.cancel();
             }
         }
     }
 
     /**
-     *
      * @param entitySpeed
      * @param d
      * @param d2
      */
-    private void handleEntityMotion(float entitySpeed, double d, double d2)
-    {
+    private void handleEntityMotion(float entitySpeed, double d, double d2) {
         Vec3d motion = mc.player.getVehicle().getVelocity();
         //
         float forward = mc.player.input.movementForward;
         float strafe = mc.player.input.movementSideways;
-        if (forward == 0 && strafe == 0)
-        {
+        if (forward == 0 && strafe == 0) {
             mc.player.getVehicle().setVelocity(0.0, motion.y, 0.0);
             return;
         }

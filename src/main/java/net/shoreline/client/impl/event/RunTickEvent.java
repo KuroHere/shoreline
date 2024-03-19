@@ -8,11 +8,9 @@ import net.shoreline.client.mixin.MixinMinecraftClient;
  * {@link net.minecraft.client.MinecraftClient#running} var is <tt>true</tt>.
  *
  * @author linus
- * @since 1.0
- *
  * @see MixinMinecraftClient
+ * @since 1.0
  */
-public class RunTickEvent extends Event
-{
+public class RunTickEvent extends Event {
 
 }

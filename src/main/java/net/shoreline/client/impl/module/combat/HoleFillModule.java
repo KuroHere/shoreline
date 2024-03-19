@@ -7,13 +7,10 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.PlaceBlockModule;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class HoleFillModule extends PlaceBlockModule
-{
+public class HoleFillModule extends PlaceBlockModule {
     //
     Config<Float> rangeConfig = new NumberConfig<>("PlaceRange", "The range" +
             " to fill nearby holes", 0.1f, 4.0f, 5.0f);
@@ -29,11 +26,9 @@ public class HoleFillModule extends PlaceBlockModule
     /**
      *
      */
-    public HoleFillModule()
-    {
+    public HoleFillModule() {
         super("HoleFill", "Fills in nearby holes with blocks", ModuleCategory.COMBAT);
     }
-
 
 
 }

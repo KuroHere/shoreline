@@ -8,17 +8,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
- *
  */
 @Mixin(ClientWorld.class)
-public interface AccessorClientWorld
-{
+public interface AccessorClientWorld {
     /**
-     *
      * @param x
      * @param y
      * @param z
@@ -35,7 +30,6 @@ public interface AccessorClientWorld
                        boolean useDistance, long seed);
 
     /**
-     *
      * @return
      */
     @Invoker("getPendingUpdateManager")

@@ -8,26 +8,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see Command
+ * @since 1.0
  */
-public class CommandArgument extends Argument<Command>
-{
+public class CommandArgument extends Argument<Command> {
     //
     private final Collection<String> commandIds = new ArrayList<>();
 
     /**
-     *
-     *
      * @param name
      * @param desc
      */
-    public CommandArgument(String name, String desc)
-    {
+    public CommandArgument(String name, String desc) {
         super(name, desc);
     }
 
@@ -35,12 +28,9 @@ public class CommandArgument extends Argument<Command>
      * @see Command#onCommandInput()
      */
     @Override
-    public Command getValue()
-    {
-        for (Command command : Managers.COMMAND.getCommands())
-        {
-            if (command.getName().equalsIgnoreCase(getLiteral()))
-            {
+    public Command getValue() {
+        for (Command command : Managers.COMMAND.getCommands()) {
+            if (command.getName().equalsIgnoreCase(getLiteral())) {
                 return command;
             }
         }
@@ -49,18 +39,14 @@ public class CommandArgument extends Argument<Command>
     }
 
     /**
-     *
      * @return
      */
     @Override
-    public Collection<String> getSuggestions()
-    {
-        if (!commandIds.isEmpty())
-        {
+    public Collection<String> getSuggestions() {
+        if (!commandIds.isEmpty()) {
             return commandIds;
         }
-        for (Command command : Managers.COMMAND.getCommands())
-        {
+        for (Command command : Managers.COMMAND.getCommands()) {
             commandIds.add(command.getName());
         }
         return commandIds;

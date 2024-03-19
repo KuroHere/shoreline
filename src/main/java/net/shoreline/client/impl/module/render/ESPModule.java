@@ -20,13 +20,10 @@ import net.shoreline.client.util.world.EntityUtil;
 import java.awt.*;
 
 /**
- * 
- * 
  * @author linus
  * @since 1.0
  */
-public class ESPModule extends ToggleModule
-{
+public class ESPModule extends ToggleModule {
     //
     Config<ESPMode> modeConfig = new EnumConfig<>("Mode", "ESP rendering " +
             "mode", ESPMode.GLOW, ESPMode.values());
@@ -90,38 +87,30 @@ public class ESPModule extends ToggleModule
             () -> furnacesConfig.getValue());
 
     /**
-     * 
+     *
      */
-    public ESPModule()
-    {
+    public ESPModule() {
         super("ESP", "See entities and objects through walls", ModuleCategory.RENDER);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onEntityOutline(EntityOutlineEvent event)
-    {
-        if (modeConfig.getValue() == ESPMode.GLOW && checkESP(event.getEntity()))
-        {
+    public void onEntityOutline(EntityOutlineEvent event) {
+        if (modeConfig.getValue() == ESPMode.GLOW && checkESP(event.getEntity())) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onTeamColor(TeamColorEvent event)
-    {
-        if (modeConfig.getValue() == ESPMode.GLOW)
-        {
+    public void onTeamColor(TeamColorEvent event) {
+        if (modeConfig.getValue() == ESPMode.GLOW) {
             Color color = getESPColor(event.getEntity());
-            if (color == null)
-            {
+            if (color == null) {
                 return;
             }
             event.cancel();
@@ -129,67 +118,52 @@ public class ESPModule extends ToggleModule
         }
     }
 
-    public Color getStorageESPColor(BlockEntity tileEntity)
-    {
-        if (tileEntity instanceof ChestBlockEntity)
-        {
+    public Color getStorageESPColor(BlockEntity tileEntity) {
+        if (tileEntity instanceof ChestBlockEntity) {
             return chestsColorConfig.getValue();
         }
-        if (tileEntity instanceof EnderChestBlockEntity)
-        {
+        if (tileEntity instanceof EnderChestBlockEntity) {
             return echestsColorConfig.getValue();
         }
-        if (tileEntity instanceof ShulkerBoxBlockEntity)
-        {
+        if (tileEntity instanceof ShulkerBoxBlockEntity) {
             return shulkersColorConfig.getValue();
         }
-        if (tileEntity instanceof HopperBlockEntity)
-        {
+        if (tileEntity instanceof HopperBlockEntity) {
             return hoppersColorConfig.getValue();
         }
-        if (tileEntity instanceof FurnaceBlockEntity)
-        {
+        if (tileEntity instanceof FurnaceBlockEntity) {
             return furnacesColorConfig.getValue();
         }
         return null;
     }
 
-    public Color getESPColor(Entity entity)
-    {
-        if (entity instanceof PlayerEntity)
-        {
+    public Color getESPColor(Entity entity) {
+        if (entity instanceof PlayerEntity) {
             return playersColorConfig.getValue();
         }
-        if (EntityUtil.isMonster(entity))
-        {
+        if (EntityUtil.isMonster(entity)) {
             return monstersColorConfig.getValue();
         }
-        if (EntityUtil.isNeutral(entity) || EntityUtil.isPassive(entity))
-        {
+        if (EntityUtil.isNeutral(entity) || EntityUtil.isPassive(entity)) {
             return animalsColorConfig.getValue();
         }
-        if (EntityUtil.isVehicle(entity))
-        {
+        if (EntityUtil.isVehicle(entity)) {
             return vehiclesColorConfig.getValue();
         }
-        if (entity instanceof EndCrystalEntity)
-        {
+        if (entity instanceof EndCrystalEntity) {
             return crystalsColorConfig.getValue();
         }
-        if (entity instanceof ItemEntity)
-        {
+        if (entity instanceof ItemEntity) {
             return itemsColorConfig.getValue();
         }
         return null;
     }
 
     /**
-     *
      * @param entity
      * @return
      */
-    public boolean checkESP(Entity entity)
-    {
+    public boolean checkESP(Entity entity) {
         return entity != mc.player && entity instanceof PlayerEntity && playersConfig.getValue()
                 || EntityUtil.isMonster(entity) && monstersConfig.getValue()
                 || (EntityUtil.isNeutral(entity)
@@ -198,9 +172,8 @@ public class ESPModule extends ToggleModule
                 || entity instanceof EndCrystalEntity && crystalsConfig.getValue()
                 || entity instanceof ItemEntity && itemsConfig.getValue();
     }
-    
-    public enum ESPMode 
-    {
+
+    public enum ESPMode {
         // OUTLINE,
         GLOW
     }

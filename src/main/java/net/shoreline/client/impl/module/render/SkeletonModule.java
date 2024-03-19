@@ -1,11 +1,5 @@
 package net.shoreline.client.impl.module.render;
 
-import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.ToggleModule;
-import net.shoreline.client.api.render.Interpolation;
-import net.shoreline.client.impl.event.render.RenderWorldEvent;
-import net.shoreline.client.init.Modules;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
@@ -19,35 +13,35 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
+import net.shoreline.client.api.event.listener.EventListener;
+import net.shoreline.client.api.module.ModuleCategory;
+import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.api.render.Interpolation;
+import net.shoreline.client.impl.event.render.RenderWorldEvent;
+import net.shoreline.client.init.Modules;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import java.awt.*;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class SkeletonModule extends ToggleModule
-{
+public class SkeletonModule extends ToggleModule {
     /**
      *
      */
-    public SkeletonModule()
-    {
+    public SkeletonModule() {
         super("Skeleton", "Renders a skeleton to show player limbs",
                 ModuleCategory.RENDER);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderWorld(RenderWorldEvent event)
-    {
+    public void onRenderWorld(RenderWorldEvent event) {
         float g = event.getTickDelta();
         //
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
@@ -56,16 +50,12 @@ public class SkeletonModule extends ToggleModule
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(MinecraftClient.isFancyGraphicsOrBetter());
         RenderSystem.enableCull();
-        for (Entity entity : mc.world.getEntities())
-        {
-            if (entity == null || !entity.isAlive())
-            {
+        for (Entity entity : mc.world.getEntities()) {
+            if (entity == null || !entity.isAlive()) {
                 continue;
             }
-            if (entity instanceof PlayerEntity playerEntity)
-            {
-                if (mc.options.getPerspective().isFirstPerson() && playerEntity == mc.player)
-                {
+            if (entity instanceof PlayerEntity playerEntity) {
+                if (mc.options.getPerspective().isFirstPerson() && playerEntity == mc.player) {
                     continue;
                 }
                 Vec3d skeletonPos = Interpolation.getInterpolatedPosition(entity, g);
@@ -94,17 +84,14 @@ public class SkeletonModule extends ToggleModule
                 ModelPart rightLeg = playerEntityModel.rightLeg;
                 event.getMatrices().push();
                 event.getMatrices().translate(skeletonPos.x, skeletonPos.y, skeletonPos.z);
-                if (swimming) 
-                {
+                if (swimming) {
                     event.getMatrices().translate(0, 0.35f, 0);
                 }
                 event.getMatrices().multiply(new Quaternionf().setAngleAxis((h + 180) * Math.PI / 180.0f, 0, -1, 0));
-                if (swimming || flying) 
-                {
+                if (swimming || flying) {
                     event.getMatrices().multiply(new Quaternionf().setAngleAxis((90 + m) * Math.PI / 180.0f, -1, 0, 0));
                 }
-                if (swimming) 
-                {
+                if (swimming) {
                     event.getMatrices().translate(0, -0.95f, 0);
                 }
                 Tessellator tessellator = Tessellator.getInstance();
@@ -167,16 +154,13 @@ public class SkeletonModule extends ToggleModule
                 event.getMatrices().pop();
                 // bufferBuilder.clear();
                 tessellator.draw();
-                if (swimming) 
-                {
+                if (swimming) {
                     event.getMatrices().translate(0, 0.95f, 0);
                 }
-                if (swimming || flying) 
-                {
+                if (swimming || flying) {
                     event.getMatrices().multiply(new Quaternionf().setAngleAxis((90 + m) * Math.PI / 180F, 1, 0, 0));
                 }
-                if (swimming) 
-                {
+                if (swimming) {
                     event.getMatrices().translate(0, -0.35f, 0);
                 }
                 event.getMatrices().multiply(new Quaternionf().setAngleAxis((h + 180) * Math.PI / 180.0f, 0, 1, 0));
@@ -192,22 +176,17 @@ public class SkeletonModule extends ToggleModule
     }
 
     /**
-     *
      * @param matrix
      * @param modelPart
      */
-    private void rotateSkeleton(MatrixStack matrix, ModelPart modelPart)
-    {
-        if (modelPart.roll != 0.0f)
-        {
+    private void rotateSkeleton(MatrixStack matrix, ModelPart modelPart) {
+        if (modelPart.roll != 0.0f) {
             matrix.multiply(RotationAxis.POSITIVE_Z.rotation(modelPart.roll));
         }
-        if (modelPart.yaw != 0.0f)
-        {
+        if (modelPart.yaw != 0.0f) {
             matrix.multiply(RotationAxis.NEGATIVE_Y.rotation(modelPart.yaw));
         }
-        if (modelPart.pitch != 0.0f)
-        {
+        if (modelPart.pitch != 0.0f) {
             matrix.multiply(RotationAxis.NEGATIVE_X.rotation(modelPart.pitch));
         }
     }

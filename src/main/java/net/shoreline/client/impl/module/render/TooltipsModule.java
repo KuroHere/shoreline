@@ -17,13 +17,10 @@ import net.shoreline.client.impl.event.gui.RenderTooltipEvent;
 import net.shoreline.client.init.Modules;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class TooltipsModule extends ToggleModule
-{
+public class TooltipsModule extends ToggleModule {
     //
     Config<Boolean> enderChestsConfig = new BooleanConfig("EnderChests",
             "Renders all the contents of ender chests in tooltips", false);
@@ -35,28 +32,23 @@ public class TooltipsModule extends ToggleModule
     /**
      *
      */
-    public TooltipsModule()
-    {
+    public TooltipsModule() {
         super("Tooltips", "Renders detailed tooltips showing items",
                 ModuleCategory.RENDER);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderTooltip(RenderTooltipEvent event)
-    {
+    public void onRenderTooltip(RenderTooltipEvent event) {
         final ItemStack stack = event.getStack();
-        if (stack.isEmpty())
-        {
+        if (stack.isEmpty()) {
             return;
         }
         NbtCompound nbtCompound = BlockItem.getBlockEntityNbt(stack);
         if (shulkersConfig.getValue() && nbtCompound != null
-                && nbtCompound.contains("Items", NbtElement.LIST_TYPE))
-        {
+                && nbtCompound.contains("Items", NbtElement.LIST_TYPE)) {
             event.cancel();
             MatrixStack stack1 = new MatrixStack();
             stack1.push();
@@ -67,8 +59,7 @@ public class TooltipsModule extends ToggleModule
                     event.getY() - 21.0, 150.0, 14.0, Modules.COLORS.getRGB());
             RenderManager.rect(stack1, event.getX() + 8.0,
                     event.getY() - 7.0, 150.0, 55.0, 0x77000000);
-            for (int i = 0; i < defaultedList.size(); i++)
-            {
+            for (int i = 0; i < defaultedList.size(); i++) {
                 event.getContext().drawItem(defaultedList.get(i), event.getX() + (i % 9) * 16 + 9, event.getY() + (i / 9) * 16 - 5);
                 event.getContext().drawItemInSlot(mc.textRenderer, defaultedList.get(i),
                         event.getX() + (i % 9) * 16 + 9, event.getY() + (i / 9) * 16 - 5);

@@ -1,15 +1,14 @@
 package net.shoreline.client.api.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.*;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.*;
 import net.shoreline.client.init.Fonts;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorWorldRenderer;
 import net.shoreline.client.util.Globals;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
@@ -17,13 +16,10 @@ import org.lwjgl.opengl.GL11;
 import java.awt.*;
 
 /**
- *
- * 
  * @author linus
  * @since 1.0
  */
-public class RenderManager implements Globals
-{
+public class RenderManager implements Globals {
     //
     public static final Tessellator TESSELLATOR = RenderSystem.renderThreadTesselator();
     public static final BufferBuilder BUFFER = TESSELLATOR.getBuffer();
@@ -31,8 +27,7 @@ public class RenderManager implements Globals
     /**
      *
      */
-    private static void preRenderWorld()
-    {
+    private static void preRenderWorld() {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
         GL11.glEnable(GL11.GL_CULL_FACE);
@@ -43,35 +38,28 @@ public class RenderManager implements Globals
     /**
      *
      */
-    private static void postRenderWorld()
-    {
+    private static void postRenderWorld() {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
     }
 
     /**
-     *
      * @param matrices
      * @param p
      * @param color
      */
-    public static void renderBox(MatrixStack matrices, BlockPos p, int color)
-    {
+    public static void renderBox(MatrixStack matrices, BlockPos p, int color) {
         renderBox(matrices, new Box(p), color);
     }
 
     /**
-     *
-     *
      * @param matrices
      * @param box
      * @param color
      */
-    public static void renderBox(MatrixStack matrices, Box box, int color)
-    {
-        if (!isFrustumVisible(box))
-        {
+    public static void renderBox(MatrixStack matrices, Box box, int color) {
+        if (!isFrustumVisible(box)) {
             return;
         }
         matrices.push();
@@ -89,12 +77,10 @@ public class RenderManager implements Globals
     }
 
     /**
-     *
      * @param matrices
      * @param box
      */
-    public static void drawBox(MatrixStack matrices, Box box)
-    {
+    public static void drawBox(MatrixStack matrices, Box box) {
         drawBox(matrices, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
     }
 
@@ -115,8 +101,7 @@ public class RenderManager implements Globals
      * @param z2
      */
     public static void drawBox(MatrixStack matrices, double x1, double y1,
-                               double z1, double x2, double y2, double z2)
-    {
+                               double z1, double x2, double y2, double z2) {
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
         Matrix3f matrix3f = matrices.peek().getNormalMatrix();
         float f = (float) x1;
@@ -152,30 +137,23 @@ public class RenderManager implements Globals
     }
 
     /**
-     *
-     *
      * @param p
      * @param width
      * @param color
      */
     public static void renderBoundingBox(MatrixStack matrices, BlockPos p,
-                                         float width, int color)
-    {
+                                         float width, int color) {
         renderBoundingBox(matrices, new Box(p), width, color);
     }
 
     /**
-     *
-     *
      * @param box
      * @param width
      * @param color
      */
     public static void renderBoundingBox(MatrixStack matrices, Box box,
-                                         float width, int color)
-    {
-        if (!isFrustumVisible(box))
-        {
+                                         float width, int color) {
+        if (!isFrustumVisible(box)) {
             return;
         }
         matrices.push();
@@ -194,17 +172,14 @@ public class RenderManager implements Globals
     }
 
     /**
-     *
      * @param matrices
      * @param box
      */
-    public static void drawBoundingBox(MatrixStack matrices, Box box)
-    {
+    public static void drawBoundingBox(MatrixStack matrices, Box box) {
         drawBoundingBox(matrices, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
     }
 
     /**
-     * 
      * @param matrices
      * @param x1
      * @param y1
@@ -213,9 +188,8 @@ public class RenderManager implements Globals
      * @param y2
      * @param z2
      */
-    public static void drawBoundingBox(MatrixStack matrices, double x1, double y1, 
-                                       double z1, double x2, double y2, double z2) 
-    {
+    public static void drawBoundingBox(MatrixStack matrices, double x1, double y1,
+                                       double z1, double x2, double y2, double z2) {
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
         Matrix3f matrix3f = matrices.peek().getNormalMatrix();
         float f = (float) x1;
@@ -251,20 +225,17 @@ public class RenderManager implements Globals
     }
 
     /**
-     *
      * @param matrices
      * @param s
      * @param d
      * @param width
      */
     public static void renderLine(MatrixStack matrices, Vec3d s,
-                                  Vec3d d, float width, int color)
-    {
+                                  Vec3d d, float width, int color) {
         renderLine(matrices, s.x, s.y, s.z, d.x, d.y, d.z, width, color);
     }
 
     /**
-     *
      * @param matrices
      * @param x1
      * @param y1
@@ -276,8 +247,7 @@ public class RenderManager implements Globals
      */
     public static void renderLine(MatrixStack matrices, double x1, double y1,
                                   double z1, double x2, double y2, double z2,
-                                  float width, int color)
-    {
+                                  float width, int color) {
         matrices.push();
         preRenderWorld();
         Color c = new Color(color, true);
@@ -294,7 +264,6 @@ public class RenderManager implements Globals
     }
 
     /**
-     *
      * @param matrices
      * @param x1
      * @param y1
@@ -304,8 +273,7 @@ public class RenderManager implements Globals
      * @param z2
      */
     public static void drawLine(MatrixStack matrices, double x1, double y1,
-                                double z1, double x2, double y2, double z2)
-    {
+                                double z1, double x2, double y2, double z2) {
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
         float f = (float) x1;
         float g = (float) y1;
@@ -318,18 +286,15 @@ public class RenderManager implements Globals
     }
 
     /**
-     *
      * @param matrices
      * @param text
      * @param pos
      */
-    public static void renderSign(MatrixStack matrices, String text, Vec3d pos)
-    {
+    public static void renderSign(MatrixStack matrices, String text, Vec3d pos) {
         renderSign(matrices, text, pos.getX(), pos.getY(), pos.getZ());
     }
 
     /**
-     *
      * @param matrices
      * @param text
      * @param x1
@@ -337,12 +302,10 @@ public class RenderManager implements Globals
      * @param x3
      */
     public static void renderSign(MatrixStack matrices, String text,
-                                  double x1, double x2, double x3)
-    {
+                                  double x1, double x2, double x3) {
         double dist = Math.sqrt(mc.player.squaredDistanceTo(x1, x2, x3));
         float scaling = 0.0018f + Modules.NAMETAGS.getScaling() * (float) dist;
-        if (dist <= 8.0)
-        {
+        if (dist <= 8.0) {
             scaling = 0.0245f;
         }
         Camera camera = mc.gameRenderer.getCamera();
@@ -369,17 +332,14 @@ public class RenderManager implements Globals
     }
 
     /**
-     *
      * @param box
      * @return
      */
-    public static boolean isFrustumVisible(Box box)
-    {
+    public static boolean isFrustumVisible(Box box) {
         return ((AccessorWorldRenderer) mc.worldRenderer).getFrustum().isVisible(box);
     }
 
     /**
-     *
      * @param matrices
      * @param x1
      * @param y1
@@ -388,13 +348,11 @@ public class RenderManager implements Globals
      * @param color
      */
     public static void rect(MatrixStack matrices, double x1, double y1,
-                            double x2, double y2, int color)
-    {
+                            double x2, double y2, int color) {
         rect(matrices, x1, y1, x2, y2, 0.0, color);
     }
 
     /**
-     *
      * @param matrices
      * @param x1
      * @param y1
@@ -404,20 +362,17 @@ public class RenderManager implements Globals
      * @param color
      */
     public static void rect(MatrixStack matrices, double x1, double y1,
-                            double x2, double y2, double z, int color)
-    {
+                            double x2, double y2, double z, int color) {
         x2 += x1;
         y2 += y1;
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
         double i;
-        if (x1 < x2)
-        {
+        if (x1 < x2) {
             i = x1;
             x1 = x2;
             x2 = i;
         }
-        if (y1 < y2)
-        {
+        if (y1 < y2) {
             i = y1;
             y1 = y2;
             y2 = i;
@@ -443,27 +398,21 @@ public class RenderManager implements Globals
     }
 
     /**
-     *
-     *
      * @param context
      * @param text
      * @param x
      * @param y
      * @param color
      */
-    public static void renderText(DrawContext context, String text, float x, float y, int color)
-    {
+    public static void renderText(DrawContext context, String text, float x, float y, int color) {
         context.drawText(mc.textRenderer, text, (int) x, (int) y, color, true);
     }
 
     /**
-     *
-     *
      * @param text
      * @return
      */
-    public static int textWidth(String text)
-    {
+    public static int textWidth(String text) {
         return mc.textRenderer.getWidth(text);
     }
 }

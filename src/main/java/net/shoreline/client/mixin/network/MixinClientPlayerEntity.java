@@ -18,7 +18,6 @@ import net.shoreline.client.impl.event.entity.SwingEvent;
 import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.impl.event.network.*;
 import net.shoreline.client.util.Globals;
-import net.shoreline.client.util.chat.ChatUtil;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,37 +29,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * 
- * 
  * @author linus
- * @since 1.0
- * 
  * @see ClientPlayerEntity
+ * @since 1.0
  */
 @Mixin(ClientPlayerEntity.class)
-public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity implements Globals
-{
-    //
-    @Shadow
-    protected abstract void sendSprintingPacket();
-    //
-    @Shadow
-    public abstract boolean isSneaking();
-    @Shadow
-    protected abstract boolean isCamera();
+public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity implements Globals {
     //
     @Shadow
     @Final
     public ClientPlayNetworkHandler networkHandler;
-    // Last tick values
-    @Shadow
-    private boolean lastSneaking;
     @Shadow
     public double lastX;
     @Shadow
     public double lastBaseY;
     @Shadow
     public double lastZ;
+    @Shadow
+    public Input input;
+    //
+    @Shadow
+    @Final
+    protected MinecraftClient client;
+    // Last tick values
+    @Shadow
+    private boolean lastSneaking;
     @Shadow
     private float lastYaw;
     @Shadow
@@ -73,39 +66,46 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     @Shadow
     private boolean autoJumpEnabled;
     //
-    @Shadow
-    @Final
-    protected MinecraftClient client;
-    @Shadow
-    public Input input;
-    //
-    @Shadow
-    protected abstract void autoJump(float dx, float dz);
-    //
-    @Shadow
-    public abstract void tick();
-    //
-    @Shadow
-    protected abstract void sendMovementPackets();
-
+    @Unique
+    private boolean ticking;
     /**
-     * 
+     *
      */
-    public MixinClientPlayerEntity() 
-    {
+    public MixinClientPlayerEntity() {
         // Treating this class as ClientPlayerEntity with mc.player info works
         // Need a better solution
         super(MinecraftClient.getInstance().world,
                 MinecraftClient.getInstance().player.getGameProfile());
     }
 
+    //
+    @Shadow
+    protected abstract void sendSprintingPacket();
+
+    //
+    @Shadow
+    public abstract boolean isSneaking();
+
+    @Shadow
+    protected abstract boolean isCamera();
+
+    //
+    @Shadow
+    protected abstract void autoJump(float dx, float dz);
+
+    //
+    @Shadow
+    public abstract void tick();
+
+    //
+    @Shadow
+    protected abstract void sendMovementPackets();
+
     /**
-     *
      * @param ci
      */
     @Inject(method = "sendMovementPackets", at = @At(value = "HEAD"), cancellable = true)
-    private void hookSendMovementPackets(CallbackInfo ci)
-    {
+    private void hookSendMovementPackets(CallbackInfo ci) {
         PlayerUpdateEvent playerUpdateEvent = new PlayerUpdateEvent();
         playerUpdateEvent.setStage(EventStage.PRE);
         Shoreline.EVENT_HANDLER.dispatch(playerUpdateEvent);
@@ -119,20 +119,17 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         float yaw = movementPacketsEvent.getYaw();
         float pitch = movementPacketsEvent.getPitch();
         boolean ground = movementPacketsEvent.getOnGround();
-        if (movementPacketsEvent.isCanceled())
-        {
+        if (movementPacketsEvent.isCanceled()) {
             ci.cancel();
             sendSprintingPacket();
             boolean bl = isSneaking();
-            if (bl != lastSneaking)
-            {
+            if (bl != lastSneaking) {
                 ClientCommandC2SPacket.Mode mode = bl ? ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY :
                         ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY;
                 networkHandler.sendPacket(new ClientCommandC2SPacket(this, mode));
                 lastSneaking = bl;
             }
-            if (isCamera())
-            {
+            if (isCamera()) {
                 double d = x - lastX;
                 double e = y - lastBaseY;
                 double f = z - lastZ;
@@ -141,37 +138,26 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                 ++ticksSinceLastPositionPacketSent;
                 boolean bl2 = MathHelper.squaredMagnitude(d, e, f) > MathHelper.square(2.0E-4) || ticksSinceLastPositionPacketSent >= 20;
                 boolean bl3 = g != 0.0 || h != 0.0;
-                if (hasVehicle())
-                {
+                if (hasVehicle()) {
                     Vec3d vec3d = getVelocity();
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(vec3d.x, -999.0, vec3d.z, getYaw(), getPitch(), ground));
                     bl2 = false;
-                }
-                else if (bl2 && bl3)
-                {
+                } else if (bl2 && bl3) {
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(x, y, z, yaw, pitch, ground));
-                }
-                else if (bl2)
-                {
+                } else if (bl2) {
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, ground));
-                }
-                else if (bl3)
-                {
+                } else if (bl3) {
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, ground));
-                }
-                else if (lastOnGround != isOnGround())
-                {
+                } else if (lastOnGround != isOnGround()) {
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(ground));
                 }
-                if (bl2)
-                {
+                if (bl2) {
                     lastX = x;
                     lastBaseY = y;
                     lastZ = z;
                     ticksSinceLastPositionPacketSent = 0;
                 }
-                if (bl3)
-                {
+                if (bl3) {
                     lastYaw = yaw;
                     lastPitch = pitch;
                 }
@@ -183,42 +169,31 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         Shoreline.EVENT_HANDLER.dispatch(playerUpdateEvent);
     }
 
-    //
-    @Unique
-    private boolean ticking;
-
     /**
-     *
      * @param ci
      */
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/" +
             "minecraft/client/network/AbstractClientPlayerEntity;tick()V",
             shift = At.Shift.BEFORE, ordinal = 0))
-    private void hookTickPre(CallbackInfo ci)
-    {
+    private void hookTickPre(CallbackInfo ci) {
         PlayerTickEvent playerTickEvent = new PlayerTickEvent();
         Shoreline.EVENT_HANDLER.dispatch(playerTickEvent);
     }
 
     /**
-     *
      * @param ci
      */
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/" +
             "minecraft/client/network/ClientPlayerEntity;sendMovementPackets" +
             "()V", ordinal = 0, shift = At.Shift.AFTER))
-    private void hookTick(CallbackInfo ci)
-    {
-        if (ticking)
-        {
+    private void hookTick(CallbackInfo ci) {
+        if (ticking) {
             return;
         }
         TickMovementEvent tickMovementEvent = new TickMovementEvent();
         Shoreline.EVENT_HANDLER.dispatch(tickMovementEvent);
-        if (tickMovementEvent.isCanceled())
-        {
-            for (int i = 0; i < tickMovementEvent.getIterations(); i++)
-            {
+        if (tickMovementEvent.isCanceled()) {
+            for (int i = 0; i < tickMovementEvent.getIterations(); i++) {
                 ticking = true;
                 tick();
                 ticking = false;
@@ -226,38 +201,31 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
             }
         }
     }
-    
+
     /**
-     *
-     *
      * @param ci
      */
     @Inject(method = "tickMovement", at = @At(value = "FIELD", target =
             "Lnet/minecraft/client/network/ClientPlayerEntity;" +
                     "ticksLeftToDoubleTapSprint:I", shift = At.Shift.AFTER))
-    private void hookTickMovementPost(CallbackInfo ci)
-    {
+    private void hookTickMovementPost(CallbackInfo ci) {
         MovementSlowdownEvent movementUpdateEvent =
                 new MovementSlowdownEvent(input);
         Shoreline.EVENT_HANDLER.dispatch(movementUpdateEvent);
     }
 
     /**
-     *
-     *
      * @param movementType
      * @param movement
      * @param ci
      */
     @Inject(method = "move", at = @At(value = "HEAD"), cancellable = true)
     private void hookMove(MovementType movementType, Vec3d movement,
-                          CallbackInfo ci)
-    {
+                          CallbackInfo ci) {
         final PlayerMoveEvent playerMoveEvent =
                 new PlayerMoveEvent(movementType, movement);
         Shoreline.EVENT_HANDLER.dispatch(playerMoveEvent);
-        if (playerMoveEvent.isCanceled())
-        {
+        if (playerMoveEvent.isCanceled()) {
             ci.cancel();
             double d = getX();
             double e = getZ();
@@ -267,97 +235,80 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     }
 
     /**
-     *
      * @param x
      * @param z
      * @param ci
      */
     @Inject(method = "pushOutOfBlocks", at = @At(value = "HEAD"),
             cancellable = true)
-    private void onPushOutOfBlocks(double x, double z, CallbackInfo ci)
-    {
+    private void onPushOutOfBlocks(double x, double z, CallbackInfo ci) {
         PushOutOfBlocksEvent pushOutOfBlocksEvent = new PushOutOfBlocksEvent();
         Shoreline.EVENT_HANDLER.dispatch(pushOutOfBlocksEvent);
-        if (pushOutOfBlocksEvent.isCanceled())
-        {
+        if (pushOutOfBlocksEvent.isCanceled()) {
             ci.cancel();
         }
     }
-    
+
     /**
-     *
      * @param hand
      * @param ci
      */
     @Inject(method = "setCurrentHand", at = @At(value = "HEAD"))
-    private void hookSetCurrentHand(Hand hand, CallbackInfo ci)
-    {
+    private void hookSetCurrentHand(Hand hand, CallbackInfo ci) {
         SetCurrentHandEvent setCurrentHandEvent = new SetCurrentHandEvent(hand);
         Shoreline.EVENT_HANDLER.dispatch(setCurrentHandEvent);
     }
 
     /**
-     *
      * @param instance
      * @param b
      */
     @Redirect(method = "tickMovement", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/client/network/ClientPlayerEntity;setSprinting(Z)V",
             ordinal = 3))
-    private void hookSetSprinting(ClientPlayerEntity instance, boolean b)
-    {
+    private void hookSetSprinting(ClientPlayerEntity instance, boolean b) {
         final SprintCancelEvent sprintEvent = new SprintCancelEvent();
         Shoreline.EVENT_HANDLER.dispatch(sprintEvent);
-        if (sprintEvent.isCanceled())
-        {
+        if (sprintEvent.isCanceled()) {
             instance.setSprinting(true);
-        }
-        else
-        {
+        } else {
             instance.setSprinting(b);
         }
     }
 
     /**
-     *
      * @param instance
      * @return
      */
     @Redirect(method = "updateNausea", at = @At(value = "FIELD", target = "Lnet" +
             "/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/" +
             "client/gui/screen/Screen;"))
-    private Screen hookCurrentScreen(MinecraftClient instance)
-    {
+    private Screen hookCurrentScreen(MinecraftClient instance) {
         //
         return null;
     }
 
     /**
-     *
      * @param cir
      */
     @Inject(method = "getMountJumpStrength", at = @At(value = "HEAD"),
             cancellable = true)
-    private void hookGetMountJumpStrength(CallbackInfoReturnable<Float> cir)
-    {
+    private void hookGetMountJumpStrength(CallbackInfoReturnable<Float> cir) {
         MountJumpStrengthEvent mountJumpStrengthEvent =
                 new MountJumpStrengthEvent();
         Shoreline.EVENT_HANDLER.dispatch(mountJumpStrengthEvent);
-        if (mountJumpStrengthEvent.isCanceled())
-        {
+        if (mountJumpStrengthEvent.isCanceled()) {
             cir.cancel();
             cir.setReturnValue(mountJumpStrengthEvent.getJumpStrength());
         }
     }
 
     /**
-     *
      * @param hand
      * @param ci
      */
     @Inject(method = "swingHand", at = @At(value = "RETURN"))
-    private void hookSwingHand(Hand hand, CallbackInfo ci)
-    {
+    private void hookSwingHand(Hand hand, CallbackInfo ci) {
         SwingEvent swingEvent = new SwingEvent(hand);
         Shoreline.EVENT_HANDLER.dispatch(swingEvent);
     }

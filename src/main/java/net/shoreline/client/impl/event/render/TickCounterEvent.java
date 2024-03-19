@@ -4,34 +4,25 @@ import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
 
 /**
- *
- *
- *
  * @author linus
  * @since 1.0
  */
 @Cancelable
-public class TickCounterEvent extends Event
-{
+public class TickCounterEvent extends Event {
     //
     private float ticks;
 
     /**
-     *
-     *
-     * @param ticks
+     * @return
      */
-    public void setTicks(float ticks)
-    {
-        this.ticks = ticks;
+    public float getTicks() {
+        return ticks;
     }
 
     /**
-     *
-     * @return
+     * @param ticks
      */
-    public float getTicks()
-    {
-        return ticks;
+    public void setTicks(float ticks) {
+        this.ticks = ticks;
     }
 }

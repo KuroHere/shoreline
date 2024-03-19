@@ -1,29 +1,25 @@
 package net.shoreline.client.mixin.world;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.world.BlockCollisionEvent;
-import net.shoreline.client.util.Globals;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockCollisionSpliterator;
 import net.minecraft.world.BlockView;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.world.BlockCollisionEvent;
+import net.shoreline.client.util.Globals;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Mixin(BlockCollisionSpliterator.class)
-public class MixinBlockCollisionSpliterator implements Globals
-{
+public class MixinBlockCollisionSpliterator implements Globals {
     /**
-     *
      * @param instance
      * @param blockView
      * @param blockPos
@@ -34,18 +30,15 @@ public class MixinBlockCollisionSpliterator implements Globals
             "block/BlockState;getCollisionShape(Lnet/minecraft/world/BlockView;Lnet/minecraft/" +
             "util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;"))
     private VoxelShape hookGetCollisionShape(BlockState instance, BlockView blockView,
-                                             BlockPos blockPos, ShapeContext shapeContext)
-    {
+                                             BlockPos blockPos, ShapeContext shapeContext) {
         VoxelShape voxelShape = instance.getCollisionShape(blockView, blockPos, shapeContext);
-        if (blockView != mc.world)
-        {
+        if (blockView != mc.world) {
             return voxelShape;
         }
         BlockCollisionEvent blockCollisionEvent =
                 new BlockCollisionEvent(blockPos, instance);
         Shoreline.EVENT_HANDLER.dispatch(blockCollisionEvent);
-        if (blockCollisionEvent.isCanceled())
-        {
+        if (blockCollisionEvent.isCanceled()) {
             return blockCollisionEvent.getVoxelShape();
         }
         return voxelShape;

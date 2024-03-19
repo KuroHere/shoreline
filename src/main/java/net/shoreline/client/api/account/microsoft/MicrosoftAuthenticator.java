@@ -1,30 +1,28 @@
 package net.shoreline.client.api.account.microsoft;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.shoreline.client.api.account.microsoft.data.MinecraftProfile;
 import net.shoreline.client.api.account.microsoft.data.OAuthData;
 import net.shoreline.client.api.account.microsoft.data.XboxLoginData;
 import net.shoreline.client.util.network.RequestUtil;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
- * @see <a href="https://mojang-api-docs.gapple.pw/authentication/msa">MSA</a>
- *
  * @author Gavin
+ * @see <a href="https://mojang-api-docs.gapple.pw/authentication/msa">MSA</a>
  * @since 1.0
- *
- *
  */
-public class MicrosoftAuthenticator
-{
+public class MicrosoftAuthenticator {
     private static final String USER_AGENT =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0";
     private static final String OAUTH_AUTH_URL =
@@ -67,35 +65,30 @@ public class MicrosoftAuthenticator
     /**
      * Gets the profile data for an email and a password
      *
-     * @param email the email
+     * @param email    the email
      * @param password the password
      * @return the MinecraftProfile for this email and password
      * @throws IOException
      * @throws MicrosoftAuthException
      */
     public MinecraftProfile getProfileData(String email, String password)
-            throws IOException, MicrosoftAuthException
-    {
+            throws IOException, MicrosoftAuthException {
         OAuthData oauthData = getOAuthData();
-        if (oauthData == null)
-        {
+        if (oauthData == null) {
             throw new NullPointerException("OAuthData cannot be null");
         }
         Map<String, String> loginData = getLoginData(oauthData, email,
                 password);
-        if (loginData == null || !loginData.containsKey("access_token"))
-        {
+        if (loginData == null || !loginData.containsKey("access_token")) {
             throw new MicrosoftAuthException("Access token cannot be null");
         }
         // i want to kill myself
         XboxLoginData xboxLogin = loginXbox(loginData.get("access_token"));
-        if (xboxLogin == null)
-        {
+        if (xboxLogin == null) {
             throw new MicrosoftAuthException("Xbox Login data cannot be null");
         }
         XboxLoginData xstsData = getXSTSData(xboxLogin);
-        if (xstsData == null)
-        {
+        if (xstsData == null) {
             throw new MicrosoftAuthException("XSTS data cannot be null");
         }
         String accessToken = xboxAuth(xstsData);
@@ -106,20 +99,18 @@ public class MicrosoftAuthenticator
     /**
      * Gets the profile on the access token and refresh token
      *
-     * @param accessToken the access token (required)
+     * @param accessToken  the access token (required)
      * @param refreshToken the refresh token (optional)
      * @return the MinecraftProfile object or null if the request fails
      * @throws IOException if reading the result of the request fails
      */
     public MinecraftProfile getProfile(String accessToken, String refreshToken)
-            throws IOException
-    {
+            throws IOException {
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
         headers.put("Authorization", "Bearer " + accessToken);
         String data = RequestUtil.get(PROFILE_URL, headers, false);
-        if (data == null)
-        {
+        if (data == null) {
             return null;
         }
         JsonObject obj = PARSER.parse(data).getAsJsonObject();
@@ -133,8 +124,7 @@ public class MicrosoftAuthenticator
      * @param data the login data
      * @return the access token needed for future requests
      */
-    private String xboxAuth(final XboxLoginData data)
-    {
+    private String xboxAuth(final XboxLoginData data) {
         final Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("Accept", "application/json");
@@ -151,8 +141,7 @@ public class MicrosoftAuthenticator
      * @param accessToken the access token
      * @return the XboxLoginData object with the Token and UHS, or null
      */
-    private XboxLoginData loginXbox(final String accessToken)
-    {
+    private XboxLoginData loginXbox(final String accessToken) {
         final Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("Accept", "application/json");
@@ -160,8 +149,7 @@ public class MicrosoftAuthenticator
                 + accessToken + "\"},\"RelyingParty\":\"http://auth.xboxlive.com\",\"TokenType\":\"JWT\"}";
         String data = RequestUtil.post(XBOX_LIVE_AUTH_URL, headers, false,
                 body);
-        if (data == null)
-        {
+        if (data == null) {
             return null;
         }
         JsonObject obj = PARSER.parse(data).getAsJsonObject();
@@ -176,12 +164,11 @@ public class MicrosoftAuthenticator
      *
      * @param data the previous XboxLoginData object from the xbox login request
      * @return the resulting updated XboxLoginData or null if request fails
-     * @throws IOException if the output or input streams fail to write/read
+     * @throws IOException            if the output or input streams fail to write/read
      * @throws MicrosoftAuthException if the account is locked in some way from authorizing, or no result was found
      */
     private XboxLoginData getXSTSData(final XboxLoginData data)
-            throws IOException, MicrosoftAuthException
-    {
+            throws IOException, MicrosoftAuthException {
         final Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("Accept", "application/json");
@@ -190,26 +177,20 @@ public class MicrosoftAuthenticator
                 "{\"Properties\":{\"SandboxId\":\"RETAIL\",\"UserTokens\":[\""
                         + data.token()
                         + "\"]},\"RelyingParty\":\"rp://api.minecraftservices.com/\",\"TokenType\":\"JWT\"})");
-        if (connection == null)
-        {
+        if (connection == null) {
             return null;
         }
         String content = RequestUtil.readConnection(connection);
-        if (content == null)
-        {
+        if (content == null) {
             throw new MicrosoftAuthException("input stream cannot be null");
         }
         JsonObject jsonObject = PARSER.parse(content).getAsJsonObject();
-        if (connection.getResponseCode() == 401)
-        {
+        if (connection.getResponseCode() == 401) {
             long errCode = jsonObject.get("XErr").getAsLong();
-            if (errCode == 2148916238L)
-            {
+            if (errCode == 2148916238L) {
                 throw new MicrosoftAuthException("Account is owned by user under " +
                         "the age of 18");
-            }
-            else if (errCode == 2148916233L)
-            {
+            } else if (errCode == 2148916233L) {
                 throw new MicrosoftAuthException("Account does not have an Xbox " +
                         "account created");
             }
@@ -223,17 +204,16 @@ public class MicrosoftAuthenticator
      * Gets the user data from the oauth data
      *
      * @param oauthData The oauth data result
-     * @param email The email
-     * @param password The password
+     * @param email     The email
+     * @param password  The password
      * @return The map that contains the access_token, refresh_token,
      * expires_at, etc
-     * @throws IOException if the output or input streams fail to write/read
+     * @throws IOException            if the output or input streams fail to write/read
      * @throws MicrosoftAuthException if the authentication with Microsoft fails
      */
     private Map<String, String> getLoginData(OAuthData oauthData, String email,
                                              String password)
-            throws IOException, MicrosoftAuthException
-    {
+            throws IOException, MicrosoftAuthException {
         final Map<String, String> headers = new HashMap<>();
         headers.put("Cookie", oauthData.cookie());
         headers.put("Content-Type", "application/x-www-form-urlencoded");
@@ -243,33 +223,27 @@ public class MicrosoftAuthenticator
                 + "&loginfmt=" + email
                 + "&passwd=" + password
                 + "&PPFT=" + oauthData.sfttTag());
-        if (connection == null)
-        {
+        if (connection == null) {
             return null;
         }
         String data = RequestUtil.readConnection(connection);
-        if (data == null)
-        {
+        if (data == null) {
             return null;
         }
         String redirectedUrl = connection.getURL().toString();
         if (redirectedUrl.contains("accessToken")
-                && redirectedUrl.equals(oauthData.postUrl()))
-        {
+                && redirectedUrl.equals(oauthData.postUrl())) {
             throw new MicrosoftAuthException("Login failed, [url=" + redirectedUrl + "]");
         }
-        if (data.contains("Sign in to"))
-        {
+        if (data.contains("Sign in to")) {
             throw new MicrosoftAuthException("Invalid credentials");
         }
-        if (data.contains("Help us protect your account"))
-        {
+        if (data.contains("Help us protect your account")) {
             throw new MicrosoftAuthException("2FA has been enabled on this account");
         }
         String raw = connection.getURL().toString().split("#")[1];
         Map<String, String> loginData = new LinkedHashMap<>();
-        for (String param : raw.split("&"))
-        {
+        for (String param : raw.split("&")) {
             String[] paramSplit = param.split("=");
             loginData.put(paramSplit[0], paramSplit[1]);
         }
@@ -282,14 +256,12 @@ public class MicrosoftAuthenticator
      * @return The OAuthData object
      * @throws IOException If the stream fails to be read from
      */
-    private OAuthData getOAuthData() throws IOException
-    {
+    private OAuthData getOAuthData() throws IOException {
         Map<String, String> headers = new HashMap<>();
         headers.put("User-Agent", USER_AGENT);
         headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8");
         HttpURLConnection connection = RequestUtil.get(OAUTH_AUTH_URL, headers);
-        if (connection == null)
-        {
+        if (connection == null) {
             return null;
         }
         String data = RequestUtil.readConnection(connection);
@@ -298,12 +270,10 @@ public class MicrosoftAuthenticator
         }
         String sfttTag = null, postUrl = null;
         Matcher matcher = SFTT_TAG_PATTERN.matcher(data);
-        if (matcher.find())
-        {
+        if (matcher.find()) {
             sfttTag = matcher.group(1);
         }
-        if ((matcher = POST_URL_PATTERN.matcher(data)).find())
-        {
+        if ((matcher = POST_URL_PATTERN.matcher(data)).find()) {
             postUrl = matcher.group(1);
         }
         List<String> cookieData = connection.getHeaderFields().get("Set-Cookie");

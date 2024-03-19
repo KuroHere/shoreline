@@ -10,7 +10,6 @@ import net.shoreline.client.mixin.MixinMinecraftClient;
  * @see MixinMinecraftClient
  */
 @Cancelable
-public class ItemMultitaskEvent extends Event
-{
+public class ItemMultitaskEvent extends Event {
 
 }

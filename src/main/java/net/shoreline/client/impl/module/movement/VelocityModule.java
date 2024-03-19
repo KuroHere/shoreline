@@ -32,13 +32,10 @@ import net.shoreline.client.util.string.EnumFormatter;
 import java.text.DecimalFormat;
 
 /**
- *
- *
  * @author Gavin, linus
  * @since 1.0
  */
-public class VelocityModule extends ToggleModule
-{
+public class VelocityModule extends ToggleModule {
     Config<VelocityMode> modeConfig = new EnumConfig<>("Mode",
             "The anti-cheat bypass for velocity", VelocityMode.NORMAL,
             VelocityMode.values());
@@ -62,21 +59,17 @@ public class VelocityModule extends ToggleModule
     /**
      *
      */
-    public VelocityModule()
-    {
+    public VelocityModule() {
         super("Velocity", "Reduces the amount of player knockback velocity",
                 ModuleCategory.MOVEMENT);
     }
 
     /**
-     *
      * @return
      */
     @Override
-    public String getModuleData()
-    {
-        if (modeConfig.getValue() == VelocityMode.NORMAL)
-        {
+    public String getModuleData() {
+        if (modeConfig.getValue() == VelocityMode.NORMAL) {
             DecimalFormat decimal = new DecimalFormat("0.0");
             return String.format("H:%s%%, V:%s%%",
                     decimal.format(horizontalConfig.getValue()),
@@ -86,36 +79,26 @@ public class VelocityModule extends ToggleModule
     }
 
     @Override
-    public void onEnable()
-    {
+    public void onEnable() {
         cancelVelocity = false;
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onPacketInbound(PacketEvent.Inbound event)
-    {
-        if (mc.player == null || mc.world == null)
-        {
+    public void onPacketInbound(PacketEvent.Inbound event) {
+        if (mc.player == null || mc.world == null) {
             return;
         }
-        if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet)
-        {
-            if (packet.getId() != mc.player.getId())
-            {
+        if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet) {
+            if (packet.getId() != mc.player.getId()) {
                 return;
             }
-            switch (modeConfig.getValue())
-            {
-                case NORMAL ->
-                {
+            switch (modeConfig.getValue()) {
+                case NORMAL -> {
                     if (horizontalConfig.getValue() == 0.0f
-                            && verticalConfig.getValue() == 0.0f)
-                    {
+                            && verticalConfig.getValue() == 0.0f) {
                         event.cancel();
                         return;
                     }
@@ -126,30 +109,21 @@ public class VelocityModule extends ToggleModule
                     ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityZ((int) (packet.getVelocityZ()
                             * (horizontalConfig.getValue() / 100.0f)));
                 }
-                case GRIM ->
-                {
-                    if (!Managers.NCP.passed(100))
-                    {
+                case GRIM -> {
+                    if (!Managers.NCP.passed(100)) {
                         return;
                     }
                     event.cancel();
                     cancelVelocity = true;
                 }
             }
-        }
-        else if (event.getPacket() instanceof ExplosionS2CPacket packet)
-        {
-            switch (modeConfig.getValue())
-            {
-                case NORMAL ->
-                {
+        } else if (event.getPacket() instanceof ExplosionS2CPacket packet) {
+            switch (modeConfig.getValue()) {
+                case NORMAL -> {
                     if (horizontalConfig.getValue() == 0.0f
-                            && verticalConfig.getValue() == 0.0f)
-                    {
+                            && verticalConfig.getValue() == 0.0f) {
                         event.cancel();
-                    }
-                    else
-                    {
+                    } else {
                         ((AccessorExplosionS2CPacket) packet).setPlayerVelocityX(packet.getPlayerVelocityX()
                                 * (horizontalConfig.getValue() / 100.0f));
                         ((AccessorExplosionS2CPacket) packet).setPlayerVelocityY(packet.getPlayerVelocityY()
@@ -158,54 +132,41 @@ public class VelocityModule extends ToggleModule
                                 * (horizontalConfig.getValue() / 100.0f));
                     }
                 }
-                case GRIM ->
-                {
-                    if (!Managers.NCP.passed(100))
-                    {
+                case GRIM -> {
+                    if (!Managers.NCP.passed(100)) {
                         return;
                     }
                     event.cancel();
                     cancelVelocity = true;
                 }
             }
-            if (event.isCanceled() && mc.world.getServer() != null)
-            {
+            if (event.isCanceled() && mc.world.getServer() != null) {
                 // Dumb fix bc canceling explosion velocity removes explosion handling in 1.19
-                try
-                {
+                try {
                     mc.world.playSound(packet.getX(), packet.getY(), packet.getZ(),
                             SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
                             4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false);
-                }
-                catch (Exception ignored)
-                {
+                } catch (Exception ignored) {
 
                 }
             }
-        }
-        else if (event.getPacket() instanceof EntityStatusS2CPacket packet
-                && packet.getStatus() == EntityStatuses.PULL_HOOKED_ENTITY && pushFishhookConfig.getValue())
-        {
+        } else if (event.getPacket() instanceof EntityStatusS2CPacket packet
+                && packet.getStatus() == EntityStatuses.PULL_HOOKED_ENTITY && pushFishhookConfig.getValue()) {
             Entity entity = packet.getEntity(mc.world);
             if (entity instanceof FishingBobberEntity hook
-                    && hook.getHookedEntity() == mc.player)
-            {
+                    && hook.getHookedEntity() == mc.player) {
                 event.cancel();
             }
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() == EventStage.PRE && cancelVelocity)
-        {
-            if (modeConfig.getValue() == VelocityMode.GRIM && Managers.NCP.passed(100))
-            {
+    public void onTick(TickEvent event) {
+        if (event.getStage() == EventStage.PRE && cancelVelocity) {
+            if (modeConfig.getValue() == VelocityMode.GRIM && Managers.NCP.passed(100)) {
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
                         mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround()));
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
@@ -216,46 +177,36 @@ public class VelocityModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPushEntity(PushEntityEvent event)
-    {
-        if (pushEntitiesConfig.getValue())
-        {
+    public void onPushEntity(PushEntityEvent event) {
+        if (pushEntitiesConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPushOutOfBlocks(PushOutOfBlocksEvent event)
-    {
-        if (pushBlocksConfig.getValue())
-        {
+    public void onPushOutOfBlocks(PushOutOfBlocksEvent event) {
+        if (pushBlocksConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPushFluid(PushFluidsEvent event)
-    {
-        if (pushLiquidsConfig.getValue())
-        {
+    public void onPushFluid(PushFluidsEvent event) {
+        if (pushLiquidsConfig.getValue()) {
             event.cancel();
         }
     }
 
-    private enum VelocityMode
-    {
+    private enum VelocityMode {
         NORMAL,
         GRIM
     }

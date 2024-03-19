@@ -6,17 +6,13 @@ import net.minecraft.screen.BeaconScreenHandler;
 import net.minecraft.text.Text;
 
 /**
- *
- *
  * @author Shoreline
  * @since 1.0
  */
-public class BeaconSelectorScreen extends BeaconScreen
-{
+public class BeaconSelectorScreen extends BeaconScreen {
     public BeaconSelectorScreen(BeaconScreenHandler handler,
                                 PlayerInventory inventory,
-                                Text title)
-    {
+                                Text title) {
         super(handler, inventory, title);
     }
 
@@ -24,8 +20,7 @@ public class BeaconSelectorScreen extends BeaconScreen
      *
      */
     @Override
-    public void init()
-    {
+    public void init() {
         super.init();
     }
 
@@ -33,8 +28,7 @@ public class BeaconSelectorScreen extends BeaconScreen
      *
      */
     @Override
-    public void handledScreenTick()
-    {
+    public void handledScreenTick() {
         super.handledScreenTick();
     }
 }

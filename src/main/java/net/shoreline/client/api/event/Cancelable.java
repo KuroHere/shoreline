@@ -10,13 +10,11 @@ import java.lang.annotation.Target;
  * cancelable are given access to {@link Event#setCanceled(boolean)}.
  *
  * @author linus
- * @since 1.0
- *
  * @see Event
+ * @since 1.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Cancelable
-{
+public @interface Cancelable {
 
 }

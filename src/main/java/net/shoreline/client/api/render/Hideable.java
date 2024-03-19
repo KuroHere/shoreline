@@ -1,16 +1,13 @@
 package net.shoreline.client.api.render;
 
-public interface Hideable
-{
+public interface Hideable {
     /**
-     *
-     * @param hidden
-     */
-    void setHidden(boolean hidden);
-
-    /**
-     *
      * @return
      */
     boolean isHidden();
+
+    /**
+     * @param hidden
+     */
+    void setHidden(boolean hidden);
 }

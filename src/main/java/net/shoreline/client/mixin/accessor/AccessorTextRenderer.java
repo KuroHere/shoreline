@@ -12,23 +12,18 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 /**
- *
- *
  * @author Shoreline
  * @since 1.0
  */
 @Mixin(TextRenderer.class)
-public interface AccessorTextRenderer
-{
+public interface AccessorTextRenderer {
     /**
-     *
      * @return
      */
     @Accessor("validateAdvance")
     boolean hookGetValidateAdvance();
 
     /**
-     *
      * @param id
      * @return
      */
@@ -36,7 +31,6 @@ public interface AccessorTextRenderer
     FontStorage hookGetFontStorage(Identifier id);
 
     /**
-     *
      * @param glyphRenderer
      * @param bold
      * @param italic
@@ -58,7 +52,6 @@ public interface AccessorTextRenderer
                        float blue, float alpha, int light);
 
     /**
-     *
      * @param text
      * @param x
      * @param y

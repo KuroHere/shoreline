@@ -32,17 +32,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class NoSlowModule extends ToggleModule
-{
+public class NoSlowModule extends ToggleModule {
+    //
+    private static KeyBinding[] MOVE_KEYBINDS;
     //
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Strict NCP " +
             "bypass for ground slowdowns", false);
-    Config<Boolean> airStrictConfig = new BooleanConfig("AirStrict",  "Strict" +
+    Config<Boolean> airStrictConfig = new BooleanConfig("AirStrict", "Strict" +
             " NCP bypass for air slowdowns", false);
     Config<Boolean> grimConfig = new BooleanConfig("Grim", "Strict" +
             " Grim bypass for slowdown", false);
@@ -67,37 +66,30 @@ public class NoSlowModule extends ToggleModule
             "the slowdown effect caused by walking over SoulSand blocks", false);
     Config<Boolean> honeyblockConfig = new BooleanConfig("HoneyBlock", "Removes " +
             "the slowdown effect caused by walking over Honey blocks", false);
-    Config<Boolean> slimeblockConfig = new BooleanConfig("SlimeBlock",  "Removes " +
+    Config<Boolean> slimeblockConfig = new BooleanConfig("SlimeBlock", "Removes " +
             "the slowdown effect caused by walking over Slime blocks", false);
     //
     private boolean sneaking;
-    //
-    private static KeyBinding[] MOVE_KEYBINDS;
 
     /**
      *
      */
-    public NoSlowModule()
-    {
+    public NoSlowModule() {
         super("NoSlow", "Prevents items from slowing down player",
                 ModuleCategory.MOVEMENT);
     }
 
     @Override
-    public void onEnable()
-    {
-        if (MOVE_KEYBINDS != null)
-        {
+    public void onEnable() {
+        if (MOVE_KEYBINDS != null) {
             return;
         }
         MOVE_KEYBINDS = new KeyBinding[]{mc.options.jumpKey, mc.options.sneakKey, mc.options.forwardKey, mc.options.backKey, mc.options.rightKey, mc.options.leftKey};
     }
 
     @Override
-    public void onDisable()
-    {
-        if (airStrictConfig.getValue() && sneaking)
-        {
+    public void onDisable() {
+        if (airStrictConfig.getValue() && sneaking) {
             Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                     ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         }
@@ -106,16 +98,13 @@ public class NoSlowModule extends ToggleModule
     }
 
     @EventListener
-    public void onGameJoin(GameJoinEvent event)
-    {
+    public void onGameJoin(GameJoinEvent event) {
         onEnable();
     }
 
     @EventListener
-    public void onSetCurrentHand(SetCurrentHandEvent event)
-    {
-        if (airStrictConfig.getValue() && !sneaking && checkSlowed())
-        {
+    public void onSetCurrentHand(SetCurrentHandEvent event) {
+        if (airStrictConfig.getValue() && !sneaking && checkSlowed()) {
             sneaking = true;
             Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                     ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
@@ -123,82 +112,61 @@ public class NoSlowModule extends ToggleModule
     }
 
     @EventListener
-    public void onPlayerUpdate(PlayerUpdateEvent event)
-    {
+    public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (event.getStage() == EventStage.PRE && grimConfig.getValue()
-                && mc.player.isUsingItem() && !mc.player.isSneaking() && itemsConfig.getValue())
-        {
-            if (mc.player.getActiveHand() == Hand.OFF_HAND)
-            {
+                && mc.player.isUsingItem() && !mc.player.isSneaking() && itemsConfig.getValue()) {
+            if (mc.player.getActiveHand() == Hand.OFF_HAND) {
                 Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
                         mc.player.getInventory().selectedSlot % 8 + 1));
                 Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
                         mc.player.getInventory().selectedSlot));
-            }
-            else
-            {
+            } else {
                 Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
             }
         }
     }
 
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() == EventStage.PRE)
-        {
+    public void onTick(TickEvent event) {
+        if (event.getStage() == EventStage.PRE) {
             if (airStrictConfig.getValue() && sneaking
-                    && !mc.player.isUsingItem())
-            {
+                    && !mc.player.isUsingItem()) {
                 sneaking = false;
                 Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                         ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
             }
-            if (strafeFixConfig.getValue() && checkSlowed())
-            {
+            if (strafeFixConfig.getValue() && checkSlowed()) {
                 // Old NCP
                 Managers.NETWORK.sendSequencedPacket(id ->
                         new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND,
                                 new BlockHitResult(mc.player.getPos(),
-                                Direction.UP, BlockPos.ORIGIN, false), id));
+                                        Direction.UP, BlockPos.ORIGIN, false), id));
             }
             if (inventoryMoveConfig.getValue() && checkScreen()
-                    && MOVE_KEYBINDS != null)
-            {
+                    && MOVE_KEYBINDS != null) {
                 final long handle = mc.getWindow().getHandle();
-                for (KeyBinding binding : MOVE_KEYBINDS)
-                {
+                for (KeyBinding binding : MOVE_KEYBINDS) {
                     binding.setPressed(InputUtil.isKeyPressed(handle,
                             binding.getDefaultKey().getCode()));
                 }
-                if (arrowMoveConfig.getValue())
-                {
+                if (arrowMoveConfig.getValue()) {
                     float yaw = mc.player.getYaw();
                     float pitch = mc.player.getPitch();
-                    if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_UP))
-                    {
+                    if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_UP)) {
                         pitch -= 3.0f;
-                    }
-                    else if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_DOWN))
-                    {
-                       pitch += 3.0f;
-                    }
-                    else if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT))
-                    {
+                    } else if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_DOWN)) {
+                        pitch += 3.0f;
+                    } else if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_LEFT)) {
                         yaw -= 3.0f;
-                    }
-                    else if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT))
-                    {
+                    } else if (InputUtil.isKeyPressed(handle, GLFW.GLFW_KEY_RIGHT)) {
                         yaw += 3.0f;
                     }
                     mc.player.setYaw(yaw);
                     mc.player.setPitch(MathHelper.clamp(pitch, -90.0f, 90.0f));
                 }
             }
-            if (grimConfig.getValue() && (websConfig.getValue() || berryBushConfig.getValue()))
-            {
-                for (BlockPos pos : getIntersectingWebs())
-                {
+            if (grimConfig.getValue() && (websConfig.getValue() || berryBushConfig.getValue())) {
+                for (BlockPos pos : getIntersectingWebs()) {
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, pos, Direction.DOWN));
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
@@ -209,129 +177,100 @@ public class NoSlowModule extends ToggleModule
     }
 
     @EventListener
-    public void onSlowMovement(SlowMovementEvent event)
-    {
+    public void onSlowMovement(SlowMovementEvent event) {
         Block block = event.getState().getBlock();
         if (block instanceof CobwebBlock && websConfig.getValue()
-                || block instanceof SweetBerryBushBlock && berryBushConfig.getValue())
-        {
-            if (grimConfig.getValue())
-            {
+                || block instanceof SweetBerryBushBlock && berryBushConfig.getValue()) {
+            if (grimConfig.getValue()) {
                 event.cancel();
                 return;
             }
-            if (mc.player.isOnGround())
-            {
+            if (mc.player.isOnGround()) {
                 Managers.TICK.setClientTick(1.0f);
-            }
-            else
-            {
+            } else {
                 Managers.TICK.setClientTick(webSpeedConfig.getValue() / 2.0f);
             }
         }
     }
 
     @EventListener
-    public void onMovementSlowdown(MovementSlowdownEvent event)
-    {
-        if (checkSlowed())
-        {
+    public void onMovementSlowdown(MovementSlowdownEvent event) {
+        if (checkSlowed()) {
             event.input.movementForward *= 5.0f;
             event.input.movementSideways *= 5.0f;
         }
     }
 
     @EventListener
-    public void onVelocityMultiplier(VelocityMultiplierEvent event)
-    {
+    public void onVelocityMultiplier(VelocityMultiplierEvent event) {
         if (event.getBlock() == Blocks.SOUL_SAND && soulsandConfig.getValue()
-                || event.getBlock() == Blocks.HONEY_BLOCK && honeyblockConfig.getValue())
-        {
+                || event.getBlock() == Blocks.HONEY_BLOCK && honeyblockConfig.getValue()) {
             event.cancel();
         }
     }
 
     @EventListener
-    public void onSteppedOnSlimeBlock(SteppedOnSlimeBlockEvent event)
-    {
-        if (slimeblockConfig.getValue())
-        {
+    public void onSteppedOnSlimeBlock(SteppedOnSlimeBlockEvent event) {
+        if (slimeblockConfig.getValue()) {
             event.cancel();
         }
     }
 
     @EventListener
-    public void onBlockSlipperiness(BlockSlipperinessEvent event)
-    {
+    public void onBlockSlipperiness(BlockSlipperinessEvent event) {
         if (event.getBlock() == Blocks.SLIME_BLOCK
-                && slimeblockConfig.getValue())
-        {
+                && slimeblockConfig.getValue()) {
             event.cancel();
             event.setSlipperiness(0.6f);
         }
     }
 
     @EventListener
-    public void onPacketOutbound(PacketEvent.Outbound event)
-    {
-        if (mc.player == null || mc.world == null || mc.isInSingleplayer())
-        {
+    public void onPacketOutbound(PacketEvent.Outbound event) {
+        if (mc.player == null || mc.world == null || mc.isInSingleplayer()) {
             return;
         }
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet && packet.changesPosition()
-                && strictConfig.getValue() && checkSlowed())
-        {
+                && strictConfig.getValue() && checkSlowed()) {
             // Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(0));
             // Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
             Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
-        }
-        else if (event.getPacket() instanceof ClickSlotC2SPacket && strictConfig.getValue())
-        {
-            if (mc.player.isUsingItem())
-            {
+        } else if (event.getPacket() instanceof ClickSlotC2SPacket && strictConfig.getValue()) {
+            if (mc.player.isUsingItem()) {
                 mc.player.stopUsingItem();
             }
-            if (sneaking || Managers.POSITION.isSneaking())
-            {
+            if (sneaking || Managers.POSITION.isSneaking()) {
                 Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                         ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
             }
-            if (Managers.POSITION.isSprinting())
-            {
+            if (Managers.POSITION.isSprinting()) {
                 Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                         ClientCommandC2SPacket.Mode.STOP_SPRINTING));
             }
         }
     }
 
-    public boolean checkSlowed()
-    {
+    public boolean checkSlowed() {
         return !mc.player.isRiding() && !mc.player.isSneaking() && !mc.player.isFallFlying()
                 && (mc.player.isUsingItem() && itemsConfig.getValue() || mc.player.isBlocking() && shieldsConfig.getValue() && !grimConfig.getValue());
     }
 
-    public boolean checkScreen()
-    {
+    public boolean checkScreen() {
         return mc.currentScreen != null && !(mc.currentScreen instanceof ChatScreen
                 || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof DeathScreen);
     }
 
-    public List<BlockPos> getIntersectingWebs()
-    {
+    public List<BlockPos> getIntersectingWebs() {
         int radius = 5;
         final List<BlockPos> blocks = new ArrayList<>();
-        for (int x = radius; x > -radius; --x)
-        {
-            for (int y = radius; y > -radius; --y)
-            {
-                for (int z = radius; z > -radius; --z)
-                {
+        for (int x = radius; x > -radius; --x) {
+            for (int y = radius; y > -radius; --y) {
+                for (int z = radius; z > -radius; --z) {
                     final BlockPos blockPos = BlockPos.ofFloored(mc.player.getX() + x,
                             mc.player.getY() + y, mc.player.getZ() + z);
                     BlockState state = mc.world.getBlockState(blockPos);
                     if (state.getBlock() instanceof CobwebBlock && websConfig.getValue()
-                            || state.getBlock() instanceof SweetBerryBushBlock && berryBushConfig.getValue())
-                    {
+                            || state.getBlock() instanceof SweetBerryBushBlock && berryBushConfig.getValue()) {
                         blocks.add(blockPos);
                     }
                 }

@@ -9,70 +9,53 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class StringArgument extends Argument<String>
-{
+public class StringArgument extends Argument<String> {
+    //
+    private static final ArrayList<String> EMPTY_SUGGESTIONS =
+            new ArrayList<>();
     //
     private final List<String> allowedValues;
 
     /**
-     *
-     *
      * @param name
      * @param desc
      * @param allowedValues
      */
-    public StringArgument(String name, String desc, List<String> allowedValues)
-    {
+    public StringArgument(String name, String desc, List<String> allowedValues) {
         super(name, desc);
         this.allowedValues = allowedValues;
     }
 
     /**
-     *
-     *
      * @param name
      * @param desc
      */
-    public StringArgument(String name, String desc)
-    {
+    public StringArgument(String name, String desc) {
         super(name, desc);
         this.allowedValues = null;
     }
 
     /**
-     *
-     *
      * @see Command#onCommandInput()
      */
     @Override
-    public String getValue()
-    {
+    public String getValue() {
         final String literal = getLiteral();
-        if (allowedValues == null || allowedValues.contains(literal))
-        {
+        if (allowedValues == null || allowedValues.contains(literal)) {
             return literal;
         }
         ChatUtil.error("Failed to parse argument! Allowed values: ");
         return null;
     }
 
-    //
-    private static final ArrayList<String> EMPTY_SUGGESTIONS =
-            new ArrayList<>();
-
     /**
-     *
-     *
      * @return
      */
     @Override
-    public Collection<String> getSuggestions()
-    {
+    public Collection<String> getSuggestions() {
         return allowedValues != null ? allowedValues : EMPTY_SUGGESTIONS;
     }
 }

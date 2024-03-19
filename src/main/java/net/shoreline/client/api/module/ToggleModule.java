@@ -22,76 +22,64 @@ import org.lwjgl.glfw.GLFW;
  * to change the enabled state.</p>
  *
  * @author linus
- * @since 1.0
- *
  * @see Macro
  * @see ToggleConfig
+ * @since 1.0
  */
-public class ToggleModule extends Module implements Hideable
-{
+public class ToggleModule extends Module implements Hideable {
+    //
+    private final Animation animation = new Animation(Easing.CUBIC_IN_OUT);
+    // Config representing the module enabled state. Cannot interact with
+    // this configuration unless using #toggle() #enable() or #disable().
+    Config<Boolean> enabledConfig = new ToggleConfig("Enabled", "The module" +
+            " enabled state. This state is true when the module is running.", false);
     // Config for keybinding implementation. Module keybind is used to
     // interact with the #enabledConfig.
     Config<Macro> keybindingConfig = new MacroConfig("Keybind", "The module " +
             "keybinding. Pressing this key will toggle the module enabled " +
             "state. Press [BACKSPACE] to delete the keybind.",
             new Macro(getId(), GLFW.GLFW_KEY_UNKNOWN, () -> toggle()));
-    // Config representing the module enabled state. Cannot interact with
-    // this configuration unless using #toggle() #enable() or #disable().
-    Config<Boolean> enabledConfig = new ToggleConfig("Enabled", "The module" +
-            " enabled state. This state is true when the module is running.", false);
     // Arraylist rendering info
     Config<Boolean> hiddenConfig = new BooleanConfig("Hidden", "The hidden " +
             "state of the module in the Arraylist", false);
-    //
-    private final Animation animation = new Animation(Easing.CUBIC_IN_OUT);
 
     /**
-     *
-     *
      * @param name     The module unique identifier
      * @param desc     The module description
      * @param category The module category
      */
-    public ToggleModule(String name, String desc, ModuleCategory category)
-    {
+    public ToggleModule(String name, String desc, ModuleCategory category) {
         super(name, desc, category);
         // Toggle settings
         register(keybindingConfig, enabledConfig, hiddenConfig);
     }
 
     /**
-     *
-     *
      * @param name     The module unique identifier
      * @param desc     The module description
      * @param category The module category
      * @param keycode  The module default keybind
      */
     public ToggleModule(String name, String desc, ModuleCategory category,
-                        Integer keycode)
-    {
+                        Integer keycode) {
         this(name, desc, category);
         keybind(keycode);
     }
 
     /**
-     *
-     * @param hidden
-     */
-    @Override
-    public void setHidden(boolean hidden)
-    {
-        hiddenConfig.setValue(hidden);
-    }
-
-    /**
-     *
      * @return
      */
     @Override
-    public boolean isHidden()
-    {
+    public boolean isHidden() {
         return hiddenConfig.getValue();
+    }
+
+    /**
+     * @param hidden
+     */
+    @Override
+    public void setHidden(boolean hidden) {
+        hiddenConfig.setValue(hidden);
     }
 
     /**
@@ -102,14 +90,10 @@ public class ToggleModule extends Module implements Hideable
      * @see #enable()
      * @see #disable()
      */
-    public void toggle()
-    {
-        if (isEnabled())
-        {
+    public void toggle() {
+        if (isEnabled()) {
             disable();
-        }
-        else
-        {
+        } else {
             enable();
         }
     }
@@ -121,8 +105,7 @@ public class ToggleModule extends Module implements Hideable
      * @see #onEnable()
      * @see ToggleConfig#setValue(Boolean)
      */
-    public void enable()
-    {
+    public void enable() {
         enabledConfig.setValue(true);
         onEnable();
     }
@@ -134,8 +117,7 @@ public class ToggleModule extends Module implements Hideable
      * @see #onDisable()
      * @see ToggleConfig#setValue(Boolean)
      */
-    public void disable()
-    {
+    public void disable() {
         enabledConfig.setValue(false);
         onDisable();
     }
@@ -146,8 +128,7 @@ public class ToggleModule extends Module implements Hideable
      *
      * @see #enable()
      */
-    protected void onEnable()
-    {
+    protected void onEnable() {
 
     }
 
@@ -157,8 +138,7 @@ public class ToggleModule extends Module implements Hideable
      *
      * @see #disable()
      */
-    protected void onDisable()
-    {
+    protected void onDisable() {
 
     }
 
@@ -168,12 +148,10 @@ public class ToggleModule extends Module implements Hideable
      * keybind is pressed.
      *
      * @param keycode The keybind
-     *
      * @see Macro
      * @see #keybindingConfig
      */
-    public void keybind(int keycode)
-    {
+    public void keybind(int keycode) {
         keybindingConfig.setContainer(this);
         ((MacroConfig) keybindingConfig).setValue(keycode);
     }
@@ -183,30 +161,23 @@ public class ToggleModule extends Module implements Hideable
      * Wrapper method for {@link ToggleConfig#getValue()}.
      *
      * @return <tt>true</tt> if the module is enabled
-     *
      * @see #enabledConfig
      */
-    public boolean isEnabled()
-    {
+    public boolean isEnabled() {
         return enabledConfig.getValue();
     }
 
     /**
-     *
-     *
      * @return
      */
-    public Macro getKeybinding()
-    {
+    public Macro getKeybinding() {
         return keybindingConfig.getValue();
     }
 
     /**
-     *
      * @return
      */
-    public Animation getAnimation()
-    {
+    public Animation getAnimation() {
         return animation;
     }
 }

@@ -1,8 +1,8 @@
 package net.shoreline.client.init;
 
 import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.manager.ModuleManager;
+import net.shoreline.client.api.module.Module;
 import net.shoreline.client.impl.module.client.ClickGuiModule;
 import net.shoreline.client.impl.module.client.ColorsModule;
 import net.shoreline.client.impl.module.client.HUDModule;
@@ -18,23 +18,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see Module
  * @see ModuleManager
+ * @since 1.0
  */
-public class Modules
-{
-    // The initialized state of the modules. Once this is true, all modules
-    // have been initialized and the init process is complete. As a general
-    // rule, it is good practice to check this state before accessing instances.
-    private static boolean initialized;
-    // The module initialization cache. This prevents modules from being
-    // initialized more than once.
-    private static Set<Module> CACHE;
+public class Modules {
     // Module instances.
     public static ClickGuiModule CLICK_GUI;
     public static ColorsModule COLORS;
@@ -144,6 +133,13 @@ public class Modules
     public static MultitaskModule MULTITASK;
     public static NoGlitchBlocksModule NO_GLITCH_BLOCKS;
     public static SpeedmineModule SPEEDMINE;
+    // The initialized state of the modules. Once this is true, all modules
+    // have been initialized and the init process is complete. As a general
+    // rule, it is good practice to check this state before accessing instances.
+    private static boolean initialized;
+    // The module initialization cache. This prevents modules from being
+    // initialized more than once.
+    private static Set<Module> CACHE;
 
     /**
      * Returns the registered {@link Module} with the param name in the
@@ -153,19 +149,15 @@ public class Modules
      * @param id The module name
      * @return The retrieved module
      * @throws IllegalStateException If the module was not registered
-     *
      * @see ModuleManager
      */
-    private static Module getRegisteredModule(final String id)
-    {
+    private static Module getRegisteredModule(final String id) {
         Module registered = Managers.MODULE.getModule(id);
-        if (CACHE.add(registered))
-        {
+        if (CACHE.add(registered)) {
             return registered;
         }
         // already cached!!
-        else
-        {
+        else {
             throw new IllegalStateException("Invalid module requested: " + id);
         }
     }
@@ -178,10 +170,8 @@ public class Modules
      * @see #getRegisteredModule(String)
      * @see Managers#isInitialized()
      */
-    public static void init()
-    {
-        if (Managers.isInitialized())
-        {
+    public static void init() {
+        if (Managers.isInitialized()) {
             CACHE = new HashSet<>();
             CLICK_GUI = (ClickGuiModule) getRegisteredModule(
                     "clickgui-module");
@@ -331,18 +321,14 @@ public class Modules
                     "speedmine-module");
             initialized = true;
             // reflect configuration properties for each cached module
-            for (Module module : CACHE)
-            {
-                if (module == null)
-                {
+            for (Module module : CACHE) {
+                if (module == null) {
                     continue;
                 }
                 module.reflectConfigs();
             }
             CACHE.clear();
-        }
-        else
-        {
+        } else {
             throw new RuntimeException("Accessed modules before managers " +
                     "finished initializing!");
         }
@@ -354,12 +340,10 @@ public class Modules
      * {@link Shoreline#preInit()} has finished running.
      *
      * @return <tt>true</tt> if the module instances have been initialized
-     *
      * @see #init()
      * @see #initialized
      */
-    public static boolean isInitialized()
-    {
+    public static boolean isInitialized() {
         return initialized;
     }
 }

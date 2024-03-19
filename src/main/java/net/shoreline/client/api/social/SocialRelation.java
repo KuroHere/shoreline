@@ -1,6 +1,5 @@
 package net.shoreline.client.api.social;
 
-public enum SocialRelation
-{
+public enum SocialRelation {
     FRIEND
 }

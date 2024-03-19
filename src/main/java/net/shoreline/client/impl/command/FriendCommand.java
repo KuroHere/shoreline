@@ -14,13 +14,10 @@ import net.shoreline.client.util.chat.ChatUtil;
 import java.util.Arrays;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class FriendCommand extends Command
-{
+public class FriendCommand extends Command {
     //
     @OptionalArgument
     Argument<String> actionArgument = new StringArgument("Add/Remove",
@@ -35,8 +32,7 @@ public class FriendCommand extends Command
     /**
      *
      */
-    public FriendCommand()
-    {
+    public FriendCommand() {
         super("Friend", "Adds/Removes a friend from the player list");
     }
 
@@ -44,41 +40,31 @@ public class FriendCommand extends Command
      *
      */
     @Override
-    public void onCommandInput()
-    {
+    public void onCommandInput() {
         final PlayerEntity player = playerArgument.getValue();
-        if (player != null)
-        {
+        if (player != null) {
             final String action = actionArgument.getValue();
             final Boolean notify = notifyArgument.getValue();
-            if (action != null)
-            {
-                if (action.equalsIgnoreCase("add"))
-                {
+            if (action != null) {
+                if (action.equalsIgnoreCase("add")) {
                     ChatUtil.clientSendMessage("Added friend with name " +
                             Formatting.AQUA + player.getName().getString() + Formatting.RESET + "!");
                     Managers.SOCIAL.addFriend(player.getUuid());
-                    if (notify != null && notify)
-                    {
+                    if (notify != null && notify) {
                         ChatUtil.serverSendMessage(player, "You were friended by %s!",
                                 mc.player.getName().getString());
                     }
-                }
-                else if (action.equalsIgnoreCase("remove")
-                        || action.equalsIgnoreCase("del"))
-                {
+                } else if (action.equalsIgnoreCase("remove")
+                        || action.equalsIgnoreCase("del")) {
                     ChatUtil.clientSendMessage("Removed friend with name " +
                             Formatting.DARK_BLUE + player.getName().getString() + Formatting.RESET + "!");
                     Managers.SOCIAL.remove(player.getUuid());
                 }
-            }
-            else
-            {
+            } else {
                 ChatUtil.clientSendMessage("Added friend with name " +
                         Formatting.DARK_BLUE + player.getName().getString() + Formatting.RESET + "!");
                 Managers.SOCIAL.addFriend(player.getUuid());
-                if (notify != null && notify)
-                {
+                if (notify != null && notify) {
                     ChatUtil.serverSendMessage(player, "You were friended by %s!",
                             mc.player.getName().getString());
                 }

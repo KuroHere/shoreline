@@ -14,32 +14,27 @@ import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.string.EnumFormatter;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class SprintModule extends ToggleModule
-{
+public class SprintModule extends ToggleModule {
     //
     Config<SprintMode> modeConfig = new EnumConfig<>("Mode",
             "Sprinting mode. Rage allows for multi-directional sprinting.",
             SprintMode.LEGIT, SprintMode.values());
+
     /**
      *
      */
-    public SprintModule()
-    {
+    public SprintModule() {
         super("Sprint", "Automatically sprints", ModuleCategory.MOVEMENT);
     }
 
     /**
-     *
      * @return
      */
     @Override
-    public String getModuleData()
-    {
+    public String getModuleData() {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
@@ -47,10 +42,8 @@ public class SprintModule extends ToggleModule
      *
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() != EventStage.PRE)
-        {
+    public void onTick(TickEvent event) {
+        if (event.getStage() != EventStage.PRE) {
             return;
         }
         if (!Managers.POSITION.isSprinting()
@@ -61,16 +54,12 @@ public class SprintModule extends ToggleModule
                 && !mc.player.isInLava()
                 && !mc.player.isHoldingOntoLadder()
                 && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
-                && mc.player.getHungerManager().getFoodLevel() > 6.0F)
-        {
-            switch (modeConfig.getValue())
-            {
-                case LEGIT ->
-                {
+                && mc.player.getHungerManager().getFoodLevel() > 6.0F) {
+            switch (modeConfig.getValue()) {
+                case LEGIT -> {
                     if (mc.player.input.hasForwardMovement()
                             && (!mc.player.horizontalCollision
-                            || mc.player.collidedSoftly))
-                    {
+                            || mc.player.collidedSoftly)) {
                         mc.player.setSprinting(true);
                     }
                 }
@@ -80,12 +69,10 @@ public class SprintModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onSprintCancel(SprintCancelEvent event)
-    {
+    public void onSprintCancel(SprintCancelEvent event) {
         if (!Managers.POSITION.isSneaking()
                 && MovementUtil.isInputtingMovement()
                 && !mc.player.isRiding()
@@ -94,14 +81,12 @@ public class SprintModule extends ToggleModule
                 && !mc.player.isHoldingOntoLadder()
                 && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
                 && mc.player.getHungerManager().getFoodLevel() > 6.0F
-                && modeConfig.getValue() == SprintMode.RAGE)
-        {
+                && modeConfig.getValue() == SprintMode.RAGE) {
             event.cancel();
         }
     }
 
-    public enum SprintMode
-    {
+    public enum SprintMode {
         LEGIT,
         RAGE
     }

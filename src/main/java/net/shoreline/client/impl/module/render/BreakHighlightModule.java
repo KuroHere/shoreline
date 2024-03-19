@@ -1,5 +1,9 @@
 package net.shoreline.client.impl.module.render;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.client.render.BlockBreakingInfo;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
@@ -9,19 +13,12 @@ import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorWorldRenderer;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.client.render.BlockBreakingInfo;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class BreakHighlightModule extends ToggleModule
-{
+public class BreakHighlightModule extends ToggleModule {
     //
     Config<Float> rangeConfig = new NumberConfig<>("Range", "The ranged to " +
             "render breaking blocks", 5.0f, 20.0f, 50.0f);
@@ -29,32 +26,26 @@ public class BreakHighlightModule extends ToggleModule
     /**
      *
      */
-    public BreakHighlightModule()
-    {
+    public BreakHighlightModule() {
         super("BreakHighlight", "Highlights blocks that are being broken",
                 ModuleCategory.RENDER);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderWorld(RenderWorldEvent event)
-    {
-        if (mc.player == null || mc.world == null)
-        {
+    public void onRenderWorld(RenderWorldEvent event) {
+        if (mc.player == null || mc.world == null) {
             return;
         }
         Int2ObjectMap<BlockBreakingInfo> blockBreakProgressions =
                 ((AccessorWorldRenderer) mc.worldRenderer).getBlockBreakingProgressions();
         for (Int2ObjectMap.Entry<BlockBreakingInfo> info :
-                blockBreakProgressions.int2ObjectEntrySet())
-        {
+                blockBreakProgressions.int2ObjectEntrySet()) {
             BlockPos pos = info.getValue().getPos();
             double dist = mc.player.squaredDistanceTo(pos.toCenterPos());
-            if (dist > rangeConfig.getValue() * rangeConfig.getValue())
-            {
+            if (dist > rangeConfig.getValue() * rangeConfig.getValue()) {
                 continue;
             }
             int damage = info.getValue().getStage();
@@ -66,7 +57,7 @@ public class BreakHighlightModule extends ToggleModule
             double sizeY = damage * ((bb.maxY - y) / 8.0);
             double sizeZ = damage * ((bb.maxZ - z) / 8.0);
             RenderManager.renderBox(event.getMatrices(), new Box(x - sizeX,
-                    y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ),
+                            y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ),
                     Modules.COLORS.getRGB(60));
             RenderManager.renderBoundingBox(event.getMatrices(), new Box(x - sizeX,
                             y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ),

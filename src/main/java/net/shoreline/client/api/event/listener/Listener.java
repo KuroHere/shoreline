@@ -32,17 +32,16 @@ import java.util.Map;
  * }</pre>
  *
  * @author linus
- * @since 1.0
- *
  * @see Event
  * @see EventHandler
  * @see EventListener
+ * @since 1.0
  */
-public class Listener implements Comparable<Listener>
-{
-    // The Listener invoker created by the LambdaMetaFactory which invokes the
-    // code from the Listener method.
-    private Invokable<Object> invoker;
+public class Listener implements Comparable<Listener> {
+    // subscriber invoker cache for each listener method
+    private static final Map<Method, Invokable<Object>> INVOKE_CACHE = new HashMap<>();
+    // the MethodHandler lookup
+    private static final Lookup LOOKUP = MethodHandles.lookup();
     // The EventListener method which contains the code to invoke when the
     // listener is invoked.
     private final Method method;
@@ -53,14 +52,11 @@ public class Listener implements Comparable<Listener>
     private final boolean receiveCanceled;
     //
     private final int priority;
-    // subscriber invoker cache for each listener method
-    private static final Map<Method, Invokable<Object>> INVOKE_CACHE = new HashMap<>();
-    // the MethodHandler lookup
-    private static final Lookup LOOKUP = MethodHandles.lookup();
+    // The Listener invoker created by the LambdaMetaFactory which invokes the
+    // code from the Listener method.
+    private Invokable<Object> invoker;
 
     /**
-     *
-     *
      * @param method
      * @param subscriber
      * @param receiveCanceled
@@ -68,17 +64,14 @@ public class Listener implements Comparable<Listener>
      */
     @SuppressWarnings("unchecked")
     public Listener(Method method, Object subscriber,
-                    boolean receiveCanceled, int priority)
-    {
+                    boolean receiveCanceled, int priority) {
         this.method = method;
         this.subscriber = subscriber;
         this.receiveCanceled = receiveCanceled;
         this.priority = priority;
         // lambda at runtime to call the method
-        try
-        {
-            if (!INVOKE_CACHE.containsKey(method))
-            {
+        try {
+            if (!INVOKE_CACHE.containsKey(method)) {
                 MethodType methodType = MethodType.methodType(Invokable.class);
                 CallSite callSite = LambdaMetafactory.metafactory(
                         LOOKUP, "invoke",
@@ -90,31 +83,22 @@ public class Listener implements Comparable<Listener>
                 );
                 invoker = (Invokable<Object>) callSite.getTarget().invoke(subscriber);
                 INVOKE_CACHE.put(method, invoker);
-            }
-            else
-            {
+            } else {
                 invoker = INVOKE_CACHE.get(method);
             }
-        }
-        catch (Throwable e)
-        {
+        } catch (Throwable e) {
             Shoreline.error("Failed to build invoker for {}!", method.getName());
             e.printStackTrace();
         }
     }
 
     /**
-     *
-     *
      * @param event
      * @throws NullPointerException
-     *
      * @see Invokable#invoke(Object)
      */
-    public void invokeSubscriber(Event event)
-    {
-        if (event != null)
-        {
+    public void invokeSubscriber(Event event) {
+        if (event != null) {
             invoker.invoke(event);
         }
         // throw new NullPointerException("Failed to invoke subscriber!");
@@ -126,52 +110,38 @@ public class Listener implements Comparable<Listener>
      * specified listener.
      *
      * @param other The comparing listener
-     *
      * @see #getPriority()
      */
     @Override
-    public int compareTo(Listener other)
-    {
+    public int compareTo(Listener other) {
         return Integer.compare(getPriority(), other.getPriority());
     }
 
     /**
-     *
-     *
      * @return
      */
-    public Method getMethod()
-    {
+    public Method getMethod() {
         return method;
     }
 
     /**
-     *
-     *
      * @return
      */
-    public Object getSubscriber()
-    {
+    public Object getSubscriber() {
         return subscriber;
     }
 
     /**
-     *
-     *
      * @return
      */
-    public boolean isReceiveCanceled()
-    {
+    public boolean isReceiveCanceled() {
         return receiveCanceled;
     }
 
     /**
-     *
-     *
      * @return
      */
-    public int getPriority()
-    {
+    public int getPriority() {
         return priority;
     }
 }

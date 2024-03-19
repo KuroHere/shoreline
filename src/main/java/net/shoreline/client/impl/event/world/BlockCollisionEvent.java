@@ -1,57 +1,48 @@
 package net.shoreline.client.impl.event.world;
 
-import net.shoreline.client.api.event.Cancelable;
-import net.shoreline.client.api.event.Event;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import net.shoreline.client.api.event.Cancelable;
+import net.shoreline.client.api.event.Event;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Cancelable
-public class BlockCollisionEvent extends Event
-{
+public class BlockCollisionEvent extends Event {
     //
     private final BlockPos pos;
     private final BlockState state;
     //
     private VoxelShape voxelShape;
 
-    public BlockCollisionEvent(BlockPos pos, BlockState state)
-    {
+    public BlockCollisionEvent(BlockPos pos, BlockState state) {
         this.pos = pos;
         this.state = state;
         this.voxelShape = VoxelShapes.empty();
     }
 
-    public BlockPos getPos()
-    {
+    public BlockPos getPos() {
         return pos;
     }
 
-    public BlockState getState()
-    {
+    public BlockState getState() {
         return state;
     }
 
-    public Block getBlock()
-    {
+    public Block getBlock() {
         return state.getBlock();
     }
 
-    public VoxelShape getVoxelShape()
-    {
+    public VoxelShape getVoxelShape() {
         return voxelShape;
     }
 
-    public void setVoxelShape(VoxelShape voxelShape)
-    {
+    public void setVoxelShape(VoxelShape voxelShape) {
         this.voxelShape = voxelShape;
     }
 }

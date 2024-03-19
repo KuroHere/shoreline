@@ -10,13 +10,10 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class AutoMapartModule extends ToggleModule
-{
+public class AutoMapartModule extends ToggleModule {
     //
     Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to " +
             "place maps around the player", 0.1f, 6.0f, 10.0f);
@@ -26,21 +23,17 @@ public class AutoMapartModule extends ToggleModule
     /**
      *
      */
-    public AutoMapartModule()
-    {
+    public AutoMapartModule() {
         super("AutoMapart", "Automatically places maparts on walls",
                 ModuleCategory.MISCELLANEOUS);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() == EventStage.PRE)
-        {
+    public void onTick(TickEvent event) {
+        if (event.getStage() == EventStage.PRE) {
 
         }
     }

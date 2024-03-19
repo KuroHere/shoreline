@@ -22,27 +22,24 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
- *
  * @author linus, bon55
  * @since 1.0
  */
-public class RotationManager implements Globals
-{
+public class RotationManager implements Globals {
     private static final Map<String, Integer> ROTATE_PRIORITY = new HashMap<>();
+    private final List<RotationRequest> requests = new ArrayList<>();
     //
     private float yaw, pitch;
     //
     private RotationRequest rotation;
     private RotationModule rotateModule;
-    private final List<RotationRequest> requests = new ArrayList<>();
     private int rotateTicks;
+    private float prevYaw;
 
     /**
      *
      */
-    public RotationManager()
-    {
+    public RotationManager() {
         Shoreline.EVENT_HANDLER.subscribe(this);
         //
         ROTATE_PRIORITY.put("Surround", 1000);
@@ -54,18 +51,14 @@ public class RotationManager implements Globals
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPacketOutbound(PacketEvent.Outbound event)
-    {
-        if (mc.player == null || mc.world == null)
-        {
+    public void onPacketOutbound(PacketEvent.Outbound event) {
+        if (mc.player == null || mc.world == null) {
             return;
         }
-        if (event.getPacket() instanceof PlayerMoveC2SPacket packet && packet.changesLook())
-        {
+        if (event.getPacket() instanceof PlayerMoveC2SPacket packet && packet.changesLook()) {
             float packetYaw = packet.getYaw(0.0f);
             float packetPitch = packet.getPitch(0.0f);
             yaw = packetYaw;
@@ -74,34 +67,27 @@ public class RotationManager implements Globals
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onMovementPackets(MovementPacketsEvent event)
-    {
+    public void onMovementPackets(MovementPacketsEvent event) {
         requests.removeIf(r -> System.currentTimeMillis() - r.getTime() > 500);
         // vanillaPacket = true;
         float vanillaYaw = mc.player.getYaw();
         float vanillaPitch = mc.player.getPitch();
-        if (requests.isEmpty())
-        {
+        if (requests.isEmpty()) {
             rotation = null;
             rotateModule = null;
             return;
         }
         RotationRequest request = getRotationRequest();
-        if (request == null)
-        {
-            if (isDoneRotating())
-            {
+        if (request == null) {
+            if (isDoneRotating()) {
                 rotation = null;
                 rotateModule = null;
                 return;
             }
-        }
-        else
-        {
+        } else {
             rotation = request;
             rotateModule = rotation.getModule();
         }
@@ -117,24 +103,19 @@ public class RotationManager implements Globals
     }
 
     @Nullable
-    private RotationRequest getRotationRequest()
-    {
-        if (requests.isEmpty())
-        {
+    private RotationRequest getRotationRequest() {
+        if (requests.isEmpty()) {
             return null;
         }
         RotationRequest rotationRequest = null;
         int priority = 0;
         long time = 0;
-        for (RotationRequest request : requests)
-        {
-            if (!request.getModule().isEnabled())
-            {
+        for (RotationRequest request : requests) {
+            if (!request.getModule().isEnabled()) {
                 continue;
             }
             if (request.getPriority() > priority ||
-                    request.getPriority() == priority && request.getTime() > time)
-            {
+                    request.getPriority() == priority && request.getTime() > time) {
                 rotationRequest = request;
                 priority = request.getPriority();
                 time = request.getTime();
@@ -144,15 +125,12 @@ public class RotationManager implements Globals
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onKeyboardTick(KeyboardTickEvent event)
-    {
+    public void onKeyboardTick(KeyboardTickEvent event) {
         if (rotation != null && mc.player != null
-                && Modules.ROTATIONS.getMovementFix())
-        {
+                && Modules.ROTATIONS.getMovementFix()) {
             event.cancel();
             float forward = mc.player.input.movementForward;
             float strafe = mc.player.input.movementSideways;
@@ -165,51 +143,37 @@ public class RotationManager implements Globals
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onUpdateVelocity(UpdateVelocityEvent event)
-    {
-        if (rotation != null && Modules.ROTATIONS.getMovementFix())
-        {
+    public void onUpdateVelocity(UpdateVelocityEvent event) {
+        if (rotation != null && Modules.ROTATIONS.getMovementFix()) {
             event.cancel();
             event.setYaw(rotation.getYaw());
         }
     }
 
-    private float prevYaw;
-
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPlayerJump(PlayerJumpEvent event)
-    {
-        if (rotation != null && Modules.ROTATIONS.getMovementFix())
-        {
-            if (event.getStage() == EventStage.PRE)
-            {
+    public void onPlayerJump(PlayerJumpEvent event) {
+        if (rotation != null && Modules.ROTATIONS.getMovementFix()) {
+            if (event.getStage() == EventStage.PRE) {
                 prevYaw = mc.player.getYaw();
                 mc.player.setYaw(rotation.getYaw());
-            }
-            else
-            {
+            } else {
                 mc.player.setYaw(prevYaw);
             }
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderPlayer(RenderPlayerEvent event)
-    {
-        if (event.getEntity() == mc.player)
-        {
+    public void onRenderPlayer(RenderPlayerEvent event) {
+        if (event.getEntity() == mc.player) {
             // Match packet server rotations
             event.setYaw(getWrappedYaw());
             event.setPitch(getPitch());
@@ -218,17 +182,13 @@ public class RotationManager implements Globals
     }
 
     /**
-     *
      * @param requester
      * @param yaw
      * @param pitch
      */
-    public void setRotation(RotationModule requester, float yaw, float pitch)
-    {
-        for (RotationRequest r : requests)
-        {
-            if (requester == r.getModule())
-            {
+    public void setRotation(RotationModule requester, float yaw, float pitch) {
+        for (RotationRequest r : requests) {
+            if (requester == r.getModule()) {
                 // r.setPriority();
                 r.setTime(System.currentTimeMillis());
                 r.setYaw(yaw);
@@ -241,32 +201,25 @@ public class RotationManager implements Globals
     }
 
     /**
-     *
      * @param request
      */
-    public boolean removeRotation(RotationRequest request)
-    {
+    public boolean removeRotation(RotationRequest request) {
         return requests.remove(request);
     }
 
     /**
-     *
      * @param requester
      */
-    public void removeRotation(RotationModule requester)
-    {
+    public void removeRotation(RotationModule requester) {
         requests.removeIf(r -> requester == r.getModule());
     }
 
     /**
-     *
      * @param yaw
      * @param pitch
      */
-    public void setRotationClient(float yaw, float pitch)
-    {
-        if (mc.player == null)
-        {
+    public void setRotationClient(float yaw, float pitch) {
+        if (mc.player == null) {
             return;
         }
         mc.player.setYaw(yaw);
@@ -276,47 +229,37 @@ public class RotationManager implements Globals
     }
 
     /**
-     *
      * @return
      */
-    public boolean isDoneRotating()
-    {
+    public boolean isDoneRotating() {
         return rotateTicks > Modules.ROTATIONS.getPreserveTicks();
     }
 
     /**
-     *
      * @return
      */
-    public RotationModule getRotatingModule()
-    {
+    public RotationModule getRotatingModule() {
         return rotateModule;
     }
 
     /**
-     *
      * @return
      */
-    public float getYaw()
-    {
+    public float getYaw() {
         return yaw;
     }
 
     /**
-     *
      * @return
      */
-    public float getWrappedYaw()
-    {
+    public float getWrappedYaw() {
         return MathHelper.wrapDegrees(yaw);
     }
 
     /**
-     *
      * @return
      */
-    public float getPitch()
-    {
+    public float getPitch() {
         return pitch;
     }
 }

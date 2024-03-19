@@ -1,20 +1,17 @@
 package net.shoreline.client.impl.command;
 
+import net.shoreline.client.api.command.Command;
 import net.shoreline.client.api.command.arg.Argument;
 import net.shoreline.client.api.command.arg.OptionalArgument;
 import net.shoreline.client.api.command.arg.arguments.CommandArgument;
-import net.shoreline.client.api.command.Command;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.chat.ChatUtil;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class HelpCommand extends Command
-{
+public class HelpCommand extends Command {
     //
     @OptionalArgument
     Argument<Command> commandArgument = new CommandArgument("Command", "The " +
@@ -23,8 +20,7 @@ public class HelpCommand extends Command
     /**
      *
      */
-    public HelpCommand()
-    {
+    public HelpCommand() {
         super("Help", "Displays command functionality");
     }
 
@@ -32,23 +28,16 @@ public class HelpCommand extends Command
      *
      */
     @Override
-    public void onCommandInput()
-    {
+    public void onCommandInput() {
         final Command command = commandArgument.getValue();
-        if (command != null)
-        {
+        if (command != null) {
             ChatUtil.clientSendMessage(toHelpMessage(command));
-        }
-        else
-        {
+        } else {
             ChatUtil.clientSendMessageRaw("§7[§fCommands Help§7]");
             boolean sent = false;
-            for (Command c : Managers.COMMAND.getCommands())
-            {
-                if (c instanceof ModuleCommand)
-                {
-                    if (!sent)
-                    {
+            for (Command c : Managers.COMMAND.getCommands()) {
+                if (c instanceof ModuleCommand) {
+                    if (!sent) {
                         ChatUtil.clientSendMessageRaw(toHelpMessage(c));
                         sent = true;
                     }
@@ -60,14 +49,11 @@ public class HelpCommand extends Command
     }
 
     /**
-     *
      * @param command
      * @return
      */
-    private String toHelpMessage(Command command)
-    {
-        if (command instanceof ModuleCommand)
-        {
+    private String toHelpMessage(Command command) {
+        if (command instanceof ModuleCommand) {
             return String.format("module %s- %s", command.getUsage(),
                     command.getDescription());
         }

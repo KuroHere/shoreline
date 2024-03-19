@@ -1,5 +1,7 @@
 package net.shoreline.client.impl.module.world;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -8,19 +10,14 @@ import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.util.world.RenderUtil;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 
 import java.util.List;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class WallhackModule extends ToggleModule
-{
+public class WallhackModule extends ToggleModule {
     //
     Config<XRayMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
             "wallhack rendering", XRayMode.CIRCUITS, XRayMode.values());
@@ -44,8 +41,7 @@ public class WallhackModule extends ToggleModule
     /**
      *
      */
-    public WallhackModule()
-    {
+    public WallhackModule() {
         super("Wallhack", "Allows you to see through solid blocks",
                 ModuleCategory.WORLD);
     }
@@ -54,10 +50,8 @@ public class WallhackModule extends ToggleModule
      *
      */
     @Override
-    public void onEnable()
-    {
-        if (mc.world == null)
-        {
+    public void onEnable() {
+        if (mc.world == null) {
             return;
         }
         RenderUtil.reloadRenders(softReloadConfig.getValue());
@@ -68,18 +62,15 @@ public class WallhackModule extends ToggleModule
      *
      */
     @Override
-    public void onDisable()
-    {
-        if (mc.world == null)
-        {
+    public void onDisable() {
+        if (mc.world == null) {
             return;
         }
         RenderUtil.reloadRenders(softReloadConfig.getValue());
         mc.chunkCullingEnabled = true;
     }
 
-    public enum XRayMode
-    {
+    public enum XRayMode {
         CIRCUITS, NORMAL
     }
 }

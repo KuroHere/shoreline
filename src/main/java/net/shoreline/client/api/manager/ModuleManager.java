@@ -16,13 +16,10 @@ import net.shoreline.client.impl.module.world.*;
 import java.util.*;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class ModuleManager
-{
+public class ModuleManager {
     // The client module register. Keeps a list of modules and their ids for
     // easy retrieval by id.
     private final Map<String, Module> modules =
@@ -31,8 +28,7 @@ public class ModuleManager
     /**
      * Initializes the module register.
      */
-    public ModuleManager()
-    {
+    public ModuleManager() {
         // MAINTAIN ALPHABETICAL ORDER
         register(
                 // Client
@@ -161,54 +157,39 @@ public class ModuleManager
     /**
      *
      */
-    public void postInit()
-    {
+    public void postInit() {
         // TODO
     }
 
     /**
-     *
-     *
      * @param modules
-     *
      * @see #register(Module)
      */
-    private void register(Module... modules)
-    {
-        for (Module module : modules)
-        {
+    private void register(Module... modules) {
+        for (Module module : modules) {
             register(module);
         }
     }
 
     /**
-     *
-     *
      * @param module
      */
-    private void register(Module module)
-    {
+    private void register(Module module) {
         modules.put(module.getId(), module);
     }
 
     /**
-     *
-     *
      * @param id
      * @return
      */
-    public Module getModule(String id)
-    {
+    public Module getModule(String id) {
         return modules.get(id);
     }
 
     /**
-     *
-     *
      * @return
      */
-    public List<Module> getModules()
-    {
+    public List<Module> getModules() {
         return new ArrayList<>(modules.values());
     }
 }

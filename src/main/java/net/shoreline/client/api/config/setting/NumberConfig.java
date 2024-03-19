@@ -1,20 +1,17 @@
 package net.shoreline.client.api.config.setting;
 
-import net.shoreline.client.api.config.Config;
-import net.shoreline.client.api.config.NumberDisplay;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.shoreline.client.api.config.Config;
+import net.shoreline.client.api.config.NumberDisplay;
 
 import java.util.function.Supplier;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class NumberConfig<T extends Number> extends Config<T>
-{
+public class NumberConfig<T extends Number> extends Config<T> {
     // Value min and max bounds. If the current value exceeds these bounds,
     // then {@link #setValue(Number)} will clamp the value to the bounds.
     private final T min, max;
@@ -25,8 +22,6 @@ public class NumberConfig<T extends Number> extends Config<T>
     private final int roundingScale;
 
     /**
-     *
-     *
      * @param name
      * @param desc
      * @param min
@@ -35,8 +30,7 @@ public class NumberConfig<T extends Number> extends Config<T>
      * @param format
      */
     public NumberConfig(String name, String desc, T min, T value, T max,
-                        NumberDisplay format)
-    {
+                        NumberDisplay format) {
         super(name, desc, value);
         this.min = min;
         this.max = max;
@@ -47,8 +41,6 @@ public class NumberConfig<T extends Number> extends Config<T>
     }
 
     /**
-     *
-     *
      * @param name
      * @param desc
      * @param min
@@ -58,8 +50,7 @@ public class NumberConfig<T extends Number> extends Config<T>
      * @param roundingScale
      */
     public NumberConfig(String name, String desc, T min, T value, T max,
-                        NumberDisplay format, int roundingScale)
-    {
+                        NumberDisplay format, int roundingScale) {
         super(name, desc, value);
         this.min = min;
         this.max = max;
@@ -68,8 +59,6 @@ public class NumberConfig<T extends Number> extends Config<T>
     }
 
     /**
-     *
-     *
      * @param name
      * @param desc
      * @param min
@@ -79,8 +68,7 @@ public class NumberConfig<T extends Number> extends Config<T>
      * @param visible
      */
     public NumberConfig(String name, String desc, T min, T value, T max,
-                        NumberDisplay format, Supplier<Boolean> visible)
-    {
+                        NumberDisplay format, Supplier<Boolean> visible) {
         super(name, desc, value, visible);
         this.min = min;
         this.max = max;
@@ -90,22 +78,17 @@ public class NumberConfig<T extends Number> extends Config<T>
     }
 
     /**
-     *
-     *
      * @param name
      * @param desc
      * @param min
      * @param value
      * @param max
      */
-    public NumberConfig(String name, String desc, T min, T value, T max)
-    {
+    public NumberConfig(String name, String desc, T min, T value, T max) {
         this(name, desc, min, value, max, NumberDisplay.DEFAULT);
     }
 
     /**
-     *
-     *
      * @param name
      * @param desc
      * @param min
@@ -114,149 +97,110 @@ public class NumberConfig<T extends Number> extends Config<T>
      * @param visible
      */
     public NumberConfig(String name, String desc, T min, T value, T max,
-                        Supplier<Boolean> visible)
-    {
+                        Supplier<Boolean> visible) {
         this(name, desc, min, value, max, NumberDisplay.DEFAULT, visible);
 
     }
 
     /**
-     *
      * @return
      */
-    public T getMin()
-    {
+    public T getMin() {
         return min;
     }
 
     /**
-     *
      * @return
      */
-    public T getMax()
-    {
+    public T getMax() {
         return max;
     }
 
     /**
-     *
      * @return
      */
-    public boolean isMin()
-    {
+    public boolean isMin() {
         return min.doubleValue() == getValue().doubleValue();
     }
 
     /**
-     *
      * @return
      */
-    public boolean isMax()
-    {
+    public boolean isMax() {
         return max.doubleValue() == getValue().doubleValue();
     }
 
     /**
-     *
      * @return
      */
-    public int getRoundingScale()
-    {
+    public int getRoundingScale() {
         return roundingScale;
     }
 
     /**
-     *
      * @return
      */
-    public NumberDisplay getFormat()
-    {
+    public NumberDisplay getFormat() {
         return format;
     }
 
     /**
-     *
      * @return
      */
-    public double getValueSq()
-    {
+    public double getValueSq() {
         T val = getValue();
         return val.doubleValue() * val.doubleValue();
     }
 
     /**
-     *
-     *
      * @param val The param value
      */
     @Override
-    public void setValue(T val)
-    {
+    public void setValue(T val) {
         // clamp
-        if (val.doubleValue() < min.doubleValue())
-        {
+        if (val.doubleValue() < min.doubleValue()) {
             super.setValue(min);
-        }
-        else if (val.doubleValue() > max.doubleValue())
-        {
+        } else if (val.doubleValue() > max.doubleValue()) {
             super.setValue(max);
         }
         // inbounds
-        else
-        {
+        else {
             super.setValue(val);
         }
     }
 
     /**
-     *
-     *
      * @return
      */
     @Override
-    public JsonObject toJson()
-    {
+    public JsonObject toJson() {
         JsonObject configObj = super.toJson();
-        if (getValue() instanceof Integer)
-        {
+        if (getValue() instanceof Integer) {
             configObj.addProperty("value", (Integer) getValue());
-        }
-        else if (getValue() instanceof Float)
-        {
+        } else if (getValue() instanceof Float) {
             configObj.addProperty("value", (Float) getValue());
-        }
-        else if (getValue() instanceof Double)
-        {
+        } else if (getValue() instanceof Double) {
             configObj.addProperty("value", (Double) getValue());
         }
         return configObj;
     }
 
     /**
-     *
-     *
      * @param jsonObj The data as a json object
      * @return
      */
     @Override
-    public T fromJson(JsonObject jsonObj)
-    {
-        if (jsonObj.has("value"))
-        {
+    public T fromJson(JsonObject jsonObj) {
+        if (jsonObj.has("value")) {
             JsonElement element = jsonObj.get("value");
             // get config as number
-            if (getValue() instanceof Integer)
-            {
+            if (getValue() instanceof Integer) {
                 Integer val = (Integer) element.getAsInt();
                 return (T) val;
-            }
-            else if (getValue() instanceof Float)
-            {
+            } else if (getValue() instanceof Float) {
                 Float val = (Float) element.getAsFloat();
                 return (T) val;
-            }
-            else if (getValue() instanceof Double)
-            {
+            } else if (getValue() instanceof Double) {
                 Double val = (Double) element.getAsDouble();
                 return (T) val;
             }

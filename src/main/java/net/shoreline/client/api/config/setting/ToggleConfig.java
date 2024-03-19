@@ -6,39 +6,28 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.api.render.anim.Animation;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see BooleanConfig
+ * @since 1.0
  */
-public class ToggleConfig extends BooleanConfig
-{
-    public ToggleConfig(String name, String desc, Boolean val)
-    {
+public class ToggleConfig extends BooleanConfig {
+    public ToggleConfig(String name, String desc, Boolean val) {
         super(name, desc, val);
     }
 
     /**
-     *
      * @param val The param value
      */
     @Override
-    public void setValue(Boolean val)
-    {
+    public void setValue(Boolean val) {
         super.setValue(val);
         ConfigContainer container = getContainer();
-        if (container instanceof ToggleModule toggle)
-        {
+        if (container instanceof ToggleModule toggle) {
             Animation anim = toggle.getAnimation();
             anim.setState(val);
-            if (val)
-            {
+            if (val) {
                 Shoreline.EVENT_HANDLER.subscribe(toggle);
-            }
-            else
-            {
+            } else {
                 Shoreline.EVENT_HANDLER.unsubscribe(toggle);
             }
         }

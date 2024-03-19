@@ -11,7 +11,6 @@ import net.shoreline.client.impl.gui.click.impl.config.setting.ConfigButton;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.string.EnumFormatter;
-import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -22,43 +21,36 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * allows the user to configure a {@link Module}'s {@link Config} values.
  *
  * @author linus
- * @since 1.0
- *
  * @see Frame
  * @see Module
  * @see Config
+ * @since 1.0
  */
-public class CategoryFrame extends Frame
-{
+public class CategoryFrame extends Frame {
     //
     private final String name;
     private final ModuleCategory category;
+    // module components
+    private final List<ModuleButton> moduleButtons =
+            new CopyOnWriteArrayList<>();
     // global module offset
     private float off;
     private boolean open;
     private boolean drag;
-    // module components
-    private final List<ModuleButton> moduleButtons =
-            new CopyOnWriteArrayList<>();
 
     /**
-     *
-     *
      * @param x
      * @param y
      * @param width
      * @param height
      */
     public CategoryFrame(ModuleCategory category, float x, float y,
-                        float width, float height)
-    {
+                         float width, float height) {
         super(x, y, width, height);
         this.category = category;
         this.name = EnumFormatter.formatEnum(category);
-        for (Module module : Managers.MODULE.getModules())
-        {
-            if (module.getCategory() == category)
-            {
+        for (Module module : Managers.MODULE.getModules()) {
+            if (module.getCategory() == category) {
                 moduleButtons.add(new ModuleButton(module, this, x, y));
             }
         }
@@ -66,53 +58,41 @@ public class CategoryFrame extends Frame
     }
 
     /**
-     *
-     *
      * @param category
      * @param x
      * @param y
      */
-    public CategoryFrame(ModuleCategory category, float x, float y)
-    {
+    public CategoryFrame(ModuleCategory category, float x, float y) {
         this(category, x, y, 88.0f, 14.0f);
     }
 
     /**
-     *
-     *
      * @param context
      * @param mouseX
      * @param mouseY
      * @param delta
      */
     @Override
-    public void render(DrawContext context, float mouseX, float mouseY, float delta)
-    {
-        if (isWithin(mouseX, mouseY) && ClickGuiScreen.MOUSE_LEFT_HOLD)
-        {
+    public void render(DrawContext context, float mouseX, float mouseY, float delta) {
+        if (isWithin(mouseX, mouseY) && ClickGuiScreen.MOUSE_LEFT_HOLD) {
             drag = true;
         }
-        if (drag)
-        {
+        if (drag) {
             x += ClickGuiScreen.MOUSE_X - px;
             y += ClickGuiScreen.MOUSE_Y - py;
         }
         // draw the component
         rect(context, Modules.COLORS.getRGB());
         RenderManager.renderText(context, name, x + 3.0f, y + 3.0f, -1);
-        if (open)
-        {
+        if (open) {
             fheight = 3.0f;
-            for (ModuleButton moduleButton : moduleButtons)
-            {
+            for (ModuleButton moduleButton : moduleButtons) {
                 // account for button height
                 fheight += 15.5f;
-                if (moduleButton.isOpen())
-                {
+                if (moduleButton.isOpen()) {
                     fheight += 0.5f;
                     for (ConfigButton<?> configButton :
-                            moduleButton.getConfigButtons())
-                    {
+                            moduleButton.getConfigButtons()) {
                         // config button height may vary
                         fheight += configButton.getHeight();
                     }
@@ -120,8 +100,7 @@ public class CategoryFrame extends Frame
             }
             fill(context, x, y + height, 88.0f, fheight, 0x77000000);
             off = y + height + 1.0f;
-            for (ModuleButton moduleButton : moduleButtons)
-            {
+            for (ModuleButton moduleButton : moduleButtons) {
                 moduleButton.render(context, x + 1.0f, off + 1, mouseX,
                         mouseY, delta);
                 off += 15.5f;
@@ -133,78 +112,60 @@ public class CategoryFrame extends Frame
     }
 
     /**
-     *
-     *
      * @param mouseX
      * @param mouseY
      * @param mouseButton
      */
     @Override
-    public void mouseClicked(double mouseX, double mouseY, int mouseButton)
-    {
+    public void mouseClicked(double mouseX, double mouseY, int mouseButton) {
         super.mouseClicked(mouseX, mouseY, mouseButton);
-        if (mouseButton == GLFW.GLFW_MOUSE_BUTTON_RIGHT && isWithin(mouseX, mouseY))
-        {
+        if (mouseButton == GLFW.GLFW_MOUSE_BUTTON_RIGHT && isWithin(mouseX, mouseY)) {
             open = !open;
         }
-        if (open)
-        {
-            for (ModuleButton button : moduleButtons)
-            {
+        if (open) {
+            for (ModuleButton button : moduleButtons) {
                 button.mouseClicked(mouseX, mouseY, mouseButton);
             }
         }
     }
 
     /**
-     *
-     *
      * @param mouseX
      * @param mouseY
      * @param mouseButton
      */
     @Override
-    public void mouseReleased(double mouseX, double mouseY, int mouseButton)
-    {
+    public void mouseReleased(double mouseX, double mouseY, int mouseButton) {
         super.mouseReleased(mouseX, mouseY, mouseButton);
         drag = false;
-        if (open)
-        {
-            for (ModuleButton button : moduleButtons)
-            {
+        if (open) {
+            for (ModuleButton button : moduleButtons) {
                 button.mouseReleased(mouseX, mouseY, mouseButton);
             }
         }
     }
 
     /**
-     *
-     *
      * @param keyCode
      * @param scanCode
      * @param modifiers
      */
     @Override
-    public void keyPressed(int keyCode, int scanCode, int modifiers)
-    {
+    public void keyPressed(int keyCode, int scanCode, int modifiers) {
         super.keyPressed(keyCode, scanCode, modifiers);
-        if (open)
-        {
-            for (ModuleButton button : moduleButtons)
-            {
+        if (open) {
+            for (ModuleButton button : moduleButtons) {
                 button.keyPressed(keyCode, scanCode, modifiers);
             }
         }
     }
 
     /**
-     *
      * @param mx
      * @param my
      * @return
      */
-    public boolean isWithinTotal(float mx, float my)
-    {
+    public boolean isWithinTotal(float mx, float my) {
         return isMouseOver(mx, my, x, y, width, getTotalHeight());
     }
 
@@ -213,18 +174,14 @@ public class CategoryFrame extends Frame
      *
      * @param in The offset
      */
-    public void offset(float in)
-    {
+    public void offset(float in) {
         off += in;
     }
 
     /**
-     *
-     *
      * @return
      */
-    public ModuleCategory getCategory()
-    {
+    public ModuleCategory getCategory() {
         return category;
     }
 
@@ -233,18 +190,14 @@ public class CategoryFrame extends Frame
      *
      * @return The total height
      */
-    public float getTotalHeight()
-    {
+    public float getTotalHeight() {
         return height + fheight;
     }
 
     /**
-     *
-     *
      * @return
      */
-    public List<ModuleButton> getModuleButtons()
-    {
+    public List<ModuleButton> getModuleButtons() {
         return moduleButtons;
     }
 }

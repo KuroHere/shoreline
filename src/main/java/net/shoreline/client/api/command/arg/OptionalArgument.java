@@ -6,18 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see Argument
  * @see ArgumentFactory
- *
+ * @since 1.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface OptionalArgument
-{
+public @interface OptionalArgument {
 
 }

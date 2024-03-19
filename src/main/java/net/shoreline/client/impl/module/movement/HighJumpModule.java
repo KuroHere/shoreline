@@ -8,16 +8,12 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.util.Globals;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class HighJumpModule extends ToggleModule
-{
+public class HighJumpModule extends ToggleModule {
     //
     Config<Float> heightConfig = new NumberConfig<>("Height", "The height to " +
             "jump on the ground", 0.1f, 0.42f, 1.0f);
@@ -27,21 +23,17 @@ public class HighJumpModule extends ToggleModule
     /**
      *
      */
-    public HighJumpModule()
-    {
+    public HighJumpModule() {
         super("HighJump", "Allows player to jump higher", ModuleCategory.MOVEMENT);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPlayerMove(PlayerMoveEvent event)
-    {
+    public void onPlayerMove(PlayerMoveEvent event) {
         if (mc.options.jumpKey.isPressed() && (mc.player.isOnGround()
-                || airJumpConfig.getValue()))
-        {
+                || airJumpConfig.getValue())) {
             Managers.MOVEMENT.setMotionY(heightConfig.getValue());
             event.cancel();
             event.setY(mc.player.getVelocity().y);

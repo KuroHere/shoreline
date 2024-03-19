@@ -6,28 +6,22 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.AttackCooldownEvent;
 
 /**
- *
- *
  * @author Shoreline
  * @since 1.0
  */
-public class NoHitDelayModule extends ToggleModule
-{
+public class NoHitDelayModule extends ToggleModule {
     /**
      *
      */
-    public NoHitDelayModule()
-    {
+    public NoHitDelayModule() {
         super("NoHitDelay", "Prevents hit delay when clicking fast", ModuleCategory.COMBAT);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onAttackCooldown(AttackCooldownEvent event)
-    {
+    public void onAttackCooldown(AttackCooldownEvent event) {
         event.cancel();
     }
 }

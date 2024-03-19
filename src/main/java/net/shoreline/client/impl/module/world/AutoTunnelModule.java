@@ -4,18 +4,14 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class AutoTunnelModule extends ToggleModule
-{
+public class AutoTunnelModule extends ToggleModule {
     /**
      *
      */
-    public AutoTunnelModule()
-    {
+    public AutoTunnelModule() {
         super("AutoTunnel", "Automatically mines a tunnel", ModuleCategory.WORLD);
     }
 }

@@ -1,5 +1,8 @@
 package net.shoreline.client.impl.module.world;
 
+import net.minecraft.block.Blocks;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.shape.VoxelShapes;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.event.EventStage;
@@ -10,18 +13,12 @@ import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.world.BlockCollisionEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.world.BlockUtil;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShapes;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class AvoidModule extends ToggleModule
-{
+public class AvoidModule extends ToggleModule {
     //
     Config<Boolean> voidConfig = new BooleanConfig("Void", "Prevents player " +
             "from falling into the void", true);
@@ -37,23 +34,19 @@ public class AvoidModule extends ToggleModule
     /**
      *
      */
-    public AvoidModule()
-    {
+    public AvoidModule() {
         super("Avoid", "Prevents player from entering harmful areas",
                 ModuleCategory.WORLD);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
+    public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE && voidConfig.getValue()
                 && !mc.player.isSpectator()
-                && mc.player.getY() < mc.world.getBottomY())
-        {
+                && mc.player.getY() < mc.world.getBottomY()) {
             // sendModuleMessage(Formatting.RED + "Prevented player from " +
             //    "falling into void!");
             Managers.MOVEMENT.setMotionY(0.0);
@@ -61,12 +54,10 @@ public class AvoidModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onBlockCollision(BlockCollisionEvent event)
-    {
+    public void onBlockCollision(BlockCollisionEvent event) {
         BlockPos pos = event.getPos();
         if (fireConfig.getValue() && event.getBlock() == Blocks.FIRE
                 && mc.player.getY() < pos.getY() + 1.0
@@ -75,8 +66,7 @@ public class AvoidModule extends ToggleModule
                 || berryBushConfig.getValue()
                 && event.getBlock() == Blocks.SWEET_BERRY_BUSH
                 || unloadedConfig.getValue()
-                && !BlockUtil.isBlockLoaded(pos.getX(), pos.getZ()))
-        {
+                && !BlockUtil.isBlockLoaded(pos.getX(), pos.getZ())) {
             event.cancel();
             event.setVoxelShape(VoxelShapes.fullCube());
         }

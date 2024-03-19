@@ -1,7 +1,6 @@
 package net.shoreline.client.impl.imixin;
 
-public interface IMinecraftClient
-{
+public interface IMinecraftClient {
     void leftClick();
 
     void rightClick();

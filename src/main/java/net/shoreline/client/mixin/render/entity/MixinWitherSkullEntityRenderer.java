@@ -1,27 +1,23 @@
 package net.shoreline.client.mixin.render.entity;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.render.entity.RenderWitherSkullEvent;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.WitherSkullEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.projectile.WitherSkullEntity;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.render.entity.RenderWitherSkullEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Mixin(WitherSkullEntityRenderer.class)
-public class MixinWitherSkullEntityRenderer
-{
+public class MixinWitherSkullEntityRenderer {
     /**
-     *
      * @param witherSkullEntity
      * @param f
      * @param g
@@ -36,13 +32,11 @@ public class MixinWitherSkullEntityRenderer
     private void hookRender(WitherSkullEntity witherSkullEntity, float f,
                             float g, MatrixStack matrixStack,
                             VertexConsumerProvider vertexConsumerProvider,
-                            int i, CallbackInfo ci)
-    {
+                            int i, CallbackInfo ci) {
         RenderWitherSkullEvent renderWitherSkullEvent =
                 new RenderWitherSkullEvent();
         Shoreline.EVENT_HANDLER.dispatch(renderWitherSkullEvent);
-        if (renderWitherSkullEvent.isCanceled())
-        {
+        if (renderWitherSkullEvent.isCanceled()) {
             ci.cancel();
         }
     }

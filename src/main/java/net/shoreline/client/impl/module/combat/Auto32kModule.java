@@ -7,13 +7,10 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
 
 /**
- *
- *
  * @author linus, bon55
  * @since 1.0
  */
-public class Auto32kModule extends RotationModule
-{
+public class Auto32kModule extends RotationModule {
     //
     Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to " +
             "place and dispense 32ks", 0.1f, 3.0f, 3.0f);
@@ -29,8 +26,7 @@ public class Auto32kModule extends RotationModule
     /**
      *
      */
-    public Auto32kModule()
-    {
+    public Auto32kModule() {
         super("Auto32k", "Automatically bypasses sharpness 32k patches",
                 ModuleCategory.COMBAT);
     }

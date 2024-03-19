@@ -1,5 +1,14 @@
 package net.shoreline.client.impl.module.render;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -12,26 +21,14 @@ import net.shoreline.client.impl.event.render.RenderBlockOutlineEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
 
 import java.text.DecimalFormat;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class BlockHighlightModule extends ToggleModule
-{
+public class BlockHighlightModule extends ToggleModule {
     //
     Config<BoxRender> boxModeConfig = new EnumConfig<>("BoxMode", "Box " +
             "rendering mode", BoxRender.OUTLINE, BoxRender.values());
@@ -43,55 +40,43 @@ public class BlockHighlightModule extends ToggleModule
     /**
      *
      */
-    public BlockHighlightModule()
-    {
+    public BlockHighlightModule() {
         super("BlockHighlight", "Highlights the block the player is facing",
                 ModuleCategory.RENDER);
     }
 
     /**
-     *
      * @return
      */
     @Override
-    public String getModuleData()
-    {
+    public String getModuleData() {
         DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(distance);
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onRenderWorld(RenderWorldEvent event)
-    {
-        if (mc.world == null)
-        {
+    public void onRenderWorld(RenderWorldEvent event) {
+        if (mc.world == null) {
             return;
         }
         Box render = null;
         final HitResult result = mc.crosshairTarget;
-        if (result != null)
-        {
+        if (result != null) {
             final Vec3d pos = Managers.POSITION.getEyePos();
             if (entitiesConfig.getValue()
-                    && result.getType() == HitResult.Type.ENTITY)
-            {
+                    && result.getType() == HitResult.Type.ENTITY) {
                 final Entity entity = ((EntityHitResult) result).getEntity();
                 render = entity.getBoundingBox();
                 distance = pos.distanceTo(entity.getPos());
-            }
-            else if (result.getType() == HitResult.Type.BLOCK)
-            {
+            } else if (result.getType() == HitResult.Type.BLOCK) {
                 //
                 BlockPos hpos = ((BlockHitResult) result).getBlockPos();
                 BlockState state = mc.world.getBlockState(hpos);
                 VoxelShape outlineShape = state.getOutlineShape(mc.world, hpos);
-                if (outlineShape.isEmpty())
-                {
+                if (outlineShape.isEmpty()) {
                     return;
                 }
                 // WHY DOESNT THIS WORK
@@ -102,12 +87,9 @@ public class BlockHighlightModule extends ToggleModule
                 distance = pos.distanceTo(hpos.toCenterPos());
             }
         }
-        if (render != null)
-        {
-            switch (boxModeConfig.getValue())
-            {
-                case FILL ->
-                {
+        if (render != null) {
+            switch (boxModeConfig.getValue()) {
+                case FILL -> {
                     RenderManager.renderBox(event.getMatrices(), render,
                             Modules.COLORS.getRGB(60));
                     RenderManager.renderBoundingBox(event.getMatrices(),
@@ -120,12 +102,10 @@ public class BlockHighlightModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderBlockOutline(RenderBlockOutlineEvent event)
-    {
+    public void onRenderBlockOutline(RenderBlockOutlineEvent event) {
         event.cancel();
     }
 }

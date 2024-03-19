@@ -5,17 +5,14 @@ import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
 
 @Cancelable
-public class RemoveFireworkEvent extends Event
-{
+public class RemoveFireworkEvent extends Event {
     private final FireworkRocketEntity rocketEntity;
 
-    public RemoveFireworkEvent(FireworkRocketEntity rocketEntity)
-    {
+    public RemoveFireworkEvent(FireworkRocketEntity rocketEntity) {
         this.rocketEntity = rocketEntity;
     }
 
-    public FireworkRocketEntity getRocketEntity()
-    {
+    public FireworkRocketEntity getRocketEntity() {
         return rocketEntity;
     }
 }

@@ -8,13 +8,10 @@ import net.shoreline.client.api.command.arg.arguments.StringArgument;
 import java.util.List;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class ConfigCommand extends Command
-{
+public class ConfigCommand extends Command {
     //
     Argument<String> actionArgument = new StringArgument("Action", "Whether " +
             "to save or load a preset", List.of("save", "load"));
@@ -24,8 +21,7 @@ public class ConfigCommand extends Command
     /**
      *
      */
-    public ConfigCommand()
-    {
+    public ConfigCommand() {
         super("Config", "Creates a new configuration preset");
     }
 
@@ -33,21 +29,16 @@ public class ConfigCommand extends Command
      * Runs when the command is inputted in chat
      */
     @Override
-    public void onCommandInput()
-    {
+    public void onCommandInput() {
         String action = actionArgument.getValue();
         String name = nameArgument.getValue();
-        if (action == null || name == null)
-        {
+        if (action == null || name == null) {
             return;
         }
-        if (action.equalsIgnoreCase("save"))
-        {
+        if (action.equalsIgnoreCase("save")) {
             Shoreline.CONFIG.setConfigPreset(name);
 
-        }
-        else if (action.equalsIgnoreCase("load"))
-        {
+        } else if (action.equalsIgnoreCase("load")) {
 
         }
     }

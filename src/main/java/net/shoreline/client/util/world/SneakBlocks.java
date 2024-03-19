@@ -7,42 +7,15 @@ import net.minecraft.block.Blocks;
 import java.util.Set;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class SneakBlocks
-{
+public class SneakBlocks {
     // Constant set containing the blocks that can only be placed on if the
     // player is holding shift
     private static final Set<Block> SNEAK_BLOCKS;
 
-    /**
-     * Returns <tt>true</tt> if the block state can only be placed on if the
-     * player is holding shift
-     *
-     * @return <tt>true</tt> if the block state requires sneaking to be
-     * placed on
-     */
-    public static boolean isSneakBlock(BlockState state)
-    {
-        return isSneakBlock(state.getBlock());
-    }
-
-    /**
-     * Returns <tt>true</tt> if the block can only be placed on if the player
-     * is holding shift
-     *
-     * @return <tt>true</tt> if the block requires sneaking to be placed on
-     */
-    public static boolean isSneakBlock(Block block)
-    {
-        return SNEAK_BLOCKS.contains(block);
-    }
-
-    static
-    {
+    static {
         SNEAK_BLOCKS = Set.of(
                 Blocks.CHEST,
                 Blocks.ENDER_CHEST,
@@ -61,5 +34,26 @@ public class SneakBlocks
                 Blocks.JUKEBOX,
                 Blocks.NOTE_BLOCK
         );
+    }
+
+    /**
+     * Returns <tt>true</tt> if the block state can only be placed on if the
+     * player is holding shift
+     *
+     * @return <tt>true</tt> if the block state requires sneaking to be
+     * placed on
+     */
+    public static boolean isSneakBlock(BlockState state) {
+        return isSneakBlock(state.getBlock());
+    }
+
+    /**
+     * Returns <tt>true</tt> if the block can only be placed on if the player
+     * is holding shift
+     *
+     * @return <tt>true</tt> if the block requires sneaking to be placed on
+     */
+    public static boolean isSneakBlock(Block block) {
+        return SNEAK_BLOCKS.contains(block);
     }
 }

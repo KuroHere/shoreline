@@ -16,64 +16,48 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see Macro
+ * @since 1.0
  */
-public class MacroManager implements Globals
-{
+public class MacroManager implements Globals {
     // For handling macros
     //
     private final Set<Macro> macros = new HashSet<>();
 
     /**
      *
-     *
      */
-    public MacroManager()
-    {
+    public MacroManager() {
         Shoreline.EVENT_HANDLER.subscribe(this);
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onKeyboardInput(KeyboardInputEvent event)
-    {
+    public void onKeyboardInput(KeyboardInputEvent event) {
         if (mc.player == null || mc.world == null
-                || mc.currentScreen != null)
-        {
+                || mc.currentScreen != null) {
             return;
         }
         // module keybind impl
-        for (Module module : Managers.MODULE.getModules())
-        {
-            if (module instanceof ToggleModule toggle)
-            {
+        for (Module module : Managers.MODULE.getModules()) {
+            if (module instanceof ToggleModule toggle) {
                 final Macro keybind = toggle.getKeybinding();
                 if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
-                        && event.getKeycode() == keybind.getKeycode())
-                {
+                        && event.getKeycode() == keybind.getKeycode()) {
                     keybind.runMacro();
                 }
             }
         }
         //
-        if (macros.isEmpty())
-        {
+        if (macros.isEmpty()) {
             return;
         }
-        for (Macro macro : macros)
-        {
+        for (Macro macro : macros) {
             if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
-                    && event.getKeycode() == macro.getKeycode())
-            {
+                    && event.getKeycode() == macro.getKeycode()) {
                 macro.runMacro();
             }
         }
@@ -83,41 +67,30 @@ public class MacroManager implements Globals
      * Loads custom macros from the
      * {@link ConfigFile} system
      */
-    public void postInit()
-    {
+    public void postInit() {
         // TODO
     }
 
     /**
-     *
-     *
      * @param macros
      */
-    public void register(Macro... macros)
-    {
-        for (Macro macro : macros)
-        {
+    public void register(Macro... macros) {
+        for (Macro macro : macros) {
             register(macro);
         }
     }
 
     /**
-     *
-     *
      * @param macro
      */
-    public void register(Macro macro)
-    {
+    public void register(Macro macro) {
         macros.add(macro);
     }
 
     /**
-     *
-     *
      * @return
      */
-    public Collection<Macro> getMacros()
-    {
+    public Collection<Macro> getMacros() {
         return macros;
     }
 }

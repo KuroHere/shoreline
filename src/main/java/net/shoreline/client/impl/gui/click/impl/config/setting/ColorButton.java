@@ -1,25 +1,21 @@
 package net.shoreline.client.impl.gui.click.impl.config.setting;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.gui.click.ClickGuiScreen;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 import net.shoreline.client.init.Modules;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 
 /**
- *
- *
  * @author Shoreline
  * @since 1.0
  */
-public class ColorButton extends ConfigButton<Color>
-{
+public class ColorButton extends ConfigButton<Color> {
     private final float[] hsb;
 
     /**
@@ -28,8 +24,7 @@ public class ColorButton extends ConfigButton<Color>
      * @param x
      * @param y
      */
-    public ColorButton(CategoryFrame frame, Config<Color> config, float x, float y)
-    {
+    public ColorButton(CategoryFrame frame, Config<Color> config, float x, float y) {
         super(frame, config, x, y);
         Color color = config.getValue();
         hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
@@ -37,15 +32,13 @@ public class ColorButton extends ConfigButton<Color>
 
     @Override
     public void render(DrawContext context, float ix, float iy, float mouseX,
-                       float mouseY, float delta)
-    {
+                       float mouseY, float delta) {
         x = ix;
         y = iy;
         //
         int min = 0;
         int max = 360;
-        if (isWithin(mouseX, mouseY) && ClickGuiScreen.MOUSE_LEFT_HOLD)
-        {
+        if (isWithin(mouseX, mouseY) && ClickGuiScreen.MOUSE_LEFT_HOLD) {
             float fillv = (mouseX - ix) / width;
             float val = (float) min + fillv * (max - min);
             int bval = (int) MathHelper.clamp(val, min, max);
@@ -53,12 +46,9 @@ public class ColorButton extends ConfigButton<Color>
             float lower = ix + 1.0f;
             float upper = ix + width - 1.0f;
             // out of bounds
-            if (mouseX < lower)
-            {
+            if (mouseX < lower) {
                 hsb[0] = min;
-            }
-            else if (mouseX > upper)
-            {
+            } else if (mouseX > upper) {
                 hsb[0] = max;
             }
         }
@@ -71,20 +61,17 @@ public class ColorButton extends ConfigButton<Color>
     }
 
     @Override
-    public void mouseClicked(double mouseX, double mouseY, int button)
-    {
+    public void mouseClicked(double mouseX, double mouseY, int button) {
 
     }
 
     @Override
-    public void mouseReleased(double mouseX, double mouseY, int button)
-    {
+    public void mouseReleased(double mouseX, double mouseY, int button) {
 
     }
 
     @Override
-    public void keyPressed(int keyCode, int scanCode, int modifiers)
-    {
+    public void keyPressed(int keyCode, int scanCode, int modifiers) {
 
     }
 }

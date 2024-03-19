@@ -8,8 +8,7 @@ import net.minecraft.client.MinecraftClient;
  * @author linus
  * @since 1.0
  */
-public interface Globals
-{
+public interface Globals {
     // Minecraft game instance
     MinecraftClient mc = MinecraftClient.getInstance();
 }

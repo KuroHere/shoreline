@@ -6,39 +6,30 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.TickEvent;
 
 /**
- *
  * TODO: Test the accuracy of ticks
  *
  * @author linus
- * @since 1.0
- *
  * @see Timer
+ * @since 1.0
  */
-public class TickTimer implements Timer
-{
+public class TickTimer implements Timer {
     //
     private long ticks;
 
     /**
      *
-     *
      */
-    public TickTimer()
-    {
+    public TickTimer() {
         ticks = 0;
         Shoreline.EVENT_HANDLER.subscribe(this);
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() == EventStage.PRE)
-        {
+    public void onTick(TickEvent event) {
+        if (event.getStage() == EventStage.PRE) {
             ++ticks;
         }
     }
@@ -52,8 +43,7 @@ public class TickTimer implements Timer
      * the param time
      */
     @Override
-    public boolean passed(Number time)
-    {
+    public boolean passed(Number time) {
         return ticks >= time.longValue();
     }
 
@@ -61,8 +51,7 @@ public class TickTimer implements Timer
      *
      */
     @Override
-    public void reset()
-    {
+    public void reset() {
         setElapsedTime(0);
     }
 
@@ -70,19 +59,15 @@ public class TickTimer implements Timer
      * @return
      */
     @Override
-    public long getElapsedTime()
-    {
+    public long getElapsedTime() {
         return ticks;
     }
 
     /**
-     *
-     *
      * @param time
      */
     @Override
-    public void setElapsedTime(Number time)
-    {
+    public void setElapsedTime(Number time) {
         ticks = time.longValue();
     }
 }

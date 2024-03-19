@@ -1,5 +1,10 @@
 package net.shoreline.client.impl.module.combat;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BowItem;
+import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.event.EventStage;
@@ -10,20 +15,12 @@ import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.world.EntityUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BowItem;
-import net.minecraft.util.math.Vec3d;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class BowAimModule extends ToggleModule
-{
+public class BowAimModule extends ToggleModule {
     //
     Config<Boolean> playersConfig = new BooleanConfig("Players",
             "Aims bow at players", true);
@@ -39,46 +36,37 @@ public class BowAimModule extends ToggleModule
     /**
      *
      */
-    public BowAimModule()
-    {
+    public BowAimModule() {
         super("BowAim", "Automatically aims charged bow at nearby entities",
                 ModuleCategory.COMBAT);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPlayerUpdate(PlayerUpdateEvent event)
-    {
-        if (event.getStage() != EventStage.PRE)
-        {
+    public void onPlayerUpdate(PlayerUpdateEvent event) {
+        if (event.getStage() != EventStage.PRE) {
             return;
         }
         if (mc.player.getMainHandStack().getItem() instanceof BowItem
-                && mc.player.getItemUseTime() >= 3)
-        {
+                && mc.player.getItemUseTime() >= 3) {
             double minDist = Double.MAX_VALUE;
             Entity aimTarget = null;
-            for (Entity entity : mc.world.getEntities())
-            {
+            for (Entity entity : mc.world.getEntities()) {
                 if (entity == null || entity == mc.player || !entity.isAlive()
                         || !isValidAimTarget(entity)
                         || Managers.SOCIAL.isFriend(entity.getUuid())
-                        || entity instanceof PlayerEntity player && Modules.ANTI_BOTS.contains(player))
-                {
+                        || entity instanceof PlayerEntity player && Modules.ANTI_BOTS.contains(player)) {
                     continue;
                 }
                 double dist = mc.player.distanceTo(entity);
-                if (dist < minDist)
-                {
+                if (dist < minDist) {
                     minDist = dist;
                     aimTarget = entity;
                 }
             }
-            if (aimTarget instanceof LivingEntity target)
-            {
+            if (aimTarget instanceof LivingEntity target) {
                 float[] rots = getBowRotationsTo(target);
                 Managers.ROTATION.setRotationClient(rots[0], rots[1]);
             }
@@ -86,12 +74,10 @@ public class BowAimModule extends ToggleModule
     }
 
     /**
-     *
      * @param target
      * @return
      */
-    private float[] getBowRotationsTo(LivingEntity target)
-    {
+    private float[] getBowRotationsTo(LivingEntity target) {
         float velocity = (72000.0f - mc.player.getItemUseTimeLeft()) / 20.0f;
         velocity = Math.min(1.0f, (velocity * velocity + velocity * 2) / 3.0f);
         Vec3d newTargetVec = target.getPos().add(target.getVelocity());
@@ -108,19 +94,16 @@ public class BowAimModule extends ToggleModule
         float pitch = (float) -Math.toDegrees(Math.atan((velocitySq - Math.sqrt(velocityPow4 - g * (g * hDistanceSq + 2.0f * y * velocitySq))) / (g * hDistance)));
         return new float[]
                 {
-                       yaw , pitch
+                        yaw, pitch
                 };
     }
 
     /**
-     *
      * @param entity
      * @return
      */
-    private boolean isValidAimTarget(Entity entity)
-    {
-        if (entity.isInvisible() && !invisiblesConfig.getValue())
-        {
+    private boolean isValidAimTarget(Entity entity) {
+        if (entity.isInvisible() && !invisiblesConfig.getValue()) {
             return false;
         }
         return entity instanceof PlayerEntity && playersConfig.getValue()

@@ -1,15 +1,11 @@
 package net.shoreline.client.api.module;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see Module
+ * @since 1.0
  */
-public enum ModuleCategory
-{
+public enum ModuleCategory {
     /**
      * Modules used for combat (Ex: Aura, AutoCrystal, Surround, etc.)
      */

@@ -1,13 +1,10 @@
 package net.shoreline.client.util.math.timer;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public interface Timer
-{
+public interface Timer {
     //
     long MAX_TIME = -0xff;
 
@@ -35,8 +32,6 @@ public interface Timer
     long getElapsedTime();
 
     /**
-     *
-     *
      * @param time
      */
     void setElapsedTime(Number time);

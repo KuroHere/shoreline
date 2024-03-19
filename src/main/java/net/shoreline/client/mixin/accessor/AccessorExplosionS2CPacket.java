@@ -6,18 +6,13 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see AccessorExplosionS2CPacket
+ * @since 1.0
  */
 @Mixin(ExplosionS2CPacket.class)
-public interface AccessorExplosionS2CPacket
-{
+public interface AccessorExplosionS2CPacket {
     /**
-     *
      * @param playerVelocityX
      */
     @Accessor("playerVelocityX")
@@ -25,7 +20,6 @@ public interface AccessorExplosionS2CPacket
     void setPlayerVelocityX(float playerVelocityX);
 
     /**
-     *
      * @param playerVelocityY
      */
     @Accessor("playerVelocityY")
@@ -33,7 +27,6 @@ public interface AccessorExplosionS2CPacket
     void setPlayerVelocityY(float playerVelocityY);
 
     /**
-     *
      * @param playerVelocityZ
      */
     @Accessor("playerVelocityZ")

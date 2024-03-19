@@ -4,18 +4,14 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class SearchModule extends ToggleModule
-{
+public class SearchModule extends ToggleModule {
     /**
      *
      */
-    public SearchModule()
-    {
+    public SearchModule() {
         super("Search", "Highlights specified blocks in the world",
                 ModuleCategory.RENDER);
     }

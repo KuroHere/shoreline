@@ -5,16 +5,11 @@ import net.shoreline.client.api.manager.client.MacroManager;
 import org.lwjgl.glfw.GLFW;
 
 /**
- *
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see MacroManager
+ * @since 1.0
  */
-public class Macro implements Identifiable
-{
+public class Macro implements Identifiable {
     //
     private final String name;
     // Runnable macro which represents the functionality of the keybind. This
@@ -24,53 +19,35 @@ public class Macro implements Identifiable
     private int keycode;
 
     /**
-     *
      * @param name
      * @param keycode
      * @param macro
      */
-    public Macro(String name, int keycode, Runnable macro)
-    {
+    public Macro(String name, int keycode, Runnable macro) {
         this.name = name;
         this.keycode = keycode;
         this.macro = macro;
     }
 
     /**
-     *
-     *
      * @see Runnable#run()
      */
-    public void runMacro()
-    {
+    public void runMacro() {
         macro.run();
     }
 
     /**
-     *
      * @return
      */
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
     /**
-     *
      * @return
      */
-    public Runnable getRunnable()
-    {
+    public Runnable getRunnable() {
         return macro;
-    }
-
-    /**
-     *
-     * @param keycode
-     */
-    public void setKeycode(int keycode)
-    {
-        this.keycode = keycode;
     }
 
     /**
@@ -80,19 +57,22 @@ public class Macro implements Identifiable
      * @return The macro keycode
      * @see #keycode
      */
-    public int getKeycode()
-    {
+    public int getKeycode() {
         return keycode;
     }
 
     /**
-     *
-     *
+     * @param keycode
+     */
+    public void setKeycode(int keycode) {
+        this.keycode = keycode;
+    }
+
+    /**
      * @return
      */
     @Override
-    public String getId()
-    {
+    public String getId() {
         return String.format("%s-macro", name.toLowerCase());
     }
 
@@ -104,10 +84,8 @@ public class Macro implements Identifiable
      * @see #keycode
      * @see GLFW#glfwGetKeyScancode(int)
      */
-    public String getKeyName()
-    {
-        if (keycode != GLFW.GLFW_KEY_UNKNOWN)
-        {
+    public String getKeyName() {
+        if (keycode != GLFW.GLFW_KEY_UNKNOWN) {
             final String name = GLFW.glfwGetKeyName(keycode,
                     GLFW.glfwGetKeyScancode(keycode));
             return name != null ? name.toUpperCase() : "NONE";

@@ -6,29 +6,23 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.gui.hud.PlayerListEvent;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class ExtraTabModule extends ToggleModule
-{
+public class ExtraTabModule extends ToggleModule {
     /**
      *
      */
-    public ExtraTabModule()
-    {
+    public ExtraTabModule() {
         super("ExtraTab", "Expands the tab list size to allow for more players",
                 ModuleCategory.RENDER);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPlayerList(PlayerListEvent event)
-    {
+    public void onPlayerList(PlayerListEvent event) {
         event.cancel();
     }
 }

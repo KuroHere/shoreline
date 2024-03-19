@@ -1,7 +1,5 @@
 package net.shoreline.client.mixin.render.block;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.render.block.RenderBlockEvent;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.BlockModelRenderer;
@@ -10,22 +8,20 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.render.block.RenderBlockEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Mixin(BlockModelRenderer.class)
-public class MixinBlockModelRenderer
-{
+public class MixinBlockModelRenderer {
     /**
-     *
      * @param world
      * @param model
      * @param state
@@ -49,13 +45,11 @@ public class MixinBlockModelRenderer
                             MatrixStack matrices,
                             VertexConsumer vertexConsumer, boolean cull,
                             Random random, long seed, int overlay,
-                            CallbackInfo ci)
-    {
+                            CallbackInfo ci) {
         RenderBlockEvent renderBlockEvent =
                 new RenderBlockEvent(state, pos);
         Shoreline.EVENT_HANDLER.dispatch(renderBlockEvent);
-        if (renderBlockEvent.isCanceled())
-        {
+        if (renderBlockEvent.isCanceled()) {
             ci.cancel();
         }
     }

@@ -1,7 +1,6 @@
 package net.shoreline.client.api.event;
 
-public enum EventStage
-{
+public enum EventStage {
     PRE,
     POST
 }

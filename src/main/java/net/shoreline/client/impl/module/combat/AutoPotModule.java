@@ -1,5 +1,15 @@
 package net.shoreline.client.impl.module.combat;
 
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.PotionItem;
+import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.potion.PotionUtil;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.util.Hand;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -12,27 +22,16 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.PotionItem;
-import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.potion.PotionUtil;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.Hand;
 
 import java.util.List;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class AutoPotModule extends RotationModule
-{
+public class AutoPotModule extends RotationModule {
+    //
+    private final Timer potionTimer = new CacheTimer();
     //
     Config<Float> healthConfig = new NumberConfig<>("Health", "The minimum " +
             "health to start using potions", 1.0f, 10.0f, 19.0f);
@@ -50,14 +49,11 @@ public class AutoPotModule extends RotationModule
     private double groundZ;
     private int groundCancelTicks;
     private boolean potion;
-    //
-    private final Timer potionTimer = new CacheTimer();
 
     /**
      *
      */
-    public AutoPotModule()
-    {
+    public AutoPotModule() {
         super("AutoPot", "Automatically throws beneficial potions",
                 ModuleCategory.COMBAT);
     }
@@ -66,32 +62,25 @@ public class AutoPotModule extends RotationModule
      *
      */
     @Override
-    public void onEnable()
-    {
+    public void onEnable() {
         groundCancelTicks = 0;
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPlayerUpdate(PlayerUpdateEvent event)
-    {
-        if (!mc.player.isOnGround() && onGroundConfig.getValue())
-        {
+    public void onPlayerUpdate(PlayerUpdateEvent event) {
+        if (!mc.player.isOnGround() && onGroundConfig.getValue()) {
             return;
         }
-        if (event.getStage() == EventStage.PRE)
-        {
+        if (event.getStage() == EventStage.PRE) {
             float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
             if (health <= healthConfig.getValue()
-                    && potionTimer.passed(delayConfig.getValue() * 1000.0f))
-            {
+                    && potionTimer.passed(delayConfig.getValue() * 1000.0f)) {
                 int instantHealth = getInstantHealthPotion();
                 if (instantHealth != -1 && mc.player.verticalCollision
-                        && !Modules.SPEED.isEnabled() && !onGroundConfig.getValue())
-                {
+                        && !Modules.SPEED.isEnabled() && !onGroundConfig.getValue()) {
                     Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
                             mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), -90.0f, true));
                     mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId,
@@ -99,13 +88,10 @@ public class AutoPotModule extends RotationModule
                             SlotActionType.SWAP, mc.player);
                     potionTimer.reset();
                     Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slotConfig.getValue()));
-                    if (handFixConfig.getValue())
-                    {
+                    if (handFixConfig.getValue()) {
                         Managers.NETWORK.sendSequencedPacket(id ->
                                 new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, id));
-                    }
-                    else
-                    {
+                    } else {
                         Managers.NETWORK.sendSequencedPacket(id ->
                                 new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
                     }
@@ -124,31 +110,24 @@ public class AutoPotModule extends RotationModule
                     groundY = mc.player.getY() + 1.24;
                     groundZ = mc.player.getZ();
                     groundCancelTicks = 5;
-                }
-                else
-                {
+                } else {
                     setRotation(mc.player.getYaw(), 90.0f);
                     potion = true;
                     // potionTimer.reset();
                 }
-                if (groundCancelTicks >= 0)
-                {
+                if (groundCancelTicks >= 0) {
                     event.cancel();
                 }
-                if (groundCancelTicks == 0)
-                {
+                if (groundCancelTicks == 0) {
                     Managers.MOVEMENT.setMotionXZ(0.0, 0.0);
                     mc.player.updatePosition(groundX, groundY, groundZ);
                     Managers.MOVEMENT.setMotionY(-0.08);
                 }
                 groundCancelTicks--;
             }
-        }
-        else if (event.getStage() == EventStage.POST && potion)
-        {
+        } else if (event.getStage() == EventStage.POST && potion) {
             int instantHealth = getInstantHealthPotion();
-            if (instantHealth == -1)
-            {
+            if (instantHealth == -1) {
                 return;
             }
             mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId,
@@ -156,13 +135,10 @@ public class AutoPotModule extends RotationModule
                     SlotActionType.SWAP, mc.player);
             potionTimer.reset();
             Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slotConfig.getValue()));
-            if (handFixConfig.getValue())
-            {
+            if (handFixConfig.getValue()) {
                 Managers.NETWORK.sendSequencedPacket(id ->
                         new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, id));
-            }
-            else
-            {
+            } else {
                 Managers.NETWORK.sendSequencedPacket(id ->
                         new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
             }
@@ -172,28 +148,21 @@ public class AutoPotModule extends RotationModule
     }
 
     /**
-     *
      * @return
      */
-    private int getInstantHealthPotion()
-    {
+    private int getInstantHealthPotion() {
         int potionSlot = -1;
-        for (int i = 0; i < 45; i++)
-        {
+        for (int i = 0; i < 45; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.isEmpty())
-            {
+            if (stack.isEmpty()) {
                 continue;
             }
             if (stack.getItem() instanceof PotionItem
-                    && PotionUtil.getPotionEffects(stack) != null)
-            {
+                    && PotionUtil.getPotionEffects(stack) != null) {
                 List<StatusEffectInstance> effects =
                         PotionUtil.getPotionEffects(stack);
-                for (StatusEffectInstance effect : effects)
-                {
-                    if (effect.getEffectType() == StatusEffects.INSTANT_HEALTH)
-                    {
+                for (StatusEffectInstance effect : effects) {
+                    if (effect.getEffectType() == StatusEffects.INSTANT_HEALTH) {
                         potionSlot = i;
                         break;
                     }

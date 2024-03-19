@@ -1,13 +1,13 @@
 package net.shoreline.client.mixin.render.entity;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.render.entity.RenderEntityEvent;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.render.entity.RenderEntityEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,8 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(LivingEntityRenderer.class)
-public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>>
-{
+public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> {
     //
     @Shadow
     protected M model;
@@ -29,7 +28,6 @@ public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityM
     protected List<FeatureRenderer<T, M>> features;
 
     /**
-     *
      * @param livingEntity
      * @param f
      * @param g
@@ -43,13 +41,11 @@ public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityM
             "render/VertexConsumerProvider;I)V", at = @At(value = "HEAD"), cancellable = true)
     private void hookRender(LivingEntity livingEntity, float f, float g,
                             MatrixStack matrixStack,
-                            VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci)
-    {
+                            VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
         RenderEntityEvent renderEntityEvent = new RenderEntityEvent(livingEntity,
                 f, g, matrixStack, vertexConsumerProvider, i, model, features);
         Shoreline.EVENT_HANDLER.dispatch(renderEntityEvent);
-        if (renderEntityEvent.isCanceled())
-        {
+        if (renderEntityEvent.isCanceled()) {
             ci.cancel();
         }
     }

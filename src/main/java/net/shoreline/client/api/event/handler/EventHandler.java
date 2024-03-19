@@ -4,16 +4,12 @@ import net.shoreline.client.api.event.Event;
 import net.shoreline.client.api.event.listener.Listener;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see Event
  * @see EventBus
+ * @since 1.0
  */
-public interface EventHandler
-{
+public interface EventHandler {
     /**
      * Subscribes a {@link Object} to the EventHandler
      *

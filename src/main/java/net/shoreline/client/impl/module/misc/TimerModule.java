@@ -15,13 +15,10 @@ import net.shoreline.client.init.Modules;
 import java.text.DecimalFormat;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class TimerModule extends ToggleModule
-{
+public class TimerModule extends ToggleModule {
     //
     Config<Float> ticksConfig = new NumberConfig<>("Ticks", "Tick speed",
             0.1f, 2.0f, 50.0f);
@@ -34,20 +31,16 @@ public class TimerModule extends ToggleModule
     /**
      *
      */
-    public TimerModule()
-    {
+    public TimerModule() {
         super("Timer", "Changes the client tick speed",
                 ModuleCategory.MISCELLANEOUS);
     }
 
     /**
-     *
-     *
      * @return
      */
     @Override
-    public String getModuleData()
-    {
+    public String getModuleData() {
         DecimalFormat decimal = new DecimalFormat("0.0#");
         return decimal.format(timer);
     }
@@ -56,32 +49,24 @@ public class TimerModule extends ToggleModule
      *
      */
     @Override
-    public void toggle()
-    {
+    public void toggle() {
         Modules.SPEED.setPrevTimer();
-        if (Modules.SPEED.isUsingTimer())
-        {
+        if (Modules.SPEED.isUsingTimer()) {
             return;
         }
         super.toggle();
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() == EventStage.PRE)
-        {
-            if (Modules.SPEED.isUsingTimer())
-            {
+    public void onTick(TickEvent event) {
+        if (event.getStage() == EventStage.PRE) {
+            if (Modules.SPEED.isUsingTimer()) {
                 return;
             }
-            if (tpsSyncConfig.getValue())
-            {
+            if (tpsSyncConfig.getValue()) {
                 timer = Math.max(Managers.TICK.getTpsCurrent() / 20.0f, 0.1f);
                 return;
             }
@@ -90,49 +75,38 @@ public class TimerModule extends ToggleModule
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onTickCounter(TickCounterEvent event)
-    {
-        if (timer != 1.0f)
-        {
+    public void onTickCounter(TickCounterEvent event) {
+        if (timer != 1.0f) {
             event.cancel();
             event.setTicks(timer);
         }
     }
 
     /**
-     *
      * @return
      */
-    public float getTimer()
-    {
+    public float getTimer() {
         return timer;
     }
 
     /**
-     *
+     * @param timer
      */
-    public void resetTimer()
-    {
-        if (prevTimer > 0.0f)
-        {
-            this.timer = prevTimer;
-            prevTimer = -1.0f;
-        }
+    public void setTimer(float timer) {
+        prevTimer = this.timer;
+        this.timer = timer;
     }
 
     /**
      *
-     *
-     * @param timer
      */
-    public void setTimer(float timer)
-    {
-        prevTimer = this.timer;
-        this.timer = timer;
+    public void resetTimer() {
+        if (prevTimer > 0.0f) {
+            this.timer = prevTimer;
+            prevTimer = -1.0f;
+        }
     }
 }

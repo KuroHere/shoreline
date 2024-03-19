@@ -11,13 +11,10 @@ import net.shoreline.client.util.chat.ChatUtil;
 import org.lwjgl.glfw.GLFW;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class BindCommand extends Command
-{
+public class BindCommand extends Command {
     //
     Argument<Module> moduleArgument = new ModuleArgument("Module", "The " +
             "param module to keybind");
@@ -27,8 +24,7 @@ public class BindCommand extends Command
     /**
      *
      */
-    public BindCommand()
-    {
+    public BindCommand() {
         super("Bind", "Keybinds a module");
     }
 
@@ -36,20 +32,16 @@ public class BindCommand extends Command
      * Runs when the command is inputted in chat
      */
     @Override
-    public void onCommandInput()
-    {
+    public void onCommandInput() {
         Module module = moduleArgument.getValue();
-        if (module instanceof ToggleModule t)
-        {
+        if (module instanceof ToggleModule t) {
             final String key = keybindArgument.getValue();
-            if (key == null || key.length() > 1)
-            {
+            if (key == null || key.length() > 1) {
                 ChatUtil.error("Invalid key!");
                 return;
             }
             int keycode = KeyboardUtil.getKeyCode(key);
-            if (keycode == GLFW.GLFW_KEY_UNKNOWN)
-            {
+            if (keycode == GLFW.GLFW_KEY_UNKNOWN) {
                 ChatUtil.error("Failed to parse key!");
                 return;
             }

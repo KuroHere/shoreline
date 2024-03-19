@@ -14,13 +14,10 @@ import net.shoreline.client.impl.event.network.GameJoinEvent;
 import net.shoreline.client.impl.event.render.LightmapGammaEvent;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class FullbrightModule extends ToggleModule
-{
+public class FullbrightModule extends ToggleModule {
     //
     Config<Brightness> brightnessConfig = new EnumConfig<>("Mode", "Mode for " +
             "world brightness", Brightness.GAMMA, Brightness.values());
@@ -28,21 +25,17 @@ public class FullbrightModule extends ToggleModule
     /**
      *
      */
-    public FullbrightModule()
-    {
+    public FullbrightModule() {
         super("Fullbright", "Brightens the world", ModuleCategory.RENDER);
     }
 
     /**
      *
-     *
      */
     @Override
-    public void onEnable()
-    {
+    public void onEnable() {
         if (mc.player != null && mc.world != null
-                && brightnessConfig.getValue() == Brightness.POTION)
-        {
+                && brightnessConfig.getValue() == Brightness.POTION) {
             mc.player.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.NIGHT_VISION, -1, 0)); // INFINITE
         }
@@ -50,76 +43,60 @@ public class FullbrightModule extends ToggleModule
 
     /**
      *
-     *
      */
     @Override
-    public void onDisable()
-    {
+    public void onDisable() {
         if (mc.player != null && mc.world != null
-                && brightnessConfig.getValue() == Brightness.POTION)
-        {
+                && brightnessConfig.getValue() == Brightness.POTION) {
             mc.player.removeStatusEffect(StatusEffects.NIGHT_VISION);
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onGameJoin(GameJoinEvent event)
-    {
+    public void onGameJoin(GameJoinEvent event) {
         onDisable();
         onEnable();
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onLightmapGamma(LightmapGammaEvent event)
-    {
-        if (brightnessConfig.getValue() == Brightness.GAMMA)
-        {
+    public void onLightmapGamma(LightmapGammaEvent event) {
+        if (brightnessConfig.getValue() == Brightness.GAMMA) {
             event.cancel();
             event.setGamma(0xffffffff);
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onConfigUpdate(ConfigUpdateEvent event)
-    {
+    public void onConfigUpdate(ConfigUpdateEvent event) {
         if (mc.player != null && brightnessConfig == event.getConfig()
                 && event.getStage() == EventStage.POST
-                && brightnessConfig.getValue() != Brightness.POTION)
-        {
+                && brightnessConfig.getValue() != Brightness.POTION) {
             mc.player.removeStatusEffect(StatusEffects.NIGHT_VISION);
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
+    public void onTick(TickEvent event) {
         if (brightnessConfig.getValue() == Brightness.POTION
-                && !mc.player.hasStatusEffect(StatusEffects.NIGHT_VISION))
-        {
+                && !mc.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) {
             mc.player.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.NIGHT_VISION, -1, 0));
         }
     }
 
-    public enum Brightness
-    {
+    public enum Brightness {
         GAMMA,
         POTION
     }

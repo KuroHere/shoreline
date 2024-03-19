@@ -1,5 +1,7 @@
 package net.shoreline.client.impl.module.misc;
 
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
@@ -10,51 +12,39 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class AutoAcceptModule extends ToggleModule
-{
+public class AutoAcceptModule extends ToggleModule {
+    //
+    private final Timer acceptTimer = new CacheTimer();
     //
     Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay before" +
             " accepting teleport requests", 0.0f, 3.0f, 10.0f);
-    //
-    private final Timer acceptTimer = new CacheTimer();
 
     /**
      *
      */
-    public AutoAcceptModule()
-    {
+    public AutoAcceptModule() {
         super("AutoAccept", "Automatically accepts teleport requests",
                 ModuleCategory.MISCELLANEOUS);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPacketInbound(PacketEvent.Inbound event)
-    {
-        if (event.getPacket() instanceof ChatMessageS2CPacket packet)
-        {
+    public void onPacketInbound(PacketEvent.Inbound event) {
+        if (event.getPacket() instanceof ChatMessageS2CPacket packet) {
             String text = packet.body().content();
             if ((text.contains("has requested to teleport to you.")
                     || text.contains("has requested you teleport to them."))
-                    && acceptTimer.passed(delayConfig.getValue() * 1000))
-            {
+                    && acceptTimer.passed(delayConfig.getValue() * 1000)) {
                 for (PlayerEntity friend :
-                        Managers.SOCIAL.getFriendEntities())
-                {
-                    if (text.contains(friend.getName().getString()))
-                    {
+                        Managers.SOCIAL.getFriendEntities()) {
+                    if (text.contains(friend.getName().getString())) {
                         ChatUtil.serverSendMessage("/tpaccept");
                         break;
                     }

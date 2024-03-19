@@ -1,11 +1,11 @@
 package net.shoreline.client.mixin.render.entity;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.render.entity.RenderPlayerEvent;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.render.entity.RenderPlayerEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,16 +13,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see PlayerEntityRenderer
+ * @since 1.0
  */
 @Mixin(PlayerEntityRenderer.class)
-public class MixinPlayerEntityRenderer
-{
+public class MixinPlayerEntityRenderer {
     //
     @Unique
     private float yaw, prevYaw, bodyYaw, prevBodyYaw, headYaw, prevHeadYaw;
@@ -30,8 +26,6 @@ public class MixinPlayerEntityRenderer
     private float pitch, prevPitch;
 
     /**
-     *
-     *
      * @param abstractClientPlayerEntity
      * @param f
      * @param g
@@ -47,8 +41,7 @@ public class MixinPlayerEntityRenderer
     private void onRenderHead(AbstractClientPlayerEntity abstractClientPlayerEntity,
                               float f, float g, MatrixStack matrixStack,
                               VertexConsumerProvider vertexConsumerProvider,
-                              int i, CallbackInfo ci)
-    {
+                              int i, CallbackInfo ci) {
         final RenderPlayerEvent renderPlayerEvent =
                 new RenderPlayerEvent(abstractClientPlayerEntity);
         Shoreline.EVENT_HANDLER.dispatch(renderPlayerEvent);
@@ -60,8 +53,7 @@ public class MixinPlayerEntityRenderer
         prevHeadYaw = abstractClientPlayerEntity.prevHeadYaw;
         pitch = abstractClientPlayerEntity.getPitch();
         prevPitch = abstractClientPlayerEntity.prevPitch;
-        if (renderPlayerEvent.isCanceled())
-        {
+        if (renderPlayerEvent.isCanceled()) {
             abstractClientPlayerEntity.setYaw(renderPlayerEvent.getYaw());
             abstractClientPlayerEntity.prevYaw = renderPlayerEvent.getYaw();
             abstractClientPlayerEntity.setBodyYaw(renderPlayerEvent.getYaw());
@@ -74,8 +66,6 @@ public class MixinPlayerEntityRenderer
     }
 
     /**
-     *
-     *
      * @param abstractClientPlayerEntity
      * @param f
      * @param g
@@ -91,8 +81,7 @@ public class MixinPlayerEntityRenderer
     private void onRenderTail(AbstractClientPlayerEntity abstractClientPlayerEntity,
                               float f, float g, MatrixStack matrixStack,
                               VertexConsumerProvider vertexConsumerProvider,
-                              int i, CallbackInfo ci)
-    {
+                              int i, CallbackInfo ci) {
         abstractClientPlayerEntity.setYaw(yaw);
         abstractClientPlayerEntity.prevYaw = prevYaw;
         abstractClientPlayerEntity.setBodyYaw(bodyYaw);

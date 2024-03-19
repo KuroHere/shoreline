@@ -9,8 +9,7 @@ import net.fabricmc.api.ModInitializer;
  * @author linus
  * @since 1.0
  */
-public class ShorelineMod implements ClientModInitializer
-{
+public class ShorelineMod implements ClientModInitializer {
     // Mod identifier
     public static final String MOD_ID = "shoreline";
     // Mod name
@@ -31,8 +30,7 @@ public class ShorelineMod implements ClientModInitializer
      * Proceed with mild caution.
      */
     @Override
-    public void onInitializeClient()
-    {
+    public void onInitializeClient() {
         Shoreline.preInit();
         Shoreline.init();
         Shoreline.postInit();

@@ -21,7 +21,6 @@ import net.shoreline.client.impl.event.network.AttackBlockEvent;
 import net.shoreline.client.impl.event.network.BreakBlockEvent;
 import net.shoreline.client.impl.event.network.InteractBlockEvent;
 import net.shoreline.client.impl.event.network.ReachEvent;
-import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,16 +30,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see ClientPlayerInteractionManager
+ * @since 1.0
  */
 @Mixin(ClientPlayerInteractionManager.class)
-public abstract class MixinClientPlayerInteractionManager implements Globals
-{
+public abstract class MixinClientPlayerInteractionManager implements Globals {
     //
     @Shadow
     private GameMode gameMode;
@@ -52,47 +47,40 @@ public abstract class MixinClientPlayerInteractionManager implements Globals
     protected abstract void sendSequencedPacket(ClientWorld world, SequencedPacketCreator packetCreator);
 
     /**
-     *
-     *
      * @param pos
      * @param direction
      * @param cir
      */
     @Inject(method = "attackBlock", at = @At(value = "HEAD"), cancellable = true)
     private void hookAttackBlock(BlockPos pos, Direction direction,
-                                 CallbackInfoReturnable<Boolean> cir)
-    {
+                                 CallbackInfoReturnable<Boolean> cir) {
         BlockState state = mc.world.getBlockState(pos);
         final AttackBlockEvent attackBlockEvent = new AttackBlockEvent(
                 pos, state, direction);
         Shoreline.EVENT_HANDLER.dispatch(attackBlockEvent);
-        if (attackBlockEvent.isCanceled())
-        {
+        if (attackBlockEvent.isCanceled()) {
             cir.cancel();
             // cir.setReturnValue(false);
         }
     }
 
     /**
-     *
      * @param cir
      */
     @Inject(method = "getReachDistance", at = @At(value = "HEAD"),
             cancellable = true)
-    private void hookGetReachDistance(CallbackInfoReturnable<Float> cir)
-    {
+    private void hookGetReachDistance(CallbackInfoReturnable<Float> cir) {
         final ReachEvent reachEvent = new ReachEvent();
         Shoreline.EVENT_HANDLER.dispatch(reachEvent);
-        if (reachEvent.isCanceled())
-        {
+        if (reachEvent.isCanceled()) {
             cir.cancel();
-            float reach = gameMode.isCreative() ? 5.0f : 4.5f;;
+            float reach = gameMode.isCreative() ? 5.0f : 4.5f;
+            ;
             cir.setReturnValue(reach + reachEvent.getReach());
         }
     }
 
     /**
-     *
      * @param player
      * @param hand
      * @param hitResult
@@ -101,44 +89,37 @@ public abstract class MixinClientPlayerInteractionManager implements Globals
     @Inject(method = "interactBlock", at = @At(value = "HEAD"), cancellable = true)
     private void hookInteractBlock(ClientPlayerEntity player, Hand hand,
                                    BlockHitResult hitResult,
-                                   CallbackInfoReturnable<ActionResult> cir)
-    {
+                                   CallbackInfoReturnable<ActionResult> cir) {
         InteractBlockEvent interactBlockEvent = new InteractBlockEvent(
                 player, hand, hitResult);
         Shoreline.EVENT_HANDLER.dispatch(interactBlockEvent);
-        if (interactBlockEvent.isCanceled())
-        {
+        if (interactBlockEvent.isCanceled()) {
             cir.setReturnValue(ActionResult.SUCCESS);
             cir.cancel();
         }
     }
 
     /**
-     *
      * @param pos
      * @param cir
      */
     @Inject(method = "breakBlock", at = @At(value = "HEAD"), cancellable = true)
-    private void hookBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir)
-    {
+    private void hookBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         BreakBlockEvent breakBlockEvent = new BreakBlockEvent(pos);
         Shoreline.EVENT_HANDLER.dispatch(breakBlockEvent);
-        if (breakBlockEvent.isCanceled())
-        {
+        if (breakBlockEvent.isCanceled()) {
             cir.setReturnValue(false);
             cir.cancel();
         }
     }
 
     /**
-     *
      * @param player
      * @param hand
      * @param cir
      */
     @Inject(method = "interactItem", at = @At(value = "HEAD"), cancellable = true)
-    public void hookInteractItem(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir)
-    {
+    public void hookInteractItem(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         cir.cancel();
         if (this.gameMode == GameMode.SPECTATOR) {
             cir.setReturnValue(ActionResult.PASS);
@@ -146,7 +127,7 @@ public abstract class MixinClientPlayerInteractionManager implements Globals
         syncSelectedSlot();
         // TODO: ROTATION SYNC
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(),
-                 player.getYaw(), player.getPitch(), player.isOnGround()));
+                player.getYaw(), player.getPitch(), player.isOnGround()));
         MutableObject mutableObject = new MutableObject();
         sendSequencedPacket(mc.world, sequence -> {
             PlayerInteractItemC2SPacket playerInteractItemC2SPacket = new PlayerInteractItemC2SPacket(hand, sequence);
@@ -163,6 +144,6 @@ public abstract class MixinClientPlayerInteractionManager implements Globals
             mutableObject.setValue(typedActionResult.getResult());
             return playerInteractItemC2SPacket;
         });
-        cir.setReturnValue((ActionResult)((Object)mutableObject.getValue()));
+        cir.setReturnValue((ActionResult) ((Object) mutableObject.getValue()));
     }
 }

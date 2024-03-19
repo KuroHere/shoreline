@@ -5,33 +5,23 @@ import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 import net.shoreline.client.init.Modules;
-import net.minecraft.client.util.math.MatrixStack;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see Config
+ * @since 1.0
  */
-public class CheckboxButton extends ConfigButton<Boolean>
-{
+public class CheckboxButton extends ConfigButton<Boolean> {
     /**
-     *
-     *
      * @param frame
      * @param config
      */
     public CheckboxButton(CategoryFrame frame, Config<Boolean> config,
-                          float x, float y)
-    {
+                          float x, float y) {
         super(frame, config, x, y);
     }
 
     /**
-     *
-     *
      * @param context
      * @param ix
      * @param iy
@@ -41,8 +31,7 @@ public class CheckboxButton extends ConfigButton<Boolean>
      */
     @Override
     public void render(DrawContext context, float ix, float iy, float mouseX,
-                       float mouseY, float delta)
-    {
+                       float mouseY, float delta) {
         x = ix;
         y = iy;
         boolean val = config.getValue();
@@ -52,19 +41,14 @@ public class CheckboxButton extends ConfigButton<Boolean>
     }
 
     /**
-     *
-     *
      * @param mouseX
      * @param mouseY
      * @param button
      */
     @Override
-    public void mouseClicked(double mouseX, double mouseY, int button)
-    {
-        if (isWithin(mouseX, mouseY))
-        {
-            if (button == 0)
-            {
+    public void mouseClicked(double mouseX, double mouseY, int button) {
+        if (isWithin(mouseX, mouseY)) {
+            if (button == 0) {
                 boolean val = config.getValue();
                 config.setValue(!val);
             }
@@ -72,28 +56,22 @@ public class CheckboxButton extends ConfigButton<Boolean>
     }
 
     /**
-     *
-     *
      * @param mouseX
      * @param mouseY
      * @param button
      */
     @Override
-    public void mouseReleased(double mouseX, double mouseY, int button)
-    {
+    public void mouseReleased(double mouseX, double mouseY, int button) {
 
     }
 
     /**
-     *
-     *
      * @param keyCode
      * @param scanCode
      * @param modifiers
      */
     @Override
-    public void keyPressed(int keyCode, int scanCode, int modifiers)
-    {
+    public void keyPressed(int keyCode, int scanCode, int modifiers) {
 
     }
 

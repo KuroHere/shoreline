@@ -6,17 +6,12 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Mixin(PlayerMoveC2SPacket.class)
-public interface AccessorPlayerMoveC2SPacket
-{
+public interface AccessorPlayerMoveC2SPacket {
     /**
-     *
-     *
      * @param onGround
      */
     @Accessor("onGround")
@@ -24,7 +19,6 @@ public interface AccessorPlayerMoveC2SPacket
     void hookSetOnGround(boolean onGround);
 
     /**
-     *
      * @param x
      */
     @Accessor("x")
@@ -32,7 +26,6 @@ public interface AccessorPlayerMoveC2SPacket
     void hookSetX(double x);
 
     /**
-     *
      * @param y
      */
     @Accessor("y")
@@ -40,7 +33,6 @@ public interface AccessorPlayerMoveC2SPacket
     void hookSetY(double y);
 
     /**
-     *
      * @param z
      */
     @Accessor("z")
@@ -48,7 +40,6 @@ public interface AccessorPlayerMoveC2SPacket
     void hookSetZ(double z);
 
     /**
-     *
      * @param yaw
      */
     @Accessor("yaw")
@@ -56,7 +47,6 @@ public interface AccessorPlayerMoveC2SPacket
     void hookSetYaw(float yaw);
 
     /**
-     *
      * @param pitch
      */
     @Accessor("pitch")

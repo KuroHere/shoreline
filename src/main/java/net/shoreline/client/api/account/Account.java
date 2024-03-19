@@ -7,31 +7,24 @@ import net.shoreline.client.api.config.setting.StringConfig;
 import net.shoreline.client.util.Globals;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see AccountType
  * @see MicrosoftAuthenticator
+ * @since 1.0
  */
-public class Account extends ConfigContainer implements Globals
-{
+public class Account extends ConfigContainer implements Globals {
+    //
+    private final AccountType type;
     //
     Config<String> password = new StringConfig("Password", "Password login " +
             "field of the account.", "");
-    //
-    private final AccountType type;
 
     /**
-     *
-     *
      * @param type
      * @param username
      * @param password
      */
-    public Account(AccountType type, String username, String password)
-    {
+    public Account(AccountType type, String username, String password) {
         super(username);
         this.type = type;
         this.password.setValue(password);
@@ -40,8 +33,7 @@ public class Account extends ConfigContainer implements Globals
     /**
      *
      */
-    public void login()
-    {
+    public void login() {
 //        switch (type)
 //        {
 //            case MICROSOFT -> Shoreline.EXECUTOR.execute(() ->
@@ -63,31 +55,25 @@ public class Account extends ConfigContainer implements Globals
 //        }
     }
 
-    protected void xboxLiveLogin()
-    {
+    protected void xboxLiveLogin() {
 
     }
-    protected void xstsLogin()
-    {
+
+    protected void xstsLogin() {
 
     }
 
     /**
-     *
      * @return
      */
-    public String getPassword()
-    {
+    public String getPassword() {
         return password.getValue();
     }
 
     /**
-     *
-     *
      * @return
      */
-    public AccountType getType()
-    {
+    public AccountType getType() {
         return type;
     }
 }

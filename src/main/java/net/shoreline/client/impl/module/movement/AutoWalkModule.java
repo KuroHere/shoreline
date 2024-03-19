@@ -7,16 +7,12 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
-import net.shoreline.client.util.Globals;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class AutoWalkModule extends ToggleModule
-{
+public class AutoWalkModule extends ToggleModule {
     //
     Config<Boolean> lockConfig = new BooleanConfig("Lock", "Stops movement " +
             "when sneaking or jumping", false);
@@ -24,8 +20,7 @@ public class AutoWalkModule extends ToggleModule
     /**
      *
      */
-    public AutoWalkModule()
-    {
+    public AutoWalkModule() {
         super("AutoWalk", "Automatically moves forward", ModuleCategory.MOVEMENT);
     }
 
@@ -33,8 +28,7 @@ public class AutoWalkModule extends ToggleModule
      *
      */
     @Override
-    public void onDisable()
-    {
+    public void onDisable() {
         mc.options.forwardKey.setPressed(false);
     }
 
@@ -42,10 +36,8 @@ public class AutoWalkModule extends ToggleModule
      *
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() == EventStage.PRE)
-        {
+    public void onTick(TickEvent event) {
+        if (event.getStage() == EventStage.PRE) {
             mc.options.forwardKey.setPressed(!mc.options.sneakKey.isPressed()
                     && (!lockConfig.getValue() || (!mc.options.jumpKey.isPressed()
                     && mc.player.isOnGround())));

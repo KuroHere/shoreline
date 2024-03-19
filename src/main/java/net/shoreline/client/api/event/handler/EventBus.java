@@ -10,18 +10,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see Event
  * @see EventHandler
  * @see net.shoreline.client.api.event.listener.EventListener
  * @see Listener
+ * @since 1.0
  */
-public class EventBus implements EventHandler
-{
+public class EventBus implements EventHandler {
     // Active subscriber cache. Used to check if a class is already
     // subscribed to this EventHandler.
     private final Set<Object> subscribers =
@@ -38,20 +34,15 @@ public class EventBus implements EventHandler
      * @param obj The subscriber object
      */
     @Override
-    public void subscribe(Object obj)
-    {
+    public void subscribe(Object obj) {
         subscribers.add(obj);
-        for (Method method : obj.getClass().getMethods())
-        {
+        for (Method method : obj.getClass().getMethods()) {
             method.trySetAccessible();
-            if (method.isAnnotationPresent(EventListener.class))
-            {
+            if (method.isAnnotationPresent(EventListener.class)) {
                 EventListener listener = method.getAnnotation(EventListener.class);
-                if (method.getReturnType() == Void.TYPE)
-                {
+                if (method.getReturnType() == Void.TYPE) {
                     Class<?>[] params = method.getParameterTypes();
-                    if (params.length == 1)
-                    {
+                    if (params.length == 1) {
                         List<Listener> active = listeners.computeIfAbsent(params[0],
                                 v -> new CopyOnWriteArrayList<>());
                         active.add(new Listener(method, obj,
@@ -70,10 +61,8 @@ public class EventBus implements EventHandler
      * @param obj The subscriber object
      */
     @Override
-    public void unsubscribe(Object obj)
-    {
-        if (subscribers.remove(obj))
-        {
+    public void unsubscribe(Object obj) {
+        if (subscribers.remove(obj)) {
             listeners.values().forEach(set ->
                     set.removeIf(l -> l.getSubscriber() == obj));
             listeners.entrySet().removeIf(e -> e.getValue().isEmpty());
@@ -88,22 +77,17 @@ public class EventBus implements EventHandler
      * @return <tt>true</tt> if {@link Event#isCanceled()}
      */
     @Override
-    public boolean dispatch(Event event)
-    {
-        if (event == null)
-        {
+    public boolean dispatch(Event event) {
+        if (event == null) {
             return false;
         }
         List<Listener> active = listeners.get(event.getClass());
         // if there are no items to dispatch to, just early return
-        if (active == null || active.isEmpty())
-        {
+        if (active == null || active.isEmpty()) {
             return false;
         }
-        for (Listener listener : active)
-        {
-            if (event.isCanceled() && !listener.isReceiveCanceled())
-            {
+        for (Listener listener : active) {
+            if (event.isCanceled() && !listener.isReceiveCanceled()) {
                 continue;
             }
             listener.invokeSubscriber(event);

@@ -18,20 +18,16 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.entity.player.TravelEvent;
-import net.shoreline.client.impl.event.entity.projectile.RemoveFireworkEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.mixin.accessor.AccessorPlayerMoveC2SPacket;
 import net.shoreline.client.util.string.EnumFormatter;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class ElytraFlyModule extends ToggleModule
-{
+public class ElytraFlyModule extends ToggleModule {
     //
     Config<FlyMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
             "elytra flight", FlyMode.CONTROL, FlyMode.values());
@@ -50,40 +46,31 @@ public class ElytraFlyModule extends ToggleModule
     /**
      *
      */
-    public ElytraFlyModule()
-    {
+    public ElytraFlyModule() {
         super("ElytraFly", "Allows you to fly freely using an elytra",
                 ModuleCategory.MOVEMENT);
     }
 
     @Override
-    public String getModuleData()
-    {
+    public String getModuleData() {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
     @EventListener
-    public void onTravel(TravelEvent event)
-    {
+    public void onTravel(TravelEvent event) {
         if (event.getStage() != EventStage.PRE || mc.player == null
-                || mc.world == null || !mc.player.isFallFlying())
-        {
+                || mc.world == null || !mc.player.isFallFlying()) {
             return;
         }
-        switch (modeConfig.getValue())
-        {
-            case CONTROL ->
-            {
+        switch (modeConfig.getValue()) {
+            case CONTROL -> {
                 event.cancel();
                 float forward = mc.player.input.movementForward;
                 float strafe = mc.player.input.movementSideways;
                 float yaw = mc.player.getYaw();
-                if (forward == 0.0f && strafe == 0.0f)
-                {
+                if (forward == 0.0f && strafe == 0.0f) {
                     Managers.MOVEMENT.setMotionXZ(0.0, 0.0);
-                }
-                else
-                {
+                } else {
                     pitch = 12;
                     double rx = Math.cos(Math.toRadians(yaw + 90.0f));
                     double rz = Math.sin(Math.toRadians(yaw + 90.0f));
@@ -93,25 +80,20 @@ public class ElytraFlyModule extends ToggleModule
                 }
                 Managers.MOVEMENT.setMotionY(0.0);
                 pitch = 0;
-                if (mc.options.jumpKey.isPressed())
-                {
+                if (mc.options.jumpKey.isPressed()) {
                     pitch = -51;
                     Managers.MOVEMENT.setMotionY(vspeedConfig.getValue());
-                }
-                else if (mc.options.sneakKey.isPressed())
-                {
+                } else if (mc.options.sneakKey.isPressed()) {
                     Managers.MOVEMENT.setMotionY(-vspeedConfig.getValue());
                 }
             }
-            case BOOST ->
-            {
+            case BOOST -> {
                 event.cancel();
                 mc.player.limbAnimator.setSpeed(0.0f);
                 glideElytraVec(mc.player.getPitch());
                 boolean boost = mc.options.jumpKey.isPressed();
                 float yaw = mc.player.getYaw() * 0.017453292f;
-                if (boost)
-                {
+                if (boost) {
                     double sin = -MathHelper.sin(yaw);
                     double cos = MathHelper.cos(yaw);
                     double motionX = sin * speedConfig.getValue() / 20.0f;
@@ -139,27 +121,20 @@ public class ElytraFlyModule extends ToggleModule
 //    }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPacketOutbound(PacketEvent.Outbound event)
-    {
-        if (mc.player == null)
-        {
+    public void onPacketOutbound(PacketEvent.Outbound event) {
+        if (mc.player == null) {
             return;
         }
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet
-                && packet.changesLook() && mc.player.isFallFlying())
-        {
-            if (modeConfig.getValue() == FlyMode.CONTROL)
-            {
-                if (mc.options.leftKey.isPressed())
-                {
+                && packet.changesLook() && mc.player.isFallFlying()) {
+            if (modeConfig.getValue() == FlyMode.CONTROL) {
+                if (mc.options.leftKey.isPressed()) {
                     ((AccessorPlayerMoveC2SPacket) packet).hookSetYaw(packet.getYaw(0.0f) - 90.0f);
                 }
-                if (mc.options.rightKey.isPressed())
-                {
+                if (mc.options.rightKey.isPressed()) {
                     ((AccessorPlayerMoveC2SPacket) packet).hookSetYaw(packet.getYaw(0.0f) + 90.0f);
                 }
             }
@@ -167,24 +142,19 @@ public class ElytraFlyModule extends ToggleModule
         }
     }
 
-    private void boostFirework()
-    {
+    private void boostFirework() {
         int slot = -1;
-        for (int i = 0; i < 9; i++)
-        {
+        for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.isEmpty())
-            {
+            if (stack.isEmpty()) {
                 continue;
             }
-            if (stack.getItem() instanceof FireworkRocketItem)
-            {
+            if (stack.getItem() instanceof FireworkRocketItem) {
                 slot = i;
                 break;
             }
         }
-        if (slot != -1)
-        {
+        if (slot != -1) {
             int prev = mc.player.getInventory().selectedSlot;
             mc.player.getInventory().selectedSlot = slot;
             Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
@@ -194,12 +164,10 @@ public class ElytraFlyModule extends ToggleModule
         }
     }
 
-    private void glideElytraVec(float pitch)
-    {
+    private void glideElytraVec(float pitch) {
         double d = 0.08;
         boolean bl = mc.player.getVelocity().y <= 0.0;
-        if (bl && mc.player.hasStatusEffect(StatusEffects.SLOW_FALLING))
-        {
+        if (bl && mc.player.hasStatusEffect(StatusEffects.SLOW_FALLING)) {
             d = 0.01;
         }
         Vec3d vec3d4 = mc.player.getVelocity();
@@ -217,8 +185,7 @@ public class ElytraFlyModule extends ToggleModule
         //    m = vec3d4.y * -0.1 * l;
         //    vec3d4 = vec3d4.add(vec3d5.x * m / i, m, vec3d5.z * m / i);
         // }
-        if (f < 0.0f && i > 0.0)
-        {
+        if (f < 0.0f && i > 0.0) {
             m = j * (double) (-MathHelper.sin(f)) * 0.04;
             vec3d4 = vec3d4.add(-vec3d5.x * m / i, m * 3.2, -vec3d5.z * m / i);
         }
@@ -229,8 +196,7 @@ public class ElytraFlyModule extends ToggleModule
         mc.player.setVelocity(vec3d4.multiply(0.9900000095367432, 0.9800000190734863, 0.9900000095367432));
     }
 
-    protected final Vec3d getRotationVector(float pitch, float yaw)
-    {
+    protected final Vec3d getRotationVector(float pitch, float yaw) {
         float f = pitch * 0.017453292f;
         float g = -yaw * 0.017453292f;
         float h = MathHelper.cos(g);
@@ -240,8 +206,7 @@ public class ElytraFlyModule extends ToggleModule
         return new Vec3d((double) (i * j), (double) (-k), (double) (h * j));
     }
 
-    public enum FlyMode
-    {
+    public enum FlyMode {
         CONTROL,
         BOOST,
         FACTORIZE,

@@ -5,16 +5,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see Entity
+ * @since 1.0
  */
 @Mixin(Entity.class)
-public interface AccessorEntity
-{
+public interface AccessorEntity {
     /**
      *
      */

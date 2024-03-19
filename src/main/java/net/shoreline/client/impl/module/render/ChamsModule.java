@@ -1,15 +1,5 @@
 package net.shoreline.client.impl.module.render;
 
-import net.shoreline.client.api.config.Config;
-import net.shoreline.client.api.config.setting.BooleanConfig;
-import net.shoreline.client.api.config.setting.EnumConfig;
-import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.ToggleModule;
-import net.shoreline.client.impl.event.render.entity.RenderCrystalEvent;
-import net.shoreline.client.impl.event.render.entity.RenderEntityEvent;
-import net.shoreline.client.init.Modules;
-import net.shoreline.client.util.world.EntityUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EndCrystalEntityRenderer;
@@ -23,18 +13,26 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
+import net.shoreline.client.api.config.Config;
+import net.shoreline.client.api.config.setting.BooleanConfig;
+import net.shoreline.client.api.config.setting.EnumConfig;
+import net.shoreline.client.api.event.listener.EventListener;
+import net.shoreline.client.api.module.ModuleCategory;
+import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.impl.event.render.entity.RenderCrystalEvent;
+import net.shoreline.client.impl.event.render.entity.RenderEntityEvent;
+import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.world.EntityUtil;
 import org.joml.Quaternionf;
 
 import java.awt.*;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class ChamsModule extends ToggleModule
-{
+public class ChamsModule extends ToggleModule {
+    private static final float SINE_45_DEGREES = (float) Math.sin(0.7853981633974483);
     //
     Config<ChamsMode> modeConfig = new EnumConfig<>("Mode",
             "The rendering mode for the chams", ChamsMode.NORMAL, ChamsMode.values());
@@ -50,28 +48,42 @@ public class ChamsModule extends ToggleModule
             "Render chams on animals", true);
     Config<Boolean> otherConfig = new BooleanConfig("Others",
             "Render chams on crystals", true);
-    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles",
-            "Render chams on invisible entities", true);
     // Config<Boolean> textureConfig = new BooleanConfig("Texture", "Renders" +
     //        " the entity texture beneath the chams", false);
+    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles",
+            "Render chams on invisible entities", true);
 
     /**
      *
      */
-    public ChamsModule()
-    {
+    public ChamsModule() {
         super("Chams", "Renders entity models through walls", ModuleCategory.RENDER);
     }
 
+    private static float getYaw(Direction direction) {
+        switch (direction) {
+            case SOUTH: {
+                return 90.0f;
+            }
+            case WEST: {
+                return 0.0f;
+            }
+            case NORTH: {
+                return 270.0f;
+            }
+            case EAST: {
+                return 180.0f;
+            }
+        }
+        return 0.0f;
+    }
+
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderEntity(RenderEntityEvent event)
-    {
-        if (!checkChams(event.entity))
-        {
+    public void onRenderEntity(RenderEntityEvent event) {
+        if (!checkChams(event.entity)) {
             return;
         }
         RenderSystem.enableBlend();
@@ -97,7 +109,7 @@ public class ChamsModule extends ToggleModule
         float j = MathHelper.lerpAngleDegrees(event.g, ((LivingEntity) event.entity).prevHeadYaw, ((LivingEntity) event.entity).headYaw);
         float k = j - h;
         if (((Entity) event.entity).hasVehicle() && ((Entity) event.entity).getVehicle() instanceof LivingEntity) {
-            LivingEntity livingEntity2 = (LivingEntity)((Entity) event.entity).getVehicle();
+            LivingEntity livingEntity2 = (LivingEntity) ((Entity) event.entity).getVehicle();
             h = MathHelper.lerpAngleDegrees(event.g, livingEntity2.prevBodyYaw, livingEntity2.bodyYaw);
             k = j - h;
             float l = MathHelper.wrapDegrees(k);
@@ -120,7 +132,7 @@ public class ChamsModule extends ToggleModule
         }
         if (((Entity) event.entity).isInPose(EntityPose.SLEEPING) && (direction = ((LivingEntity) event.entity).getSleepingDirection()) != null) {
             n = ((Entity) event.entity).getEyeHeight(EntityPose.STANDING) - 0.1f;
-            event.matrixStack.translate((float)(-direction.getOffsetX()) * n, 0.0f, (float)(-direction.getOffsetZ()) * n);
+            event.matrixStack.translate((float) (-direction.getOffsetX()) * n, 0.0f, (float) (-direction.getOffsetZ()) * n);
         }
         float l = event.entity.age + event.g;
         setupTransforms(event.entity, event.matrixStack, l, h, event.g);
@@ -145,10 +157,8 @@ public class ChamsModule extends ToggleModule
         boolean bl2 = !bl && !((Entity) event.entity).isInvisibleTo(mc.player);
         int p = LivingEntityRenderer.getOverlay(event.entity, 0);
         event.model.render(event.matrixStack, vertexConsumer, event.i, p, 1.0f, 1.0f, 1.0f, bl2 ? 0.15f : 1.0f);
-        if (!((Entity) event.entity).isSpectator())
-        {
-            for (Object featureRenderer : event.features)
-            {
+        if (!((Entity) event.entity).isSpectator()) {
+            for (Object featureRenderer : event.features) {
                 ((FeatureRenderer) featureRenderer).render(event.matrixStack, event.vertexConsumerProvider, event.i,
                         event.entity, o, n, event.g, l, k, m);
             }
@@ -163,23 +173,22 @@ public class ChamsModule extends ToggleModule
     }
 
     protected void setupTransforms(LivingEntity entity, MatrixStack matrices, float animationProgress,
-                                   float bodyYaw, float tickDelta)
-    {
+                                   float bodyYaw, float tickDelta) {
         if (entity.isFrozen()) {
-            bodyYaw += (float)(Math.cos((double)((LivingEntity) entity).age * 3.25) * Math.PI * (double)0.4f);
+            bodyYaw += (float) (Math.cos((double) ((LivingEntity) entity).age * 3.25) * Math.PI * (double) 0.4f);
         }
         if (!((Entity) entity).isInPose(EntityPose.SLEEPING)) {
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f - bodyYaw));
         }
         if (((LivingEntity) entity).deathTime > 0) {
-            float f = ((float)((LivingEntity) entity).deathTime + tickDelta - 1.0f) / 20.0f * 1.6f;
+            float f = ((float) ((LivingEntity) entity).deathTime + tickDelta - 1.0f) / 20.0f * 1.6f;
             if ((f = MathHelper.sqrt(f)) > 1.0f) {
                 f = 1.0f;
             }
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(f * 90.0f));
         } else if (((LivingEntity) entity).isUsingRiptide()) {
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90.0f - ((Entity) entity).getPitch()));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(((float)((LivingEntity) entity).age + tickDelta) * -75.0f));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(((float) ((LivingEntity) entity).age + tickDelta) * -75.0f));
         } else if (((Entity) entity).isInPose(EntityPose.SLEEPING)) {
             Direction direction = ((LivingEntity) entity).getSleepingDirection();
             float g = direction != null ? getYaw(direction) : bodyYaw;
@@ -187,40 +196,17 @@ public class ChamsModule extends ToggleModule
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90.0f));
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(270.0f));
         } else if (LivingEntityRenderer.shouldFlipUpsideDown(entity)) {
-            matrices.translate(0.0f, ((Entity)entity).getHeight() + 0.1f, 0.0f);
+            matrices.translate(0.0f, ((Entity) entity).getHeight() + 0.1f, 0.0f);
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0f));
         }
     }
 
-    private static float getYaw(Direction direction) {
-        switch (direction) {
-            case SOUTH: {
-                return 90.0f;
-            }
-            case WEST: {
-                return 0.0f;
-            }
-            case NORTH: {
-                return 270.0f;
-            }
-            case EAST: {
-                return 180.0f;
-            }
-        }
-        return 0.0f;
-    }
-
-    private static final float SINE_45_DEGREES = (float) Math.sin(0.7853981633974483);
-
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderCrystal(RenderCrystalEvent event)
-    {
-        if (!otherConfig.getValue())
-        {
+    public void onRenderCrystal(RenderCrystalEvent event) {
+        if (!otherConfig.getValue()) {
             return;
         }
         RenderSystem.enableBlend();
@@ -265,10 +251,8 @@ public class ChamsModule extends ToggleModule
         event.cancel();
     }
 
-    private boolean checkChams(LivingEntity entity)
-    {
-        if (entity instanceof PlayerEntity && playersConfig.getValue())
-        {
+    private boolean checkChams(LivingEntity entity) {
+        if (entity instanceof PlayerEntity && playersConfig.getValue()) {
             return selfConfig.getValue() || entity != mc.player;
         }
         return (!entity.isInvisible() || invisiblesConfig.getValue())
@@ -277,8 +261,7 @@ public class ChamsModule extends ToggleModule
                 || EntityUtil.isPassive(entity)) && animalsConfig.getValue());
     }
 
-    public enum ChamsMode
-    {
+    public enum ChamsMode {
         NORMAL,
         WIREFRAME
     }

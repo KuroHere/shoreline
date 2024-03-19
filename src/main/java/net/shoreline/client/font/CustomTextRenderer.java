@@ -1,8 +1,5 @@
 package net.shoreline.client.font;
 
-import net.shoreline.client.init.Fonts;
-import net.shoreline.client.mixin.accessor.AccessorTextRenderer;
-import net.shoreline.client.util.Globals;
 import net.minecraft.client.font.*;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
@@ -12,29 +9,26 @@ import net.minecraft.text.CharacterVisitor;
 import net.minecraft.text.Style;
 import net.minecraft.text.TextColor;
 import net.minecraft.text.TextVisitFactory;
+import net.shoreline.client.mixin.accessor.AccessorTextRenderer;
+import net.shoreline.client.util.Globals;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 import java.util.List;
 
-public class CustomTextRenderer implements Globals
-{
+public class CustomTextRenderer implements Globals {
     // Autism
-    public void drawWithShadow(MatrixStack matrices, String text, float x, float y, int color)
-    {
+    public void drawWithShadow(MatrixStack matrices, String text, float x, float y, int color) {
         draw(matrices, text, x + 1.0f, y + 1.0f, color, true);
         draw(matrices, text, x, y, color, false);
     }
 
-    public void draw(MatrixStack matrices, String text, float x, float y, int color, boolean shadow)
-    {
+    public void draw(MatrixStack matrices, String text, float x, float y, int color, boolean shadow) {
         this.draw(text, x, y, color, matrices.peek().getPositionMatrix(), shadow);
     }
 
-    private void draw(String text, float x, float y, int color, Matrix4f matrix, boolean shadow)
-    {
-        if (text == null)
-        {
+    private void draw(String text, float x, float y, int color, Matrix4f matrix, boolean shadow) {
+        if (text == null) {
             return;
         }
         VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(
@@ -46,15 +40,13 @@ public class CustomTextRenderer implements Globals
 
     public void draw(String text, float x, float y, int color, boolean shadow,
                      Matrix4f matrix, VertexConsumerProvider vertexConsumers,
-                     TextRenderer.TextLayerType layerType, int backgroundColor, int light)
-    {
+                     TextRenderer.TextLayerType layerType, int backgroundColor, int light) {
         drawInternal(text, x, y, color, shadow, matrix, vertexConsumers, layerType, backgroundColor, light);
     }
 
     private void drawInternal(String text, float x, float y, int color, boolean shadow,
                               Matrix4f matrix, VertexConsumerProvider vertexConsumers,
-                              TextRenderer.TextLayerType layerType, int backgroundColor, int light)
-    {
+                              TextRenderer.TextLayerType layerType, int backgroundColor, int light) {
         // color = TextRenderer.tweakTransparency(color);
         Matrix4f matrix4f = new Matrix4f(matrix);
         drawLayer(text, x, y, color, shadow, matrix4f, vertexConsumers, layerType, backgroundColor, light);
@@ -62,15 +54,13 @@ public class CustomTextRenderer implements Globals
 
     private void drawLayer(String text, float x, float y, int color, boolean shadow,
                            Matrix4f matrix, VertexConsumerProvider vertexConsumerProvider,
-                           TextRenderer.TextLayerType layerType, int underlineColor, int light)
-    {
+                           TextRenderer.TextLayerType layerType, int underlineColor, int light) {
         Drawer drawer = new Drawer(vertexConsumerProvider, x, y, color, shadow, matrix, layerType, light);
         TextVisitFactory.visitFormatted(text, Style.EMPTY, (CharacterVisitor) drawer);
         drawer.drawLayer();
     }
 
-    public static class Drawer implements CharacterVisitor
-    {
+    public static class Drawer implements CharacterVisitor {
         final VertexConsumerProvider vertexConsumers;
         private final float brightnessMultiplier;
         private final float red;
@@ -87,24 +77,22 @@ public class CustomTextRenderer implements Globals
 
         public Drawer(VertexConsumerProvider vertexConsumers, float x,
                       float y, int color, boolean shadow, Matrix4f matrix,
-                      TextRenderer.TextLayerType layerType, int light)
-        {
+                      TextRenderer.TextLayerType layerType, int light) {
             this.vertexConsumers = vertexConsumers;
             this.x = x;
             this.y = y;
             this.brightnessMultiplier = shadow ? 0.25f : 1.0f;
-            this.red = (float)(color >> 16 & 0xFF) / 255.0f * this.brightnessMultiplier;
-            this.green = (float)(color >> 8 & 0xFF) / 255.0f * this.brightnessMultiplier;
-            this.blue = (float)(color & 0xFF) / 255.0f * this.brightnessMultiplier;
-            this.alpha = (float)(color >> 24 & 0xFF) / 255.0f;
+            this.red = (float) (color >> 16 & 0xFF) / 255.0f * this.brightnessMultiplier;
+            this.green = (float) (color >> 8 & 0xFF) / 255.0f * this.brightnessMultiplier;
+            this.blue = (float) (color & 0xFF) / 255.0f * this.brightnessMultiplier;
+            this.alpha = (float) (color >> 24 & 0xFF) / 255.0f;
             this.matrix = matrix;
             this.layerType = layerType;
             this.light = light;
         }
 
         @Override
-        public boolean accept(int i, Style style, int j)
-        {
+        public boolean accept(int i, Style style, int j) {
             // float n;
             float l;
             float h;
@@ -136,8 +124,7 @@ public class CustomTextRenderer implements Globals
             return true;
         }
 
-        public void drawLayer()
-        {
+        public void drawLayer() {
             if (this.rectangles != null) {
                 GlyphRenderer glyphRenderer = ((AccessorTextRenderer) mc.textRenderer).hookGetFontStorage(Style.DEFAULT_FONT_ID).getRectangleRenderer();
                 VertexConsumer vertexConsumer = this.vertexConsumers.getBuffer(glyphRenderer.getLayer(this.layerType));

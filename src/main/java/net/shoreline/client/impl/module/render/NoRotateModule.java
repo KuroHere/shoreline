@@ -1,5 +1,9 @@
 package net.shoreline.client.impl.module.render;
 
+import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.event.listener.EventListener;
@@ -8,19 +12,12 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.mixin.accessor.AccessorPlayerMoveC2SPacket;
 import net.shoreline.client.mixin.accessor.AccessorPlayerPositionLookS2CPacket;
-import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class NoRotateModule extends ToggleModule
-{
+public class NoRotateModule extends ToggleModule {
     Config<Boolean> positionAdjustConfig = new BooleanConfig("PositionAdjust",
             "Adjusts outgoing rotation packets", false);
     //
@@ -30,25 +27,20 @@ public class NoRotateModule extends ToggleModule
     /**
      *
      */
-    public NoRotateModule()
-    {
+    public NoRotateModule() {
         super("NoRotate", "Prevents server from forcing rotations",
                 ModuleCategory.RENDER);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPacketInbound(PacketEvent.Inbound event)
-    {
-        if (mc.player == null || mc.currentScreen instanceof DownloadingTerrainScreen)
-        {
+    public void onPacketInbound(PacketEvent.Inbound event) {
+        if (mc.player == null || mc.currentScreen instanceof DownloadingTerrainScreen) {
             return;
         }
-        if (event.getPacket() instanceof PlayerPositionLookS2CPacket packet)
-        {
+        if (event.getPacket() instanceof PlayerPositionLookS2CPacket packet) {
             yaw = packet.getYaw();
             pitch = packet.getPitch();
             ((AccessorPlayerPositionLookS2CPacket) packet).setYaw(mc.player.getYaw());
@@ -61,16 +53,12 @@ public class NoRotateModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPacketOutbound(PacketEvent.Outbound event)
-    {
-        if (event.getPacket() instanceof PlayerMoveC2SPacket.Full packet && cancelRotate)
-        {
-            if (positionAdjustConfig.getValue())
-            {
+    public void onPacketOutbound(PacketEvent.Outbound event) {
+        if (event.getPacket() instanceof PlayerMoveC2SPacket.Full packet && cancelRotate) {
+            if (positionAdjustConfig.getValue()) {
                 ((AccessorPlayerMoveC2SPacket) packet).hookSetYaw(yaw);
                 ((AccessorPlayerMoveC2SPacket) packet).hookSetPitch(pitch);
             }

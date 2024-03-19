@@ -1,18 +1,17 @@
 package net.shoreline.client.impl.event.render.entity;
 
-import net.shoreline.client.api.event.Cancelable;
-import net.shoreline.client.api.event.Event;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
+import net.shoreline.client.api.event.Cancelable;
+import net.shoreline.client.api.event.Event;
 
 import java.util.List;
 
 @Cancelable
-public class RenderEntityEvent<T extends LivingEntity> extends Event
-{
+public class RenderEntityEvent<T extends LivingEntity> extends Event {
     public final LivingEntity entity;
 
     public final float f;
@@ -25,7 +24,6 @@ public class RenderEntityEvent<T extends LivingEntity> extends Event
     public final List<FeatureRenderer<T, EntityModel<T>>> features;
 
     /**
-     *
      * @param entity
      * @param f
      * @param g
@@ -39,8 +37,7 @@ public class RenderEntityEvent<T extends LivingEntity> extends Event
                              MatrixStack matrixStack,
                              VertexConsumerProvider vertexConsumerProvider,
                              int i, EntityModel model,
-                             List<FeatureRenderer<T, EntityModel<T>>> features)
-    {
+                             List<FeatureRenderer<T, EntityModel<T>>> features) {
         this.entity = entity;
         this.f = f;
         this.g = g;

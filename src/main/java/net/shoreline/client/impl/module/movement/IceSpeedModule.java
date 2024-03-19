@@ -1,24 +1,19 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.block.Blocks;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.mixin.accessor.AccessorAbstractBlock;
-import net.minecraft.block.Blocks;
-import net.shoreline.client.util.Globals;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class IceSpeedModule extends ToggleModule
-{
+public class IceSpeedModule extends ToggleModule {
     /**
      *
      */
-    public IceSpeedModule()
-    {
+    public IceSpeedModule() {
         super("IceSpeed", "Modifies the walking speed on ice",
                 ModuleCategory.MOVEMENT);
     }
@@ -27,10 +22,8 @@ public class IceSpeedModule extends ToggleModule
      *
      */
     @Override
-    public void onEnable()
-    {
-        if (mc.world == null)
-        {
+    public void onEnable() {
+        if (mc.world == null) {
             return;
         }
         ((AccessorAbstractBlock) Blocks.ICE).setSlipperiness(0.4f);
@@ -43,10 +36,8 @@ public class IceSpeedModule extends ToggleModule
      *
      */
     @Override
-    public void onDisable()
-    {
-        if (mc.world == null)
-        {
+    public void onDisable() {
+        if (mc.world == null) {
             return;
         }
         ((AccessorAbstractBlock) Blocks.ICE).setSlipperiness(0.98f);

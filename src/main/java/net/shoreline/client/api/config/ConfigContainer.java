@@ -1,17 +1,17 @@
 package net.shoreline.client.api.config;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.Identifiable;
-import net.shoreline.client.api.macro.Macro;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.Identifiable;
 import net.shoreline.client.api.config.setting.*;
+import net.shoreline.client.api.macro.Macro;
 
 import java.awt.*;
 import java.lang.reflect.Field;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -19,13 +19,11 @@ import java.util.concurrent.ConcurrentMap;
  * all declared configurations for the container class.
  *
  * @author linus
- * @since 1.0
- *
  * @see Config
  * @see ConfigFactory
+ * @since 1.0
  */
-public class ConfigContainer implements Identifiable, Serializable<Config<?>>
-{
+public class ConfigContainer implements Identifiable, Serializable<Config<?>> {
     // Container name is its UNIQUE identifier.
     protected final String name;
     // List of all configurations in the container. The configs are managed
@@ -39,34 +37,27 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>
      * be registered if this process does not complete.
      *
      * @param name The container name
-     *
      * @see ConfigFactory
      */
-    public ConfigContainer(String name)
-    {
+    public ConfigContainer(String name) {
         // set name of this container early
         // DO NOT MOVE THIS BACK - aesthetical
         this.name = name;
     }
 
     /**
-     *
      * @param config
      */
-    protected void register(Config<?> config)
-    {
+    protected void register(Config<?> config) {
         config.setContainer(this);
         configurations.put(config.getId(), config);
     }
 
     /**
-     *
      * @param configs
      */
-    protected void register(Config<?>... configs)
-    {
-        for (Config<?> config : configs)
-        {
+    protected void register(Config<?>... configs) {
+        for (Config<?> config : configs) {
             register(config);
         }
     }
@@ -74,17 +65,13 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>
     /**
      * Reflect configuration fields
      */
-    public void reflectConfigs()
-    {
+    public void reflectConfigs() {
         final ConfigFactory factory = new ConfigFactory(this);
         // populate container using reflection
-        for (Field field : getClass().getDeclaredFields())
-        {
-            if (Config.class.isAssignableFrom(field.getType()))
-            {
+        for (Field field : getClass().getDeclaredFields()) {
+            if (Config.class.isAssignableFrom(field.getType())) {
                 Config<?> config = factory.build(field);
-                if (config == null)
-                {
+                if (config == null) {
                     // failsafe for debugging purposes
                     Shoreline.error("Value for field {} is null!", field);
                     continue;
@@ -99,18 +86,15 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>
      * registered {@link Config}
      *
      * @return The container as a json object
-     *
      * @see Config#toJson()
      */
     @Override
-    public JsonObject toJson()
-    {
+    public JsonObject toJson() {
         final JsonObject out = new JsonObject();
         out.addProperty("name", getName());
         out.addProperty("id", getId());
         final JsonArray array = new JsonArray();
-        for (Config<?> config : getConfigs())
-        {
+        for (Config<?> config : getConfigs()) {
             array.add(config.toJson());
         }
         out.add("configs", array);
@@ -123,74 +107,52 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>
      *
      * @param jsonObj The container as a json object
      * @return
-     *
      * @see Config#fromJson(JsonObject)
      */
     @Override
-    public Config<?> fromJson(JsonObject jsonObj)
-    {
-        if (jsonObj.has("configs"))
-        {
+    public Config<?> fromJson(JsonObject jsonObj) {
+        if (jsonObj.has("configs")) {
             JsonElement element = jsonObj.get("configs");
-            if (!element.isJsonArray())
-            {
+            if (!element.isJsonArray()) {
                 return null;
             }
-            for (JsonElement je : element.getAsJsonArray())
-            {
-                if (!je.isJsonObject())
-                {
+            for (JsonElement je : element.getAsJsonArray()) {
+                if (!je.isJsonObject()) {
                     continue;
                 }
                 final JsonObject configObj = je.getAsJsonObject();
                 final JsonElement id = configObj.get("id");
                 //
                 Config<?> config = getConfig(id.getAsString());
-                if (config == null)
-                {
+                if (config == null) {
                     continue;
                 }
-                try
-                {
-                    if (config instanceof BooleanConfig cfg)
-                    {
+                try {
+                    if (config instanceof BooleanConfig cfg) {
                         Boolean val = cfg.fromJson(configObj);
                         cfg.setValue(val);
-                    }
-                    else if (config instanceof ColorConfig cfg)
-                    {
+                    } else if (config instanceof ColorConfig cfg) {
                         Color val = cfg.fromJson(configObj);
                         cfg.setValue(val);
-                    }
-                    else if (config instanceof EnumConfig cfg)
-                    {
+                    } else if (config instanceof EnumConfig cfg) {
                         Enum<?> val = cfg.fromJson(configObj);
                         cfg.setValue(val);
-                    }
-                    else if (config instanceof ListConfig cfg)
-                    {
+                    } else if (config instanceof ListConfig cfg) {
                         List<?> val = cfg.fromJson(configObj);
                         cfg.setValue(val);
-                    }
-                    else if (config instanceof MacroConfig cfg)
-                    {
+                    } else if (config instanceof MacroConfig cfg) {
                         Macro val = cfg.fromJson(configObj);
                         cfg.setValue(val);
-                    }
-                    else if (config instanceof NumberConfig cfg)
-                    {
+                    } else if (config instanceof NumberConfig cfg) {
                         Number val = cfg.fromJson(configObj);
                         cfg.setValue(val);
-                    }
-                    else if (config instanceof StringConfig cfg)
-                    {
+                    } else if (config instanceof StringConfig cfg) {
                         String val = cfg.fromJson(configObj);
                         cfg.setValue(val);
                     }
                 }
                 // couldn't parse Json value
-                catch (Exception e)
-                {
+                catch (Exception e) {
                     Shoreline.error("Couldn't parse Json for {}!",
                             config.getName());
                     e.printStackTrace();
@@ -206,18 +168,15 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>
      *
      * @return The unique name
      */
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
     /**
-     *
      * @return
      */
     @Override
-    public String getId()
-    {
+    public String getId() {
         return String.format("%s-container", name.toLowerCase());
     }
 
@@ -227,21 +186,16 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>
      *
      * @param id The config data tag
      * @return The config from the id
-     *
      * @see Config#getId()
      */
-    public Config<?> getConfig(String id)
-    {
+    public Config<?> getConfig(String id) {
         return configurations.get(id);
     }
 
     /**
-     *
-     *
      * @return
      */
-    public Collection<Config<?>> getConfigs()
-    {
+    public Collection<Config<?>> getConfigs() {
         return configurations.values();
     }
 }

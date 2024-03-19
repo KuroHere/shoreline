@@ -1,45 +1,39 @@
 package net.shoreline.client.impl.event.network;
 
-import net.shoreline.client.api.event.Cancelable;
-import net.shoreline.client.api.event.Event;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.shoreline.client.api.event.Cancelable;
+import net.shoreline.client.api.event.Event;
 
 @Cancelable
-public class InteractBlockEvent extends Event
-{
+public class InteractBlockEvent extends Event {
     //
     private final ClientPlayerEntity player;
     private final Hand hand;
     private final BlockHitResult hitResult;
 
     /**
-     *
      * @param player
      * @param hand
      * @param hitResult
      */
     public InteractBlockEvent(ClientPlayerEntity player, Hand hand,
-                              BlockHitResult hitResult)
-    {
+                              BlockHitResult hitResult) {
         this.player = player;
         this.hand = hand;
         this.hitResult = hitResult;
     }
 
-    public ClientPlayerEntity getPlayer()
-    {
+    public ClientPlayerEntity getPlayer() {
         return player;
     }
 
-    public Hand getHand()
-    {
+    public Hand getHand() {
         return hand;
     }
 
-    public BlockHitResult getHitResult()
-    {
+    public BlockHitResult getHitResult() {
         return hitResult;
     }
 }

@@ -3,26 +3,18 @@ package net.shoreline.client.impl.module.render;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.ColorConfig;
-import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
-import net.shoreline.client.impl.event.config.ConfigUpdateEvent;
-import net.shoreline.client.impl.event.render.AmbientColorEvent;
 import net.shoreline.client.impl.event.world.SkyboxEvent;
-import net.shoreline.client.mixin.accessor.AccessorLightmapTextureManager;
-import net.shoreline.client.util.world.RenderUtil;
 
 import java.awt.*;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class SkyboxModule extends ToggleModule
-{
+public class SkyboxModule extends ToggleModule {
     //
     Config<Boolean> skyConfig = new BooleanConfig("Sky", "Changes the world " +
             "skybox color", true);
@@ -44,8 +36,7 @@ public class SkyboxModule extends ToggleModule
     /**
      *
      */
-    public SkyboxModule()
-    {
+    public SkyboxModule() {
         super("Skybox", "Changes the rendering of the world skybox",
                 ModuleCategory.RENDER);
     }
@@ -114,42 +105,33 @@ public class SkyboxModule extends ToggleModule
 //    }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onSkyboxSky(SkyboxEvent.Sky event)
-    {
-        if (skyConfig.getValue())
-        {
+    public void onSkyboxSky(SkyboxEvent.Sky event) {
+        if (skyConfig.getValue()) {
             event.cancel();
             event.setColor(skyColorConfig.getValue());
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onSkyboxCloud(SkyboxEvent.Cloud event)
-    {
-        if (cloudConfig.getValue())
-        {
+    public void onSkyboxCloud(SkyboxEvent.Cloud event) {
+        if (cloudConfig.getValue()) {
             event.cancel();
             event.setColor(cloudColorConfig.getValue());
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onSkyboxFog(SkyboxEvent.Fog event)
-    {
-        if (fogConfig.getValue())
-        {
+    public void onSkyboxFog(SkyboxEvent.Fog event) {
+        if (fogConfig.getValue()) {
             event.cancel();
             event.setColor(fogColorConfig.getValue());
         }

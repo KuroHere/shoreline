@@ -7,13 +7,11 @@ import com.google.gson.JsonObject;
  * <tt>.json</tt> file. Data will be converted to and from {@link JsonObject}.
  *
  * @author linus
- * @since 1.0
- *
  * @see Config
  * @see JsonObject
+ * @since 1.0
  */
-public interface Serializable<T>
-{
+public interface Serializable<T> {
     /**
      * Converts all data in the object to a {@link JsonObject}.
      *
@@ -26,7 +24,6 @@ public interface Serializable<T>
      * data in the object.
      *
      * @param jsonObj The data as a json object
-     *
      * @see #toJson()
      */
     T fromJson(JsonObject jsonObj);

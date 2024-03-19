@@ -17,12 +17,10 @@ import java.util.concurrent.Executors;
  * instances and client managers.
  *
  * @author linus
- * @since 1.0
- *
  * @see ShorelineMod
+ * @since 1.0
  */
-public class Shoreline
-{
+public class Shoreline {
     // Client logger.
     public static Logger LOGGER;
     // Client Event handler (aka Event bus) which handles event dispatching
@@ -40,8 +38,7 @@ public class Shoreline
     /**
      * Called before {@link ShorelineMod#onInitializeClient()}
      */
-    public static void preInit()
-    {
+    public static void preInit() {
         LOGGER = LogManager.getLogger("Shoreline");
         info("Starting preInit ...");
         EXECUTOR = Executors.newFixedThreadPool(1);
@@ -52,8 +49,7 @@ public class Shoreline
     /**
      * Called during {@link ShorelineMod#onInitializeClient()}
      */
-    public static void init()
-    {
+    public static void init() {
         info("Starting init ...");
         Managers.init();
         Modules.init();
@@ -63,8 +59,7 @@ public class Shoreline
     /**
      * Called after {@link ShorelineMod#onInitializeClient()}
      */
-    public static void postInit()
-    {
+    public static void postInit() {
         info("Starting postInit ...");
         Managers.postInit();
         SHUTDOWN = new ShutdownHook();
@@ -80,22 +75,17 @@ public class Shoreline
      * the client {@link Logger}.
      *
      * @param message The log message
-     *
      * @see Logger#info(String)
      */
-    public static void info(String message)
-    {
+    public static void info(String message) {
         LOGGER.info(String.format("[Shoreline] %s", message));
     }
 
     /**
-     *
-     *
      * @param message
      * @param params
      */
-    public static void info(String message, Object... params)
-    {
+    public static void info(String message, Object... params) {
         LOGGER.info(String.format("[Shoreline] %s", message), params);
     }
 
@@ -105,24 +95,19 @@ public class Shoreline
      *
      * @param feature
      * @param message The log message
-     *
      * @see Logger#info(String)
      */
-    public static void info(Identifiable feature, String message)
-    {
+    public static void info(Identifiable feature, String message) {
         LOGGER.info(String.format("[%s] %s", feature.getId(), message));
     }
 
     /**
-     *
-     *
      * @param feature
      * @param message
      * @param params
      */
     public static void info(Identifiable feature, String message,
-                            Object... params)
-    {
+                            Object... params) {
         LOGGER.info(String.format("[%s] %s", feature.getId(), message), params);
     }
 
@@ -131,21 +116,16 @@ public class Shoreline
      * the client {@link Logger}.
      *
      * @param message The log message
-     *
      * @see Logger#error(String)
      */
-    public static void error(String message)
-    {
+    public static void error(String message) {
         LOGGER.error(message);
     }
 
     /**
-     *
-     *
      * @param message
      */
-    public static void error(String message, Object... params)
-    {
+    public static void error(String message, Object... params) {
         LOGGER.error(message, params);
     }
 
@@ -155,24 +135,19 @@ public class Shoreline
      *
      * @param feature
      * @param message The log message
-     *
      * @see Logger#error(String)
      */
-    public static void error(Identifiable feature, String message)
-    {
+    public static void error(Identifiable feature, String message) {
         LOGGER.error(String.format("[%s] %s", feature.getId(), message));
     }
 
     /**
-     *
-     *
      * @param feature
      * @param message
      * @param params
      */
     public static void error(Identifiable feature, String message,
-                             Object... params)
-    {
+                             Object... params) {
         LOGGER.error(String.format("[%s] %s", feature.getId(), message), params);
     }
 }

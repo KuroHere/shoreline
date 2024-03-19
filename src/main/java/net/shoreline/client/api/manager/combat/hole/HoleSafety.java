@@ -1,7 +1,6 @@
 package net.shoreline.client.api.manager.combat.hole;
 
-public enum HoleSafety
-{
+public enum HoleSafety {
     RESISTANT,
     MIXED,
     UNBREAKABLE,

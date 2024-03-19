@@ -6,44 +6,36 @@ import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.StageEvent;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Cancelable
-public class RenderTooltipEvent extends StageEvent
-{
+public class RenderTooltipEvent extends StageEvent {
     private final DrawContext context;
     private final ItemStack stack;
     //
     private final int x, y;
 
-    public RenderTooltipEvent(DrawContext context, ItemStack stack, int x, int y)
-    {
+    public RenderTooltipEvent(DrawContext context, ItemStack stack, int x, int y) {
         this.context = context;
         this.stack = stack;
         this.x = x;
         this.y = y;
     }
 
-    public DrawContext getContext()
-    {
+    public DrawContext getContext() {
         return context;
     }
 
-    public ItemStack getStack()
-    {
+    public ItemStack getStack() {
         return stack;
     }
 
-    public int getX()
-    {
+    public int getX() {
         return x;
     }
 
-    public int getY()
-    {
+    public int getY() {
         return y;
     }
 }

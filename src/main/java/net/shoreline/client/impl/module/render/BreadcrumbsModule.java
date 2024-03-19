@@ -15,25 +15,21 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class BreadcrumbsModule extends ToggleModule
-{
+public class BreadcrumbsModule extends ToggleModule {
+    //
+    private final Map<Vec3d, Long> positions = new ConcurrentHashMap<>();
     Config<Boolean> infiniteConfig = new BooleanConfig("Infinite",
             "Renders breadcrumbs for all positions since toggle", true);
     Config<Float> maxTimeConfig = new NumberConfig<>("MaxPosition",
             "The maximum time for a given position", 1.0f, 2.0f, 20.0f);
-    //
-    private final Map<Vec3d, Long> positions = new ConcurrentHashMap<>();
 
     /**
      *
      */
-    public BreadcrumbsModule()
-    {
+    public BreadcrumbsModule() {
         super("Breadcrumbs", "Renders a line connecting all previous positions",
                 ModuleCategory.RENDER);
     }
@@ -42,29 +38,23 @@ public class BreadcrumbsModule extends ToggleModule
      *
      */
     @Override
-    public void onDisable()
-    {
+    public void onDisable() {
         positions.clear();
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPlayerUpdate(PlayerUpdateEvent event)
-    {
-        if (event.getStage() != EventStage.PRE)
-        {
+    public void onPlayerUpdate(PlayerUpdateEvent event) {
+        if (event.getStage() != EventStage.PRE) {
             return;
         }
         positions.put(new Vec3d(mc.player.getX(), mc.player.getBoundingBox().minY, mc.player.getZ()), System.currentTimeMillis());
-        if (!infiniteConfig.getValue())
-        {
+        if (!infiniteConfig.getValue()) {
             positions.forEach((p, t) ->
             {
-                if (System.currentTimeMillis() - t >= maxTimeConfig.getValue() * 1000)
-                {
+                if (System.currentTimeMillis() - t >= maxTimeConfig.getValue() * 1000) {
                     positions.remove(p);
                 }
             });
@@ -72,12 +62,10 @@ public class BreadcrumbsModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderWorld(RenderWorldEvent event)
-    {
+    public void onRenderWorld(RenderWorldEvent event) {
 
     }
 }

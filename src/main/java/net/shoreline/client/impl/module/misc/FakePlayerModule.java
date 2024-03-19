@@ -7,36 +7,28 @@ import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.util.world.FakePlayerEntity;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see FakePlayerEntity
+ * @since 1.0
  */
-public class FakePlayerModule extends ToggleModule
-{
+public class FakePlayerModule extends ToggleModule {
     //
     private FakePlayerEntity fakePlayer;
 
     /**
      *
      */
-    public FakePlayerModule()
-    {
+    public FakePlayerModule() {
         super("FakePlayer", "Spawns an indestructible client-side player",
                 ModuleCategory.MISCELLANEOUS);
     }
 
     /**
      *
-     *
      */
     @Override
-    public void onEnable()
-    {
-        if (mc.player != null && mc.world != null)
-        {
+    public void onEnable() {
+        if (mc.player != null && mc.world != null) {
             fakePlayer = new FakePlayerEntity(mc.player, "FakePlayer");
             fakePlayer.spawnPlayer();
         }
@@ -44,26 +36,20 @@ public class FakePlayerModule extends ToggleModule
 
     /**
      *
-     *
      */
     @Override
-    public void onDisable()
-    {
-        if (fakePlayer != null)
-        {
+    public void onDisable() {
+        if (fakePlayer != null) {
             fakePlayer.despawnPlayer();
             fakePlayer = null;
         }
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onDisconnect(DisconnectEvent event)
-    {
+    public void onDisconnect(DisconnectEvent event) {
         fakePlayer = null;
         disable();
     }

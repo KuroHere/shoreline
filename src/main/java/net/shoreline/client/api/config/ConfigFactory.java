@@ -5,25 +5,18 @@ import net.shoreline.client.Shoreline;
 import java.lang.reflect.Field;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see ConfigContainer
+ * @since 1.0
  */
-public class ConfigFactory
-{
+public class ConfigFactory {
     // The object to grab from
     protected final Object configObj;
 
     /**
-     *
-     *
      * @param configObj
      */
-    public ConfigFactory(Object configObj)
-    {
+    public ConfigFactory(Object configObj) {
         this.configObj = configObj;
     }
 
@@ -34,19 +27,16 @@ public class ConfigFactory
      * @param f The config field
      * @return The created config
      * @throws RuntimeException if the field is not a Config type or reflect
-     * could not access the field
+     *                          could not access the field
      */
-    public Config<?> build(Field f)
-    {
+    public Config<?> build(Field f) {
         f.setAccessible(true);
         // attempt to extract object from field
-        try
-        {
+        try {
             return (Config<?>) f.get(configObj);
         }
         // field getter error
-        catch (IllegalArgumentException | IllegalAccessException e)
-        {
+        catch (IllegalArgumentException | IllegalAccessException e) {
             Shoreline.error("Failed to build config from field {}!", f.getName());
             e.printStackTrace();
         }

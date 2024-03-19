@@ -1,38 +1,29 @@
 package net.shoreline.client.impl.event.network;
 
+import net.minecraft.network.packet.Packet;
 import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
 import net.shoreline.client.init.Managers;
-import net.minecraft.network.packet.Packet;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class PacketEvent extends Event
-{
+public class PacketEvent extends Event {
     //
     private final Packet<?> packet;
 
     /**
-     *
-     *
      * @param packet
      */
-    public PacketEvent(Packet<?> packet)
-    {
+    public PacketEvent(Packet<?> packet) {
         this.packet = packet;
     }
 
     /**
-     *
-     *
      * @return
      */
-    public Packet<?> getPacket()
-    {
+    public Packet<?> getPacket() {
         return packet;
     }
 
@@ -40,15 +31,11 @@ public class PacketEvent extends Event
      *
      */
     @Cancelable
-    public static class Inbound extends PacketEvent
-    {
+    public static class Inbound extends PacketEvent {
         /**
-         *
-         *
          * @param packet
          */
-        public Inbound(Packet<?> packet)
-        {
+        public Inbound(Packet<?> packet) {
             super(packet);
         }
     }
@@ -57,28 +44,22 @@ public class PacketEvent extends Event
      *
      */
     @Cancelable
-    public static class Outbound extends PacketEvent
-    {
+    public static class Outbound extends PacketEvent {
         //
         private final boolean cached;
 
         /**
-         *
-         *
          * @param packet
          */
-        public Outbound(Packet<?> packet)
-        {
+        public Outbound(Packet<?> packet) {
             super(packet);
             this.cached = Managers.NETWORK.isCached(packet);
         }
 
         /**
-         *
          * @return
          */
-        public boolean isClientPacket()
-        {
+        public boolean isClientPacket() {
             return cached;
         }
     }

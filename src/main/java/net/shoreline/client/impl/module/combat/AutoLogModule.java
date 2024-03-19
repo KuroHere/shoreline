@@ -1,5 +1,8 @@
 package net.shoreline.client.impl.module.combat;
 
+import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.item.Items;
+import net.minecraft.text.Text;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -9,20 +12,13 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.init.Managers;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.shoreline.client.util.Globals;
 import net.shoreline.client.util.world.FakePlayerEntity;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class AutoLogModule extends ToggleModule
-{
+public class AutoLogModule extends ToggleModule {
     //
     Config<Float> healthConfig = new NumberConfig<>("Health", "Disconnects" +
             " when player reaches this health", 0.1f, 5.0f, 19.0f);
@@ -40,29 +36,23 @@ public class AutoLogModule extends ToggleModule
     /**
      *
      */
-    public AutoLogModule()
-    {
+    public AutoLogModule() {
         super("AutoLog", "Automatically disconnects from server" +
                 " during combat", ModuleCategory.COMBAT);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() != EventStage.PRE)
-        {
+    public void onTick(TickEvent event) {
+        if (event.getStage() != EventStage.PRE) {
             return;
         }
-        if (onRenderConfig.getValue())
-        {
+        if (onRenderConfig.getValue()) {
             AbstractClientPlayerEntity player = mc.world.getPlayers().stream()
                     .filter(p -> checkEnemy(p)).findFirst().orElse(null);
-            if (player != null)
-            {
+            if (player != null) {
                 playerDisconnect("[AutoLog] %s came into render distance.", player.getName().getString());
                 return;
             }
@@ -70,34 +60,26 @@ public class AutoLogModule extends ToggleModule
         float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
         int totems = Managers.INVENTORY.count(Items.TOTEM_OF_UNDYING);
         boolean b2 = totems <= totemsConfig.getValue();
-        if (health <= healthConfig.getValue())
-        {
-            if (!healthTotemConfig.getValue())
-            {
+        if (health <= healthConfig.getValue()) {
+            if (!healthTotemConfig.getValue()) {
                 playerDisconnect("[AutoLog] logged out with %d hearts remaining.", (int) health);
                 return;
-            }
-            else if (b2)
-            {
+            } else if (b2) {
                 playerDisconnect("[AutoLog] logged out with %d totems and %d hearts remaining.", totems, (int) health);
                 return;
             }
         }
-        if (b2 && noTotemConfig.getValue())
-        {
+        if (b2 && noTotemConfig.getValue()) {
             playerDisconnect("[AutoLog] logged out with %d totems remaining.", totems);
         }
     }
 
     /**
-     *
      * @param disconnectReason
      * @param args
      */
-    private void playerDisconnect(String disconnectReason, Object... args)
-    {
-        if (mc.getNetworkHandler() == null)
-        {
+    private void playerDisconnect(String disconnectReason, Object... args) {
+        if (mc.getNetworkHandler() == null) {
             mc.world.disconnect();
             return;
         }
@@ -107,12 +89,10 @@ public class AutoLogModule extends ToggleModule
     }
 
     /**
-     *
      * @param player
      * @return
      */
-    private boolean checkEnemy(AbstractClientPlayerEntity player)
-    {
+    private boolean checkEnemy(AbstractClientPlayerEntity player) {
         return !Managers.SOCIAL.isFriend(player.getUuid()) && !(player instanceof FakePlayerEntity);
     }
 }

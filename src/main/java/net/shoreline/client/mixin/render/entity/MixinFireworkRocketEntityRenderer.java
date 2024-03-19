@@ -1,27 +1,23 @@
 package net.shoreline.client.mixin.render.entity;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.render.entity.RenderFireworkRocketEvent;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.FireworkRocketEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.render.entity.RenderFireworkRocketEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Mixin(FireworkRocketEntityRenderer.class)
-public class MixinFireworkRocketEntityRenderer
-{
+public class MixinFireworkRocketEntityRenderer {
     /**
-     *
      * @param fireworkRocketEntity
      * @param f
      * @param g
@@ -38,13 +34,11 @@ public class MixinFireworkRocketEntityRenderer
     private void hookRender(FireworkRocketEntity fireworkRocketEntity,
                             float f, float g, MatrixStack matrixStack,
                             VertexConsumerProvider vertexConsumerProvider,
-                            int i, CallbackInfo ci)
-    {
+                            int i, CallbackInfo ci) {
         RenderFireworkRocketEvent renderFireworkRocketEvent =
                 new RenderFireworkRocketEvent();
         Shoreline.EVENT_HANDLER.dispatch(renderFireworkRocketEvent);
-        if (renderFireworkRocketEvent.isCanceled())
-        {
+        if (renderFireworkRocketEvent.isCanceled()) {
             ci.cancel();
         }
     }

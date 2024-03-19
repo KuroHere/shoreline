@@ -12,10 +12,8 @@ import java.util.Optional;
  *
  */
 @Mixin(UpdateBeaconC2SPacket.class)
-public interface AccessorUpdateBeaconC2SPacket
-{
+public interface AccessorUpdateBeaconC2SPacket {
     /**
-     *
      * @param primaryEffectId
      */
     @Accessor("primaryEffectId")
@@ -23,7 +21,6 @@ public interface AccessorUpdateBeaconC2SPacket
     void setPrimaryEffect(Optional<StatusEffect> primaryEffectId);
 
     /**
-     *
      * @param secondaryEffectId
      */
     @Accessor("secondaryEffectId")

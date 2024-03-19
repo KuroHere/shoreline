@@ -10,17 +10,13 @@ import net.shoreline.client.Shoreline;
  * @author linus
  * @since 1.0
  */
-public class ConcurrentModule extends Module
-{
+public class ConcurrentModule extends Module {
     /**
-     *
-     *
      * @param name
      * @param desc
      * @param category
      */
-    public ConcurrentModule(String name, String desc, ModuleCategory category)
-    {
+    public ConcurrentModule(String name, String desc, ModuleCategory category) {
         super(name, desc, category);
         Shoreline.EVENT_HANDLER.subscribe(this);
     }

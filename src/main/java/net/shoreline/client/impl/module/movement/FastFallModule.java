@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.util.math.Box;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -14,17 +15,13 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
-import net.minecraft.util.math.Box;
-import net.shoreline.client.util.Globals;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class FastFallModule extends ToggleModule
-{
+public class FastFallModule extends ToggleModule {
+    private final Timer fallTimer = new CacheTimer();
     //
     Config<Float> heightConfig = new NumberConfig<>("Height", "The maximum " +
             "fall height", 1.0f, 3.0f, 10.0f);
@@ -35,7 +32,6 @@ public class FastFallModule extends ToggleModule
             () -> fallModeConfig.getValue() == FallMode.SHIFT);
     //
     private boolean prevOnGround;
-    private final Timer fallTimer = new CacheTimer();
     //
     private boolean cancelFallMovement;
     private int fallTicks;
@@ -43,8 +39,7 @@ public class FastFallModule extends ToggleModule
     /**
      *
      */
-    public FastFallModule()
-    {
+    public FastFallModule() {
         super("FastFall", "Falls down blocks faster", ModuleCategory.MOVEMENT);
     }
 
@@ -52,42 +47,33 @@ public class FastFallModule extends ToggleModule
      *
      */
     @Override
-    public void onDisable()
-    {
+    public void onDisable() {
         cancelFallMovement = false;
         fallTicks = 0;
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() == EventStage.PRE)
-        {
+    public void onTick(TickEvent event) {
+        if (event.getStage() == EventStage.PRE) {
             prevOnGround = mc.player.isOnGround();
-            if (fallModeConfig.getValue() == FallMode.STEP)
-            {
+            if (fallModeConfig.getValue() == FallMode.STEP) {
                 if (mc.player.isRiding()
                         || mc.player.isFallFlying()
                         || mc.player.isHoldingOntoLadder()
                         || mc.player.isInLava()
                         || mc.player.isTouchingWater()
                         || mc.player.input.jumping
-                        || mc.player.input.sneaking)
-                {
+                        || mc.player.input.sneaking) {
                     return;
                 }
                 if (Modules.SPEED.isEnabled() || Modules.LONG_JUMP.isEnabled()
-                        || Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled())
-                {
+                        || Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled()) {
                     return;
                 }
-                if (mc.player.isOnGround() && isNearestBlockWithinHeight(heightConfig.getValue()))
-                {
+                if (mc.player.isOnGround() && isNearestBlockWithinHeight(heightConfig.getValue())) {
                     Managers.MOVEMENT.setMotionY(-3.0);
                     // Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
                 }
@@ -96,36 +82,30 @@ public class FastFallModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      * @see TickMovementEvent
      */
     @EventListener
-    public void onTickMovement(TickMovementEvent event)
-    {
-        if (fallModeConfig.getValue() == FallMode.SHIFT)
-        {
+    public void onTickMovement(TickMovementEvent event) {
+        if (fallModeConfig.getValue() == FallMode.SHIFT) {
             if (mc.player.isRiding()
                     || mc.player.isFallFlying()
                     || mc.player.isHoldingOntoLadder()
                     || mc.player.isInLava()
                     || mc.player.isTouchingWater()
                     || mc.player.input.jumping
-                    || mc.player.input.sneaking)
-            {
+                    || mc.player.input.sneaking) {
                 return;
             }
             if (!Managers.NCP.passed(1000) || !fallTimer.passed(1000)
                     || Modules.SPEED.isEnabled()
                     || Modules.LONG_JUMP.isEnabled()
                     || Modules.FLIGHT.isEnabled()
-                    || Modules.PACKET_FLY.isEnabled())
-            {
+                    || Modules.PACKET_FLY.isEnabled()) {
                 return;
             }
             if (mc.player.getVelocity().y < 0 && prevOnGround && !mc.player.isOnGround()
-                    && isNearestBlockWithinHeight(heightConfig.getValue() + 0.01))
-            {
+                    && isNearestBlockWithinHeight(heightConfig.getValue() + 0.01)) {
                 fallTimer.reset();
                 event.cancel();
                 event.setIterations(shiftTicksConfig.getValue());
@@ -136,24 +116,19 @@ public class FastFallModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPlayerMove(PlayerMoveEvent event)
-    {
-        if (Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled())
-        {
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if (Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled()) {
             return;
         }
-        if (cancelFallMovement && fallModeConfig.getValue() == FallMode.SHIFT)
-        {
+        if (cancelFallMovement && fallModeConfig.getValue() == FallMode.SHIFT) {
             event.setX(0.0);
             event.setZ(0.0);
             Managers.MOVEMENT.setMotionXZ(0.0, 0.0);
             ++fallTicks;
-            if (fallTicks > shiftTicksConfig.getValue())
-            {
+            if (fallTicks > shiftTicksConfig.getValue()) {
                 cancelFallMovement = false;
                 fallTicks = 0;
             }
@@ -161,25 +136,19 @@ public class FastFallModule extends ToggleModule
     }
 
     /**
-     *
-     *
      * @return
      */
-    private boolean isNearestBlockWithinHeight(double height)
-    {
+    private boolean isNearestBlockWithinHeight(double height) {
         Box bb = mc.player.getBoundingBox();
-        for (double i = 0; i < height + 0.5; i += 0.01)
-        {
-            if (!mc.world.isSpaceEmpty(mc.player, bb.offset(0, -i, 0)))
-            {
+        for (double i = 0; i < height + 0.5; i += 0.01) {
+            if (!mc.world.isSpaceEmpty(mc.player, bb.offset(0, -i, 0))) {
                 return true;
             }
         }
         return false;
     }
 
-    public enum FallMode
-    {
+    public enum FallMode {
         STEP,
         SHIFT
     }

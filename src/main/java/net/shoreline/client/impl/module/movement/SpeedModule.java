@@ -8,7 +8,6 @@ import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
@@ -32,13 +31,10 @@ import net.shoreline.client.util.string.EnumFormatter;
 import net.shoreline.client.util.world.FakePlayerEntity;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class SpeedModule extends ToggleModule
-{
+public class SpeedModule extends ToggleModule {
     //
     Config<Boolean> directionalConfig = new BooleanConfig("Directional",
             "Allows player to move in all directions", true);
@@ -81,18 +77,15 @@ public class SpeedModule extends ToggleModule
     /**
      *
      */
-    public SpeedModule()
-    {
+    public SpeedModule() {
         super("Speed", "Move faster", ModuleCategory.MOVEMENT);
     }
 
     /**
-     *
      * @return
      */
     @Override
-    public String getModuleData()
-    {
+    public String getModuleData() {
         return EnumFormatter.formatEnum(speedModeConfig.getValue());
     }
 
@@ -100,74 +93,58 @@ public class SpeedModule extends ToggleModule
      *
      */
     @Override
-    public void onEnable()
-    {
+    public void onEnable() {
         prevTimer = Modules.TIMER.isEnabled();
         if (timerConfig.getValue() && !prevTimer
-                && speedModeConfig.getValue() != Speed.GRIM_COLLIDE)
-        {
+                && speedModeConfig.getValue() != Speed.GRIM_COLLIDE) {
             Modules.TIMER.enable();
         }
     }
 
     /**
      *
-     *
      */
     @Override
-    public void onDisable()
-    {
+    public void onDisable() {
         clear();
-        if (Modules.TIMER.isEnabled())
-        {
+        if (Modules.TIMER.isEnabled()) {
             Modules.TIMER.resetTimer();
-            if (!prevTimer)
-            {
+            if (!prevTimer) {
                 Modules.TIMER.disable();
             }
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onDisconnect(DisconnectEvent event)
-    {
+    public void onDisconnect(DisconnectEvent event) {
         disable();
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (event.getStage() == EventStage.PRE)
-        {
+    public void onTick(TickEvent event) {
+        if (event.getStage() == EventStage.PRE) {
             boostTicks++;
-            if (boostTicks > boostTicksConfig.getValue())
-            {
+            if (boostTicks > boostTicksConfig.getValue()) {
                 boostSpeed = 0.0;
             }
             double dx = mc.player.getX() - mc.player.prevX;
             double dz = mc.player.getZ() - mc.player.prevZ;
             distance = Math.sqrt(dx * dx + dz * dz);
-            if (speedModeConfig.getValue() == Speed.GRIM_COLLIDE && MovementUtil.isInputtingMovement())
-            {
+            if (speedModeConfig.getValue() == Speed.GRIM_COLLIDE && MovementUtil.isInputtingMovement()) {
                 int collisions = 0;
                 Box box = mc.player.getBoundingBox().expand(1.0);
-                for (Entity entity : mc.world.getEntities())
-                {
-                    if (checkIsCollidingEntity(entity) && entity.getBoundingBox().intersects(box))
-                    {
+                for (Entity entity : mc.world.getEntities()) {
+                    if (checkIsCollidingEntity(entity) && entity.getBoundingBox().intersects(box)) {
                         collisions++;
                     }
                 }
-                if (collisions > 0)
-                {
+                if (collisions > 0) {
                     Vec3d velocity = mc.player.getVelocity();
                     // double COLLISION_DISTANCE = 1.5;
                     double factor = factorConfig.getValue() ? 0.08 * collisions : 0.08;
@@ -179,25 +156,21 @@ public class SpeedModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPlayerMove(PlayerMoveEvent event)
-    {
-        if (mc.player != null && mc.world != null)
-        {
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if (mc.player != null && mc.world != null) {
             if (!MovementUtil.isInputtingMovement()
                     || Modules.FLIGHT.isEnabled()
                     || Modules.LONG_JUMP.isEnabled()
-    //              || Modules.ELYTRA_FLY.isEnabled()
+                    //              || Modules.ELYTRA_FLY.isEnabled()
                     || mc.player.isRiding()
                     || mc.player.isFallFlying()
                     || mc.player.isHoldingOntoLadder()
                     || mc.player.fallDistance > 2.0f
                     || (mc.player.isInLava() || mc.player.isTouchingWater())
-                    && !speedWaterConfig.getValue())
-            {
+                    && !speedWaterConfig.getValue()) {
                 clear();
                 Modules.TIMER.setTimer(1.0f);
                 return;
@@ -206,66 +179,50 @@ public class SpeedModule extends ToggleModule
             //
             double speedEffect = 1.0;
             double slowEffect = 1.0;
-            if (mc.player.hasStatusEffect(StatusEffects.SPEED))
-            {
+            if (mc.player.hasStatusEffect(StatusEffects.SPEED)) {
                 double amplifier = mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier();
                 speedEffect = 1 + (0.2 * (amplifier + 1));
             }
-            if (mc.player.hasStatusEffect(StatusEffects.SLOWNESS))
-            {
+            if (mc.player.hasStatusEffect(StatusEffects.SLOWNESS)) {
                 double amplifier = mc.player.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier();
                 slowEffect = 1 + (0.2 * (amplifier + 1));
             }
             final double base = 0.2873f * speedEffect / slowEffect;
             float jumpEffect = 0.0f;
-            if (mc.player.hasStatusEffect(StatusEffects.JUMP_BOOST))
-            {
+            if (mc.player.hasStatusEffect(StatusEffects.JUMP_BOOST)) {
                 jumpEffect += (mc.player.getStatusEffect(StatusEffects.JUMP_BOOST).getAmplifier() + 1) * 0.1f;
             }
             // ~29 kmh
-            if (speedModeConfig.getValue() == Speed.STRAFE)
-            {
-                if (!Managers.NCP.passed(100))
-                {
+            if (speedModeConfig.getValue() == Speed.STRAFE) {
+                if (!Managers.NCP.passed(100)) {
                     return;
                 }
-                if (timerConfig.getValue())
-                {
+                if (timerConfig.getValue()) {
                     Modules.TIMER.setTimer(1.0888f);
                 }
-                if (strafe == 1)
-                {
+                if (strafe == 1) {
                     speed = 1.35f * base - 0.01f;
-                }
-                else if (strafe == 2)
-                {
-                    if (mc.player.input.jumping || !mc.player.isOnGround())
-                    {
+                } else if (strafe == 2) {
+                    if (mc.player.input.jumping || !mc.player.isOnGround()) {
                         return;
                     }
                     float jump = (bhopStrafeConfig.getValue() ? 0.4000000059604645f : 0.3999999463558197f) + jumpEffect;
                     event.setY(jump);
                     Managers.MOVEMENT.setMotionY(jump);
                     speed *= bhopStrafeConfig.getValue() ? 1.535 : (accel ? 1.6835 : 1.395);
-                }
-                else if (strafe == 3)
-                {
+                } else if (strafe == 3) {
                     double moveSpeed = 0.66 * (distance - base);
                     speed = distance - moveSpeed;
                     accel = !accel;
-                }
-                else
-                {
+                } else {
                     if ((!mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0,
-                            mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision) && strafe > 0)
-                    {
+                            mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision) && strafe > 0) {
                         strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                     }
                     speed = distance - distance / 159.0;
                 }
                 speed = Math.max(speed, base);
-                if (strafeBoostConfig.getValue())
-                {
+                if (strafeBoostConfig.getValue()) {
                     speed += boostSpeed;
                 }
                 final Vec2f motion = handleStrafeMotion((float) speed);
@@ -274,20 +231,14 @@ public class SpeedModule extends ToggleModule
                 strafe++;
             }
             // ~26-27 kmh
-            else if (speedModeConfig.getValue() == Speed.STRAFE_STRICT)
-            {
-                if (!Managers.NCP.passed(100))
-                {
+            else if (speedModeConfig.getValue() == Speed.STRAFE_STRICT) {
+                if (!Managers.NCP.passed(100)) {
                     return;
                 }
-                if (strafe == 1)
-                {
+                if (strafe == 1) {
                     speed = 1.35f * base - 0.01f;
-                }
-                else if (strafe == 2)
-                {
-                    if (mc.player.input.jumping || !mc.player.isOnGround())
-                    {
+                } else if (strafe == 2) {
+                    if (mc.player.input.jumping || !mc.player.isOnGround()) {
                         return;
                     }
                     float jump = (strictJumpConfig.getValue() ?
@@ -295,17 +246,12 @@ public class SpeedModule extends ToggleModule
                     event.setY(jump);
                     Managers.MOVEMENT.setMotionY(jump);
                     speed *= 2.149;
-                }
-                else if (strafe == 3)
-                {
+                } else if (strafe == 3) {
                     double moveSpeed = 0.66 * (distance - base);
                     speed = distance - moveSpeed;
-                }
-                else
-                {
+                } else {
                     if ((!mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0,
-                            mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision) && strafe > 0)
-                    {
+                            mc.player.getVelocity().getY(), 0)) || mc.player.verticalCollision) && strafe > 0) {
                         strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                     }
                     speed = distance - distance / 159.0;
@@ -313,85 +259,60 @@ public class SpeedModule extends ToggleModule
                 strictTicks++;
                 speed = Math.max(speed, base);
                 //
-                if (timerConfig.getValue())
-                {
+                if (timerConfig.getValue()) {
                     Modules.TIMER.setTimer(1.0888f);
                 }
                 double baseMax = 0.465 * speedEffect / slowEffect;
                 double baseMin = 0.44 * speedEffect / slowEffect;
                 speed = Math.min(speed, strictTicks > 25 ? baseMax : baseMin);
-                if (strafeBoostConfig.getValue())
-                {
+                if (strafeBoostConfig.getValue()) {
                     speed += boostSpeed;
                 }
-                if (strictTicks > 50)
-                {
+                if (strictTicks > 50) {
                     strictTicks = 0;
                 }
                 final Vec2f motion = handleStrafeMotion((float) speed);
                 event.setX(motion.x);
                 event.setZ(motion.y);
                 strafe++;
-            }
-            else if (speedModeConfig.getValue() == Speed.LOW_HOP)
-            {
-                if (!Managers.NCP.passed(100))
-                {
+            } else if (speedModeConfig.getValue() == Speed.LOW_HOP) {
+                if (!Managers.NCP.passed(100)) {
                     return;
                 }
-                if (timerConfig.getValue())
-                {
+                if (timerConfig.getValue()) {
                     Modules.TIMER.setTimer(1.0888f);
                 }
-                if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.4, 3))
-                {
+                if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.4, 3)) {
                     Managers.MOVEMENT.setMotionY(0.31 + jumpEffect);
                     event.setY(0.31 + jumpEffect);
-                }
-                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.71, 3))
-                {
+                } else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.71, 3)) {
                     Managers.MOVEMENT.setMotionY(0.04 + jumpEffect);
                     event.setY(0.04 + jumpEffect);
-                }
-                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.75, 3))
-                {
+                } else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.75, 3)) {
                     Managers.MOVEMENT.setMotionY(-0.2 - jumpEffect);
                     event.setY(-0.2 - jumpEffect);
-                }
-                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.55, 3))
-                {
+                } else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.55, 3)) {
                     Managers.MOVEMENT.setMotionY(-0.14 + jumpEffect);
                     event.setY(-0.14 + jumpEffect);
-                }
-                else
-                {
-                    if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.41, 3))
-                    {
+                } else {
+                    if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.41, 3)) {
                         Managers.MOVEMENT.setMotionY(-0.2 + jumpEffect);
                         event.setY(-0.2 + jumpEffect);
                     }
                 }
-                if (strafe == 1)
-                {
+                if (strafe == 1) {
                     speed = 1.35f * base - 0.01f;
-                }
-                else if (strafe == 2)
-                {
+                } else if (strafe == 2) {
                     double jump = (isBoxColliding() ? 0.2 : 0.3999) + jumpEffect;
                     Managers.MOVEMENT.setMotionY(jump);
                     event.setY(jump);
                     speed *= accel ? 1.5685 : 1.3445;
-                }
-                else if (strafe == 3)
-                {
+                } else if (strafe == 3) {
                     double moveSpeed = 0.66 * (distance - base);
                     speed = distance - moveSpeed;
                     accel = !accel;
-                }
-                else
-                {
-                    if (mc.player.isOnGround() && strafe > 0)
-                    {
+                } else {
+                    if (mc.player.isOnGround() && strafe > 0) {
                         strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                     }
                     speed = distance - distance / 159.0;
@@ -401,125 +322,87 @@ public class SpeedModule extends ToggleModule
                 event.setX(motion.x);
                 event.setZ(motion.y);
                 strafe++;
-            }
-            else if (speedModeConfig.getValue() == Speed.GAY_HOP)
-            {
-                if (!Managers.NCP.passed(100))
-                {
+            } else if (speedModeConfig.getValue() == Speed.GAY_HOP) {
+                if (!Managers.NCP.passed(100)) {
                     strafe = 1;
                     return;
                 }
                 if (strafe == 1 && mc.player.verticalCollision
-                        && MovementUtil.isInputtingMovement())
-                {
+                        && MovementUtil.isInputtingMovement()) {
                     speed = (strictJumpConfig.getValue() ? 1.38f : 1.25f) * base - 0.01f;
-                }
-                else if (strafe == 2 && mc.player.verticalCollision
-                        && MovementUtil.isInputtingMovement())
-                {
+                } else if (strafe == 2 && mc.player.verticalCollision
+                        && MovementUtil.isInputtingMovement()) {
                     float jump = (isBoxColliding() ? 0.2f : 0.4f) + jumpEffect;
                     event.setY(jump);
                     Managers.MOVEMENT.setMotionY(jump);
                     speed *= 2.149;
-                }
-                else if (strafe == 3)
-                {
+                } else if (strafe == 3) {
                     double moveSpeed = 0.66 * (distance - base);
                     speed = distance - moveSpeed;
-                }
-                else
-                {
-                    if (mc.player.isOnGround() && strafe > 0)
-                    {
-                        if (1.35 * base - 0.01 > speed)
-                        {
+                } else {
+                    if (mc.player.isOnGround() && strafe > 0) {
+                        if (1.35 * base - 0.01 > speed) {
                             strafe = 0;
-                        }
-                        else
-                        {
+                        } else {
                             strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                         }
                     }
                     speed = distance - distance / 159.0;
                 }
                 speed = Math.max(speed, base);
-                if (strafe > 0)
-                {
+                if (strafe > 0) {
                     Vec2f motion = handleStrafeMotion((float) speed);
                     event.setX(motion.x);
                     event.setZ(motion.y);
                 }
                 strafe++;
-            }
-            else if (speedModeConfig.getValue() == Speed.V_HOP)
-            {
-                if (!Managers.NCP.passed(100))
-                {
+            } else if (speedModeConfig.getValue() == Speed.V_HOP) {
+                if (!Managers.NCP.passed(100)) {
                     strafe = 1;
                     return;
                 }
-                if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.4, 3))
-                {
+                if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.4, 3)) {
                     Managers.MOVEMENT.setMotionY(0.31 + jumpEffect);
                     event.setY(0.31 + jumpEffect);
-                }
-                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.71, 3))
-                {
+                } else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.71, 3)) {
                     Managers.MOVEMENT.setMotionY(0.04 + jumpEffect);
                     event.setY(0.04 + jumpEffect);
-                }
-                else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.75, 3))
-                {
+                } else if (MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.75, 3)) {
                     Managers.MOVEMENT.setMotionY(-0.2 - jumpEffect);
                     event.setY(-0.2 - jumpEffect);
                 }
                 if (!mc.world.isSpaceEmpty(null, mc.player.getBoundingBox().offset(0.0, -0.56, 0.0))
-                        && MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.55, 3))
-                {
+                        && MathUtil.round(mc.player.getY() - (double) (int) mc.player.getY(), 3) == MathUtil.round(0.55, 3)) {
                     Managers.MOVEMENT.setMotionY(-0.14 + jumpEffect);
                     event.setY(-0.14 + jumpEffect);
                 }
                 if (strafe != 1 || !mc.player.verticalCollision
-                        || mc.player.forwardSpeed == 0.0f && mc.player.sidewaysSpeed == 0.0f)
-                {
+                        || mc.player.forwardSpeed == 0.0f && mc.player.sidewaysSpeed == 0.0f) {
                     if (strafe != 2 || !mc.player.verticalCollision
-                            || mc.player.forwardSpeed == 0.0f && mc.player.sidewaysSpeed == 0.0f)
-                    {
-                        if (strafe == 3)
-                        {
+                            || mc.player.forwardSpeed == 0.0f && mc.player.sidewaysSpeed == 0.0f) {
+                        if (strafe == 3) {
                             double moveSpeed = 0.66 * (distance - base);
                             speed = distance - moveSpeed;
-                        }
-                        else
-                        {
-                            if (mc.player.isOnGround() && strafe > 0)
-                            {
-                                if (1.35 * base - 0.01 > speed)
-                                {
+                        } else {
+                            if (mc.player.isOnGround() && strafe > 0) {
+                                if (1.35 * base - 0.01 > speed) {
                                     strafe = 0;
-                                }
-                                else
-                                {
+                                } else {
                                     strafe = MovementUtil.isInputtingMovement() ? 1 : 0;
                                 }
                             }
                             speed = distance - distance / 159.0;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         double jump = (isBoxColliding() ? 0.2 : 0.4) + jumpEffect;
                         Managers.MOVEMENT.setMotionY(jump);
                         event.setY(jump);
                         speed *= 2.149;
                     }
-                }
-                else
-                {
+                } else {
                     speed = 2.0 * base - 0.01;
                 }
-                if (strafe > 8)
-                {
+                if (strafe > 8) {
                     speed = base;
                 }
                 speed = Math.max(speed, base);
@@ -527,38 +410,27 @@ public class SpeedModule extends ToggleModule
                 event.setX(motion.x);
                 event.setZ(motion.y);
                 strafe++;
-            }
-            else if (speedModeConfig.getValue() == Speed.B_HOP)
-            {
-                if (!Managers.NCP.passed(100))
-                {
+            } else if (speedModeConfig.getValue() == Speed.B_HOP) {
+                if (!Managers.NCP.passed(100)) {
                     strafe = 4;
                     return;
                 }
-                if (MathUtil.round(mc.player.getY() - ((int) mc.player.getY()), 3) == MathUtil.round(0.138, 3))
-                {
+                if (MathUtil.round(mc.player.getY() - ((int) mc.player.getY()), 3) == MathUtil.round(0.138, 3)) {
                     Managers.MOVEMENT.setMotionY(mc.player.getVelocity().y - (0.08 + jumpEffect));
                     event.setY(event.getY() - (0.0931 + jumpEffect));
                     Managers.POSITION.setPositionY(mc.player.getY() - (0.0931 + jumpEffect));
                 }
-                if (strafe != 2 || mc.player.forwardSpeed == 0.0f && mc.player.sidewaysSpeed == 0.0f)
-                {
-                    if (strafe == 3)
-                    {
+                if (strafe != 2 || mc.player.forwardSpeed == 0.0f && mc.player.sidewaysSpeed == 0.0f) {
+                    if (strafe == 3) {
                         double moveSpeed = 0.66 * (distance - base);
                         speed = distance - moveSpeed;
-                    }
-                    else
-                    {
-                        if (mc.player.isOnGround())
-                        {
+                    } else {
+                        if (mc.player.isOnGround()) {
                             strafe = 1;
                         }
                         speed = distance - distance / 159.0;
                     }
-                }
-                else
-                {
+                } else {
                     double jump = (isBoxColliding() ? 0.2 : 0.4) + jumpEffect;
                     Managers.MOVEMENT.setMotionY(jump);
                     event.setY(jump);
@@ -569,9 +441,7 @@ public class SpeedModule extends ToggleModule
                 event.setX(motion.x);
                 event.setZ(motion.y);
                 strafe++;
-            }
-            else if (speedModeConfig.getValue() == Speed.VANILLA)
-            {
+            } else if (speedModeConfig.getValue() == Speed.VANILLA) {
                 Vec2f motion = handleVanillaMotion(vanillaStrafeConfig.getValue() ? (float) base :
                         speedConfig.getValue() / 10.0f);
                 event.setX(motion.x);
@@ -581,37 +451,26 @@ public class SpeedModule extends ToggleModule
     }
 
     /**
-     *
      * @param speed
      * @return
      */
-    public Vec2f handleStrafeMotion(final float speed)
-    {
+    public Vec2f handleStrafeMotion(final float speed) {
         float forward = mc.player.input.movementForward;
         float strafe = mc.player.input.movementSideways;
         float yaw = mc.player.prevYaw + (mc.player.getYaw() - mc.player.prevYaw) * mc.getTickDelta();
-        if (forward == 0.0f && strafe == 0.0f)
-        {
+        if (forward == 0.0f && strafe == 0.0f) {
             return Vec2f.ZERO;
-        }
-        else if (forward != 0.0f)
-        {
-            if (strafe >= 1.0f)
-            {
+        } else if (forward != 0.0f) {
+            if (strafe >= 1.0f) {
                 yaw += forward > 0.0f ? -45 : 45;
                 strafe = 0.0f;
-            }
-            else if (strafe <= -1.0f)
-            {
+            } else if (strafe <= -1.0f) {
                 yaw += forward > 0.0f ? 45 : -45;
                 strafe = 0.0f;
             }
-            if (forward > 0.0f)
-            {
+            if (forward > 0.0f) {
                 forward = 1.0f;
-            }
-            else if (forward < 0.0f)
-            {
+            } else if (forward < 0.0f) {
                 forward = -1.0f;
             }
         }
@@ -621,16 +480,12 @@ public class SpeedModule extends ToggleModule
                 (forward * speed * rx) - (strafe * speed * rz));
     }
 
-    public Vec2f handleVanillaMotion(final float speed)
-    {
+    public Vec2f handleVanillaMotion(final float speed) {
         float forward = mc.player.input.movementForward;
         float strafe = mc.player.input.movementSideways;
-        if (forward == 0.0f && strafe == 0.0f)
-        {
+        if (forward == 0.0f && strafe == 0.0f) {
             return Vec2f.ZERO;
-        }
-        else if (forward != 0.0f && strafe != 0.0f)
-        {
+        } else if (forward != 0.0f && strafe != 0.0f) {
             forward *= (float) Math.sin(0.7853981633974483);
             strafe *= (float) Math.cos(0.7853981633974483);
         }
@@ -639,98 +494,75 @@ public class SpeedModule extends ToggleModule
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onPacketInbound(PacketEvent.Inbound event)
-    {
-        if (mc.player == null || mc.world == null)
-        {
+    public void onPacketInbound(PacketEvent.Inbound event) {
+        if (mc.player == null || mc.world == null) {
             return;
         }
-        if (event.getPacket() instanceof ExplosionS2CPacket packet)
-        {
+        if (event.getPacket() instanceof ExplosionS2CPacket packet) {
             double x = packet.getPlayerVelocityX();
             double z = packet.getPlayerVelocityZ();
             boostSpeed = Math.sqrt(x * x + z * z);
             boostTicks = 0;
-        }
-        else if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet
-                && packet.getId() == mc.player.getId())
-        {
+        } else if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet
+                && packet.getId() == mc.player.getId()) {
             double x = packet.getVelocityX();
             double z = packet.getVelocityZ();
             boostSpeed = Math.sqrt(x * x + z * z);
             boostTicks = 0;
-        }
-        else if (event.getPacket() instanceof PlayerPositionLookS2CPacket)
-        {
+        } else if (event.getPacket() instanceof PlayerPositionLookS2CPacket) {
             clear();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onConfigUpdate(ConfigUpdateEvent event)
-    {
+    public void onConfigUpdate(ConfigUpdateEvent event) {
         if (event.getConfig() == timerConfig && event.getStage() == EventStage.POST
-                && speedModeConfig.getValue() != Speed.GRIM_COLLIDE)
-        {
-            if (timerConfig.getValue())
-            {
+                && speedModeConfig.getValue() != Speed.GRIM_COLLIDE) {
+            if (timerConfig.getValue()) {
                 prevTimer = Modules.TIMER.isEnabled();
-                if (!prevTimer)
-                {
+                if (!prevTimer) {
                     Modules.TIMER.enable();
                     // Modules.TIMER.setTimer(1.0888f);
                 }
-            }
-            else if (Modules.TIMER.isEnabled())
-            {
+            } else if (Modules.TIMER.isEnabled()) {
                 Modules.TIMER.resetTimer();
-                if (!prevTimer)
-                {
+                if (!prevTimer) {
                     Modules.TIMER.disable();
                 }
             }
         }
     }
 
-    public boolean isBoxColliding()
-    {
+    public boolean isBoxColliding() {
         return !mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0.0, 0.21, 0.0));
     }
 
-    public boolean checkIsCollidingEntity(Entity entity)
-    {
+    public boolean checkIsCollidingEntity(Entity entity) {
         return entity != null && entity != mc.player && entity instanceof LivingEntity
                 && !(entity instanceof FakePlayerEntity) && !(entity instanceof ArmorStandEntity);
     }
 
-    public void setPrevTimer()
-    {
+    public void setPrevTimer() {
         prevTimer = !prevTimer;
     }
 
     /**
-     *
      * @return
      */
-    public boolean isUsingTimer()
-    {
+    public boolean isUsingTimer() {
         return isEnabled() && timerConfig.getValue();
     }
 
     /**
      *
      */
-    public void clear()
-    {
+    public void clear() {
         strafe = 4;
         strictTicks = 0;
         speed = 0.0f;
@@ -738,8 +570,7 @@ public class SpeedModule extends ToggleModule
         accel = false;
     }
 
-    private enum Speed
-    {
+    private enum Speed {
         STRAFE,
         STRAFE_STRICT,
         LOW_HOP,

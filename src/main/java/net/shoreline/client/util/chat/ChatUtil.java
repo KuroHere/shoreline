@@ -1,18 +1,15 @@
 package net.shoreline.client.util.chat;
 
-import net.shoreline.client.util.Globals;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.shoreline.client.util.Globals;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class ChatUtil implements Globals
-{
+public class ChatUtil implements Globals {
     //
     private static final String PREFIX = "§7[§fShoreline§7] §f";
 
@@ -22,37 +19,30 @@ public class ChatUtil implements Globals
      *
      * @param message The message
      */
-    public static void clientSendMessage(String message)
-    {
+    public static void clientSendMessage(String message) {
         mc.inGameHud.getChatHud().addMessage(Text.of(PREFIX + message), null, null);
     }
 
     /**
-     *
      * @param message
      * @param params
      */
-    public static void clientSendMessage(String message, Object... params)
-    {
+    public static void clientSendMessage(String message, Object... params) {
         clientSendMessage(String.format(message, params));
     }
 
     /**
-     *
      * @param message
      */
-    public static void clientSendMessageRaw(String message)
-    {
+    public static void clientSendMessageRaw(String message) {
         mc.inGameHud.getChatHud().addMessage(Text.of(message), null, null);
     }
 
     /**
-     *
      * @param message
      * @param params
      */
-    public static void clientSendMessageRaw(String message, Object... params)
-    {
+    public static void clientSendMessageRaw(String message, Object... params) {
         clientSendMessageRaw(String.format(message, params));
     }
 
@@ -62,58 +52,45 @@ public class ChatUtil implements Globals
      *
      * @param message The message
      */
-    public static void serverSendMessage(String message)
-    {
-        if (mc.player != null)
-        {
+    public static void serverSendMessage(String message) {
+        if (mc.player != null) {
             mc.player.networkHandler.sendChatMessage(PREFIX + message);
         }
     }
 
     /**
-     *
-     *
      * @param player
      * @param message
      */
-    public static void serverSendMessage(PlayerEntity player, String message)
-    {
-        if (mc.player != null)
-        {
+    public static void serverSendMessage(PlayerEntity player, String message) {
+        if (mc.player != null) {
             String reply = "/w " + player.getName().getString() + " ";
             mc.player.networkHandler.sendChatMessage(reply + PREFIX + message);
         }
     }
 
     /**
-     *
-     *
      * @param player
      * @param message
      * @param params
      */
     public static void serverSendMessage(PlayerEntity player, String message,
-                                         Object... params)
-    {
+                                         Object... params) {
         serverSendMessage(player, String.format(message, params));
     }
 
     /**
-     *
      * @param message
      */
-    public static void error(String message)
-    {
+    public static void error(String message) {
         clientSendMessage(Formatting.RED + message);
     }
 
     /**
-     *
      * @param message
      * @param params
      */
-    public static void error(String message, Object... params)
-    {
+    public static void error(String message, Object... params) {
         clientSendMessage(Formatting.RED + message, params);
     }
 }

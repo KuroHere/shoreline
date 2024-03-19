@@ -1,40 +1,32 @@
 package net.shoreline.client.impl.gui.click.impl.config.setting;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.gui.click.ClickGuiScreen;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 import net.shoreline.client.init.Modules;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- *
- *
+ * @param <T>
  * @author linus
  * @since 1.0
- *
- * @param <T>
  */
-public class SliderButton<T extends Number> extends ConfigButton<T>
-{
+public class SliderButton<T extends Number> extends ConfigButton<T> {
     // Slider rounding scale
     private final int scale;
 
     /**
-     *
-     *
      * @param frame
      * @param config
      */
-    public SliderButton(CategoryFrame frame, Config<T> config, float x, float y)
-    {
+    public SliderButton(CategoryFrame frame, Config<T> config, float x, float y) {
         super(frame, config, x, y);
         //
         final String sval = String.valueOf(config.getValue());
@@ -42,8 +34,6 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
     }
 
     /**
-     *
-     *
      * @param context
      * @param ix
      * @param iy
@@ -53,33 +43,26 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
      */
     @Override
     public void render(DrawContext context, float ix, float iy, float mouseX,
-                       float mouseY, float delta)
-    {
+                       float mouseY, float delta) {
         x = ix;
         y = iy;
         //
         Number min = ((NumberConfig<T>) config).getMin();
         Number max = ((NumberConfig<T>) config).getMax();
-        if (isWithin(mouseX, mouseY) && ClickGuiScreen.MOUSE_LEFT_HOLD)
-        {
+        if (isWithin(mouseX, mouseY) && ClickGuiScreen.MOUSE_LEFT_HOLD) {
             float fillv = (mouseX - ix) / width;
-            if (config.getValue() instanceof Integer)
-            {
+            if (config.getValue() instanceof Integer) {
                 float val = min.floatValue() + fillv * (max.intValue() - min.intValue());
                 int bval = (int) MathHelper.clamp(val, min.intValue(), max.intValue());
                 ((NumberConfig<Integer>) config).setValue(bval);
-            }
-            else if (config.getValue() instanceof Float)
-            {
+            } else if (config.getValue() instanceof Float) {
                 float val = min.floatValue() + fillv * (max.floatValue() - min.floatValue());
                 float bval = MathHelper.clamp(val, min.floatValue(),
                         max.floatValue());
                 BigDecimal bigDecimal = new BigDecimal(bval);
                 bval = bigDecimal.setScale(scale, RoundingMode.HALF_UP).floatValue();
                 ((NumberConfig<Float>) config).setValue(bval);
-            }
-            else if (config.getValue() instanceof Double)
-            {
+            } else if (config.getValue() instanceof Double) {
                 double val = min.doubleValue() + fillv * (max.doubleValue() - min.doubleValue());
                 double bval = MathHelper.clamp(val, min.doubleValue(),
                         max.doubleValue());
@@ -90,12 +73,9 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
             float lower = ix + 1.0f;
             float upper = ix + width - 1.0f;
             // out of bounds
-            if (mouseX < lower)
-            {
+            if (mouseX < lower) {
                 config.setValue((T) min);
-            }
-            else if (mouseX > upper)
-            {
+            } else if (mouseX > upper) {
                 config.setValue((T) max);
             }
         }
@@ -104,7 +84,7 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
                 / (max.floatValue() - min.floatValue());
         fill(context, ix, iy, (fill * width), height, Modules.COLORS.getRGB());
         RenderManager.renderText(context, config.getName() + Formatting.GRAY
-                        + " " + config.getValue(), ix + 2.0f, iy + 4.0f, -1);
+                + " " + config.getValue(), ix + 2.0f, iy + 4.0f, -1);
     }
 
     /**
@@ -113,8 +93,7 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
      * @param button
      */
     @Override
-    public void mouseClicked(double mouseX, double mouseY, int button)
-    {
+    public void mouseClicked(double mouseX, double mouseY, int button) {
 
     }
 
@@ -124,8 +103,7 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
      * @param button
      */
     @Override
-    public void mouseReleased(double mouseX, double mouseY, int button)
-    {
+    public void mouseReleased(double mouseX, double mouseY, int button) {
 
     }
 
@@ -135,8 +113,7 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
      * @param modifiers
      */
     @Override
-    public void keyPressed(int keyCode, int scanCode, int modifiers)
-    {
+    public void keyPressed(int keyCode, int scanCode, int modifiers) {
 
     }
 }

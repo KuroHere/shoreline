@@ -1,20 +1,16 @@
 package net.shoreline.client.mixin.accessor;
 
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 /**
- *
- *
  * @author Gavin
  * @since 1.0
  */
 @Mixin(EntityVelocityUpdateS2CPacket.class)
-public interface AccessorEntityVelocityUpdateS2CPacket
-{
+public interface AccessorEntityVelocityUpdateS2CPacket {
     @Accessor("velocityX")
     @Mutable
     void setVelocityX(int velocityX);

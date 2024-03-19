@@ -1,27 +1,23 @@
 package net.shoreline.client.mixin.render.entity;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.render.entity.RenderItemEvent;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.ItemEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.ItemEntity;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.render.entity.RenderItemEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Mixin(ItemEntityRenderer.class)
-public class MixinItemEntityRenderer
-{
+public class MixinItemEntityRenderer {
     /**
-     *
      * @param itemEntity
      * @param f
      * @param g
@@ -37,12 +33,10 @@ public class MixinItemEntityRenderer
     private void hookRender(ItemEntity itemEntity, float f, float g,
                             MatrixStack matrixStack,
                             VertexConsumerProvider vertexConsumerProvider,
-                            int i, CallbackInfo ci)
-    {
+                            int i, CallbackInfo ci) {
         RenderItemEvent renderItemEvent = new RenderItemEvent(itemEntity);
         Shoreline.EVENT_HANDLER.dispatch(renderItemEvent);
-        if (renderItemEvent.isCanceled())
-        {
+        if (renderItemEvent.isCanceled()) {
             ci.cancel();
         }
     }

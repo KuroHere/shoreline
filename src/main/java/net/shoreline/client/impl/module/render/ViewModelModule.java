@@ -7,14 +7,10 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
- *
  */
-public class ViewModelModule extends ToggleModule
-{
+public class ViewModelModule extends ToggleModule {
     //
     Config<Integer> fovConfig = new NumberConfig<>("FOV", "Field of view", 0,
             180, 180);
@@ -42,14 +38,12 @@ public class ViewModelModule extends ToggleModule
     /**
      *
      */
-    public ViewModelModule()
-    {
+    public ViewModelModule() {
         super("ViewModel", "Renders for the first-person viewmodel",
                 ModuleCategory.RENDER);
     }
 
-    public enum AspectRatio
-    {
+    public enum AspectRatio {
         DEFAULT
     }
 }

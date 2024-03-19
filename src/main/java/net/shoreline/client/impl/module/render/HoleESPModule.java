@@ -1,5 +1,7 @@
 package net.shoreline.client.impl.module.render;
 
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.ColorConfig;
@@ -13,19 +15,14 @@ import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class HoleESPModule extends ToggleModule
-{
+public class HoleESPModule extends ToggleModule {
     //
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to " +
             "display holes", 3.0f, 5.0f, 25.0f);
@@ -52,34 +49,27 @@ public class HoleESPModule extends ToggleModule
     /**
      *
      */
-    public HoleESPModule()
-    {
+    public HoleESPModule() {
         super("HoleESP", "Displays nearby blast resistant holes",
                 ModuleCategory.RENDER);
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderWorld(RenderWorldEvent event)
-    {
-        if (mc.player == null)
-        {
+    public void onRenderWorld(RenderWorldEvent event) {
+        if (mc.player == null) {
             return;
         }
-        for (Hole hole : Managers.HOLE.getHoles())
-        {
+        for (Hole hole : Managers.HOLE.getHoles()) {
             if ((hole.isDoubleX() || hole.isDoubleZ()) && !doubleConfig.getValue()
                     || hole.isQuad() && !quadConfig.getValue()
-                    || hole.getSafety() == HoleSafety.VOID && !voidConfig.getValue())
-            {
+                    || hole.getSafety() == HoleSafety.VOID && !voidConfig.getValue()) {
                 continue;
             }
             double dist = hole.squaredDistanceTo(mc.player);
-            if (dist > ((NumberConfig) rangeConfig).getValueSq())
-            {
+            if (dist > ((NumberConfig) rangeConfig).getValueSq()) {
                 continue;
             }
             double x = hole.getX();
@@ -88,37 +78,26 @@ public class HoleESPModule extends ToggleModule
             Color color = getHoleColor(hole);
             //
             Box render = null;
-            if (hole.getSafety() == HoleSafety.VOID)
-            {
+            if (hole.getSafety() == HoleSafety.VOID) {
                 render = new Box(x, y, z, x + 1.0, y + 1.0, z + 1.0);
-            }
-            else if (hole.isDoubleX())
-            {
-               render = new Box(x, y, z, x + 2.0,
-                       y + heightConfig.getValue(), z + 1.0);
-            }
-            else if (hole.isDoubleZ())
-            {
+            } else if (hole.isDoubleX()) {
+                render = new Box(x, y, z, x + 2.0,
+                        y + heightConfig.getValue(), z + 1.0);
+            } else if (hole.isDoubleZ()) {
                 render = new Box(x, y, z, x + 1.0,
                         y + heightConfig.getValue(), z + 2.0);
-            }
-            else if (hole.isQuad())
-            {
+            } else if (hole.isQuad()) {
                 render = new Box(x, y, z, x + 2.0,
                         y + heightConfig.getValue(), z + 2.0);
-            }
-            else if (hole.isStandard())
-            {
+            } else if (hole.isStandard()) {
                 render = new Box(x, y, z, x + 1.0,
                         y + heightConfig.getValue(), z + 1.0);
             }
-            if (render == null)
-            {
+            if (render == null) {
                 return;
             }
             double alpha = 1.0;
-            if (fadeConfig.getValue())
-            {
+            if (fadeConfig.getValue()) {
                 double fadeRange = rangeConfig.getValue() - 1.0;
                 double fadeRangeSq = fadeRange * fadeRange;
                 alpha = (fadeRangeSq + 9.0 - mc.player.squaredDistanceTo(hole.getX(),
@@ -133,14 +112,11 @@ public class HoleESPModule extends ToggleModule
     }
 
     /**
-     *
      * @param hole
      * @return
      */
-    private Color getHoleColor(Hole hole)
-    {
-        return switch (hole.getSafety())
-        {
+    private Color getHoleColor(Hole hole) {
+        return switch (hole.getSafety()) {
             case RESISTANT -> obsidianConfig.getValue();
             case MIXED -> mixedConfig.getValue();
             case UNBREAKABLE -> bedrockConfig.getValue();
@@ -148,8 +124,7 @@ public class HoleESPModule extends ToggleModule
         };
     }
 
-    public double getRange()
-    {
+    public double getRange() {
         return rangeConfig.getValue();
     }
 }

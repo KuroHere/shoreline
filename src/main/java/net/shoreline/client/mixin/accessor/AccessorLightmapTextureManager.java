@@ -5,18 +5,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see LightmapTextureManager
+ * @since 1.0
  */
 @Mixin(LightmapTextureManager.class)
-public interface AccessorLightmapTextureManager
-{
+public interface AccessorLightmapTextureManager {
     /**
-     *
      * @param dirty
      */
     @Accessor("dirty")

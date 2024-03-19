@@ -6,13 +6,10 @@ import net.shoreline.client.api.module.ConcurrentModule;
 import net.shoreline.client.api.module.ModuleCategory;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class ChatModule extends ConcurrentModule
-{
+public class ChatModule extends ConcurrentModule {
     //
     Config<Boolean> debugConfig = new BooleanConfig("ChatDebug", "Allows " +
             "client debug messages to be printed in the chat", false);
@@ -20,8 +17,7 @@ public class ChatModule extends ConcurrentModule
     /**
      *
      */
-    public ChatModule()
-    {
+    public ChatModule() {
         super("Chat", "Manages the client chat", ModuleCategory.CLIENT);
     }
 }

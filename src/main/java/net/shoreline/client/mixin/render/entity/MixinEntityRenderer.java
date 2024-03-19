@@ -1,28 +1,24 @@
 package net.shoreline.client.mixin.render.entity;
 
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.render.entity.RenderLabelEvent;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
+import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.render.entity.RenderLabelEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
 @Mixin(EntityRenderer.class)
-public class MixinEntityRenderer
-{
+public class MixinEntityRenderer {
     /**
-     *
      * @param entity
      * @param text
      * @param matrices
@@ -35,12 +31,10 @@ public class MixinEntityRenderer
     public void hookRenderLabelIfPresent(Entity entity, Text text,
                                          MatrixStack matrices,
                                          VertexConsumerProvider vertexConsumers,
-                                         int light, CallbackInfo ci)
-    {
+                                         int light, CallbackInfo ci) {
         RenderLabelEvent renderLabelEvent = new RenderLabelEvent(entity);
         Shoreline.EVENT_HANDLER.dispatch(renderLabelEvent);
-        if (renderLabelEvent.isCanceled())
-        {
+        if (renderLabelEvent.isCanceled()) {
             ci.cancel();
         }
     }

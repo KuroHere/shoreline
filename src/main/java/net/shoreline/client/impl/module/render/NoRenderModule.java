@@ -1,5 +1,13 @@
 package net.shoreline.client.impl.module.render;
 
+import com.google.common.collect.Lists;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Items;
+import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.tag.FluidTags;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -18,23 +26,12 @@ import net.shoreline.client.impl.event.render.entity.RenderArmorEvent;
 import net.shoreline.client.impl.event.render.entity.RenderFireworkRocketEvent;
 import net.shoreline.client.impl.event.render.entity.RenderItemEvent;
 import net.shoreline.client.impl.event.render.entity.RenderWitherSkullEvent;
-import com.google.common.collect.Lists;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.tag.FluidTags;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class NoRenderModule extends ToggleModule
-{
+public class NoRenderModule extends ToggleModule {
     //
     Config<Boolean> hurtCamConfig = new BooleanConfig("NoHurtCam",
             "Prevents the hurt camera shake effect from rendering", true);
@@ -90,8 +87,7 @@ public class NoRenderModule extends ToggleModule
     /**
      *
      */
-    public NoRenderModule()
-    {
+    public NoRenderModule() {
         super("NoRender", "Prevents certain game elements from rendering",
                 ModuleCategory.RENDER);
     }
@@ -99,18 +95,13 @@ public class NoRenderModule extends ToggleModule
     // insane code below
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event)
-    {
-        if (itemsConfig.getValue() == ItemRender.REMOVE && event.getStage() == EventStage.PRE)
-        {
-            for (Entity entity : Lists.newArrayList(mc.world.getEntities()))
-            {
-                if (entity instanceof ItemEntity)
-                {
+    public void onTick(TickEvent event) {
+        if (itemsConfig.getValue() == ItemRender.REMOVE && event.getStage() == EventStage.PRE) {
+            for (Entity entity : Lists.newArrayList(mc.world.getEntities())) {
+                if (entity instanceof ItemEntity) {
                     mc.world.removeEntity(entity.getId(), Entity.RemovalReason.DISCARDED);
                 }
             }
@@ -118,343 +109,264 @@ public class NoRenderModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPacketInbound(PacketEvent.Inbound event)
-    {
-        if (mc.world == null)
-        {
+    public void onPacketInbound(PacketEvent.Inbound event) {
+        if (mc.world == null) {
             return;
         }
         if (event.getPacket() instanceof ChatMessageS2CPacket packet
-                && unicodeConfig.getValue())
-        {
+                && unicodeConfig.getValue()) {
             String msg = packet.body().content();
-            for (char c : msg.toCharArray())
-            {
-                if (Character.UnicodeBlock.of(c) != Character.UnicodeBlock.BASIC_LATIN)
-                {
+            for (char c : msg.toCharArray()) {
+                if (Character.UnicodeBlock.of(c) != Character.UnicodeBlock.BASIC_LATIN) {
                     event.cancel();
                     break;
                 }
             }
         }
-        if (antiCrashConfig.getValue())
-        {
+        if (antiCrashConfig.getValue()) {
             // Crash packets from server
             if (event.getPacket() instanceof PlayerPositionLookS2CPacket packet
                     && (packet.getX() > 30000000 || packet.getY() > mc.world.getTopY()
                     || packet.getZ() > 30000000 || packet.getX() < -30000000
-                    || packet.getY() < mc.world.getBottomY() || packet.getZ() < -30000000))
-            {
+                    || packet.getY() < mc.world.getBottomY() || packet.getZ() < -30000000)) {
                 event.cancel();
-            }
-            else if (event.getPacket() instanceof ExplosionS2CPacket packet
+            } else if (event.getPacket() instanceof ExplosionS2CPacket packet
                     && (packet.getX() > 30000000 || packet.getY() > mc.world.getTopY()
                     || packet.getZ() > 30000000 || packet.getX() < -30000000
                     || packet.getY() < mc.world.getBottomY() || packet.getZ() < -30000000
                     || packet.getRadius() > 1000 || packet.getAffectedBlocks().size() > 1000
                     || packet.getPlayerVelocityX() > 1000 || packet.getPlayerVelocityY() > 1000
                     || packet.getPlayerVelocityZ() > 1000 || packet.getPlayerVelocityX() < -1000
-                    || packet.getPlayerVelocityY() < -1000 || packet.getPlayerVelocityZ() < -1000))
-            {
+                    || packet.getPlayerVelocityY() < -1000 || packet.getPlayerVelocityZ() < -1000)) {
                 event.cancel();
-            }
-            else if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet
+            } else if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet
                     && (packet.getVelocityX() > 1000 || packet.getVelocityY() > 1000 ||
                     packet.getVelocityZ() > 1000 || packet.getVelocityX() < -1000 ||
-                    packet.getVelocityY() < -1000 || packet.getVelocityZ() < -1000))
-            {
+                    packet.getVelocityY() < -1000 || packet.getVelocityZ() < -1000)) {
                 event.cancel();
-            }
-            else if (event.getPacket() instanceof ParticleS2CPacket packet
-                && packet.getCount() > 500)
-            {
+            } else if (event.getPacket() instanceof ParticleS2CPacket packet
+                    && packet.getCount() > 500) {
                 event.cancel();
             }
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onHurtCam(HurtCamEvent event)
-    {
-        if (hurtCamConfig.getValue())
-        {
+    public void onHurtCam(HurtCamEvent event) {
+        if (hurtCamConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderArmor(RenderArmorEvent event)
-    {
-        if (armorConfig.getValue() && event.getEntity() instanceof PlayerEntity)
-        {
+    public void onRenderArmor(RenderArmorEvent event) {
+        if (armorConfig.getValue() && event.getEntity() instanceof PlayerEntity) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderOverlayFire(RenderOverlayEvent.Fire event)
-    {
-        if (fireOverlayConfig.getValue())
-        {
+    public void onRenderOverlayFire(RenderOverlayEvent.Fire event) {
+        if (fireOverlayConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderOverlayWater(RenderOverlayEvent.Water event)
-    {
-        if (waterOverlayConfig.getValue())
-        {
+    public void onRenderOverlayWater(RenderOverlayEvent.Water event) {
+        if (waterOverlayConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderOverlayBlock(RenderOverlayEvent.Block event)
-    {
-        if (blockOverlayConfig.getValue())
-        {
-            event.cancel();
-        }
-    }
-    /**
-     *
-     * @param event
-     */
-    @EventListener
-    public void onRenderOverlaySpyglass(RenderOverlayEvent.Spyglass event)
-    {
-        if (spyglassOverlayConfig.getValue())
-        {
+    public void onRenderOverlayBlock(RenderOverlayEvent.Block event) {
+        if (blockOverlayConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderOverlayPumpkin(RenderOverlayEvent.Pumpkin event)
-    {
-        if (pumpkinOverlayConfig.getValue())
-        {
+    public void onRenderOverlaySpyglass(RenderOverlayEvent.Spyglass event) {
+        if (spyglassOverlayConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderOverlayBossBar(RenderOverlayEvent.BossBar event)
-    {
-        if (bossOverlayConfig.getValue())
-        {
+    public void onRenderOverlayPumpkin(RenderOverlayEvent.Pumpkin event) {
+        if (pumpkinOverlayConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderOverlayFrostbite(RenderOverlayEvent.Frostbite event)
-    {
-        if (frostbiteConfig.getValue())
-        {
+    public void onRenderOverlayBossBar(RenderOverlayEvent.BossBar event) {
+        if (bossOverlayConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderNausea(RenderNauseaEvent event)
-    {
-        if (nauseaConfig.getValue())
-        {
+    public void onRenderOverlayFrostbite(RenderOverlayEvent.Frostbite event) {
+        if (frostbiteConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderSkylight(RenderSkylightEvent event)
-    {
-        if (skylightConfig.getValue())
-        {
+    public void onRenderNausea(RenderNauseaEvent event) {
+        if (nauseaConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderWitherSkull(RenderWitherSkullEvent event)
-    {
-        if (witherSkullsConfig.getValue())
-        {
+    public void onRenderSkylight(RenderSkylightEvent event) {
+        if (skylightConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderEnchantingTableBook(RenderTileEntityEvent.EnchantingTableBook event)
-    {
-        if (tileEntitiesConfig.getValue())
-        {
+    public void onRenderWitherSkull(RenderWitherSkullEvent event) {
+        if (witherSkullsConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onParticle(ParticleEvent event)
-    {
+    public void onRenderEnchantingTableBook(RenderTileEntityEvent.EnchantingTableBook event) {
+        if (tileEntitiesConfig.getValue()) {
+            event.cancel();
+        }
+    }
+
+    /**
+     * @param event
+     */
+    @EventListener
+    public void onParticle(ParticleEvent event) {
         if (explosionsConfig.getValue() && (event.getParticleType() == ParticleTypes.EXPLOSION
                 || event.getParticleType() == ParticleTypes.EXPLOSION_EMITTER)
                 || fireworksConfig.getValue() && event.getParticleType() == ParticleTypes.FIREWORK
-                || campfiresConfig.getValue() && event.getParticleType() == ParticleTypes.CAMPFIRE_COSY_SMOKE)
-        {
+                || campfiresConfig.getValue() && event.getParticleType() == ParticleTypes.CAMPFIRE_COSY_SMOKE) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderFireworkRocket(RenderFireworkRocketEvent event)
-    {
-        if (fireworksConfig.getValue())
-        {
+    public void onRenderFireworkRocket(RenderFireworkRocketEvent event) {
+        if (fireworksConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
-     *
      * @param event
      */
     @EventListener
-    public void onParticleEmitter(ParticleEvent.Emitter event)
-    {
-        if (totemConfig.getValue() && event.getParticleType() == ParticleTypes.TOTEM_OF_UNDYING)
-        {
+    public void onParticleEmitter(ParticleEvent.Emitter event) {
+        if (totemConfig.getValue() && event.getParticleType() == ParticleTypes.TOTEM_OF_UNDYING) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderFloatingItem(RenderFloatingItemEvent event)
-    {
-        if (totemConfig.getValue() && event.getFloatingItem() == Items.TOTEM_OF_UNDYING)
-        {
+    public void onRenderFloatingItem(RenderFloatingItemEvent event) {
+        if (totemConfig.getValue() && event.getFloatingItem() == Items.TOTEM_OF_UNDYING) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderWorldBorder(RenderWorldBorderEvent event)
-    {
-        if (worldBorderConfig.getValue())
-        {
+    public void onRenderWorldBorder(RenderWorldBorderEvent event) {
+        if (worldBorderConfig.getValue()) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderFog(RenderFogEvent event)
-    {
+    public void onRenderFog(RenderFogEvent event) {
         if (fogConfig.getValue() == FogRender.LIQUID_VISION
-                && mc.player != null && mc.player.isSubmergedIn(FluidTags.LAVA))
-        {
+                && mc.player != null && mc.player.isSubmergedIn(FluidTags.LAVA)) {
             event.cancel();
-        }
-        else if (fogConfig.getValue() == FogRender.CLEAR)
-        {
+        } else if (fogConfig.getValue() == FogRender.CLEAR) {
             event.cancel();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onRenderItem(RenderItemEvent event)
-    {
-        if (itemsConfig.getValue() == ItemRender.HIDE)
-        {
+    public void onRenderItem(RenderItemEvent event) {
+        if (itemsConfig.getValue() == ItemRender.HIDE) {
             event.cancel();
         }
     }
 
-    public enum FogRender
-    {
+    public enum FogRender {
         CLEAR,
         LIQUID_VISION,
         OFF
     }
 
-    public enum ItemRender
-    {
+    public enum ItemRender {
         REMOVE,
         HIDE,
         OFF

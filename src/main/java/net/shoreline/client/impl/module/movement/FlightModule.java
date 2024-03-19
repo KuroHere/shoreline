@@ -13,16 +13,14 @@ import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.string.EnumFormatter;
-import net.shoreline.client.util.Globals;
 
 /**
- *
- *
  * @author linus
  * @since 1.0
  */
-public class FlightModule extends ToggleModule
-{
+public class FlightModule extends ToggleModule {
+    //
+    private final Timer antiKickTimer = new CacheTimer();
     //
     Config<FlightMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
             "vanilla flight", FlightMode.CREATIVE, FlightMode.values());
@@ -34,25 +32,20 @@ public class FlightModule extends ToggleModule
             "Accounts for air friction when flying", false);
     Config<Boolean> antiKickConfig = new BooleanConfig("AntiKick", "Prevents " +
             "vanilla flight detection", true);
-    //
-    private final Timer antiKickTimer = new CacheTimer();
 
     /**
      *
      */
-    public FlightModule()
-    {
+    public FlightModule() {
         super("Flight", "Allows the player to fly in survival",
                 ModuleCategory.MOVEMENT);
     }
 
     /**
-     *
      * @return
      */
     @Override
-    public String getModuleData()
-    {
+    public String getModuleData() {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
@@ -60,11 +53,9 @@ public class FlightModule extends ToggleModule
      *
      */
     @Override
-    public void onEnable()
-    {
+    public void onEnable() {
         antiKickTimer.reset();
-        if (modeConfig.getValue() == FlightMode.VANILLA)
-        {
+        if (modeConfig.getValue() == FlightMode.VANILLA) {
             enableVanillaFly();
         }
     }
@@ -73,37 +64,28 @@ public class FlightModule extends ToggleModule
      *
      */
     @Override
-    public void onDisable()
-    {
-        if (modeConfig.getValue() == FlightMode.VANILLA)
-        {
+    public void onDisable() {
+        if (modeConfig.getValue() == FlightMode.VANILLA) {
             disableVanillaFly();
         }
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onPlayerMove(PlayerMoveEvent event)
-    {
+    public void onPlayerMove(PlayerMoveEvent event) {
         event.cancel();
         // Vanilla fly kick checks every 80 ticks
-        if (antiKickTimer.passed(3800) && antiKickConfig.getValue())
-        {
+        if (antiKickTimer.passed(3800) && antiKickConfig.getValue()) {
             event.setY(-0.04);
             antiKickTimer.reset();
         }
-        if (modeConfig.getValue() == FlightMode.CREATIVE)
-        {
+        if (modeConfig.getValue() == FlightMode.CREATIVE) {
             event.setY(0.0);
-            if (mc.options.jumpKey.isPressed())
-            {
+            if (mc.options.jumpKey.isPressed()) {
                 event.setY(vspeedConfig.getValue());
-            }
-            else if (mc.options.sneakKey.isPressed())
-            {
+            } else if (mc.options.sneakKey.isPressed()) {
                 event.setY(-vspeedConfig.getValue());
             }
             float speed = getFlySpeed();
@@ -111,8 +93,7 @@ public class FlightModule extends ToggleModule
             float forward = mc.player.input.movementForward;
             float strafe = mc.player.input.movementSideways;
             float yaw = mc.player.getYaw();
-            if (forward == 0.0f && strafe == 0.0f)
-            {
+            if (forward == 0.0f && strafe == 0.0f) {
                 event.setX(0.0);
                 event.setZ(0.0);
                 return;
@@ -125,36 +106,27 @@ public class FlightModule extends ToggleModule
     }
 
     /**
-     *
      * @param event
      */
     @EventListener
-    public void onConfigUpdate(ConfigUpdateEvent event)
-    {
-        if (event.getConfig() == modeConfig && event.getStage() == EventStage.POST)
-        {
-            if (modeConfig.getValue() == FlightMode.VANILLA)
-            {
+    public void onConfigUpdate(ConfigUpdateEvent event) {
+        if (event.getConfig() == modeConfig && event.getStage() == EventStage.POST) {
+            if (modeConfig.getValue() == FlightMode.VANILLA) {
                 enableVanillaFly();
-            }
-            else
-            {
+            } else {
                 disableVanillaFly();
             }
         }
     }
 
-    private void enableVanillaFly()
-    {
+    private void enableVanillaFly() {
         mc.player.getAbilities().allowFlying = true;
         mc.player.getAbilities().flying = true;
         mc.player.getAbilities().setFlySpeed(speedConfig.getValue() * 0.05f);
     }
 
-    private void disableVanillaFly()
-    {
-        if (!mc.player.isCreative())
-        {
+    private void disableVanillaFly() {
+        if (!mc.player.isCreative()) {
             mc.player.getAbilities().allowFlying = false;
         }
         mc.player.getAbilities().flying = false;
@@ -162,22 +134,18 @@ public class FlightModule extends ToggleModule
     }
 
     /**
-     *
      * @return
      */
-    private float getFlySpeed()
-    {
+    private float getFlySpeed() {
         float speed = speedConfig.getValue();
         // Wierd NCP shit idk, but it works
-        if (airStrictConfig.getValue())
-        {
+        if (airStrictConfig.getValue()) {
             speed = speed - speed / 159.0f;
         }
         return Math.max(speed, 0.2873f);
     }
 
-    public enum FlightMode
-    {
+    public enum FlightMode {
         CREATIVE,
         VANILLA
     }

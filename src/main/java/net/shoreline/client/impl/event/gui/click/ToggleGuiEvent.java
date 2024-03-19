@@ -4,26 +4,21 @@ import net.shoreline.client.api.event.Event;
 import net.shoreline.client.api.module.ToggleModule;
 
 /**
- *
  * @author linus
  * @since 1.0
  */
-public class ToggleGuiEvent extends Event
-{
+public class ToggleGuiEvent extends Event {
     private final ToggleModule module;
 
-    public ToggleGuiEvent(ToggleModule module)
-    {
+    public ToggleGuiEvent(ToggleModule module) {
         this.module = module;
     }
 
-    public ToggleModule getModule()
-    {
+    public ToggleModule getModule() {
         return module;
     }
 
-    public boolean isEnabled()
-    {
+    public boolean isEnabled() {
         return module.isEnabled();
     }
 }

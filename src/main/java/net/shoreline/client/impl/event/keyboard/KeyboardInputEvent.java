@@ -9,23 +9,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Dispatched in {@link MixinKeyboard#hookOnKey(long, int, int, int, int, CallbackInfo)}
  *
  * @author linus
- * @since 1.0
- *
  * @see MixinKeyboard
+ * @since 1.0
  */
 @Cancelable
-public class KeyboardInputEvent extends Event
-{
+public class KeyboardInputEvent extends Event {
     // The inputted keycode in GLFW format
     private final int keycode;
 
     /**
-     *
-     *
      * @param keycode
      */
-    public KeyboardInputEvent(int keycode)
-    {
+    public KeyboardInputEvent(int keycode) {
         this.keycode = keycode;
     }
 
@@ -33,11 +28,9 @@ public class KeyboardInputEvent extends Event
      * Returns the inputted {@link org.lwjgl.glfw.GLFW} keycode
      *
      * @return The input key
-     *
      * @see #keycode
      */
-    public int getKeycode()
-    {
+    public int getKeycode() {
         return keycode;
     }
 }

@@ -12,16 +12,13 @@ import java.util.Collection;
  * argument. The argument can be marked as an optional value by using the
  * {@link OptionalArgument} annotation.
  *
- * @author linus
- * @since 1.0
- *
  * @param <T> The argument value type
- *
+ * @author linus
  * @see Command
  * @see CommandManager
+ * @since 1.0
  */
-public abstract class Argument<T> extends Config<T>
-{
+public abstract class Argument<T> extends Config<T> {
     // The literal string input of the user which will be updated every key
     // press. If the input is null, the argument is left blank.
     private String literal;
@@ -33,12 +30,11 @@ public abstract class Argument<T> extends Config<T>
      * not be used to initialize a configuration, instead use the explicit
      * definitions of the configs in {@link com.caspian.client.api.config.setting}.
      *
-     * @param name  The unique config identifier
-     * @param desc  The config description
+     * @param name The unique config identifier
+     * @param desc The config description
      * @throws NullPointerException if value is <tt>null</tt>
      */
-    public Argument(String name, String desc)
-    {
+    public Argument(String name, String desc) {
         super(name.toLowerCase(), desc);
     }
 
@@ -48,13 +44,10 @@ public abstract class Argument<T> extends Config<T>
      *
      * @see #getSuggestion()
      */
-    public String completeLiteral()
-    {
-        if (literal != null && !literal.isBlank())
-        {
+    public String completeLiteral() {
+        if (literal != null && !literal.isBlank()) {
             final String suggestion = getSuggestion();
-            if (suggestion != null)
-            {
+            if (suggestion != null) {
                 setLiteral(suggestion);
                 return suggestion;
             }
@@ -63,81 +56,57 @@ public abstract class Argument<T> extends Config<T>
     }
 
     /**
-     *
-     *
      * @throws ArgumentParseException
-     *
      * @see Command#onCommandInput()
      */
     @Override
     public abstract T getValue();
 
     /**
-     *
      * @return
      */
-    public String getLiteral()
-    {
+    public String getLiteral() {
         return literal;
     }
 
     /**
-     *
+     * @param literal
+     * @see CommandManager#onChatInput(ChatInputEvent)
+     */
+    public void setLiteral(String literal) {
+        this.literal = literal;
+    }
+
+    /**
      * @return
      */
-    public boolean isOptional()
-    {
+    public boolean isOptional() {
         return optional;
     }
 
     /**
-     *
-     *
+     * @param optional
+     */
+    public void setOptional(boolean optional) {
+        this.optional = optional;
+    }
+
+    /**
      * @return
-     *
      * @see #getSuggestions()
      */
-    public String getSuggestion()
-    {
-        for (String suggestion : getSuggestions())
-        {
-            if (suggestion.startsWith(literal))
-            {
+    public String getSuggestion() {
+        for (String suggestion : getSuggestions()) {
+            if (suggestion.startsWith(literal)) {
                 return suggestion;
             }
         }
         return literal;
     }
 
-
-
     /**
-     *
-     *
      * @return
-     *
      * @see #getSuggestion()
      */
     public abstract Collection<String> getSuggestions();
-
-    /**
-     *
-     *
-     * @param literal
-     *
-     * @see CommandManager#onChatInput(ChatInputEvent)
-     */
-    public void setLiteral(String literal)
-    {
-        this.literal = literal;
-    }
-
-    /**
-     *
-     * @param optional
-     */
-    public void setOptional(boolean optional)
-    {
-        this.optional = optional;
-    }
 }

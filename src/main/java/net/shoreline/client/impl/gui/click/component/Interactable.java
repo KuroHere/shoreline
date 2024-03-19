@@ -1,18 +1,12 @@
 package net.shoreline.client.impl.gui.click.component;
 
 /**
- *
- *
  * @author linus
- * @since 1.0
- *
  * @see Drawable
+ * @since 1.0
  */
-public interface Interactable extends Drawable
-{
+public interface Interactable extends Drawable {
     /**
-     *
-     *
      * @param mouseX
      * @param mouseY
      * @param button
@@ -20,8 +14,6 @@ public interface Interactable extends Drawable
     void mouseClicked(double mouseX, double mouseY, int button);
 
     /**
-     *
-     *
      * @param mouseX
      * @param mouseY
      * @param button
@@ -29,9 +21,6 @@ public interface Interactable extends Drawable
     void mouseReleased(double mouseX, double mouseY, int button);
 
     /**
-     *
-     *
-     *
      * @param keyCode
      * @param scanCode
      * @param modifiers

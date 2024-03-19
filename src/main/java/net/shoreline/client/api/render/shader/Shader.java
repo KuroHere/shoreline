@@ -11,39 +11,31 @@ import java.util.List;
 import static org.lwjgl.opengl.GL20C.*;
 
 
-public class Shader
-{
+public class Shader {
     private final int id;
 
-    public Shader(String shaderName, int shaderMode)
-    {
+    public Shader(String shaderName, int shaderMode) {
         id = GlStateManager.glCreateShader(shaderMode);
-        try
-        {
+        try {
             GlStateManager.glShaderSource(id, loadShader(shaderName));
             GlStateManager.glCompileShader(id);
 
-            if (glGetShaderi(id, GL_COMPILE_STATUS) == GL_FALSE)
-            {
+            if (glGetShaderi(id, GL_COMPILE_STATUS) == GL_FALSE) {
                 throw new RuntimeException(
                         "Shader compilation error!\n" +
-                        glGetShaderInfoLog(id, glGetShaderi(id, GL_INFO_LOG_LENGTH))
+                                glGetShaderInfoLog(id, glGetShaderi(id, GL_INFO_LOG_LENGTH))
                 );
             }
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static List<String> loadShader(String name) throws IOException
-    {
+    private static List<String> loadShader(String name) throws IOException {
         InputStream stream = Shader.class
                 .getClassLoader()
                 .getResourceAsStream("assets/shoreline/shader/" + name);
-        if (stream == null)
-        {
+        if (stream == null) {
             throw new IOException("Shader with name " + name + " not found");
         }
 
@@ -52,8 +44,7 @@ public class Shader
                 .toList();
     }
 
-    public int getId()
-    {
+    public int getId() {
         return id;
     }
 }
