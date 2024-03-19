@@ -34,6 +34,7 @@ public class WaypointsModule extends ToggleModule {
         super("Waypoints", "Renders a waypoint at marked locations",
                 ModuleCategory.RENDER);
     }
+
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.world == null) {

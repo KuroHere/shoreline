@@ -39,39 +39,24 @@ import java.util.List;
  */
 public class NoSlowModule extends ToggleModule {
     //
-    private static KeyBinding[] MOVE_KEYBINDS;
-    //
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Strict NCP " +
-            "bypass for ground slowdowns", false);
-    Config<Boolean> airStrictConfig = new BooleanConfig("AirStrict", "Strict" +
-            " NCP bypass for air slowdowns", false);
-    Config<Boolean> grimConfig = new BooleanConfig("Grim", "Strict" +
-            " Grim bypass for slowdown", false);
-    Config<Boolean> strafeFixConfig = new BooleanConfig("StrafeFix", "Old NCP" +
-            " bypass for strafe", false);
-    Config<Boolean> inventoryMoveConfig = new BooleanConfig("InventoryMove",
-            "Allows the player to move while in inventories or screens", false);
-    Config<Boolean> arrowMoveConfig = new BooleanConfig("ArrowMove", "Allows " +
-            "the player to look while in inventories or screens by using the " +
-            "arrow keys", false);
-    Config<Boolean> itemsConfig = new BooleanConfig("Items", "Removes " +
-            "the slowdown effect caused by using items", true);
-    Config<Boolean> shieldsConfig = new BooleanConfig("Shields", "Removes the" +
-            " slowdown effect caused by shields", true);
-    Config<Boolean> websConfig = new BooleanConfig("Webs", "Removes the " +
-            "slowdown caused when moving through webs", false);
-    Config<Boolean> berryBushConfig = new BooleanConfig("BerryBush", "Removes the " +
-            "slowdown caused when moving through webs", false);
-    Config<Float> webSpeedConfig = new NumberConfig<>("WebSpeed", "Speed to " +
-            "fall through webs", 0.0f, 3.5f, 20.0f, () -> websConfig.getValue());
-    Config<Boolean> soulsandConfig = new BooleanConfig("SoulSand", "Removes " +
-            "the slowdown effect caused by walking over SoulSand blocks", false);
-    Config<Boolean> honeyblockConfig = new BooleanConfig("HoneyBlock", "Removes " +
-            "the slowdown effect caused by walking over Honey blocks", false);
-    Config<Boolean> slimeblockConfig = new BooleanConfig("SlimeBlock", "Removes " +
-            "the slowdown effect caused by walking over Slime blocks", false);
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Strict NCP bypass for ground slowdowns", false);
+    Config<Boolean> airStrictConfig = new BooleanConfig("AirStrict", "Strict NCP bypass for air slowdowns", false);
+    Config<Boolean> grimConfig = new BooleanConfig("Grim", "Strict Grim bypass for slowdown", false);
+    Config<Boolean> strafeFixConfig = new BooleanConfig("StrafeFix", "Old NCP bypass for strafe", false);
+    Config<Boolean> inventoryMoveConfig = new BooleanConfig("InventoryMove", "Allows the player to move while in inventories or screens", false);
+    Config<Boolean> arrowMoveConfig = new BooleanConfig("ArrowMove", "Allows the player to look while in inventories or screens by using the arrow keys", false);
+    Config<Boolean> itemsConfig = new BooleanConfig("Items", "Removes the slowdown effect caused by using items", true);
+    Config<Boolean> shieldsConfig = new BooleanConfig("Shields", "Removes the slowdown effect caused by shields", true);
+    Config<Boolean> websConfig = new BooleanConfig("Webs", "Removes the slowdown caused when moving through webs", false);
+    Config<Boolean> berryBushConfig = new BooleanConfig("BerryBush", "Removes the slowdown caused when moving through webs", false);
+    Config<Float> webSpeedConfig = new NumberConfig<>("WebSpeed", "Speed to fall through webs", 0.0f, 3.5f, 20.0f, () -> websConfig.getValue());
+    Config<Boolean> soulsandConfig = new BooleanConfig("SoulSand", "Removes the slowdown effect caused by walking over SoulSand blocks", false);
+    Config<Boolean> honeyblockConfig = new BooleanConfig("HoneyBlock", "Removes the slowdown effect caused by walking over Honey blocks", false);
+    Config<Boolean> slimeblockConfig = new BooleanConfig("SlimeBlock", "Removes the slowdown effect caused by walking over Slime blocks", false);
     //
     private boolean sneaking;
+    //
+    private static KeyBinding[] MOVE_KEYBINDS;
 
     /**
      *
@@ -117,15 +102,14 @@ public class NoSlowModule extends ToggleModule {
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (event.getStage() == EventStage.PRE && grimConfig.getValue()
                 && mc.player.isUsingItem() && !mc.player.isSneaking() && itemsConfig.getValue()) {
-
             ItemStack offHandStack = mc.player.getOffHandStack();
-
+            //
             if (mc.player.getActiveHand() == Hand.OFF_HAND) {
                 Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
                         mc.player.getInventory().selectedSlot % 8 + 1));
                 Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
                         mc.player.getInventory().selectedSlot));
-            } else if(!offHandStack.isFood() && offHandStack.getItem() != Items.BOW && offHandStack.getItem() != Items.CROSSBOW && offHandStack.getItem() != Items.SHIELD) {
+            } else if (!offHandStack.isFood() && offHandStack.getItem() != Items.BOW && offHandStack.getItem() != Items.CROSSBOW && offHandStack.getItem() != Items.SHIELD) {
                 Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
             }
         }
@@ -144,8 +128,7 @@ public class NoSlowModule extends ToggleModule {
                 // Old NCP
                 Managers.NETWORK.sendSequencedPacket(id ->
                         new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND,
-                                new BlockHitResult(mc.player.getPos(),
-                                        Direction.UP, BlockPos.ORIGIN, false), id));
+                                new BlockHitResult(mc.player.getPos(), Direction.UP, BlockPos.ORIGIN, false), id));
             }
             if (inventoryMoveConfig.getValue() && checkScreen()
                     && MOVE_KEYBINDS != null) {
@@ -257,10 +240,9 @@ public class NoSlowModule extends ToggleModule {
 
     public boolean checkSlowed() {
         ItemStack offHandStack = mc.player.getOffHandStack();
-
-        if((offHandStack.isFood() || offHandStack.getItem() == Items.BOW || offHandStack.getItem() == Items.CROSSBOW || offHandStack.getItem() == Items.SHIELD) && grimConfig.getValue())
+        if ((offHandStack.isFood() || offHandStack.getItem() == Items.BOW || offHandStack.getItem() == Items.CROSSBOW || offHandStack.getItem() == Items.SHIELD) && grimConfig.getValue()) {
             return false;
-
+        }
         return !mc.player.isRiding() && !mc.player.isSneaking() && !mc.player.isFallFlying()
                 && (mc.player.isUsingItem() && itemsConfig.getValue() || mc.player.isBlocking() && shieldsConfig.getValue() && !grimConfig.getValue());
     }
@@ -276,7 +258,7 @@ public class NoSlowModule extends ToggleModule {
         for (int x = radius; x > -radius; --x) {
             for (int y = radius; y > -radius; --y) {
                 for (int z = radius; z > -radius; --z) {
-                    final BlockPos blockPos = BlockPos.ofFloored(mc.player.getX() + x,
+                    BlockPos blockPos = BlockPos.ofFloored(mc.player.getX() + x,
                             mc.player.getY() + y, mc.player.getZ() + z);
                     BlockState state = mc.world.getBlockState(blockPos);
                     if (state.getBlock() instanceof CobwebBlock && websConfig.getValue()

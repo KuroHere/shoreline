@@ -33,7 +33,7 @@ import net.shoreline.client.impl.event.render.entity.RenderWitherSkullEvent;
  */
 public class NoRenderModule extends ToggleModule {
     Config<Boolean> hurtCamConfig = new BooleanConfig("NoHurtCam", "Prevents the hurt camera shake effect from rendering", true);
-    Config<Boolean> antiCrashConfig = new BooleanConfig("AntiCrash", "Prevents server packets from crashing the client", false);
+    Config<Boolean> antiCrashConfig = new BooleanConfig("NoServerCrash", "Prevents server packets from crashing the client", false);
     Config<Boolean> armorConfig = new BooleanConfig("Armor", "Prevents armor pieces from rendering", false);
     Config<Boolean> fireOverlayConfig = new BooleanConfig("Overlay-Fire", "Prevents the fire Hud overlay from rendering", true);
     Config<Boolean> waterOverlayConfig = new BooleanConfig("Overlay-Water", "Prevents the water Hud overlay from rendering", true);
@@ -89,6 +89,7 @@ public class NoRenderModule extends ToggleModule {
             }
         }
         if (antiCrashConfig.getValue()) {
+            // Out of bounds packets from server
             if (event.getPacket() instanceof PlayerPositionLookS2CPacket packet
                     && (packet.getX() > 30000000 || packet.getY() > mc.world.getTopY()
                     || packet.getZ() > 30000000 || packet.getX() < -30000000

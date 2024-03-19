@@ -24,8 +24,7 @@ public class SkyboxModule extends ToggleModule {
     Config<Color> fogColorConfig = new ColorConfig("FogColor", "The color for the world fog", ColorConfig.GLOBAL_COLOR);
 
     public SkyboxModule() {
-        super("Skybox", "Changes the rendering of the world skybox",
-                ModuleCategory.RENDER);
+        super("Skybox", "Changes the rendering of the world skybox", ModuleCategory.RENDER);
     }
 
 //    @Override

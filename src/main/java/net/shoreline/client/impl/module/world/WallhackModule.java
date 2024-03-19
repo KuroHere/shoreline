@@ -19,8 +19,8 @@ import java.util.List;
  */
 public class WallhackModule extends ToggleModule {
 
-    Config<XRayMode> modeConfig = new EnumConfig<>("Mode", "The mode for " + "wallhack rendering", XRayMode.CIRCUITS, XRayMode.values());
-    Config<Integer> opacityConfig = new NumberConfig<>("Opacity", "The " + "opacity of the blocks in wallhack", 0, 120, 255);
+    Config<XRayMode> modeConfig = new EnumConfig<>("Mode", "The mode for wallhack rendering", XRayMode.CIRCUITS, XRayMode.values());
+    Config<Integer> opacityConfig = new NumberConfig<>("Opacity", "The opacity of the blocks in wallhack", 0, 120, 255);
     Config<Boolean> softReloadConfig = new BooleanConfig("SoftReload", "Reloads world renders without causing game interruption", true);
     Config<List<Block>> blocksConfig = new ListConfig<>("Blocks", "Valid block whitelist for wallhack",
             Blocks.EMERALD_ORE,

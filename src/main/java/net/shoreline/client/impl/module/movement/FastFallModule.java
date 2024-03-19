@@ -21,7 +21,7 @@ import net.shoreline.client.util.math.timer.Timer;
  * @since 1.0
  */
 public class FastFallModule extends ToggleModule {
-    private final Timer fallTimer = new CacheTimer();
+
     //
     Config<Float> heightConfig = new NumberConfig<>("Height", "The maximum " +
             "fall height", 1.0f, 3.0f, 10.0f);
@@ -35,6 +35,7 @@ public class FastFallModule extends ToggleModule {
     //
     private boolean cancelFallMovement;
     private int fallTicks;
+    private final Timer fallTimer = new CacheTimer();
 
     /**
      *
@@ -43,18 +44,12 @@ public class FastFallModule extends ToggleModule {
         super("FastFall", "Falls down blocks faster", ModuleCategory.MOVEMENT);
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         cancelFallMovement = false;
         fallTicks = 0;
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE) {
@@ -81,10 +76,6 @@ public class FastFallModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     * @see TickMovementEvent
-     */
     @EventListener
     public void onTickMovement(TickMovementEvent event) {
         if (fallModeConfig.getValue() == FallMode.SHIFT) {
@@ -115,9 +106,6 @@ public class FastFallModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerMove(PlayerMoveEvent event) {
         if (Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled()) {
@@ -135,9 +123,6 @@ public class FastFallModule extends ToggleModule {
         }
     }
 
-    /**
-     * @return
-     */
     private boolean isNearestBlockWithinHeight(double height) {
         Box bb = mc.player.getBoundingBox();
         for (double i = 0; i < height + 0.5; i += 0.01) {

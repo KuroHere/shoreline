@@ -346,8 +346,7 @@ public class NametagsModule extends ToggleModule {
             }
         }
         if (pingConfig.getValue() && mc.getNetworkHandler() != null) {
-            final PlayerListEntry playerEntry =
-                    mc.getNetworkHandler().getPlayerListEntry(player.getGameProfile().getId());
+            PlayerListEntry playerEntry = mc.getNetworkHandler().getPlayerListEntry(player.getGameProfile().getId());
             if (playerEntry != null) {
                 info.append(playerEntry.getLatency());
                 info.append("ms ");

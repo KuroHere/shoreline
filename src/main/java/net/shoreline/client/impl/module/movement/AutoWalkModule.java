@@ -14,8 +14,7 @@ import net.shoreline.client.impl.event.TickEvent;
  */
 public class AutoWalkModule extends ToggleModule {
     //
-    Config<Boolean> lockConfig = new BooleanConfig("Lock", "Stops movement " +
-            "when sneaking or jumping", false);
+    Config<Boolean> lockConfig = new BooleanConfig("Lock", "Stops movement when sneaking or jumping", false);
 
     /**
      *
@@ -24,17 +23,11 @@ public class AutoWalkModule extends ToggleModule {
         super("AutoWalk", "Automatically moves forward", ModuleCategory.MOVEMENT);
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         mc.options.forwardKey.setPressed(false);
     }
 
-    /**
-     *
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE) {

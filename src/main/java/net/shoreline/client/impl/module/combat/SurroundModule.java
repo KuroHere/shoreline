@@ -125,15 +125,11 @@ public class SurroundModule extends PlaceBlockModule {
                 disable();
                 return;
             }
-            BlockPos pos = BlockPos.ofFloored(mc.player.getX(),
-                    mc.player.getY(), mc.player.getZ());
+            BlockPos pos = mc.player.getBlockPos();
             if (shiftDelay < shiftDelayConfig.getValue()) {
                 shiftDelay++;
                 return;
             }
-            //
-            // surround.clear();
-            // placements.clear();
             surround = getSurroundPositions(pos);
             placements = surround.stream().filter(p -> mc.world.isAir(p)).toList();
             while (blocksPlaced < shiftTicksConfig.getValue()
@@ -178,7 +174,6 @@ public class SurroundModule extends PlaceBlockModule {
                     continue;
                 }
                 BlockPos pos1 = pos.add(dir.getVector());
-                //
                 List<Entity> box = mc.world.getOtherEntities(null, new Box(pos1))
                         .stream().filter(e -> !checkSurroundEntity(e)).toList();
                 if (box.isEmpty()) {

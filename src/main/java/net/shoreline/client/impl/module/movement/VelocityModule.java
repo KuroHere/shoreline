@@ -36,23 +36,13 @@ import java.text.DecimalFormat;
  * @since 1.0
  */
 public class VelocityModule extends ToggleModule {
-    Config<VelocityMode> modeConfig = new EnumConfig<>("Mode",
-            "The anti-cheat bypass for velocity", VelocityMode.NORMAL,
-            VelocityMode.values());
-    Config<Float> horizontalConfig = new NumberConfig<>("Horizontal",
-            "How much horizontal knock-back to take", 0.0f, 0.0f, 100.0f,
-            NumberDisplay.PERCENT, () -> modeConfig.getValue() == VelocityMode.NORMAL);
-    Config<Float> verticalConfig = new NumberConfig<>("Vertical",
-            "How much vertical knock-back to take", 0.0f, 0.0f, 100.0f,
-            NumberDisplay.PERCENT, () -> modeConfig.getValue() == VelocityMode.NORMAL);
-    Config<Boolean> pushEntitiesConfig = new BooleanConfig("NoPush-Entities",
-            "Prevents being pushed away from entities", true);
-    Config<Boolean> pushBlocksConfig = new BooleanConfig("NoPush-Blocks",
-            "Prevents being pushed out of blocks", true);
-    Config<Boolean> pushLiquidsConfig = new BooleanConfig("NoPush-Liquids",
-            "Prevents being pushed by flowing liquids", true);
-    Config<Boolean> pushFishhookConfig = new BooleanConfig("NoPush-Fishhook",
-            "Prevents being pulled by fishing rod hooks", true);
+    Config<VelocityMode> modeConfig = new EnumConfig<>("Mode", "The mode for velocity", VelocityMode.NORMAL, VelocityMode.values());
+    Config<Float> horizontalConfig = new NumberConfig<>("Horizontal", "How much horizontal knock-back to take", 0.0f, 0.0f, 100.0f, NumberDisplay.PERCENT, () -> modeConfig.getValue() == VelocityMode.NORMAL);
+    Config<Float> verticalConfig = new NumberConfig<>("Vertical", "How much vertical knock-back to take", 0.0f, 0.0f, 100.0f, NumberDisplay.PERCENT, () -> modeConfig.getValue() == VelocityMode.NORMAL);
+    Config<Boolean> pushEntitiesConfig = new BooleanConfig("NoPush-Entities", "Prevents being pushed away from entities", true);
+    Config<Boolean> pushBlocksConfig = new BooleanConfig("NoPush-Blocks", "Prevents being pushed out of blocks", true);
+    Config<Boolean> pushLiquidsConfig = new BooleanConfig("NoPush-Liquids", "Prevents being pushed by flowing liquids", true);
+    Config<Boolean> pushFishhookConfig = new BooleanConfig("NoPush-Fishhook", "Prevents being pulled by fishing rod hooks", true);
     //
     private boolean cancelVelocity;
 
@@ -64,9 +54,6 @@ public class VelocityModule extends ToggleModule {
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         if (modeConfig.getValue() == VelocityMode.NORMAL) {
@@ -83,9 +70,6 @@ public class VelocityModule extends ToggleModule {
         cancelVelocity = false;
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null || mc.world == null) {
@@ -160,15 +144,20 @@ public class VelocityModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE && cancelVelocity) {
             if (modeConfig.getValue() == VelocityMode.GRIM && Managers.NCP.passed(100)) {
+                // Fixes issue with rotations
+                float yaw = mc.player.getYaw();
+                float pitch = mc.player.getPitch();
+                if (Managers.ROTATION.isRotating())
+                {
+                    yaw = Managers.ROTATION.getRotationYaw();
+                    pitch = Managers.ROTATION.getRotationPitch();
+                }
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
-                        mc.player.getY(), mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround()));
+                        mc.player.getY(), mc.player.getZ(), yaw, pitch, mc.player.isOnGround()));
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
                         mc.player.getBlockPos(), mc.player.getHorizontalFacing().getOpposite()));
             }
@@ -176,9 +165,6 @@ public class VelocityModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPushEntity(PushEntityEvent event) {
         if (pushEntitiesConfig.getValue()) {
@@ -186,9 +172,6 @@ public class VelocityModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPushOutOfBlocks(PushOutOfBlocksEvent event) {
         if (pushBlocksConfig.getValue()) {
@@ -196,9 +179,6 @@ public class VelocityModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPushFluid(PushFluidsEvent event) {
         if (pushLiquidsConfig.getValue()) {

@@ -35,11 +35,8 @@ import net.shoreline.client.util.string.EnumFormatter;
  */
 public class JesusModule extends ToggleModule {
     //
-    Config<JesusMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
-            "walking on water", JesusMode.SOLID, JesusMode.values());
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "NCP Updated " +
-            "bypass for floating offsets", false,
-            () -> modeConfig.getValue() == JesusMode.SOLID);
+    Config<JesusMode> modeConfig = new EnumConfig<>("Mode", "The mode for walking on water", JesusMode.SOLID, JesusMode.values());
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "NCP Updated bypass for floating offsets", false, () -> modeConfig.getValue() == JesusMode.SOLID);
     //
     private int floatTimer = 1000;
     private boolean fluidState;
@@ -53,17 +50,11 @@ public class JesusModule extends ToggleModule {
         super("Jesus", "Allow player to walk on water", ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         floatOffset = 0.0;
@@ -72,9 +63,6 @@ public class JesusModule extends ToggleModule {
         KeyBinding.setKeyPressed(((AccessorKeyBinding) mc.options.jumpKey).getBoundKey(), false);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onBlockCollision(BlockCollisionEvent event) {
         BlockState state = event.getState();
@@ -98,9 +86,6 @@ public class JesusModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerJump(PlayerJumpEvent event) {
         if (!isInFluid() && isOnFluid()) {
@@ -108,9 +93,6 @@ public class JesusModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE) {
@@ -142,9 +124,6 @@ public class JesusModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled()) {
@@ -181,9 +160,6 @@ public class JesusModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (event.isClientPacket() || mc.player == null || mc.getNetworkHandler() == null
@@ -213,18 +189,10 @@ public class JesusModule extends ToggleModule {
         return mc.player.isTouchingWater() || mc.player.isInLava();
     }
 
-    /**
-     * @param box
-     * @return
-     */
     public BlockState getFluidBlockInBB(Box box) {
         return getFluidBlockInBB(MathHelper.floor(box.minY - 0.2));
     }
 
-    /**
-     * @param minY
-     * @return
-     */
     public BlockState getFluidBlockInBB(int minY) {
         for (int i = MathHelper.floor(mc.player.getBoundingBox().minX); i < MathHelper.ceil(mc.player.getBoundingBox().maxX); i++) {
             for (int j = MathHelper.floor(mc.player.getBoundingBox().minZ); j < MathHelper.ceil(mc.player.getBoundingBox().maxZ); j++) {
@@ -237,9 +205,6 @@ public class JesusModule extends ToggleModule {
         return null;
     }
 
-    /**
-     * @return
-     */
     public boolean isOnFluid() {
         if (mc.player.fallDistance >= 3.0f) {
             return false;

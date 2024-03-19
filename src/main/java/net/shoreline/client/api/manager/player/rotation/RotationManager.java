@@ -251,6 +251,18 @@ public class RotationManager implements Globals {
         return rotateTicks > Modules.ROTATIONS.getPreserveTicks();
     }
 
+    public boolean isRotating() {
+        return rotation != null;
+    }
+
+    public float getRotationYaw() {
+        return rotation.getYaw();
+    }
+
+    public float getRotationPitch() {
+        return rotation.getPitch();
+    }
+
     /**
      * @return
      */

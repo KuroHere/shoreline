@@ -29,12 +29,9 @@ import net.shoreline.client.util.string.EnumFormatter;
  */
 public class LongJumpModule extends ToggleModule {
     //
-    Config<JumpMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
-            "long jump", JumpMode.NORMAL, JumpMode.values());
-    Config<Float> boostConfig = new NumberConfig<>("Boost", "The jump boost " +
-            "speed", 0.1f, 4.5f, 10.0f, () -> modeConfig.getValue() == JumpMode.NORMAL);
-    Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable", "Automatically" +
-            " disables when rubberband is detected", true);
+    Config<JumpMode> modeConfig = new EnumConfig<>("Mode", "The mode for long jump", JumpMode.NORMAL, JumpMode.values());
+    Config<Float> boostConfig = new NumberConfig<>("Boost", "The jump boost speed", 0.1f, 4.5f, 10.0f, () -> modeConfig.getValue() == JumpMode.NORMAL);
+    Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable", "Automatically disables when rubberband is detected", true);
     //
     private int stage;
     private double distance;
@@ -51,34 +48,22 @@ public class LongJumpModule extends ToggleModule {
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         groundTicks = 0;
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         stage = 0;
         distance = 0.0;
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -89,9 +74,6 @@ public class LongJumpModule extends ToggleModule {
         distance = Math.sqrt(dx * dx + dz * dz);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerMove(PlayerMoveEvent event) {
         if (modeConfig.getValue() == JumpMode.NORMAL) {
@@ -140,9 +122,6 @@ public class LongJumpModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         // Direkt LongJump
@@ -325,9 +304,6 @@ public class LongJumpModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null || mc.world == null

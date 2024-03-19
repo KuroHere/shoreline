@@ -25,6 +25,7 @@ public class TooltipsModule extends ToggleModule {
     Config<Boolean> enderChestsConfig = new BooleanConfig("EnderChests", "Renders all the contents of ender chests in tooltips", false);
     Config<Boolean> shulkersConfig = new BooleanConfig("Shulkers", "Renders all the contents of shulkers in tooltips", true);
     Config<Boolean> mapsConfig = new BooleanConfig("Maps", "Renders a preview of maps in tooltips", false);
+
     public TooltipsModule() {
         super("Tooltips", "Renders detailed tooltips showing items",
                 ModuleCategory.RENDER);

@@ -33,9 +33,7 @@ public class FastPlaceModule extends ToggleModule {
     //
     private final CacheTimer startTimer = new CacheTimer();
     //
-    Config<Selection> selectionConfig = new EnumConfig<>("Selection", "The " +
-            "selection of items to apply fast placements", Selection.WHITELIST,
-            Selection.values());
+    Config<Selection> selectionConfig = new EnumConfig<>("Selection", "The selection of items to apply fast placements", Selection.WHITELIST, Selection.values());
     Config<Integer> delayConfig = new NumberConfig<>("Delay", "Fast place click delay", 0, 1, 4);
     Config<Float> startDelayConfig = new NumberConfig<>("StartDelay", "Fast place start delay", 0.0f, 0.0f, 1.0f);
     Config<Boolean> ghostFixConfig = new BooleanConfig("GhostFix", "Fixes item ghosting issue on some servers", false);

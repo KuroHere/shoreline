@@ -49,10 +49,10 @@ public class SpeedmineModule extends RotationModule {
     Config<Float> mineSpeedConfig = new NumberConfig<>("Speed", "The speed to mine blocks", 0.0f, 0.7f, 0.9f, () -> modeConfig.getValue() == SpeedmineMode.DAMAGE);
     Config<Boolean> instantConfig = new BooleanConfig("Instant", "Instantly removes the mining block", false);
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range for mine", 1.0f, 4.5f, 5.0f);
-    Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best " + "tool once the mining is complete", Swap.SILENT, Swap.values());
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates" + " when mining the block", true);
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool" + " using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF);
-    Config<Boolean> fastConfig = new BooleanConfig("Fast", "Attempts to " + "instantly remine blocks", false);
+    Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best tool once the mining is complete", Swap.SILENT, Swap.values());
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates when mining the block", true);
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF);
+    Config<Boolean> fastConfig = new BooleanConfig("Fast", "Attempts to instantly remine blocks", false);
     Config<Boolean> remineConfig = new BooleanConfig("Remine", "Attempts to remine blocks", true);
     Config<Boolean> remineFullConfig = new BooleanConfig("Remine-Full", "Resets the block breaking state when remining", true, () -> remineConfig.getValue());
     Config<Boolean> remineInfiniteConfig = new BooleanConfig("Remine-Infinite", "Attempts to remine blocks infinitely", false, () -> remineConfig.getValue());

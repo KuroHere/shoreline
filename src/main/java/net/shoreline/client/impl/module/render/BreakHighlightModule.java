@@ -20,7 +20,7 @@ import net.shoreline.client.mixin.accessor.AccessorWorldRenderer;
  */
 public class BreakHighlightModule extends ToggleModule {
 
-    Config<Float> rangeConfig = new NumberConfig<>("Range", "The ranged to " + "render breaking blocks", 5.0f, 20.0f, 50.0f);
+    Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to render breaking blocks", 5.0f, 20.0f, 50.0f);
 
     public BreakHighlightModule() {
         super("BreakHighlight", "Highlights blocks that are being broken",
@@ -38,7 +38,7 @@ public class BreakHighlightModule extends ToggleModule {
                 blockBreakProgressions.int2ObjectEntrySet()) {
             BlockPos pos = info.getValue().getPos();
             double dist = mc.player.squaredDistanceTo(pos.toCenterPos());
-            if (dist > rangeConfig.getValue() * rangeConfig.getValue()) {
+            if (dist > ((NumberConfig) rangeConfig).getValueSq()) {
                 continue;
             }
             int damage = info.getValue().getStage();

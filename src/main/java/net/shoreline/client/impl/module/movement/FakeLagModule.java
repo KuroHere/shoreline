@@ -25,15 +25,14 @@ import java.util.Set;
  * @since 1.0
  */
 public class FakeLagModule extends ToggleModule {
+
     //
-    private final Set<Packet<?>> packets = new HashSet<>();
-    //
-    Config<LagMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
-            "caching packets", LagMode.BLINK, LagMode.values());
-    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders the " +
-            "serverside player postion", true);
+    Config<LagMode> modeConfig = new EnumConfig<>("Mode", "The mode for caching packets", LagMode.BLINK, LagMode.values());
+    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders the serverside player postion", true);
     //
     private FakePlayerEntity serverModel;
+    //
+    private final Set<Packet<?>> packets = new HashSet<>();
 
     /**
      *
@@ -43,9 +42,6 @@ public class FakeLagModule extends ToggleModule {
                 "clientside lag", ModuleCategory.MOVEMENT);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         if (renderConfig.getValue()) {
@@ -54,9 +50,6 @@ public class FakeLagModule extends ToggleModule {
         }
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         if (mc.player == null) {
@@ -80,18 +73,12 @@ public class FakeLagModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onDisconnectEvent(DisconnectEvent event) {
         // packets.clear();
         disable();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (mc.player == null || mc.player.isRiding()) {

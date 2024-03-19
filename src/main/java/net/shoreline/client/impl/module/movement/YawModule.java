@@ -13,6 +13,7 @@ import net.shoreline.client.impl.event.TickEvent;
  * @since 1.0
  */
 public class YawModule extends ToggleModule {
+
     /**
      *
      */
@@ -21,9 +22,6 @@ public class YawModule extends ToggleModule {
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE) {

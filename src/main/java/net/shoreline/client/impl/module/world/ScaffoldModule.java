@@ -15,12 +15,9 @@ import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
  */
 public class ScaffoldModule extends RotationModule {
     //
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates " +
-            "before placing blocks", false);
-    Config<Boolean> towerConfig = new BooleanConfig("Tower", "Automatically" +
-            " towers when jumping", true);
-    Config<Boolean> stopSprintConfig = new BooleanConfig("StopSprint", "Stops" +
-            " sprinting when placing blocks", false);
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates before placing blocks", false);
+    Config<Boolean> towerConfig = new BooleanConfig("Tower", "Automatically towers when jumping", true);
+    Config<Boolean> stopSprintConfig = new BooleanConfig("StopSprint", "Stops sprinting when placing blocks", false);
     Config<Boolean> keepYConfig = new BooleanConfig("KeepY", "Maintains the y-level of the player", false);
     private double y;
 

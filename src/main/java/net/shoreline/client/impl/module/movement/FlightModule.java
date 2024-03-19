@@ -19,19 +19,15 @@ import net.shoreline.client.util.string.EnumFormatter;
  * @since 1.0
  */
 public class FlightModule extends ToggleModule {
+
+    //
+    Config<FlightMode> modeConfig = new EnumConfig<>("Mode", "The mode for vanilla flight", FlightMode.CREATIVE, FlightMode.values());
+    Config<Float> speedConfig = new NumberConfig<>("Speed", "The horizontal flight speed", 0.1f, 2.5f, 10.0f);
+    Config<Float> vspeedConfig = new NumberConfig<>("VerticalSpeed", "The vertical flight speed", 0.1f, 1.0f, 5.0f);
+    Config<Boolean> airStrictConfig = new BooleanConfig("StrictAccel", "Accounts for air friction when flying", false);
+    Config<Boolean> antiKickConfig = new BooleanConfig("AntiKick", "Prevents vanilla flight detection", true);
     //
     private final Timer antiKickTimer = new CacheTimer();
-    //
-    Config<FlightMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
-            "vanilla flight", FlightMode.CREATIVE, FlightMode.values());
-    Config<Float> speedConfig = new NumberConfig<>("Speed", "The horizontal " +
-            "flight speed", 0.1f, 2.5f, 10.0f);
-    Config<Float> vspeedConfig = new NumberConfig<>("VerticalSpeed", "The " +
-            "vertical flight speed", 0.1f, 1.0f, 5.0f);
-    Config<Boolean> airStrictConfig = new BooleanConfig("StrictAccel",
-            "Accounts for air friction when flying", false);
-    Config<Boolean> antiKickConfig = new BooleanConfig("AntiKick", "Prevents " +
-            "vanilla flight detection", true);
 
     /**
      *
@@ -41,17 +37,11 @@ public class FlightModule extends ToggleModule {
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         antiKickTimer.reset();
@@ -60,9 +50,6 @@ public class FlightModule extends ToggleModule {
         }
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         if (modeConfig.getValue() == FlightMode.VANILLA) {
@@ -70,9 +57,6 @@ public class FlightModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerMove(PlayerMoveEvent event) {
         event.cancel();
@@ -105,9 +89,6 @@ public class FlightModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onConfigUpdate(ConfigUpdateEvent event) {
         if (event.getConfig() == modeConfig && event.getStage() == EventStage.POST) {

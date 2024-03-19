@@ -21,8 +21,9 @@ public class NoWeatherModule extends ToggleModule {
 
     Config<Weather> weatherConfig = new EnumConfig<>("Weather", "The world weather", Weather.CLEAR, Weather.values());
     Config<Integer> dayTimeConfig = new NumberConfig<>("Time", "The world time of day", 0, 6000, 24000);
-
+    // The current weather mode
     private Weather weather;
+
     public NoWeatherModule() {
         super("NoWeather", "Prevents weather rendering", ModuleCategory.RENDER);
     }

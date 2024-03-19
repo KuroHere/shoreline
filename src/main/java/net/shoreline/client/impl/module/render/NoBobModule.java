@@ -14,6 +14,7 @@ public class NoBobModule extends ToggleModule {
     public NoBobModule() {
         super("NoBob", "Prevents the hand from bobbing while moving", ModuleCategory.RENDER);
     }
+
     @EventListener
     public void onBobView(BobViewEvent event) {
         event.cancel();

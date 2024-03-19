@@ -41,49 +41,24 @@ import java.util.List;
  */
 public class AutoTotemModule extends ToggleModule {
     //
-    private static final int OFFHAND_SLOT = 45;
-    //
-    Config<TickStage> tickStageConfig = new EnumConfig<>("TickStage", "Tick stage " +
-            "to run the totem swap. (Note: LOOP will run much more frequently " +
+    Config<TickStage> tickStageConfig = new EnumConfig<>("TickStage", "Tick stage to run the totem swap. (Note: LOOP will run much more frequently " +
             "than TICK, may cause performance issues)", TickStage.TICK, TickStage.values());
-    Config<OffhandItem> offhandConfig = new EnumConfig<>("Offhand", "Item to " +
-            "keep in offhand when in a safe environment", OffhandItem.TOTEM, OffhandItem.values());
-    Config<Float> healthConfig = new NumberConfig<>("Health", "Lethal offhand" +
-            " health", 0.0f, 0.0f, 20.0f);
-    Config<Boolean> lethalConfig = new BooleanConfig("Lethal",
-            "Calculate lethal damage sources and place totem in offhand", false);
-    Config<Boolean> instantConfig = new BooleanConfig("Instant",
-            "Attempt to instantly replace totem in offhand after popping a " +
-                    "totem", false);
-    Config<Boolean> fallbackCrystalConfig = new BooleanConfig(
-            "FallbackCrystal", "Fallback to END_CRYSTAL when there are no " +
-            "totems", true);
-    Config<Boolean> strictActionConfig = new BooleanConfig("StrictActions",
-            "Stops actions before clicking slots", false);
-    Config<Boolean> strictMoveConfig = new BooleanConfig("StrictMove",
-            "Stops motion before clicking slots", false);
-    Config<Boolean> offhandOverrideConfig = new BooleanConfig(
-            "Offhand-Override", "Overrides the Offhand item with a " +
-            "GOLDEN_APPLE when trying to use an item", false);
-    Config<Boolean> offhandPotionConfig = new BooleanConfig("Offhand-Potions",
-            "Uses potions in the inventory before gapples", false);
-    Config<Boolean> hotbarConfig = new BooleanConfig("AllowHotbar",
-            "Allow offhand items to be taken from the hotbar", false);
-    Config<Boolean> noCollisionConfig = new BooleanConfig("CollisionTotem",
-            "If the mainhand is already holding the item in the offhand, " +
-                    "place a totem in the offhand instead", false);
-    Config<Boolean> crappleConfig = new BooleanConfig("Crapple",
-            "Attempts to take an advantage of a glitch in older versions to " +
-                    "fully restore absorption hearts", false);
-    Config<Boolean> crystalCheckConfig = new BooleanConfig("Crystal-Check",
-            "Checks if a crystal is needed in the offhand", false);
-    Config<Boolean> hotbarTotemConfig = new BooleanConfig("HotbarTotem",
-            "Attempts to swap totems into the offhand from the hotbar", false);
-    Config<Integer> totemSlotConfig = new NumberConfig<>("TotemSlot", "Slot " +
-            "in the hotbar that is dedicated for hotbar totem swaps", 0, 8, 8,
-            () -> hotbarTotemConfig.getValue());
-    Config<Boolean> debugConfig = new BooleanConfig("Offhand-Debug",
-            "Displays the current item in the offhand", false);
+    Config<OffhandItem> offhandConfig = new EnumConfig<>("Offhand", "Item to keep in offhand when in a safe environment", OffhandItem.TOTEM, OffhandItem.values());
+    Config<Float> healthConfig = new NumberConfig<>("Health", "Lethal offhand health", 0.0f, 0.0f, 20.0f);
+    Config<Boolean> lethalConfig = new BooleanConfig("Lethal", "Calculate lethal damage sources and place totem in offhand", false);
+    Config<Boolean> instantConfig = new BooleanConfig("Instant", "Attempt to instantly replace totem in offhand after popping a totem", false);
+    Config<Boolean> fallbackCrystalConfig = new BooleanConfig("FallbackCrystal", "Fallback to END_CRYSTAL when there are no totems", true);
+    Config<Boolean> strictActionConfig = new BooleanConfig("Strict-Click", "Stops actions before clicking slots", false);
+    Config<Boolean> strictMoveConfig = new BooleanConfig("Strict-Move", "Stops motion before clicking slots", false);
+    Config<Boolean> offhandOverrideConfig = new BooleanConfig("Offhand-Override", "Overrides the Offhand item with a GOLDEN_APPLE when trying to use an item", false);
+    Config<Boolean> offhandPotionConfig = new BooleanConfig("Offhand-Potions", "Uses potions in the inventory before gapples", false);
+    Config<Boolean> hotbarConfig = new BooleanConfig("AllowHotbar", "Allow offhand items to be taken from the hotbar", false);
+    Config<Boolean> noCollisionConfig = new BooleanConfig("CollisionTotem", "If the mainhand is already holding the item in the offhand, place a totem in the offhand instead", false);
+    Config<Boolean> crappleConfig = new BooleanConfig("Crapple", "Attempts to take an advantage of a glitch in older versions to fully restore absorption hearts", false);
+    Config<Boolean> crystalCheckConfig = new BooleanConfig("Crystal-Check", "Checks if a crystal is needed in the offhand", false);
+    Config<Boolean> hotbarTotemConfig = new BooleanConfig("HotbarTotem", "Attempts to swap totems into the offhand from the hotbar", false);
+    Config<Integer> totemSlotConfig = new NumberConfig<>("TotemSlot", "Slot in the hotbar that is dedicated for hotbar totem swaps", 0, 8, 8, () -> hotbarTotemConfig.getValue());
+    Config<Boolean> debugConfig = new BooleanConfig("Debug-Offhand", "Displays the current item in the offhand", false);
     //
     private Item offhand;
     //
@@ -92,6 +67,8 @@ public class AutoTotemModule extends ToggleModule {
     private boolean popTick;
     private int slotTotem;
     private int totems;
+    //
+    private static final int OFFHAND_SLOT = 45;
 
     /**
      *
@@ -101,9 +78,6 @@ public class AutoTotemModule extends ToggleModule {
                 ModuleCategory.COMBAT);
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         offhand = null;
@@ -114,9 +88,6 @@ public class AutoTotemModule extends ToggleModule {
         popTick = false;
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         if (offhand != null && debugConfig.getValue()) {
@@ -125,9 +96,6 @@ public class AutoTotemModule extends ToggleModule {
         return Integer.toString(totems);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRunTick(RunTickEvent event) {
         // runs before mc gameloop ...
@@ -137,9 +105,6 @@ public class AutoTotemModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (tickStageConfig.getValue() == TickStage.TICK
@@ -158,8 +123,8 @@ public class AutoTotemModule extends ToggleModule {
         int slotPotion = -1;
         final ItemStack off = mc.player.getOffHandStack();
         if (hotbarTotemConfig.getValue()) {
-            int idx = totemSlotConfig.getValue() + 36;
-            ItemStack slot = mc.player.getInventory().getStack(idx);
+            int totemIdx = totemSlotConfig.getValue() + 36;
+            ItemStack slot = mc.player.getInventory().getStack(totemIdx);
             if (slot.getItem() == Items.TOTEM_OF_UNDYING) {
                 totemCount++;
                 slotTotem = totemSlotConfig.getValue();
@@ -173,8 +138,7 @@ public class AutoTotemModule extends ToggleModule {
                         continue;
                     }
                     slotTotem = i;
-                } else if (offhandPotionConfig.getValue()
-                        && slot.getItem() == Items.POTION) {
+                } else if (offhandPotionConfig.getValue() && slot.getItem() == Items.POTION) {
                     final List<StatusEffectInstance> list =
                             PotionUtil.getPotionEffects(slot);
                     boolean harm = list.stream().anyMatch(p -> !p.getEffectType().isBeneficial());
@@ -190,16 +154,13 @@ public class AutoTotemModule extends ToggleModule {
             return;
         }
         OffhandItem offhandItem = offhandConfig.getValue();
-        offhand = crystalCheckConfig.getValue()
-                && Modules.AUTO_CRYSTAL.isPlacing() ?
+        offhand = crystalCheckConfig.getValue() && Modules.AUTO_CRYSTAL.isPlacing() ?
                 Items.END_CRYSTAL : offhandItem.getItem();
         //
         final ItemStack mainhand = mc.player.getMainHandStack();
-        if (mainhand.getItem() instanceof SwordItem
-                && mc.options.useKey.isPressed()
+        if (mainhand.getItem() instanceof SwordItem && mc.options.useKey.isPressed()
                 && offhandOverrideConfig.getValue()) {
-            offhand = slotPotion != -1 ? Items.POTION :
-                    Items.GOLDEN_APPLE;
+            offhand = slotPotion != -1 && offhandPotionConfig.getValue() ? Items.POTION : Items.GOLDEN_APPLE;
         }
         if (!mc.player.isCreative()) {
             float health = mc.player.getHealth() + mc.player.getAbsorptionAmount();
@@ -294,11 +255,13 @@ public class AutoTotemModule extends ToggleModule {
                 }
             }
         }
-        if (slotOffhand == -1) {
+        if (slotOffhand == -1 && slotTotem != -1) {
             // ChatUtil.error("No %s left in inventory!", offhand.getName());
             slotOffhand = slotTotem;
+            offhand = Items.TOTEM_OF_UNDYING;
+            slotTotem = -1;
         }
-        if (slotOffhand != -1 && (off.isEmpty() || off.getItem() != offhand)) {
+        if (slotOffhand != -1 && (off.isEmpty() || !off.getItem().equals(offhand))) {
             preClickSlot();
             boolean returnClick = !off.isEmpty();
             if (returnClick) {
@@ -306,15 +269,11 @@ public class AutoTotemModule extends ToggleModule {
             }
             Managers.INVENTORY.pickupSlot(slotOffhand);
             Managers.INVENTORY.pickupSlot(OFFHAND_SLOT);
-
             // Managers.INVENTORY.closeScreen();
             postClickSlot();
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null || mc.world == null) {
@@ -344,9 +303,6 @@ public class AutoTotemModule extends ToggleModule {
         }
     }
 
-    /**
-     *
-     */
     private void preClickSlot() {
         sneaking = Managers.POSITION.isSneaking();
         sprinting = Managers.POSITION.isSprinting();
@@ -372,9 +328,6 @@ public class AutoTotemModule extends ToggleModule {
         }
     }
 
-    /**
-     *
-     */
     private void postClickSlot() {
         if (strictActionConfig.getValue()) {
             if (sneaking) {
@@ -390,10 +343,6 @@ public class AutoTotemModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param fallDistance
-     * @return
-     */
     private int computeFallDamage(float fallDistance) {
         StatusEffectInstance statusEffectInstance = mc.player.getStatusEffect(StatusEffects.JUMP_BOOST);
         float f = statusEffectInstance == null ? 0.0f :
@@ -401,10 +350,6 @@ public class AutoTotemModule extends ToggleModule {
         return MathHelper.ceil(fallDistance - 3.0f - f);
     }
 
-    /**
-     * @param stack
-     * @return
-     */
     private boolean isStackInOffhand(final ItemStack stack) {
         final ItemStack offhand = mc.player.getOffHandStack();
         if (offhand.isEmpty()) {

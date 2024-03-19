@@ -20,8 +20,7 @@ import net.shoreline.client.util.string.EnumFormatter;
  */
 public class NoFallModule extends ToggleModule {
     //
-    Config<NoFallMode> modeConfig = new EnumConfig<>("Mode", "The mode to " +
-            "prevent fall damage", NoFallMode.ANTI, NoFallMode.values());
+    Config<NoFallMode> modeConfig = new EnumConfig<>("Mode", "The mode to prevent fall damage", NoFallMode.ANTI, NoFallMode.values());
 
     /**
      *

@@ -11,6 +11,7 @@ import net.shoreline.client.impl.event.TickEvent;
  * @since 1.0
  */
 public class ParkourModule extends ToggleModule {
+
     /**
      *
      */
@@ -19,9 +20,6 @@ public class ParkourModule extends ToggleModule {
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {

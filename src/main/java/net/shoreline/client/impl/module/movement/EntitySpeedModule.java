@@ -26,15 +26,13 @@ import java.text.DecimalFormat;
  * @since 1.0
  */
 public class EntitySpeedModule extends ToggleModule {
+
+    //
+    Config<Float> speedConfig = new NumberConfig<>("Speed", "The speed of the entity while moving", 0.1f, 0.5f, 4.0f);
+    Config<Boolean> antiStuckConfig = new BooleanConfig("AntiStuck", "Prevents entities from getting stuck when moving up", false);
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "The NCP-Updated bypass for speeding up entity movement", false);
     //
     private final Timer entityJumpTimer = new CacheTimer();
-    //
-    Config<Float> speedConfig = new NumberConfig<>("Speed", "The speed of the" +
-            " entity while moving", 0.1f, 0.5f, 4.0f);
-    Config<Boolean> antiStuckConfig = new BooleanConfig("AntiStuck",
-            "Prevents entities from getting stuck when moving up", false);
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "The NCP" +
-            "-Updated bypass for speeding up entity movement", false);
 
     /**
      *
@@ -43,18 +41,12 @@ public class EntitySpeedModule extends ToggleModule {
         super("EntitySpeed", "Increases riding entity speeds", ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(speedConfig.getValue());
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -108,9 +100,6 @@ public class EntitySpeedModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null || !mc.player.isRiding() || mc.options.sneakKey.isPressed()
@@ -126,11 +115,6 @@ public class EntitySpeedModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param entitySpeed
-     * @param d
-     * @param d2
-     */
     private void handleEntityMotion(float entitySpeed, double d, double d2) {
         Vec3d motion = mc.player.getVehicle().getVelocity();
         //

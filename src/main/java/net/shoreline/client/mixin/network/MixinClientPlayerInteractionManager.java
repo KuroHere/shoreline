@@ -21,6 +21,7 @@ import net.shoreline.client.impl.event.network.AttackBlockEvent;
 import net.shoreline.client.impl.event.network.BreakBlockEvent;
 import net.shoreline.client.impl.event.network.InteractBlockEvent;
 import net.shoreline.client.impl.event.network.ReachEvent;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -125,9 +126,15 @@ public abstract class MixinClientPlayerInteractionManager implements Globals {
             cir.setReturnValue(ActionResult.PASS);
         }
         syncSelectedSlot();
-        // TODO: ROTATION SYNC
+        float yaw = mc.player.getYaw();
+        float pitch = mc.player.getPitch();
+        if (Managers.ROTATION.isRotating())
+        {
+            yaw = Managers.ROTATION.getRotationYaw();
+            pitch = Managers.ROTATION.getRotationPitch();
+        }
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(),
-                player.getYaw(), player.getPitch(), player.isOnGround()));
+                yaw, pitch, player.isOnGround()));
         MutableObject mutableObject = new MutableObject();
         sendSequencedPacket(mc.world, sequence -> {
             PlayerInteractItemC2SPacket playerInteractItemC2SPacket = new PlayerInteractItemC2SPacket(hand, sequence);

@@ -5,6 +5,7 @@ import net.shoreline.client.api.module.ToggleModule;
 
 // Is this still necessary in 1.19?
 public class FastSwimModule extends ToggleModule {
+
     /**
      *
      */

@@ -10,6 +10,7 @@ import net.shoreline.client.mixin.accessor.AccessorAbstractBlock;
  * @since 1.0
  */
 public class IceSpeedModule extends ToggleModule {
+
     /**
      *
      */
@@ -18,9 +19,6 @@ public class IceSpeedModule extends ToggleModule {
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         if (mc.world == null) {
@@ -32,9 +30,6 @@ public class IceSpeedModule extends ToggleModule {
         ((AccessorAbstractBlock) Blocks.FROSTED_ICE).setSlipperiness(0.4f);
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         if (mc.world == null) {

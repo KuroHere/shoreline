@@ -36,32 +36,17 @@ import net.shoreline.client.util.world.FakePlayerEntity;
  */
 public class SpeedModule extends ToggleModule {
     //
-    Config<Boolean> directionalConfig = new BooleanConfig("Directional",
-            "Allows player to move in all directions", true);
-    Config<Speed> speedModeConfig = new EnumConfig<>("Mode", "Speed mode",
-            Speed.STRAFE, Speed.values());
-    Config<Boolean> bhopStrafeConfig = new BooleanConfig("Strafe-BHop",
-            "Applies NCP magic bhop number", false,
-            () -> speedModeConfig.getValue() == Speed.STRAFE);
-    Config<Boolean> vanillaStrafeConfig = new BooleanConfig("Strafe-Vanilla",
-            "Applies strafe speeds to vanilla speed", false,
-            () -> speedModeConfig.getValue() == Speed.VANILLA);
-    Config<Float> speedConfig = new NumberConfig<>("Speed", "The" +
-            " speed for alternative modes", 0.1f, 4.0f, 10.0f);
-    Config<Boolean> strictJumpConfig = new BooleanConfig("StrictJump", "Use " +
-            "slightly higher and slower jumps to bypass NCP", false,
-            () -> speedModeConfig.getValue() == Speed.STRAFE_STRICT);
-    Config<Boolean> timerConfig = new BooleanConfig("UseTimer", "Uses " +
-            "timer to increase acceleration", false);
-    Config<Boolean> strafeBoostConfig = new BooleanConfig("StrafeBoost",
-            "Uses explosion velocity to boost Strafe", false);
-    Config<Integer> boostTicksConfig = new NumberConfig<>("BoostTicks",
-            "The number of ticks to boost strafe", 10, 20, 40,
-            () -> strafeBoostConfig.getValue());
-    Config<Boolean> speedWaterConfig = new BooleanConfig("SpeedInWater",
-            "Applies speed even in water and lava", false);
-    Config<Boolean> factorConfig = new BooleanConfig("Entity-Factor",
-            "Factors entity collisions in speed", false);
+    Config<Boolean> directionalConfig = new BooleanConfig("Directional", "Allows player to move in all directions", true);
+    Config<Speed> speedModeConfig = new EnumConfig<>("Mode", "Speed mode", Speed.STRAFE, Speed.values());
+    Config<Boolean> bhopStrafeConfig = new BooleanConfig("Strafe-BHop", "Applies NCP magic bhop number", false, () -> speedModeConfig.getValue() == Speed.STRAFE);
+    Config<Boolean> vanillaStrafeConfig = new BooleanConfig("Strafe-Vanilla", "Applies strafe speeds to vanilla speed", false, () -> speedModeConfig.getValue() == Speed.VANILLA);
+    Config<Float> speedConfig = new NumberConfig<>("Speed", "The speed for alternative modes", 0.1f, 4.0f, 10.0f);
+    Config<Boolean> strictJumpConfig = new BooleanConfig("StrictJump", "Use slightly higher and slower jumps to bypass NCP", false, () -> speedModeConfig.getValue() == Speed.STRAFE_STRICT);
+    Config<Boolean> timerConfig = new BooleanConfig("UseTimer", "Uses timer to increase acceleration", false);
+    Config<Boolean> strafeBoostConfig = new BooleanConfig("StrafeBoost", "Uses explosion velocity to boost Strafe", false);
+    Config<Integer> boostTicksConfig = new NumberConfig<>("BoostTicks", "The number of ticks to boost strafe", 10, 20, 40, () -> strafeBoostConfig.getValue());
+    Config<Boolean> speedWaterConfig = new BooleanConfig("SpeedInWater", "Applies speed even in water and lava", false);
+    Config<Boolean> factorConfig = new BooleanConfig("Entity-Factor", "Factors entity collisions in speed", false);
     //
     private int strafe = 4;
     private boolean accel;
@@ -81,17 +66,11 @@ public class SpeedModule extends ToggleModule {
         super("Speed", "Move faster", ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         return EnumFormatter.formatEnum(speedModeConfig.getValue());
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         prevTimer = Modules.TIMER.isEnabled();
@@ -101,12 +80,9 @@ public class SpeedModule extends ToggleModule {
         }
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
-        clear();
+        resetStrafe();
         if (Modules.TIMER.isEnabled()) {
             Modules.TIMER.resetTimer();
             if (!prevTimer) {
@@ -115,17 +91,11 @@ public class SpeedModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onDisconnect(DisconnectEvent event) {
         disable();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE) {
@@ -155,23 +125,20 @@ public class SpeedModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerMove(PlayerMoveEvent event) {
         if (mc.player != null && mc.world != null) {
             if (!MovementUtil.isInputtingMovement()
                     || Modules.FLIGHT.isEnabled()
                     || Modules.LONG_JUMP.isEnabled()
-                    //              || Modules.ELYTRA_FLY.isEnabled()
+            //      || Modules.ELYTRA_FLY.isEnabled()
                     || mc.player.isRiding()
                     || mc.player.isFallFlying()
                     || mc.player.isHoldingOntoLadder()
                     || mc.player.fallDistance > 2.0f
                     || (mc.player.isInLava() || mc.player.isTouchingWater())
                     && !speedWaterConfig.getValue()) {
-                clear();
+                resetStrafe();
                 Modules.TIMER.setTimer(1.0f);
                 return;
             }
@@ -493,9 +460,6 @@ public class SpeedModule extends ToggleModule {
                 (float) (forward * speed * Math.cos(Math.toRadians(mc.player.getYaw())) - strafe * speed * -Math.sin(Math.toRadians(mc.player.getYaw()))));
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null || mc.world == null) {
@@ -513,13 +477,10 @@ public class SpeedModule extends ToggleModule {
             boostSpeed = Math.sqrt(x * x + z * z);
             boostTicks = 0;
         } else if (event.getPacket() instanceof PlayerPositionLookS2CPacket) {
-            clear();
+            resetStrafe();
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onConfigUpdate(ConfigUpdateEvent event) {
         if (event.getConfig() == timerConfig && event.getStage() == EventStage.POST
@@ -552,17 +513,11 @@ public class SpeedModule extends ToggleModule {
         prevTimer = !prevTimer;
     }
 
-    /**
-     * @return
-     */
     public boolean isUsingTimer() {
         return isEnabled() && timerConfig.getValue();
     }
 
-    /**
-     *
-     */
-    public void clear() {
+    public void resetStrafe() {
         strafe = 4;
         strictTicks = 0;
         speed = 0.0f;

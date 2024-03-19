@@ -18,10 +18,8 @@ import net.shoreline.client.impl.event.network.MountJumpStrengthEvent;
  */
 public class EntityControlModule extends ToggleModule {
     //
-    Config<Float> jumpStrengthConfig = new NumberConfig<>("JumpStrength",
-            "The fixed jump strength of the mounted entity", 0.1f, 0.7f, 2.0f);
-    Config<Boolean> noPigMoveConfig = new BooleanConfig("NoPigAI", "Prevents" +
-            " the pig movement when controlling pigs", false);
+    Config<Float> jumpStrengthConfig = new NumberConfig<>("JumpStrength", "The fixed jump strength of the mounted entity", 0.1f, 0.7f, 2.0f);
+    Config<Boolean> noPigMoveConfig = new BooleanConfig("NoPigAI", "Prevents the pig movement when controlling pigs", false);
 
     /**
      *

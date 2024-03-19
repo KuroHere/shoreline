@@ -27,20 +27,16 @@ import net.shoreline.client.util.string.EnumFormatter;
  * @since 1.0
  */
 public class StepModule extends ToggleModule {
+
+    //
+    Config<StepMode> modeConfig = new EnumConfig<>("Mode", "Step mode", StepMode.NORMAL, StepMode.values());
+    Config<Float> heightConfig = new NumberConfig<>("Height", "The maximum height for stepping up blocks", 1.0f, 2.5f, 10.0f);
+    Config<Boolean> useTimerConfig = new BooleanConfig("UseTimer", "Slows down packets by applying timer when stepping", true);
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Confirms the step height for NCP servers", false, () -> heightConfig.getValue() <= 2.5f);
+    Config<Boolean> entityStepConfig = new BooleanConfig("EntityStep", "Allows entities to step up blocks", false);
+    private boolean cancelTimer;
     //
     private final Timer stepTimer = new CacheTimer();
-    //
-    Config<StepMode> modeConfig = new EnumConfig<>("Mode", "Step mode",
-            StepMode.NORMAL, StepMode.values());
-    Config<Float> heightConfig = new NumberConfig<>("Height", "The maximum " +
-            "height for stepping up blocks", 1.0f, 2.5f, 10.0f);
-    Config<Boolean> useTimerConfig = new BooleanConfig("UseTimer", "Slows " +
-            "down packets by applying timer when stepping", true);
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Confirms the " +
-            "step height for NCP servers", false, () -> heightConfig.getValue() <= 2.5f);
-    Config<Boolean> entityStepConfig = new BooleanConfig("EntityStep",
-            "Allows entities to step up blocks", false);
-    private boolean cancelTimer;
 
     /**
      *
@@ -50,17 +46,11 @@ public class StepModule extends ToggleModule {
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         if (mc.player == null) {
@@ -70,9 +60,6 @@ public class StepModule extends ToggleModule {
         Managers.TICK.setClientTick(1.0f);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -101,9 +88,6 @@ public class StepModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -127,9 +111,6 @@ public class StepModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent event) {
         if (event.getPacket() instanceof PlayerPositionLookS2CPacket) {
@@ -137,9 +118,6 @@ public class StepModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param stepHeight
-     */
     private void setStepHeight(float stepHeight) {
         if (entityStepConfig.getValue() && mc.player.getVehicle() != null) {
             mc.player.getVehicle().setStepHeight(stepHeight);
@@ -153,33 +131,25 @@ public class StepModule extends ToggleModule {
      * @return
      */
     private double[] getStepOffsets(double stepHeight) {
-        double[] packets = new double[]
-                {
+        double[] packets = new double[] {
                         0.42, stepHeight <= 1.0 && stepHeight > 0.8 ? 0.753 :
                         0.75, 1.0, 1.16, 1.23, 1.2
                 };
         if (stepHeight == 2.5) {
-            packets = new double[]
-                    {
+            packets = new double[] {
                             0.425, 0.821, 0.699, 0.599, 1.022, 1.372, 1.652,
                             1.869, 2.019, 1.907
                     };
         } else if (stepHeight == 2.0) {
-            packets = new double[]
-                    {
+            packets = new double[] {
                             0.42, 0.78, 0.63, 0.51, 0.9, 1.21, 1.45, 1.43
                     };
         }
         return packets;
     }
 
-    /**
-     * @param e
-     * @return
-     */
     private boolean isAbstractHorse(Entity e) {
-        return e instanceof HorseEntity || e instanceof LlamaEntity
-                || e instanceof MuleEntity;
+        return e instanceof HorseEntity || e instanceof LlamaEntity || e instanceof MuleEntity;
     }
 
     public enum StepMode {

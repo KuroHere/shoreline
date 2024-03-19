@@ -10,6 +10,7 @@ import net.shoreline.client.impl.event.entity.LevitationEvent;
  * @since 1.0
  */
 public class AntiLevitationModule extends ToggleModule {
+
     /**
      *
      */
@@ -18,9 +19,6 @@ public class AntiLevitationModule extends ToggleModule {
                 ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onLevitation(LevitationEvent event) {
         event.cancel();
