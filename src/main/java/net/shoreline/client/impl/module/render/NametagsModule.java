@@ -109,6 +109,10 @@ public class NametagsModule extends ToggleModule
                     continue;
                 }
                 String info = getNametagInfo(player);
+                if (info == null)
+                {
+                    continue;
+                }
                 Vec3d pinterpolate = Interpolation.getRenderPosition(
                         player, mc.getTickDelta());
                 double rx = player.getX() - pinterpolate.getX();
@@ -130,8 +134,7 @@ public class NametagsModule extends ToggleModule
                 {
                     scaling = 0.0245f;
                 }
-                renderInfo(info, hwidth, player,
-                        rx, ry, rz, camera, scaling);
+                renderInfo(info, hwidth, player, rx, ry, rz, camera, scaling);
                 // renderItems(render, camera);
             }
         }
@@ -438,6 +441,10 @@ public class NametagsModule extends ToggleModule
      */
     private String getNametagInfo(PlayerEntity player)
     {
+        if (player == null)
+        {
+            return null;
+        }
         final StringBuilder info = new StringBuilder(player.getName().getString());
         info.append(" ");
         if (entityIdConfig.getValue())
