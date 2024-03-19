@@ -52,16 +52,10 @@ public class AuraModule extends RotationModule {
     private final Timer critTimer = new CacheTimer();
     private final Timer autoSwapTimer = new CacheTimer();
     private final Timer switchTimer = new CacheTimer();
-    Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swings the " +
-            "hand after attacking", true);
-    Config<TargetMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
-            "targeting entities to attack", TargetMode.SWITCH,
-            TargetMode.values());
-    Config<Priority> priorityConfig = new EnumConfig<>("Priority", "The " +
-            "heuristic to prioritize when searching for targets",
-            Priority.HEALTH, Priority.values());
-    Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to attack " +
-            "entities", 1.0f, 4.5f, 5.0f);
+    Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swings the hand after attacking", true);
+    Config<TargetMode> modeConfig = new EnumConfig<>("Mode", "The mode for targeting entities to attack", TargetMode.SWITCH, TargetMode.values());
+    Config<Priority> priorityConfig = new EnumConfig<>("Priority", "The heuristic to prioritize when searching for targets", Priority.HEALTH, Priority.values());
+    Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to attack entities", 1.0f, 4.5f, 5.0f);
     Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to" +
             " attack entities through walls", 1.0f, 4.5f, 5.0f);
     Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to " +
