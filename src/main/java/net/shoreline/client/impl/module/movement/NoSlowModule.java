@@ -6,6 +6,8 @@ import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -115,12 +117,15 @@ public class NoSlowModule extends ToggleModule {
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (event.getStage() == EventStage.PRE && grimConfig.getValue()
                 && mc.player.isUsingItem() && !mc.player.isSneaking() && itemsConfig.getValue()) {
+
+            ItemStack offHandStack = mc.player.getOffHandStack();
+
             if (mc.player.getActiveHand() == Hand.OFF_HAND) {
                 Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
                         mc.player.getInventory().selectedSlot % 8 + 1));
                 Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
                         mc.player.getInventory().selectedSlot));
-            } else {
+            } else if(!offHandStack.isFood() && offHandStack.getItem() != Items.BOW && offHandStack.getItem() != Items.CROSSBOW && offHandStack.getItem() != Items.SHIELD) {
                 Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
             }
         }
@@ -251,6 +256,11 @@ public class NoSlowModule extends ToggleModule {
     }
 
     public boolean checkSlowed() {
+        ItemStack offHandStack = mc.player.getOffHandStack();
+
+        if((offHandStack.isFood() || offHandStack.getItem() == Items.BOW || offHandStack.getItem() == Items.CROSSBOW || offHandStack.getItem() == Items.SHIELD) && grimConfig.getValue())
+            return false;
+
         return !mc.player.isRiding() && !mc.player.isSneaking() && !mc.player.isFallFlying()
                 && (mc.player.isUsingItem() && itemsConfig.getValue() || mc.player.isBlocking() && shieldsConfig.getValue() && !grimConfig.getValue());
     }
