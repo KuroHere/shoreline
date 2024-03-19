@@ -1,5 +1,6 @@
 package net.shoreline.client.mixin.gui.screen;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.gui.chat.ChatInputEvent;
 import net.shoreline.client.impl.event.gui.chat.ChatKeyInputEvent;
@@ -87,17 +88,15 @@ public class MixinChatScreen
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param mouseX
      * @param mouseY
      * @param delta
      * @param ci
      */
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet " +
-            "/minecraft/client/gui/widget/TextFieldWidget;render" +
-            "(Lnet/minecraft/client/util/math/MatrixStack;IIF)V",
-            shift = At.Shift.BEFORE))
-    private void hookRender(MatrixStack matrices, int mouseX, int mouseY,
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/" +
+            "widget/TextFieldWidget;render(Lnet/minecraft/client/gui/DrawContext;IIF)V", shift = At.Shift.BEFORE))
+    private void hookRender(DrawContext context, int mouseX, int mouseY,
                             float delta, CallbackInfo ci)
     {
         float x = ((AccessorTextFieldWidget) chatField).isDrawsBackground() ?
@@ -105,8 +104,7 @@ public class MixinChatScreen
         float y = ((AccessorTextFieldWidget) chatField).isDrawsBackground() ?
                 chatField.getY() + (chatField.getHeight() - 8) / 2.0f :
                 chatField.getY();
-        ChatRenderEvent chatTextRenderEvent = new ChatRenderEvent(matrices,
-                x ,y);
+        ChatRenderEvent chatTextRenderEvent = new ChatRenderEvent(context, x ,y);
         Shoreline.EVENT_HANDLER.dispatch(chatTextRenderEvent);
     }
 }

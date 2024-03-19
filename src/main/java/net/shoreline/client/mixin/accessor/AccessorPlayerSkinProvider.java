@@ -17,9 +17,8 @@ public interface AccessorPlayerSkinProvider
 {
     /**
      *
-     *
      * @return
      */
-    @Accessor("skinCacheDir")
-    File getSkinCacheDir();
+    @Accessor("skinCache")
+    PlayerSkinProvider.FileCache getSkinCacheDir();
 }

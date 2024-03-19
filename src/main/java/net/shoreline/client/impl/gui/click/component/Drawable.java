@@ -1,6 +1,6 @@
 package net.shoreline.client.impl.gui.click.component;
 
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 
 /**
  *
@@ -13,11 +13,10 @@ public interface Drawable
     /**
      *
      *
-     * @param matrixStack
+     * @param context
      * @param mouseX
      * @param mouseY
      * @param delta
      */
-    void render(MatrixStack matrixStack, float mouseX, float mouseY,
-                float delta);
+    void render(DrawContext context, float mouseX, float mouseY, float delta);
 }

@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.gui.click.impl.config.setting;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 import net.minecraft.client.util.math.MatrixStack;
@@ -28,7 +29,7 @@ public class TextButton extends ConfigButton<String>
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param ix
      * @param iy
      * @param mouseX
@@ -36,7 +37,7 @@ public class TextButton extends ConfigButton<String>
      * @param delta
      */
     @Override
-    public void render(MatrixStack matrices, float ix, float iy, float mouseX,
+    public void render(DrawContext context, float ix, float iy, float mouseX,
                        float mouseY, float delta)
     {
 

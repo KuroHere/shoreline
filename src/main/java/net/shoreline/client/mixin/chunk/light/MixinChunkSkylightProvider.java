@@ -6,6 +6,7 @@ import net.minecraft.world.chunk.light.ChunkSkyLightProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
@@ -21,21 +22,19 @@ public class MixinChunkSkylightProvider
 {
     /**
      *
-     * @param id
-     * @param excludedId
-     * @param maxLevel
-     * @param cir
+     * @param blockPos
+     * @param l
+     * @param lightLevel
+     * @param ci
      */
-    @Inject(method = "recalculateLevel", at = @At(value = "HEAD"), cancellable = true)
-    private void hookRecalculateLevel(long id, long excludedId, int maxLevel,
-                                      CallbackInfoReturnable<Integer> cir)
+    @Inject(method = "method_51531", at = @At(value = "HEAD"), cancellable = true)
+    private void hookRecalculateLevel(long blockPos, long l, int lightLevel, CallbackInfo ci)
     {
         RenderSkylightEvent renderSkylightEvent = new RenderSkylightEvent();
         Shoreline.EVENT_HANDLER.dispatch(renderSkylightEvent);
         if (renderSkylightEvent.isCanceled())
         {
-            cir.setReturnValue(0);
-            cir.cancel();
+            ci.cancel();
         }
     }
 }

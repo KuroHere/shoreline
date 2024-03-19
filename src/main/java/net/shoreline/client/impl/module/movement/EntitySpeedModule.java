@@ -1,5 +1,11 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
+import net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -12,13 +18,6 @@ import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.shoreline.client.util.Globals;
 
 import java.text.DecimalFormat;
 
@@ -79,22 +78,22 @@ public class EntitySpeedModule extends ToggleModule
             BlockPos pos2 = BlockPos.ofFloored(mc.player.getX() + (2.0 * d),
                     mc.player.getY() - 2.0, mc.player.getZ() + (2.0 * d2));
             if (antiStuckConfig.getValue() && !mc.player.getVehicle().isOnGround()
-                    && !mc.world.getBlockState(pos1).getMaterial().blocksMovement()
-                    && !mc.world.getBlockState(pos2).getMaterial().blocksMovement())
+                    && !mc.world.getBlockState(pos1).blocksMovement()
+                    && !mc.world.getBlockState(pos2).blocksMovement())
             {
                 entityJumpTimer.reset();
                 return;
             }
             BlockPos pos3 = BlockPos.ofFloored(mc.player.getX() + (2.0 * d),
                     mc.player.getY(), mc.player.getZ() + (2.0 * d2));
-            if (antiStuckConfig.getValue() && mc.world.getBlockState(pos3).getMaterial().blocksMovement())
+            if (antiStuckConfig.getValue() && mc.world.getBlockState(pos3).blocksMovement())
             {
                 entityJumpTimer.reset();
                 return;
             }
             BlockPos pos4 = BlockPos.ofFloored(mc.player.getX() + d,
                     mc.player.getY() + 1.0, mc.player.getZ() + d2);
-            if (antiStuckConfig.getValue() && mc.world.getBlockState(pos4).getMaterial().blocksMovement())
+            if (antiStuckConfig.getValue() && mc.world.getBlockState(pos4).blocksMovement())
             {
                 entityJumpTimer.reset();
                 return;

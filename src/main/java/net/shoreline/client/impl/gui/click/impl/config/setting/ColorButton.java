@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.gui.click.impl.config.setting;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.gui.click.ClickGuiScreen;
@@ -35,7 +36,7 @@ public class ColorButton extends ConfigButton<Color>
     }
 
     @Override
-    public void render(MatrixStack matrices, float ix, float iy, float mouseX,
+    public void render(DrawContext context, float ix, float iy, float mouseX,
                        float mouseY, float delta)
     {
         x = ix;
@@ -63,8 +64,8 @@ public class ColorButton extends ConfigButton<Color>
         }
         // slider fill
         float fill = (hsb[0] - (float) min) / (max - min);
-        fill(matrices, ix, iy, (fill * width), height, Modules.COLORS.getRGB());
-        RenderManager.renderText(matrices, config.getName() + Formatting.GRAY
+        fill(context, ix, iy, (fill * width), height, Modules.COLORS.getRGB());
+        RenderManager.renderText(context, config.getName() + Formatting.GRAY
                 + " " + hsb[0], ix + 2.0f, iy + 4.0f, -1);
         config.setValue(new Color(Color.HSBtoRGB(hsb[0] / 360.0f, hsb[1], hsb[2])));
     }

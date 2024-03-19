@@ -63,7 +63,7 @@ public class AutoLogModule extends ToggleModule
                     .filter(p -> checkEnemy(p)).findFirst().orElse(null);
             if (player != null)
             {
-                playerDisconnect("[AutoLog] %s came into render distance.", player.getEntityName());
+                playerDisconnect("[AutoLog] %s came into render distance.", player.getName().getString());
                 return;
             }
         }

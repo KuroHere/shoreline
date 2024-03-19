@@ -2,7 +2,6 @@ package net.shoreline.client.api.render;
 
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.shoreline.client.mixin.accessor.AccessorBufferBuilderStorage;
 import net.shoreline.client.util.Globals;
 import org.lwjgl.opengl.GL11;
 
@@ -11,12 +10,6 @@ public class RenderLayersClient implements Globals
     public static final RenderLayer GLINT = RenderLayer.of("glint", VertexFormats.POSITION_TEXTURE, VertexFormat.DrawMode.QUADS, 256, RenderLayer.MultiPhaseParameters.builder()
             .program(RenderPhase.GLINT_PROGRAM).texture(new RenderPhase.Texture(ItemRenderer.ITEM_ENCHANTMENT_GLINT, true, false))
             .writeMaskState(RenderPhase.COLOR_MASK).cull(RenderPhase.DISABLE_CULLING).depthTest(new DepthTest()).transparency(RenderPhase.GLINT_TRANSPARENCY).texturing(RenderPhase.GLINT_TEXTURING).build(false));
-
-    public static void initLayers()
-    {
-        ((AccessorBufferBuilderStorage) mc.getBufferBuilders()).hookGetEntityBuilders()
-                .put(GLINT, new BufferBuilder(GLINT.getExpectedBufferSize()));
-    }
 
     protected static class DepthTest extends RenderPhase.DepthTest
     {

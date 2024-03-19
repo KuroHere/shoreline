@@ -24,14 +24,13 @@ public class MixinClientWorld
 {
     /**
      *
-     * @param id
      * @param entity
      * @param ci
      */
     @Inject(method = "addEntity", at = @At(value = "HEAD"))
-    private void hookAddEntity(int id, Entity entity, CallbackInfo ci)
+    private void hookAddEntity(Entity entity, CallbackInfo ci)
     {
-        AddEntityEvent addEntityEvent = new AddEntityEvent(id, entity);
+        AddEntityEvent addEntityEvent = new AddEntityEvent(entity);
         Shoreline.EVENT_HANDLER.dispatch(addEntityEvent);
     }
 

@@ -41,16 +41,16 @@ public class VanishCommand extends Command
         String dismount = dismountArgument.getValue();
         if (dismount.equalsIgnoreCase("dismount"))
         {
-            if (Globals.mc.player.isRiding() && Globals.mc.player.getVehicle() != null)
+            if (mc.player.isRiding() && mc.player.getVehicle() != null)
             {
                 if (mount != null)
                 {
                     ChatUtil.error("Entity vanished, must remount!");
                     return;
                 }
-                mount = Globals.mc.player.getVehicle();
-                Globals.mc.player.dismountVehicle();
-                Globals.mc.world.removeEntity(mount.getId(), Entity.RemovalReason.DISCARDED);
+                mount = mc.player.getVehicle();
+                mc.player.dismountVehicle();
+                mc.world.removeEntity(mount.getId(), Entity.RemovalReason.DISCARDED);
             }
         }
         else if (dismount.equalsIgnoreCase("remount"))
@@ -62,8 +62,8 @@ public class VanishCommand extends Command
             }
             //
             ((AccessorEntity) mount).hookUnsetRemoved();
-            Globals.mc.world.addEntity(mount.getId(), mount);
-            Globals.mc.player.startRiding(mount, true);
+            mc.world.addEntity(mount);
+            mc.player.startRiding(mount, true);
             mount = null;
         }
     }

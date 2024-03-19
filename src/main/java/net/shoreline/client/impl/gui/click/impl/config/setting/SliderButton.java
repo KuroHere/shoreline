@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.gui.click.impl.config.setting;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.render.RenderManager;
@@ -43,7 +44,7 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param ix
      * @param iy
      * @param mouseX
@@ -51,7 +52,7 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
      * @param delta
      */
     @Override
-    public void render(MatrixStack matrices, float ix, float iy, float mouseX,
+    public void render(DrawContext context, float ix, float iy, float mouseX,
                        float mouseY, float delta)
     {
         x = ix;
@@ -101,8 +102,8 @@ public class SliderButton<T extends Number> extends ConfigButton<T>
         // slider fill
         float fill = (config.getValue().floatValue() - min.floatValue())
                 / (max.floatValue() - min.floatValue());
-        fill(matrices, ix, iy, (fill * width), height, Modules.COLORS.getRGB());
-        RenderManager.renderText(matrices, config.getName() + Formatting.GRAY
+        fill(context, ix, iy, (fill * width), height, Modules.COLORS.getRGB());
+        RenderManager.renderText(context, config.getName() + Formatting.GRAY
                         + " " + config.getValue(), ix + 2.0f, iy + 4.0f, -1);
     }
 

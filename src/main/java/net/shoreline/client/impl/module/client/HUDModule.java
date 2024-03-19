@@ -109,10 +109,6 @@ public class HUDModule extends ToggleModule
     @EventListener
     public void onRenderOverlayPost(RenderOverlayEvent.Post event)
     {
-        if (mc.options.debugEnabled)
-        {
-            return;
-        }
         if (mc.player != null && mc.world != null)
         {
             Window res = mc.getWindow();
@@ -136,7 +132,7 @@ public class HUDModule extends ToggleModule
             }
             if (watermarkConfig.getValue())
             {
-                RenderManager.renderText(event.getMatrices(), String.format("%s §f%s-%s",
+                RenderManager.renderText(event.getContext(), String.format("%s §f%s-%s",
                                 ShorelineMod.MOD_NAME, ShorelineMod.MOD_VER,
                                 ShorelineMod.MOD_BUILD_NUMBER), 2.0f,
                         topLeft, getHudColor(rainbowOffset));
@@ -166,7 +162,7 @@ public class HUDModule extends ToggleModule
                         }
                         String text = getFormattedModule(m);
                         int width = RenderManager.textWidth(text);
-                        RenderManager.renderText(event.getMatrices(), text,
+                        RenderManager.renderText(event.getContext(), text,
                                 res.getScaledWidth() - width * factor - 1.0f,
                                 renderingUp ? topRight : bottomRight, getHudColor(rainbowOffset));
                         if (renderingUp)
@@ -191,13 +187,13 @@ public class HUDModule extends ToggleModule
                         continue;
                     }
                     boolean amplifier = e.getAmplifier() > 1 && !e.isInfinite();
-                    Text duration = StatusEffectUtil.durationToString(e, 1.0f);
+                    Text duration = StatusEffectUtil.getDurationText(e, 1.0f, 1.0f);
                     String text = String.format("%s %s§f%s",
                             effect.getName().getString(),
                             amplifier ? e.getAmplifier() + " " : "",
                             e.isInfinite() ? "" : duration.getString());
                     int width = RenderManager.textWidth(text);
-                    RenderManager.renderText(event.getMatrices(), text,
+                    RenderManager.renderText(event.getContext(), text,
                             res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
                             potionColorsConfig.getValue() ? effect.getColor() : getHudColor(rainbowOffset));
                     if (renderingUp)
@@ -211,11 +207,11 @@ public class HUDModule extends ToggleModule
                     rainbowOffset++;
                 }
             }
-            if (serverBrandConfig.getValue())
+            if (serverBrandConfig.getValue() && mc.getServer() != null)
             {
-                String brand = mc.player.getServerBrand();
+                String brand = mc.getServer().getVersion();
                 int width = RenderManager.textWidth(brand);
-                RenderManager.renderText(event.getMatrices(), brand,
+                RenderManager.renderText(event.getContext(), brand,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
                         getHudColor(rainbowOffset));
                 if (renderingUp)
@@ -240,7 +236,7 @@ public class HUDModule extends ToggleModule
                 String text = String.format("Speed §f%skm/h",
                         decimal.format(speed));
                 int width = RenderManager.textWidth(text);
-                RenderManager.renderText(event.getMatrices(), text,
+                RenderManager.renderText(event.getContext(), text,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
                         getHudColor(rainbowOffset));
                 if (renderingUp)
@@ -262,10 +258,10 @@ public class HUDModule extends ToggleModule
                 int width = RenderManager.textWidth(text1);
                 int width2 = RenderManager.textWidth(text2);
                 Color color = ColorUtil.hslToColor((float) (n - n2) / (float) n * 120.0f, 100.0f, 50.0f, 1.0f);
-                RenderManager.renderText(event.getMatrices(), text1,
+                RenderManager.renderText(event.getContext(), text1,
                         res.getScaledWidth() - width - width2 - 1.0f, renderingUp ? bottomRight : topRight,
                         getHudColor(rainbowOffset));
-                RenderManager.renderText(event.getMatrices(), text2,
+                RenderManager.renderText(event.getContext(), text2,
                         res.getScaledWidth() - width2 - 1.0f, renderingUp ? bottomRight : topRight,
                         color.getRGB());
                 if (renderingUp)
@@ -283,7 +279,7 @@ public class HUDModule extends ToggleModule
                 int latency = Managers.NETWORK.getClientLatency();
                 String text = String.format("Ping §f%dms", latency);
                 int width = RenderManager.textWidth(text);
-                RenderManager.renderText(event.getMatrices(), text,
+                RenderManager.renderText(event.getContext(), text,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
                         getHudColor(rainbowOffset));
                 if (renderingUp)
@@ -304,7 +300,7 @@ public class HUDModule extends ToggleModule
                         decimal.format(avg),
                         decimal.format(curr));
                 int width = RenderManager.textWidth(text);
-                RenderManager.renderText(event.getMatrices(), text,
+                RenderManager.renderText(event.getContext(), text,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
                         getHudColor(rainbowOffset));
                 if (renderingUp)
@@ -321,7 +317,7 @@ public class HUDModule extends ToggleModule
             {
                 String text = String.format("FPS §f%d", mc.getCurrentFps());
                 int width = RenderManager.textWidth(text);
-                RenderManager.renderText(event.getMatrices(), text,
+                RenderManager.renderText(event.getContext(), text,
                         res.getScaledWidth() - width - 1.0f, renderingUp ? bottomRight : topRight,
                         getHudColor(rainbowOffset));
                 // bottomRight -= 9.0f;
@@ -337,7 +333,7 @@ public class HUDModule extends ToggleModule
                         mc.player.getX() / 8;
                 double nz = nether ? mc.player.getZ() * 8 :
                         mc.player.getZ() / 8;
-                RenderManager.renderText(event.getMatrices(), String.format(
+                RenderManager.renderText(event.getContext(), String.format(
                                 "XYZ §f%s, %s, %s " + (netherCoordsConfig.getValue() ?
                                         "§7[§f%s, %s§7]" : ""),
                                 nether ? decimal.format(nx) : decimal.format(x),
@@ -355,7 +351,7 @@ public class HUDModule extends ToggleModule
                 String dir = EnumFormatter.formatDirection(direction);
                 String axis = EnumFormatter.formatAxis(direction.getAxis());
                 boolean pos = direction.getDirection() == Direction.AxisDirection.POSITIVE;
-                RenderManager.renderText(event.getMatrices(),
+                RenderManager.renderText(event.getContext(),
                         String.format("%s §7[§f%s%s§7]", dir, axis,
                                 pos ? "+" : "-"), 2, bottomLeft,
                         getHudColor(rainbowOffset));
@@ -388,10 +384,8 @@ public class HUDModule extends ToggleModule
                 for (int i = 3; i >= 0; --i)
                 {
                     ItemStack armor = mc.player.getInventory().armor.get(i);
-                    mc.getItemRenderer().renderInGui(event.getMatrices(),
-                            armor, x, y);
-                    mc.getItemRenderer().renderGuiItemOverlay(event.getMatrices(),
-                            mc.textRenderer, armor, x, y);
+                    event.getContext().drawItem(armor, x, y);
+                    event.getContext().drawItemInSlot(mc.textRenderer, armor, x, y);
                     x += 18;
                 }
             }

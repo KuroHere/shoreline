@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.event.gui.chat;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
 import net.minecraft.client.util.math.MatrixStack;
@@ -14,19 +15,19 @@ import net.minecraft.client.util.math.MatrixStack;
 public class ChatRenderEvent extends Event
 {
     //
-    private final MatrixStack matrices;
+    private final DrawContext context;
     private final float x, y;
 
-    public ChatRenderEvent(MatrixStack matrices, float x, float y)
+    public ChatRenderEvent(DrawContext context, float x, float y)
     {
-        this.matrices = matrices;
+        this.context = context;
         this.x = x;
         this.y = y;
     }
 
-    public MatrixStack getMatrices()
+    public DrawContext getContext()
     {
-        return matrices;
+        return context;
     }
 
     public float getX()

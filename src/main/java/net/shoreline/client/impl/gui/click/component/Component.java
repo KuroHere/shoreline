@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.gui.click.component;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.util.Globals;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -40,38 +41,37 @@ public abstract class Component implements Drawable, Globals
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param mouseX
      * @param mouseY
      * @param delta
      */
     @Override
-    public abstract void render(MatrixStack matrices, float mouseX, float mouseY,
-                        float delta);
+    public abstract void render(DrawContext context, float mouseX, float mouseY, float delta);
 
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param color
      */
-    protected void rect(MatrixStack matrices, int color)
+    protected void rect(DrawContext context, int color)
     {
-        fill(matrices, x, y, width, height, color);
+        fill(context, x, y, width, height, color);
     }
 
-    protected void drawRoundedRect(MatrixStack matrices, double x1, double y1,
+    protected void drawRoundedRect(DrawContext context, double x1, double y1,
                                    double x2, double y2, int color)
     {
-        drawRoundedRect(matrices, x1, y1, x2, y2, 0, color);
+        drawRoundedRect(context, x1, y1, x2, y2, 0, color);
     }
 
-    protected void drawRoundedRect(MatrixStack matrices, double x1, double y1,
+    protected void drawRoundedRect(DrawContext context, double x1, double y1,
                                    double x2, double y2, double z, int color)
     {
-        fill(matrices, x1, y1, x2, y2, z, color);
+        fill(context, x1, y1, x2, y2, z, color);
         /*
-        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+        Matrix4f matrix4f = context.peek().getPositionMatrix();
         Shader shader = new Shader("rect.vert", "roundedrect.frag");
         shader.bind();
         float f = (float) ColorHelper.Argb.getAlpha(color) / 255.0f;
@@ -97,17 +97,17 @@ public abstract class Component implements Drawable, Globals
          */
     }
 
-    protected void drawCircle(MatrixStack matrices, double x, double y,
+    protected void drawCircle(DrawContext context, double x, double y,
                               double radius, int color)
     {
-        drawCircle(matrices, x, y, 0, radius, color);
+        drawCircle(context, x, y, 0, radius, color);
     }
 
-    protected void drawCircle(MatrixStack matrices, double x, double y,
+    protected void drawCircle(DrawContext context, double x, double y,
                               double z, double radius, int color)
     {
         /*
-        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+        Matrix4f matrix4f = context.peek().getPositionMatrix();
         Shader shader = new Shader("rect.vert", "circle.frag");
         shader.bind();
         float f = (float) ColorHelper.Argb.getAlpha(color) / 255.0f;
@@ -133,7 +133,7 @@ public abstract class Component implements Drawable, Globals
          */
     }
 
-    protected void drawHorizontalLine(MatrixStack matrices, double x1, double x2,
+    protected void drawHorizontalLine(DrawContext context, double x1, double x2,
                                       double y, int color)
     {
         if (x2 < x1)
@@ -142,10 +142,10 @@ public abstract class Component implements Drawable, Globals
             x1 = x2;
             x2 = i;
         }
-        fill(matrices, x1, y, x1 + x2 + 1, y + 1, color);
+        fill(context, x1, y, x1 + x2 + 1, y + 1, color);
     }
 
-    protected void drawVerticalLine(MatrixStack matrices, double x, double y1,
+    protected void drawVerticalLine(DrawContext context, double x, double y1,
                                     double y2, int color)
     {
         if (y2 < y1)
@@ -154,13 +154,12 @@ public abstract class Component implements Drawable, Globals
             y1 = y2;
             y2 = i;
         }
-        fill(matrices, x, y1 + 1, x + 1, y1 + y2, color);
+        fill(context, x, y1 + 1, x + 1, y1 + y2, color);
     }
 
     public void enableScissor(int x1, int y1, int x2, int y2)
     {
-        setScissor(SCISSOR_STACK.push(new ScreenRect(x1, y1, x2 - x1,
-                y2 - y1)));
+        setScissor(SCISSOR_STACK.push(new ScreenRect(x1, y1, x2 - x1, y2 - y1)));
     }
 
     public void disableScissor() 
@@ -188,18 +187,18 @@ public abstract class Component implements Drawable, Globals
         }
     }
 
-    public void fill(MatrixStack matrices, double x1, double y1, double x2,
+    public void fill(DrawContext context, double x1, double y1, double x2,
                      double y2, int color)
     {
-        fill(matrices, x1, y1, x2, y2, 0.0, color);
+        fill(context, x1, y1, x2, y2, 0.0, color);
     }
 
-    public void fill(MatrixStack matrices, double x1, double y1, double x2,
+    public void fill(DrawContext context, double x1, double y1, double x2,
                             double y2, double z, int color)
     {
         x2 += x1;
         y2 += y1;
-        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+        Matrix4f matrix4f = context.getMatrices().peek().getPositionMatrix();
         double i;
         if (x1 < x2) 
         {
@@ -234,14 +233,14 @@ public abstract class Component implements Drawable, Globals
         RenderSystem.disableBlend();
     }
 
-    protected void fillGradient(MatrixStack matrices, int startX,
+    protected void fillGradient(DrawContext context, int startX,
                                        int startY, int endX, int endY,
                                        int colorStart, int colorEnd) 
     {
-        fillGradient(matrices, startX, startY, endX, endY, colorStart, colorEnd, 0);
+        fillGradient(context, startX, startY, endX, endY, colorStart, colorEnd, 0);
     }
 
-    protected void fillGradient(MatrixStack matrices, int startX,
+    protected void fillGradient(DrawContext context, int startX,
                                        int startY, int endX, int endY,
                                        int colorStart, int colorEnd, int z) 
     {
@@ -250,7 +249,7 @@ public abstract class Component implements Drawable, Globals
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        fillGradient(matrices.peek().getPositionMatrix(), buffer,
+        fillGradient(context.getMatrices().peek().getPositionMatrix(), buffer,
                 startX, startY, endX, endY, z, colorStart, colorEnd);
         tessellator.draw();
         RenderSystem.disableBlend();
@@ -278,55 +277,7 @@ public abstract class Component implements Drawable, Globals
         builder.vertex(matrix, (float) endX, (float) startY, (float) z)
                 .color(g, h, i, f).next();
     }
-
-    public void drawCenteredTextWithShadow(MatrixStack matrices,
-                                           TextRenderer textRenderer,
-                                           String text, double centerX,
-                                           double y, int color)
-    {
-        textRenderer.drawWithShadow(matrices, text,
-                (float) (centerX - textRenderer.getWidth(text) / 2),
-                (float) y, color);
-    }
-
-    public void drawCenteredTextWithShadow(MatrixStack matrices, TextRenderer textRenderer,
-                                           Text text, double centerX, double y,
-                                           int color)
-    {
-        OrderedText orderedText = text.asOrderedText();
-        textRenderer.drawWithShadow(matrices, orderedText,
-                (float) (centerX - textRenderer.getWidth(orderedText) / 2),
-                (float) y, color);
-    }
-
-    public void drawCenteredTextWithShadow(MatrixStack matrices,
-                                           TextRenderer textRenderer,
-                                           OrderedText text, double centerX,
-                                           double y, int color)
-    {
-        textRenderer.drawWithShadow(matrices, text,
-                (float) (centerX - textRenderer.getWidth(text) / 2),
-                (float) y, color);
-    }
-
-    public void drawTextWithShadow(MatrixStack matrices,
-                                   TextRenderer textRenderer, String text,
-                                   double x, double y, int color)
-    {
-        textRenderer.drawWithShadow(matrices, text, (float) x, (float) y, color);
-    }
-
-    public void drawTextWithShadow(MatrixStack matrices, TextRenderer textRenderer,
-                                   OrderedText text, double x, double y, int color)
-    {
-        textRenderer.drawWithShadow(matrices, text, (float) x, (float) y, color);
-    }
-
-    public void drawTextWithShadow(MatrixStack matrices, TextRenderer textRenderer,
-                                   Text text, double x, double y, int color)
-    {
-        textRenderer.drawWithShadow(matrices, text, (float) x, (float) y, color);
-    }
+    
 
     public void drawWithOutline(int x, int y, BiConsumer<Integer, Integer> renderAction)
     {
@@ -342,71 +293,71 @@ public abstract class Component implements Drawable, Globals
         renderAction.accept(x, y);
     }
 
-    public void drawSprite(MatrixStack matrices, int x, int y, int z, int width,
+    public void drawSprite(DrawContext context, int x, int y, int z, int width,
                            int height, Sprite sprite)
     {
-        drawTexturedQuad(matrices.peek().getPositionMatrix(), x, x + width,
+        drawTexturedQuad(context.getMatrices().peek().getPositionMatrix(), x, x + width,
                 y, y + height, z, sprite.getMinU(), sprite.getMaxU(),
                 sprite.getMinV(), sprite.getMaxV());
     }
 
-    public void drawSprite(MatrixStack matrices, int x, int y, int z, int width,
+    public void drawSprite(DrawContext context, int x, int y, int z, int width,
                            int height, Sprite sprite, float red, float green,
                            float blue, float alpha)
     {
-        drawTexturedQuad(matrices.peek().getPositionMatrix(), x, x + width,
+        drawTexturedQuad(context.getMatrices().peek().getPositionMatrix(), x, x + width,
                 y, y + height, z, sprite.getMinU(), sprite.getMaxU(),
                 sprite.getMinV(), sprite.getMaxV(), red, green, blue, alpha);
     }
 
-    public void drawBorder(MatrixStack matrices, int x, int y, int width,
+    public void drawBorder(DrawContext context, int x, int y, int width,
                            int height, int color)
     {
-        fill(matrices, x, y, x + width, y + 1, color);
-        fill(matrices, x, y + height - 1, x + width, y + height, color);
-        fill(matrices, x, y + 1, x + 1, y + height - 1, color);
-        fill(matrices, x + width - 1, y + 1, x + width,
+        fill(context, x, y, x + width, y + 1, color);
+        fill(context, x, y + height - 1, x + width, y + height, color);
+        fill(context, x, y + 1, x + 1, y + height - 1, color);
+        fill(context, x + width - 1, y + 1, x + width,
                 y + height - 1, color);
     }
 
-    public void drawTexture(MatrixStack matrices, int x, int y, int u,
+    public void drawTexture(DrawContext context, int x, int y, int u,
                                    int v, int width, int height) 
     {
-        drawTexture(matrices, x, y, 0, (float) u, (float) v, width, height,
+        drawTexture(context, x, y, 0, (float) u, (float) v, width, height,
                 256, 256);
     }
 
-    public void drawTexture(MatrixStack matrices, int x, int y, int z,
+    public void drawTexture(DrawContext context, int x, int y, int z,
                                    float u, float v, int width, int height,
                                    int textureWidth, int textureHeight) 
     {
-        drawTexture(matrices, x, x + width, y, y + height, z, width,
+        drawTexture(context, x, x + width, y, y + height, z, width,
                 height, u, v, textureWidth, textureHeight);
     }
 
-    public void drawTexture(MatrixStack matrices, int x, int y, int width,
+    public void drawTexture(DrawContext context, int x, int y, int width,
                                    int height, float u, float v, int regionWidth,
                                    int regionHeight, int textureWidth,
                                    int textureHeight) 
     {
-        drawTexture(matrices, x, x + width, y, y + height, 0,
+        drawTexture(context, x, x + width, y, y + height, 0,
                 regionWidth, regionHeight, u, v, textureWidth, textureHeight);
     }
 
-    public void drawTexture(MatrixStack matrices, int x, int y, float u,
+    public void drawTexture(DrawContext context, int x, int y, float u,
                                    float v, int width, int height,
                                    int textureWidth, int textureHeight) 
     {
-        drawTexture(matrices, x, y, width, height, u, v, width, height,
+        drawTexture(context, x, y, width, height, u, v, width, height,
                 textureWidth, textureHeight);
     }
 
-    private void drawTexture(MatrixStack matrices, int x0, int x1,
+    private void drawTexture(DrawContext context, int x0, int x1,
                                     int y0, int y1, int z, int regionWidth,
                                     int regionHeight, float u, float v,
                                     int textureWidth, int textureHeight) 
     {
-        drawTexturedQuad(matrices.peek().getPositionMatrix(), x0, x1, y0, y1, z,
+        drawTexturedQuad(context.getMatrices().peek().getPositionMatrix(), x0, x1, y0, y1, z,
                 (u + 0.0F) / (float)textureWidth,
                 (u + (float)regionWidth) / (float) textureWidth,
                 (v + 0.0F) / (float)textureHeight,

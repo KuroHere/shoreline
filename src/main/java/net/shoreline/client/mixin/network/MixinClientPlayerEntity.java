@@ -56,11 +56,11 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     @Shadow
     private boolean lastSneaking;
     @Shadow
-    private double lastX;
+    public double lastX;
     @Shadow
-    private double lastBaseY;
+    public double lastBaseY;
     @Shadow
-    private double lastZ;
+    public double lastZ;
     @Shadow
     private float lastYaw;
     @Shadow
@@ -101,22 +101,24 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
 
     /**
      *
-     *
      * @param ci
      */
-    @Inject(method = "sendMovementPackets", at = @At(value = "HEAD"),
-            cancellable = true)
+    @Inject(method = "sendMovementPackets", at = @At(value = "HEAD"), cancellable = true)
     private void hookSendMovementPackets(CallbackInfo ci)
     {
         PlayerUpdateEvent playerUpdateEvent = new PlayerUpdateEvent();
         playerUpdateEvent.setStage(EventStage.PRE);
         Shoreline.EVENT_HANDLER.dispatch(playerUpdateEvent);
         //
-        MovementPacketsEvent movementPacketsEvent =
-                new MovementPacketsEvent(mc.player.getX(), mc.player.getY(),
-                        mc.player.getZ(), mc.player.getYaw(),
-                        mc.player.getPitch(), mc.player.isOnGround());
+        MovementPacketsEvent movementPacketsEvent = new MovementPacketsEvent(mc.player.getX(), mc.player.getY(),
+                mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround());
         Shoreline.EVENT_HANDLER.dispatch(movementPacketsEvent);
+        double x = movementPacketsEvent.getX();
+        double y = movementPacketsEvent.getY();
+        double z = movementPacketsEvent.getZ();
+        float yaw = movementPacketsEvent.getYaw();
+        float pitch = movementPacketsEvent.getPitch();
+        boolean ground = movementPacketsEvent.getOnGround();
         if (movementPacketsEvent.isCanceled())
         {
             ci.cancel();
@@ -131,27 +133,18 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
             }
             if (isCamera())
             {
-                double x = movementPacketsEvent.getX();
-                double y = movementPacketsEvent.getY();
-                double z = movementPacketsEvent.getZ();
-                float yaw = movementPacketsEvent.getYaw();
-                float pitch = movementPacketsEvent.getPitch();
-                boolean ground = movementPacketsEvent.getOnGround();
-                //
                 double d = x - lastX;
                 double e = y - lastBaseY;
                 double f = z - lastZ;
                 double g = yaw - lastYaw;
                 double h = pitch - lastPitch;
                 ++ticksSinceLastPositionPacketSent;
-                boolean bl2 = MathHelper.squaredMagnitude(d, e, f) > MathHelper.square(2.0e-4)
-                        || ticksSinceLastPositionPacketSent >= 20;
+                boolean bl2 = MathHelper.squaredMagnitude(d, e, f) > MathHelper.square(2.0E-4) || ticksSinceLastPositionPacketSent >= 20;
                 boolean bl3 = g != 0.0 || h != 0.0;
                 if (hasVehicle())
                 {
                     Vec3d vec3d = getVelocity();
-                    networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(
-                            vec3d.x, -999.0, vec3d.z, getYaw(), getPitch(), ground));
+                    networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(vec3d.x, -999.0, vec3d.z, getYaw(), getPitch(), ground));
                     bl2 = false;
                 }
                 else if (bl2 && bl3)
@@ -166,7 +159,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                 {
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, ground));
                 }
-                else if (lastOnGround != onGround)
+                else if (lastOnGround != isOnGround())
                 {
                     networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(ground));
                 }
@@ -184,8 +177,6 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                 }
                 lastOnGround = ground;
                 autoJumpEnabled = client.options.getAutoJump().getValue();
-                playerUpdateEvent.setYaw(yaw);
-                playerUpdateEvent.setPitch(pitch);
             }
         }
         playerUpdateEvent.setStage(EventStage.POST);
@@ -202,7 +193,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
      */
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/" +
             "minecraft/client/network/AbstractClientPlayerEntity;tick()V",
-            shift = At.Shift.BEFORE, ordinal = 0), cancellable = true)
+            shift = At.Shift.BEFORE, ordinal = 0))
     private void hookTickPre(CallbackInfo ci)
     {
         PlayerTickEvent playerTickEvent = new PlayerTickEvent();
@@ -295,7 +286,6 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     
     /**
      *
-     *
      * @param hand
      * @param ci
      */
@@ -307,7 +297,6 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     }
 
     /**
-     *
      *
      * @param instance
      * @param b

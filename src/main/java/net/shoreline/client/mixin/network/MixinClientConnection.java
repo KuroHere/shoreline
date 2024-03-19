@@ -51,9 +51,8 @@ public class MixinClientConnection
      */
     @Inject(method = "sendImmediately", at = @At(value = "HEAD"),
             cancellable = true)
-    private void hookSendImmediately(Packet<?> packet,
-                                     @Nullable PacketCallbacks callbacks,
-                                     CallbackInfo ci)
+    private void hookSendImmediately(Packet<?> packet, @Nullable PacketCallbacks callbacks,
+                                     boolean flush, CallbackInfo ci)
     {
         PacketEvent.Outbound packetOutboundEvent =
                 new PacketEvent.Outbound(packet);

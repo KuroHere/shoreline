@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.gui.click.component;
 
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 
 /**
@@ -32,14 +33,13 @@ public class Frame extends Component implements Interactable
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param mouseX
      * @param mouseY
      * @param delta
      */
     @Override
-    public void render(MatrixStack matrices, float mouseX, float mouseY,
-                       float delta)
+    public void render(DrawContext context, float mouseX, float mouseY, float delta)
     {
         // fill(matrices, x, y, width, height, 0xe5000000);
     }

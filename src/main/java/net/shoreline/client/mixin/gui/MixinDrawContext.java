@@ -1,7 +1,7 @@
-package net.shoreline.client.mixin.gui.screen.ingame;
+package net.shoreline.client.mixin.gui;
 
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.gui.RenderTooltipEvent;
@@ -10,23 +10,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(CreativeInventoryScreen.class)
-public class MixinCreativeInventoryScreen
+@Mixin(DrawContext.class)
+public class MixinDrawContext
 {
     /**
      *
-     * @param matrices
      * @param stack
      * @param x
      * @param y
      * @param ci
      */
-    @Inject(method = "renderTooltip", at = @At(value = "HEAD"), cancellable = true)
-    private void hookRenderTooltip(MatrixStack matrices, ItemStack stack,
-                                   int x, int y, CallbackInfo ci)
+    @Inject(method = "drawItemTooltip", at = @At(value = "HEAD"), cancellable = true)
+    private void hookRenderTooltip(TextRenderer textRenderer, ItemStack stack, int x, int y, CallbackInfo ci)
     {
         RenderTooltipEvent renderTooltipEvent =
-                new RenderTooltipEvent(matrices, stack, x, y);
+                new RenderTooltipEvent((DrawContext) (Object) this, stack, x, y);
         Shoreline.EVENT_HANDLER.dispatch(renderTooltipEvent);
         if (renderTooltipEvent.isCanceled())
         {

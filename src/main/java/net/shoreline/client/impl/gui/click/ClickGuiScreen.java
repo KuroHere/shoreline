@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.gui.click;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 import net.shoreline.client.impl.gui.click.impl.config.ModuleButton;
@@ -55,22 +56,22 @@ public class ClickGuiScreen extends Screen implements Globals
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param mouseX
      * @param mouseY
      * @param delta
      */
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta)
+    public void render(DrawContext context, int mouseX, int mouseY, float delta)
     {
-        super.render(matrices, mouseX, mouseY, delta);
+        super.render(context, mouseX, mouseY, delta);
         for (CategoryFrame frame : frames)
         {
             if (frame.isWithinTotal(mouseX, mouseY))
             {
                 focus = frame;
             }
-            frame.render(matrices, mouseX, mouseY, delta);
+            frame.render(context, mouseX, mouseY, delta);
             float scale = module.getScale();
             if (scale != 1.0f)
             {
@@ -158,15 +159,15 @@ public class ClickGuiScreen extends Screen implements Globals
      * @param amount value is {@code < 0} if scrolled down, {@code > 0} if scrolled up
      * @return
      */
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount)
-    {
-        if (focus != null)
-        {
-            focus.setPos(focus.getX(), (float) (focus.getY() + amount));
-        }
-        return super.mouseScrolled(mouseX, mouseY, amount);
-    }
+//    @Override
+//    public boolean mouseScrolled(double mouseX, double mouseY, double amount)
+//    {
+//        if (focus != null)
+//        {
+//            focus.setPos(focus.getX(), (float) (focus.getY() + amount));
+//        }
+//        return super.mouseScrolled(mouseX, mouseY, amount);
+//    }
 
     /**
      *

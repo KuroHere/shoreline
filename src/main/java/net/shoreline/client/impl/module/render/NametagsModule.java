@@ -253,12 +253,7 @@ public class NametagsModule extends ToggleModule
             mc.getBufferBuilders().getEntityVertexConsumers().draw();
             DiffuseLighting.enableGuiDepthLighting();
             matrixStack.pop();
-            mc.getItemRenderer().renderGuiItemOverlay(matrixStack, mc.textRenderer, stack, (int) n10, (int) m2);
-            if (stack.getCount() != 1)
-            {
-                String string = String.valueOf(stack.getCount());
-                Fonts.VANILLA.drawWithShadow(matrixStack, string, n10 + 17 - mc.textRenderer.getWidth(string), m2 + 9.0f, -1);
-            }
+            renderItemOverlay(matrixStack, stack, (int) n10, (int) m2);
             // int n4 = (n11 > 4) ? ((n11 - 4) * 8 / 2) : 0;
             // mc.getItemRenderer().renderInGui(matrixStack, mc.textRenderer, stack, n10, m2);
             matrixStack.scale(0.5f, 0.5f, 0.5f);
@@ -322,6 +317,28 @@ public class NametagsModule extends ToggleModule
                     overlay, matrices, getItemGlintConsumer(vertexConsumers, RenderLayers.getItemLayer(stack, false), stack.hasGlint()));
         }
         matrices.pop();
+    }
+
+    private void renderItemOverlay(MatrixStack matrixStack, ItemStack stack, int x, int y)
+    {
+        matrixStack.push();
+        if (stack.getCount() != 1)
+        {
+            String string = String.valueOf(stack.getCount());
+            // this.matrices.translate(0.0f, 0.0f, 200.0f);
+            Fonts.VANILLA.drawWithShadow(matrixStack, string, x + 17 - mc.textRenderer.getWidth(string), y + 9.0f, -1);
+        }
+        // dont need this cuz durability render
+//        if (stack.isItemBarVisible())
+//        {
+//            int i = stack.getItemBarStep();
+//            int j = stack.getItemBarColor();
+//            int k = x + 2;
+//            int l = y + 13;
+//            RenderManager.rect(matrixStack, k, l, 13, 2, Colors.BLACK);
+//            RenderManager.rect(matrixStack, k, l, i, 2, j | Colors.BLACK);
+//        }
+        matrixStack.pop();
     }
 
     public static VertexConsumer getItemGlintConsumer(VertexConsumerProvider vertexConsumers,
@@ -421,7 +438,7 @@ public class NametagsModule extends ToggleModule
      */
     private String getNametagInfo(PlayerEntity player)
     {
-        final StringBuilder info = new StringBuilder(player.getEntityName());
+        final StringBuilder info = new StringBuilder(player.getName().getString());
         info.append(" ");
         if (entityIdConfig.getValue())
         {

@@ -26,27 +26,23 @@ public class MixinBlockCollisionSpliterator implements Globals
      *
      * @param instance
      * @param blockView
-     * @param pos
+     * @param blockPos
      * @param shapeContext
      * @return
      */
-    @Redirect(method = "computeNext()Lnet/minecraft/util/shape/VoxelShape;",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/block/" +
-                    "BlockState;getCollisionShape(Lnet/minecraft/world/" +
-                    "BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/" +
-                    "minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;"))
-    private VoxelShape hookGetCollisionShape(BlockState instance,
-                                             BlockView blockView, BlockPos pos,
-                                             ShapeContext shapeContext)
+    @Redirect(method = "computeNext", at = @At(value = "INVOKE", target = "Lnet/minecraft/" +
+            "block/BlockState;getCollisionShape(Lnet/minecraft/world/BlockView;Lnet/minecraft/" +
+            "util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;"))
+    private VoxelShape hookGetCollisionShape(BlockState instance, BlockView blockView,
+                                             BlockPos blockPos, ShapeContext shapeContext)
     {
-        VoxelShape voxelShape = instance.getCollisionShape(blockView, pos,
-                shapeContext);
+        VoxelShape voxelShape = instance.getCollisionShape(blockView, blockPos, shapeContext);
         if (blockView != mc.world)
         {
             return voxelShape;
         }
         BlockCollisionEvent blockCollisionEvent =
-                new BlockCollisionEvent(pos, instance);
+                new BlockCollisionEvent(blockPos, instance);
         Shoreline.EVENT_HANDLER.dispatch(blockCollisionEvent);
         if (blockCollisionEvent.isCanceled())
         {

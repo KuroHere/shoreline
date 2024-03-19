@@ -57,7 +57,7 @@ public class SocialManager implements Globals
      */
     public boolean isFriend(String name)
     {
-        return getFriendEntities().stream().anyMatch(e -> e.getEntityName().equals(name));
+        return getFriendEntities().stream().anyMatch(e -> e.getName().getString().equals(name));
     }
 
     /**

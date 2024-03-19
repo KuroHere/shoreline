@@ -6,6 +6,7 @@ import net.shoreline.client.api.command.arg.Argument;
 import net.shoreline.client.api.command.arg.ArgumentParseException;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.Module;
+import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.command.*;
 import net.shoreline.client.impl.event.gui.chat.ChatInputEvent;
 import net.shoreline.client.impl.event.gui.chat.ChatKeyInputEvent;
@@ -240,7 +241,7 @@ public class CommandManager implements Globals
     @EventListener
     public void onChatRender(ChatRenderEvent event)
     {
-        mc.textRenderer.drawWithShadow(event.getMatrices(),
+        RenderManager.renderText(event.getContext(),
                 chatAutocomplete.toString(), event.getX(), event.getY(), 0xff808080);
     }
 

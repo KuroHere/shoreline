@@ -58,29 +58,6 @@ public abstract class MixinScreen
 
     /**
      *
-     * @param matrices
-     * @param stack
-     * @param x
-     * @param y
-     * @param ci
-     */
-    @Inject(method = "renderTooltip(Lnet/minecraft/client/util/math/" +
-            "MatrixStack;Lnet/minecraft/item/ItemStack;II)V",
-            at = @At(value = "HEAD"), cancellable = true)
-    private void hookRenderTooltip(MatrixStack matrices, ItemStack stack,
-                                   int x, int y, CallbackInfo ci)
-    {
-        RenderTooltipEvent renderTooltipEvent =
-                new RenderTooltipEvent(matrices, stack, x, y);
-        Shoreline.EVENT_HANDLER.dispatch(renderTooltipEvent);
-        if (renderTooltipEvent.isCanceled())
-        {
-            ci.cancel();
-        }
-    }
-
-    /**
-     *
      * @return
      */
     @Unique

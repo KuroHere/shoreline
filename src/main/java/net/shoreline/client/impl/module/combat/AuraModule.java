@@ -74,7 +74,7 @@ public class AuraModule extends RotationModule
     //
     Config<Boolean> attackDelayConfig = new BooleanConfig("AttackDelay",
             "Delays attacks according to minecraft hit delays for maximum " +
-                    "damage per attack", false);
+                    "damage per attack", true);
     Config<Float> attackSpeedConfig = new NumberConfig<>("AttackSpeed",
             "Delay for attacks (Only functions if AttackDelay is off)", 1.0f,
             20.0f, 20.0f, () -> !attackDelayConfig.getValue());

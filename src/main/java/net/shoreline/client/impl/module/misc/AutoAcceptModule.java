@@ -53,7 +53,7 @@ public class AutoAcceptModule extends ToggleModule
                 for (PlayerEntity friend :
                         Managers.SOCIAL.getFriendEntities())
                 {
-                    if (text.contains(friend.getEntityName()))
+                    if (text.contains(friend.getName().getString()))
                     {
                         ChatUtil.serverSendMessage("/tpaccept");
                         break;

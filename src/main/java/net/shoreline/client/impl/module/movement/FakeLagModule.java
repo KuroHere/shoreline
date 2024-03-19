@@ -1,5 +1,10 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.c2s.common.KeepAliveC2SPacket;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
+import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -11,12 +16,6 @@ import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.util.world.FakePlayerEntity;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
-import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
-import net.minecraft.network.packet.c2s.play.KeepAliveC2SPacket;
-import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
-import net.shoreline.client.util.Globals;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -123,19 +123,20 @@ public class ElytraFlyModule extends ToggleModule
         }
     }
 
-    @EventListener
-    public void onRemoveFirework(RemoveFireworkEvent event)
-    {
-        if (mc.player == null)
-        {
-            return;
-        }
-        if (mc.player.isFallFlying() && fireworkConfig.getValue())
-        {
-            // fireworkRocketEntity = event.getRocketEntity();
-            // boostFirework();
-        }
-    }
+//    @EventListener
+//    public void onRemoveFirework(RemoveFireworkEvent event)
+//    {
+//        if (mc.player == null)
+//        {
+//            return;
+//        }
+//        if (mc.player.isFallFlying() && event.getRocketEntity() != fireworkRocketEntity
+//                && fireworkConfig.getValue())
+//        {
+//            fireworkRocketEntity = event.getRocketEntity();
+//            boostFirework();
+//        }
+//    }
 
     /**
      *
@@ -151,6 +152,17 @@ public class ElytraFlyModule extends ToggleModule
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet
                 && packet.changesLook() && mc.player.isFallFlying())
         {
+            if (modeConfig.getValue() == FlyMode.CONTROL)
+            {
+                if (mc.options.leftKey.isPressed())
+                {
+                    ((AccessorPlayerMoveC2SPacket) packet).hookSetYaw(packet.getYaw(0.0f) - 90.0f);
+                }
+                if (mc.options.rightKey.isPressed())
+                {
+                    ((AccessorPlayerMoveC2SPacket) packet).hookSetYaw(packet.getYaw(0.0f) + 90.0f);
+                }
+            }
             ((AccessorPlayerMoveC2SPacket) packet).hookSetPitch(pitch);
         }
     }

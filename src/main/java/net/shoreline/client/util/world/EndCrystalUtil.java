@@ -1,13 +1,14 @@
 package net.shoreline.client.util.world;
 
+import com.google.common.collect.Multimap;
+import net.minecraft.entity.*;
+import net.minecraft.entity.attribute.*;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.item.ItemStack;
 import net.shoreline.client.util.Globals;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.DamageUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.hit.BlockHitResult;
@@ -51,17 +52,12 @@ public class EndCrystalUtil implements Globals
                                      final Vec3d crystal,
                                      final boolean ignoreTerrain)
     {
-        if (!entity.isImmuneToExplosion())
-        {
-            double ab = getExposure(crystal, entity, ignoreTerrain);
-            double w = Math.sqrt(entity.squaredDistanceTo(crystal)) / 12.0;
-            double ac = (1.0 - w) * ab;
-            double dmg = (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * 12.0 + 1.0));
-            dmg = getDamageForDifficulty(dmg);
-            dmg = getReduction(entity, dmg);
-            return Math.max(0.0, dmg);
-        }
-        return 0.0;
+        double ab = getExposure(crystal, entity, ignoreTerrain);
+        double w = Math.sqrt(entity.squaredDistanceTo(crystal)) / 12.0;
+        double ac = (1.0 - w) * ab;
+        double dmg = (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * 12.0 + 1.0));
+        dmg = getReduction(entity, mc.world.getDamageSources().explosion(null), dmg);
+        return Math.max(0.0, dmg);
     }
 
     /**
@@ -93,39 +89,18 @@ public class EndCrystalUtil implements Globals
                                         final Vec3d crystal,
                                         final boolean ignoreTerrain)
     {
-        if (!entity.isImmuneToExplosion())
-        {
-            final Box bb = entity.getBoundingBox();
-            double dx = pos.getX() - bb.minX;
-            double dy = pos.getY() - bb.minY;
-            double dz = pos.getZ() - bb.minZ;
-            final Box box = bb.offset(dx, dy, dz);
-            //
-            double ab = getExposure(crystal, entity, box, ignoreTerrain);
-            double w = Math.sqrt(pos.squaredDistanceTo(crystal)) / 12.0;
-            double ac = (1.0 - w) * ab;
-            double dmg = (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * 12.0 + 1.0));
-            dmg = getDamageForDifficulty(dmg);
-            dmg = getReduction(entity, dmg);
-            return Math.max(0.0, dmg);
-        }
-        return 0.0;
-    }
-
-    /**
-     *
-     * @param damage
-     * @return
-     */
-    private static double getDamageForDifficulty(final double damage)
-    {
-        return switch (mc.world.getDifficulty())
-                {
-                    // case PEACEFUL -> 0;
-                    case EASY -> Math.min(damage / 2.0f + 1.0f, damage);
-                    case HARD -> damage * 3.0f / 2.0f;
-                    default -> damage;
-                };
+        final Box bb = entity.getBoundingBox();
+        double dx = pos.getX() - bb.minX;
+        double dy = pos.getY() - bb.minY;
+        double dz = pos.getZ() - bb.minZ;
+        final Box box = bb.offset(dx, dy, dz);
+        //
+        double ab = getExposure(crystal, entity, box, ignoreTerrain);
+        double w = Math.sqrt(pos.squaredDistanceTo(crystal)) / 12.0;
+        double ac = (1.0 - w) * ab;
+        double dmg = (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * 12.0 + 1.0));
+        dmg = getReduction(entity, mc.world.getDamageSources().explosion(null), dmg);
+        return Math.max(0.0, dmg);
     }
 
     /**
@@ -135,25 +110,57 @@ public class EndCrystalUtil implements Globals
      * @param damage
      * @return
      */
-    private static double getReduction(Entity entity, double damage)
+    private static double getReduction(Entity entity, DamageSource damageSource, double damage)
     {
-        if (entity instanceof LivingEntity e)
+        if (damageSource.isScaledWithDifficulty())
         {
-            damage = DamageUtil.getDamageLeft((float) damage, (float) e.getArmor(),
-                    (float) e.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
-            if (e.hasStatusEffect(StatusEffects.RESISTANCE))
+            switch (mc.world.getDifficulty())
             {
-                damage = damage * (1.0 - (double) (e.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1) * 0.2);
+                // case PEACEFUL -> return 0;
+                case EASY -> damage = Math.min(damage / 2 + 1, damage);
+                case HARD -> damage *= 1.5f;
             }
         }
-        int i = EnchantmentHelper.getProtectionAmount(entity.getArmorItems(),
-                new Explosion(mc.world, null, 0.0, 0.0, 0.0, 6.0f, false,
-                        Explosion.DestructionType.DESTROY).getDamageSource());
-        if (i > 0)
+        if (entity instanceof LivingEntity livingEntity)
         {
-            damage = DamageUtil.getInflictedDamage((float) damage, (float) i);
+            damage = DamageUtil.getDamageLeft((float) damage, getArmor(livingEntity), (float) getAttributeValue(livingEntity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+            damage = getProtectionReduction(entity, damage, damageSource);
         }
-        return Math.max(0.0, damage);
+        return Math.max(damage, 0);
+    }
+
+    private static float getArmor(LivingEntity entity)
+    {
+        return (float) Math.floor(getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR));
+    }
+
+    private static float getProtectionReduction(Entity player, double damage, DamageSource source)
+    {
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), source);
+        return DamageUtil.getInflictedDamage((float) damage, protLevel);
+    }
+
+    public static double getAttributeValue(LivingEntity entity, EntityAttribute attribute)
+    {
+        return getAttributeInstance(entity, attribute).getValue();
+    }
+
+    public static EntityAttributeInstance getAttributeInstance(LivingEntity entity, EntityAttribute attribute)
+    {
+        double baseValue = getDefaultForEntity(entity).getBaseValue(attribute);
+        EntityAttributeInstance attributeInstance = new EntityAttributeInstance(attribute, o1 -> {});
+        attributeInstance.setBaseValue(baseValue);
+        for (var equipmentSlot : EquipmentSlot.values()) {
+            ItemStack stack = entity.getEquippedStack(equipmentSlot);
+            Multimap<EntityAttribute, EntityAttributeModifier> modifiers = stack.getAttributeModifiers(equipmentSlot);
+            for (var modifier : modifiers.get(attribute)) attributeInstance.addTemporaryModifier(modifier);
+        }
+        return attributeInstance;
+    }
+
+    private static <T extends LivingEntity> DefaultAttributeContainer getDefaultForEntity(T entity)
+    {
+        return DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType());
     }
 
     /**

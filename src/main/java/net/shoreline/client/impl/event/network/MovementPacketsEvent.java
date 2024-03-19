@@ -19,18 +19,7 @@ public class MovementPacketsEvent extends Event
     private float yaw, pitch;
     private boolean onGround;
 
-    /**
-     *
-     *
-     * @param x
-     * @param y
-     * @param z
-     * @param yaw
-     * @param pitch
-     * @param onGround
-     */
-    public MovementPacketsEvent(double x, double y, double z, float yaw,
-                                float pitch, boolean onGround)
+    public MovementPacketsEvent(double x, double y, double z, float yaw, float pitch, boolean onGround)
     {
         this.x = x;
         this.y = y;

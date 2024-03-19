@@ -1,13 +1,13 @@
 package net.shoreline.client.mixin.gui.hud;
 
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.gui.hud.RenderOverlayEvent;
 import net.shoreline.client.util.Globals;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,32 +38,31 @@ public class MixinInGameHud implements Globals
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param tickDelta
      * @param ci
      */
     @Inject(method = "render", at = @At(value = "TAIL"))
-    private void hookRender(MatrixStack matrices, float tickDelta,
-                            CallbackInfo ci)
+    private void hookRender(DrawContext context, float tickDelta, CallbackInfo ci)
     {
         RenderOverlayEvent.Post renderOverlayEvent =
-            new RenderOverlayEvent.Post(matrices, tickDelta);
+            new RenderOverlayEvent.Post(context, tickDelta);
         Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
     }
 
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param ci
      */
     @Inject(method = "renderStatusEffectOverlay", at = @At(value = "HEAD"),
             cancellable = true)
-    private void hookRenderStatusEffectOverlay(MatrixStack matrices,
+    private void hookRenderStatusEffectOverlay(DrawContext context,
                             CallbackInfo ci)
     {
         RenderOverlayEvent.StatusEffect renderOverlayEvent =
-                new RenderOverlayEvent.StatusEffect(matrices);
+                new RenderOverlayEvent.StatusEffect(context);
         Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
         if (renderOverlayEvent.isCanceled())
         {
@@ -73,17 +72,17 @@ public class MixinInGameHud implements Globals
 
     /**
      *
-     * @param matrices
+     * @param context
      * @param scale
      * @param ci
      */
     @Inject(method = "renderSpyglassOverlay", at = @At(value = "HEAD"),
             cancellable = true)
-    private void hookRenderSpyglassOverlay(MatrixStack matrices, float scale,
+    private void hookRenderSpyglassOverlay(DrawContext context, float scale,
                                            CallbackInfo ci)
     {
         RenderOverlayEvent.Spyglass renderOverlayEvent =
-                new RenderOverlayEvent.Spyglass(matrices);
+                new RenderOverlayEvent.Spyglass(context);
         Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
         if (renderOverlayEvent.isCanceled())
         {
@@ -93,19 +92,19 @@ public class MixinInGameHud implements Globals
 
     /**
      *
-     * @param matrices
+     * @param context
      * @param texture
      * @param opacity
      * @param ci
      */
     @Inject(method = "renderOverlay", at = @At(value = "HEAD"), cancellable = true)
-    private void hookRenderOverlay(MatrixStack matrices, Identifier texture,
+    private void hookRenderOverlay(DrawContext context, Identifier texture,
                                    float opacity, CallbackInfo ci)
     {
         if (texture.getPath().equals(PUMPKIN_BLUR.getPath()))
         {
             RenderOverlayEvent.Pumpkin renderOverlayEvent =
-                    new RenderOverlayEvent.Pumpkin(matrices);
+                    new RenderOverlayEvent.Pumpkin(context);
             Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
             if (renderOverlayEvent.isCanceled())
             {
@@ -115,7 +114,7 @@ public class MixinInGameHud implements Globals
         else if (texture.getPath().equals(POWDER_SNOW_OUTLINE.getPath()))
         {
             RenderOverlayEvent.Frostbite renderOverlayEvent =
-                    new RenderOverlayEvent.Frostbite(matrices);
+                    new RenderOverlayEvent.Frostbite(context);
             Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
             if (renderOverlayEvent.isCanceled())
             {
@@ -128,7 +127,6 @@ public class MixinInGameHud implements Globals
      *
      *
      * @param instance
-     * @param matrices
      * @param text
      * @param x
      * @param y
@@ -136,25 +134,23 @@ public class MixinInGameHud implements Globals
      * @return
      */
     @Redirect(method = "renderHeldItemTooltip", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/font/TextRenderer;drawWithShadow" +
-                    "(Lnet/minecraft/client/util/math/MatrixStack;" +
-                    "Lnet/minecraft/text/Text;FFI)I"))
-    private int hookRenderHeldItemTooltip(TextRenderer instance,
-                                          MatrixStack matrices, Text text,
-                                          float x, float y, int color)
+            target = "Lnet/minecraft/client/gui/DrawContext;drawTextWithShadow" +
+                    "(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;III)I"))
+    private int hookRenderHeldItemTooltip(DrawContext instance, TextRenderer textRenderer,
+                                          Text text, int x, int y, int color)
     {
         RenderOverlayEvent.ItemName renderOverlayEvent =
-                new RenderOverlayEvent.ItemName(matrices);
+                new RenderOverlayEvent.ItemName(instance);
         Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
         if (renderOverlayEvent.isCanceled())
         {
             if (renderOverlayEvent.isUpdateXY())
             {
-                return instance.drawWithShadow(matrices, text,
-                        renderOverlayEvent.getX(), renderOverlayEvent.getY(), color);
+                return instance.drawText(mc.textRenderer, text,
+                        renderOverlayEvent.getX(), renderOverlayEvent.getY(), color, true);
             }
             return 0;
         }
-        return instance.drawWithShadow(matrices, text, x, y, color);
+        return instance.drawText(mc.textRenderer, text, x, y, color, true);
     }
 }

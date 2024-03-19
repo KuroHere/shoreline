@@ -51,8 +51,11 @@ public class NetworkManager implements Globals
      */
     public void sendPacket(final Packet<?> p)
     {
-        PACKET_CACHE.add(p);
-        mc.player.networkHandler.sendPacket(p);
+        if (mc.getNetworkHandler() != null)
+        {
+            PACKET_CACHE.add(p);
+            mc.getNetworkHandler().sendPacket(p);
+        }
     }
 
     /**
@@ -136,7 +139,6 @@ public class NetworkManager implements Globals
     }
 
     /**
-     *
      *
      * @param p
      * @return

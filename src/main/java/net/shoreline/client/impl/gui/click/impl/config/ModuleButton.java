@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.gui.click.impl.config;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.macro.Macro;
 import net.shoreline.client.api.module.Module;
@@ -99,41 +100,40 @@ public class ModuleButton extends Button
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param mouseX
      * @param mouseY
      * @param delta
      */
     @Override
-    public void render(MatrixStack matrices, float mouseX, float mouseY,
-                          float delta)
+    public void render(DrawContext context, float mouseX, float mouseY, float delta)
     {
-        render(matrices, x, y, mouseX, mouseY, delta);
+        render(context, x, y, mouseX, mouseY, delta);
     }
 
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param mouseX
      * @param mouseY
      * @param delta
      */
-    public void render(MatrixStack matrices, float ix, float iy, float mouseX,
+    public void render(DrawContext context, float ix, float iy, float mouseX,
                        float mouseY, float delta)
     {
         x = ix;
         y = iy;
         boolean fill = !(module instanceof ToggleModule t) || t.isEnabled();
-        rect(matrices, fill ? Modules.COLORS.getRGB() : 0x55555555);
-        RenderManager.renderText(matrices, module.getName(), ix + 2, iy + 4, -1);
+        rect(context, fill ? Modules.COLORS.getRGB() : 0x55555555);
+        RenderManager.renderText(context, module.getName(), ix + 2, iy + 4, -1);
         if (open)
         {
             float off = y + height + 0.5f;
             for (ConfigButton<?> configButton : configComponents)
             {
                 // run draw event
-                configButton.render(matrices, ix + 0.5f, off, mouseX, mouseY, delta);
+                configButton.render(context, ix + 0.5f, off, mouseX, mouseY, delta);
                 ((CategoryFrame) frame).offset(15.0f);
                 off += 15.0f;
             }

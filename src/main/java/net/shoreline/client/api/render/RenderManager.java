@@ -1,5 +1,6 @@
 package net.shoreline.client.api.render;
 
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.math.*;
 import net.shoreline.client.init.Fonts;
 import net.shoreline.client.init.Modules;
@@ -444,16 +445,15 @@ public class RenderManager implements Globals
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param text
      * @param x
      * @param y
      * @param color
      */
-    public static void renderText(MatrixStack matrices, String text, float x,
-                                  float y, int color)
+    public static void renderText(DrawContext context, String text, float x, float y, int color)
     {
-        mc.textRenderer.drawWithShadow(matrices, text, x, y, color);
+        context.drawText(mc.textRenderer, text, (int) x, (int) y, color, true);
     }
 
     /**

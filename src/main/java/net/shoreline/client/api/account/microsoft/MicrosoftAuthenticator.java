@@ -6,7 +6,6 @@ import net.shoreline.client.api.account.microsoft.data.XboxLoginData;
 import net.shoreline.client.util.network.RequestUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.client.util.Session;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -52,18 +51,18 @@ public class MicrosoftAuthenticator
      * @throws IOException
      * @throws MicrosoftAuthException
      */
-    public Session login(String email, String password)
-            throws MicrosoftAuthException, IOException
-    {
-        MinecraftProfile profile = getProfileData(email, password);
-        if (profile != null)
-        {
-            return new Session(profile.username(), profile.id(),
-                    profile.accessToken(), Optional.empty(),
-                    Optional.empty(), Session.AccountType.MSA);
-        }
-        return null;
-    }
+//    public Session login(String email, String password)
+//            throws MicrosoftAuthException, IOException
+//    {
+//        MinecraftProfile profile = getProfileData(email, password);
+//        if (profile != null)
+//        {
+//            return new Session(profile.username(), profile.id(),
+//                    profile.accessToken(), Optional.empty(),
+//                    Optional.empty(), Session.AccountType.MSA);
+//        }
+//        return null;
+//    }
 
     /**
      * Gets the profile data for an email and a password

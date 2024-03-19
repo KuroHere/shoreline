@@ -242,7 +242,7 @@ public class AnnouncerModule extends ToggleModule
             Entity attackEntity = packet.getEntity();
             if (attackEntity instanceof PlayerEntity && attackAnnounceTimer.passed(300))
             {
-                sendAnnouncement("I just attacked " + attackEntity.getEntityName() + "!");
+                sendAnnouncement("I just attacked " + attackEntity.getName() + "!");
                 attackAnnounceTimer.reset();
             }
         }
@@ -277,7 +277,7 @@ public class AnnouncerModule extends ToggleModule
                     {
                         String serverIp = mc.getServer().getServerIp();
                         sendAnnouncement(JOIN_ANNOUNCE[rand.nextInt(JOIN_ANNOUNCE.length)]
-                                .replace("{server}", serverIp) + player.getEntityName());
+                                .replace("{server}", serverIp) + player.getName());
                     }
                 }
             }
@@ -290,8 +290,7 @@ public class AnnouncerModule extends ToggleModule
                 PlayerEntity player = mc.world.getPlayerByUuid(id);
                 if (player != null)
                 {
-                    sendAnnouncement(LEAVE_ANNOUNCE[rand.nextInt(LEAVE_ANNOUNCE.length)]
-                            + player.getEntityName());
+                    sendAnnouncement(LEAVE_ANNOUNCE[rand.nextInt(LEAVE_ANNOUNCE.length)] + player.getName());
                 }
             }
         }
@@ -343,8 +342,7 @@ public class AnnouncerModule extends ToggleModule
         if (eatConfig.getValue() && eatAnnounceTimer.passed(300)
                 && foodEaten > rand.nextInt(10))
         {
-            sendAnnouncement("I just ate " + foodEaten + " " + event.getStack().getName()
-                    + (foodEaten > 1 ? "'s" : "") + "!");
+            sendAnnouncement("I just ate " + foodEaten + " " + event.getStack().getName() + (foodEaten > 1 ? "'s" : "") + "!");
             foodEaten = 0;
             eatAnnounceTimer.reset();
         }

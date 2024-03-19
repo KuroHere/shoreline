@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.gui.click.impl.config.setting;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.MacroConfig;
 import net.shoreline.client.api.macro.Macro;
@@ -35,7 +36,7 @@ public class BindButton extends ConfigButton<Macro>
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param ix
      * @param iy
      * @param mouseX
@@ -43,15 +44,15 @@ public class BindButton extends ConfigButton<Macro>
      * @param delta
      */
     @Override
-    public void render(MatrixStack matrices, float ix, float iy, float mouseX,
+    public void render(DrawContext context, float ix, float iy, float mouseX,
                        float mouseY, float delta)
     {
         x = ix;
         y = iy;
         final Macro macro = config.getValue();
         String val = listen ? "..." : macro.getKeyName();
-        rect(matrices, 0x00000000);
-        RenderManager.renderText(matrices, config.getName() + Formatting.GRAY
+        rect(context, 0x00000000);
+        RenderManager.renderText(context, config.getName() + Formatting.GRAY
                         + " " + val, ix + 2.0f, iy + 4.0f, -1);
     }
 

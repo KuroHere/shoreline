@@ -1,16 +1,19 @@
 package net.shoreline.client.mixin.accessor;
 
-import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferBuilderStorage;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
-
-import java.util.SortedMap;
 
 @Mixin(BufferBuilderStorage.class)
 public interface AccessorBufferBuilderStorage
 {
-    @Accessor("entityBuilders")
-    SortedMap<RenderLayer, BufferBuilder> hookGetEntityBuilders();
+    /**
+     *
+     * @param vertexConsumerProvider
+     */
+    @Accessor("entityVertexConsumers")
+    @Mutable
+    void hookSetEntityVertexConsumers(VertexConsumerProvider.Immediate vertexConsumerProvider);
 }

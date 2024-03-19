@@ -3,7 +3,6 @@ package net.shoreline.client.impl.module.movement;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.network.NetworkThreadUtils;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
@@ -174,10 +173,9 @@ public class VelocityModule extends ToggleModule
                 // Dumb fix bc canceling explosion velocity removes explosion handling in 1.19
                 try
                 {
-                    mc.world.getServer().executeSync(() ->
-                        mc.world.playSound(packet.getX(), packet.getY(), packet.getZ(),
-                                SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
-                                4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false));
+                    mc.world.playSound(packet.getX(), packet.getY(), packet.getZ(),
+                            SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
+                            4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false);
                 }
                 catch (Exception ignored)
                 {

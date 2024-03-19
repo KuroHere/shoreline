@@ -36,8 +36,7 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
         {
             for (PlayerEntity player : mc.world.getPlayers())
             {
-                if (player.getEntityName().toLowerCase()
-                        .equalsIgnoreCase(getLiteral()))
+                if (player.getName().getString().toLowerCase().equalsIgnoreCase(getLiteral()))
                 {
                     return player;
                 }
@@ -64,7 +63,7 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals
                 {
                     continue;
                 }
-                playerNames.add(player.getEntityName().toLowerCase());
+                playerNames.add(player.getName().getString().toLowerCase());
             }
         }
         return playerNames;

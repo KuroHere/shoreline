@@ -28,12 +28,10 @@ public class MixinInGameOverlayRenderer
      */
     @Inject(method = "renderFireOverlay", at = @At(value = "HEAD"),
             cancellable = true)
-    private static void hookRenderFireOverlay(MinecraftClient client,
-                                              MatrixStack matrices,
-                                              CallbackInfo ci)
+    private static void hookRenderFireOverlay(MinecraftClient client, MatrixStack matrices, CallbackInfo ci)
     {
         RenderOverlayEvent.Fire renderOverlayEvent =
-                new RenderOverlayEvent.Fire(matrices);
+                new RenderOverlayEvent.Fire(null);
         Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
         if (renderOverlayEvent.isCanceled())
         {
@@ -49,12 +47,11 @@ public class MixinInGameOverlayRenderer
      */
     @Inject(method = "renderUnderwaterOverlay", at = @At(value = "HEAD"),
             cancellable = true)
-    private static void hookRenderUnderwaterOverlay(MinecraftClient client,
-                                                    MatrixStack matrices,
+    private static void hookRenderUnderwaterOverlay(MinecraftClient client, MatrixStack matrices,
                                                     CallbackInfo ci)
     {
         RenderOverlayEvent.Water renderOverlayEvent =
-                new RenderOverlayEvent.Water(matrices);
+                new RenderOverlayEvent.Water(null);
         Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
         if (renderOverlayEvent.isCanceled())
         {
@@ -70,12 +67,10 @@ public class MixinInGameOverlayRenderer
      */
     @Inject(method = "renderInWallOverlay", at = @At(value = "HEAD"),
             cancellable = true)
-    private static void hookRenderFireOverlay(Sprite sprite,
-                                              MatrixStack matrices,
-                                              CallbackInfo ci)
+    private static void hookRenderFireOverlay(Sprite sprite, MatrixStack matrices, CallbackInfo ci)
     {
         RenderOverlayEvent.Block renderOverlayEvent =
-                new RenderOverlayEvent.Block(matrices);
+                new RenderOverlayEvent.Block(null);
         Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
         if (renderOverlayEvent.isCanceled())
         {

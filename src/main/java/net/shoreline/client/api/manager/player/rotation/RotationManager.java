@@ -13,10 +13,7 @@ import net.shoreline.client.impl.event.network.MovementPacketsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.render.entity.RenderPlayerEvent;
 import net.shoreline.client.init.Modules;
-import net.shoreline.client.mixin.accessor.AccessorPlayerMoveC2SPacket;
 import net.shoreline.client.util.Globals;
-import net.shoreline.client.util.math.timer.CacheTimer;
-import net.shoreline.client.util.math.timer.Timer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -39,7 +36,7 @@ public class RotationManager implements Globals
     private RotationRequest rotation;
     private RotationModule rotateModule;
     private final List<RotationRequest> requests = new ArrayList<>();
-    private final Timer rotateTimer = new CacheTimer();
+    private int rotateTicks;
 
     /**
      *
@@ -69,20 +66,10 @@ public class RotationManager implements Globals
         }
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet && packet.changesLook())
         {
-            if (rotation != null && !event.isClientPacket())
-            {
-                float serverYawChange = rotation.getYaw() - getWrappedYaw();
-                float serverPitchChange = rotation.getPitch() - getPitch();
-                float yaw1 = yaw + serverYawChange;
-                float pitch1 = pitch + serverPitchChange;
-                ((AccessorPlayerMoveC2SPacket) packet).hookSetYaw(yaw1);
-                ((AccessorPlayerMoveC2SPacket) packet).hookSetPitch(pitch1);
-                yaw = yaw1;
-                pitch = pitch1;
-                return;
-            }
-            yaw = packet.getYaw(0.0f);
-            pitch = packet.getPitch(0.0f);
+            float packetYaw = packet.getYaw(0.0f);
+            float packetPitch = packet.getPitch(0.0f);
+            yaw = packetYaw;
+            pitch = packetPitch;
         }
     }
 
@@ -94,6 +81,7 @@ public class RotationManager implements Globals
     public void onMovementPackets(MovementPacketsEvent event)
     {
         requests.removeIf(r -> System.currentTimeMillis() - r.getTime() > 500);
+        // vanillaPacket = true;
         float vanillaYaw = mc.player.getYaw();
         float vanillaPitch = mc.player.getPitch();
         if (requests.isEmpty())
@@ -122,7 +110,7 @@ public class RotationManager implements Globals
         float serverPitchChange = rotation.getPitch() - getPitch();
         float yaw1 = yaw + serverYawChange;
         float pitch1 = pitch + serverPitchChange;
-        rotateTimer.reset();
+        rotateTicks = 0;
         event.cancel();
         event.setYaw(yaw1);
         event.setPitch(pitch1);
@@ -229,11 +217,6 @@ public class RotationManager implements Globals
         }
     }
 
-    public void setRotation(float yaw, float pitch)
-    {
-
-    }
-
     /**
      *
      * @param requester
@@ -298,7 +281,7 @@ public class RotationManager implements Globals
      */
     public boolean isDoneRotating()
     {
-        return rotateTimer.passed(Modules.ROTATIONS.getPreserveTicks() * 50.0f);
+        return rotateTicks > Modules.ROTATIONS.getPreserveTicks();
     }
 
     /**

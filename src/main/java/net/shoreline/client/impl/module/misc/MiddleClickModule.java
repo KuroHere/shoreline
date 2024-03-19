@@ -71,7 +71,7 @@ public class MiddleClickModule extends ToggleModule
                     }
                     case DUEL ->
                     {
-                        ChatUtil.serverSendMessage("/duel " + target.getEntityName());
+                        ChatUtil.serverSendMessage("/duel " + target.getName());
                     }
                 }
             }

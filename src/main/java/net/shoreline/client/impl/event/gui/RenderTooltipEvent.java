@@ -1,9 +1,8 @@
 package net.shoreline.client.impl.event.gui;
 
-import net.shoreline.client.api.event.Cancelable;
-import net.shoreline.client.api.event.Event;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
+import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.StageEvent;
 
 /**
@@ -15,17 +14,22 @@ import net.shoreline.client.api.event.StageEvent;
 @Cancelable
 public class RenderTooltipEvent extends StageEvent
 {
-    public final MatrixStack matrices;
+    private final DrawContext context;
     private final ItemStack stack;
     //
     private final int x, y;
 
-    public RenderTooltipEvent(MatrixStack matrices, ItemStack stack, int x, int y)
+    public RenderTooltipEvent(DrawContext context, ItemStack stack, int x, int y)
     {
-        this.matrices = matrices;
+        this.context = context;
         this.stack = stack;
         this.x = x;
         this.y = y;
+    }
+
+    public DrawContext getContext()
+    {
+        return context;
     }
 
     public ItemStack getStack()

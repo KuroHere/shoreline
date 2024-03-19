@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.gui.click.impl.config.setting;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.impl.gui.click.component.Button;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
@@ -32,29 +33,28 @@ public abstract class ConfigButton<T> extends Button
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param mouseX
      * @param mouseY
      * @param delta
      */
     @Override
-    public void render(MatrixStack matrices, float mouseX, float mouseY,
-                       float delta)
+    public void render(DrawContext context, float mouseX, float mouseY, float delta)
     {
-        render(matrices, x, y, mouseX, mouseY, delta);
+        render(context, x, y, mouseX, mouseY, delta);
     }
 
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param ix
      * @param iy
      * @param mouseX
      * @param mouseY
      * @param delta
      */
-    public abstract void render(MatrixStack matrices, float ix, float iy,
+    public abstract void render(DrawContext context, float ix, float iy,
                                 float mouseX, float mouseY, float delta);
 
     /**

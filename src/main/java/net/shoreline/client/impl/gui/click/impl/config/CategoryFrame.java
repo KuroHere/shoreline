@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.gui.click.impl.config;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -79,14 +80,13 @@ public class CategoryFrame extends Frame
     /**
      *
      *
-     * @param matrices
+     * @param context
      * @param mouseX
      * @param mouseY
      * @param delta
      */
     @Override
-    public void render(MatrixStack matrices, float mouseX, float mouseY,
-                       float delta)
+    public void render(DrawContext context, float mouseX, float mouseY, float delta)
     {
         if (isWithin(mouseX, mouseY) && ClickGuiScreen.MOUSE_LEFT_HOLD)
         {
@@ -98,8 +98,8 @@ public class CategoryFrame extends Frame
             y += ClickGuiScreen.MOUSE_Y - py;
         }
         // draw the component
-        rect(matrices, Modules.COLORS.getRGB());
-        RenderManager.renderText(matrices, name, x + 3.0f, y + 3.0f, -1);
+        rect(context, Modules.COLORS.getRGB());
+        RenderManager.renderText(context, name, x + 3.0f, y + 3.0f, -1);
         if (open)
         {
             fheight = 3.0f;
@@ -118,11 +118,11 @@ public class CategoryFrame extends Frame
                     }
                 }
             }
-            fill(matrices, x, y + height, 88.0f, fheight, 0x77000000);
+            fill(context, x, y + height, 88.0f, fheight, 0x77000000);
             off = y + height + 1.0f;
             for (ModuleButton moduleButton : moduleButtons)
             {
-                moduleButton.render(matrices, x + 1.0f, off + 1, mouseX,
+                moduleButton.render(context, x + 1.0f, off + 1, mouseX,
                         mouseY, delta);
                 off += 15.5f;
             }

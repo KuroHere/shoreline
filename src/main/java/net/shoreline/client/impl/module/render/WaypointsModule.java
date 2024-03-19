@@ -71,8 +71,7 @@ public class WaypointsModule extends ToggleModule
                 {
                     if (packet.getActions().contains(PlayerListS2CPacket.Action.ADD_PLAYER))
                     {
-                        Managers.WAYPOINT.remove(String.format("%s's Logout",
-                                player.getEntityName()));
+                        Managers.WAYPOINT.remove(String.format("%s's Logout", player.getName().getString()));
                     }
                 }
             }
@@ -88,8 +87,7 @@ public class WaypointsModule extends ToggleModule
                 if (player != null)
                 {
                     Managers.WAYPOINT.register(new Waypoint(String.format("%s's Logout",
-                            player.getEntityName()), serverIp,
-                            player.prevX, player.prevY, player.prevZ));
+                            player.getName().getString()), serverIp, player.prevX, player.prevY, player.prevZ));
                 }
             }
         }

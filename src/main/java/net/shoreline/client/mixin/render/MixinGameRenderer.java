@@ -1,16 +1,22 @@
 package net.shoreline.client.mixin.render;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.*;
+import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ResourceFactory;
+import net.minecraft.util.Util;
 import net.minecraft.util.hit.HitResult;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.render.RenderLayersClient;
 import net.shoreline.client.impl.event.network.ReachEvent;
 import net.shoreline.client.impl.event.render.*;
 import net.shoreline.client.init.Programs;
+import net.shoreline.client.mixin.accessor.AccessorBufferBuilderStorage;
+import net.shoreline.client.util.Globals;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,13 +29,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import java.util.SortedMap;
+
 /**
  * @author linus
  * @see GameRenderer
  * @since 1.0
  */
 @Mixin(GameRenderer.class)
-public class MixinGameRenderer
+public class MixinGameRenderer implements Globals
 {
     //
     @Shadow
@@ -93,7 +101,7 @@ public class MixinGameRenderer
      * @param ci
      */
     @Inject(method = "renderNausea", at = @At(value = "HEAD"), cancellable = true)
-    private void hookRenderNausea(float distortionStrength, CallbackInfo ci)
+    private void hookRenderNausea(DrawContext context, float distortionStrength, CallbackInfo ci)
     {
         RenderNauseaEvent renderNauseaEvent = new RenderNauseaEvent();
         Shoreline.EVENT_HANDLER.dispatch(renderNauseaEvent);
@@ -145,18 +153,6 @@ public class MixinGameRenderer
      * @param d
      * @return
      */
-    @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 3))
-    private double updateTargetedEntityModifySurvivalReach(double d)
-    {
-        ReachEvent reachEvent = new ReachEvent();
-        Shoreline.EVENT_HANDLER.dispatch(reachEvent);
-        return reachEvent.isCanceled() ? reachEvent.getReach() + 3.0 : 3.0;
-    }
-
-    /**
-     * @param d
-     * @return
-     */
     @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 9))
     private double updateTargetedEntityModifySquaredMaxReach(double d)
     {
@@ -195,7 +191,27 @@ public class MixinGameRenderer
     private void initPrograms(ResourceFactory factory, CallbackInfo ci)
     {
         Programs.initPrograms();
-        // Initialize client layers
-        RenderLayersClient.initLayers();
+        SortedMap sortedMap = Util.make(new Object2ObjectLinkedOpenHashMap(), map -> {
+            map.put(TexturedRenderLayers.getEntitySolid(), mc.getBufferBuilders().getBlockBufferBuilders().get(RenderLayer.getSolid()));
+            map.put(TexturedRenderLayers.getEntityCutout(), mc.getBufferBuilders().getBlockBufferBuilders().get(RenderLayer.getCutout()));
+            map.put(TexturedRenderLayers.getBannerPatterns(), mc.getBufferBuilders().getBlockBufferBuilders().get(RenderLayer.getCutoutMipped()));
+            map.put(TexturedRenderLayers.getEntityTranslucentCull(), mc.getBufferBuilders().getBlockBufferBuilders().get(RenderLayer.getTranslucent()));
+            map.put(TexturedRenderLayers.getShieldPatterns(), new BufferBuilder(TexturedRenderLayers.getShieldPatterns().getExpectedBufferSize()));
+            map.put(TexturedRenderLayers.getBeds(), new BufferBuilder(TexturedRenderLayers.getBeds().getExpectedBufferSize()));
+            map.put(TexturedRenderLayers.getSign(), new BufferBuilder(TexturedRenderLayers.getSign().getExpectedBufferSize()));
+            map.put(TexturedRenderLayers.getHangingSign(), new BufferBuilder(TexturedRenderLayers.getHangingSign().getExpectedBufferSize()));
+            map.put(TexturedRenderLayers.getChest(), new BufferBuilder(786432));
+            map.put(RenderLayer.getArmorGlint(), new BufferBuilder(RenderLayer.getArmorGlint().getExpectedBufferSize()));
+            map.put(RenderLayer.getArmorEntityGlint(), new BufferBuilder(RenderLayer.getArmorEntityGlint().getExpectedBufferSize()));
+            map.put(RenderLayer.getGlint(), new BufferBuilder(RenderLayer.getGlint().getExpectedBufferSize()));
+            map.put(RenderLayer.getDirectGlint(), new BufferBuilder(RenderLayer.getDirectGlint().getExpectedBufferSize()));
+            map.put(RenderLayer.getGlintTranslucent(), new BufferBuilder(RenderLayer.getGlintTranslucent().getExpectedBufferSize()));
+            map.put(RenderLayer.getEntityGlint(), new BufferBuilder(RenderLayer.getEntityGlint().getExpectedBufferSize()));
+            map.put(RenderLayer.getDirectEntityGlint(), new BufferBuilder(RenderLayer.getDirectEntityGlint().getExpectedBufferSize()));
+            map.put(RenderLayer.getWaterMask(), new BufferBuilder(RenderLayer.getWaterMask().getExpectedBufferSize()));
+            map.put(RenderLayersClient.GLINT, new BufferBuilder(RenderLayersClient.GLINT.getExpectedBufferSize()));
+            ModelLoader.BLOCK_DESTRUCTION_RENDER_LAYERS.forEach(renderLayer -> map.put(renderLayer, new BufferBuilder(renderLayer.getExpectedBufferSize())));
+        });
+        ((AccessorBufferBuilderStorage) mc.getBufferBuilders()).hookSetEntityVertexConsumers(VertexConsumerProvider.immediate(sortedMap, new BufferBuilder(786432)));
     }
 }

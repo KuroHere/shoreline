@@ -18,6 +18,8 @@ public class EvictingQueue<E> extends ArrayDeque<E>
 {
     //
     private final int limit;
+    //
+    private int size;
 
     /**
      *
@@ -26,6 +28,7 @@ public class EvictingQueue<E> extends ArrayDeque<E>
     public EvictingQueue(int limit)
     {
         this.limit = limit;
+        size = 0;
     }
 
     /**
@@ -40,7 +43,9 @@ public class EvictingQueue<E> extends ArrayDeque<E>
         while (add && size() > limit)
         {
             super.remove();
+            size--;
         }
+        size++;
         return add;
     }
 
@@ -52,9 +57,11 @@ public class EvictingQueue<E> extends ArrayDeque<E>
     public void addFirst(@NotNull E element)
     {
         super.addFirst(element);
+        size++;
         while (size() > limit)
         {
             super.removeLast();
+            size--;
         }
     }
 
@@ -62,7 +69,27 @@ public class EvictingQueue<E> extends ArrayDeque<E>
      *
      * @return
      */
-    public int getLimit()
+    @Override
+    public int size()
+    {
+        return size;
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public boolean isEmpty()
+    {
+        return size <= 0;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int limit()
     {
         return limit;
     }

@@ -60,7 +60,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity implements Globals
      */
     public FakePlayerEntity(PlayerEntity player)
     {
-        this(player, player.getEntityName());
+        this(player, player.getName().getString());
     }
 
     /**
@@ -72,7 +72,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity implements Globals
         if (mc.world != null)
         {
             unsetRemoved();
-            mc.world.addEntity(getId(), this);
+            mc.world.addEntity(this);
         }
     }
 

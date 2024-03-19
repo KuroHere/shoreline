@@ -1,27 +1,33 @@
 package net.shoreline.client.mixin.network;
 
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.network.packet.Packet;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.client.network.SequencedPacketCreator;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.GameMode;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.network.AttackBlockEvent;
 import net.shoreline.client.impl.event.network.BreakBlockEvent;
 import net.shoreline.client.impl.event.network.InteractBlockEvent;
 import net.shoreline.client.impl.event.network.ReachEvent;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.GameMode;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
@@ -33,11 +39,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * @see ClientPlayerInteractionManager
  */
 @Mixin(ClientPlayerInteractionManager.class)
-public class MixinClientPlayerInteractionManager implements Globals
+public abstract class MixinClientPlayerInteractionManager implements Globals
 {
     //
     @Shadow
     private GameMode gameMode;
+
+    @Shadow
+    protected abstract void syncSelectedSlot();
+
+    @Shadow
+    protected abstract void sendSequencedPacket(ClientWorld world, SequencedPacketCreator packetCreator);
 
     /**
      *
@@ -116,5 +128,41 @@ public class MixinClientPlayerInteractionManager implements Globals
             cir.setReturnValue(false);
             cir.cancel();
         }
+    }
+
+    /**
+     *
+     * @param player
+     * @param hand
+     * @param cir
+     */
+    @Inject(method = "interactItem", at = @At(value = "HEAD"), cancellable = true)
+    public void hookInteractItem(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir)
+    {
+        cir.cancel();
+        if (this.gameMode == GameMode.SPECTATOR) {
+            cir.setReturnValue(ActionResult.PASS);
+        }
+        syncSelectedSlot();
+        // TODO: ROTATION SYNC
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(),
+                 player.getYaw(), player.getPitch(), player.isOnGround()));
+        MutableObject mutableObject = new MutableObject();
+        sendSequencedPacket(mc.world, sequence -> {
+            PlayerInteractItemC2SPacket playerInteractItemC2SPacket = new PlayerInteractItemC2SPacket(hand, sequence);
+            ItemStack itemStack = player.getStackInHand(hand);
+            if (player.getItemCooldownManager().isCoolingDown(itemStack.getItem())) {
+                mutableObject.setValue(ActionResult.PASS);
+                return playerInteractItemC2SPacket;
+            }
+            TypedActionResult<ItemStack> typedActionResult = itemStack.use(mc.world, player, hand);
+            ItemStack itemStack2 = typedActionResult.getValue();
+            if (itemStack2 != itemStack) {
+                player.setStackInHand(hand, itemStack2);
+            }
+            mutableObject.setValue(typedActionResult.getResult());
+            return playerInteractItemC2SPacket;
+        });
+        cir.setReturnValue((ActionResult)((Object)mutableObject.getValue()));
     }
 }

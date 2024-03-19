@@ -1,5 +1,6 @@
 package net.shoreline.client.mixin.gui.hud;
 
+import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.gui.hud.RenderOverlayEvent;
 import net.minecraft.client.gui.hud.BossBarHud;
@@ -20,14 +21,14 @@ public class MixinBossBarHud
 {
     /**
      *
-     * @param matrices
+     * @param context
      * @param ci
      */
     @Inject(method = "render", at = @At(value = "HEAD"), cancellable = true)
-    private void hookRender(MatrixStack matrices, CallbackInfo ci)
+    private void hookRender(DrawContext context, CallbackInfo ci)
     {
         RenderOverlayEvent.BossBar renderOverlayEvent =
-                new RenderOverlayEvent.BossBar(matrices);
+                new RenderOverlayEvent.BossBar(context);
         Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
         if (renderOverlayEvent.isCanceled())
         {

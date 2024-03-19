@@ -147,7 +147,7 @@ public class BlockLagModule extends PlaceBlockModule
      */
     private boolean isInsideBlock(BlockState state)
     {
-        return state.getMaterial().blocksMovement() && !mc.player.verticalCollision;
+        return state.blocksMovement() && !mc.player.verticalCollision;
     }
 
     /**

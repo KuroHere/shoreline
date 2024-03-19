@@ -1,5 +1,7 @@
 package net.shoreline.client.impl.command;
 
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Formatting;
 import net.shoreline.client.api.command.Command;
 import net.shoreline.client.api.command.arg.Argument;
 import net.shoreline.client.api.command.arg.OptionalArgument;
@@ -8,9 +10,6 @@ import net.shoreline.client.api.command.arg.arguments.PlayerArgument;
 import net.shoreline.client.api.command.arg.arguments.StringArgument;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.chat.ChatUtil;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Formatting;
-import net.shoreline.client.util.Globals;
 
 import java.util.Arrays;
 
@@ -57,31 +56,31 @@ public class FriendCommand extends Command
                 if (action.equalsIgnoreCase("add"))
                 {
                     ChatUtil.clientSendMessage("Added friend with name " +
-                            Formatting.AQUA + player.getEntityName() + Formatting.RESET + "!");
+                            Formatting.AQUA + player.getName().getString() + Formatting.RESET + "!");
                     Managers.SOCIAL.addFriend(player.getUuid());
                     if (notify != null && notify)
                     {
                         ChatUtil.serverSendMessage(player, "You were friended by %s!",
-                                Globals.mc.player.getEntityName());
+                                mc.player.getName().getString());
                     }
                 }
                 else if (action.equalsIgnoreCase("remove")
                         || action.equalsIgnoreCase("del"))
                 {
                     ChatUtil.clientSendMessage("Removed friend with name " +
-                            Formatting.DARK_BLUE + player.getEntityName() + Formatting.RESET + "!");
+                            Formatting.DARK_BLUE + player.getName().getString() + Formatting.RESET + "!");
                     Managers.SOCIAL.remove(player.getUuid());
                 }
             }
             else
             {
                 ChatUtil.clientSendMessage("Added friend with name " +
-                        Formatting.DARK_BLUE + player.getEntityName() + Formatting.RESET + "!");
+                        Formatting.DARK_BLUE + player.getName().getString() + Formatting.RESET + "!");
                 Managers.SOCIAL.addFriend(player.getUuid());
                 if (notify != null && notify)
                 {
                     ChatUtil.serverSendMessage(player, "You were friended by %s!",
-                            Globals.mc.player.getEntityName());
+                            mc.player.getName().getString());
                 }
             }
         }
