@@ -29,34 +29,21 @@ import java.text.DecimalFormat;
  * @since 1.0
  */
 public class BlockHighlightModule extends ToggleModule {
-    //
-    Config<BoxRender> boxModeConfig = new EnumConfig<>("BoxMode", "Box " +
-            "rendering mode", BoxRender.OUTLINE, BoxRender.values());
-    Config<Boolean> entitiesConfig = new BooleanConfig("Debug-Entities",
-            "Highlights entity bounding boxes for debug purposes", false);
-    //
+
+    Config<BoxRender> boxModeConfig = new EnumConfig<>("BoxMode", "Box " + "rendering mode", BoxRender.OUTLINE, BoxRender.values());
+    Config<Boolean> entitiesConfig = new BooleanConfig("Debug-Entities", "Highlights entity bounding boxes for debug purposes", false);
     private double distance;
 
-    /**
-     *
-     */
     public BlockHighlightModule() {
-        super("BlockHighlight", "Highlights the block the player is facing",
-                ModuleCategory.RENDER);
+        super("BlockHighlight", "Highlights the block the player is facing", ModuleCategory.RENDER);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(distance);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (mc.world == null) {
@@ -72,14 +59,13 @@ public class BlockHighlightModule extends ToggleModule {
                 render = entity.getBoundingBox();
                 distance = pos.distanceTo(entity.getPos());
             } else if (result.getType() == HitResult.Type.BLOCK) {
-                //
+
                 BlockPos hpos = ((BlockHitResult) result).getBlockPos();
                 BlockState state = mc.world.getBlockState(hpos);
                 VoxelShape outlineShape = state.getOutlineShape(mc.world, hpos);
                 if (outlineShape.isEmpty()) {
                     return;
                 }
-                // WHY DOESNT THIS WORK
                 Box render1 = outlineShape.getBoundingBox();
                 render = new Box(hpos.getX() + render1.minX, hpos.getY() + render1.minY,
                         hpos.getZ() + render1.minZ, hpos.getX() + render1.maxX,
@@ -101,9 +87,6 @@ public class BlockHighlightModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderBlockOutline(RenderBlockOutlineEvent event) {
         event.cancel();

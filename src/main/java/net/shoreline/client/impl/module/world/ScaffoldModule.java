@@ -21,22 +21,14 @@ public class ScaffoldModule extends RotationModule {
             " towers when jumping", true);
     Config<Boolean> stopSprintConfig = new BooleanConfig("StopSprint", "Stops" +
             " sprinting when placing blocks", false);
-    Config<Boolean> keepYConfig = new BooleanConfig("KeepY", "Maintains " +
-            "the y-level of the player", false);
-    //
+    Config<Boolean> keepYConfig = new BooleanConfig("KeepY", "Maintains the y-level of the player", false);
     private double y;
 
-    /**
-     *
-     */
     public ScaffoldModule() {
         super("Scaffold", "Automatically places blocks below the player",
                 ModuleCategory.WORLD);
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         if (mc.player == null) {
@@ -45,9 +37,6 @@ public class ScaffoldModule extends RotationModule {
 
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (mc.player == null) {
@@ -60,9 +49,6 @@ public class ScaffoldModule extends RotationModule {
 
     }
 
-    /**
-     * @return
-     */
     private BlockPos getFloorPlacement() {
         double y2 = keepYConfig.getValue() ? y : mc.player.getY() - 1.0;
         BlockPos pos = BlockPos.ofFloored(mc.player.getX(), y2,

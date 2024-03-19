@@ -47,38 +47,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @since 1.0
  */
 public class NametagsModule extends ToggleModule {
-    //
-    Config<Boolean> armorConfig = new BooleanConfig("Armor", "Displays " +
-            "the player's armor", true);
-    Config<Boolean> enchantmentsConfig = new BooleanConfig("Enchantments",
-            "Displays a list of the item's enchantments", true);
-    Config<Boolean> durabilityConfig = new BooleanConfig("Durability",
-            "Displays item durability", true);
-    Config<Boolean> itemNameConfig = new BooleanConfig("ItemName", "Displays " +
-            "the player's current held item name", false);
-    Config<Boolean> entityIdConfig = new BooleanConfig("EntityId", "Displays " +
-            "the player's entity id", false);
-    Config<Boolean> gamemodeConfig = new BooleanConfig("Gamemode", "Displays " +
-            "the player's gamemode", false);
-    Config<Boolean> pingConfig = new BooleanConfig("Ping", "Displays " +
-            "the player's server connection ping", true);
-    Config<Boolean> healthConfig = new BooleanConfig("Health", "Displays " +
-            "the player's current health", true);
-    Config<Boolean> totemsConfig = new BooleanConfig("Totems", "Displays " +
-            "the player's popped totem count", false);
-    Config<Float> scalingConfig = new NumberConfig<>("Scaling", "The nametag " +
-            "label scale", 0.001f, 0.003f, 0.01f);
-    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles",
-            "Renders nametags on invisible players", true);
-    Config<Boolean> borderedConfig = new BooleanConfig("TextBorder",
-            "Renders a border behind the nametag", true);
+    Config<Boolean> armorConfig = new BooleanConfig("Armor", "Displays the player's armor", true);
+    Config<Boolean> enchantmentsConfig = new BooleanConfig("Enchantments", "Displays a list of the item's enchantments", true);
+    Config<Boolean> durabilityConfig = new BooleanConfig("Durability", "Displays item durability", true);
+    Config<Boolean> itemNameConfig = new BooleanConfig("ItemName", "Displays the player's current held item name", false);
+    Config<Boolean> entityIdConfig = new BooleanConfig("EntityId", "Displays the player's entity id", false);
+    Config<Boolean> gamemodeConfig = new BooleanConfig("Gamemode", "Displays the player's gamemode", false);
+    Config<Boolean> pingConfig = new BooleanConfig("Ping", "Displays the player's server connection ping", true);
+    Config<Boolean> healthConfig = new BooleanConfig("Health", "Displays the player's current health", true);
+    Config<Boolean> totemsConfig = new BooleanConfig("Totems", "Displays the player's popped totem count", false);
+    Config<Float> scalingConfig = new NumberConfig<>("Scaling", "The nametag label scale", 0.001f, 0.003f, 0.01f);
+    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles", "Renders nametags on invisible players", true);
+    Config<Boolean> borderedConfig = new BooleanConfig("TextBorder", "Renders a border behind the nametag", true);
 
-    /**
-     *
-     */
     public NametagsModule() {
-        super("Nametags", "Renders info on player nametags",
-                ModuleCategory.RENDER);
+        super("Nametags", "Renders info on player nametags", ModuleCategory.RENDER);
     }
 
     public static VertexConsumer getItemGlintConsumer(VertexConsumerProvider vertexConsumers,
@@ -89,9 +72,6 @@ public class NametagsModule extends ToggleModule {
         return vertexConsumers.getBuffer(layer);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (mc.gameRenderer == null || mc.getCameraEntity() == null) {
@@ -114,7 +94,7 @@ public class NametagsModule extends ToggleModule {
                 double rz = player.getZ() - pinterpolate.getZ();
                 int width = RenderManager.textWidth(info);
                 float hwidth = width / 2.0f;
-                //
+
                 double dx = (mc.player.getX() - interpolate.getX()) - rx;
                 double dy = (mc.player.getY() - interpolate.getY()) - ry;
                 double dz = (mc.player.getZ() - interpolate.getZ()) - rz;
@@ -128,14 +108,10 @@ public class NametagsModule extends ToggleModule {
                 }
                 renderInfo(info, hwidth, player,
                         rx, ry, rz, camera, scaling);
-                // renderItems(render, camera);
             }
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderLabel(RenderLabelEvent event) {
         if (event.getEntity() instanceof PlayerEntity && event.getEntity() != mc.player) {
@@ -143,16 +119,6 @@ public class NametagsModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param info
-     * @param width
-     * @param entity
-     * @param x
-     * @param y
-     * @param z
-     * @param camera
-     * @param scaling
-     */
     private void renderInfo(String info, float width, PlayerEntity entity,
                             double x, double y, double z, Camera camera, float scaling) {
         final Vec3d pos = camera.getPos();
@@ -175,7 +141,6 @@ public class NametagsModule extends ToggleModule {
             RenderManager.rect(matrices, -width - 1.0f, -1.0f, width * 2.0f + 2.0f,
                     mc.textRenderer.fontHeight + 1.0f, 0.0, 0x55000400);
         }
-        // ANNOYING HACK
         int color = getNametagColor(entity);
         Fonts.VANILLA.drawWithShadow(matrices, info, -width, 0.0f, color);
         // drawInternal(info, -width + 1.0f, 1.0f, getNametagColor(entity),
@@ -194,9 +159,6 @@ public class NametagsModule extends ToggleModule {
         matrices.pop();
     }
 
-    /**
-     * @param player
-     */
     private void renderItems(MatrixStack matrixStack, PlayerEntity player) {
         List<ItemStack> displayItems = new CopyOnWriteArrayList<>();
         if (!player.getOffHandStack().isEmpty()) {
@@ -328,7 +290,7 @@ public class NametagsModule extends ToggleModule {
             return;
         }
         Map<Enchantment, Integer> enchants = EnchantmentHelper.get(itemStack);
-        //
+
         float n2 = 0;
         for (Enchantment enchantment : enchants.keySet()) {
             int lvl = enchants.get(enchantment);
@@ -360,22 +322,12 @@ public class NametagsModule extends ToggleModule {
         return n2;
     }
 
-    /**
-     * @param matrixStack
-     * @param itemStack
-     * @param x
-     * @param y
-     */
     private void renderItemName(MatrixStack matrixStack, ItemStack itemStack, float x, float y) {
         String itemName = itemStack.getName().getString();
         float width = mc.textRenderer.getWidth(itemName) / 4.0f;
         Fonts.VANILLA.drawWithShadow(matrixStack, itemName, (x - width) * 2, y * 2, -1);
     }
 
-    /**
-     * @param player
-     * @return
-     */
     private String getNametagInfo(PlayerEntity player) {
         final StringBuilder info = new StringBuilder(player.getName().getString());
         info.append(" ");
@@ -403,7 +355,7 @@ public class NametagsModule extends ToggleModule {
         }
         if (healthConfig.getValue()) {
             double health = Math.ceil(player.getHealth() + player.getAbsorptionAmount());
-            //
+
             Formatting hcolor;
             if (health > 18) {
                 hcolor = Formatting.GREEN;
@@ -426,9 +378,9 @@ public class NametagsModule extends ToggleModule {
         if (totemsConfig.getValue()) {
             int totems = Managers.TOTEM.getTotems(player);
             if (totems > 0) {
-                //
+
                 Formatting pcolor = Formatting.GREEN;
-                ;
+
                 if (totems > 1) {
                     pcolor = Formatting.DARK_GREEN;
                 }
@@ -452,10 +404,6 @@ public class NametagsModule extends ToggleModule {
         return info.toString().trim();
     }
 
-    /**
-     * @param player
-     * @return
-     */
     private int getNametagColor(PlayerEntity player) {
         if (Managers.SOCIAL.isFriend(player.getUuid())) {
             return 0xff66ffff;

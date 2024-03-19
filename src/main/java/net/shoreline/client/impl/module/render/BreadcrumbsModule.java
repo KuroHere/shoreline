@@ -19,32 +19,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 1.0
  */
 public class BreadcrumbsModule extends ToggleModule {
-    //
-    private final Map<Vec3d, Long> positions = new ConcurrentHashMap<>();
-    Config<Boolean> infiniteConfig = new BooleanConfig("Infinite",
-            "Renders breadcrumbs for all positions since toggle", true);
-    Config<Float> maxTimeConfig = new NumberConfig<>("MaxPosition",
-            "The maximum time for a given position", 1.0f, 2.0f, 20.0f);
 
-    /**
-     *
-     */
+    private final Map<Vec3d, Long> positions = new ConcurrentHashMap<>();
+    Config<Boolean> infiniteConfig = new BooleanConfig("Infinite", "Renders breadcrumbs for all positions since toggle", true);
+    Config<Float> maxTimeConfig = new NumberConfig<>("MaxPosition", "The maximum time for a given position", 1.0f, 2.0f, 20.0f);
+
     public BreadcrumbsModule() {
-        super("Breadcrumbs", "Renders a line connecting all previous positions",
-                ModuleCategory.RENDER);
+        super("Breadcrumbs", "Renders a line connecting all previous positions", ModuleCategory.RENDER);
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         positions.clear();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -61,9 +49,6 @@ public class BreadcrumbsModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
 

@@ -26,23 +26,14 @@ import java.util.UUID;
  * @since 1.0
  */
 public class WaypointsModule extends ToggleModule {
-    //
-    Config<Boolean> logoutsConfig = new BooleanConfig("LogoutPoints", "Marks " +
-            "the position of player logouts", false);
-    Config<Boolean> deathsConfig = new BooleanConfig("DeathPoints", "Marks " +
-            "the position of player deaths", false);
 
-    /**
-     *
-     */
+    Config<Boolean> logoutsConfig = new BooleanConfig("LogoutPoints", "Marks the position of player logouts", false);
+    Config<Boolean> deathsConfig = new BooleanConfig("DeathPoints", "Marks the position of player deaths", false);
+
     public WaypointsModule() {
         super("Waypoints", "Renders a waypoint at marked locations",
                 ModuleCategory.RENDER);
     }
-
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.world == null) {
@@ -77,9 +68,6 @@ public class WaypointsModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRemoveEntity(RemoveEntityEvent event) {
         if (event.getRemovalReason() == Entity.RemovalReason.KILLED &&
@@ -91,9 +79,6 @@ public class WaypointsModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (mc.player == null) {

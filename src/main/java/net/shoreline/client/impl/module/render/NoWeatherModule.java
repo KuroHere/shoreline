@@ -18,33 +18,20 @@ import net.shoreline.client.util.string.EnumFormatter;
  * @since 1.0
  */
 public class NoWeatherModule extends ToggleModule {
-    // WHY THE FUCK DOES THIS NEED A HACK
-    //
-    Config<Weather> weatherConfig = new EnumConfig<>("Weather", "The world " +
-            "weather", Weather.CLEAR, Weather.values());
-    Config<Integer> dayTimeConfig = new NumberConfig<>("Time", "The world " +
-            "time of day", 0, 6000, 24000);
-    //
-    private Weather weather;
 
-    /**
-     *
-     */
+    Config<Weather> weatherConfig = new EnumConfig<>("Weather", "The world weather", Weather.CLEAR, Weather.values());
+    Config<Integer> dayTimeConfig = new NumberConfig<>("Time", "The world time of day", 0, 6000, 24000);
+
+    private Weather weather;
     public NoWeatherModule() {
         super("NoWeather", "Prevents weather rendering", ModuleCategory.RENDER);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         return EnumFormatter.formatEnum(weatherConfig.getValue());
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         if (mc.world != null) {
@@ -60,9 +47,6 @@ public class NoWeatherModule extends ToggleModule {
         }
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         if (mc.world != null && weather != null) {
@@ -70,9 +54,6 @@ public class NoWeatherModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.POST) {
@@ -81,9 +62,6 @@ public class NoWeatherModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param weather
-     */
     private void setWeather(Weather weather) {
         switch (weather) {
             case CLEAR -> {
@@ -104,9 +82,6 @@ public class NoWeatherModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (event.getPacket() instanceof GameStateChangeS2CPacket packet) {

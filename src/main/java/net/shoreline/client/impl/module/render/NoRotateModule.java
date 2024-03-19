@@ -18,23 +18,13 @@ import net.shoreline.client.mixin.accessor.AccessorPlayerPositionLookS2CPacket;
  * @since 1.0
  */
 public class NoRotateModule extends ToggleModule {
-    Config<Boolean> positionAdjustConfig = new BooleanConfig("PositionAdjust",
-            "Adjusts outgoing rotation packets", false);
-    //
+    Config<Boolean> positionAdjustConfig = new BooleanConfig("PositionAdjust", "Adjusts outgoing rotation packets", false);
     private float yaw, pitch;
     private boolean cancelRotate;
-
-    /**
-     *
-     */
     public NoRotateModule() {
-        super("NoRotate", "Prevents server from forcing rotations",
-                ModuleCategory.RENDER);
+        super("NoRotate", "Prevents server from forcing rotations", ModuleCategory.RENDER);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null || mc.currentScreen instanceof DownloadingTerrainScreen) {
@@ -48,13 +38,9 @@ public class NoRotateModule extends ToggleModule {
             packet.getFlags().remove(PositionFlag.X_ROT);
             packet.getFlags().remove(PositionFlag.Y_ROT);
             cancelRotate = true;
-            // Cancel packet and custom handle??
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (event.getPacket() instanceof PlayerMoveC2SPacket.Full packet && cancelRotate) {
