@@ -1,36 +1,26 @@
 package net.shoreline.client.impl.event.entity;
 
-import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.StageEvent;
 
 @Cancelable
 public class UpdateVelocityEvent extends StageEvent {
-    Vec3d movementInput;
-    float speed;
-    float yaw;
-    Vec3d velocity;
+    private final float speed;
+    private float yaw;
 
-    public UpdateVelocityEvent(Vec3d movementInput, float speed, float yaw, Vec3d velocity) {
-        this.movementInput = movementInput;
+    public UpdateVelocityEvent(float speed) {
         this.speed = speed;
-        this.yaw = yaw;
-        this.velocity = velocity;
     }
 
-    public Vec3d getMovementInput() {
-        return this.movementInput;
+    public float getYaw() {
+        return yaw;
+    }
+
+    public void setYaw(float yaw) {
+        this.yaw = yaw;
     }
 
     public float getSpeed() {
-        return this.speed;
-    }
-
-    public Vec3d getVelocity() {
-        return this.velocity;
-    }
-
-    public void setVelocity(Vec3d velocity) {
-        this.velocity = velocity;
+        return speed;
     }
 }

@@ -17,7 +17,6 @@ import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.impl.event.entity.SwingEvent;
 import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.impl.event.network.*;
-import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -179,7 +178,6 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     private void hookTickPre(CallbackInfo ci) {
         PlayerTickEvent playerTickEvent = new PlayerTickEvent();
         Shoreline.EVENT_HANDLER.dispatch(playerTickEvent);
-        Managers.ROTATION.onUpdate();
     }
 
     /**

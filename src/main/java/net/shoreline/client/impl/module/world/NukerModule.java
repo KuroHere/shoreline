@@ -22,34 +22,20 @@ import net.shoreline.client.util.world.BlastResistantBlocks;
  * @since 1.0
  */
 public class NukerModule extends ToggleModule {
-    //
-    Config<BreakMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
-            "breaking blocks", BreakMode.SURVIVAL, BreakMode.values());
-    Config<Timing> timingConfig = new EnumConfig<>("Timing", "The timing for " +
-            "the break process", Timing.SEQUENTIAL, Timing.values());
-    Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to " +
-            "break blocks", 0.1f, 5.0f, 7.0f);
-    Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay " +
-            "between breaking blocks", 0.0f, 0.0f, 10.0f);
-    Config<Boolean> flattenConfig = new BooleanConfig("Flatten", "Creates a " +
-            "flat area when breaking blocks", false);
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates to " +
-            "the current breaking position ", true);
-    Config<Boolean> raytraceConfig = new BooleanConfig("Raytrace",
-            "Raytraces to the current breaking position", true);
-    Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection",
-            "Clicks only on visible block faces", false);
 
-    /**
-     *
-     */
+    Config<BreakMode> modeConfig = new EnumConfig<>("Mode", "The mode for breaking blocks", BreakMode.SURVIVAL, BreakMode.values());
+    Config<Timing> timingConfig = new EnumConfig<>("Timing", "The timing for the break process", Timing.SEQUENTIAL, Timing.values());
+    Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to break blocks", 0.1f, 5.0f, 7.0f);
+    Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay between breaking blocks", 0.0f, 0.0f, 10.0f);
+    Config<Boolean> flattenConfig = new BooleanConfig("Flatten", "Creates a flat area when breaking blocks", false);
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates to the current breaking position ", true);
+    Config<Boolean> raytraceConfig = new BooleanConfig("Raytrace", "Raytraces to the current breaking position", true);
+    Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Clicks only on visible block faces", false);
+
     public NukerModule() {
         super("Nuker", "Destroys all blocks around the player", ModuleCategory.WORLD);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (timingConfig.getValue() == Timing.SEQUENTIAL) {
@@ -87,10 +73,6 @@ public class NukerModule extends ToggleModule {
         return nukerBlock;
     }
 
-    /**
-     * @param block
-     * @return
-     */
     public boolean isNukerBlock(Block block) {
         return BlastResistantBlocks.isBreakable(block);
     }

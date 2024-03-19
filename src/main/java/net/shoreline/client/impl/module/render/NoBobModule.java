@@ -10,17 +10,10 @@ import net.shoreline.client.impl.event.render.BobViewEvent;
  * @since 1.0
  */
 public class NoBobModule extends ToggleModule {
-    /**
-     *
-     */
-    public NoBobModule() {
-        super("NoBob", "Prevents the hand from bobbing while moving",
-                ModuleCategory.RENDER);
-    }
 
-    /**
-     * @param event
-     */
+    public NoBobModule() {
+        super("NoBob", "Prevents the hand from bobbing while moving", ModuleCategory.RENDER);
+    }
     @EventListener
     public void onBobView(BobViewEvent event) {
         event.cancel();

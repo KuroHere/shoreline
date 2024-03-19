@@ -33,7 +33,6 @@ import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
-import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
@@ -175,7 +174,10 @@ public class AuraModule extends RotationModule {
      * @param event
      */
     @EventListener
-    public void onPlayerUpdate(PlayerTickEvent event) {
+    public void onPlayerUpdate(PlayerUpdateEvent event) {
+        if (event.getStage() != EventStage.PRE) {
+            return;
+        }
         if (Modules.AUTO_CRYSTAL.isAttacking()
                 || Modules.AUTO_CRYSTAL.isPlacing()
                 || rotating > 0) {

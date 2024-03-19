@@ -33,29 +33,16 @@ import java.awt.*;
  */
 public class ChamsModule extends ToggleModule {
     private static final float SINE_45_DEGREES = (float) Math.sin(0.7853981633974483);
-    //
-    Config<ChamsMode> modeConfig = new EnumConfig<>("Mode",
-            "The rendering mode for the chams", ChamsMode.NORMAL, ChamsMode.values());
-    Config<Boolean> handsConfig = new BooleanConfig("Hands",
-            "Render chams on first-person hands", true);
-    Config<Boolean> selfConfig = new BooleanConfig("Self",
-            "Render chams on the player", true);
-    Config<Boolean> playersConfig = new BooleanConfig("Players",
-            "Render chams on other players", true);
-    Config<Boolean> monstersConfig = new BooleanConfig("Monsters",
-            "Render chams on monsters", true);
-    Config<Boolean> animalsConfig = new BooleanConfig("Animals",
-            "Render chams on animals", true);
-    Config<Boolean> otherConfig = new BooleanConfig("Others",
-            "Render chams on crystals", true);
-    // Config<Boolean> textureConfig = new BooleanConfig("Texture", "Renders" +
-    //        " the entity texture beneath the chams", false);
-    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles",
-            "Render chams on invisible entities", true);
 
-    /**
-     *
-     */
+    Config<ChamsMode> modeConfig = new EnumConfig<>("Mode", "The rendering mode for the chams", ChamsMode.NORMAL, ChamsMode.values());
+    Config<Boolean> handsConfig = new BooleanConfig("Hands", "Render chams on first-person hands", true);
+    Config<Boolean> selfConfig = new BooleanConfig("Self", "Render chams on the player", true);
+    Config<Boolean> playersConfig = new BooleanConfig("Players", "Render chams on other players", true);
+    Config<Boolean> monstersConfig = new BooleanConfig("Monsters", "Render chams on monsters", true);
+    Config<Boolean> animalsConfig = new BooleanConfig("Animals", "Render chams on animals", true);
+    Config<Boolean> otherConfig = new BooleanConfig("Others", "Render chams on crystals", true);
+    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles", "Render chams on invisible entities", true);
+
     public ChamsModule() {
         super("Chams", "Renders entity models through walls", ModuleCategory.RENDER);
     }
@@ -78,9 +65,6 @@ public class ChamsModule extends ToggleModule {
         return 0.0f;
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderEntity(RenderEntityEvent event) {
         if (!checkChams(event.entity)) {
@@ -201,9 +185,6 @@ public class ChamsModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderCrystal(RenderCrystalEvent event) {
         if (!otherConfig.getValue()) {

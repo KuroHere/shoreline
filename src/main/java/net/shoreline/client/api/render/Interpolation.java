@@ -35,14 +35,4 @@ public class Interpolation implements Globals {
                 entity.prevY + ((entity.getY() - entity.prevY) * tickDelta),
                 entity.prevZ + ((entity.getZ() - entity.prevZ) * tickDelta));
     }
-
-    /**
-     * @param prev
-     * @param value
-     * @param tickDelta
-     * @return
-     */
-    public static float interpolateFloat(float prev, float value, float tickDelta) {
-        return prev + ((value - prev) * tickDelta);
-    }
 }

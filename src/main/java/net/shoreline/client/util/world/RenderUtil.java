@@ -21,6 +21,4 @@ public class RenderUtil implements Globals {
             mc.worldRenderer.reload();
         }
     }
-
-
 }

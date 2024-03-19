@@ -18,15 +18,12 @@ import java.util.List;
  * @since 1.0
  */
 public class WallhackModule extends ToggleModule {
-    //
-    Config<XRayMode> modeConfig = new EnumConfig<>("Mode", "The mode for " +
-            "wallhack rendering", XRayMode.CIRCUITS, XRayMode.values());
-    Config<Integer> opacityConfig = new NumberConfig<>("Opacity", "The " +
-            "opacity of the blocks in wallhack", 0, 120, 255);
-    Config<Boolean> softReloadConfig = new BooleanConfig("SoftReload",
-            "Reloads world renders without causing game interruption", true);
-    Config<List<Block>> blocksConfig = new ListConfig<>("Blocks",
-            "Valid block whitelist for wallhack", Blocks.EMERALD_ORE,
+
+    Config<XRayMode> modeConfig = new EnumConfig<>("Mode", "The mode for " + "wallhack rendering", XRayMode.CIRCUITS, XRayMode.values());
+    Config<Integer> opacityConfig = new NumberConfig<>("Opacity", "The " + "opacity of the blocks in wallhack", 0, 120, 255);
+    Config<Boolean> softReloadConfig = new BooleanConfig("SoftReload", "Reloads world renders without causing game interruption", true);
+    Config<List<Block>> blocksConfig = new ListConfig<>("Blocks", "Valid block whitelist for wallhack",
+            Blocks.EMERALD_ORE,
             Blocks.DIAMOND_ORE, Blocks.IRON_ORE, Blocks.GOLD_ORE,
             Blocks.COAL_ORE, Blocks.LAPIS_ORE, Blocks.REDSTONE_ORE,
             Blocks.COPPER_ORE, Blocks.DEEPSLATE_EMERALD_ORE,
@@ -38,17 +35,10 @@ public class WallhackModule extends ToggleModule {
             Blocks.DIAMOND_BLOCK, Blocks.IRON_BLOCK, Blocks.GOLD_BLOCK,
             Blocks.BEACON, Blocks.SPAWNER);
 
-    /**
-     *
-     */
     public WallhackModule() {
-        super("Wallhack", "Allows you to see through solid blocks",
-                ModuleCategory.WORLD);
+        super("Wallhack", "Allows you to see through solid blocks", ModuleCategory.WORLD);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         if (mc.world == null) {
@@ -58,9 +48,6 @@ public class WallhackModule extends ToggleModule {
         mc.chunkCullingEnabled = false;
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         if (mc.world == null) {

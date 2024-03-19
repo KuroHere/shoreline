@@ -21,25 +21,15 @@ import net.shoreline.client.init.Modules;
  * @since 1.0
  */
 public class TooltipsModule extends ToggleModule {
-    //
-    Config<Boolean> enderChestsConfig = new BooleanConfig("EnderChests",
-            "Renders all the contents of ender chests in tooltips", false);
-    Config<Boolean> shulkersConfig = new BooleanConfig("Shulkers", "Renders " +
-            "all the contents of shulkers in tooltips", true);
-    Config<Boolean> mapsConfig = new BooleanConfig("Maps", "Renders a preview" +
-            " of maps in tooltips", false);
 
-    /**
-     *
-     */
+    Config<Boolean> enderChestsConfig = new BooleanConfig("EnderChests", "Renders all the contents of ender chests in tooltips", false);
+    Config<Boolean> shulkersConfig = new BooleanConfig("Shulkers", "Renders all the contents of shulkers in tooltips", true);
+    Config<Boolean> mapsConfig = new BooleanConfig("Maps", "Renders a preview of maps in tooltips", false);
     public TooltipsModule() {
         super("Tooltips", "Renders detailed tooltips showing items",
                 ModuleCategory.RENDER);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderTooltip(RenderTooltipEvent event) {
         final ItemStack stack = event.getStack();
