@@ -117,12 +117,11 @@ public abstract class MixinEntity implements Globals {
     @Inject(method = "updateVelocity", at = @At(value = "HEAD"), cancellable = true)
     private void hookUpdateVelocity(float speed, Vec3d movementInput, CallbackInfo ci) {
         if ((Object) this == mc.player) {
-            UpdateVelocityEvent updateVelocityEvent = new UpdateVelocityEvent(speed);
+            UpdateVelocityEvent updateVelocityEvent = new UpdateVelocityEvent(movementInput, speed, mc.player.getYaw(), movementInputToVelocity(movementInput, speed, mc.player.getYaw()));
             Shoreline.EVENT_HANDLER.dispatch(updateVelocityEvent);
             if (updateVelocityEvent.isCanceled()) {
                 ci.cancel();
-                Vec3d vec3d = movementInputToVelocity(movementInput, speed, updateVelocityEvent.getYaw());
-                mc.player.setVelocity(mc.player.getVelocity().add(vec3d));
+                mc.player.setVelocity(mc.player.getVelocity().add(updateVelocityEvent.getVelocity()));
             }
         }
     }
