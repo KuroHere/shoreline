@@ -12,15 +12,21 @@ import net.shoreline.client.impl.event.text.TextVisitEvent;
  * @since 1.0
  */
 public class NameProtectModule extends ToggleModule {
-
+    //
     Config<String> placeholderConfig = new StringConfig("Placeholder", "The " +
             "placeholder name for the player", "Player");
 
+    /**
+     *
+     */
     public NameProtectModule() {
         super("NameProtect", "Hides the player name in chat and tablist",
                 ModuleCategory.RENDER);
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onTextVisit(TextVisitEvent event) {
         if (mc.player == null) {

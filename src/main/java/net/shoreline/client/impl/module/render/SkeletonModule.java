@@ -29,15 +29,21 @@ import java.awt.*;
  * @since 1.0
  */
 public class SkeletonModule extends ToggleModule {
-
+    /**
+     *
+     */
     public SkeletonModule() {
-        super("Skeleton", "Renders a skeleton to show player limbs", ModuleCategory.RENDER);
+        super("Skeleton", "Renders a skeleton to show player limbs",
+                ModuleCategory.RENDER);
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         float g = event.getTickDelta();
-
+        //
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -106,7 +112,7 @@ public class SkeletonModule extends ToggleModule {
                         0.7f, sneaking ? 0.23f : 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 bufferBuilder.vertex(matrix4f, 0.15f, sneaking ? 0.6f : 0.7f,
                         sneaking ? 0.23f : 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
-
+                //
                 event.getMatrices().push();
                 event.getMatrices().translate(0, sneaking ? 1.05f : 1.4f, 0);
                 rotateSkeleton(event.getMatrices(), head);
@@ -114,7 +120,7 @@ public class SkeletonModule extends ToggleModule {
                 bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 bufferBuilder.vertex(matrix4f, 0, 0.15f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 event.getMatrices().pop();
-
+                //
                 event.getMatrices().push();
                 event.getMatrices().translate(0.15f, sneaking ? 0.6f : 0.7f, sneaking ? 0.23f : 0);
                 rotateSkeleton(event.getMatrices(), rightLeg);
@@ -122,7 +128,7 @@ public class SkeletonModule extends ToggleModule {
                 bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 bufferBuilder.vertex(matrix4f, 0, -0.6f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 event.getMatrices().pop();
-
+                // 
                 event.getMatrices().push();
                 event.getMatrices().translate(-0.15f, sneaking ? 0.6f : 0.7f, sneaking ? 0.23f : 0);
                 rotateSkeleton(event.getMatrices(), leftLeg);
@@ -130,7 +136,7 @@ public class SkeletonModule extends ToggleModule {
                 bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 bufferBuilder.vertex(matrix4f, 0, -0.6f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 event.getMatrices().pop();
-
+                // 
                 event.getMatrices().push();
                 event.getMatrices().translate(0.37f, sneaking ? 1.05f : 1.35f, 0);
                 rotateSkeleton(event.getMatrices(), rightArm);
@@ -138,7 +144,7 @@ public class SkeletonModule extends ToggleModule {
                 bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 bufferBuilder.vertex(matrix4f, 0, -0.55f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 event.getMatrices().pop();
-
+                //
                 event.getMatrices().push();
                 event.getMatrices().translate(-0.37f, sneaking ? 1.05f : 1.35f, 0);
                 rotateSkeleton(event.getMatrices(), leftArm);
@@ -146,6 +152,7 @@ public class SkeletonModule extends ToggleModule {
                 bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 bufferBuilder.vertex(matrix4f, 0, -0.55f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
                 event.getMatrices().pop();
+                // bufferBuilder.clear();
                 tessellator.draw();
                 if (swimming) {
                     event.getMatrices().translate(0, 0.95f, 0);
@@ -168,6 +175,10 @@ public class SkeletonModule extends ToggleModule {
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
     }
 
+    /**
+     * @param matrix
+     * @param modelPart
+     */
     private void rotateSkeleton(MatrixStack matrix, ModelPart modelPart) {
         if (modelPart.roll != 0.0f) {
             matrix.multiply(RotationAxis.POSITIVE_Z.rotation(modelPart.roll));

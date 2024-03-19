@@ -15,19 +15,35 @@ import java.awt.*;
  * @since 1.0
  */
 public class SkyboxModule extends ToggleModule {
+    //
+    Config<Boolean> skyConfig = new BooleanConfig("Sky", "Changes the world " +
+            "skybox color", true);
+    Config<Color> skyColorConfig = new ColorConfig("SkyColor", "The color for" +
+            " the world skybox", ColorConfig.GLOBAL_COLOR);
+    Config<Boolean> cloudConfig = new BooleanConfig("Cloud", "Changes the " +
+            "world cloud color", false);
+    Config<Color> cloudColorConfig = new ColorConfig("CloudColor", "The color" +
+            " for the world clouds", ColorConfig.GLOBAL_COLOR);
+    Config<Boolean> fogConfig = new BooleanConfig("Fog", "Changes the world " +
+            "fog color", false);
+    Config<Color> fogColorConfig = new ColorConfig("FogColor", "The color for" +
+            " the world fog", ColorConfig.GLOBAL_COLOR);
+    // Config<Boolean> ambientConfig = new BooleanConfig("Ambient", "Changes the" +
+    //        " world ambient color overlay", true);
+    // Config<Color> ambientColorConfig = new ColorConfig("AmbientColor", "The " +
+    //       "color for the game overlay", ColorConfig.GLOBAL_COLOR);
 
-    Config<Boolean> skyConfig = new BooleanConfig("Sky", "Changes the world skybox color", true);
-    Config<Color> skyColorConfig = new ColorConfig("SkyColor", "The color for the world skybox", ColorConfig.GLOBAL_COLOR);
-    Config<Boolean> cloudConfig = new BooleanConfig("Cloud", "Changes the world cloud color", false);
-    Config<Color> cloudColorConfig = new ColorConfig("CloudColor", "The color for the world clouds", ColorConfig.GLOBAL_COLOR);
-    Config<Boolean> fogConfig = new BooleanConfig("Fog", "Changes the world fog color", false);
-    Config<Color> fogColorConfig = new ColorConfig("FogColor", "The color for the world fog", ColorConfig.GLOBAL_COLOR);
-
+    /**
+     *
+     */
     public SkyboxModule() {
         super("Skybox", "Changes the rendering of the world skybox",
                 ModuleCategory.RENDER);
     }
 
+    /**
+     *
+     */
 //    @Override
 //    public void onEnable()
 //    {
@@ -42,6 +58,9 @@ public class SkyboxModule extends ToggleModule {
 //        }
 //    }
 
+    /**
+     *
+     */
 //    @Override
 //    public void onDisable()
 //    {
@@ -55,6 +74,10 @@ public class SkyboxModule extends ToggleModule {
 //        }
 //    }
 
+    /**
+     *
+     * @param event
+     */
 //    @EventListener
 //    public void onConfigUpdate(ConfigUpdateEvent event)
 //    {
@@ -81,6 +104,9 @@ public class SkyboxModule extends ToggleModule {
 //        }
 //    }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onSkyboxSky(SkyboxEvent.Sky event) {
         if (skyConfig.getValue()) {
@@ -89,6 +115,9 @@ public class SkyboxModule extends ToggleModule {
         }
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onSkyboxCloud(SkyboxEvent.Cloud event) {
         if (cloudConfig.getValue()) {
@@ -97,6 +126,9 @@ public class SkyboxModule extends ToggleModule {
         }
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onSkyboxFog(SkyboxEvent.Fog event) {
         if (fogConfig.getValue()) {
@@ -105,6 +137,10 @@ public class SkyboxModule extends ToggleModule {
         }
     }
 
+    /**
+     *
+     * @param event
+     */
 //    @EventListener
 //    public void onAmbientColor(AmbientColorEvent event)
 //    {

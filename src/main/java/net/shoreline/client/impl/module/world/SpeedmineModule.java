@@ -44,35 +44,63 @@ import java.text.DecimalFormat;
  * @since 1.0
  */
 public class SpeedmineModule extends RotationModule {
-
-    Config<SpeedmineMode> modeConfig = new EnumConfig<>("Mode", "The mining mode for speedmine", SpeedmineMode.PACKET, SpeedmineMode.values());
-    Config<Float> mineSpeedConfig = new NumberConfig<>("Speed", "The speed to mine blocks", 0.0f, 0.7f, 0.9f, () -> modeConfig.getValue() == SpeedmineMode.DAMAGE);
-    Config<Boolean> instantConfig = new BooleanConfig("Instant", "Instantly removes the mining block", false);
-    Config<Float> rangeConfig = new NumberConfig<>("Range", "Range for mine", 1.0f, 4.5f, 5.0f);
-    Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best " + "tool once the mining is complete", Swap.SILENT, Swap.values());
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates" + " when mining the block", true);
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool" + " using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF);
-    Config<Boolean> fastConfig = new BooleanConfig("Fast", "Attempts to " + "instantly remine blocks", false);
-    Config<Boolean> remineConfig = new BooleanConfig("Remine", "Attempts to remine blocks", true);
-    Config<Boolean> remineFullConfig = new BooleanConfig("Remine-Full", "Resets the block breaking state when remining", true, () -> remineConfig.getValue());
-    Config<Boolean> remineInfiniteConfig = new BooleanConfig("Remine-Infinite", "Attempts to remine blocks infinitely", false, () -> remineConfig.getValue());
-    Config<Integer> maxRemineConfig = new NumberConfig<>("MaxRemines", "Maximum remines of a block before reset", 0, 2, 10, () -> remineConfig.getValue() && !remineInfiniteConfig.getValue());
+    //
+    Config<SpeedmineMode> modeConfig = new EnumConfig<>("Mode",
+            "The mining mode for speedmine", SpeedmineMode.PACKET, SpeedmineMode.values());
+    Config<Float> mineSpeedConfig = new NumberConfig<>("Speed",
+            "The speed to mine blocks", 0.0f, 0.7f, 0.9f,
+            () -> modeConfig.getValue() == SpeedmineMode.DAMAGE);
+    Config<Boolean> instantConfig = new BooleanConfig("Instant",
+            "Instantly removes the mining block", false);
+    Config<Float> rangeConfig = new NumberConfig<>("Range", "Range for mine",
+            1.0f, 4.5f, 5.0f);
+    Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best " +
+            "tool once the mining is complete", Swap.SILENT, Swap.values());
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates" +
+            " when mining the block", true);
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool" +
+            " using alternative packets to bypass NCP silent swap", false,
+            () -> swapConfig.getValue() != Swap.OFF);
+    Config<Boolean> fastConfig = new BooleanConfig("Fast", "Attempts to " +
+            "instantly remine blocks", false);
+    Config<Boolean> remineConfig = new BooleanConfig("Remine",
+            "Attempts to remine blocks", true);
+    Config<Boolean> remineFullConfig = new BooleanConfig("Remine-Full",
+            "Resets the block breaking state when remining", true,
+            () -> remineConfig.getValue());
+    Config<Boolean> remineInfiniteConfig = new BooleanConfig("Remine-Infinite",
+            "Attempts to remine blocks infinitely", false,
+            () -> remineConfig.getValue());
+    Config<Integer> maxRemineConfig = new NumberConfig<>("MaxRemines",
+            "Maximum remines of a block before reset", 0, 2, 10,
+            () -> remineConfig.getValue() && !remineInfiniteConfig.getValue());
+    // Mining block info
     private BlockPos mining;
     private BlockState state;
     private Direction direction;
     private float damage;
+    // Number of remines on the current mining block.
     private int remines;
 
+    /**
+     *
+     */
     public SpeedmineModule() {
         super("Speedmine", "Mines faster", ModuleCategory.WORLD);
     }
 
+    /**
+     * @return
+     */
     @Override
     public String getModuleData() {
         DecimalFormat decimal = new DecimalFormat("0.0");
         return decimal.format(damage);
     }
 
+    /**
+     *
+     */
     @Override
     public void onDisable() {
         mining = null;
@@ -81,6 +109,10 @@ public class SpeedmineModule extends RotationModule {
         damage = 0.0f;
         remines = 0;
     }
+
+    /**
+     * @param event
+     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE || modeConfig.getValue() != SpeedmineMode.DAMAGE) {
@@ -93,6 +125,9 @@ public class SpeedmineModule extends RotationModule {
         }
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (modeConfig.getValue() != SpeedmineMode.PACKET) {
@@ -106,11 +141,11 @@ public class SpeedmineModule extends RotationModule {
             state = mc.world.getBlockState(mining);
             int prev = mc.player.getInventory().selectedSlot;
             int slot = getBestTool(state);
-
+            //
             double dist = mc.player.squaredDistanceTo(mining.toCenterPos());
-            if (dist > ((NumberConfig<?>) rangeConfig).getValueSq()
-                    || state.isAir()
-                    || damage > 3.0f
+            if (dist > ((NumberConfig<?>) rangeConfig).getValueSq() // walked out of range
+                    || state.isAir() // mining is done
+                    || damage > 3.0f // waited too long
                     || !remineConfig.getValue()
                     || !remineInfiniteConfig.getValue()
                     && remines > maxRemineConfig.getValue()) {
@@ -134,6 +169,7 @@ public class SpeedmineModule extends RotationModule {
                         swap(slot);
                     }
                 }
+                // break current block
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                         PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mining, direction));
                 if (fastConfig.getValue()) {
@@ -155,6 +191,8 @@ public class SpeedmineModule extends RotationModule {
                         swap(prev);
                     }
                 }
+                // reset, this position needs to be remined if we
+                // attempt to mine again
                 if (remineFullConfig.getValue()) {
                     damage = 0.0f;
                 }
@@ -186,10 +224,16 @@ public class SpeedmineModule extends RotationModule {
         }
     }
 
+    /**
+     * @return
+     */
     public BlockPos getBlockTarget() {
         return mining;
     }
 
+    /**
+     * @param slot
+     */
     private void swap(int slot) {
         if (PlayerInventory.isValidHotbarIndex(slot)) {
             mc.player.getInventory().selectedSlot = slot;
@@ -198,6 +242,9 @@ public class SpeedmineModule extends RotationModule {
         }
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onAttackBlock(AttackBlockEvent event) {
         if (modeConfig.getValue() != SpeedmineMode.PACKET) {
@@ -230,6 +277,13 @@ public class SpeedmineModule extends RotationModule {
         }
     }
 
+    /**
+     * Returns the hotbar slot of the best {@link ToolItem} for the
+     * {@link BlockState} of the mining {@link BlockPos}
+     *
+     * @param state The block state of the mining position
+     * @return The hotbar slot of the best tool
+     */
     public int getBestTool(BlockState state) {
         int slot = mc.player.getInventory().selectedSlot;
         float bestTool = 0.0f;
@@ -251,6 +305,12 @@ public class SpeedmineModule extends RotationModule {
         return slot;
     }
 
+    /**
+     * @param state
+     * @param world
+     * @param pos
+     * @return
+     */
     private float calcBlockBreakingDelta(BlockState state, BlockView world,
                                          BlockPos pos) {
         if (swapConfig.getValue() == Swap.OFF) {
@@ -265,6 +325,10 @@ public class SpeedmineModule extends RotationModule {
         }
     }
 
+    /**
+     * @param block
+     * @return
+     */
     private float getBlockBreakingSpeed(BlockState block) {
         int tool = getBestTool(block);
         float f = mc.player.getInventory().getStack(tool).getMiningSpeedMultiplier(block);
@@ -297,6 +361,15 @@ public class SpeedmineModule extends RotationModule {
         return f;
     }
 
+    /**
+     * Determines whether the player is able to harvest drops from the specified block state.
+     * If a block requires a special tool, it will check
+     * whether the held item is effective for that block, otherwise
+     * it returns {@code true}.
+     *
+     * @param state
+     * @see net.minecraft.item.Item#isSuitableFor(BlockState)
+     */
     private boolean canHarvest(BlockState state) {
         if (state.isToolRequired()) {
             int tool = getBestTool(state);
@@ -305,6 +378,9 @@ public class SpeedmineModule extends RotationModule {
         return true;
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (mining == null || state == null || mc.player.isCreative()

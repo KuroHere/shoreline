@@ -19,14 +19,21 @@ import net.shoreline.client.mixin.accessor.AccessorWorldRenderer;
  * @since 1.0
  */
 public class BreakHighlightModule extends ToggleModule {
+    //
+    Config<Float> rangeConfig = new NumberConfig<>("Range", "The ranged to " +
+            "render breaking blocks", 5.0f, 20.0f, 50.0f);
 
-    Config<Float> rangeConfig = new NumberConfig<>("Range", "The ranged to " + "render breaking blocks", 5.0f, 20.0f, 50.0f);
-
+    /**
+     *
+     */
     public BreakHighlightModule() {
         super("BreakHighlight", "Highlights blocks that are being broken",
                 ModuleCategory.RENDER);
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (mc.player == null || mc.world == null) {

@@ -127,18 +127,16 @@ public class ClickGuiScreen extends Screen implements Globals {
      *
      * @param mouseX the X coordinate of the mouse
      * @param mouseY the Y coordinate of the mouse
-     * @param amount value is {@code < 0} if scrolled down, {@code > 0} if scrolled up
      * @return
      */
-//    @Override
-//    public boolean mouseScrolled(double mouseX, double mouseY, double amount)
-//    {
-//        if (focus != null)
-//        {
-//            focus.setPos(focus.getX(), (float) (focus.getY() + amount));
-//        }
-//        return super.mouseScrolled(mouseX, mouseY, amount);
-//    }
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (focus != null)
+        {
+            focus.setPos(focus.getX(), (float) (focus.getY() + verticalAmount * 50f));
+        }
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    }
 
     /**
      * @param keyCode

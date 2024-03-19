@@ -18,13 +18,20 @@ import net.shoreline.client.impl.event.render.LightmapGammaEvent;
  * @since 1.0
  */
 public class FullbrightModule extends ToggleModule {
+    //
+    Config<Brightness> brightnessConfig = new EnumConfig<>("Mode", "Mode for " +
+            "world brightness", Brightness.GAMMA, Brightness.values());
 
-    Config<Brightness> brightnessConfig = new EnumConfig<>("Mode", "Mode for world brightness", Brightness.GAMMA, Brightness.values());
-
+    /**
+     *
+     */
     public FullbrightModule() {
         super("Fullbright", "Brightens the world", ModuleCategory.RENDER);
     }
 
+    /**
+     *
+     */
     @Override
     public void onEnable() {
         if (mc.player != null && mc.world != null
@@ -34,6 +41,9 @@ public class FullbrightModule extends ToggleModule {
         }
     }
 
+    /**
+     *
+     */
     @Override
     public void onDisable() {
         if (mc.player != null && mc.world != null
@@ -42,12 +52,18 @@ public class FullbrightModule extends ToggleModule {
         }
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onGameJoin(GameJoinEvent event) {
         onDisable();
         onEnable();
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onLightmapGamma(LightmapGammaEvent event) {
         if (brightnessConfig.getValue() == Brightness.GAMMA) {
@@ -56,6 +72,9 @@ public class FullbrightModule extends ToggleModule {
         }
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onConfigUpdate(ConfigUpdateEvent event) {
         if (mc.player != null && brightnessConfig == event.getConfig()
@@ -65,6 +84,9 @@ public class FullbrightModule extends ToggleModule {
         }
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onTick(TickEvent event) {
         if (brightnessConfig.getValue() == Brightness.POTION

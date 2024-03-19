@@ -28,19 +28,30 @@ import java.util.Map;
  * @since 1.0
  */
 public class FreecamModule extends ToggleModule {
-
-    Config<Float> speedConfig = new NumberConfig<>("Speed", "The move speed of the camera", 0.1f, 1.0f, 2.0f);
-    Config<Interact> interactConfig = new EnumConfig<>("Interact", "The interaction type of the camera", Interact.CAMERA, Interact.values());
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate to the point of interaction", false);
+    //
+    Config<Float> speedConfig = new NumberConfig<>("Speed", "The move speed " +
+            "of the camera", 0.1f, 1.0f, 2.0f);
+    Config<Interact> interactConfig = new EnumConfig<>("Interact", "The " +
+            "interaction type of the camera", Interact.CAMERA, Interact.values());
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate to the" +
+            " point of interaction", false);
+    //
     private Input freecamInput;
+    //
     private Entity playerEntity;
     private FreecamEntity freecamEntity;
 
+    /**
+     *
+     */
     public FreecamModule() {
         super("Freecam", "Allows you to control the camera separately from the player",
                 ModuleCategory.RENDER);
     }
 
+    /**
+     *
+     */
     @Override
     public void onEnable() {
         if (mc.player == null || mc.world == null) {
@@ -54,17 +65,26 @@ public class FreecamModule extends ToggleModule {
         mc.setCameraEntity(freecamEntity);
     }
 
+    /**
+     *
+     */
     @Override
     public void onDisable() {
         freecamEntity = null;
         mc.setCameraEntity(mc.player);
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onDisconnect(DisconnectEvent event) {
         disable();
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onScreenOpen(ScreenOpenEvent event) {
         if (event.getScreen() instanceof DeathScreen) {
@@ -72,6 +92,9 @@ public class FreecamModule extends ToggleModule {
         }
     }
 
+    /**
+     * @param event
+     */
     @EventListener
     public void onPlayerMove(PlayerMoveEvent event) {
         freecamInput.tick(false, 0.3f);
@@ -90,10 +113,14 @@ public class FreecamModule extends ToggleModule {
         CAMERA
     }
 
+    //
     // TODO: FIX
-
+    //
+    //
     public static class FreecamEntity extends ClientPlayerEntity {
-
+        /**
+         * @param world
+         */
         public FreecamEntity(ClientWorld world) {
             super(mc, world, mc.player.networkHandler, mc.player.getStatHandler(),
                     mc.player.getRecipeBook(), false, false);
