@@ -39,64 +39,36 @@ import java.util.List;
  * @since 1.0
  */
 public class HUDModule extends ToggleModule {
-    //
-    private final DecimalFormat decimal = new DecimalFormat("0.0");
+
     //
     // private static final HudScreen HUD_SCREEN = new HudScreen();
     //
-    Config<Boolean> watermarkConfig = new BooleanConfig("Watermark",
-            "Displays client name and version watermark", true);
-    Config<Boolean> directionConfig = new BooleanConfig("Direction",
-            "Displays facing direction", true);
-    Config<Boolean> armorConfig = new BooleanConfig("Armor",
-            "Displays player equipped armor and durability", true);
-    Config<VanillaHud> potionHudConfig = new EnumConfig<>("PotionHud",
-            "Renders the Minecraft potion Hud", VanillaHud.HIDE,
-            VanillaHud.values());
-    Config<VanillaHud> itemNameConfig = new EnumConfig<>("ItemName",
-            "Renders the Minecraft item name display", VanillaHud.HIDE,
-            VanillaHud.values());
-    Config<Boolean> potionEffectsConfig = new BooleanConfig("PotionEffects",
-            "Displays active potion effects", true);
-    Config<Boolean> potionColorsConfig = new BooleanConfig("PotionColors",
-            "Displays active potion colors", true);
-    Config<Boolean> durabilityConfig = new BooleanConfig("Durability",
-            "Displays the current held items durability", false);
-    Config<Boolean> coordsConfig = new BooleanConfig("Coords",
-            "Displays world coordinates", true);
-    Config<Boolean> netherCoordsConfig = new BooleanConfig(
-            "NetherCoords", "Displays nether coordinates", true);
-    Config<Boolean> serverBrandConfig = new BooleanConfig("ServerBrand",
-            "Displays the current server brand", false);
-    Config<Boolean> speedConfig = new BooleanConfig("Speed",
-            "Displays the current movement speed of the player in kmh", true);
-    Config<Boolean> pingConfig = new BooleanConfig("Ping",
-            "Display server response time in ms", true);
-    Config<Boolean> tpsConfig = new BooleanConfig("TPS",
-            "Displays server ticks per second", true);
-    Config<Boolean> fpsConfig = new BooleanConfig("FPS",
-            "Displays game FPS", true);
-    Config<Boolean> arraylistConfig = new BooleanConfig("Arraylist",
-            "Displays a list of all active modules", true);
-    Config<Ordering> orderingConfig = new EnumConfig<>("Ordering",
-            "The ordering of the arraylist", Ordering.LENGTH, Ordering.values(),
-            () -> arraylistConfig.getValue());
-    Config<Rendering> renderingConfig = new EnumConfig<>("Rendering",
-            "The rendering mode of the HUD", Rendering.UP, Rendering.values());
+    Config<Boolean> watermarkConfig = new BooleanConfig("Watermark", "Displays client name and version watermark", true);
+    Config<Boolean> directionConfig = new BooleanConfig("Direction", "Displays facing direction", true);
+    Config<Boolean> armorConfig = new BooleanConfig("Armor", "Displays player equipped armor and durability", true);
+    Config<VanillaHud> potionHudConfig = new EnumConfig<>("PotionHud", "Renders the Minecraft potion Hud", VanillaHud.HIDE, VanillaHud.values());
+    Config<VanillaHud> itemNameConfig = new EnumConfig<>("ItemName", "Renders the Minecraft item name display", VanillaHud.HIDE, VanillaHud.values());
+    Config<Boolean> potionEffectsConfig = new BooleanConfig("PotionEffects", "Displays active potion effects", true);
+    Config<Boolean> potionColorsConfig = new BooleanConfig("PotionColors", "Displays active potion colors", true);
+    Config<Boolean> durabilityConfig = new BooleanConfig("Durability", "Displays the current held items durability", false);
+    Config<Boolean> coordsConfig = new BooleanConfig("Coords", "Displays world coordinates", true);
+    Config<Boolean> netherCoordsConfig = new BooleanConfig("NetherCoords", "Displays nether coordinates", true);
+    Config<Boolean> serverBrandConfig = new BooleanConfig("ServerBrand", "Displays the current server brand", false);
+    Config<Boolean> speedConfig = new BooleanConfig("Speed", "Displays the current movement speed of the player in kmh", true);
+    Config<Boolean> pingConfig = new BooleanConfig("Ping", "Display server response time in ms", true);
+    Config<Boolean> tpsConfig = new BooleanConfig("TPS", "Displays server ticks per second", true);
+    Config<Boolean> fpsConfig = new BooleanConfig("FPS", "Displays game FPS", true);
+    Config<Boolean> arraylistConfig = new BooleanConfig("Arraylist", "Displays a list of all active modules", true);
+    Config<Ordering> orderingConfig = new EnumConfig<>("Ordering", "The ordering of the arraylist", Ordering.LENGTH, Ordering.values(), () -> arraylistConfig.getValue());
+    Config<Rendering> renderingConfig = new EnumConfig<>("Rendering", "The rendering mode of the HUD", Rendering.UP, Rendering.values());
     // Rainbow settings
-    Config<RainbowMode> rainbowModeConfig = new EnumConfig<>("Rainbow", "The " +
-            "rendering mode for rainbow", RainbowMode.OFF, RainbowMode.values());
-    Config<Float> rainbowSpeedConfig = new NumberConfig<>("Rainbow-Speed",
-            "The speed for the rainbow color cycling", 0.1f, 50.0f, 100.0f);
-    Config<Integer> rainbowSaturationConfig = new NumberConfig<>("Rainbow-Saturation",
-            "The saturation of rainbow colors", 0, 35, 100);
-    Config<Integer> rainbowBrightnessConfig = new NumberConfig<>("Rainbow-Brightness",
-            "The brightness of rainbow colors", 0, 100, 100);
-    Config<Float> rainbowDifferenceConfig = new NumberConfig<>("Rainbow-Difference",
-            "The difference offset for rainbow colors", 0.1f, 40.0f, 100.0f);
+    Config<RainbowMode> rainbowModeConfig = new EnumConfig<>("Rainbow", "The rendering mode for rainbow", RainbowMode.OFF, RainbowMode.values());
+    Config<Float> rainbowSpeedConfig = new NumberConfig<>("Rainbow-Speed", "The speed for the rainbow color cycling", 0.1f, 50.0f, 100.0f);
+    Config<Integer> rainbowSaturationConfig = new NumberConfig<>("Rainbow-Saturation", "The saturation of rainbow colors", 0, 35, 100);
+    Config<Integer> rainbowBrightnessConfig = new NumberConfig<>("Rainbow-Brightness", "The brightness of rainbow colors", 0, 100, 100);
+    Config<Float> rainbowDifferenceConfig = new NumberConfig<>("Rainbow-Difference", "The difference offset for rainbow colors", 0.1f, 40.0f, 100.0f);
     //
-    private int rainbowOffset;
-
+    private final DecimalFormat decimal = new DecimalFormat("0.0");
     public HUDModule() {
         super("HUD", "Displays the HUD (heads up display) screen.",
                 ModuleCategory.CLIENT);
@@ -106,7 +78,8 @@ public class HUDModule extends ToggleModule {
     public void onRenderOverlayPost(RenderOverlayEvent.Post event) {
         if (mc.player != null && mc.world != null) {
             Window res = mc.getWindow();
-            rainbowOffset = 0;
+            //
+            int rainbowOffset = 0;
             // Render offsets for each corner of the screen.
             float topLeft = 2.0f;
             float topRight = topLeft;

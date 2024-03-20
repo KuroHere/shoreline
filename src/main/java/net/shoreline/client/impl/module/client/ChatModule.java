@@ -11,8 +11,7 @@ import net.shoreline.client.api.module.ModuleCategory;
  */
 public class ChatModule extends ConcurrentModule {
     //
-    Config<Boolean> debugConfig = new BooleanConfig("ChatDebug", "Allows " +
-            "client debug messages to be printed in the chat", false);
+    Config<Boolean> debugConfig = new BooleanConfig("ChatDebug", "Allows client debug messages to be printed in the chat", false);
 
     /**
      *

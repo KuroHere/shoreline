@@ -25,8 +25,7 @@ public class MixinDecoderHandler {
      */
     @Inject(method = "decode", at = @At(value = "INVOKE", target = "Lnet/minecraft/" +
             "network/NetworkState;getId()Ljava/lang/String;", shift = At.Shift.AFTER), cancellable = true)
-    private void hookDecode(ChannelHandlerContext ctx, ByteBuf buf,
-                            List<Object> objects, CallbackInfo ci) {
+    private void hookDecode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> objects, CallbackInfo ci) {
         DecodePacketEvent decodePacketEvent = new DecodePacketEvent();
         Shoreline.EVENT_HANDLER.dispatch(decodePacketEvent);
         if (decodePacketEvent.isCanceled()) {

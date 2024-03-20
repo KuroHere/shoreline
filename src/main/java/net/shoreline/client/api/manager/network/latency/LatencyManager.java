@@ -53,10 +53,11 @@ public class LatencyManager implements Globals {
                 final Entity entity = mc.world.getEntityById(packet.getId());
                 if (packet.getEntityType() == EntityType.PLAYER) {
                     final PlayerEntity player = (PlayerEntity) entity;
-                    final Vec3d spawn = new Vec3d(packet.getX(), packet.getY(),
-                            packet.getZ());
-                    trackers.put(player, new PlayerLatencyTracker(player,
-                            spawn));
+                    final Vec3d spawn = new Vec3d(packet.getX(), packet.getY(), packet.getZ());
+                    if (player == null) {
+                        return;
+                    }
+                    trackers.put(player, new PlayerLatencyTracker(player, spawn));
                 }
             } else if (event.getPacket() instanceof EntitiesDestroyS2CPacket packet) {
                 trackers.entrySet().removeIf(t ->
