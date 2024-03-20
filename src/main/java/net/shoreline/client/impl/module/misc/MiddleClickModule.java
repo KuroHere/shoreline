@@ -20,11 +20,10 @@ import org.lwjgl.glfw.GLFW;
  * @since 1.0
  */
 public class MiddleClickModule extends ToggleModule {
+
     //
-    Config<Action> actionConfig = new EnumConfig<>("Action", "The action to " +
-            "perform when middle-clicking", Action.FRIEND, Action.values());
-    Config<MissAction> missActionConfig = new EnumConfig<>("MissAction", "Throws a pearl " +
-            "if looking at air", MissAction.PEARL, MissAction.values());
+    Config<Action> actionConfig = new EnumConfig<>("Action", "The action to perform when middle-clicking", Action.FRIEND, Action.values());
+    Config<MissAction> missActionConfig = new EnumConfig<>("MissAction", "Throws a pearl if looking at air", MissAction.PEARL, MissAction.values());
 
     /**
      *
@@ -34,9 +33,6 @@ public class MiddleClickModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onMouseClick(MouseClickEvent event) {
         if (mc.player == null || mc.interactionManager == null) {
@@ -57,7 +53,7 @@ public class MiddleClickModule extends ToggleModule {
                         ChatUtil.serverSendMessage("/duel " + target.getName());
                     }
                 }
-            } else if (mc.targetedEntity == null) {
+            } else if (mc.targetedEntity == null && missActionConfig.getValue() != MissAction.OFF) {
                 int slot = -1;
                 for (int i = 0; i < 9; i++) {
                     ItemStack stack = mc.player.getInventory().getStack(i);

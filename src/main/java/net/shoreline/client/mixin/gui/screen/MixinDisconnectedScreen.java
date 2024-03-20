@@ -3,6 +3,7 @@ package net.shoreline.client.mixin.gui.screen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.DirectionalLayoutWidget;
 import net.minecraft.text.Text;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
@@ -24,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinDisconnectedScreen extends MixinScreen implements Globals {
     @Shadow
     @Final
-    private Text reason;
+    private DirectionalLayoutWidget grid;
     //
     @Unique
     private long reconnectSeconds;
@@ -32,9 +33,10 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
     /**
      * @param ci
      */
-    @Inject(method = "init", at = @At(value = "RETURN"))
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/" +
+            "widget/DirectionalLayoutWidget;add(Lnet/minecraft/client/gui/widget/Widget;)" +
+            "Lnet/minecraft/client/gui/widget/Widget;", ordinal = 2))
     private void hookInit(CallbackInfo ci) {
-        int reasonHeight = (int) (Math.ceil(mc.textRenderer.getWidth(reason) / 50.0f) * mc.textRenderer.fontHeight);
         ButtonWidget.Builder reconnectButton = ButtonWidget.builder(Text.of("Reconnect"),
                 (button) ->
                 {
@@ -51,10 +53,12 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
                         reconnectSeconds = Math.round(Modules.AUTO_RECONNECT.getDelay() * 20.0f);
                     }
                 });
-        addDrawableChild(reconnectButton.dimensions(width / 2 - 100,
-                height / 2 + reasonHeight / 2 + mc.textRenderer.fontHeight + 24, 200, 20).build());
-        addDrawableChild(autoReconnectButton.dimensions(width / 2 - 100,
-                height / 2 + reasonHeight / 2 + mc.textRenderer.fontHeight + 48, 200, 20).build());
+        grid.add(autoReconnectButton.build());
+        grid.add(reconnectButton.build());
+        // addDrawableChild(reconnectButton.dimensions(width / 2 - 100,
+        //        height / 2 + mc.textRenderer.fontHeight + 24, 200, 20).build());
+        // addDrawableChild(autoReconnectButton.dimensions(width / 2 - 100,
+        //        height / 2 + mc.textRenderer.fontHeight + 48, 200, 20).build());
         if (Modules.AUTO_RECONNECT.isEnabled()) {
             reconnectSeconds = Math.round(Modules.AUTO_RECONNECT.getDelay() * 20.0f);
         }
@@ -68,7 +72,7 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
         super.tick();
         if (getDrawables().size() > 1) {
             if (Modules.AUTO_RECONNECT.isEnabled()) {
-                ((AccessorClickableWidget) getDrawables().get(1)).setMessage(
+                ((AccessorClickableWidget) getDrawables().get(3)).setMessage(
                         Text.of("AutoReconnect (" + (reconnectSeconds / 20 + 1) + ")"));
                 if (reconnectSeconds > 0) {
                     --reconnectSeconds;
@@ -77,7 +81,7 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
                             Managers.NETWORK.getAddress(), Managers.NETWORK.getInfo(), false);
                 }
             } else {
-                ((AccessorClickableWidget) getDrawables().get(1)).setMessage(Text.of("AutoReconnect"));
+                ((AccessorClickableWidget) getDrawables().get(3)).setMessage(Text.of("AutoReconnect"));
             }
         }
     }

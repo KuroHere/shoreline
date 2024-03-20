@@ -12,6 +12,7 @@ import java.nio.file.Paths;
  * @since 1.0
  */
 public class OpenFolderCommand extends Command {
+
     /**
      *
      */
@@ -19,13 +20,10 @@ public class OpenFolderCommand extends Command {
         super("OpenFolder", "Opens the client configurations folder");
     }
 
-    /**
-     * Runs when the command is inputted in chat
-     */
     @Override
     public void onCommandInput() {
         try {
-            Desktop.getDesktop().open(Paths.get("Caspian").toFile());
+            Desktop.getDesktop().open(Paths.get("Shoreline").toFile());
         } catch (IOException e) {
             e.printStackTrace();
             ChatUtil.error("Failed to open client folder!");

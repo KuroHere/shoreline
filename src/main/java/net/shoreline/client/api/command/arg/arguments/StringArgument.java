@@ -5,6 +5,7 @@ import net.shoreline.client.api.command.arg.Argument;
 import net.shoreline.client.util.chat.ChatUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -24,9 +25,9 @@ public class StringArgument extends Argument<String> {
      * @param desc
      * @param allowedValues
      */
-    public StringArgument(String name, String desc, List<String> allowedValues) {
+    public StringArgument(String name, String desc, String... allowedValues) {
         super(name, desc);
-        this.allowedValues = allowedValues;
+        this.allowedValues = Arrays.asList(allowedValues);
     }
 
     /**

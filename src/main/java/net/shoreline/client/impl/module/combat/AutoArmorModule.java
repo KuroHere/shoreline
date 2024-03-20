@@ -29,24 +29,19 @@ import java.util.Queue;
  * @since 1.0
  */
 public class AutoArmorModule extends ToggleModule {
+
+    //
+    Config<Priority> priorityConfig = new EnumConfig<>("Priority", "Armor enchantment priority", Priority.BLAST_PROTECTION, Priority.values());
+    Config<Float> minDurabilityConfig = new NumberConfig<>("MinDurability", "Durability percent to replace armor", 0.0f, 0.0f, 20.0f, NumberDisplay.PERCENT);
+    Config<Boolean> elytraPriorityConfig = new BooleanConfig("ElytraPriority", "Prioritizes existing elytras in the chestplate armor slot", true);
+    Config<Boolean> blastLeggingsConfig = new BooleanConfig("Leggings-BlastPriority", "Prioritizes Blast Protection leggings", true);
+    Config<Boolean> noBindingConfig = new BooleanConfig("NoBinding", "Avoids armor with the Curse of Binding enchantment", true);
+    Config<Boolean> inventoryConfig = new BooleanConfig("AllowInventory", "Allows armor to be swapped while in the inventory menu", false);
     //
     private final Queue<ArmorSlot> helmet = new PriorityQueue<>();
     private final Queue<ArmorSlot> chestplate = new PriorityQueue<>();
     private final Queue<ArmorSlot> leggings = new PriorityQueue<>();
     private final Queue<ArmorSlot> boots = new PriorityQueue<>();
-    //
-    Config<Priority> priorityConfig = new EnumConfig<>("Priority", "Armor " +
-            "enchantment priority", Priority.BLAST_PROTECTION, Priority.values());
-    Config<Float> minDurabilityConfig = new NumberConfig<>("MinDurability",
-            "Durability percent to replace armor", 0.0f, 0.0f, 20.0f, NumberDisplay.PERCENT);
-    Config<Boolean> elytraPriorityConfig = new BooleanConfig("ElytraPriority",
-            "Prioritizes existing elytras in the chestplate armor slot", true);
-    Config<Boolean> blastLeggingsConfig = new BooleanConfig("Leggings-BlastPriority",
-            "Prioritizes Blast Protection leggings", true);
-    Config<Boolean> noBindingConfig = new BooleanConfig("NoBinding", "Avoids " +
-            "armor with the Curse of Binding enchantment", true);
-    Config<Boolean> inventoryConfig = new BooleanConfig("AllowInventory",
-            "Allows armor to be swapped while in the inventory menu", false);
 
     /**
      *
@@ -56,9 +51,6 @@ public class AutoArmorModule extends ToggleModule {
                 ModuleCategory.COMBAT);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -197,18 +189,6 @@ public class AutoArmorModule extends ToggleModule {
             this.armorStack = armorStack;
         }
 
-        /**
-         * Compares this object with the specified object for order.  Returns a
-         * negative integer, zero, or a positive integer as this object is less
-         * than, equal to, or greater than the specified object.
-         *
-         * @param other the object to be compared.
-         * @return a negative integer, zero, or a positive integer as this object
-         * is less than, equal to, or greater than the specified object.
-         * @throws NullPointerException if the specified object is null
-         * @throws ClassCastException   if the specified object's type
-         *                              prevents it from being compared to this object.
-         */
         @Override
         public int compareTo(ArmorSlot other) {
             final ItemStack otherStack = other.getArmorStack();

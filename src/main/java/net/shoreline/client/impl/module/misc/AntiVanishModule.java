@@ -32,17 +32,11 @@ public class AntiVanishModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         messageCache.clear();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onChatMessage(ChatMessageEvent event) {
         // This only works if the server doesnt have a custom join/leave
@@ -53,9 +47,6 @@ public class AntiVanishModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {

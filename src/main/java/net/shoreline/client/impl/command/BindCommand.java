@@ -16,10 +16,8 @@ import org.lwjgl.glfw.GLFW;
  */
 public class BindCommand extends Command {
     //
-    Argument<Module> moduleArgument = new ModuleArgument("Module", "The " +
-            "param module to keybind");
-    Argument<String> keybindArgument = new StringArgument("Keybind", "The new" +
-            " key to bind the module");
+    Argument<Module> moduleArgument = new ModuleArgument("Module", "The param module to keybind");
+    Argument<String> keybindArgument = new StringArgument("Keybind", "The new key to bind the module");
 
     /**
      *
@@ -28,9 +26,6 @@ public class BindCommand extends Command {
         super("Bind", "Keybinds a module");
     }
 
-    /**
-     * Runs when the command is inputted in chat
-     */
     @Override
     public void onCommandInput() {
         Module module = moduleArgument.getValue();

@@ -23,9 +23,6 @@ public class FakePlayerModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         if (mc.player != null && mc.world != null) {
@@ -34,9 +31,6 @@ public class FakePlayerModule extends ToggleModule {
         }
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         if (fakePlayer != null) {
@@ -45,9 +39,6 @@ public class FakePlayerModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onDisconnect(DisconnectEvent event) {
         fakePlayer = null;

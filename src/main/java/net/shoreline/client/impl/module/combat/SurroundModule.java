@@ -40,29 +40,17 @@ import java.util.List;
  */
 public class SurroundModule extends PlaceBlockModule {
     //
-    Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange", "The " +
-            "placement range for surround", 0.0f, 4.0f, 5.0f);
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates to " +
-            "block before placing", false);
-    Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection",
-            "Places on visible sides only", false);
-    Config<Boolean> attackConfig = new BooleanConfig("Attack", "Attacks " +
-            "crystals in the way of surround", true);
-    Config<Boolean> centerConfig = new BooleanConfig("Center", "Centers the" +
-            " player before placing blocks", false);
-    Config<Boolean> extendConfig = new BooleanConfig("Extend", "Extends " +
-            "surround if the player is not in the center of a block", true,
-            () -> !centerConfig.getValue());
-    Config<Boolean> floorConfig = new BooleanConfig("Floor", "Creates a " +
-            "floor for the surround if there is none", false);
-    Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The" +
-            " number of blocks to place per tick", 1, 2, 5);
-    Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay",
-            "The delay between each block placement interval", 0, 1, 5);
-    Config<Boolean> jumpDisableConfig = new BooleanConfig("AutoDisable",
-            "Disables after moving out of the hole", true);
-    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders" +
-            " block placements of the surround", false);
+    Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange", "The placement range for surround", 0.0f, 4.0f, 5.0f);
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates to block before placing", false);
+    Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Places on visible sides only", false);
+    Config<Boolean> attackConfig = new BooleanConfig("Attack", "Attacks crystals in the way of surround", true);
+    Config<Boolean> centerConfig = new BooleanConfig("Center", "Centers the player before placing blocks", false);
+    Config<Boolean> extendConfig = new BooleanConfig("Extend", "Extends surround if the player is not in the center of a block", true, () -> !centerConfig.getValue());
+    Config<Boolean> floorConfig = new BooleanConfig("Floor", "Creates a floor for the surround if there is none", false);
+    Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The number of blocks to place per tick", 1, 2, 5);
+    Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
+    Config<Boolean> jumpDisableConfig = new BooleanConfig("AutoDisable", "Disables after moving out of the hole", true);
+    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders block placements of the surround", false);
     //
     private List<BlockPos> surround = new ArrayList<>();
     private List<BlockPos> placements = new ArrayList<>();
@@ -78,9 +66,6 @@ public class SurroundModule extends PlaceBlockModule {
         super("Surround", "Surrounds feet with obsidian", ModuleCategory.COMBAT);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         if (mc.player == null) {
@@ -95,17 +80,11 @@ public class SurroundModule extends PlaceBlockModule {
         prevY = mc.player.getY();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onDisconnect(DisconnectEvent event) {
         disable();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onScreenOpen(ScreenOpenEvent event) {
         if (event.getScreen() instanceof DeathScreen) {
@@ -113,9 +92,6 @@ public class SurroundModule extends PlaceBlockModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         // Do we need this check?? Surround is always highest prio
@@ -161,10 +137,6 @@ public class SurroundModule extends PlaceBlockModule {
         return isEnabled() && !placements.isEmpty();
     }
 
-    /**
-     * @param pos
-     * @return
-     */
     public List<BlockPos> getSurroundPositions(BlockPos pos) {
         List<BlockPos> entities = new ArrayList<>();
         entities.add(pos);
@@ -237,9 +209,6 @@ public class SurroundModule extends PlaceBlockModule {
         return intersections;
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null) {
@@ -278,9 +247,6 @@ public class SurroundModule extends PlaceBlockModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (renderConfig.getValue()) {

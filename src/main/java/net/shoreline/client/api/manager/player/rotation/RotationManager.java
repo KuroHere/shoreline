@@ -1,7 +1,6 @@
 package net.shoreline.client.api.manager.player.rotation;
 
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
@@ -14,11 +13,9 @@ import net.shoreline.client.impl.event.entity.player.PlayerJumpEvent;
 import net.shoreline.client.impl.event.keyboard.KeyboardTickEvent;
 import net.shoreline.client.impl.event.network.MovementPacketsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
-import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.entity.RenderPlayerEvent;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.Globals;
-import net.shoreline.client.util.world.RenderUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -77,7 +74,6 @@ public class RotationManager implements Globals {
         public void onUpdate(PlayerTickEvent event) {
     */
     public void onUpdate() {
-        requests.removeIf(r -> System.currentTimeMillis() - r.getTime() > 500);
         if (requests.isEmpty()) {
             rotation = null;
             rotateModule = null;
@@ -109,7 +105,8 @@ public class RotationManager implements Globals {
 
     @EventListener
     public void onMovementPackets(MovementPacketsEvent event) {
-        if(rotate) {
+        if (rotate) {
+            removeRotation(rotation.getModule());
             event.cancel();
             event.setYaw(lastYaw);
             event.setPitch(lastPitch);
@@ -163,7 +160,7 @@ public class RotationManager implements Globals {
     public void onUpdateVelocity(UpdateVelocityEvent event) {
         if (rotation != null && Modules.ROTATIONS.getMovementFix()) {
             event.cancel();
-            event.setVelocity(fix(rotation.getYaw(), event.getMovementInput(), event.getSpeed()));
+            event.setVelocity(movementInputToVelocity(rotation.getYaw(), event.getMovementInput(), event.getSpeed()));
         }
     }
 
@@ -187,7 +184,7 @@ public class RotationManager implements Globals {
      */
     @EventListener
     public void onRenderPlayer(RenderPlayerEvent event) {
-        if (event.getEntity() == mc.player) {
+        if (event.getEntity() == mc.player && rotation != null) {
             // Match packet server rotations
             event.setYaw(Interpolation.interpolateFloat(prevYaw, getYaw(), mc.getTickDelta()));
             event.setPitch(Interpolation.interpolateFloat(prevPitch, getPitch(), mc.getTickDelta()));
@@ -291,10 +288,12 @@ public class RotationManager implements Globals {
         return pitch;
     }
 
-    private Vec3d fix(float yaw, Vec3d movementInput, float speed) {
+    //
+    private Vec3d movementInputToVelocity(float yaw, Vec3d movementInput, float speed) {
         double d = movementInput.lengthSquared();
-        if (d < 1.0E-7)
+        if (d < 1.0E-7) {
             return Vec3d.ZERO;
+        }
         Vec3d vec3d = (d > 1.0 ? movementInput.normalize() : movementInput).multiply(speed);
         float f = MathHelper.sin(yaw * MathHelper.RADIANS_PER_DEGREE);
         float g = MathHelper.cos(yaw * MathHelper.RADIANS_PER_DEGREE);

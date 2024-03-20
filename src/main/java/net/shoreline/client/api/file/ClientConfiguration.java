@@ -28,11 +28,15 @@ public class ClientConfiguration implements Globals {
     // Set of configuration files that must be saved and loaded. This can be
     // modified after init.
     private final Set<ConfigFile> files = new HashSet<>();
+    private final Set<ModuleFile> moduleFiles = new HashSet<>();
     // Main client directory. This folder will contain all locally saved
     // configurations for the client.
     private Path clientDir;
     //
-    private String configPreset;
+    private final Set<String> configPresets = new HashSet<>();
+    private String configPreset = "Modules";
+    //
+    private final ClientInfoFile clientInfoFile;
 
     /**
      *
@@ -68,17 +72,20 @@ public class ClientConfiguration implements Globals {
                 }
             }
         }
+        // Holds client metadata
+        clientInfoFile = new ClientInfoFile(clientDir);
+        files.add(clientInfoFile);
         for (Module module : Managers.MODULE.getModules()) {
             // files.add(new ModulePreset(clientDir.resolve("Defaults"), module));
-            files.add(new ModuleFile(clientDir.resolve("Modules"), module));
+            moduleFiles.add(new ModuleFile(clientDir.resolve("Modules"), module));
         }
+        configPresets.add("Modules");
         files.add(Modules.INV_CLEANER.getBlacklistFile(clientDir));
         for (SocialRelation relation : SocialRelation.values()) {
             files.add(new SocialFile(clientDir, relation));
         }
         for (AccountType accountType : AccountType.values()) {
-            files.add(new AccountFile(clientDir.resolve("Accounts"),
-                    accountType));
+            files.add(new AccountFile(clientDir.resolve("Accounts"), accountType));
         }
     }
 
@@ -92,6 +99,11 @@ public class ClientConfiguration implements Globals {
         for (ConfigFile file : files) {
             file.save();
         }
+        for (ModuleFile moduleFile : moduleFiles) {
+            if (moduleFile.getFileName().equalsIgnoreCase(configPreset)) {
+                moduleFile.save();
+            }
+        }
     }
 
     /**
@@ -101,10 +113,49 @@ public class ClientConfiguration implements Globals {
         for (ConfigFile file : files) {
             file.load();
         }
+        for (ModuleFile moduleFile : moduleFiles) {
+            if (moduleFile.getFileName().equalsIgnoreCase(configPreset)) {
+                moduleFile.load();
+            }
+        }
+    }
+
+    public void saveModulesFolder(String name)
+    {
+        if (!configPresets.contains(name))
+        {
+            configPresets.add(name);
+            for (Module module : Managers.MODULE.getModules()) {
+                moduleFiles.add(new ModuleFile(clientDir.resolve(name), module));
+            }
+        }
+        for (ModuleFile moduleFile : moduleFiles) {
+            if (moduleFile.getFileName().equalsIgnoreCase(name)) {
+                moduleFile.save();
+            }
+        }
+    }
+
+    public void loadModulesFolder(String name) {
+        configPreset = name;
+        for (ModuleFile moduleFile : moduleFiles) {
+            if (moduleFile.getFileName().equalsIgnoreCase(configPreset)) {
+                moduleFile.load();
+            }
+        }
+        clientInfoFile.save();
+    }
+
+    public String getConfigPreset() {
+        return configPreset;
     }
 
     public void setConfigPreset(String configPreset) {
-        this.configPreset = configPreset;
+        if (Files.exists(clientDir.resolve(configPreset))) {
+            this.configPreset = configPreset;
+            return;
+        }
+        this.configPreset = "Modules";
     }
 
     /**

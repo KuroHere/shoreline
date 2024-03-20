@@ -30,25 +30,21 @@ import java.util.List;
  * @since 1.0
  */
 public class AutoPotModule extends RotationModule {
+
     //
-    private final Timer potionTimer = new CacheTimer();
-    //
-    Config<Float> healthConfig = new NumberConfig<>("Health", "The minimum " +
-            "health to start using potions", 1.0f, 10.0f, 19.0f);
-    Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay " +
-            "between using potions", 0.01f, 0.70f, 1.0f);
-    Config<Boolean> handFixConfig = new BooleanConfig("1.9Fix", "Fixes the " +
-            "hand when using potions in versions 1.9 or below", true);
-    Config<Integer> slotConfig = new NumberConfig<>("Slot", "The slot of the " +
-            "potion in the hotbar to swap with", 0, 1, 8);
-    Config<Boolean> onGroundConfig = new BooleanConfig("OnGround", "Attempts " +
-            "to fix the onGround state before using potions", false);
+    Config<Float> healthConfig = new NumberConfig<>("Health", "The minimum health to start using potions", 1.0f, 10.0f, 19.0f);
+    Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay between using potions", 0.01f, 0.70f, 1.0f);
+    Config<Boolean> handFixConfig = new BooleanConfig("1.9Fix", "Fixes the hand when using potions in versions 1.9 or below", true);
+    Config<Integer> slotConfig = new NumberConfig<>("Slot", "The slot of the potion in the hotbar to swap with", 0, 1, 8);
+    Config<Boolean> onGroundConfig = new BooleanConfig("OnGround", "Attempts to fix the onGround state before using potions", false);
     //
     private double groundX;
     private double groundY;
     private double groundZ;
     private int groundCancelTicks;
     private boolean potion;
+    //
+    private final Timer potionTimer = new CacheTimer();
 
     /**
      *
@@ -58,17 +54,11 @@ public class AutoPotModule extends RotationModule {
                 ModuleCategory.COMBAT);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         groundCancelTicks = 0;
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (!mc.player.isOnGround() && onGroundConfig.getValue()) {
@@ -147,9 +137,6 @@ public class AutoPotModule extends RotationModule {
         }
     }
 
-    /**
-     * @return
-     */
     private int getInstantHealthPotion() {
         int potionSlot = -1;
         for (int i = 0; i < 45; i++) {

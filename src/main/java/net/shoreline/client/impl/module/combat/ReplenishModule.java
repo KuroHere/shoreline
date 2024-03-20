@@ -19,8 +19,7 @@ import net.shoreline.client.init.Modules;
  */
 public class ReplenishModule extends ToggleModule {
     //
-    Config<Integer> percentConfig = new NumberConfig<>("Percent",
-            "The minimum percent of total stack before replenishing", 1, 25, 80);
+    Config<Integer> percentConfig = new NumberConfig<>("Percent", "The minimum percent of total stack before replenishing", 1, 25, 80);
 
     /**
      *
@@ -30,9 +29,6 @@ public class ReplenishModule extends ToggleModule {
                 ModuleCategory.COMBAT);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -54,10 +50,6 @@ public class ReplenishModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param item
-     * @param slot
-     */
     private void replenishStack(ItemStack item, int slot) {
         int replenishSlot = -1;
         for (int i = 9; i < 36; i++) {

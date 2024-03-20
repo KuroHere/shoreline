@@ -6,10 +6,11 @@ import net.shoreline.client.api.event.StageEvent;
 
 @Cancelable
 public class UpdateVelocityEvent extends StageEvent {
-    Vec3d movementInput;
-    float speed;
-    float yaw;
-    Vec3d velocity;
+    //
+    private final Vec3d movementInput;
+    private final float speed;
+    private final float yaw;
+    private Vec3d velocity;
 
     public UpdateVelocityEvent(Vec3d movementInput, float speed, float yaw, Vec3d velocity) {
         this.movementInput = movementInput;

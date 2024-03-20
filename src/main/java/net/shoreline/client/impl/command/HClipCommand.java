@@ -13,8 +13,7 @@ import net.shoreline.client.util.chat.ChatUtil;
  */
 public class HClipCommand extends Command {
     //
-    Argument<String> distanceArgument = new StringArgument("Distance", "The " +
-            "distance to horizontally clip");
+    Argument<String> distanceArgument = new StringArgument("Distance", "The distance to horizontally clip");
 
     /**
      *

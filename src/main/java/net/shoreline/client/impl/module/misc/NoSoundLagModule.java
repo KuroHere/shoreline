@@ -36,9 +36,6 @@ public class NoSoundLagModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (event.getPacket() instanceof PlaySoundFromEntityS2CPacket packet

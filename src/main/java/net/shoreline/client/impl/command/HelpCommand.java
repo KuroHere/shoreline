@@ -14,8 +14,7 @@ import net.shoreline.client.util.chat.ChatUtil;
 public class HelpCommand extends Command {
     //
     @OptionalArgument
-    Argument<Command> commandArgument = new CommandArgument("Command", "The " +
-            "specified command to display info");
+    Argument<Command> commandArgument = new CommandArgument("Command", "The specified command to display info");
 
     /**
      *
@@ -24,9 +23,6 @@ public class HelpCommand extends Command {
         super("Help", "Displays command functionality");
     }
 
-    /**
-     *
-     */
     @Override
     public void onCommandInput() {
         final Command command = commandArgument.getValue();

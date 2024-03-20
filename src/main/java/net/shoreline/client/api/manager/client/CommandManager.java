@@ -51,7 +51,8 @@ public class CommandManager implements Globals {
                 new DrawnCommand(),
                 new OpenFolderCommand(),
                 new BindCommand(),
-                new VanishCommand()
+                new VanishCommand(),
+                new ConfigCommand()
         );
         //
         for (Module module : Managers.MODULE.getModules()) {
@@ -167,24 +168,7 @@ public class CommandManager implements Globals {
             String msg = event.getChatText().trim();
             if (msg.startsWith(prefix)) {
                 event.cancel();
-                String literal = msg.substring(1);
-                String[] args = literal.split(" ");
-                for (Command command : getCommands()) {
-                    String name = command.getName();
-                    if (args.length > 1 && name.equals(args[0])) {
-                        Argument<?> tail = command.getArg(args.length - 2);
-                        if (tail == null || tail.getSuggestions().isEmpty()) {
-                            ChatUtil.error("Unable to autocomplete!");
-                            break;
-                        }
-                        tail.completeLiteral();
-                        event.setChatText(command.getLiteral(prefix));
-                        break;
-                    } else if (name.startsWith(args[0])) {
-                        event.setChatText(prefix + name + " ");
-                        break;
-                    }
-                }
+                event.setChatText(prefix + chatAutocomplete.toString());
             }
         }
     }

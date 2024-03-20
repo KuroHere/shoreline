@@ -15,10 +15,8 @@ import net.shoreline.client.impl.event.TickEvent;
  */
 public class AutoMapartModule extends ToggleModule {
     //
-    Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to " +
-            "place maps around the player", 0.1f, 6.0f, 10.0f);
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates " +
-            "before placing maps", false);
+    Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to place maps around the player", 0.1f, 6.0f, 10.0f);
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates before placing maps", false);
 
     /**
      *
@@ -28,9 +26,6 @@ public class AutoMapartModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE) {

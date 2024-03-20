@@ -31,23 +31,22 @@ import net.shoreline.client.util.world.EntityUtil;
  * @since 1.0
  */
 public class CriticalsModule extends ToggleModule {
+
     //
-    private final Timer attackTimer = new CacheTimer();
-    //
-    Config<CritMode> modeConfig = new EnumConfig<>("Mode", "Mode for critical" +
-            " attack modifier", CritMode.PACKET, CritMode.values());
-    Config<Boolean> packetSyncConfig = new BooleanConfig("Tick-Sync",
-            "Syncs the cached packet interaction to the MC tick", false);
+    Config<CritMode> modeConfig = new EnumConfig<>("Mode", "Mode for critical attack modifier", CritMode.PACKET, CritMode.values());
+    Config<Boolean> packetSyncConfig = new BooleanConfig("Tick-Sync", "Syncs the cached packet interaction to the MC tick", false);
     // The cached attack packets that will be resent after manipulating
     // player position packets
     private PlayerInteractEntityC2SPacket attackPacket;
     private HandSwingC2SPacket swingPacket;
+    //
+    private final Timer attackTimer = new CacheTimer();
 
     /**
      *
      */
     public CriticalsModule() {
-        super("Criticals", "Modifies attacks to guarentee critical hits",
+        super("Criticals", "Modifies attacks to always land critical hits",
                 ModuleCategory.COMBAT);
     }
 
@@ -59,9 +58,6 @@ public class CriticalsModule extends ToggleModule {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.POST) {

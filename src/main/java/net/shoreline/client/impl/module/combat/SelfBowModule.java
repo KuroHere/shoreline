@@ -27,9 +27,6 @@ public class SelfBowModule extends ToggleModule {
                 ModuleCategory.COMBAT);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE) {

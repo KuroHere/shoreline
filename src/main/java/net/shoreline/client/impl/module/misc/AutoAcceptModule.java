@@ -32,9 +32,6 @@ public class AutoAcceptModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (event.getPacket() instanceof ChatMessageS2CPacket packet) {
@@ -42,8 +39,7 @@ public class AutoAcceptModule extends ToggleModule {
             if ((text.contains("has requested to teleport to you.")
                     || text.contains("has requested you teleport to them."))
                     && acceptTimer.passed(delayConfig.getValue() * 1000)) {
-                for (PlayerEntity friend :
-                        Managers.SOCIAL.getFriendEntities()) {
+                for (PlayerEntity friend : Managers.SOCIAL.getFriendEntities()) {
                     if (text.contains(friend.getName().getString())) {
                         ChatUtil.serverSendMessage("/tpaccept");
                         break;

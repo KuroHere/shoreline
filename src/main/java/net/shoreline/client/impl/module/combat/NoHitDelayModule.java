@@ -10,16 +10,15 @@ import net.shoreline.client.impl.event.AttackCooldownEvent;
  * @since 1.0
  */
 public class NoHitDelayModule extends ToggleModule {
+
     /**
      *
      */
     public NoHitDelayModule() {
-        super("NoHitDelay", "Prevents hit delay when clicking fast", ModuleCategory.COMBAT);
+        super("NoHitDelay", "Prevents hit delay when clicking too fast", ModuleCategory.COMBAT);
     }
 
-    /**
-     * @param event
-     */
+    // Insane exploit
     @EventListener
     public void onAttackCooldown(AttackCooldownEvent event) {
         event.cancel();

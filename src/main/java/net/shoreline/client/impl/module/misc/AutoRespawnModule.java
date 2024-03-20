@@ -24,9 +24,6 @@ public class AutoRespawnModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE && respawn && mc.player.isDead()) {
@@ -35,9 +32,6 @@ public class AutoRespawnModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onScreenOpen(ScreenOpenEvent event) {
         if (event.getScreen() instanceof DeathScreen) {

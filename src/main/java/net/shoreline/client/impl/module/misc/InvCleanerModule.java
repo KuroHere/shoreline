@@ -30,15 +30,14 @@ import java.util.List;
  * @since 1.0
  */
 public class InvCleanerModule extends ToggleModule {
+
+    //
+    Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay between removing items from the inventory", 0.05f, 0.0f, 1.0f);
+    Config<Boolean> hotbarConfig = new BooleanConfig("Hotbar", "Cleans the hotbar inventory slots", true);
     //
     private final Timer invCleanTimer = new CacheTimer();
     //
     private final List<Item> blacklist = new ArrayList<>();
-    //
-    Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay " +
-            "between removing items from the inventory", 0.05f, 0.0f, 1.0f);
-    Config<Boolean> hotbarConfig = new BooleanConfig("Hotbar", "Cleans the " +
-            "hotbar inventory slots", true);
 
     /**
      *
@@ -48,9 +47,6 @@ public class InvCleanerModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -72,9 +68,6 @@ public class InvCleanerModule extends ToggleModule {
         }
     }
 
-    /**
-     * @return
-     */
     public ConfigFile getBlacklistFile(Path clientDir) {
         return new InvCleanerFile(clientDir);
     }
@@ -83,17 +76,11 @@ public class InvCleanerModule extends ToggleModule {
      * @see ConfigFile
      */
     public class InvCleanerFile extends ConfigFile {
-        /**
-         *
-         */
+
         public InvCleanerFile(Path clientDir) {
             super(clientDir, "inv-cleaner");
         }
 
-        /**
-         * Saves the configuration to a <tt>.json</tt> file in the local
-         * <tt>Caspian</tt> directory
-         */
         @Override
         public void save() {
             try {
@@ -117,9 +104,6 @@ public class InvCleanerModule extends ToggleModule {
             }
         }
 
-        /**
-         * Loads the configuration from the associated <tt>.json</tt> file
-         */
         @Override
         public void load() {
             try {

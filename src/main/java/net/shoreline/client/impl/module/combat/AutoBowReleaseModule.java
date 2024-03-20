@@ -23,12 +23,9 @@ import net.shoreline.client.init.Managers;
  */
 public class AutoBowReleaseModule extends ToggleModule {
     //
-    Config<Boolean> crossbowConfig = new BooleanConfig("Crossbow",
-            "Automatically releases crossbow when fully charged", false);
-    Config<Integer> ticksConfig = new NumberConfig<>("Ticks", "Ticks before " +
-            "releasing the bow charge", 3, 5, 20);
-    Config<Boolean> tpsSyncConfig = new BooleanConfig("TPS-Sync", "Sync bow " +
-            "release to server ticks", false);
+    Config<Boolean> crossbowConfig = new BooleanConfig("Crossbow", "Automatically releases crossbow when fully charged", false);
+    Config<Integer> ticksConfig = new NumberConfig<>("Ticks", "Ticks before releasing the bow charge", 3, 5, 20);
+    Config<Boolean> tpsSyncConfig = new BooleanConfig("TPS-Sync", "Sync bow release to server ticks", false);
 
     /**
      *
@@ -38,9 +35,6 @@ public class AutoBowReleaseModule extends ToggleModule {
                 ModuleCategory.COMBAT);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.POST) {

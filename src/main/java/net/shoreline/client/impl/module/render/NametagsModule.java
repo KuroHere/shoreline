@@ -82,7 +82,7 @@ public class NametagsModule extends ToggleModule {
         Camera camera = mc.gameRenderer.getCamera();
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity player) {
-                if (!player.isAlive() || player == mc.player
+                if (player == null || !player.isAlive() || player == mc.player
                         || !invisiblesConfig.getValue() && player.isInvisible()) {
                     continue;
                 }
@@ -94,7 +94,6 @@ public class NametagsModule extends ToggleModule {
                 double rz = player.getZ() - pinterpolate.getZ();
                 int width = RenderManager.textWidth(info);
                 float hwidth = width / 2.0f;
-
                 double dx = (mc.player.getX() - interpolate.getX()) - rx;
                 double dy = (mc.player.getY() - interpolate.getY()) - ry;
                 double dz = (mc.player.getZ() - interpolate.getZ()) - rz;

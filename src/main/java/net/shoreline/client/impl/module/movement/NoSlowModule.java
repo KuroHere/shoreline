@@ -10,7 +10,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -126,9 +125,9 @@ public class NoSlowModule extends ToggleModule {
             }
             if (strafeFixConfig.getValue() && checkSlowed()) {
                 // Old NCP
-                Managers.NETWORK.sendSequencedPacket(id ->
-                        new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND,
-                                new BlockHitResult(mc.player.getPos(), Direction.UP, BlockPos.ORIGIN, false), id));
+                // Managers.NETWORK.sendSequencedPacket(id ->
+                //        new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND,
+                //                new BlockHitResult(mc.player.getPos(), Direction.UP, BlockPos.ORIGIN, false), id));
             }
             if (inventoryMoveConfig.getValue() && checkScreen()
                     && MOVE_KEYBINDS != null) {
@@ -269,5 +268,9 @@ public class NoSlowModule extends ToggleModule {
             }
         }
         return blocks;
+    }
+
+    public boolean getStrafeFix() {
+        return strafeFixConfig.getValue();
     }
 }

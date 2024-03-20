@@ -24,6 +24,7 @@ public abstract class ConfigFile {
             .create();
     // The UNIX filepath to configuration file. This filepath is always
     // within the client directory.
+    private final String fileName;
     private final Path filepath;
 
     /**
@@ -41,6 +42,7 @@ public abstract class ConfigFile {
                 e.printStackTrace();
             }
         }
+        fileName = dir.getFileName().toString();
         filepath = dir.resolve(toJsonPath(path));
     }
 
@@ -110,6 +112,10 @@ public abstract class ConfigFile {
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
         out.write(bytes, 0, bytes.length);
         out.close();
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 
     /**

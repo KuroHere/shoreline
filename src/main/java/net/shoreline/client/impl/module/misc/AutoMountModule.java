@@ -29,18 +29,12 @@ public class AutoMountModule extends ToggleModule {
     //
     private final Timer mountTimer = new CacheTimer();
     //
-    Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay to " +
-            "wait between mounts", 0.0f, 0.5f, 10.0f);
-    Config<Boolean> donkeyConfig = new BooleanConfig("Donkey", "Automatically" +
-            " mounts nearby donkeys", true);
-    Config<Boolean> horseConfig = new BooleanConfig("Horse", "Automatically " +
-            "mounts nearby horses", true);
-    Config<Boolean> skeletonHorseConfig = new BooleanConfig("SkeletonHorse",
-            "Automatically mounts nearby skeleton horses", false);
-    Config<Boolean> llamaConfig = new BooleanConfig("Llama", "Automatically " +
-            "mounts nearby llamas", false);
-    Config<Boolean> pigConfig = new BooleanConfig("Pig", "Automatically " +
-            "mounts nearby pigs", false);
+    Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay to wait between mounts", 0.0f, 0.5f, 10.0f);
+    Config<Boolean> donkeyConfig = new BooleanConfig("Donkey", "Automatically mounts nearby donkeys", true);
+    Config<Boolean> horseConfig = new BooleanConfig("Horse", "Automatically mounts nearby horses", true);
+    Config<Boolean> skeletonHorseConfig = new BooleanConfig("SkeletonHorse", "Automatically mounts nearby skeleton horses", false);
+    Config<Boolean> llamaConfig = new BooleanConfig("Llama", "Automatically mounts nearby llamas", false);
+    Config<Boolean> pigConfig = new BooleanConfig("Pig", "Automatically mounts nearby pigs", false);
 
     /**
      *
@@ -50,9 +44,6 @@ public class AutoMountModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {
