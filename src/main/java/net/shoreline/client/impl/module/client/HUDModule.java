@@ -167,7 +167,7 @@ public class HUDModule extends ToggleModule {
                         continue;
                     }
                     boolean amplifier = e.getAmplifier() > 1 && !e.isInfinite();
-                    Text duration = StatusEffectUtil.getDurationText(e, 1.0f, 1.0f);
+                    Text duration = StatusEffectUtil.getDurationText(e, 1.0f, mc.world.getTickManager().getTickRate());
                     String text = String.format("%s %s§f%s",
                             effect.getName().getString(),
                             amplifier ? e.getAmplifier() + " " : "",
