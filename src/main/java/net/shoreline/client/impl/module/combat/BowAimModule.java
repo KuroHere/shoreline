@@ -22,16 +22,11 @@ import net.shoreline.client.util.world.EntityUtil;
  */
 public class BowAimModule extends ToggleModule {
     //
-    Config<Boolean> playersConfig = new BooleanConfig("Players",
-            "Aims bow at players", true);
-    Config<Boolean> monstersConfig = new BooleanConfig("Monsters",
-            "Aims bow at monsters", false);
-    Config<Boolean> neutralsConfig = new BooleanConfig("Neutrals",
-            "Aims bow at neutrals", false);
-    Config<Boolean> animalsConfig = new BooleanConfig("Animals",
-            "Aims bow at animals", false);
-    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles",
-            "Aims bow at invisible entities", false);
+    Config<Boolean> playersConfig = new BooleanConfig("Players", "Aims bow at players", true);
+    Config<Boolean> monstersConfig = new BooleanConfig("Monsters", "Aims bow at monsters", false);
+    Config<Boolean> neutralsConfig = new BooleanConfig("Neutrals", "Aims bow at neutrals", false);
+    Config<Boolean> animalsConfig = new BooleanConfig("Animals", "Aims bow at animals", false);
+    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles", "Aims bow at invisible entities", false);
 
     /**
      *
@@ -41,9 +36,6 @@ public class BowAimModule extends ToggleModule {
                 ModuleCategory.COMBAT);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -73,10 +65,6 @@ public class BowAimModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param target
-     * @return
-     */
     private float[] getBowRotationsTo(LivingEntity target) {
         float velocity = (72000.0f - mc.player.getItemUseTimeLeft()) / 20.0f;
         velocity = Math.min(1.0f, (velocity * velocity + velocity * 2) / 3.0f);
@@ -98,10 +86,6 @@ public class BowAimModule extends ToggleModule {
                 };
     }
 
-    /**
-     * @param entity
-     * @return
-     */
     private boolean isValidAimTarget(Entity entity) {
         if (entity.isInvisible() && !invisiblesConfig.getValue()) {
             return false;

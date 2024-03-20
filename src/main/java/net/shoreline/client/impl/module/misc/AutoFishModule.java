@@ -22,12 +22,9 @@ import net.shoreline.client.impl.imixin.IMinecraftClient;
  */
 public class AutoFishModule extends ToggleModule {
     //
-    Config<Boolean> openInventoryConfig = new BooleanConfig("OpenInventory",
-            "Allows you to fish while in the inventory", true);
-    Config<Integer> castDelayConfig = new NumberConfig<>("CastingDelay", "The " +
-            "delay between fishing rod casts", 10, 15, 25);
-    Config<Float> maxSoundDistConfig = new NumberConfig<>("MaxSoundDist",
-            "The maximum distance from the splash sound", 0.0f, 2.0f, 5.0f);
+    Config<Boolean> openInventoryConfig = new BooleanConfig("OpenInventory", "Allows you to fish while in the inventory", true);
+    Config<Integer> castDelayConfig = new NumberConfig<>("CastingDelay", "The delay between fishing rod casts", 10, 15, 25);
+    Config<Float> maxSoundDistConfig = new NumberConfig<>("MaxSoundDist", "The maximum distance from the splash sound", 0.0f, 2.0f, 5.0f);
     //
     private boolean autoReel;
     private int autoReelTicks;
@@ -42,9 +39,6 @@ public class AutoFishModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null) {
@@ -66,9 +60,6 @@ public class AutoFishModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {

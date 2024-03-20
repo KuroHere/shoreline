@@ -10,6 +10,7 @@ import net.shoreline.client.impl.event.item.DurabilityEvent;
  * @since 1.0
  */
 public class TrueDurabilityModule extends ToggleModule {
+
     /**
      *
      */
@@ -18,9 +19,6 @@ public class TrueDurabilityModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onDurability(DurabilityEvent event) {
         // ??? Whats this

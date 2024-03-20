@@ -22,16 +22,11 @@ import net.shoreline.client.init.Managers;
  */
 public class BlockLagModule extends PlaceBlockModule {
     //
-    Config<Boolean> selfFillConfig = new BooleanConfig("SelfFill", "Fills in " +
-            "the block beneath you", false);
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates " +
-            "before placing the block", false);
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "NCP-Updated " +
-            "bypass for lagging", false);
-    Config<Boolean> attackConfig = new BooleanConfig("Attack", "crystals in " +
-            "the way of block", true);
-    Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable",
-            "Automatically disables after placing block", false);
+    Config<Boolean> selfFillConfig = new BooleanConfig("SelfFill", "Fills in the block beneath you", false);
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates before placing the block", false);
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "NCP-Updated bypass for lagging", false);
+    Config<Boolean> attackConfig = new BooleanConfig("Attack", "crystals in the way of block", true);
+    Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable", "Automatically disables after placing block", false);
     //
     private BlockPos prevPos;
 
@@ -43,9 +38,6 @@ public class BlockLagModule extends PlaceBlockModule {
                 ModuleCategory.COMBAT);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         if (mc.player == null) {
@@ -54,17 +46,11 @@ public class BlockLagModule extends PlaceBlockModule {
         prevPos = mc.player.getBlockPos();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onDisconnect(DisconnectEvent event) {
         disable();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onScreenOpen(ScreenOpenEvent event) {
         if (event.getScreen() instanceof DeathScreen) {
@@ -72,9 +58,6 @@ public class BlockLagModule extends PlaceBlockModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -128,11 +111,8 @@ public class BlockLagModule extends PlaceBlockModule {
         return state.blocksMovement() && !mc.player.verticalCollision;
     }
 
-    /**
-     * @return
-     */
     public Vec3d getLagOffsetVec() {
-        return new Vec3d(mc.player.getX(), mc.player.getY() + 3.5,
-                mc.player.getZ());
+        // TODO: strict calcs
+        return new Vec3d(mc.player.getX(), mc.player.getY() + 3.5, mc.player.getZ());
     }
 }

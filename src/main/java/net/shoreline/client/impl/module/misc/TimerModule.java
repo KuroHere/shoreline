@@ -20,10 +20,8 @@ import java.text.DecimalFormat;
  */
 public class TimerModule extends ToggleModule {
     //
-    Config<Float> ticksConfig = new NumberConfig<>("Ticks", "Tick speed",
-            0.1f, 2.0f, 50.0f);
-    Config<Boolean> tpsSyncConfig = new BooleanConfig("TPSSync", "Syncs game " +
-            "tick speed to server tick speed", false);
+    Config<Float> ticksConfig = new NumberConfig<>("Ticks", "The game tick speed", 0.1f, 2.0f, 50.0f);
+    Config<Boolean> tpsSyncConfig = new BooleanConfig("TPSSync", "Syncs game tick speed to server tick speed", false);
     //
     private float prevTimer = -1.0f;
     private float timer = 1.0f;
@@ -32,22 +30,15 @@ public class TimerModule extends ToggleModule {
      *
      */
     public TimerModule() {
-        super("Timer", "Changes the client tick speed",
-                ModuleCategory.MISCELLANEOUS);
+        super("Timer", "Changes the client tick speed", ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         DecimalFormat decimal = new DecimalFormat("0.0#");
         return decimal.format(timer);
     }
 
-    /**
-     *
-     */
     @Override
     public void toggle() {
         Modules.SPEED.setPrevTimer();
@@ -57,9 +48,6 @@ public class TimerModule extends ToggleModule {
         super.toggle();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE) {
@@ -74,9 +62,6 @@ public class TimerModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTickCounter(TickCounterEvent event) {
         if (timer != 1.0f) {
@@ -100,9 +85,6 @@ public class TimerModule extends ToggleModule {
         this.timer = timer;
     }
 
-    /**
-     *
-     */
     public void resetTimer() {
         if (prevTimer > 0.0f) {
             this.timer = prevTimer;

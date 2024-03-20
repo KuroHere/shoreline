@@ -49,87 +49,42 @@ import net.shoreline.client.util.world.EntityUtil;
  * @since 1.0
  */
 public class AuraModule extends RotationModule {
-    private final Timer attackTimer = new CacheTimer();
-    private final Timer critTimer = new CacheTimer();
-    private final Timer autoSwapTimer = new CacheTimer();
-    private final Timer switchTimer = new CacheTimer();
     Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swings the hand after attacking", true);
     Config<TargetMode> modeConfig = new EnumConfig<>("Mode", "The mode for targeting entities to attack", TargetMode.SWITCH, TargetMode.values());
     Config<Priority> priorityConfig = new EnumConfig<>("Priority", "The heuristic to prioritize when searching for targets", Priority.HEALTH, Priority.values());
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to attack entities", 1.0f, 4.5f, 5.0f);
-    Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to" +
-            " attack entities through walls", 1.0f, 4.5f, 5.0f);
-    Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to " +
-            "attack entities", 1.0f, 180.0f, 180.0f);
-    Config<Boolean> latencyPositionConfig = new BooleanConfig(
-            "LatencyPosition", "Targets the latency positions of enemies", false);
-    Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency",
-            "Maximum latency factor when calculating positions", 50, 250,
-            1000, () -> latencyPositionConfig.getValue());
+    Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to attack entities through walls", 1.0f, 4.5f, 5.0f);
+    Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to attack entities", 1.0f, 180.0f, 180.0f);
+    Config<Boolean> latencyPositionConfig = new BooleanConfig("LatencyPosition", "Targets the latency positions of enemies", false);
+    Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency", "Maximum latency factor when calculating positions", 50, 250, 1000, () -> latencyPositionConfig.getValue());
     //
-    Config<Boolean> attackDelayConfig = new BooleanConfig("AttackDelay",
-            "Delays attacks according to minecraft hit delays for maximum " +
-                    "damage per attack", true);
-    Config<Float> attackSpeedConfig = new NumberConfig<>("AttackSpeed",
-            "Delay for attacks (Only functions if AttackDelay is off)", 1.0f,
-            20.0f, 20.0f, () -> !attackDelayConfig.getValue());
-    Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed",
-            "Randomized delay for attacks (Only functions if AttackDelay is " +
-                    "off)", 0.0f, 0.0f, 10.0f,
-            () -> !attackDelayConfig.getValue());
-    Config<Integer> packetsConfig = new NumberConfig<>("Packets", "Maximum " +
-            "attack packets to send in a single tick", 0, 1, 20);
-    Config<Float> swapDelayConfig = new NumberConfig<>("SwapPenalty", "Delay " +
-            "for attacking after swapping items which prevents NCP flags", 0.0f,
-            0.0f, 10.0f);
-    Config<TickSync> tpsSyncConfig = new EnumConfig<>("TPS-Sync", "Syncs the " +
-            "attacks with the server TPS", TickSync.NONE, TickSync.values());
-    Config<Boolean> autoSwapConfig = new BooleanConfig("AutoSwap",
-            "Automatically swaps to a weapon before attacking", true);
-    Config<Boolean> swordCheckConfig = new BooleanConfig("Sword-Check",
-            "Checks if a weapon is in the hand before attacking", true);
+    Config<Boolean> attackDelayConfig = new BooleanConfig("AttackDelay", "Delays attacks according to minecraft hit delays for maximum damage per attack", true);
+    Config<Float> attackSpeedConfig = new NumberConfig<>("AttackSpeed", "Delay for attacks (Only functions if AttackDelay is off)", 1.0f, 20.0f, 20.0f, () -> !attackDelayConfig.getValue());
+    Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed", "Randomized delay for attacks (Only functions if AttackDelay is off)", 0.0f, 0.0f, 10.0f, () -> !attackDelayConfig.getValue());
+    Config<Integer> packetsConfig = new NumberConfig<>("Packets", "Maximum attack packets to send in a single tick", 0, 1, 20);
+    Config<Float> swapDelayConfig = new NumberConfig<>("SwapPenalty", "Delay for attacking after swapping items which prevents NCP flags", 0.0f, 0.0f, 10.0f);
+    Config<TickSync> tpsSyncConfig = new EnumConfig<>("TPS-Sync", "Syncs the attacks with the server TPS", TickSync.NONE, TickSync.values());
+    Config<Boolean> autoSwapConfig = new BooleanConfig("AutoSwap", "Automatically swaps to a weapon before attacking", true);
+    Config<Boolean> swordCheckConfig = new BooleanConfig("Sword-Check", "Checks if a weapon is in the hand before attacking", true);
     // ROTATE
-    Config<Vector> hitVectorConfig = new EnumConfig<>("HitVector", "The " +
-            "vector to aim for when attacking entities", Vector.FEET,
-            Vector.values());
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate" +
-            "before attacking", false);
-    Config<Boolean> strictRotateConfig = new BooleanConfig("RotateStrict",
-            "Rotates yaw over multiple ticks to prevent certain rotation  " +
-                    "flags in NCP", false, () -> rotateConfig.getValue());
-    Config<Integer> rotateLimitConfig = new NumberConfig<>(
-            "RotateLimit", "Maximum yaw rotation in degrees for one tick",
-            1, 180, 180, NumberDisplay.DEGREES,
-            () -> rotateConfig.getValue() && strictRotateConfig.getValue());
-    Config<Integer> yawTicksConfig = new NumberConfig<>("YawTicks",
-            "Minimum ticks to rotate yaw", 1, 1, 5,
-            () -> rotateConfig.getValue() && strictRotateConfig.getValue());
-    Config<Integer> rotateTimeoutConfig = new NumberConfig<>(
-            "RotateTimeout", "Minimum ticks to hold the rotation yaw after " +
-            "reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
-    Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted",
-            "The minimum age of the entity to be considered for attack", 0, 50, 200);
-    Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck",
-            "Checks if target has armor before attacking", false);
-    Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock",
-            "Automatically blocks after attack", false);
-    Config<Boolean> stopSprintConfig = new BooleanConfig("StopSprint",
-            "Stops sprinting before attacking to maintain vanilla behavior", false);
-    Config<Boolean> stopShieldConfig = new BooleanConfig("StopShield",
-            "Automatically handles shielding before attacking", false);
+    Config<Vector> hitVectorConfig = new EnumConfig<>("HitVector", "The vector to aim for when attacking entities", Vector.FEET, Vector.values());
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate before attacking", false);
+    Config<Boolean> strictRotateConfig = new BooleanConfig("RotateStrict", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", false, () -> rotateConfig.getValue());
+    Config<Integer> rotateLimitConfig = new NumberConfig<>("RotateLimit", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
+    Config<Integer> yawTicksConfig = new NumberConfig<>("YawTicks", "Minimum ticks to rotate yaw", 1, 1, 5, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
+    Config<Integer> rotateTimeoutConfig = new NumberConfig<>("RotateTimeout", "Minimum ticks to hold the rotation yaw after reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
+    Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted", "The minimum age of the entity to be considered for attack", 0, 50, 200);
+    Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck", "Checks if target has armor before attacking", false);
+    Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock", "Automatically blocks after attack", false);
+    Config<Boolean> stopSprintConfig = new BooleanConfig("StopSprint", "Stops sprinting before attacking to maintain vanilla behavior", false);
+    Config<Boolean> stopShieldConfig = new BooleanConfig("StopShield", "Automatically handles shielding before attacking", false);
     //
-    Config<Boolean> playersConfig = new BooleanConfig("Players",
-            "Target players", true);
-    Config<Boolean> monstersConfig = new BooleanConfig("Monsters",
-            "Target monsters", false);
-    Config<Boolean> neutralsConfig = new BooleanConfig("Neutrals",
-            "Target neutrals", false);
-    Config<Boolean> animalsConfig = new BooleanConfig("Animals",
-            "Target animals", false);
-    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles",
-            "Target invisible entities", true);
-    Config<Boolean> renderConfig = new BooleanConfig("Render",
-            "Renders an indicator over the target", true);
+    Config<Boolean> playersConfig = new BooleanConfig("Players", "Target players", true);
+    Config<Boolean> monstersConfig = new BooleanConfig("Monsters", "Target monsters", false);
+    Config<Boolean> neutralsConfig = new BooleanConfig("Neutrals", "Target neutrals", false);
+    Config<Boolean> animalsConfig = new BooleanConfig("Animals", "Target animals", false);
+    Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles", "Target invisible entities", true);
+    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders an indicator over the target", true);
     //
     private Entity entityTarget;
     private long randomDelay = -1;
@@ -138,6 +93,11 @@ public class AuraModule extends RotationModule {
     private boolean shielding;
     private boolean sneaking;
     private boolean sprinting;
+    //
+    private final Timer attackTimer = new CacheTimer();
+    private final Timer critTimer = new CacheTimer();
+    private final Timer autoSwapTimer = new CacheTimer();
+    private final Timer switchTimer = new CacheTimer();
 
     /**
      *
@@ -146,34 +106,22 @@ public class AuraModule extends RotationModule {
         super("Aura", "Attacks nearby entities", ModuleCategory.COMBAT);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         entityTarget = null;
         rotating = 0;
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onDisconnect(DisconnectEvent event) {
         disable();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerTickEvent event) {
         if (Modules.AUTO_CRYSTAL.isAttacking()
@@ -210,8 +158,7 @@ public class AuraModule extends RotationModule {
             }
         } else {
             if (randomDelay < 0) {
-                randomDelay = (long) RANDOM.nextFloat(
-                        (randomSpeedConfig.getValue() * 10.0f) + 1.0f);
+                randomDelay = (long) RANDOM.nextFloat((randomSpeedConfig.getValue() * 10.0f) + 1.0f);
             }
             float delay = (attackSpeedConfig.getValue() * 50.0f) + randomDelay;
             if (attackTimer.passed(1000.0f - delay) && attackTarget(entityTarget)) {
@@ -221,9 +168,6 @@ public class AuraModule extends RotationModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (mc.player == null) {
@@ -237,9 +181,6 @@ public class AuraModule extends RotationModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (entityTarget != null && renderConfig.getValue() && isHoldingSword()) {
@@ -250,10 +191,6 @@ public class AuraModule extends RotationModule {
         }
     }
 
-    /**
-     * @param entity
-     * @return
-     */
     private boolean attackTarget(Entity entity) {
         if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
                 || mc.options.attackKey.isPressed()) {
@@ -285,9 +222,6 @@ public class AuraModule extends RotationModule {
         return true;
     }
 
-    /**
-     * @return
-     */
     private int getSwordSlot() {
         float sharp = 0.0f;
         int slot = -1;
@@ -366,10 +300,6 @@ public class AuraModule extends RotationModule {
         }
     }
 
-    /**
-     * @param pos
-     * @return
-     */
     private Entity getAttackTarget(Vec3d pos) {
         double min = Double.MAX_VALUE;
         Entity attackTarget = null;
@@ -425,10 +355,6 @@ public class AuraModule extends RotationModule {
         return attackTarget;
     }
 
-    /**
-     * @param e
-     * @return
-     */
     private float getArmorDurability(LivingEntity e) {
         float edmg = 0.0f;
         float emax = 0.0f;
@@ -441,11 +367,6 @@ public class AuraModule extends RotationModule {
         return 100.0f - edmg / emax;
     }
 
-    /**
-     * @param pos
-     * @param entity
-     * @return
-     */
     public boolean isInAttackRange(Vec3d pos, Entity entity) {
         double dist = pos.distanceTo(entity.getPos());
         return isInAttackRange(dist, pos, entity);
@@ -477,9 +398,6 @@ public class AuraModule extends RotationModule {
         return true;
     }
 
-    /**
-     * @return
-     */
     public boolean isHoldingSword() {
         return !swordCheckConfig.getValue() || mc.player.getMainHandStack().getItem() instanceof SwordItem;
     }

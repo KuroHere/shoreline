@@ -32,7 +32,6 @@ import java.awt.*;
  * @since 1.0
  */
 public class ChamsModule extends ToggleModule {
-    private static final float SINE_45_DEGREES = (float) Math.sin(0.7853981633974483);
 
     Config<ChamsMode> modeConfig = new EnumConfig<>("Mode", "The rendering mode for the chams", ChamsMode.NORMAL, ChamsMode.values());
     Config<Boolean> handsConfig = new BooleanConfig("Hands", "Render chams on first-person hands", true);
@@ -42,6 +41,8 @@ public class ChamsModule extends ToggleModule {
     Config<Boolean> animalsConfig = new BooleanConfig("Animals", "Render chams on animals", true);
     Config<Boolean> otherConfig = new BooleanConfig("Others", "Render chams on crystals", true);
     Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles", "Render chams on invisible entities", true);
+
+    private static final float SINE_45_DEGREES = (float) Math.sin(0.7853981633974483);
 
     public ChamsModule() {
         super("Chams", "Renders entity models through walls", ModuleCategory.RENDER);

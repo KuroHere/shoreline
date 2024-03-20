@@ -15,6 +15,7 @@ import java.util.UUID;
  * @since 1.0
  */
 public class AntiSpamModule extends ToggleModule {
+
     //
     private final Map<UUID, String> messages = new HashMap<>();
 
@@ -26,9 +27,6 @@ public class AntiSpamModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null) {

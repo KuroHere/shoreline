@@ -14,12 +14,9 @@ import net.shoreline.client.impl.event.network.PacketEvent;
  */
 public class XCarryModule extends ToggleModule {
     //
-    Config<Boolean> inventoryConfig = new BooleanConfig("Inventory",
-            "Prevents server from recieving packets regarding inventory items", true);
-    Config<Boolean> armorConfig = new BooleanConfig("Armor",
-            "Prevents server from recieving packets regarding armor items", false);
-    Config<Boolean> forceCancelConfig = new BooleanConfig("ForceCancel",
-            "Cancels all close window packets", false);
+    Config<Boolean> inventoryConfig = new BooleanConfig("Inventory", "Prevents server from recieving packets regarding inventory items", true);
+    Config<Boolean> armorConfig = new BooleanConfig("Armor", "Prevents server from recieving packets regarding armor items", false);
+    Config<Boolean> forceCancelConfig = new BooleanConfig("ForceCancel", "Cancels all close window packets", false);
 
     /**
      *
@@ -29,9 +26,6 @@ public class XCarryModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (mc.player == null) {

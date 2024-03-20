@@ -32,9 +32,6 @@ public class BeaconSelectorModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (event.getPacket() instanceof UpdateBeaconC2SPacket packet) {
@@ -43,9 +40,6 @@ public class BeaconSelectorModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onScreenOpen(ScreenOpenEvent event) {
         if (event.getScreen() instanceof BeaconScreen screen && !customBeacon) {

@@ -30,20 +30,17 @@ import java.util.List;
  * @since 1.0
  */
 public class ChestAuraModule extends RotationModule {
+
     //
-    private final List<BlockPos> openedBlocks = new ArrayList<>();
-    //
-    Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to " +
-            "automatically open chests", 0.1f, 4.5f, 5.0f);
-    Config<Boolean> onGroundConfig = new BooleanConfig("OnGround", "Allows " +
-            "chests to be opened only if the player is on the ground", true);
-    Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay " +
-            "between opening chests", 0.0f, 1.0f, 100.0f);
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates " +
-            "before opening chests", false);
+    Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to automatically open chests", 0.1f, 4.5f, 5.0f);
+    Config<Boolean> onGroundConfig = new BooleanConfig("OnGround", "Allows chests to be opened only if the player is on the ground", true);
+    Config<Float> delayConfig = new NumberConfig<>("Delay", "The delay between opening chests", 0.0f, 1.0f, 100.0f);
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates before opening chests", false);
     //
     private int openDelay;
     private boolean openedChest;
+    //
+    private final List<BlockPos> openedBlocks = new ArrayList<>();
 
     /**
      *
@@ -53,9 +50,6 @@ public class ChestAuraModule extends RotationModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         openedChest = false;
@@ -63,9 +57,6 @@ public class ChestAuraModule extends RotationModule {
         openedBlocks.clear();
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (event.getStage() != EventStage.PRE) {
@@ -113,9 +104,6 @@ public class ChestAuraModule extends RotationModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onScreenOpen(ScreenOpenEvent event) {
         if (openedChest && event.getScreen() instanceof GenericContainerScreen) {

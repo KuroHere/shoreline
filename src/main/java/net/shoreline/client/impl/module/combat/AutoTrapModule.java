@@ -8,6 +8,7 @@ import net.shoreline.client.api.module.PlaceBlockModule;
  * @since 1.0
  */
 public class AutoTrapModule extends PlaceBlockModule {
+
     /**
      *
      */

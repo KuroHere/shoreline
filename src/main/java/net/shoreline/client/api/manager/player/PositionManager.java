@@ -131,10 +131,7 @@ public class PositionManager implements Globals {
                     x = packet.getX(x);
                     y = packet.getY(y);
                     z = packet.getZ(z);
-                    int i = MathHelper.floor(x);
-                    int j = MathHelper.floor(y);
-                    int k = MathHelper.floor(z);
-                    blockPos = new BlockPos(i, j, k);
+                    blockPos = BlockPos.ofFloored(x, y, z);
                 }
             } else if (event.getPacket() instanceof ClientCommandC2SPacket packet) {
                 switch (packet.getMode()) {

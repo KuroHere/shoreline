@@ -20,13 +20,12 @@ import java.util.Set;
  * @since 1.0
  */
 public class SkinBlinkModule extends ToggleModule {
+
+    //
+    Config<Float> speedConfig = new NumberConfig<>("Speed", "The speed to toggle the player model parts", 0.0f, 0.1f, 20.0f);
+    Config<Boolean> randomConfig = new BooleanConfig("Random", "Randomizes the toggling of each skin model part", false);
     //
     private final Timer blinkTimer = new CacheTimer();
-    //
-    Config<Float> speedConfig = new NumberConfig<>("Speed", "The speed to " +
-            "toggle the player model parts", 0.0f, 0.1f, 20.0f);
-    Config<Boolean> randomConfig = new BooleanConfig("Random", "Randomizes " +
-            "the toggling of each skin model part", false);
     // The game option parts
     private Set<PlayerModelPart> enabledPlayerModelParts;
 
@@ -38,17 +37,11 @@ public class SkinBlinkModule extends ToggleModule {
                 ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         enabledPlayerModelParts = ((AccessorGameOptions) mc.options).getPlayerModelParts();
     }
 
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         for (PlayerModelPart modelPart : PlayerModelPart.values()) {
@@ -56,9 +49,6 @@ public class SkinBlinkModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.POST &&

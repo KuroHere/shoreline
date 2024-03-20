@@ -10,6 +10,7 @@ import net.shoreline.client.impl.event.network.DecodePacketEvent;
  * @since 1.0
  */
 public class AntiBookBanModule extends ToggleModule {
+
     /**
      *
      */
@@ -18,9 +19,6 @@ public class AntiBookBanModule extends ToggleModule {
                 " issues, only use if actually book banned)", ModuleCategory.MISCELLANEOUS);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onDecodePacket(DecodePacketEvent event) {
         event.cancel();
