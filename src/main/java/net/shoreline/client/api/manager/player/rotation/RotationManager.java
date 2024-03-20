@@ -187,7 +187,7 @@ public class RotationManager implements Globals {
         if (event.getEntity() == mc.player && rotation != null) {
             // Match packet server rotations
             event.setYaw(Interpolation.interpolateFloat(prevYaw, getYaw(), mc.getTickDelta()));
-            event.setPitch(Interpolation.interpolateFloat(pitch, getPitch(), mc.getTickDelta()));
+            event.setPitch(Interpolation.interpolateFloat(prevPitch, getPitch(), mc.getTickDelta()));
             prevYaw = event.getYaw();
             prevPitch = event.getPitch();
             event.cancel();

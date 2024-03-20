@@ -30,6 +30,7 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.manager.world.tick.TickSync;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
+import net.shoreline.client.api.render.Interpolation;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
@@ -44,6 +45,12 @@ import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.string.EnumFormatter;
 import net.shoreline.client.util.world.EntityUtil;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Stream;
+
 /**
  * @author linus
  * @since 1.0
@@ -53,19 +60,20 @@ public class AuraModule extends RotationModule {
     Config<TargetMode> modeConfig = new EnumConfig<>("Mode", "The mode for targeting entities to attack", TargetMode.SWITCH, TargetMode.values());
     Config<Priority> priorityConfig = new EnumConfig<>("Priority", "The heuristic to prioritize when searching for targets", Priority.HEALTH, Priority.values());
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to attack entities", 1.0f, 4.5f, 5.0f);
-    Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to attack entities through walls", 1.0f, 4.5f, 5.0f);
-    Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to attack entities", 1.0f, 180.0f, 180.0f);
+    Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to" +" attack entities through walls", 1.0f, 4.5f, 5.0f);
+    Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to " +"attack entities", 1.0f, 180.0f, 180.0f);
     Config<Boolean> latencyPositionConfig = new BooleanConfig("LatencyPosition", "Targets the latency positions of enemies", false);
-    Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency", "Maximum latency factor when calculating positions", 50, 250, 1000, () -> latencyPositionConfig.getValue());
-    //
-    Config<Boolean> attackDelayConfig = new BooleanConfig("AttackDelay", "Delays attacks according to minecraft hit delays for maximum damage per attack", true);
-    Config<Float> attackSpeedConfig = new NumberConfig<>("AttackSpeed", "Delay for attacks (Only functions if AttackDelay is off)", 1.0f, 20.0f, 20.0f, () -> !attackDelayConfig.getValue());
-    Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed", "Randomized delay for attacks (Only functions if AttackDelay is off)", 0.0f, 0.0f, 10.0f, () -> !attackDelayConfig.getValue());
-    Config<Integer> packetsConfig = new NumberConfig<>("Packets", "Maximum attack packets to send in a single tick", 0, 1, 20);
-    Config<Float> swapDelayConfig = new NumberConfig<>("SwapPenalty", "Delay for attacking after swapping items which prevents NCP flags", 0.0f, 0.0f, 10.0f);
-    Config<TickSync> tpsSyncConfig = new EnumConfig<>("TPS-Sync", "Syncs the attacks with the server TPS", TickSync.NONE, TickSync.values());
-    Config<Boolean> autoSwapConfig = new BooleanConfig("AutoSwap", "Automatically swaps to a weapon before attacking", true);
+    Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency","Maximum latency factor when calculating positions", 50, 250,1000, () -> latencyPositionConfig.getValue());
+    Config<Boolean> attackDelayConfig = new BooleanConfig("AttackDelay","Delays attacks according to minecraft hit delays for maximum " +"damage per attack", true);
+    Config<Float> attackSpeedConfig = new NumberConfig<>("AttackSpeed","Delay for attacks (Only functions if AttackDelay is off)", 1.0f,20.0f, 20.0f, () -> !attackDelayConfig.getValue());
+    Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed","Randomized delay for attacks (Only functions if AttackDelay is " +"off)", 0.0f, 0.0f, 10.0f,() -> !attackDelayConfig.getValue());
+    Config<Integer> packetsConfig = new NumberConfig<>("Packets", "Maximum " +"attack packets to send in a single tick", 0, 1, 20);
+    Config<Float> swapDelayConfig = new NumberConfig<>("SwapPenalty", "Delay " +"for attacking after swapping items which prevents NCP flags", 0.0f,0.0f, 10.0f);
+    Config<TickSync> tpsSyncConfig = new EnumConfig<>("TPS-Sync", "Syncs the " +"attacks with the server TPS", TickSync.NONE, TickSync.values());
+    Config<Boolean> awaitCritsConfig = new BooleanConfig("AwaitCrits","Aura will wait for a critical hit when falling. ", false);
+    Config<Boolean> autoSwapConfig = new BooleanConfig("AutoSwap","Automatically swaps to a weapon before attacking", true);
     Config<Boolean> swordCheckConfig = new BooleanConfig("Sword-Check", "Checks if a weapon is in the hand before attacking", true);
+
     // ROTATE
     Config<Vector> hitVectorConfig = new EnumConfig<>("HitVector", "The vector to aim for when attacking entities", Vector.FEET, Vector.values());
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate before attacking", false);
@@ -153,7 +161,7 @@ public class AuraModule extends RotationModule {
         if (attackDelayConfig.getValue()) {
             float ticks = 20.0f - Managers.TICK.getTickSync(tpsSyncConfig.getValue());
             float progress = mc.player.getAttackCooldownProgress(ticks);
-            if (progress >= 1.0f && attackTarget(entityTarget)) {
+            if (progress >= 0.9f && attackTarget(entityTarget)) {
                 mc.player.resetLastAttackedTicks();
             }
         } else {
@@ -185,9 +193,9 @@ public class AuraModule extends RotationModule {
     public void onRenderWorld(RenderWorldEvent event) {
         if (entityTarget != null && renderConfig.getValue() && isHoldingSword()) {
             RenderManager.renderBox(event.getMatrices(),
-                    entityTarget.getBoundingBox(), Modules.COLORS.getRGB(60));
+                    Interpolation.getInterpolatedEntityBox(entityTarget), Modules.COLORS.getRGB(60));
             RenderManager.renderBoundingBox(event.getMatrices(),
-                    entityTarget.getBoundingBox(), 1.5f, Modules.COLORS.getRGB(145));
+                    Interpolation.getInterpolatedEntityBox(entityTarget), 1.5f, Modules.COLORS.getRGB(145));
         }
     }
 
@@ -206,7 +214,7 @@ public class AuraModule extends RotationModule {
                 Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
             }
         }
-        if (!isHoldingSword()) {
+        if (!isHoldingSword() || !shouldAwaitCrit()) {
             return false;
         }
         preAttackTarget();
@@ -402,13 +410,36 @@ public class AuraModule extends RotationModule {
         return !swordCheckConfig.getValue() || mc.player.getMainHandStack().getItem() instanceof SwordItem;
     }
 
+    /**
+     * @return
+     */
+    public boolean shouldAwaitCrit() {
+        return !mc.player.isOnGround()
+                && mc.player.fallDistance > 0
+                && mc.player.fallDistance < 1
+                && !mc.player.hasStatusEffect(StatusEffects.BLINDNESS)
+                && !mc.player.isClimbing()
+                && !mc.player.isTouchingWater()
+                || !awaitCritsConfig.getValue()
+                || !mc.options.jumpKey.isPressed();
+    }
+
     private Vec3d getAttackRotateVec(Entity entity) {
         Vec3d feetPos = entity.getPos();
         return switch (hitVectorConfig.getValue()) {
             case FEET -> feetPos;
             case TORSO -> feetPos.add(0.0, entity.getHeight() / 2.0f, 0.0);
             case EYES -> feetPos.add(0.0, entity.getStandingEyeHeight(), 0.0);
+            case AUTO -> getNearestBone(entity);
         };
+    }
+
+    private Vec3d getNearestBone(Entity entity) {
+        Vec3d feetPos = entity.getPos();
+        Vec3d torsoPos = feetPos.add(0.0, entity.getHeight() / 2.0f, 0.0);
+        Vec3d eyesPos = feetPos.add(0.0, entity.getStandingEyeHeight(), 0.0);
+
+        return Stream.of(feetPos, torsoPos, eyesPos).min(Comparator.comparing(b -> Managers.POSITION.getEyePos().squaredDistanceTo(b))).orElse(eyesPos);
     }
 
     /**
@@ -486,7 +517,8 @@ public class AuraModule extends RotationModule {
     public enum Vector {
         EYES,
         TORSO,
-        FEET
+        FEET,
+        AUTO
     }
 
     public enum Priority {
