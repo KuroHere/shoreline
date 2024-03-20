@@ -1,5 +1,6 @@
 package net.shoreline.client.api.manager.world.tick;
 
+import com.google.common.collect.Lists;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.listener.EventListener;
@@ -9,6 +10,7 @@ import net.shoreline.client.util.EvictingQueue;
 import net.shoreline.client.util.Globals;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Queue;
 
 /**
@@ -77,11 +79,15 @@ public class TickManager implements Globals {
      */
     public float getTpsAverage() {
         float avg = 0.0f;
-        if (!ticks.isEmpty()) {
-            for (float t : ticks) {
+
+        // fix ConcurrentModificationException
+        ArrayList<Float> ticksCopy = Lists.newArrayList(ticks);
+
+        if (!ticksCopy.isEmpty()) {
+            for (float t : ticksCopy) {
                 avg += t;
             }
-            avg /= ticks.size();
+            avg /= ticksCopy.size();
         }
         return Math.min(100.0f, avg); // Server may compensate
     }
