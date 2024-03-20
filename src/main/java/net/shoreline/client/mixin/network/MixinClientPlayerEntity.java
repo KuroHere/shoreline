@@ -110,7 +110,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
         PlayerUpdateEvent playerUpdateEvent = new PlayerUpdateEvent();
         playerUpdateEvent.setStage(EventStage.PRE);
         Shoreline.EVENT_HANDLER.dispatch(playerUpdateEvent);
-        //
+        // Rotation spoof
         MovementPacketsEvent movementPacketsEvent = new MovementPacketsEvent(mc.player.getX(), mc.player.getY(),
                 mc.player.getZ(), mc.player.getYaw(), mc.player.getPitch(), mc.player.isOnGround());
         Shoreline.EVENT_HANDLER.dispatch(movementPacketsEvent);

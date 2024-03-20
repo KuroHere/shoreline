@@ -16,8 +16,7 @@ import net.shoreline.client.util.chat.ChatUtil;
  */
 public class DrawnCommand extends Command {
     //
-    Argument<Module> moduleArgument = new ModuleArgument("Module", "The " +
-            "module to toggle the drawn state");
+    Argument<Module> moduleArgument = new ModuleArgument("Module", "The module to toggle the drawn state");
 
     /**
      *
@@ -26,9 +25,6 @@ public class DrawnCommand extends Command {
         super("Drawn", "Toggles the drawn state of the module");
     }
 
-    /**
-     * Runs when the command is inputted in chat
-     */
     @Override
     public void onCommandInput() {
         Module module = moduleArgument.getValue();

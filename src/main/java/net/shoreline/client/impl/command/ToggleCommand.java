@@ -13,8 +13,7 @@ import net.shoreline.client.util.chat.ChatUtil;
  */
 public class ToggleCommand extends Command {
     //
-    Argument<Module> moduleArgument = new ModuleArgument("Module", "The " +
-            "module to enable/disable");
+    Argument<Module> moduleArgument = new ModuleArgument("Module", "The module to enable/disable");
 
     /**
      *
@@ -23,16 +22,12 @@ public class ToggleCommand extends Command {
         super("Toggle", "Enables/Disables a module");
     }
 
-    /**
-     * Runs when the command is inputted in chat
-     */
     @Override
     public void onCommandInput() {
         Module module = moduleArgument.getValue();
         if (module instanceof ToggleModule t) {
             t.toggle();
-            ChatUtil.clientSendMessage("%s is now %s!", t.getName(),
-                    t.isEnabled() ? "§aenabled" : "§cdisabled");
+            ChatUtil.clientSendMessage("%s is now %s!", t.getName(), t.isEnabled() ? "§aenabled" : "§cdisabled");
         }
     }
 }

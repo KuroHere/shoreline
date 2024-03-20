@@ -28,7 +28,6 @@ import net.shoreline.client.api.config.NumberDisplay;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
-import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.manager.world.tick.TickSync;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -38,7 +37,6 @@ import net.shoreline.client.impl.event.RunTickEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
-import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.init.Managers;
@@ -60,20 +58,6 @@ import java.util.concurrent.*;
  * @since 1.0
  */
 public class AutoCrystalModule extends RotationModule {
-    //
-    private static final Box FULL_CRYSTAL_BB = new Box(0.0, 0.0, 0.0, 1.0, 2.0, 1.0);
-    private static final Box HALF_CRYSTAL_BB = new Box(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
-    private final Timer lastAttackTimer = new CacheTimer();
-    private final Timer lastPlaceTimer = new CacheTimer();
-    private final Timer lastSwapTimer = new CacheTimer();
-    private final Timer autoSwapTimer = new CacheTimer();
-    //
-    private final Map<Integer, Long> attackPackets =
-            Collections.synchronizedMap(new ConcurrentHashMap<>());
-    private final Map<BlockPos, Long> placePackets =
-            Collections.synchronizedMap(new ConcurrentHashMap<>());
-    //
-    private final ExecutorService executor = Executors.newFixedThreadPool(2);
     // GENERAL SETTINGS
     Config<Boolean> multitaskConfig = new BooleanConfig("Multitask",
             "Allows attacking while using items", false);
@@ -367,6 +351,20 @@ public class AutoCrystalModule extends RotationModule {
     private BlockPos renderSpawnPos;
     //
     private Vec3d crystalRotation;
+    //
+    private static final Box FULL_CRYSTAL_BB = new Box(0.0, 0.0, 0.0, 1.0, 2.0, 1.0);
+    private static final Box HALF_CRYSTAL_BB = new Box(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+    private final Timer lastAttackTimer = new CacheTimer();
+    private final Timer lastPlaceTimer = new CacheTimer();
+    private final Timer lastSwapTimer = new CacheTimer();
+    private final Timer autoSwapTimer = new CacheTimer();
+    //
+    private final Map<Integer, Long> attackPackets =
+            Collections.synchronizedMap(new ConcurrentHashMap<>());
+    private final Map<BlockPos, Long> placePackets =
+            Collections.synchronizedMap(new ConcurrentHashMap<>());
+    //
+    private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
     /**
      *
@@ -445,6 +443,7 @@ public class AutoCrystalModule extends RotationModule {
         if (rotateConfig.getValue() && crystalRotation != null) {
             float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
             setRotation(rotations[0], rotations[1]);
+            crystalRotation = null;
         }
     }
 
@@ -467,7 +466,7 @@ public class AutoCrystalModule extends RotationModule {
     public void onRenderWorld(RenderWorldEvent event) {
         if (renderPos != null && getCrystalHand() != null) {
             RenderManager.renderBox(event.getMatrices(), renderPos,
-                    Modules.COLORS.getRGB(crystalPhase == CrystalAction.ATTACKING ? 105 : 80));
+                    Modules.COLORS.getRGB(crystalPhase == CrystalAction.ATTACKING && renderAttackConfig.getValue() ? 105 : 80));
             RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
                     Modules.COLORS.getRGB(145));
             if (damageNametagConfig.getValue() && placeCrystal != null) {
@@ -514,7 +513,7 @@ public class AutoCrystalModule extends RotationModule {
         if (time != null) {
             crystalRotation = crystalPos;
             //
-            attackCrystal(crystalEntity, getCrystalHand());
+            attackInternal(crystalEntity.getId(), getCrystalHand());
             crystalPhase = CrystalAction.ATTACKING;
             lastAttackTimer.reset();
         } else if (instantCalcConfig.getValue()) {
@@ -547,7 +546,7 @@ public class AutoCrystalModule extends RotationModule {
                         && damage >= attackCrystal.getDamage() && instantMaxConfig.getValue()
                         || entity instanceof LivingEntity entity1 && isCrystalLethalTo(damage, entity1)) {
                     crystalRotation = crystalPos;
-                    attackCrystal(crystalEntity, getCrystalHand());
+                    attackInternal(crystalEntity.getId(), getCrystalHand());
                     crystalPhase = CrystalAction.ATTACKING;
                     lastAttackTimer.reset();
                     break;
@@ -614,9 +613,15 @@ public class AutoCrystalModule extends RotationModule {
         }
     }
 
-    private void attackInternal(EndCrystalEntity crystalEntity, Hand hand) {
+    private void attackInternal(EndCrystalEntity entity, Hand hand)
+    {
+        attackInternal(entity.getId(), hand);
+    }
+
+    private void attackInternal(int id, Hand hand) {
         hand = hand != null ? hand : Hand.MAIN_HAND;
         // ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(id);
+        EndCrystalEntity crystalEntity = createCrystalEntity(id);
         Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(crystalEntity, mc.player.isSneaking()));
         if (setDeadConfig.getValue()) {
             mc.world.removeEntity(crystalEntity.getId(), Entity.RemovalReason.KILLED);
@@ -627,6 +632,14 @@ public class AutoCrystalModule extends RotationModule {
         } else {
             Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
         }
+    }
+
+    private EndCrystalEntity createCrystalEntity(int id)
+    {
+        EndCrystalEntity crystalEntity = new EndCrystalEntity(mc.world, mc.player.lastX,
+                mc.player.lastBaseY, mc.player.lastZ);
+        crystalEntity.setId(id);
+        return crystalEntity;
     }
 
     private void placeCrystal(BlockPos blockPos, Hand hand) {

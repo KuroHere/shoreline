@@ -4,8 +4,7 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.command.Command;
 import net.shoreline.client.api.command.arg.Argument;
 import net.shoreline.client.api.command.arg.arguments.StringArgument;
-
-import java.util.List;
+import net.shoreline.client.util.chat.ChatUtil;
 
 /**
  * @author linus
@@ -13,10 +12,8 @@ import java.util.List;
  */
 public class ConfigCommand extends Command {
     //
-    Argument<String> actionArgument = new StringArgument("Action", "Whether " +
-            "to save or load a preset", List.of("save", "load"));
-    Argument<String> nameArgument = new StringArgument("ConfigName", "The " +
-            "name for the config preset");
+    Argument<String> actionArgument = new StringArgument("Action", "Whether to save or load a preset", "save", "load");
+    Argument<String> nameArgument = new StringArgument("ConfigName", "The name for the config preset");
 
     /**
      *
@@ -25,9 +22,6 @@ public class ConfigCommand extends Command {
         super("Config", "Creates a new configuration preset");
     }
 
-    /**
-     * Runs when the command is inputted in chat
-     */
     @Override
     public void onCommandInput() {
         String action = actionArgument.getValue();
@@ -36,10 +30,11 @@ public class ConfigCommand extends Command {
             return;
         }
         if (action.equalsIgnoreCase("save")) {
-            Shoreline.CONFIG.setConfigPreset(name);
-
+            Shoreline.CONFIG.saveModulesFolder(name);
+            ChatUtil.clientSendMessage("Saved config with name §7" + name);
         } else if (action.equalsIgnoreCase("load")) {
-
+            Shoreline.CONFIG.loadModulesFolder(name);
+            ChatUtil.clientSendMessage("Loaded config with name §7" + name);
         }
     }
 }

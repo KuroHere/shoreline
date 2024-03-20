@@ -15,8 +15,7 @@ import java.util.Arrays;
  */
 public class VanishCommand extends Command {
     //
-    Argument<String> dismountArgument = new StringArgument("Dismount/Remount",
-            "Desync or resync the entity", Arrays.asList("dismount", "remount"));
+    Argument<String> dismountArgument = new StringArgument("Dismount/Remount", "Desync or resync the entity", "dismount", "remount");
     //
     private Entity mount;
 
@@ -27,16 +26,13 @@ public class VanishCommand extends Command {
         super("Vanish", "Desyncs the riding entity");
     }
 
-    /**
-     * Runs when the command is inputted in chat
-     */
     @Override
     public void onCommandInput() {
         String dismount = dismountArgument.getValue();
         if (dismount.equalsIgnoreCase("dismount")) {
             if (mc.player.isRiding() && mc.player.getVehicle() != null) {
                 if (mount != null) {
-                    ChatUtil.error("Entity vanished, must remount!");
+                    ChatUtil.error("Entity vanished, must remount before mounting!");
                     return;
                 }
                 mount = mc.player.getVehicle();

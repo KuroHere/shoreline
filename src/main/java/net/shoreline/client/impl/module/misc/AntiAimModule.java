@@ -8,6 +8,7 @@ import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
+import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 
 /**
@@ -16,20 +17,13 @@ import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
  */
 public class AntiAimModule extends RotationModule {
     //
-    Config<YawMode> yawModeConfig = new EnumConfig<>("Yaw", "The mode for the" +
-            " rotation yaw spin ", YawMode.STATIC, YawMode.values());
-    Config<PitchMode> pitchModeConfig = new EnumConfig<>("Pitch", "The mode " +
-            "for the rotation pitch spin", PitchMode.DOWN, PitchMode.values());
-    Config<Float> yawAddConfig = new NumberConfig<>("YawAdd", "The yaw to add" +
-            " during each rotation", -180.0f, 20.0f, 180.0f);
-    Config<Float> pitchAddConfig = new NumberConfig<>("CustomPitch", "The pitch " +
-            "to add during each rotation", -90.0f, 20.0f, 90.0f);
-    Config<Float> spinSpeedConfig = new NumberConfig<>("SpinSpeed", "The yaw " +
-            "speed to rotate", 1.0f, 16.0f, 40.0f);
-    Config<Integer> flipTicksConfig = new NumberConfig<>("FlipTicks", "The " +
-            "number of ticks to wait between jitter", 2, 2, 20);
-    Config<Boolean> illegalAnglesConfig = new BooleanConfig("IllegalAngles",
-            "", false);
+    Config<YawMode> yawModeConfig = new EnumConfig<>("Yaw", "The mode for the rotation yaw spin ", YawMode.STATIC, YawMode.values());
+    Config<PitchMode> pitchModeConfig = new EnumConfig<>("Pitch", "The mode for the rotation pitch spin", PitchMode.DOWN, PitchMode.values());
+    Config<Float> yawAddConfig = new NumberConfig<>("YawAdd", "The yaw to add during each rotation", -180.0f, 20.0f, 180.0f);
+    Config<Float> pitchAddConfig = new NumberConfig<>("CustomPitch", "The pitch to add during each rotation", -90.0f, 20.0f, 90.0f);
+    Config<Float> spinSpeedConfig = new NumberConfig<>("SpinSpeed", "The yaw speed to rotate", 1.0f, 16.0f, 40.0f);
+    Config<Integer> flipTicksConfig = new NumberConfig<>("FlipTicks", "The number of ticks to wait between jitter", 2, 2, 20);
+    Config<Boolean> illegalAnglesConfig = new BooleanConfig("IllegalAngles", "", false);
     //
     private float yaw;
     private float pitch;
@@ -60,10 +54,7 @@ public class AntiAimModule extends RotationModule {
      * @param event
      */
     @EventListener
-    public void onPlayerUpdate(PlayerUpdateEvent event) {
-        if (event.getStage() != EventStage.PRE) {
-            return;
-        }
+    public void onPlayerUpdate(PlayerTickEvent event) {
         if (mc.options.attackKey.isPressed() || mc.options.useKey.isPressed()) {
             return;
         }

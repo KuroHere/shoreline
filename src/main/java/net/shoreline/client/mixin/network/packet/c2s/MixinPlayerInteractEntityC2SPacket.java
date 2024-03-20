@@ -17,8 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
  * @since 1.0
  */
 @Mixin(PlayerInteractEntityC2SPacket.class)
-public abstract class MixinPlayerInteractEntityC2SPacket implements
-        IPlayerInteractEntityC2SPacket, Globals {
+public abstract class MixinPlayerInteractEntityC2SPacket implements IPlayerInteractEntityC2SPacket, Globals {
     // Mojang mane wtf ..
     //
     @Shadow
