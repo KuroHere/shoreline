@@ -52,9 +52,6 @@ public class RotationManager implements Globals {
         ROTATE_PRIORITY.put("AntiAim", 50);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (mc.player == null || mc.world == null) {
@@ -71,7 +68,6 @@ public class RotationManager implements Globals {
     /*
         priority -1 not worked
         @EventHandler(priority = -1)
-        public void onUpdate(PlayerTickEvent event) {
     */
     public void onUpdate() {
         if (requests.isEmpty()) {
@@ -136,9 +132,6 @@ public class RotationManager implements Globals {
         return rotationRequest;
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onKeyboardTick(KeyboardTickEvent event) {
         if (rotation != null && mc.player != null
@@ -153,9 +146,6 @@ public class RotationManager implements Globals {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onUpdateVelocity(UpdateVelocityEvent event) {
         if (rotation != null && Modules.ROTATIONS.getMovementFix()) {
@@ -164,9 +154,6 @@ public class RotationManager implements Globals {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPlayerJump(PlayerJumpEvent event) {
         if (rotation != null && Modules.ROTATIONS.getMovementFix()) {
@@ -179,9 +166,6 @@ public class RotationManager implements Globals {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onRenderPlayer(RenderPlayerEvent event) {
         if (event.getEntity() == mc.player && rotation != null) {

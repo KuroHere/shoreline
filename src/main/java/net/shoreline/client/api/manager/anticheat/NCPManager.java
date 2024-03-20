@@ -1,6 +1,5 @@
 package net.shoreline.client.api.manager.anticheat;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -34,9 +33,6 @@ public class NCPManager implements Timer, Globals {
         Shoreline.EVENT_HANDLER.subscribe(this);
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player != null && mc.world != null) {
@@ -51,6 +47,23 @@ public class NCPManager implements Timer, Globals {
         }
     }
 
+    public Direction getPlaceDirectionNCP(BlockPos blockPos, boolean visible) {
+        Vec3d eyePos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
+        if (blockPos.getX() == eyePos.getX() && blockPos.getY() == eyePos.getY() && blockPos.getZ() == eyePos.getZ()) {
+            return Direction.DOWN;
+        } else {
+            Set<Direction> ncpDirections = getPlaceDirectionsNCP(eyePos.getX(), eyePos.getY(), eyePos.getZ(),
+                    blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            for (Direction dir : ncpDirections) {
+                if (visible && !mc.world.isAir(blockPos.offset(dir))) {
+                    continue;
+                }
+                return dir;
+            }
+        }
+        return Direction.UP;
+    }
+
     /**
      * @param x
      * @param y
@@ -60,45 +73,31 @@ public class NCPManager implements Timer, Globals {
      * @param dz
      * @return
      */
-    public Set<Direction> getPlaceDirectionsNCP(final int x,
-                                                final int y,
-                                                final int z,
-                                                final int dx,
-                                                final int dy,
-                                                final int dz) {
+    public Set<Direction> getPlaceDirectionsNCP(final double x, final double y, final double z,
+                                                final int dx, final int dy, final int dz) {
         // directly from NCP src
-        final BlockPos pos = new BlockPos(dx, dy, dz);
-        final Vec3d center = pos.toCenterPos();
-        final BlockState state = mc.world.getBlockState(pos);
-        final double xdiff = x - center.getX();
-        final double ydiff = y - center.getY();
-        final double zdiff = z - center.getZ();
+        final double xdiff = x - (dx + 0.5);
+        final double ydiff = y - (dy + 0.5);
+        final double zdiff = z - (dz + 0.5);
         final Set<Direction> dirs = new HashSet<>(6);
-        if (xdiff < -0.5) {
-            dirs.add(Direction.WEST);
-        } else if (xdiff > 0.5) {
+        if (xdiff == 0) {
             dirs.add(Direction.EAST);
-        } else if (state.isFullCube(mc.world, pos)) {
             dirs.add(Direction.WEST);
-            dirs.add(Direction.EAST);
-        }
-        if (ydiff < -0.5) {
-            dirs.add(Direction.DOWN);
-        } else if (ydiff > 0.5) {
-            dirs.add(Direction.UP);
         } else {
-            dirs.add(Direction.DOWN);
+            dirs.add(xdiff > 0 ? Direction.EAST : Direction.WEST);
+        }
+        if (zdiff == 0) {
+            dirs.add(Direction.SOUTH);
+            dirs.add(Direction.NORTH);
+        } else {
+            dirs.add(zdiff > 0 ? Direction.SOUTH : Direction.NORTH);
+        }
+        if (ydiff == 0) {
             dirs.add(Direction.UP);
+            dirs.add(Direction.DOWN);
+        } else {
+            dirs.add(ydiff > 0 ? Direction.UP : Direction.DOWN);
         }
-        if (zdiff < -0.5) {
-            dirs.add(Direction.NORTH);
-        } else if (zdiff > 0.5) {
-            dirs.add(Direction.SOUTH);
-        } else if (state.isFullCube(mc.world, pos)) {
-            dirs.add(Direction.NORTH);
-            dirs.add(Direction.SOUTH);
-        }
-
         return dirs;
     }
 

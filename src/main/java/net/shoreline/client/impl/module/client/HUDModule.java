@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.module.client;
 
+import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.Window;
 import net.minecraft.entity.Entity;
@@ -77,6 +78,9 @@ public class HUDModule extends ToggleModule {
     @EventListener
     public void onRenderOverlayPost(RenderOverlayEvent.Post event) {
         if (mc.player != null && mc.world != null) {
+            if (mc.getDebugHud().shouldShowDebugHud()) {
+                return;
+            }
             Window res = mc.getWindow();
             //
             int rainbowOffset = 0;

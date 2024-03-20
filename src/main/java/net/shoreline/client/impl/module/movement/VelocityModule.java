@@ -25,6 +25,7 @@ import net.shoreline.client.impl.event.entity.player.PushFluidsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PushOutOfBlocksEvent;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.mixin.accessor.AccessorClientWorld;
 import net.shoreline.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
 import net.shoreline.client.mixin.accessor.AccessorExplosionS2CPacket;
 import net.shoreline.client.util.string.EnumFormatter;
@@ -124,12 +125,12 @@ public class VelocityModule extends ToggleModule {
                     cancelVelocity = true;
                 }
             }
-            if (event.isCanceled() && mc.world.getServer() != null) {
+            if (event.isCanceled()) {
                 // Dumb fix bc canceling explosion velocity removes explosion handling in 1.19
                 try {
-                    mc.world.playSound(packet.getX(), packet.getY(), packet.getZ(),
+                    ((AccessorClientWorld) mc.world).hookPlaySound(packet.getX(), packet.getY(), packet.getZ(),
                             SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS,
-                            4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false);
+                            4.0f, (1.0f + (RANDOM.nextFloat() - RANDOM.nextFloat()) * 0.2f) * 0.7f, false, RANDOM.nextLong());
                 } catch (Exception ignored) {
 
                 }

@@ -1,5 +1,7 @@
 package net.shoreline.client.mixin.world;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
@@ -11,6 +13,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.List;
 
 /**
  * @author linus
@@ -26,6 +30,22 @@ public class MixinClientWorld {
     private void hookAddEntity(Entity entity, CallbackInfo ci) {
         AddEntityEvent addEntityEvent = new AddEntityEvent(entity);
         Shoreline.EVENT_HANDLER.dispatch(addEntityEvent);
+    }
+
+    /**
+     *
+     * @param cir
+     */
+
+    @Inject(method = "getEntities", at = @At(value = "HEAD"), cancellable = true)
+    private void hookGetEntities(CallbackInfoReturnable<Iterable<Entity>> cir) {
+        if (cir.getReturnValue() != null)
+        {
+            cir.cancel();
+            List<Entity> entities = Lists.newArrayList(cir.getReturnValue());
+            entities.removeIf(entity -> entity == null);
+            cir.setReturnValue(Iterables.unmodifiableIterable(entities));
+        }
     }
 
     /**

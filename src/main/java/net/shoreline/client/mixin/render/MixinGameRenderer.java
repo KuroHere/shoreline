@@ -17,7 +17,6 @@ import net.shoreline.client.impl.event.render.*;
 import net.shoreline.client.init.Programs;
 import net.shoreline.client.mixin.accessor.AccessorBufferBuilderStorage;
 import net.shoreline.client.util.Globals;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,22 +42,19 @@ public class MixinGameRenderer implements Globals {
     @Final
     MinecraftClient client;
 
-    /**
-     * @param tickDelta
-     * @param limitTime
-     * @param matrices
-     * @param ci
-     */
-    @Inject(method = "renderWorld", at = @At(value = "FIELD", target = "Lnet" +
-            "/minecraft/client/render/GameRenderer;renderHand:Z",
-            opcode = Opcodes.GETFIELD, ordinal = 0))
-    private void hookRenderWorld(float tickDelta, long limitTime,
-                                 MatrixStack matrices, CallbackInfo ci) {
-        // final RenderWorldEvent renderWorldEvent =
-        //         new RenderWorldEvent(matrices, tickDelta);
-        // MSAAFramebuffer.use(() ->
-        //         Caspian.EVENT_HANDLER.dispatch(renderWorldEvent));
-    }
+//    /**
+//     * @param tickDelta
+//     * @param limitTime
+//     * @param matrices
+//     * @param ci
+//     */
+//    @Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/" +
+//            "render/WorldRenderer;setupFrustum(Lnet/minecraft/client/util/math/MatrixStack;Lnet/" +
+//            "minecraft/util/math/Vec3d;Lorg/joml/Matrix4f;)V", shift = At.Shift.AFTER), cancellable = true)
+//    private void hookRenderWorld(float tickDelta, long limitTime,
+//                                 MatrixStack matrices, CallbackInfo ci) {
+//
+//    }
 
     /**
      * @param matrices
