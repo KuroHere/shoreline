@@ -14,6 +14,7 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.render.RenderLayersClient;
 import net.shoreline.client.impl.event.network.ReachEvent;
 import net.shoreline.client.impl.event.render.*;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Programs;
 import net.shoreline.client.mixin.accessor.AccessorBufferBuilderStorage;
 import net.shoreline.client.util.Globals;

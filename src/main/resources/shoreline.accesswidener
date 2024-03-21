@@ -24,3 +24,4 @@ accessible field net/minecraft/client/render/RenderPhase ALWAYS_DEPTH_TEST Lnet/
 accessible class net/minecraft/client/render/RenderPhase$DepthTest
 accessible class net/minecraft/client/render/RenderPhase$ShaderProgram
 accessible class net/minecraft/client/texture/PlayerSkinProvider$FileCache
+accessible class net/minecraft/client/MinecraftClient$LoadingContext

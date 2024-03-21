@@ -10,6 +10,7 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.impl.event.*;
 import net.shoreline.client.impl.imixin.IMinecraftClient;
+import net.shoreline.client.init.Managers;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -86,6 +87,17 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
     private void hookRun(CallbackInfo ci) {
         final RunTickEvent runTickEvent = new RunTickEvent();
         Shoreline.EVENT_HANDLER.dispatch(runTickEvent);
+    }
+
+    /**
+     * @param loadingContext
+     * @param cir
+     */
+    @Inject(method = "onInitFinished", at = @At(value = "RETURN"))
+    private void hookOnInitFinished(MinecraftClient.LoadingContext loadingContext, CallbackInfoReturnable<Runnable> cir) {
+        FinishLoadingEvent finishLoadingEvent = new FinishLoadingEvent();
+        Shoreline.EVENT_HANDLER.dispatch(finishLoadingEvent);
+        // Managers.CAPES.init();
     }
 
     /**

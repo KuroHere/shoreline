@@ -87,8 +87,10 @@ public class RotationManager implements Globals {
             rotateModule = rotation.getModule();
         }
         // fixes flags for aim % 360
-
         // GCD implementation maybe?
+        if (rotation == null) {
+            return;
+        }
         float serverYawChange = rotation.getYaw() - getWrappedYaw();
         float serverPitchChange = rotation.getPitch() - getPitch();
         float yaw1 = yaw + serverYawChange;

@@ -3,10 +3,7 @@ package net.shoreline.client.init;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.manager.ModuleManager;
 import net.shoreline.client.api.manager.anticheat.NCPManager;
-import net.shoreline.client.api.manager.client.AccountManager;
-import net.shoreline.client.api.manager.client.CommandManager;
-import net.shoreline.client.api.manager.client.MacroManager;
-import net.shoreline.client.api.manager.client.SocialManager;
+import net.shoreline.client.api.manager.client.*;
 import net.shoreline.client.api.manager.combat.TotemManager;
 import net.shoreline.client.api.manager.combat.hole.HoleManager;
 import net.shoreline.client.api.manager.network.NetworkManager;
@@ -45,6 +42,7 @@ public class Managers {
     public static InteractionManager INTERACT;
     public static LatencyManager LATENCY;
     public static SoundManager SOUND;
+    public static CapeManager CAPES;
     // The initialized state of the managers. If this is true, all managers
     // have been initialized and the init process is complete. As a general
     // rule, it is good practice to check this state before accessing instances.
@@ -92,6 +90,7 @@ public class Managers {
             MODULE.postInit();
             MACRO.postInit();
             COMMAND.postInit();
+            CAPES = new CapeManager();
         }
     }
 
