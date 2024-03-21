@@ -28,12 +28,20 @@ public class PlaceBlockModule extends RotationModule {
      * @param pos
      * @param strictDirection
      */
-    protected void placeBlockResistant(BlockPos pos, boolean strictDirection) {
+    protected float[] placeBlockResistant(BlockPos pos, boolean rotate, boolean strictDirection) {
         int slot = getResistantBlockItem();
         if (slot == -1) {
-            return;
+            return null;
         }
-        placeBlock(slot, pos, strictDirection);
+        return placeBlock(slot, pos, rotate, strictDirection);
+    }
+
+    protected float[] placeBlockResistant(BlockPos pos, boolean strictDirection) {
+        return placeBlockResistant(pos, false, strictDirection);
+    }
+
+    protected float[] placeBlock(int slot, BlockPos pos, boolean strictDirection) {
+        return placeBlock(slot, pos, false, strictDirection);
     }
 
     /**
@@ -41,17 +49,18 @@ public class PlaceBlockModule extends RotationModule {
      * @param pos
      * @param strictDirection
      */
-    protected void placeBlock(int slot, BlockPos pos, boolean strictDirection) {
+    protected float[] placeBlock(int slot, BlockPos pos, boolean rotate, boolean strictDirection) {
         int prev = mc.player.getInventory().selectedSlot;
         if (prev != slot) {
             mc.player.getInventory().selectedSlot = slot;
             Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
         }
-        Managers.INTERACT.placeBlock(pos, strictDirection);
+        float[] rotations = Managers.INTERACT.placeBlock(pos, rotate, strictDirection);
         if (prev != slot) {
             mc.player.getInventory().selectedSlot = prev;
             Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
         }
+        return rotations;
     }
 
     /**

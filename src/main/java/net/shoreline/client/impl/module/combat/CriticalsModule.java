@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -19,6 +20,7 @@ import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.imixin.IPlayerInteractEntityC2SPacket;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.network.InteractType;
@@ -79,6 +81,10 @@ public class CriticalsModule extends ToggleModule {
         // Custom aura crit handling
         if (Modules.AURA.isEnabled()) {
             return;
+        }
+        if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet)
+        {
+            ChatUtil.clientSendMessage("Dir: " + packet.getBlockHitResult().getSide());
         }
         if (event.getPacket() instanceof IPlayerInteractEntityC2SPacket packet
                 && packet.getType() == InteractType.ATTACK && !event.isClientPacket()) {

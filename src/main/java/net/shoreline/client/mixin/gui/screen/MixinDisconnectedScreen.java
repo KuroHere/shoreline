@@ -37,6 +37,7 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
             "widget/DirectionalLayoutWidget;add(Lnet/minecraft/client/gui/widget/Widget;)" +
             "Lnet/minecraft/client/gui/widget/Widget;", ordinal = 2))
     private void hookInit(CallbackInfo ci) {
+        grid.getMainPositioner().margin(2);
         ButtonWidget.Builder reconnectButton = ButtonWidget.builder(Text.of("Reconnect"),
                 (button) ->
                 {
@@ -53,8 +54,8 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
                         reconnectSeconds = Math.round(Modules.AUTO_RECONNECT.getDelay() * 20.0f);
                     }
                 });
-        grid.add(autoReconnectButton.build());
         grid.add(reconnectButton.build());
+        grid.add(autoReconnectButton.build());
         // addDrawableChild(reconnectButton.dimensions(width / 2 - 100,
         //        height / 2 + mc.textRenderer.fontHeight + 24, 200, 20).build());
         // addDrawableChild(autoReconnectButton.dimensions(width / 2 - 100,

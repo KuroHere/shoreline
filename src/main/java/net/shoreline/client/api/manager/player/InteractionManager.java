@@ -1,10 +1,7 @@
 package net.shoreline.client.api.manager.player;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
+import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -17,6 +14,8 @@ import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
+import net.shoreline.client.util.player.RotationUtil;
+import net.shoreline.client.util.world.SneakBlocks;
 
 import java.util.Set;
 
@@ -72,16 +71,16 @@ public class InteractionManager implements Globals {
         }
     }
 
-    public void placeBlock(BlockPos pos, boolean strictDirection) {
-        placeBlock(pos, Hand.MAIN_HAND, strictDirection);
+    public float[] placeBlock(BlockPos pos, boolean rotate, boolean strictDirection) {
+        return placeBlock(pos, Hand.MAIN_HAND, rotate, strictDirection);
     }
 
-    public void placeBlock(BlockPos pos, Hand hand) {
-        placeBlock(pos, hand, false);
+    public float[] placeBlock(BlockPos pos, Hand hand, boolean rotate) {
+        return placeBlock(pos, hand, rotate, false);
     }
 
-    public void placeBlock(BlockPos pos) {
-        placeBlock(pos, Hand.MAIN_HAND);
+    public float[] placeBlock(BlockPos pos) {
+        return placeBlock(pos, Hand.MAIN_HAND, false);
     }
 
     /**
@@ -89,27 +88,38 @@ public class InteractionManager implements Globals {
      * @param hand
      * @param strictDirection
      */
-    public void placeBlock(BlockPos pos, Hand hand, boolean strictDirection) {
+    public float[] placeBlock(BlockPos pos, Hand hand, boolean rotate, boolean strictDirection) {
         BlockState state = mc.world.getBlockState(pos);
-        if (!state.isReplaceable()) {
-            return;
-        }
         Direction sideHit = getInteractDirection(pos, strictDirection);
-        Vec3d hitVec = Vec3d.ofCenter(pos);
-        if (sideHit == null) {
-            sideHit = Direction.UP;
-        } else {
-            hitVec.add(sideHit.getOffsetX() * 0.5,
-                    sideHit.getOffsetY() * 0.5, sideHit.getOffsetZ() * 0.5);
+        if (!state.isReplaceable() || sideHit == null) {
+            return null;
         }
-        Vec3d eyes = mc.player.getEyePos();
-        boolean inside = eyes.x > pos.getX() && eyes.x < pos.getX() + 1 &&
-                eyes.y > pos.getY() && eyes.y < pos.getY() + 1 &&
-                eyes.z > pos.getZ() && eyes.z < pos.getZ() + 1;
-        BlockHitResult result = new BlockHitResult(hitVec, sideHit, pos, inside);
+        Vec3d hitVec = Vec3d.ofCenter(pos);
+        BlockPos offsetPos = pos.offset(sideHit.getOpposite());
+        BlockState state1 = mc.world.getBlockState(offsetPos);
+        boolean sneaking = !mc.player.isSneaking() && SneakBlocks.isSneakBlock(state1.getBlock());
+        if (sneaking) {
+            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                    ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+        }
+        float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), offsetPos.toCenterPos());
+        if (rotate) {
+            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
+                    rotations[0], rotations[1], mc.player.isOnGround()));
+        }
+        // sideHit = sideHit.getOpposite();
+        hitVec.add(sideHit.getOffsetX() * 0.5,
+                sideHit.getOffsetY() * 0.5, sideHit.getOffsetZ() * 0.5);
+        BlockHitResult result = new BlockHitResult(hitVec, sideHit, offsetPos, false);
         Managers.NETWORK.sendSequencedPacket(id ->
                 new PlayerInteractBlockC2SPacket(hand, result, id));
-        Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
+        // Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
+        mc.player.swingHand(hand);
+        if (sneaking) {
+            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                    ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+        }
+        return rotations;
     }
 
     /**
@@ -118,31 +128,21 @@ public class InteractionManager implements Globals {
      * @return
      */
     private Direction getInteractDirection(BlockPos blockPos, boolean strictDirection) {
+        Set<Direction> ncpDirections = Managers.NCP.getPlaceDirectionsNCP(mc.player.getEyePos(), blockPos.toCenterPos());
         Direction interactDirection = null;
-        double interactDist = 0.0;
         for (Direction dir : Direction.values()) {
             BlockPos pos1 = blockPos.offset(dir);
+            Direction opposite = dir.getOpposite();
             BlockState state = mc.world.getBlockState(pos1);
             //
             if (state.isAir() || !state.getFluidState().isEmpty()) {
                 continue;
             }
-            if (strictDirection) {
-                int x = blockPos.getX();
-                int y = (int) Math.floor(Managers.POSITION.getY()
-                        + mc.player.getStandingEyeHeight());
-                int z = blockPos.getZ();
-                Set<Direction> strictDirections = Managers.NCP.getPlaceDirectionsNCP(
-                        x, y, z, pos1.getX(), pos1.getY(), pos1.getZ());
-                if (!strictDirections.contains(dir.getOpposite())) {
-                    continue;
-                }
+            if (strictDirection && !ncpDirections.contains(opposite)) {
+                continue;
             }
-            double dist = mc.player.getEyePos().squaredDistanceTo(pos1.toCenterPos());
-            if (dist > interactDist) {
-                interactDirection = dir;
-                interactDist = dist;
-            }
+            interactDirection = opposite;
+            break;
         }
         return interactDirection;
     }

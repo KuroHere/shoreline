@@ -52,8 +52,7 @@ public class NCPManager implements Timer, Globals {
         if (blockPos.getX() == eyePos.getX() && blockPos.getY() == eyePos.getY() && blockPos.getZ() == eyePos.getZ()) {
             return Direction.DOWN;
         } else {
-            Set<Direction> ncpDirections = getPlaceDirectionsNCP(eyePos.getX(), eyePos.getY(), eyePos.getZ(),
-                    blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            Set<Direction> ncpDirections = getPlaceDirectionsNCP(eyePos, blockPos.toCenterPos());
             for (Direction dir : ncpDirections) {
                 if (visible && !mc.world.isAir(blockPos.offset(dir))) {
                     continue;
@@ -62,6 +61,11 @@ public class NCPManager implements Timer, Globals {
             }
         }
         return Direction.UP;
+    }
+
+    public Set<Direction> getPlaceDirectionsNCP(Vec3d eyePos, Vec3d blockPos)
+    {
+        return getPlaceDirectionsNCP(eyePos.x, eyePos.y, eyePos.z, blockPos.x, blockPos.y, blockPos.z);
     }
 
     /**
@@ -74,11 +78,11 @@ public class NCPManager implements Timer, Globals {
      * @return
      */
     public Set<Direction> getPlaceDirectionsNCP(final double x, final double y, final double z,
-                                                final int dx, final int dy, final int dz) {
+                                                final double dx, final double dy, final double dz) {
         // directly from NCP src
-        final double xdiff = x - (dx + 0.5);
-        final double ydiff = y - (dy + 0.5);
-        final double zdiff = z - (dz + 0.5);
+        final double xdiff = x - dx;
+        final double ydiff = y - dy;
+        final double zdiff = z - dz;
         final Set<Direction> dirs = new HashSet<>(6);
         if (xdiff == 0) {
             dirs.add(Direction.EAST);

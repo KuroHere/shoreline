@@ -6,7 +6,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundCategory;
@@ -29,7 +28,6 @@ import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
-import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,25 +106,23 @@ public class SurroundModule extends PlaceBlockModule {
             }
             surround = getSurroundPositions(pos);
             placements = surround.stream().filter(p -> mc.world.isAir(p)).toList();
-            while (blocksPlaced < shiftTicksConfig.getValue()
+            final int shiftTicks = shiftTicksConfig.getValue();
+            while (blocksPlaced < shiftTicks
                     && !placements.isEmpty()) {
                 if (blocksPlaced >= placements.size()) {
                     break;
                 }
                 BlockPos targetPos = placements.get(blocksPlaced);
-                if (rotateConfig.getValue()) {
-                    float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(),
-                            targetPos.toCenterPos());
-                    // All rotations for shift ticks must send extra packet
-                    // This may not work on all servers
-                    if (blocksPlaced == 0) {
+                // All rotations for shift ticks must send extra packet
+                // This may not work on all servers
+                if (blocksPlaced == shiftTicks - 1) {
+                    float[] rotations = placeBlockResistant(targetPos, strictDirectionConfig.getValue());
+                    if (rotations != null) {
                         setRotation(rotations[0], rotations[1]);
-                    } else {
-                        Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-                                rotations[0], rotations[1], mc.player.isOnGround()));
                     }
+                } else {
+                    placeBlockResistant(targetPos, rotateConfig.getValue(), strictDirectionConfig.getValue());
                 }
-                placeBlockResistant(targetPos, strictDirectionConfig.getValue());
                 blocksPlaced++;
                 shiftDelay = 0;
             }
@@ -147,7 +143,7 @@ public class SurroundModule extends PlaceBlockModule {
                 }
                 BlockPos pos1 = pos.add(dir.getVector());
                 List<Entity> box = mc.world.getOtherEntities(null, new Box(pos1))
-                        .stream().filter(e -> !checkSurroundEntity(e)).toList();
+                        .stream().filter(e -> !isEntityBlockingSurround(e)).toList();
                 if (box.isEmpty()) {
                     continue;
                 }
@@ -186,7 +182,7 @@ public class SurroundModule extends PlaceBlockModule {
         return blocks;
     }
 
-    private boolean checkSurroundEntity(Entity entity) {
+    private boolean isEntityBlockingSurround(Entity entity) {
         return entity instanceof ItemEntity || entity instanceof ExperienceOrbEntity
                 || (entity instanceof EndCrystalEntity && attackConfig.getValue());
     }
@@ -218,29 +214,16 @@ public class SurroundModule extends PlaceBlockModule {
             final BlockState state = packet.getState();
             final BlockPos targetPos = packet.getPos();
             if (surround.contains(targetPos) && state.isAir()) {
-                if (rotateConfig.getValue()) {
-                    float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(),
-                            targetPos.toCenterPos());
-                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-                            rotations[0], rotations[1], mc.player.isOnGround()));
-                }
-                placeBlockResistant(targetPos, strictDirectionConfig.getValue());
+                placeBlockResistant(targetPos, rotateConfig.getValue(), strictDirectionConfig.getValue());
                 blocksPlaced++;
                 // shiftDelay = 0;
             }
         } else if (event.getPacket() instanceof PlaySoundS2CPacket packet
                 && packet.getCategory() == SoundCategory.BLOCKS
                 && packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
-            final BlockPos targetPos = BlockPos.ofFloored(packet.getX(),
-                    packet.getY(), packet.getZ());
+            BlockPos targetPos = BlockPos.ofFloored(packet.getX(), packet.getY(), packet.getZ());
             if (surround.contains(targetPos)) {
-                if (rotateConfig.getValue()) {
-                    float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(),
-                            targetPos.toCenterPos());
-                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-                            rotations[0], rotations[1], mc.player.isOnGround()));
-                }
-                placeBlockResistant(targetPos, strictDirectionConfig.getValue());
+                placeBlockResistant(targetPos, rotateConfig.getValue(), strictDirectionConfig.getValue());
                 blocksPlaced++;
                 // shiftDelay = 0;
             }
@@ -254,8 +237,7 @@ public class SurroundModule extends PlaceBlockModule {
                 return;
             }
             for (BlockPos pos : surround) {
-                RenderManager.renderBox(event.getMatrices(),
-                        pos, Modules.COLORS.getRGB(60));
+                RenderManager.renderBox(event.getMatrices(), pos, Modules.COLORS.getRGB(60));
             }
         }
     }
