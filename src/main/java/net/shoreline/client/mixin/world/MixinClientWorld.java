@@ -33,22 +33,6 @@ public class MixinClientWorld {
     }
 
     /**
-     *
-     * @param cir
-     */
-
-    @Inject(method = "getEntities", at = @At(value = "HEAD"), cancellable = true)
-    private void hookGetEntities(CallbackInfoReturnable<Iterable<Entity>> cir) {
-        if (cir.getReturnValue() != null)
-        {
-            cir.cancel();
-            List<Entity> entities = Lists.newArrayList(cir.getReturnValue());
-            entities.removeIf(entity -> entity == null);
-            cir.setReturnValue(Iterables.unmodifiableIterable(entities));
-        }
-    }
-
-    /**
      * @param cameraPos
      * @param tickDelta
      * @param cir

@@ -11,6 +11,7 @@ import net.shoreline.client.util.Globals;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 
 /**
@@ -74,15 +75,14 @@ public class TickManager implements Globals {
         return ticks;
     }
 
+    // So many fucking issues with the EvictingQueue fuck stackoverflow
     /**
      * @return
      */
     public float getTpsAverage() {
         float avg = 0.0f;
-
         // fix ConcurrentModificationException
         ArrayList<Float> ticksCopy = Lists.newArrayList(ticks);
-
         if (!ticksCopy.isEmpty()) {
             for (float t : ticksCopy) {
                 avg += t;
@@ -96,8 +96,12 @@ public class TickManager implements Globals {
      * @return
      */
     public float getTpsCurrent() {
-        if (!ticks.isEmpty()) {
-            return ticks.getFirst();
+        try {
+            if (!ticks.isEmpty()) {
+                return ticks.getFirst();
+            }
+        } catch (NoSuchElementException ignored) {
+
         }
         return 20.0f;
     }

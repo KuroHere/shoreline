@@ -309,9 +309,11 @@ public class AutoCrystalModule extends RotationModule {
                 && packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
             for (Entity entity : Lists.newArrayList(mc.world.getEntities())) {
                 if (entity instanceof EndCrystalEntity && entity.squaredDistanceTo(packet.getX(), packet.getY(), packet.getZ()) < 144.0) {
-                    mc.world.removeEntity(entity.getId(), Entity.RemovalReason.KILLED);
-                    entity.remove(Entity.RemovalReason.KILLED);
-                    entity.setRemoved(Entity.RemovalReason.KILLED);
+                    mc.executeSync(() -> {
+                        mc.world.removeEntity(entity.getId(), Entity.RemovalReason.KILLED);
+                        // entity.remove(Entity.RemovalReason.KILLED);
+                        // entity.setRemoved(Entity.RemovalReason.KILLED);
+                    });
                 }
             }
         }
