@@ -82,10 +82,6 @@ public class CriticalsModule extends ToggleModule {
         if (Modules.AURA.isEnabled()) {
             return;
         }
-        if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet)
-        {
-            ChatUtil.clientSendMessage("Dir: " + packet.getBlockHitResult().getSide());
-        }
         if (event.getPacket() instanceof IPlayerInteractEntityC2SPacket packet
                 && packet.getType() == InteractType.ATTACK && !event.isClientPacket()) {
             if (!Managers.POSITION.isOnGround()
