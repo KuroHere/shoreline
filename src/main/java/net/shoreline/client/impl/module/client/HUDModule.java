@@ -10,6 +10,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -294,7 +295,9 @@ public class HUDModule extends ToggleModule {
                 //
                 int x = res.getScaledWidth() / 2 + 15;
                 int y = res.getScaledHeight();
-                if (mc.player.isTouchingWater() && mc.player.getAir() > 0) {
+                int n1 = mc.player.getMaxAir();
+                int n2 = Math.min(mc.player.getAir(), n1);
+                if (mc.player.isSubmergedIn(FluidTags.WATER) || n2 < n1) {
                     y -= 65;
                 } else if (riding instanceof LivingEntity entity) {
                     y -= 45 + (int) Math.ceil((entity.getMaxHealth() - 1.0f) / 20.0f) * 10;

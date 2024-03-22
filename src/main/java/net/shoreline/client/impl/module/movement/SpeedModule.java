@@ -38,15 +38,12 @@ public class SpeedModule extends ToggleModule {
     //
     Config<Boolean> directionalConfig = new BooleanConfig("Directional", "Allows player to move in all directions", true);
     Config<Speed> speedModeConfig = new EnumConfig<>("Mode", "Speed mode", Speed.STRAFE, Speed.values());
-    Config<Boolean> bhopStrafeConfig = new BooleanConfig("Strafe-BHop", "Applies NCP magic bhop number", false, () -> speedModeConfig.getValue() == Speed.STRAFE);
     Config<Boolean> vanillaStrafeConfig = new BooleanConfig("Strafe-Vanilla", "Applies strafe speeds to vanilla speed", false, () -> speedModeConfig.getValue() == Speed.VANILLA);
     Config<Float> speedConfig = new NumberConfig<>("Speed", "The speed for alternative modes", 0.1f, 4.0f, 10.0f);
-    Config<Boolean> strictJumpConfig = new BooleanConfig("StrictJump", "Use slightly higher and slower jumps to bypass NCP", false, () -> speedModeConfig.getValue() == Speed.STRAFE_STRICT);
     Config<Boolean> timerConfig = new BooleanConfig("UseTimer", "Uses timer to increase acceleration", false);
     Config<Boolean> strafeBoostConfig = new BooleanConfig("StrafeBoost", "Uses explosion velocity to boost Strafe", false);
     Config<Integer> boostTicksConfig = new NumberConfig<>("BoostTicks", "The number of ticks to boost strafe", 10, 20, 40, () -> strafeBoostConfig.getValue());
     Config<Boolean> speedWaterConfig = new BooleanConfig("SpeedInWater", "Applies speed even in water and lava", false);
-    Config<Boolean> factorConfig = new BooleanConfig("Entity-Factor", "Factors entity collisions in speed", false);
     //
     private int strafe = 4;
     private boolean accel;
@@ -117,7 +114,7 @@ public class SpeedModule extends ToggleModule {
                 if (collisions > 0) {
                     Vec3d velocity = mc.player.getVelocity();
                     // double COLLISION_DISTANCE = 1.5;
-                    double factor = factorConfig.getValue() ? 0.08 * collisions : 0.08;
+                    double factor = 0.08 * collisions;
                     Vec2f strafe = handleStrafeMotion((float) factor);
                     mc.player.setVelocity(velocity.x + strafe.x, velocity.y, velocity.z + strafe.y);
                 }
@@ -160,7 +157,7 @@ public class SpeedModule extends ToggleModule {
                 jumpEffect += (mc.player.getStatusEffect(StatusEffects.JUMP_BOOST).getAmplifier() + 1) * 0.1f;
             }
             // ~29 kmh
-            if (speedModeConfig.getValue() == Speed.STRAFE) {
+            if (speedModeConfig.getValue() == Speed.STRAFE || speedModeConfig.getValue() == Speed.STRAFE_B_HOP) {
                 if (!Managers.NCP.passed(100)) {
                     return;
                 }
@@ -173,10 +170,10 @@ public class SpeedModule extends ToggleModule {
                     if (mc.player.input.jumping || !mc.player.isOnGround()) {
                         return;
                     }
-                    float jump = (bhopStrafeConfig.getValue() ? 0.4000000059604645f : 0.3999999463558197f) + jumpEffect;
+                    float jump = (speedModeConfig.getValue() == Speed.STRAFE_B_HOP ? 0.4000000059604645f : 0.3999999463558197f) + jumpEffect;
                     event.setY(jump);
                     Managers.MOVEMENT.setMotionY(jump);
-                    speed *= bhopStrafeConfig.getValue() ? 1.535 : (accel ? 1.6835 : 1.395);
+                    speed *= speedModeConfig.getValue() == Speed.STRAFE_B_HOP ? 1.535 : (accel ? 1.6835 : 1.395);
                 } else if (strafe == 3) {
                     double moveSpeed = 0.66 * (distance - base);
                     speed = distance - moveSpeed;
@@ -208,8 +205,7 @@ public class SpeedModule extends ToggleModule {
                     if (mc.player.input.jumping || !mc.player.isOnGround()) {
                         return;
                     }
-                    float jump = (strictJumpConfig.getValue() ?
-                            0.41999998688697815f : 0.3999999463558197f) + jumpEffect;
+                    float jump = 0.3999999463558197f + jumpEffect;
                     event.setY(jump);
                     Managers.MOVEMENT.setMotionY(jump);
                     speed *= 2.149;
@@ -296,7 +292,7 @@ public class SpeedModule extends ToggleModule {
                 }
                 if (strafe == 1 && mc.player.verticalCollision
                         && MovementUtil.isInputtingMovement()) {
-                    speed = (strictJumpConfig.getValue() ? 1.38f : 1.25f) * base - 0.01f;
+                    speed = 1.25f * base - 0.01f;
                 } else if (strafe == 2 && mc.player.verticalCollision
                         && MovementUtil.isInputtingMovement()) {
                     float jump = (isBoxColliding() ? 0.2f : 0.4f) + jumpEffect;
@@ -528,6 +524,7 @@ public class SpeedModule extends ToggleModule {
     private enum Speed {
         STRAFE,
         STRAFE_STRICT,
+        STRAFE_B_HOP,
         LOW_HOP,
         GAY_HOP,
         V_HOP,
