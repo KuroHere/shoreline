@@ -54,7 +54,7 @@ public class ChatUtil implements Globals {
      */
     public static void serverSendMessage(String message) {
         if (mc.player != null) {
-            mc.player.networkHandler.sendChatMessage(PREFIX + message);
+            mc.player.networkHandler.sendChatMessage(message);
         }
     }
 
