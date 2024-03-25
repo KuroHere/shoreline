@@ -1,7 +1,6 @@
 package net.shoreline.client.impl.module.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EndCrystalEntityRenderer;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -78,13 +77,12 @@ public class ChamsModule extends ToggleModule {
         // RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableCull();
-        RenderSystem.setShader(GameRenderer::getPositionProgram);
-        RenderSystem.lineWidth(2.0f);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder vertexConsumer = tessellator.getBuffer();
         // BufferBuilder vertexConsumer = (BufferBuilder) event.vertexConsumerProvider.getBuffer(event.layer);
-        vertexConsumer.begin(modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormat.DrawMode.QUADS :
-                VertexFormat.DrawMode.LINES, VertexFormats.POSITION);
+        RenderSystem.setShader(GameRenderer::getPositionProgram);
+        RenderSystem.lineWidth(2.0f);
+        vertexConsumer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
         Color color = Modules.COLORS.getColor();
         float n;
         Direction direction;
@@ -203,10 +201,9 @@ public class ChamsModule extends ToggleModule {
         float j = ((float) event.endCrystalEntity.endCrystalAge + event.g) * 3.0f;
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder vertexConsumer = tessellator.getBuffer();
-        RenderSystem.setShader(modeConfig.getValue() == ChamsMode.NORMAL ? GameRenderer::getPositionProgram : GameRenderer::getRenderTypeLinesProgram);
+        RenderSystem.setShader(GameRenderer::getPositionProgram);
         RenderSystem.lineWidth(2.0f);
-        vertexConsumer.begin(modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormat.DrawMode.QUADS :
-                VertexFormat.DrawMode.LINES, modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormats.POSITION : VertexFormats.LINES);
+        vertexConsumer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
         event.matrixStack.push();
         Color color = Modules.COLORS.getColor();
         RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f,
@@ -242,17 +239,15 @@ public class ChamsModule extends ToggleModule {
             RenderSystem.enableBlend();
             // RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
             RenderSystem.defaultBlendFunc();
-            RenderSystem.disableCull();
+            // RenderSystem.disableCull();
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder vertexConsumer = tessellator.getBuffer();
-            RenderSystem.setShader(modeConfig.getValue() == ChamsMode.NORMAL ? GameRenderer::getPositionProgram : GameRenderer::getRenderTypeLinesProgram);
+            RenderSystem.setShader(GameRenderer::getPositionProgram);
             RenderSystem.lineWidth(2.0f);
-            vertexConsumer.begin(modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormat.DrawMode.QUADS :
-                    VertexFormat.DrawMode.LINES, modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormats.POSITION : VertexFormats.LINES);
+            vertexConsumer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
             event.matrices.push();
             Color color = Modules.COLORS.getColor();
-            RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f,
-                    color.getBlue() / 255.0f, 60 / 255.0f);
+            RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, 60 / 255.0f);
             boolean bl = event.arm != Arm.LEFT;
             float f = bl ? 1.0f : -1.0f;
             float g = MathHelper.sqrt(event.swingProgress);
@@ -289,7 +284,7 @@ public class ChamsModule extends ToggleModule {
             tessellator.draw();
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.disableBlend();
-            RenderSystem.enableCull();
+            // RenderSystem.enableCull();
             event.matrices.pop();
             event.cancel();
         }
@@ -307,6 +302,6 @@ public class ChamsModule extends ToggleModule {
 
     public enum ChamsMode {
         NORMAL,
-        WIREFRAME
+        // WIREFRAME
     }
 }

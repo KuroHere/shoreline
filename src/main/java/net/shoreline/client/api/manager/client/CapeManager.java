@@ -10,28 +10,19 @@ import net.shoreline.client.util.Globals;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicReference;
 
 // Optifine capes
 public class CapeManager implements Globals {
 
-    //
-    private Identifier capeTexture;
-
-    public void init() {
-        capeTexture = loadPlayerCape(mc.player.getGameProfile());
-    }
-
     /**
-     *
      * @param profile
+     * @param texture
      * @return
      */
-    private Identifier loadPlayerCape(GameProfile profile) {
-        AtomicReference<Identifier> capeTexture = null;
+    public void loadPlayerCape(GameProfile profile, CapeTexture texture) {
         Util.getMainWorkerExecutor().execute(() -> {
             String uuid = profile.getId().toString();
-            String url = "http://optifine.net/capes/Shoreline__.png";
+            String url = String.format("http://s.optifine.net/capes/%s.png", profile.getName());
             try {
                 URL optifineUrl = new URL(url);
                 InputStream stream = optifineUrl.openStream();
@@ -41,15 +32,20 @@ public class CapeManager implements Globals {
                 } catch (IOException e) {
                     // e.printStackTrace();
                 }
+
                 if (cape != null) {
-                    NativeImageBackedTexture texture = new NativeImageBackedTexture(imageFromStream(cape));
-                    capeTexture.set(mc.getTextureManager().registerDynamicTexture("of-capes-" + uuid, texture));
+                    NativeImage nativeImage = imageFromStream(cape);
+                    if (nativeImage == null) {
+                        return;
+                    }
+                    NativeImageBackedTexture t = new NativeImageBackedTexture(nativeImage);
+                    Identifier identifier = mc.getTextureManager().registerDynamicTexture("of-capes-" + uuid, t);
+                    texture.returnId(identifier);
                 }
             } catch (IOException e) {
 
             }
         });
-        return capeTexture.get();
     }
 
     /**
@@ -76,7 +72,7 @@ public class CapeManager implements Globals {
         return img;
     }
 
-    public Identifier getCapeTexture() {
-        return capeTexture;
+    public interface CapeTexture {
+        void returnId(Identifier id);
     }
 }
