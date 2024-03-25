@@ -170,7 +170,7 @@ public class RotationManager implements Globals {
 
     @EventListener
     public void onRenderPlayer(RenderPlayerEvent event) {
-        if (event.getEntity() == mc.player && rotation != null) {
+        if (event.getEntity() == mc.player) {
             // Match packet server rotations
             event.setYaw(Interpolation.interpolateFloat(prevYaw, getYaw(), mc.getTickDelta()));
             event.setPitch(Interpolation.interpolateFloat(prevPitch, getPitch(), mc.getTickDelta()));

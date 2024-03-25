@@ -6,11 +6,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket;
 import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
+import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.util.Globals;
 
 import java.util.UUID;
@@ -23,8 +22,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class TotemManager implements Globals {
     //
-    private final ConcurrentMap<UUID, Integer> totems =
-            new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, Integer> totems = new ConcurrentHashMap<>();
 
     /**
      *
@@ -38,7 +36,7 @@ public class TotemManager implements Globals {
         if (mc.world != null) {
             if (event.getPacket() instanceof EntityStatusS2CPacket packet
                     && packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING) {
-                final Entity entity = packet.getEntity(mc.world);
+                Entity entity = packet.getEntity(mc.world);
                 if (entity != null && entity.isAlive()) {
                     totems.put(entity.getUuid(), totems.containsKey(entity.getUuid()) ?
                             totems.get(entity.getUuid()) + 1 : 1);
@@ -53,15 +51,8 @@ public class TotemManager implements Globals {
     }
 
     @EventListener
-    public void onTick(TickEvent event) {
-        if (event.getStage() != EventStage.POST) {
-            return;
-        }
-        for (Entity entity : mc.world.getEntities()) {
-            if (!entity.isAlive()) {
-                totems.remove(entity.getUuid());
-            }
-        }
+    public void onRemoveEntity(RemoveEntityEvent event) {
+        totems.remove(event.getEntity().getUuid());
     }
 
     @EventListener

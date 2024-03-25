@@ -94,22 +94,21 @@ public class InteractionManager implements Globals {
         if (!state.isReplaceable() || sideHit == null) {
             return null;
         }
-        Vec3d hitVec = Vec3d.ofCenter(pos);
         BlockPos offsetPos = pos.offset(sideHit.getOpposite());
+        Vec3d hitVec = Vec3d.ofCenter(offsetPos);
         BlockState state1 = mc.world.getBlockState(offsetPos);
         boolean sneaking = !mc.player.isSneaking() && SneakBlocks.isSneakBlock(state1.getBlock());
         if (sneaking) {
             Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                     ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
         }
-        float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), offsetPos.toCenterPos());
+        // sideHit = sideHit.getOpposite();
+        hitVec = hitVec.add(sideHit.getOffsetX() * 0.5, sideHit.getOffsetY() * 0.5, sideHit.getOffsetZ() * 0.5);
+        float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitVec);
         if (rotate) {
             Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
                     rotations[0], rotations[1], mc.player.isOnGround()));
         }
-        // sideHit = sideHit.getOpposite();
-        hitVec.add(sideHit.getOffsetX() * 0.5,
-                sideHit.getOffsetY() * 0.5, sideHit.getOffsetZ() * 0.5);
         BlockHitResult result = new BlockHitResult(hitVec, sideHit, offsetPos, false);
         Managers.NETWORK.sendSequencedPacket(id ->
                 new PlayerInteractBlockC2SPacket(hand, result, id));

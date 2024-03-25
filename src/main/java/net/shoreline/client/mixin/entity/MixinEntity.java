@@ -141,17 +141,6 @@ public abstract class MixinEntity implements Globals {
     }
 
     /**
-     * @param removalReason
-     * @param ci
-     */
-    @Inject(method = "remove", at = @At(value = "HEAD"))
-    private void hookRemove(Entity.RemovalReason removalReason, CallbackInfo ci) {
-        RemoveEntityEvent removeEntityEvent = new RemoveEntityEvent(
-                (Entity) (Object) this, removalReason);
-        Shoreline.EVENT_HANDLER.dispatch(removeEntityEvent);
-    }
-
-    /**
      * @param cir
      */
     @Inject(method = "getTeamColorValue", at = @At(value = "HEAD"),

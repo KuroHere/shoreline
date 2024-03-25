@@ -60,7 +60,7 @@ public class TriggerModule extends ToggleModule {
             case MOUSE_CLICK -> true;
         };
         double d = Math.random() * randomSpeedConfig.getValue() * 2.0 - randomSpeedConfig.getValue();
-        if (buttonDown && triggerTimer.passed(Math.max(attackSpeedConfig.getValue() + d, 0.5) * 50)) {
+        if (buttonDown && triggerTimer.passed(1000.0 - Math.max(attackSpeedConfig.getValue() + d, 0.5) * 50)) {
             ((IMinecraftClient) mc).leftClick();
             ((AccessorMinecraftClient) mc).hookSetAttackCooldown(0);
             triggerTimer.reset();

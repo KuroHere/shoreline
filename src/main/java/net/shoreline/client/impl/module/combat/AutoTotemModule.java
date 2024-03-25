@@ -15,6 +15,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -54,9 +55,7 @@ public class AutoTotemModule extends ToggleModule {
     Config<Boolean> offhandOverrideConfig = new BooleanConfig("Offhand-Override", "Overrides the Offhand item with a GOLDEN_APPLE when trying to use an item", false);
     Config<Boolean> offhandPotionConfig = new BooleanConfig("Offhand-Potions", "Uses potions in the inventory before gapples", false);
     Config<Boolean> hotbarConfig = new BooleanConfig("AllowHotbar", "Allow offhand items to be taken from the hotbar", false);
-    Config<Boolean> noCollisionConfig = new BooleanConfig("CollisionTotem", "If the mainhand is already holding the item in the offhand, place a totem in the offhand instead", false);
     Config<Boolean> crappleConfig = new BooleanConfig("Crapple", "Attempts to take an advantage of a glitch in older versions to fully restore absorption hearts", false);
-    Config<Boolean> crystalCheckConfig = new BooleanConfig("Crystal-Check", "Checks if a crystal is needed in the offhand", false);
     Config<Boolean> hotbarTotemConfig = new BooleanConfig("HotbarTotem", "Attempts to swap totems into the offhand from the hotbar", false);
     Config<Integer> totemSlotConfig = new NumberConfig<>("TotemSlot", "Slot in the hotbar that is dedicated for hotbar totem swaps", 0, 8, 8, () -> hotbarTotemConfig.getValue());
     Config<Boolean> debugConfig = new BooleanConfig("Debug-Offhand", "Displays the current item in the offhand", false);
@@ -156,7 +155,7 @@ public class AutoTotemModule extends ToggleModule {
             return;
         }
         OffhandItem offhandItem = offhandConfig.getValue();
-        offhand = crystalCheckConfig.getValue() && Modules.AUTO_CRYSTAL.isPlacing() ? Items.END_CRYSTAL : offhandItem.getItem();
+        offhand = offhandItem.getItem();
         //
         final ItemStack mainhand = mc.player.getMainHandStack();
         boolean offhandOverride = mainhand.getItem() instanceof SwordItem && mc.options.useKey.isPressed();
@@ -188,9 +187,6 @@ public class AutoTotemModule extends ToggleModule {
                     break;
                 }
             }
-        }
-        if (noCollisionConfig.getValue() && mainhand.getItem() == offhand) {
-            offhand = Items.TOTEM_OF_UNDYING;
         }
         // Glint state boolean. For GOLDEN_APPLE, the loop will
         // exit when the preferred glint state is found

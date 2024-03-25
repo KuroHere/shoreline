@@ -1,27 +1,30 @@
 package net.shoreline.client.mixin.world;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.world.AddEntityEvent;
+import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.impl.event.world.SkyboxEvent;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.List;
 
 /**
  * @author linus
  * @since 1.0
  */
 @Mixin(ClientWorld.class)
-public class MixinClientWorld {
+public abstract class MixinClientWorld {
+
+    @Shadow
+    public abstract @Nullable Entity getEntityById(int id);
+
     /**
      * @param entity
      * @param ci
@@ -29,6 +32,22 @@ public class MixinClientWorld {
     @Inject(method = "addEntity", at = @At(value = "HEAD"))
     private void hookAddEntity(Entity entity, CallbackInfo ci) {
         AddEntityEvent addEntityEvent = new AddEntityEvent(entity);
+        Shoreline.EVENT_HANDLER.dispatch(addEntityEvent);
+    }
+
+    /**
+     *
+     * @param entityId
+     * @param removalReason
+     * @param ci
+     */
+    @Inject(method = "removeEntity", at = @At(value = "HEAD"))
+    private void hookRemoveEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo ci) {
+        Entity entity = getEntityById(entityId);
+        if (entity == null) {
+            return;
+        }
+        RemoveEntityEvent addEntityEvent = new RemoveEntityEvent(entity, removalReason);
         Shoreline.EVENT_HANDLER.dispatch(addEntityEvent);
     }
 

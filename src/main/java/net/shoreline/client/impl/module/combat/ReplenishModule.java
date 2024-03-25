@@ -2,7 +2,6 @@ package net.shoreline.client.impl.module.combat;
 
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.EventStage;
@@ -11,7 +10,6 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.init.Modules;
 
 /**
  * @author linus
@@ -41,16 +39,13 @@ public class ReplenishModule extends ToggleModule {
             }
             float total = ((float) stack.getCount() / stack.getMaxCount()) * 100.0f;
             if (total < percentConfig.getValue()) {
-                if (stack.getItem().equals(Items.END_CRYSTAL) && Modules.AUTO_CRYSTAL.isPlacing()) {
-                    continue;
-                }
-                replenishStack(stack, i);
+                replenishStack(stack);
                 break;
             }
         }
     }
 
-    private void replenishStack(ItemStack item, int slot) {
+    private void replenishStack(ItemStack item) {
         int replenishSlot = -1;
         for (int i = 9; i < 36; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
@@ -58,27 +53,16 @@ public class ReplenishModule extends ToggleModule {
             if (!stack.getName().equals(item.getName())) {
                 continue;
             }
-            if (stack.getItem() instanceof BlockItem blockItem) {
-                if (!(item.getItem() instanceof BlockItem blockItem1)) {
-                    continue;
-                }
-                if (blockItem.getBlock() != blockItem1.getBlock()) {
-                    continue;
-                }
-            } else {
-                if (stack.getItem() != item.getItem()) {
-                    continue;
-                }
+            if (stack.getItem() instanceof BlockItem blockItem && (!(item.getItem() instanceof BlockItem blockItem1) || blockItem.getBlock() != blockItem1.getBlock())) {
+                continue;
+            }
+            if (stack.getItem() != item.getItem()) {
+                continue;
             }
             replenishSlot = i;
         }
         if (replenishSlot != -1) {
-            int total = item.getCount() + mc.player.getInventory().getStack(replenishSlot).getCount();
-            Managers.INVENTORY.pickupSlot(replenishSlot);
-            Managers.INVENTORY.pickupSlot(slot < 9 ? slot + 36 : slot);
-            if (total >= item.getMaxCount()) {
-                Managers.INVENTORY.pickupSlot(replenishSlot);
-            }
+            Managers.INVENTORY.quickMove(replenishSlot);
         }
     }
 }

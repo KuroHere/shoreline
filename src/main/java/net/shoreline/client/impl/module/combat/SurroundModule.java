@@ -31,6 +31,7 @@ import net.shoreline.client.init.Modules;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author linus
@@ -72,7 +73,7 @@ public class SurroundModule extends PlaceBlockModule {
         if (centerConfig.getValue()) {
             double x = Math.floor(mc.player.getX()) + 0.5;
             double z = Math.floor(mc.player.getZ()) + 0.5;
-            Managers.POSITION.setPositionXZ(x, z);
+            Managers.MOVEMENT.setMotionXZ((x - mc.player.getX()) / 2.0, (z - mc.player.getZ()) / 2.0);
         }
         // mc.inGameHud.getChatHud().addMessage();
         prevY = mc.player.getY();
@@ -92,40 +93,33 @@ public class SurroundModule extends PlaceBlockModule {
 
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
+        if (event.getStage() != EventStage.POST) {
+            return;
+        }
         // Do we need this check?? Surround is always highest prio
-        if (event.getStage() == EventStage.PRE) {
-            blocksPlaced = 0;
-            if (jumpDisableConfig.getValue() && mc.player.getY() > prevY) {
-                disable();
-                return;
+        blocksPlaced = 0;
+        if (jumpDisableConfig.getValue() && mc.player.getY() > prevY) {
+            disable();
+            return;
+        }
+        BlockPos pos = mc.player.getBlockPos();
+        if (shiftDelay < shiftDelayConfig.getValue()) {
+            shiftDelay++;
+            return;
+        }
+        surround = getSurroundPositions(pos);
+        placements = surround.stream().filter(p -> mc.world.isAir(p)).toList();
+        final int shiftTicks = shiftTicksConfig.getValue();
+        while (blocksPlaced < shiftTicks && !placements.isEmpty()) {
+            if (blocksPlaced >= placements.size()) {
+                break;
             }
-            BlockPos pos = mc.player.getBlockPos();
-            if (shiftDelay < shiftDelayConfig.getValue()) {
-                shiftDelay++;
-                return;
-            }
-            surround = getSurroundPositions(pos);
-            placements = surround.stream().filter(p -> mc.world.isAir(p)).toList();
-            final int shiftTicks = shiftTicksConfig.getValue();
-            while (blocksPlaced < shiftTicks
-                    && !placements.isEmpty()) {
-                if (blocksPlaced >= placements.size()) {
-                    break;
-                }
-                BlockPos targetPos = placements.get(blocksPlaced);
-                // All rotations for shift ticks must send extra packet
-                // This may not work on all servers
-                if (blocksPlaced == shiftTicks - 1) {
-                    float[] rotations = placeBlockResistant(targetPos, strictDirectionConfig.getValue());
-                    if (rotations != null) {
-                        setRotation(rotations[0], rotations[1]);
-                    }
-                } else {
-                    placeBlockResistant(targetPos, rotateConfig.getValue(), strictDirectionConfig.getValue());
-                }
-                blocksPlaced++;
-                shiftDelay = 0;
-            }
+            BlockPos targetPos = placements.get(blocksPlaced);
+            blocksPlaced++;
+            shiftDelay = 0;
+            // All rotations for shift ticks must send extra packet
+            // This may not work on all servers
+            placeBlockResistant(targetPos, rotateConfig.getValue(), strictDirectionConfig.getValue());
         }
     }
 
@@ -152,7 +146,7 @@ public class SurroundModule extends PlaceBlockModule {
                 }
             }
         }
-        List<BlockPos> blocks = new ArrayList<>();
+        List<BlockPos> blocks = new CopyOnWriteArrayList<>();
         for (BlockPos epos : entities) {
             for (Direction dir2 : Direction.values()) {
                 if (!dir2.getAxis().isHorizontal()) {
@@ -170,6 +164,24 @@ public class SurroundModule extends PlaceBlockModule {
             }
         }
         if (floorConfig.getValue()) {
+            for (BlockPos blockPos : blocks) {
+                boolean support = true;
+                for (Direction dir : Direction.values()) {
+                    BlockPos offset = blockPos.offset(dir);
+                    if (!mc.world.isAir(offset)) {
+                        support = false;
+                        break;
+                    }
+                }
+                if (support) {
+                    BlockPos floor = blockPos.down();
+                    double dist = mc.player.squaredDistanceTo(floor.toCenterPos());
+                    if (dist > ((NumberConfig) placeRangeConfig).getValueSq()) {
+                        continue;
+                    }
+                    blocks.add(floor);
+                }
+            }
             for (BlockPos epos1 : entities) {
                 BlockPos floor = epos1.down();
                 double dist = mc.player.squaredDistanceTo(floor.toCenterPos());

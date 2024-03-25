@@ -2,23 +2,34 @@ package net.shoreline.client.impl.module.combat;
 
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.item.BowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.item.TippedArrowItem;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
-import net.shoreline.client.api.event.EventStage;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.ToggleModule;
-import net.shoreline.client.impl.event.TickEvent;
+import net.shoreline.client.api.module.RotationModule;
+import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.init.Managers;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author linus
  * @since 1.0
  */
-public class SelfBowModule extends ToggleModule {
+public class SelfBowModule extends RotationModule {
+
+    //
+    private final Set<StatusEffect> arrows = new HashSet<>();
+    private int shootTicks;
+
     /**
      *
      */
@@ -27,60 +38,77 @@ public class SelfBowModule extends ToggleModule {
                 ModuleCategory.COMBAT);
     }
 
+    @Override
+    public void onDisable() {
+        mc.options.useKey.setPressed(false);
+        arrows.clear();
+    }
+
     @EventListener
-    public void onTick(TickEvent event) {
-        if (event.getStage() == EventStage.PRE) {
-            int arrowSlot = -1;
-            for (int i = 9; i < 36; i++) {
-                ItemStack stack = mc.player.getInventory().getStack(i);
-                if (stack.isEmpty() || stack.getItem() != Items.TIPPED_ARROW) {
-                    continue;
-                }
-                Potion p = PotionUtil.getPotion(stack);
-                for (StatusEffectInstance effect : p.getEffects()) {
-                    StatusEffect type = effect.getEffectType();
-                    if (type.isBeneficial()
-                            && !mc.player.getStatusEffects().contains(effect)) {
-                        arrowSlot = i;
-                        break;
-                    }
-                }
-                if (arrowSlot != -1) {
+    public void onTick(PlayerTickEvent event) {
+        shootTicks++;
+        if (shootTicks < 20) {
+            return;
+        }
+        int arrowSlot = -1;
+        StatusEffect arrowEffect = null;
+        for (int i = 9; i < 36; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.isEmpty() || !(stack.getItem() instanceof TippedArrowItem)) {
+                continue;
+            }
+            Potion p = PotionUtil.getPotion(stack);
+            for (StatusEffectInstance effect : p.getEffects()) {
+                StatusEffect type = effect.getEffectType();
+                if (type.isBeneficial() && !arrows.contains(type) && mc.player.getStatusEffect(type) == null) {
+                    arrowSlot = i;
+                    arrowEffect = type;
                     break;
                 }
             }
-            int bowSlot = -1;
-            for (int i = 36; i < 45; i++) {
-                ItemStack stack = mc.player.getInventory().getStack(i);
-                if (!stack.isEmpty() && stack.getItem() == Items.BOW) {
-                    bowSlot = i;
-                    break;
-                }
+            if (arrowSlot != -1) {
+                break;
             }
-            if (bowSlot == -1) {
-                disable();
+        }
+        int bowSlot = -1;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (!stack.isEmpty() && stack.getItem() == Items.BOW) {
+                bowSlot = i;
+                break;
+            }
+        }
+        if (bowSlot == -1 || arrowSlot == -1) {
+            disable();
+            return;
+        }
+        if (mc.player.getMainHandStack().getItem() == Items.BOW) {
+            setRotation(mc.player.getYaw(), -90.0f);
+            prioritizeArrow(arrowSlot, arrowEffect);
+            float pullTime = BowItem.getPullProgress(mc.player.getItemUseTime());
+            if (pullTime >= 0.15f) {
+                arrows.add(arrowEffect);
+                shootTicks = 0;
+                mc.options.useKey.setPressed(false);
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, Direction.DOWN));
+                mc.player.stopUsingItem();
                 return;
             }
-            int prevSlot = mc.player.getInventory().selectedSlot;
-            mc.player.getInventory().selectedSlot = bowSlot;
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(bowSlot));
-            if (arrowSlot != -1) {
-                prioritizeArrow(arrowSlot);
-            }
-            mc.player.getInventory().selectedSlot = prevSlot;
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prevSlot));
+            mc.options.useKey.setPressed(true);
         }
     }
 
-    /**
-     * @param slot
-     */
-    private void prioritizeArrow(int slot) {
+    private void prioritizeArrow(int slot, StatusEffect statusEffect) {
         ItemStack stack = mc.player.getInventory().getStack(9);
-        if (!stack.isEmpty()) {
-            Managers.INVENTORY.pickupSlot(9);
+        Potion p = PotionUtil.getPotion(stack);
+        boolean b1 = p.getEffects().stream().anyMatch(p1 -> p1.getEffectType() == statusEffect);
+        if (stack.getItem() instanceof TippedArrowItem && b1) {
+            return;
         }
         Managers.INVENTORY.pickupSlot(slot);
-        Managers.INVENTORY.pickupSlot(slot);
+        Managers.INVENTORY.pickupSlot(9);
+        if (mc.player.currentScreenHandler.getCursorStack() != null) {
+            Managers.INVENTORY.pickupSlot(slot);
+        }
     }
 }

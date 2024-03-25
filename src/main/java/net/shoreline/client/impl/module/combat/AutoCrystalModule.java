@@ -716,7 +716,8 @@ public class AutoCrystalModule extends RotationModule {
             if (safetyConfig.getValue() && playerDamage >= health + 0.5f) {
                 return true;
             }
-            return playerDamage > maxLocalDamageConfig.getValue();
+            final double damageFactor = 3.0;
+            return playerDamage > maxLocalDamageConfig.getValue() * damageFactor;
         }
         return false;
     }

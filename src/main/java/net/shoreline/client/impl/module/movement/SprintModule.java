@@ -28,25 +28,18 @@ public class SprintModule extends ToggleModule {
         super("Sprint", "Automatically sprints", ModuleCategory.MOVEMENT);
     }
 
-    /**
-     * @return
-     */
     @Override
     public String getModuleData() {
         return EnumFormatter.formatEnum(modeConfig.getValue());
     }
 
-    /**
-     *
-     */
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE) {
             return;
         }
-        if (!Managers.POSITION.isSprinting()
-                && !Managers.POSITION.isSneaking()
-                && MovementUtil.isInputtingMovement()
+        if (MovementUtil.isInputtingMovement()
+                && !mc.player.isSneaking()
                 && !mc.player.isRiding()
                 && !mc.player.isTouchingWater()
                 && !mc.player.isInLava()
@@ -66,13 +59,10 @@ public class SprintModule extends ToggleModule {
         }
     }
 
-    /**
-     * @param event
-     */
     @EventListener
     public void onSprintCancel(SprintCancelEvent event) {
-        if (!Managers.POSITION.isSneaking()
-                && MovementUtil.isInputtingMovement()
+        if (MovementUtil.isInputtingMovement()
+                && !mc.player.isSneaking()
                 && !mc.player.isRiding()
                 && !mc.player.isTouchingWater()
                 && !mc.player.isInLava()

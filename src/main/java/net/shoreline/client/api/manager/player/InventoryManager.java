@@ -56,28 +56,27 @@ public class InventoryManager implements Globals {
      * @param slot
      */
     public void pickupSlot(final int slot) {
-        click(slot, SlotActionType.PICKUP, false);
+        click(slot, 0, SlotActionType.PICKUP);
+    }
+
+    public void quickMove(final int slot) {
+        click(slot, 0, SlotActionType.QUICK_MOVE);
     }
 
     /**
      * @param slot
      */
     public void throwSlot(final int slot) {
-        click(slot, SlotActionType.THROW, false);
+        click(slot, 0, SlotActionType.THROW);
     }
 
     /**
      * @param slot
+     * @param button
      * @param type
-     * @param tick
      */
-    private void click(final int slot,
-                       final SlotActionType type,
-                       final boolean tick) {
-        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, 0, type, mc.player);
-        if (tick) {
-            // syncSelectedSlot();
-        }
+    private void click(int slot, int button, SlotActionType type) {
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, type, mc.player);
     }
 
     /**

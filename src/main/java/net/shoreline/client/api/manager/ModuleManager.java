@@ -51,7 +51,7 @@ public class ModuleManager {
                 // new HoleFillModule(),
                 new NoHitDelayModule(),
                 new ReplenishModule(),
-                // new SelfBowModule(),
+                new SelfBowModule(),
                 // new SelfTrapModule(),
                 new SurroundModule(),
                 new TriggerModule(),
