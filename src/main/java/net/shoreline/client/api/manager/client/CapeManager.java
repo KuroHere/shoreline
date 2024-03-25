@@ -32,7 +32,6 @@ public class CapeManager implements Globals {
                 } catch (IOException e) {
                     // e.printStackTrace();
                 }
-
                 if (cape != null) {
                     NativeImage nativeImage = imageFromStream(cape);
                     if (nativeImage == null) {
@@ -42,7 +41,7 @@ public class CapeManager implements Globals {
                     Identifier identifier = mc.getTextureManager().registerDynamicTexture("of-capes-" + uuid, t);
                     texture.returnId(identifier);
                 }
-            } catch (IOException e) {
+            } catch (IOException | NullPointerException e) {
 
             }
         });
