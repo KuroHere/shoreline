@@ -1,6 +1,7 @@
 package net.shoreline.client.impl.module.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EndCrystalEntityRenderer;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -10,6 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Arm;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
@@ -21,6 +23,7 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.render.entity.RenderCrystalEvent;
 import net.shoreline.client.impl.event.render.entity.RenderEntityEvent;
+import net.shoreline.client.impl.event.render.item.RenderArmEvent;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.world.EntityUtil;
 import org.joml.Quaternionf;
@@ -231,6 +234,65 @@ public class ChamsModule extends ToggleModule {
         RenderSystem.disableBlend();
         RenderSystem.enableCull();
         event.cancel();
+    }
+
+    @EventListener
+    public void onRenderArm(RenderArmEvent event) {
+        if (handsConfig.getValue()) {
+            RenderSystem.enableBlend();
+            // RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.disableCull();
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder vertexConsumer = tessellator.getBuffer();
+            RenderSystem.setShader(modeConfig.getValue() == ChamsMode.NORMAL ? GameRenderer::getPositionProgram : GameRenderer::getRenderTypeLinesProgram);
+            RenderSystem.lineWidth(2.0f);
+            vertexConsumer.begin(modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormat.DrawMode.QUADS :
+                    VertexFormat.DrawMode.LINES, modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormats.POSITION : VertexFormats.LINES);
+            event.matrices.push();
+            Color color = Modules.COLORS.getColor();
+            RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f,
+                    color.getBlue() / 255.0f, 60 / 255.0f);
+            boolean bl = event.arm != Arm.LEFT;
+            float f = bl ? 1.0f : -1.0f;
+            float g = MathHelper.sqrt(event.swingProgress);
+            float h = -0.3f * MathHelper.sin(g * (float)Math.PI);
+            float i = 0.4f * MathHelper.sin(g * ((float)Math.PI * 2));
+            float j = -0.4f * MathHelper.sin(event.swingProgress * (float)Math.PI);
+            event.matrices.translate(f * (h + 0.64000005f), i + -0.6f + event.equipProgress * -0.6f, j + -0.71999997f);
+            event.matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(f * 45.0f));
+            float k = MathHelper.sin(event.swingProgress * event.swingProgress * (float)Math.PI);
+            float l = MathHelper.sin(g * (float)Math.PI);
+            event.matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(f * l * 70.0f));
+            event.matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(f * k * -20.0f));
+            event.matrices.translate(f * -1.0f, 3.6f, 3.5f);
+            event.matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(f * 120.0f));
+            event.matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(200.0f));
+            event.matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(f * -135.0f));
+            event.matrices.translate(f * 5.6f, 0.0f, 0.0f);
+            event.playerEntityRenderer.setModelPose(mc.player);
+            event.playerEntityRenderer.getModel().handSwingProgress = 0.0f;
+            event.playerEntityRenderer.getModel().sneaking = false;
+            event.playerEntityRenderer.getModel().leaningPitch = 0.0f;
+            event.playerEntityRenderer.getModel().setAngles(mc.player, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+            if (event.arm == Arm.RIGHT) {
+                event.playerEntityRenderer.getModel().rightArm.pitch = 0.0f;
+                event.playerEntityRenderer.getModel().rightArm.render(event.matrices, vertexConsumer, event.light, OverlayTexture.DEFAULT_UV);
+                event.playerEntityRenderer.getModel().rightSleeve.pitch = 0.0f;
+                event.playerEntityRenderer.getModel().rightSleeve.render(event.matrices, vertexConsumer, event.light, OverlayTexture.DEFAULT_UV);
+            } else {
+                event.playerEntityRenderer.getModel().leftArm.pitch = 0.0f;
+                event.playerEntityRenderer.getModel().leftArm.render(event.matrices, vertexConsumer, event.light, OverlayTexture.DEFAULT_UV);
+                event.playerEntityRenderer.getModel().leftSleeve.pitch = 0.0f;
+                event.playerEntityRenderer.getModel().leftSleeve.render(event.matrices, vertexConsumer, event.light, OverlayTexture.DEFAULT_UV);
+            }
+            tessellator.draw();
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.disableBlend();
+            RenderSystem.enableCull();
+            event.matrices.pop();
+            event.cancel();
+        }
     }
 
     private boolean checkChams(LivingEntity entity) {
