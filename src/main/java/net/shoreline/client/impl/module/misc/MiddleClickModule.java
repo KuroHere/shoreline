@@ -22,8 +22,8 @@ import org.lwjgl.glfw.GLFW;
 public class MiddleClickModule extends ToggleModule {
 
     //
-    Config<Action> actionConfig = new EnumConfig<>("Action", "The action to perform when middle-clicking", Action.FRIEND, Action.values());
-    Config<MissAction> missActionConfig = new EnumConfig<>("MissAction", "Throws a pearl if looking at air", MissAction.PEARL, MissAction.values());
+    Config<MissAction> missActionConfig = new EnumConfig<>("Action", "Throws a pearl if looking at air", MissAction.PEARL, MissAction.values());
+    Config<Action> actionConfig = new EnumConfig<>("Action-Player", "The action to perform when middle-clicking", Action.FRIEND, Action.values());
 
     /**
      *

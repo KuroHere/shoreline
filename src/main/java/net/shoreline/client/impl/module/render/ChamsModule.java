@@ -75,10 +75,11 @@ public class ChamsModule extends ToggleModule {
         // RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableCull();
+        RenderSystem.setShader(GameRenderer::getPositionProgram);
+        RenderSystem.lineWidth(2.0f);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder vertexConsumer = tessellator.getBuffer();
-        RenderSystem.setShader(modeConfig.getValue() == ChamsMode.NORMAL ? GameRenderer::getPositionProgram : GameRenderer::getRenderTypeLinesProgram);
-        RenderSystem.lineWidth(2.0f);
+        // BufferBuilder vertexConsumer = (BufferBuilder) event.vertexConsumerProvider.getBuffer(event.layer);
         vertexConsumer.begin(modeConfig.getValue() == ChamsMode.NORMAL ? VertexFormat.DrawMode.QUADS :
                 VertexFormat.DrawMode.LINES, VertexFormats.POSITION);
         Color color = Modules.COLORS.getColor();
@@ -141,19 +142,18 @@ public class ChamsModule extends ToggleModule {
         boolean bl = !event.entity.isInvisible();
         boolean bl2 = !bl && !((Entity) event.entity).isInvisibleTo(mc.player);
         int p = LivingEntityRenderer.getOverlay(event.entity, 0);
-        event.model.render(event.matrixStack, vertexConsumer, event.i, p, 1.0f, 1.0f, 1.0f, bl2 ? 0.15f : 1.0f);
+        event.model.render(event.matrixStack, vertexConsumer, event.i, p, 1.0f, 1.0f, 1.0f, 1.0f);
+        tessellator.draw();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.disableBlend();
+        RenderSystem.enableCull();
         if (!((Entity) event.entity).isSpectator()) {
             for (Object featureRenderer : event.features) {
                 ((FeatureRenderer) featureRenderer).render(event.matrixStack, event.vertexConsumerProvider, event.i,
                         event.entity, o, n, event.g, l, k, m);
             }
         }
-        tessellator.draw();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.disableBlend();
-        RenderSystem.enableCull();
         event.matrixStack.pop();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         event.cancel();
     }
 

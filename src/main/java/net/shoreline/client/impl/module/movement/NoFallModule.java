@@ -11,6 +11,7 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorPlayerMoveC2SPacket;
 import net.shoreline.client.util.string.EnumFormatter;
 
@@ -37,7 +38,7 @@ public class NoFallModule extends ToggleModule {
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         if (event.getStage() != EventStage.PRE || mc.player.fallDistance <= mc.player.getSafeFallDistance()
-                || mc.player.isOnGround() || mc.player.isFallFlying()) {
+                || mc.player.isOnGround() || mc.player.isFallFlying() || Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled()) {
             return;
         }
         if (modeConfig.getValue() == NoFallMode.LATENCY) {
@@ -45,8 +46,7 @@ public class NoFallModule extends ToggleModule {
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                         mc.player.getX(), 0, mc.player.getZ(), true));
             } else {
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                        0, 64, 0, true));
+                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(0, 64, 0, true));
             }
             mc.player.fallDistance = 0.0f;
         } else if (modeConfig.getValue() == NoFallMode.GRIM) {
@@ -59,7 +59,7 @@ public class NoFallModule extends ToggleModule {
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
         if (mc.player == null || mc.player.fallDistance <= mc.player.getSafeFallDistance()
-                || mc.player.isOnGround() || mc.player.isFallFlying()) {
+                || mc.player.isOnGround() || mc.player.isFallFlying() || Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled()) {
             return;
         }
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet) {

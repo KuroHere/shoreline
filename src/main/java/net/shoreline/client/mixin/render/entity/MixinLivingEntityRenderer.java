@@ -1,5 +1,6 @@
 package net.shoreline.client.mixin.render.entity;
 
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
@@ -8,6 +9,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.render.entity.RenderEntityEvent;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(LivingEntityRenderer.class)
-public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> {
+public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> {
     //
     @Shadow
     protected M model;
@@ -26,6 +28,10 @@ public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityM
     @Shadow
     @Final
     protected List<FeatureRenderer<T, M>> features;
+
+    @Shadow
+    @Nullable
+    protected abstract RenderLayer getRenderLayer(T entity, boolean showBody, boolean translucent, boolean showOutline);
 
     /**
      * @param livingEntity
@@ -36,14 +42,11 @@ public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityM
      * @param i
      * @param ci
      */
-    @Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet" +
-            "/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/" +
-            "render/VertexConsumerProvider;I)V", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "render*", at = @At(value = "HEAD"), cancellable = true)
     private void hookRender(LivingEntity livingEntity, float f, float g,
-                            MatrixStack matrixStack,
-                            VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
+                            MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
         RenderEntityEvent renderEntityEvent = new RenderEntityEvent(livingEntity,
-                f, g, matrixStack, vertexConsumerProvider, i, model, features);
+                f, g, matrixStack, vertexConsumerProvider, i, model, getRenderLayer((T) livingEntity, true, false, false), features);
         Shoreline.EVENT_HANDLER.dispatch(renderEntityEvent);
         if (renderEntityEvent.isCanceled()) {
             ci.cancel();
