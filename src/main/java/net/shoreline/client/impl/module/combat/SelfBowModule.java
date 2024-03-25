@@ -34,8 +34,7 @@ public class SelfBowModule extends RotationModule {
      *
      */
     public SelfBowModule() {
-        super("SelfBow", "Shoots player with beneficial tipped arrows",
-                ModuleCategory.COMBAT);
+        super("SelfBow", "Shoots player with beneficial tipped arrows", ModuleCategory.COMBAT);
     }
 
     @Override

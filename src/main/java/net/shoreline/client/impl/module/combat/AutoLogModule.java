@@ -2,6 +2,7 @@ package net.shoreline.client.impl.module.combat;
 
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.text.Text;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
@@ -31,8 +32,7 @@ public class AutoLogModule extends ToggleModule {
      *
      */
     public AutoLogModule() {
-        super("AutoLog", "Automatically disconnects from server" +
-                " during combat", ModuleCategory.COMBAT);
+        super("AutoLog", "Automatically disconnects from server during combat", ModuleCategory.COMBAT);
     }
 
     @EventListener
@@ -70,8 +70,14 @@ public class AutoLogModule extends ToggleModule {
      * @param args
      */
     private void playerDisconnect(String disconnectReason, Object... args) {
+        if (illegalDisconnectConfig.getValue()) {
+            Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(mc.player, false)); // Illegal packet
+            disable();
+            return;
+        }
         if (mc.getNetworkHandler() == null) {
             mc.world.disconnect();
+            disable();
             return;
         }
         disconnectReason = String.format(disconnectReason, args);
