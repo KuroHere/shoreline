@@ -20,31 +20,35 @@ public class CapeManager implements Globals {
      * @return
      */
     public void loadPlayerCape(GameProfile profile, CapeTexture texture) {
-        Util.getMainWorkerExecutor().execute(() -> {
-            String uuid = profile.getId().toString();
-            String url = String.format("http://s.optifine.net/capes/%s.png", profile.getName());
-            try {
-                URL optifineUrl = new URL(url);
-                InputStream stream = optifineUrl.openStream();
-                NativeImage cape = null;
+        try {
+            Util.getMainWorkerExecutor().execute(() -> {
+                String uuid = profile.getId().toString();
+                String url = String.format("http://s.optifine.net/capes/%s.png", profile.getName());
                 try {
-                    cape = NativeImage.read(stream);
-                } catch (IOException e) {
-                    // e.printStackTrace();
-                }
-                if (cape != null) {
-                    NativeImage nativeImage = imageFromStream(cape);
-                    if (nativeImage == null) {
-                        return;
+                    URL optifineUrl = new URL(url);
+                    InputStream stream = optifineUrl.openStream();
+                    NativeImage cape = null;
+                    try {
+                        cape = NativeImage.read(stream);
+                    } catch (IOException e) {
+                        // e.printStackTrace();
                     }
-                    NativeImageBackedTexture t = new NativeImageBackedTexture(nativeImage);
-                    Identifier identifier = mc.getTextureManager().registerDynamicTexture("of-capes-" + uuid, t);
-                    texture.returnId(identifier);
-                }
-            } catch (IOException | NullPointerException e) {
+                    if (cape != null) {
+                        NativeImage nativeImage = imageFromStream(cape);
+                        if (nativeImage == null) {
+                            return;
+                        }
+                        NativeImageBackedTexture t = new NativeImageBackedTexture(nativeImage);
+                        Identifier identifier = mc.getTextureManager().registerDynamicTexture("of-capes-" + uuid, t);
+                        texture.returnId(identifier);
+                    }
+                } catch (IOException ignored) {
 
-            }
-        });
+                }
+            });
+        } catch (NullPointerException ignored) {
+
+        }
     }
 
     /**

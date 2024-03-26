@@ -247,7 +247,7 @@ public class ChamsModule extends ToggleModule {
             vertexConsumer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
             event.matrices.push();
             Color color = Modules.COLORS.getColor();
-            RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, 60 / 255.0f);
+            RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, 100 / 255.0f);
             boolean bl = event.arm != Arm.LEFT;
             float f = bl ? 1.0f : -1.0f;
             float g = MathHelper.sqrt(event.swingProgress);

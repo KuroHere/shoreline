@@ -37,8 +37,7 @@ public class NoFallModule extends ToggleModule {
 
     @EventListener
     public void onPlayerUpdate(PlayerUpdateEvent event) {
-        if (event.getStage() != EventStage.PRE || mc.player.fallDistance <= mc.player.getSafeFallDistance()
-                || mc.player.isOnGround() || mc.player.isFallFlying() || Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled()) {
+        if (event.getStage() != EventStage.PRE || !checkFalling()) {
             return;
         }
         if (modeConfig.getValue() == NoFallMode.LATENCY) {
@@ -58,8 +57,7 @@ public class NoFallModule extends ToggleModule {
 
     @EventListener
     public void onPacketOutbound(PacketEvent.Outbound event) {
-        if (mc.player == null || mc.player.fallDistance <= mc.player.getSafeFallDistance()
-                || mc.player.isOnGround() || mc.player.isFallFlying() || Modules.FLIGHT.isEnabled() || Modules.PACKET_FLY.isEnabled()) {
+        if (mc.player == null || !checkFalling()) {
             return;
         }
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet) {
@@ -70,6 +68,11 @@ public class NoFallModule extends ToggleModule {
                 ((AccessorPlayerMoveC2SPacket) packet).hookSetY(y + 0.10000000149011612);
             }
         }
+    }
+
+    private boolean checkFalling() {
+        return mc.player.fallDistance > mc.player.getSafeFallDistance() && !mc.player.isOnGround()
+                && !mc.player.isFallFlying() && !Modules.FLIGHT.isEnabled() && !Modules.PACKET_FLY.isEnabled();
     }
 
     public enum NoFallMode {

@@ -1,6 +1,5 @@
 package net.shoreline.client.impl.module.client;
 
-import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.Window;
 import net.minecraft.entity.Entity;
@@ -101,10 +100,9 @@ public class HUDModule extends ToggleModule {
                 topRight += 27.0f;
             }
             if (watermarkConfig.getValue()) {
-                RenderManager.renderText(event.getContext(), String.format("%s §f%s-%s",
+                RenderManager.renderText(event.getContext(), String.format("%s %s-%s",
                                 ShorelineMod.MOD_NAME, ShorelineMod.MOD_VER,
-                                ShorelineMod.MOD_BUILD_NUMBER), 2.0f,
-                        topLeft, getHudColor(rainbowOffset));
+                                ShorelineMod.MOD_BUILD_NUMBER), 2.0f, topLeft, getHudColor(rainbowOffset));
                 // topLeft += 9.0f;
             }
             if (arraylistConfig.getValue()) {

@@ -43,20 +43,6 @@ public class MixinGameRenderer implements Globals {
     @Final
     MinecraftClient client;
 
-//    /**
-//     * @param tickDelta
-//     * @param limitTime
-//     * @param matrices
-//     * @param ci
-//     */
-//    @Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/" +
-//            "render/WorldRenderer;setupFrustum(Lnet/minecraft/client/util/math/MatrixStack;Lnet/" +
-//            "minecraft/util/math/Vec3d;Lorg/joml/Matrix4f;)V", shift = At.Shift.AFTER), cancellable = true)
-//    private void hookRenderWorld(float tickDelta, long limitTime,
-//                                 MatrixStack matrices, CallbackInfo ci) {
-//
-//    }
-
     /**
      * @param matrices
      * @param tickDelta

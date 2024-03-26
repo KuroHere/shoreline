@@ -45,10 +45,6 @@ public class SelfBowModule extends RotationModule {
 
     @EventListener
     public void onTick(PlayerTickEvent event) {
-        shootTicks++;
-        if (shootTicks < 20) {
-            return;
-        }
         int arrowSlot = -1;
         StatusEffect arrowEffect = null;
         for (int i = 9; i < 36; i++) {
@@ -77,24 +73,22 @@ public class SelfBowModule extends RotationModule {
                 break;
             }
         }
-        if (bowSlot == -1 || arrowSlot == -1) {
+        if (mc.player.getMainHandStack().getItem() != Items.BOW || bowSlot == -1 || arrowSlot == -1) {
             disable();
             return;
         }
-        if (mc.player.getMainHandStack().getItem() == Items.BOW) {
-            setRotation(mc.player.getYaw(), -90.0f);
-            prioritizeArrow(arrowSlot, arrowEffect);
-            float pullTime = BowItem.getPullProgress(mc.player.getItemUseTime());
-            if (pullTime >= 0.15f) {
-                arrows.add(arrowEffect);
-                shootTicks = 0;
-                mc.options.useKey.setPressed(false);
-                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, Direction.DOWN));
-                mc.player.stopUsingItem();
-                return;
-            }
-            mc.options.useKey.setPressed(true);
+        setRotation(mc.player.getYaw(), -90.0f);
+        prioritizeArrow(arrowSlot, arrowEffect);
+        float pullTime = BowItem.getPullProgress(mc.player.getItemUseTime());
+        if (pullTime >= 0.15f) {
+            arrows.add(arrowEffect);
+            shootTicks = 0;
+            mc.options.useKey.setPressed(false);
+            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, Direction.DOWN));
+            mc.player.stopUsingItem();
+            return;
         }
+        mc.options.useKey.setPressed(true);
     }
 
     private void prioritizeArrow(int slot, StatusEffect statusEffect) {
@@ -104,9 +98,10 @@ public class SelfBowModule extends RotationModule {
         if (stack.getItem() instanceof TippedArrowItem && b1) {
             return;
         }
+        boolean returnClick = mc.player.currentScreenHandler.getCursorStack().isEmpty();
         Managers.INVENTORY.pickupSlot(slot);
         Managers.INVENTORY.pickupSlot(9);
-        if (mc.player.currentScreenHandler.getCursorStack() != null) {
+        if (returnClick && !mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             Managers.INVENTORY.pickupSlot(slot);
         }
     }
