@@ -76,13 +76,9 @@ public class StepModule extends ToggleModule {
                 Managers.TICK.setClientTick(stepHeight > 1.0 ? 0.15f : 0.35f);
                 cancelTimer = true;
             }
-            for (int i = 0; i < (stepHeight > 1.0 ? offs.length : 2); i++) {
+            for (double off : offs) {
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.prevX,
-                        mc.player.prevY + offs[i], mc.player.prevZ, false));
-            }
-            if (strictConfig.getValue()) {
-                Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.prevX,
-                        mc.player.prevY + stepHeight, mc.player.prevZ, false));
+                        mc.player.prevY + off, mc.player.prevZ, false));
             }
             stepTimer.reset();
         }
@@ -93,9 +89,7 @@ public class StepModule extends ToggleModule {
         if (event.getStage() != EventStage.PRE) {
             return;
         }
-        if (mc.player.isTouchingWater()
-                || mc.player.isInLava()
-                || mc.player.isFallFlying()) {
+        if (mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.isFallFlying()) {
             Managers.TICK.setClientTick(1.0f);
             setStepHeight(isAbstractHorse(mc.player.getVehicle()) ? 1.0f : 0.6f);
             return;
@@ -131,21 +125,28 @@ public class StepModule extends ToggleModule {
      * @return
      */
     private double[] getStepOffsets(double stepHeight) {
-        double[] packets = new double[] {
-                        0.42, stepHeight <= 1.0 && stepHeight > 0.8 ? 0.753 :
-                        0.75, 1.0, 1.16, 1.23, 1.2
-                };
-        if (stepHeight == 2.5) {
-            packets = new double[] {
-                            0.425, 0.821, 0.699, 0.599, 1.022, 1.372, 1.652,
-                            1.869, 2.019, 1.907
-                    };
-        } else if (stepHeight == 2.0) {
-            packets = new double[] {
-                            0.42, 0.78, 0.63, 0.51, 0.9, 1.21, 1.45, 1.43
-                    };
+        // Credit: doogie
+        double[] offsets = new double[0];
+        if (strictConfig.getValue()) {
+            if (stepHeight > 1.1661) {
+                offsets = new double[] {0.42, 0.7532, 1.001, 1.1661, stepHeight};
+            } else if (stepHeight > 1.015) {
+                offsets = new double[] {0.42, 0.7532, 1.001, stepHeight};
+            } else if (stepHeight > 0.6) {
+                offsets = new double[] {0.42 * stepHeight, 0.7532 * stepHeight, stepHeight};
+            }
+            return offsets;
         }
-        return packets;
+        if (stepHeight > 2.019) {
+            offsets = new double[] {0.425, 0.821, 0.699, 0.599, 1.022, 1.372, 1.652, 1.869, 2.019, 1.919};
+        } else if (stepHeight > 1.5) {
+            offsets = new double[] {0.42, 0.78, 0.63, 0.51, 0.9, 1.21, 1.45, 1.43};
+        } else if (stepHeight > 1.015) {
+            offsets = new double[] {0.42, 0.7532, 1.01, 1.093, 1.015};
+        } else if (stepHeight > 0.6) {
+            offsets = new double[] {0.42 * stepHeight, 0.7532 * stepHeight};
+        }
+        return offsets;
     }
 
     private boolean isAbstractHorse(Entity e) {

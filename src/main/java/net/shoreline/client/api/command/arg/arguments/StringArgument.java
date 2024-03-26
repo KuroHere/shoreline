@@ -15,8 +15,7 @@ import java.util.List;
  */
 public class StringArgument extends Argument<String> {
     //
-    private static final ArrayList<String> EMPTY_SUGGESTIONS =
-            new ArrayList<>();
+    private static final ArrayList<String> EMPTY_SUGGESTIONS = new ArrayList<>();
     //
     private final List<String> allowedValues;
 
@@ -45,6 +44,9 @@ public class StringArgument extends Argument<String> {
     @Override
     public String getValue() {
         final String literal = getLiteral();
+        if (literal == null) {
+            return null;
+        }
         if (allowedValues == null || allowedValues.contains(literal)) {
             return literal;
         }

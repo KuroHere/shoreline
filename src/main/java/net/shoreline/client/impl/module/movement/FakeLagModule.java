@@ -38,8 +38,7 @@ public class FakeLagModule extends ToggleModule {
      *
      */
     public FakeLagModule() {
-        super("FakeLag", "Withholds packets from the server, creating " +
-                "clientside lag", ModuleCategory.MOVEMENT);
+        super("FakeLag", "Withholds packets from the server, creating clientside lag", ModuleCategory.MOVEMENT);
     }
 
     @Override

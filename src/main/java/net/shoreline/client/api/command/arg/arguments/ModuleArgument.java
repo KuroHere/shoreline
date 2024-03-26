@@ -30,8 +30,11 @@ public class ModuleArgument extends Argument<Module> {
      */
     @Override
     public Module getValue() {
-        String id = String.format(Module.MODULE_ID_FORMAT,
-                getLiteral().toLowerCase());
+        String literal = getLiteral();
+        if (literal == null) {
+            return null;
+        }
+        String id = String.format(Module.MODULE_ID_FORMAT, literal.toLowerCase());
         Module module = Managers.MODULE.getModule(id);
         if (module != null) {
             return module;

@@ -43,8 +43,8 @@ public class PlayerArgument extends Argument<PlayerEntity> implements Globals {
     @Override
     public Collection<String> getSuggestions() {
         Collection<String> playerNames = new ArrayList<>();
-        if (mc.player != null && mc.player.getServer() != null) {
-            for (String player : mc.player.getServer().getPlayerNames()) {
+        if (mc.player != null && mc.getServer() != null) {
+            for (String player : mc.getServer().getPlayerNames()) {
                 if (player.equalsIgnoreCase(mc.player.getName().getString())) {
                     continue;
                 }

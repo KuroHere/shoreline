@@ -15,6 +15,7 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.EntityOutlineEvent;
 import net.shoreline.client.impl.event.entity.decoration.TeamColorEvent;
+import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.world.EntityUtil;
 
 import java.awt.*;
@@ -63,13 +64,9 @@ public class ESPModule extends ToggleModule {
 
     @EventListener
     public void onTeamColor(TeamColorEvent event) {
-        if (modeConfig.getValue() == ESPMode.GLOW) {
-            Color color = getESPColor(event.getEntity());
-            if (color == null) {
-                return;
-            }
+        if (modeConfig.getValue() == ESPMode.GLOW && checkESP(event.getEntity())) {
             event.cancel();
-            event.setColor(color.getRGB());
+            event.setColor(Modules.COLORS.getRGB());
         }
     }
 

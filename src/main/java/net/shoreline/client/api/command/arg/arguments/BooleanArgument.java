@@ -12,6 +12,7 @@ import java.util.Collection;
  * @since 1.0
  */
 public class BooleanArgument extends Argument<Boolean> {
+
     /**
      * Initializes the config with a default value. This constructor should
      * not be used to initialize a configuration, instead use the explicit
@@ -32,6 +33,9 @@ public class BooleanArgument extends Argument<Boolean> {
     public Boolean getValue() {
         // TODO: Make cleaner
         String literal = getLiteral();
+        if (literal == null) {
+            return null;
+        }
         if (literal.equalsIgnoreCase("t")
                 || literal.equalsIgnoreCase("true")) {
             return Boolean.TRUE;

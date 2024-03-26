@@ -29,8 +29,12 @@ public class CommandArgument extends Argument<Command> {
      */
     @Override
     public Command getValue() {
+        String literal = getLiteral();
+        if (literal == null) {
+            return null;
+        }
         for (Command command : Managers.COMMAND.getCommands()) {
-            if (command.getName().equalsIgnoreCase(getLiteral())) {
+            if (command.getName().equalsIgnoreCase(literal)) {
                 return command;
             }
         }

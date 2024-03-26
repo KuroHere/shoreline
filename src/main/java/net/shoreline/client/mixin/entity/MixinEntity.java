@@ -46,31 +46,17 @@ public abstract class MixinEntity implements Globals {
     @Shadow
     public abstract Box getBoundingBox();
 
-    @Shadow
-    protected abstract Vec3d adjustMovementForCollisions(Vec3d movement);
-
-    @Shadow
-    protected abstract Vec3d adjustMovementForSneaking(Vec3d movement, MovementType type);
-
     /**
-     * @param movementType
      * @param movement
-     * @param ci
+     * @param cir
      */
-    @Inject(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;pop()V",
-            shift = At.Shift.BEFORE, ordinal = 0))
-    public void hookMove(MovementType movementType, Vec3d movement, CallbackInfo ci) {
+    @Inject(method = "adjustMovementForCollisions(Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;", at = @At(value = "HEAD"))
+    public void hookMove(Vec3d movement, CallbackInfoReturnable<Vec3d> cir) {
         if ((Object) this != mc.player) {
             return;
         }
-        Vec3d vec3d;
-        double stepHeight = 0.0;
-        vec3d = adjustMovementForCollisions(adjustMovementForSneaking(movement, movementType));
-        if (vec3d.lengthSquared() > 1.0E-7) {
-            stepHeight = vec3d.y;
-        }
-        StepEvent stepEvent = new StepEvent(stepHeight);
-        Shoreline.EVENT_HANDLER.dispatch(stepEvent);
+        // StepEvent stepEvent = new StepEvent(cir.getReturnValue().y - movement.y);
+        // Shoreline.EVENT_HANDLER.dispatch(stepEvent);
     }
 
     /**

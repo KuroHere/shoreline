@@ -30,8 +30,7 @@ import java.util.concurrent.TimeUnit;
  * @since 1.0
  */
 public class FastPlaceModule extends ToggleModule {
-    //
-    private final CacheTimer startTimer = new CacheTimer();
+
     //
     Config<Selection> selectionConfig = new EnumConfig<>("Selection", "The selection of items to apply fast placements", Selection.WHITELIST, Selection.values());
     Config<Integer> delayConfig = new NumberConfig<>("Delay", "Fast place click delay", 0, 1, 4);
@@ -39,6 +38,8 @@ public class FastPlaceModule extends ToggleModule {
     Config<Boolean> ghostFixConfig = new BooleanConfig("GhostFix", "Fixes item ghosting issue on some servers", false);
     Config<List<Item>> whitelistConfig = new ListConfig<>("Whitelist", "Valid item whitelist", Items.EXPERIENCE_BOTTLE, Items.SNOWBALL, Items.EGG);
     Config<List<Item>> blacklistConfig = new ListConfig<>("Blacklist", "Valid item blacklist", Items.ENDER_PEARL, Items.ENDER_EYE);
+    //
+    private final CacheTimer startTimer = new CacheTimer();
 
     public FastPlaceModule() {
         super("FastPlace", "Place items and blocks faster", ModuleCategory.WORLD);

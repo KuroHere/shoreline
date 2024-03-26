@@ -24,6 +24,9 @@ public class MixinTextVisitFactory implements Globals {
             "visitFormatted(Ljava/lang/String;ILnet/minecraft/text/Style;" +
             "Lnet/minecraft/text/CharacterVisitor;)Z", ordinal = 0), index = 0)
     private static String hookVisitFormatted(String text) {
+        if (text == null) {
+            return "";
+        }
         if (mc.player == null) {
             return text;
         }

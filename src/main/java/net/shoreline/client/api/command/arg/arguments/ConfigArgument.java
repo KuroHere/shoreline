@@ -43,8 +43,12 @@ public class ConfigArgument extends Argument<Config<?>> {
      */
     @Override
     public Config<?> getValue() {
+        String literal = getLiteral();
+        if (literal == null) {
+            return null;
+        }
         for (Config<?> config : container.getConfigs()) {
-            if (config.getName().equalsIgnoreCase(getLiteral())) {
+            if (config.getName().equalsIgnoreCase(literal)) {
                 return config;
             }
         }
