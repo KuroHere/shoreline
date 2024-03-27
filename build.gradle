@@ -26,7 +26,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "cabaletta:baritone-api:1.2"
-    modImplementation "cabaletta:baritone-deobf-unoptimized-mcp-dev:1.2"
+    // modImplementation "cabaletta:baritone-deobf-unoptimized-mcp-dev:1.2"
 }
 
 processResources {

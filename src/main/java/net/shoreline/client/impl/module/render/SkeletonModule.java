@@ -37,12 +37,9 @@ public class SkeletonModule extends ToggleModule {
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         float g = event.getTickDelta();
-
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(MinecraftClient.isFancyGraphicsOrBetter());
         RenderSystem.enableCull();
         for (Entity entity : mc.world.getEntities()) {
             if (entity == null || !entity.isAlive()) {
@@ -90,73 +87,68 @@ public class SkeletonModule extends ToggleModule {
                 }
                 Tessellator tessellator = Tessellator.getInstance();
                 BufferBuilder bufferBuilder = tessellator.getBuffer();
-                bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
-                        VertexFormats.POSITION_COLOR);
+                bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+                // RenderSystem.lineWidth(2.0f);
                 Matrix4f matrix4f = event.getMatrices().peek().getPositionMatrix();
                 Color skeletonColor = Modules.COLORS.getColor();
                 bufferBuilder.vertex(matrix4f, 0, sneaking ? 0.6f : 0.7f,
-                        sneaking ? 0.23f : 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
+                        sneaking ? 0.23f : 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 bufferBuilder.vertex(matrix4f, 0, sneaking ? 1.05f : 1.4f,
-                        0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
+                        0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 bufferBuilder.vertex(matrix4f, -0.37f, sneaking ? 1.05f :
-                        1.35f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
+                        1.35f, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 bufferBuilder.vertex(matrix4f, 0.37f, sneaking ? 1.05f :
-                        1.35f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
+                        1.35f, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 bufferBuilder.vertex(matrix4f, -0.15f, sneaking ? 0.6f :
-                        0.7f, sneaking ? 0.23f : 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
+                        0.7f, sneaking ? 0.23f : 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 bufferBuilder.vertex(matrix4f, 0.15f, sneaking ? 0.6f : 0.7f,
-                        sneaking ? 0.23f : 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
-
+                        sneaking ? 0.23f : 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 event.getMatrices().push();
                 event.getMatrices().translate(0, sneaking ? 1.05f : 1.4f, 0);
                 rotateSkeleton(event.getMatrices(), head);
                 matrix4f = event.getMatrices().peek().getPositionMatrix();
-                bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
-                bufferBuilder.vertex(matrix4f, 0, 0.15f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
+                bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
+                bufferBuilder.vertex(matrix4f, 0, 0.25f, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 event.getMatrices().pop();
-
                 event.getMatrices().push();
                 event.getMatrices().translate(0.15f, sneaking ? 0.6f : 0.7f, sneaking ? 0.23f : 0);
                 rotateSkeleton(event.getMatrices(), rightLeg);
                 matrix4f = event.getMatrices().peek().getPositionMatrix();
-                bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
-                bufferBuilder.vertex(matrix4f, 0, -0.6f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
+                bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
+                bufferBuilder.vertex(matrix4f, 0, -0.6f, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 event.getMatrices().pop();
-
                 event.getMatrices().push();
                 event.getMatrices().translate(-0.15f, sneaking ? 0.6f : 0.7f, sneaking ? 0.23f : 0);
                 rotateSkeleton(event.getMatrices(), leftLeg);
                 matrix4f = event.getMatrices().peek().getPositionMatrix();
-                bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
-                bufferBuilder.vertex(matrix4f, 0, -0.6f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
+                bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
+                bufferBuilder.vertex(matrix4f, 0, -0.6f, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 event.getMatrices().pop();
-
                 event.getMatrices().push();
                 event.getMatrices().translate(0.37f, sneaking ? 1.05f : 1.35f, 0);
                 rotateSkeleton(event.getMatrices(), rightArm);
                 matrix4f = event.getMatrices().peek().getPositionMatrix();
-                bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
-                bufferBuilder.vertex(matrix4f, 0, -0.55f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
+                bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
+                bufferBuilder.vertex(matrix4f, 0, -0.55f, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 event.getMatrices().pop();
-
                 event.getMatrices().push();
                 event.getMatrices().translate(-0.37f, sneaking ? 1.05f : 1.35f, 0);
                 rotateSkeleton(event.getMatrices(), leftArm);
                 matrix4f = event.getMatrices().peek().getPositionMatrix();
-                bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
-                bufferBuilder.vertex(matrix4f, 0, -0.55f, 0).color(skeletonColor.getRed(), skeletonColor.getGreen(), skeletonColor.getBlue(), 255.0f).next();
+                bufferBuilder.vertex(matrix4f, 0, 0, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
+                bufferBuilder.vertex(matrix4f, 0, -0.55f, 0).color(skeletonColor.getRed() / 255.0f, skeletonColor.getGreen() / 255.0f, skeletonColor.getBlue() / 255.0f, 1.0f).next();
                 event.getMatrices().pop();
                 tessellator.draw();
                 if (swimming) {
                     event.getMatrices().translate(0, 0.95f, 0);
                 }
                 if (swimming || flying) {
-                    event.getMatrices().multiply(new Quaternionf().setAngleAxis((90 + m) * Math.PI / 180F, 1, 0, 0));
+                    event.getMatrices().multiply(new Quaternionf().setAngleAxis((90.0f + m) * Math.PI / 180.0f, 1, 0, 0));
                 }
                 if (swimming) {
                     event.getMatrices().translate(0, -0.35f, 0);
                 }
-                event.getMatrices().multiply(new Quaternionf().setAngleAxis((h + 180) * Math.PI / 180.0f, 0, 1, 0));
+                event.getMatrices().multiply(new Quaternionf().setAngleAxis((h + 180.0f) * Math.PI / 180.0f, 0, 1, 0));
                 event.getMatrices().translate(-skeletonPos.x, -skeletonPos.y, -skeletonPos.z);
                 event.getMatrices().pop();
             }
@@ -164,7 +156,6 @@ public class SkeletonModule extends ToggleModule {
         RenderSystem.disableCull();
         RenderSystem.disableBlend();
         RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true);
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
     }
 
