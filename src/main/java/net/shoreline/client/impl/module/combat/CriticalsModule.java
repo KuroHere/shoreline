@@ -82,7 +82,7 @@ public class CriticalsModule extends ToggleModule {
         }
         if (event.getPacket() instanceof IPlayerInteractEntityC2SPacket packet
                 && packet.getType() == InteractType.ATTACK && !event.isClientPacket()) {
-            if (modeConfig.getValue() == CritMode.GRIM) {
+            if (isGrim()) {
                 if (!mc.player.isOnGround()) {
                     double x = mc.player.getX();
                     double y = mc.player.getY();

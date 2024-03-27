@@ -1,12 +1,10 @@
 package net.shoreline.client.init;
 
 import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.manager.ModuleManager;
+import net.shoreline.client.ShorelineMod;
+import net.shoreline.client.impl.manager.ModuleManager;
 import net.shoreline.client.api.module.Module;
-import net.shoreline.client.impl.module.client.ClickGuiModule;
-import net.shoreline.client.impl.module.client.ColorsModule;
-import net.shoreline.client.impl.module.client.HUDModule;
-import net.shoreline.client.impl.module.client.RotationsModule;
+import net.shoreline.client.impl.module.client.*;
 import net.shoreline.client.impl.module.combat.*;
 import net.shoreline.client.impl.module.exploit.*;
 import net.shoreline.client.impl.module.misc.*;
@@ -29,6 +27,7 @@ public class Modules {
     public static ColorsModule COLORS;
     public static HUDModule HUD;
     public static RotationsModule ROTATIONS;
+    public static BaritoneModule BARITONE;
     // Combat
     public static AntiBotsModule ANTI_BOTS;
     public static AuraModule AURA;
@@ -174,99 +173,70 @@ public class Modules {
     public static void init() {
         if (Managers.isInitialized()) {
             CACHE = new HashSet<>();
-            CLICK_GUI = (ClickGuiModule) getRegisteredModule(
-                    "clickgui-module");
+            CLICK_GUI = (ClickGuiModule) getRegisteredModule("clickgui-module");
             COLORS = (ColorsModule) getRegisteredModule("colors-module");
             HUD = (HUDModule) getRegisteredModule("hud-module");
-            ROTATIONS = (RotationsModule) getRegisteredModule(
-                    "rotations-module");
+            ROTATIONS = (RotationsModule) getRegisteredModule("rotations-module");
+            if (ShorelineMod.isBaritonePresent()) {
+                BARITONE = (BaritoneModule) getRegisteredModule("baritone-module");
+            }
             ANTI_BOTS = (AntiBotsModule) getRegisteredModule("antibots-module");
             AURA = (AuraModule) getRegisteredModule("aura-module");
             AUTO_ARMOR = (AutoArmorModule) getRegisteredModule("autoarmor-module");
-            AUTO_BOW_RELEASE = (AutoBowReleaseModule) getRegisteredModule(
-                    "autobowrelease-module");
-            AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule(
-                    "autocrystal-module");
+            AUTO_BOW_RELEASE = (AutoBowReleaseModule) getRegisteredModule("autobowrelease-module");
+            AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule("autocrystal-module");
             AUTO_LOG = (AutoLogModule) getRegisteredModule("autolog-module");
             AUTO_POT = (AutoPotModule) getRegisteredModule("autopot-module");
-            AUTO_TOTEM = (AutoTotemModule) getRegisteredModule(
-                    "autototem-module");
+            AUTO_TOTEM = (AutoTotemModule) getRegisteredModule("autototem-module");
             BLOCK_LAG = (BlockLagModule) getRegisteredModule("blocklag-module");
             BOW_AIM = (BowAimModule) getRegisteredModule("bowaim-module");
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
-            NO_HIT_DELAY = (NoHitDelayModule) getRegisteredModule(
-                    "nohitdelay-module");
+            NO_HIT_DELAY = (NoHitDelayModule) getRegisteredModule("nohitdelay-module");
             REPLENISH = (ReplenishModule) getRegisteredModule("replenish-module");
             SELF_BOW = (SelfBowModule) getRegisteredModule("selfbow-module");
             SURROUND = (SurroundModule) getRegisteredModule("surround-module");
             TRIGGER = (TriggerModule) getRegisteredModule("trigger-module");
-            ANTI_HUNGER = (AntiHungerModule) getRegisteredModule(
-                    "antihunger-module");
-            CHORUS_CONTROL = (ChorusControlModule) getRegisteredModule(
-                    "choruscontrol-module");
+            ANTI_HUNGER = (AntiHungerModule) getRegisteredModule("antihunger-module");
+            CHORUS_CONTROL = (ChorusControlModule) getRegisteredModule("choruscontrol-module");
             CLICK_TP = (ClickTPModule) getRegisteredModule("clicktp-module");
-            COLOR_SIGNS = (ColorSignsModule) getRegisteredModule(
-                    "colorsigns-module");
+            COLOR_SIGNS = (ColorSignsModule) getRegisteredModule("colorsigns-module");
             CRASHER = (CrasherModule) getRegisteredModule("crasher-module");
-            EXTENDED_FIREWORK = (ExtendedFireworkModule)
-                    getRegisteredModule("extendedfirework-module");
-            FAKE_LATENCY = (FakeLatencyModule) getRegisteredModule(
-                    "fakelatency-module");
-            FAST_PROJECTILE = (FastProjectileModule) getRegisteredModule(
-                    "fastprojectile-module");
-            NO_MINE_ANIMATION = (NoMineAnimationModule) getRegisteredModule(
-                    "nomineanimation-module");
-            PACKET_CANCELER = (PacketCancelerModule) getRegisteredModule(
-                    "packetcanceler-module");
-            PACKET_FLY = (PacketFlyModule) getRegisteredModule(
-                    "packetfly-module");
-            PORTAL_GOD_MODE = (PortalGodModeModule) getRegisteredModule(
-                    "portalgodmode-module");
+            EXTENDED_FIREWORK = (ExtendedFireworkModule) getRegisteredModule("extendedfirework-module");
+            FAKE_LATENCY = (FakeLatencyModule) getRegisteredModule("fakelatency-module");
+            FAST_PROJECTILE = (FastProjectileModule) getRegisteredModule("fastprojectile-module");
+            NO_MINE_ANIMATION = (NoMineAnimationModule) getRegisteredModule("nomineanimation-module");
+            PACKET_CANCELER = (PacketCancelerModule) getRegisteredModule("packetcanceler-module");
+            PACKET_FLY = (PacketFlyModule) getRegisteredModule("packetfly-module");
+            PORTAL_GOD_MODE = (PortalGodModeModule) getRegisteredModule("portalgodmode-module");
             REACH = (ReachModule) getRegisteredModule("reach-module");
             SWING = (SwingModule) getRegisteredModule("swing-module");
-            ANNOUNCER = (AnnouncerModule) getRegisteredModule(
-                    "announcer-module");
+            ANNOUNCER = (AnnouncerModule) getRegisteredModule("announcer-module");
             ANTI_AIM = (AntiAimModule) getRegisteredModule("antiaim-module");
-            ANTI_BOOK_BAN = (AntiBookBanModule) getRegisteredModule(
-                    "antibookban-module");
+            ANTI_BOOK_BAN = (AntiBookBanModule) getRegisteredModule("antibookban-module");
             ANTI_SPAM = (AntiSpamModule) getRegisteredModule("antispam-module");
-            AUTO_ACCEPT = (AutoAcceptModule) getRegisteredModule(
-                    "autoaccept-module");
+            AUTO_ACCEPT = (AutoAcceptModule) getRegisteredModule("autoaccept-module");
             AUTO_EAT = (AutoEatModule) getRegisteredModule("autoeat-module");
-            ANTI_VANISH = (AntiVanishModule) getRegisteredModule(
-                    "antivanish-module");
+            ANTI_VANISH = (AntiVanishModule) getRegisteredModule("antivanish-module");
             AUTO_FISH = (AutoFishModule) getRegisteredModule("autofish-module");
             AUTO_MOUNT = (AutoMountModule) getRegisteredModule("automount-module");
-            AUTO_RECONNECT = (AutoReconnectModule) getRegisteredModule(
-                    "autoreconnect-module");
-            AUTO_RESPAWN = (AutoRespawnModule) getRegisteredModule(
-                    "autorespawn-module");
-            BEACON_SELECTOR = (BeaconSelectorModule) getRegisteredModule(
-                    "beaconselector-module");
+            AUTO_RECONNECT = (AutoReconnectModule) getRegisteredModule("autoreconnect-module");
+            AUTO_RESPAWN = (AutoRespawnModule) getRegisteredModule("autorespawn-module");
+            BEACON_SELECTOR = (BeaconSelectorModule) getRegisteredModule("beaconselector-module");
             CHEST_AURA = (ChestAuraModule) getRegisteredModule("chestaura-module");
-            FAKE_PLAYER = (FakePlayerModule) getRegisteredModule(
-                    "fakeplayer-module");
-            INV_CLEANER = (InvCleanerModule) getRegisteredModule(
-                    "invcleaner-module");
-            MIDDLE_CLICK = (MiddleClickModule) getRegisteredModule(
-                    "middleclick-module");
-            NO_SOUND_LAG = (NoSoundLagModule) getRegisteredModule(
-                    "nosoundlag-module");
+            FAKE_PLAYER = (FakePlayerModule) getRegisteredModule("fakeplayer-module");
+            INV_CLEANER = (InvCleanerModule) getRegisteredModule("invcleaner-module");
+            MIDDLE_CLICK = (MiddleClickModule) getRegisteredModule("middleclick-module");
+            NO_SOUND_LAG = (NoSoundLagModule) getRegisteredModule("nosoundlag-module");
             SKIN_BLINK = (SkinBlinkModule) getRegisteredModule("skinblink-module");
             TIMER = (TimerModule) getRegisteredModule("timer-module");
-            TRUE_DURABILITY = (TrueDurabilityModule) getRegisteredModule(
-                    "truedurability-module");
-            UNFOCUSED_FPS = (UnfocusedFPSModule) getRegisteredModule(
-                    "unfocusedfps-module");
+            TRUE_DURABILITY = (TrueDurabilityModule) getRegisteredModule("truedurability-module");
+            UNFOCUSED_FPS = (UnfocusedFPSModule) getRegisteredModule("unfocusedfps-module");
             XCARRY = (XCarryModule) getRegisteredModule("xcarry-module");
-            ANTI_LEVITATION = (AntiLevitationModule) getRegisteredModule(
-                    "antilevitation-module");
+            ANTI_LEVITATION = (AntiLevitationModule) getRegisteredModule("antilevitation-module");
             AUTO_WALK = (AutoWalkModule) getRegisteredModule("autowalk-module");
             ELYTRA_FLY = (ElytraFlyModule) getRegisteredModule("elytrafly-module");
-            ENTITY_CONTROL = (EntityControlModule) getRegisteredModule(
-                    "entitycontrol-module");
-            ENTITY_SPEED = (EntitySpeedModule) getRegisteredModule(
-                    "entityspeed-module");
+            ENTITY_CONTROL = (EntityControlModule) getRegisteredModule("entitycontrol-module");
+            ENTITY_SPEED = (EntitySpeedModule) getRegisteredModule("entityspeed-module");
             FAST_FALL = (FastFallModule) getRegisteredModule("fastfall-module");
             FLIGHT = (FlightModule) getRegisteredModule("flight-module");
             HIGH_JUMP = (HighJumpModule) getRegisteredModule("highjump-module");
@@ -279,48 +249,37 @@ public class Modules {
             SPEED = (SpeedModule) getRegisteredModule("speed-module");
             SPRINT = (SprintModule) getRegisteredModule("sprint-module");
             STEP = (StepModule) getRegisteredModule("step-module");
-            TICK_SHIFT = (TickShiftModule) getRegisteredModule(
-                    "tickshift-module");
+            TICK_SHIFT = (TickShiftModule) getRegisteredModule("tickshift-module");
             VELOCITY = (VelocityModule) getRegisteredModule("velocity-module");
             YAW = (YawModule) getRegisteredModule("yaw-module");
-            BLOCK_HIGHLIGHT = (BlockHighlightModule) getRegisteredModule(
-                    "blockhighlight-module");
-            BREAK_HIGHLIGHT = (BreakHighlightModule) getRegisteredModule(
-                    "breakhighlight-module");
+            BLOCK_HIGHLIGHT = (BlockHighlightModule) getRegisteredModule("blockhighlight-module");
+            BREAK_HIGHLIGHT = (BreakHighlightModule) getRegisteredModule("breakhighlight-module");
             CHAMS = (ChamsModule) getRegisteredModule("chams-module");
             ESP = (ESPModule) getRegisteredModule("esp-module");
             EXTRA_TAB = (ExtraTabModule) getRegisteredModule("extratab-module");
-            FULLBRIGHT = (FullbrightModule) getRegisteredModule(
-                    "fullbright-module");
+            FULLBRIGHT = (FullbrightModule) getRegisteredModule("fullbright-module");
             HOLE_ESP = (HoleESPModule) getRegisteredModule("holeesp-module");
-            NAME_PROTECT = (NameProtectModule) getRegisteredModule(
-                    "nameprotect-module");
+            NAME_PROTECT = (NameProtectModule) getRegisteredModule("nameprotect-module");
             NAMETAGS = (NametagsModule) getRegisteredModule("nametags-module");
             NO_BOB = (NoBobModule) getRegisteredModule("nobob-module");
             NO_RENDER = (NoRenderModule) getRegisteredModule("norender-module");
             NO_ROTATE = (NoRotateModule) getRegisteredModule("norotate-module");
-            NO_WEATHER = (NoWeatherModule) getRegisteredModule(
-                    "noweather-module");
+            NO_WEATHER = (NoWeatherModule) getRegisteredModule("noweather-module");
             SKELETON = (SkeletonModule) getRegisteredModule("skeleton-module");
             SKYBOX = (SkyboxModule) getRegisteredModule("skybox-module");
             TOOLTIPS = (TooltipsModule) getRegisteredModule("tooltips-module");
             TRACERS = (TracersModule) getRegisteredModule("tracers-module");
-            VIEW_CLIP = (ViewClipModule) getRegisteredModule(
-                    "viewclip-module");
+            VIEW_CLIP = (ViewClipModule) getRegisteredModule("viewclip-module");
             // VIEW_MODEL = (ViewModelModule) getRegisteredModule(
             //        "viewmodel-module");
             // WAYPOINTS = (WaypointsModule) getRegisteredModule("waypoints-module");
-            ANTI_INTERACT = (AntiInteractModule) getRegisteredModule(
-                    "antiinteract-module");
+            ANTI_INTERACT = (AntiInteractModule) getRegisteredModule("antiinteract-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");
             FAST_DROP = (FastDropModule) getRegisteredModule("fastdrop-module");
-            FAST_PLACE = (FastPlaceModule) getRegisteredModule(
-                    "fastplace-module");
+            FAST_PLACE = (FastPlaceModule) getRegisteredModule("fastplace-module");
             MULTITASK = (MultitaskModule) getRegisteredModule("multitask-module");
-            NO_GLITCH_BLOCKS = (NoGlitchBlocksModule) getRegisteredModule(
-                    "noglitchblocks-module");
-            SPEEDMINE = (SpeedmineModule) getRegisteredModule(
-                    "speedmine-module");
+            NO_GLITCH_BLOCKS = (NoGlitchBlocksModule) getRegisteredModule("noglitchblocks-module");
+            SPEEDMINE = (SpeedmineModule) getRegisteredModule("speedmine-module");
             initialized = true;
             // reflect configuration properties for each cached module
             for (Module module : CACHE) {

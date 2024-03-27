@@ -26,7 +26,7 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.manager.world.tick.TickSync;
+import net.shoreline.client.impl.manager.world.tick.TickSync;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.render.Interpolation;

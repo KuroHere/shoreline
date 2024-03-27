@@ -2,6 +2,7 @@ package net.shoreline.client;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * Fabric {@link ModInitializer}.
@@ -34,5 +35,9 @@ public class ShorelineMod implements ClientModInitializer {
         Shoreline.preInit();
         Shoreline.init();
         Shoreline.postInit();
+    }
+
+    public static boolean isBaritonePresent() {
+        return FabricLoader.getInstance().getModContainer("baritone").isPresent();
     }
 }

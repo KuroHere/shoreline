@@ -1,21 +1,21 @@
 package net.shoreline.client.init;
 
 import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.manager.ModuleManager;
-import net.shoreline.client.api.manager.anticheat.NCPManager;
-import net.shoreline.client.api.manager.client.*;
-import net.shoreline.client.api.manager.combat.TotemManager;
-import net.shoreline.client.api.manager.combat.hole.HoleManager;
-import net.shoreline.client.api.manager.network.NetworkManager;
-import net.shoreline.client.api.manager.network.latency.LatencyManager;
-import net.shoreline.client.api.manager.player.InteractionManager;
-import net.shoreline.client.api.manager.player.InventoryManager;
-import net.shoreline.client.api.manager.player.MovementManager;
-import net.shoreline.client.api.manager.player.PositionManager;
-import net.shoreline.client.api.manager.player.rotation.RotationManager;
-import net.shoreline.client.api.manager.world.WaypointManager;
-import net.shoreline.client.api.manager.world.sound.SoundManager;
-import net.shoreline.client.api.manager.world.tick.TickManager;
+import net.shoreline.client.impl.manager.ModuleManager;
+import net.shoreline.client.impl.manager.anticheat.NCPManager;
+import net.shoreline.client.impl.manager.client.*;
+import net.shoreline.client.impl.manager.combat.TotemManager;
+import net.shoreline.client.impl.manager.combat.hole.HoleManager;
+import net.shoreline.client.impl.manager.network.NetworkManager;
+import net.shoreline.client.impl.manager.network.latency.LatencyManager;
+import net.shoreline.client.impl.manager.player.InteractionManager;
+import net.shoreline.client.impl.manager.player.InventoryManager;
+import net.shoreline.client.impl.manager.player.MovementManager;
+import net.shoreline.client.impl.manager.player.PositionManager;
+import net.shoreline.client.impl.manager.player.rotation.RotationManager;
+import net.shoreline.client.impl.manager.world.WaypointManager;
+import net.shoreline.client.impl.manager.world.sound.SoundManager;
+import net.shoreline.client.impl.manager.world.tick.TickManager;
 
 /**
  * @author linus

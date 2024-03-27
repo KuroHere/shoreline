@@ -1,7 +1,7 @@
 package net.shoreline.client.api.macro;
 
 import net.shoreline.client.api.Identifiable;
-import net.shoreline.client.api.manager.client.MacroManager;
+import net.shoreline.client.impl.manager.client.MacroManager;
 import org.lwjgl.glfw.GLFW;
 
 /**

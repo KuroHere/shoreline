@@ -14,8 +14,9 @@ loom {
 }
 
 repositories {
-    maven {
+    mavenCentral() {
         url "https://jitpack.io"
+        url "https://impactdevelopment.github.io/maven/"
     }
 }
 
@@ -24,6 +25,8 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_version}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation "cabaletta:baritone-api:1.2"
+    modImplementation "cabaletta:baritone-deobf-unoptimized-mcp-dev:1.2"
 }
 
 processResources {

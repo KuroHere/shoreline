@@ -5,24 +5,17 @@ bin
 .metadata
 .classpath
 .project
-
 # .idea
 out
 *.ipr
 *.iws
 *.iml
 .idea
-
 # Gradle.
 build
 .gradle
-
 # Other.
 eclipse
 run
-
-# Forge.
-forge*changelog.txt
-
 # Mac
 *.DS_Store
