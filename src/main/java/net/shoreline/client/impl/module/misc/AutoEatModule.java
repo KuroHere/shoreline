@@ -4,7 +4,6 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -47,8 +46,7 @@ public class AutoEatModule extends ToggleModule {
     public void onTick(TickEvent event) {
         if (!mc.player.isUsingItem()) {
             if (prevSlot != -1) {
-                mc.player.getInventory().selectedSlot = prevSlot;
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prevSlot));
+                Managers.INVENTORY.setClientSlot(prevSlot);
                 prevSlot = -1;
             }
             KeyBinding.setKeyPressed(((AccessorKeyBinding) mc.options.useKey).getBoundKey(), false);
@@ -65,8 +63,7 @@ public class AutoEatModule extends ToggleModule {
                 mc.player.setCurrentHand(Hand.OFF_HAND);
             } else {
                 prevSlot = mc.player.getInventory().selectedSlot;
-                mc.player.getInventory().selectedSlot = slot;
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+                Managers.INVENTORY.setClientSlot(slot);
             }
             KeyBinding.setKeyPressed(((AccessorKeyBinding) mc.options.useKey).getBoundKey(), true);
         }

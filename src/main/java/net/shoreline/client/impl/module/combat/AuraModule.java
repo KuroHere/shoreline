@@ -204,8 +204,7 @@ public class AuraModule extends RotationModule {
         if (autoSwapConfig.getValue() && autoSwapTimer.passed(500) && !sword) {
             int slot = getSwordSlot();
             if (slot != -1) {
-                mc.player.getInventory().selectedSlot = slot;
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+                Managers.INVENTORY.setClientSlot(slot);
             }
         }
         if (!isHoldingSword() || !shouldWaitCrit()) {

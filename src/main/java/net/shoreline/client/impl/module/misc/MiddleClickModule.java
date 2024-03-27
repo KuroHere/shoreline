@@ -3,7 +3,6 @@ package net.shoreline.client.impl.module.misc;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -64,11 +63,9 @@ public class MiddleClickModule extends ToggleModule {
                 }
                 if (slot != -1) {
                     int prev = mc.player.getInventory().selectedSlot;
-                    mc.player.getInventory().selectedSlot = slot;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+                    Managers.INVENTORY.setClientSlot(slot);
                     mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                    mc.player.getInventory().selectedSlot = prev;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+                    Managers.INVENTORY.setClientSlot(prev);
                 }
             }
         }

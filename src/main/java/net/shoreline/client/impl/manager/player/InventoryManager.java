@@ -2,11 +2,13 @@ package net.shoreline.client.impl.manager.player;
 
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.network.packet.s2c.play.UpdateSelectedSlotS2CPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -42,6 +44,58 @@ public class InventoryManager implements Globals {
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket packet) {
             slot = packet.getSelectedSlot();
+        }
+    }
+
+    @EventListener
+    public void onPacketOutBound(PacketEvent.Outbound event) {
+        if (event.getPacket() instanceof UpdateSelectedSlotS2CPacket packet) {
+            slot = packet.getSlot();
+        }
+    }
+
+    /**
+     * Sets the server slot via a {@link UpdateSelectedSlotC2SPacket}
+     * @param barSlot the player hotbar slot 0-8
+     * @see InventoryManager#setSlotForced(int)
+     * @apiNote Method will not do anything if the slot provided is already the server slot
+     */
+    public void setSlot(final int barSlot) {
+        if (slot != barSlot && PlayerInventory.isValidHotbarIndex(barSlot)) {
+            setSlotForced(barSlot);
+        }
+    }
+
+    /**
+     * Sets the server & client slot
+     * @param barSlot the player hotbar slot 0-8
+     * @apiNote Method will not do anything if the slot provided is already the server slot
+     * @see InventoryManager#setSlotForced(int)
+     * @see InventoryManager#setSlot(int)
+     */
+    public void setClientSlot(final int barSlot) {
+        if (mc.player.getInventory().selectedSlot != barSlot
+            && PlayerInventory.isValidHotbarIndex(barSlot))
+        {
+            mc.player.getInventory().selectedSlot = barSlot;
+            setSlotForced(barSlot);
+        }
+    }
+
+    /**
+     * Sends a {@link UpdateSelectedSlotC2SPacket} without any slot chekcs
+     * @param barSlot the player hotbar slot 0-8
+     */
+    public void setSlotForced(final int barSlot) {
+        Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(barSlot));
+    }
+
+    /**
+     * Syncs the server slot to the client slot
+     */
+    public void syncToClient() {
+        if (mc.player.getInventory().selectedSlot != slot) {
+            setSlotForced(mc.player.getInventory().selectedSlot);
         }
     }
 
@@ -90,11 +144,6 @@ public class InventoryManager implements Globals {
             int2ObjectMap.put(j, itemStack2.copy());
         }
         mc.player.networkHandler.sendPacket(new ClickSlotC2SPacket(screenHandler.syncId, screenHandler.getRevision(), slot, button, type, screenHandler.getCursorStack().copy(), int2ObjectMap));
-    }
-
-    //
-    public void syncSelectedSlot() {
-        ((AccessorClientPlayerInteractionManager) mc.interactionManager).hookSyncSelectedSlot();
     }
 
     /**

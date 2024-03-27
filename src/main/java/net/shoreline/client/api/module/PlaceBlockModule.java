@@ -4,7 +4,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.shoreline.client.impl.module.combat.SurroundModule;
 import net.shoreline.client.init.Managers;
@@ -53,12 +52,12 @@ public class PlaceBlockModule extends RotationModule {
         int prev = mc.player.getInventory().selectedSlot;
         if (prev != slot) {
             mc.player.getInventory().selectedSlot = slot;
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+            Managers.INVENTORY.setSlot(slot);
         }
         float[] rotations = Managers.INTERACT.placeBlock(pos, rotate, strictDirection);
         if (prev != slot) {
             mc.player.getInventory().selectedSlot = prev;
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+            Managers.INVENTORY.setSlot(prev);
         }
         return rotations;
     }
