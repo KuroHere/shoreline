@@ -40,6 +40,7 @@ public class SkeletonModule extends ToggleModule {
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
+        RenderSystem.disableDepthTest();
         RenderSystem.enableCull();
         for (Entity entity : mc.world.getEntities()) {
             if (entity == null || !entity.isAlive()) {
