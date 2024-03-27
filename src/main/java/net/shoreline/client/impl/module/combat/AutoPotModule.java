@@ -6,7 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.PotionItem;
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
@@ -77,7 +76,7 @@ public class AutoPotModule extends RotationModule {
                             instantHealth, slotConfig.getValue(),
                             SlotActionType.SWAP, mc.player);
                     potionTimer.reset();
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slotConfig.getValue()));
+                    Managers.INVENTORY.setClientSlot(slotConfig.getValue());
                     if (handFixConfig.getValue()) {
                         Managers.NETWORK.sendSequencedPacket(id ->
                                 new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, id));
@@ -85,7 +84,7 @@ public class AutoPotModule extends RotationModule {
                         Managers.NETWORK.sendSequencedPacket(id ->
                                 new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
                     }
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
+                    Managers.INVENTORY.syncToClient();
                     Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(),
                             mc.player.getY() + 0.42, mc.player.getZ(), true));
                     Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(),
@@ -124,7 +123,7 @@ public class AutoPotModule extends RotationModule {
                     instantHealth, slotConfig.getValue(),
                     SlotActionType.SWAP, mc.player);
             potionTimer.reset();
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slotConfig.getValue()));
+            Managers.INVENTORY.setSlot(slotConfig.getValue());
             if (handFixConfig.getValue()) {
                 Managers.NETWORK.sendSequencedPacket(id ->
                         new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, id));
@@ -132,7 +131,7 @@ public class AutoPotModule extends RotationModule {
                 Managers.NETWORK.sendSequencedPacket(id ->
                         new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
             }
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
+            Managers.INVENTORY.syncToClient();
             potion = false;
         }
     }

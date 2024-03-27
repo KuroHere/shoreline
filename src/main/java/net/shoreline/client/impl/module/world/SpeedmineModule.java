@@ -30,7 +30,7 @@ import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.AttackBlockEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
-import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
+import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
@@ -94,80 +94,79 @@ public class SpeedmineModule extends RotationModule {
     }
 
     @EventListener
-    public void onPlayerUpdate(PlayerUpdateEvent event) {
-        if (modeConfig.getValue() != SpeedmineMode.PACKET) {
+    public void onPlayerTick(PlayerTickEvent event) {
+        if (modeConfig.getValue() != SpeedmineMode.PACKET || mc.player.isCreative()) {
             return;
         }
-        if (event.getStage() == EventStage.PRE && !mc.player.isCreative()) {
-            if (mining == null) {
-                damage = 0.0f;
+
+        if (mining == null) {
+            damage = 0.0f;
+            return;
+        }
+        state = mc.world.getBlockState(mining);
+        int prev = mc.player.getInventory().selectedSlot;
+        int slot = getBestTool(state);
+
+        double dist = mc.player.squaredDistanceTo(mining.toCenterPos());
+        if (dist > ((NumberConfig<?>) rangeConfig).getValueSq()
+            || state.isAir()
+            || damage > 3.0f
+            || !remineConfig.getValue()
+            || !remineInfiniteConfig.getValue()
+            && remines > maxRemineConfig.getValue()) {
+            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, mining, Direction.DOWN));
+            mining = null;
+            state = null;
+            direction = null;
+            damage = 0.0f;
+            remines = 0;
+        } else if (damage > 1.0f && !Modules.AUTO_CRYSTAL.isAttacking()
+            && !Modules.AUTO_CRYSTAL.isPlacing() && !mc.player.isUsingItem()) {
+            if (isRotationBlocked()) {
                 return;
             }
-            state = mc.world.getBlockState(mining);
-            int prev = mc.player.getInventory().selectedSlot;
-            int slot = getBestTool(state);
-
-            double dist = mc.player.squaredDistanceTo(mining.toCenterPos());
-            if (dist > ((NumberConfig<?>) rangeConfig).getValueSq()
-                    || state.isAir()
-                    || damage > 3.0f
-                    || !remineConfig.getValue()
-                    || !remineInfiniteConfig.getValue()
-                    && remines > maxRemineConfig.getValue()) {
+            if (swapConfig.getValue() != Swap.OFF) {
+                if (strictConfig.getValue()) {
+                    mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
+                        slot + 36, prev, SlotActionType.SWAP, mc.player);
+                } else {
+                    swap(slot);
+                }
+            }
+            Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mining, direction));
+            if (fastConfig.getValue()) {
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                        PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, mining, Direction.DOWN));
-                mining = null;
-                state = null;
-                direction = null;
+                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
+                    mining, direction.getOpposite()));
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                    PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
+                    mining, direction));
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                    PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                    mining, direction));
+            }
+            if (swapConfig.getValue() == Swap.SILENT) {
+                if (strictConfig.getValue()) {
+                    mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
+                        slot + 36, prev, SlotActionType.SWAP, mc.player);
+                } else {
+                    swap(prev);
+                }
+            }
+            if (remineFullConfig.getValue()) {
                 damage = 0.0f;
-                remines = 0;
-            } else if (damage > 1.0f && !Modules.AUTO_CRYSTAL.isAttacking()
-                    && !Modules.AUTO_CRYSTAL.isPlacing() && !mc.player.isUsingItem()) {
-                if (isRotationBlocked()) {
-                    return;
-                }
-                if (swapConfig.getValue() != Swap.OFF) {
-                    if (strictConfig.getValue()) {
-                        mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
-                                slot + 36, prev, SlotActionType.SWAP, mc.player);
-                    } else {
-                        swap(slot);
-                    }
-                }
-                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                        PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mining, direction));
-                if (fastConfig.getValue()) {
-                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                            PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
-                            mining, direction.getOpposite()));
-                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                            PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
-                            mining, direction));
-                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                            PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                            mining, direction));
-                }
-                if (swapConfig.getValue() == Swap.SILENT) {
-                    if (strictConfig.getValue()) {
-                        mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
-                                slot + 36, prev, SlotActionType.SWAP, mc.player);
-                    } else {
-                        swap(prev);
-                    }
-                }
-                if (remineFullConfig.getValue()) {
-                    damage = 0.0f;
-                }
-                remines++;
-            } else {
-                float delta = calcBlockBreakingDelta(state, mc.world, mining);
-                damage += delta;
-                if (delta + damage > 1.0f && rotateConfig.getValue()
-                        && !Modules.AUTO_CRYSTAL.isAttacking()
-                        && !Modules.AUTO_CRYSTAL.isPlacing()) {
-                    float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), mining.toCenterPos());
-                    setRotation(rotations[0], rotations[1]);
-                }
+            }
+            remines++;
+        } else {
+            float delta = calcBlockBreakingDelta(state, mc.world, mining);
+            damage += delta;
+            if (delta + damage > 1.0f && rotateConfig.getValue()
+                && !Modules.AUTO_CRYSTAL.isAttacking()
+                && !Modules.AUTO_CRYSTAL.isPlacing()) {
+                float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), mining.toCenterPos());
+                setRotation(rotations[0], rotations[1]);
             }
         }
     }
@@ -195,9 +194,7 @@ public class SpeedmineModule extends RotationModule {
 
     private void swap(int slot) {
         if (PlayerInventory.isValidHotbarIndex(slot)) {
-            mc.player.getInventory().selectedSlot = slot;
-            // ((AccessorClientPlayerInteractionManager) mc.interactionManager).hookSyncSelectedSlot();
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+            Managers.INVENTORY.setClientSlot(slot);
         }
     }
 

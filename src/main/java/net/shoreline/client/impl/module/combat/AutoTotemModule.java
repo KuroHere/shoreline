@@ -176,13 +176,11 @@ public class AutoTotemModule extends ToggleModule {
             } else if (offhand.isEmpty() || !offhand.getItem().equals(Items.TOTEM_OF_UNDYING)) {
                 if (hotbarTotemConfig.getValue()) {
                     int prev = mc.player.getInventory().selectedSlot;
-                    mc.player.getInventory().selectedSlot = slotTotem;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slotTotem));
+                    Managers.INVENTORY.setClientSlot(slotTotem);
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND,
                             BlockPos.ORIGIN, Direction.DOWN));
-                    mc.player.getInventory().selectedSlot = prev;
-                    Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+                    Managers.INVENTORY.setClientSlot(prev);
                 } else {
                     preClickSlot();
                     boolean returnClick = mc.player.currentScreenHandler.getCursorStack().isEmpty();

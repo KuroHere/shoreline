@@ -5,7 +5,6 @@ import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.FireworkRocketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -144,11 +143,9 @@ public class ElytraFlyModule extends ToggleModule {
         }
         if (slot != -1) {
             int prev = mc.player.getInventory().selectedSlot;
-            mc.player.getInventory().selectedSlot = slot;
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+            Managers.INVENTORY.setClientSlot(slot);
             mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-            mc.player.getInventory().selectedSlot = prev;
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(prev));
+            Managers.INVENTORY.setClientSlot(prev);
         }
     }
 

@@ -502,9 +502,7 @@ public class AutoCrystalModule extends RotationModule {
             mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
                     slot + 36, mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
         } else {
-            mc.player.getInventory().selectedSlot = slot;
-            // ((AccessorClientPlayerInteractionManager) mc.interactionManager).hookSyncSelectedSlot();
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
+            Managers.INVENTORY.setClientSlot(slot);
         }
     }
 

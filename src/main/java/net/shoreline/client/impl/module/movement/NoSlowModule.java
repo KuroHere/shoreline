@@ -104,10 +104,8 @@ public class NoSlowModule extends ToggleModule {
             ItemStack offHandStack = mc.player.getOffHandStack();
             //
             if (mc.player.getActiveHand() == Hand.OFF_HAND) {
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
-                        mc.player.getInventory().selectedSlot % 8 + 1));
-                Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(
-                        mc.player.getInventory().selectedSlot));
+                Managers.INVENTORY.setSlotForced(mc.player.getInventory().selectedSlot % 8 + 1);
+                Managers.INVENTORY.syncToClient();
             } else if (!offHandStack.isFood() && offHandStack.getItem() != Items.BOW && offHandStack.getItem() != Items.CROSSBOW && offHandStack.getItem() != Items.SHIELD) {
                 Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
             }
@@ -221,7 +219,7 @@ public class NoSlowModule extends ToggleModule {
                 && strictConfig.getValue() && checkSlowed()) {
             // Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(0));
             // Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.OFF_HAND, id));
-            Managers.NETWORK.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
+            Managers.INVENTORY.setSlotForced(mc.player.getInventory().selectedSlot);
         } else if (event.getPacket() instanceof ClickSlotC2SPacket && strictConfig.getValue()) {
             if (mc.player.isUsingItem()) {
                 mc.player.stopUsingItem();
