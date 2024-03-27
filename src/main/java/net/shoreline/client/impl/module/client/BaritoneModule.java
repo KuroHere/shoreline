@@ -21,17 +21,13 @@ public class BaritoneModule extends ConcurrentModule {
     Config<Boolean> breakConfig = new BooleanConfig("Break", "Allow baritone to break blocks", true);
     Config<Boolean> sprintConfig = new BooleanConfig("Sprint", "Allow baritone to sprint", true);
     Config<Boolean> inventoryConfig = new BooleanConfig("UseInventory", "Allow baritone to use player inventory", false);
-
     Config<Boolean> vinesConfig = new BooleanConfig("Vines", "Allow baritone to climb vines", true);
-
     Config<Boolean> jump256Config = new BooleanConfig("JumpAt256", "Allow baritone to jump at 256 blocks", false);
     Config<Boolean> waterBucketFallConfig = new BooleanConfig("WaterBucketFall", "Allow baritone to use waterbuckets when falling", false);
     Config<Boolean> parkourConfig = new BooleanConfig("Parkour", "Allow baritone to jump between blocks", true);
     Config<Boolean> parkourPlaceConfig = new BooleanConfig("ParkourPlace", "Allow baritone to jump and place blocks", false);
-
     Config<Boolean> parkourAscendConfig = new BooleanConfig("ParkourAscend", "Allow baritone to jump up blocks", true);
     Config<Boolean> diagonalAscendConfig = new BooleanConfig("DiagonalAscend", "Allow baritone to jump up blocks diagonally", false);
-
     Config<Boolean> diagonalDescendConfig = new BooleanConfig("DiagonalDescend", "Allow baritone to move down blocks diagonally", false);
     Config<Boolean> mineDownConfig = new BooleanConfig("MineDownward", "Allow baritone to mine down", true);
     Config<Boolean> legitMineConfig = new BooleanConfig("LegitMine", "Uses baritone legit mine", false);
