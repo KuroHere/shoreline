@@ -184,6 +184,9 @@ public class SpeedmineModule extends RotationModule {
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                     PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, packet.getPos().up(), packet.getDirection()));
         }
+        if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket) {
+            damage = 0.0f;
+        }
     }
 
     public BlockPos getBlockTarget() {

@@ -26,6 +26,7 @@ import net.shoreline.client.impl.event.render.entity.RenderArmorEvent;
 import net.shoreline.client.impl.event.render.entity.RenderFireworkRocketEvent;
 import net.shoreline.client.impl.event.render.entity.RenderItemEvent;
 import net.shoreline.client.impl.event.render.entity.RenderWitherSkullEvent;
+import net.shoreline.client.impl.event.world.BlindnessEvent;
 
 /**
  * @author linus
@@ -182,6 +183,13 @@ public class NoRenderModule extends ToggleModule {
     @EventListener
     public void onRenderNausea(RenderNauseaEvent event) {
         if (nauseaConfig.getValue()) {
+            event.cancel();
+        }
+    }
+
+    @EventListener
+    public void onBlindness(BlindnessEvent event) {
+        if (blindnessConfig.getValue()) {
             event.cancel();
         }
     }

@@ -213,14 +213,15 @@ public class AuraModule extends RotationModule {
         }
         preAttackTarget();
         // preMotionAttackTarget();
-        Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(entity,
-                Managers.POSITION.isSneaking()));
+        PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(entity,
+                Managers.POSITION.isSneaking());
+        Managers.NETWORK.sendPacket(packet);
+        postAttackTarget(entity);
         if (swingConfig.getValue()) {
             mc.player.swingHand(Hand.MAIN_HAND);
         } else {
             Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
         }
-        postAttackTarget(entity);
         return true;
     }
 

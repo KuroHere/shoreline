@@ -1,10 +1,9 @@
 package net.shoreline.client.mixin.render;
 
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.WorldRenderer;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.render.RenderWorldBorderEvent;
@@ -15,6 +14,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * @author linus
@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(WorldRenderer.class)
 public class MixinWorldRenderer implements Globals {
+
     /**
      * @param matrices
      * @param tickDelta
@@ -59,4 +60,26 @@ public class MixinWorldRenderer implements Globals {
             ci.cancel();
         }
     }
+
+//    /**
+//     *
+//     * @param builder
+//     * @param f
+//     * @param cir
+//     */
+//    @Inject(method = "renderSky(Lnet/minecraft/client/render/BufferBuilder;F)" +
+//            "Lnet/minecraft/client/render/BufferBuilder$BuiltBuffer;",
+//            at = @At(value = "HEAD"), cancellable = true)
+//    private static void hookRenderSky(BufferBuilder builder, float f,
+//                                      CallbackInfoReturnable<BufferBuilder.BuiltBuffer> cir) {
+//        cir.cancel();
+//        float g = Math.signum(f) * 512.0f;
+//        RenderSystem.setShader(GameRenderer::getPositionProgram);
+//        builder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION);
+//        builder.vertex(0.0, -64.0f, 0.0).next();
+//        for (int i = -180; i <= 180; i += 45) {
+//            builder.vertex(g * MathHelper.cos((float)i * ((float)Math.PI / 180)), -64.0f, 512.0f * MathHelper.sin((float)i * ((float)Math.PI / 180))).next();
+//        }
+//        cir.setReturnValue(builder.end());
+//    }
 }

@@ -19,6 +19,7 @@ import java.util.Queue;
  * @since 1.0
  */
 public class TickManager implements Globals {
+
     private final ArrayDeque<Float> ticks = new EvictingQueue<>(20);
     // The TPS tick handler.
     //
@@ -76,18 +77,23 @@ public class TickManager implements Globals {
     }
 
     // So many fucking issues with the EvictingQueue fuck stackoverflow
+    // Im just gonna try catch everything atp
     /**
      * @return
      */
     public float getTpsAverage() {
         float avg = 0.0f;
-        // fix ConcurrentModificationException
-        ArrayList<Float> ticksCopy = Lists.newArrayList(ticks);
-        if (!ticksCopy.isEmpty()) {
-            for (float t : ticksCopy) {
-                avg += t;
+        try {
+            // fix ConcurrentModificationException
+            ArrayList<Float> ticksCopy = Lists.newArrayList(ticks);
+            if (!ticksCopy.isEmpty()) {
+                for (float t : ticksCopy) {
+                    avg += t;
+                }
+                avg /= ticksCopy.size();
             }
-            avg /= ticksCopy.size();
+        } catch (NullPointerException e) {
+
         }
         return Math.min(100.0f, avg); // Server may compensate
     }
@@ -111,10 +117,14 @@ public class TickManager implements Globals {
      */
     public float getTpsMin() {
         float min = 20.0f;
-        for (float t : ticks) {
-            if (t < min) {
-                min = t;
+        try {
+            for (float t : ticks) {
+                if (t < min) {
+                    min = t;
+                }
             }
+        } catch (NullPointerException e) {
+
         }
         return min;
     }

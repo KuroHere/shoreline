@@ -26,3 +26,4 @@ accessible class net/minecraft/client/render/RenderPhase$ShaderProgram
 accessible class net/minecraft/client/texture/PlayerSkinProvider$FileCache
 accessible class net/minecraft/client/MinecraftClient$LoadingContext
 accessible method net/minecraft/client/render/entity/PlayerEntityRenderer setModelPose (Lnet/minecraft/client/network/AbstractClientPlayerEntity;)V
+accessible class net/minecraft/client/render/BackgroundRenderer$StatusEffectFogModifier

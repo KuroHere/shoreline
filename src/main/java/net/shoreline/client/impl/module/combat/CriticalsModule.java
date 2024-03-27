@@ -4,7 +4,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -20,7 +19,6 @@ import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.imixin.IPlayerInteractEntityC2SPacket;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
-import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.network.InteractType;
@@ -84,6 +82,16 @@ public class CriticalsModule extends ToggleModule {
         }
         if (event.getPacket() instanceof IPlayerInteractEntityC2SPacket packet
                 && packet.getType() == InteractType.ATTACK && !event.isClientPacket()) {
+            if (modeConfig.getValue() == CritMode.GRIM) {
+                if (!mc.player.isOnGround()) {
+                    double x = mc.player.getX();
+                    double y = mc.player.getY();
+                    double z = mc.player.getZ();
+                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                            x, y - 0.000001, z, false));
+                }
+                return;
+            }
             if (!Managers.POSITION.isOnGround()
                     || mc.player.isRiding()
                     || mc.player.isFallFlying()
@@ -113,10 +121,10 @@ public class CriticalsModule extends ToggleModule {
                     return;
                 }
                 attackPacket = PlayerInteractEntityC2SPacket.attack(e, Managers.POSITION.isSneaking());
-                preAttackPacket();
                 if (!packetSyncConfig.getValue()) {
                     Managers.NETWORK.sendPacket(attackPacket);
                 }
+                preAttackPacket();
                 mc.player.addCritParticles(e);
                 attackTimer.reset();
             }
@@ -166,17 +174,15 @@ public class CriticalsModule extends ToggleModule {
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                         x, y + 0.0000013579f, z, false));
             }
-            case GRIM -> {
-                if (!mc.player.isOnGround()) {
-                    Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
-                            x, y - 0.000001, z, false));
-                }
-            }
             case LOW_HOP -> {
                 // mc.player.jump();
                 Managers.MOVEMENT.setMotionY(0.3425);
             }
         }
+    }
+
+    public boolean isGrim() {
+        return modeConfig.getValue() == CritMode.GRIM;
     }
 
     public enum CritMode {
