@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.util.Util;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.render.RenderLayersClient;
 import net.shoreline.client.impl.event.network.ReachEvent;
@@ -45,6 +46,10 @@ public class MixinGameRenderer implements Globals {
     @Shadow
     @Final
     MinecraftClient client;
+
+    @Shadow private float lastFovMultiplier;
+
+    @Shadow private float fovMultiplier;
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", ordinal = 1))
     private void hookRenderWorld(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo ci) {
@@ -155,6 +160,23 @@ public class MixinGameRenderer implements Globals {
         Shoreline.EVENT_HANDLER.dispatch(bobViewEvent);
         if (bobViewEvent.isCanceled()) {
             ci.cancel();
+        }
+    }
+
+    /**
+     *
+     * @param camera
+     * @param tickDelta
+     * @param changingFov
+     * @param cir
+     */
+    @Inject(method = "getFov", at = @At(value = "HEAD"), cancellable = true)
+    private void hookGetFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> cir) {
+        FovEvent fovEvent = new FovEvent();
+        Shoreline.EVENT_HANDLER.dispatch(fovEvent);
+        if (fovEvent.isCanceled()) {
+            cir.cancel();
+            cir.setReturnValue(fovEvent.getFov() * (double) MathHelper.lerp(tickDelta, lastFovMultiplier, fovMultiplier));
         }
     }
 

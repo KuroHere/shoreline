@@ -44,8 +44,8 @@ public class SkinBlinkModule extends ToggleModule {
 
     @Override
     public void onDisable() {
-        for (PlayerModelPart modelPart : PlayerModelPart.values()) {
-            mc.options.togglePlayerModelPart(modelPart, enabledPlayerModelParts.contains(modelPart));
+        for (PlayerModelPart modelPart : enabledPlayerModelParts) {
+            mc.options.togglePlayerModelPart(modelPart, true);
         }
     }
 
@@ -53,9 +53,7 @@ public class SkinBlinkModule extends ToggleModule {
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.POST &&
                 blinkTimer.passed(speedConfig.getValue() * 1000.0f)) {
-            final Set<PlayerModelPart> currentModelParts =
-                    ((AccessorGameOptions) mc.options).getPlayerModelParts();
-            ;
+            Set<PlayerModelPart> currentModelParts = ((AccessorGameOptions) mc.options).getPlayerModelParts();
             for (PlayerModelPart modelPart : PlayerModelPart.values()) {
                 mc.options.togglePlayerModelPart(modelPart, randomConfig.getValue() ?
                         Math.random() < 0.5 : !currentModelParts.contains(modelPart));

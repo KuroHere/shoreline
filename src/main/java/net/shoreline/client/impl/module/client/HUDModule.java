@@ -101,10 +101,9 @@ public class HUDModule extends ToggleModule {
                 topRight += 27.0f;
             }
             if (watermarkConfig.getValue()) {
-                RenderManager.renderText(event.getContext(), String.format("%s %s (%s-%s)",
+                RenderManager.renderText(event.getContext(), String.format("%s %s (%s%s)",
                                 ShorelineMod.MOD_NAME, ShorelineMod.MOD_VER,
-                                ShorelineMod.MOD_BUILD_NUMBER,
-                                BuildConfig.HASH), 2.0f, topLeft, getHudColor(rainbowOffset));
+                                ShorelineMod.MOD_BUILD_NUMBER, !BuildConfig.HASH.equals("null") ? "-" + BuildConfig.HASH : ""), 2.0f, topLeft, getHudColor(rainbowOffset));
                 // topLeft += 9.0f;
             }
             if (arraylistConfig.getValue()) {

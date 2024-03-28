@@ -123,7 +123,7 @@ public class Modules {
     public static TooltipsModule TOOLTIPS;
     public static TracersModule TRACERS;
     public static ViewClipModule VIEW_CLIP;
-    // public static ViewModelModule VIEW_MODEL;
+    public static ViewModelModule VIEW_MODEL;
     // public static WaypointsModule WAYPOINTS;
     // World
     public static AntiInteractModule ANTI_INTERACT;
@@ -270,8 +270,7 @@ public class Modules {
             TOOLTIPS = (TooltipsModule) getRegisteredModule("tooltips-module");
             TRACERS = (TracersModule) getRegisteredModule("tracers-module");
             VIEW_CLIP = (ViewClipModule) getRegisteredModule("viewclip-module");
-            // VIEW_MODEL = (ViewModelModule) getRegisteredModule(
-            //        "viewmodel-module");
+            VIEW_MODEL = (ViewModelModule) getRegisteredModule("viewmodel-module");
             // WAYPOINTS = (WaypointsModule) getRegisteredModule("waypoints-module");
             ANTI_INTERACT = (AntiInteractModule) getRegisteredModule("antiinteract-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");

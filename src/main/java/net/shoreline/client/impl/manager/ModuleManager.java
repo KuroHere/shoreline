@@ -136,7 +136,7 @@ public class ModuleManager {
                 new TooltipsModule(),
                 new TracersModule(),
                 new ViewClipModule(),
-                // new ViewModelModule(),
+                new ViewModelModule(),
                 // new WaypointsModule(),
                 // World
                 new AntiInteractModule(),

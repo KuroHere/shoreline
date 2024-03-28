@@ -1,6 +1,7 @@
 package net.shoreline.client.impl.module.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -41,6 +42,7 @@ public class SkeletonModule extends ToggleModule {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(MinecraftClient.isFancyGraphicsOrBetter());
         RenderSystem.enableCull();
         for (Entity entity : mc.world.getEntities()) {
             if (entity == null || !entity.isAlive()) {
@@ -79,9 +81,9 @@ public class SkeletonModule extends ToggleModule {
                 if (swimming) {
                     matrixStack.translate(0, 0.35f, 0);
                 }
-                matrixStack.multiply(new Quaternionf().setAngleAxis((h + 180) * Math.PI / 180.0f, 0, -1, 0));
+                matrixStack.multiply(new Quaternionf().setAngleAxis((h + 180.0f) * Math.PI / 180.0f, 0, -1, 0));
                 if (swimming || flying) {
-                    matrixStack.multiply(new Quaternionf().setAngleAxis((90 + m) * Math.PI / 180.0f, -1, 0, 0));
+                    matrixStack.multiply(new Quaternionf().setAngleAxis((90.0f + m) * Math.PI / 180.0f, -1, 0, 0));
                 }
                 if (swimming) {
                     matrixStack.translate(0, -0.95f, 0);
@@ -157,6 +159,7 @@ public class SkeletonModule extends ToggleModule {
         RenderSystem.disableCull();
         RenderSystem.disableBlend();
         RenderSystem.enableDepthTest();
+        RenderSystem.depthMask(true);
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
     }
 
