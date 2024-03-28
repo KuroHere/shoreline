@@ -7,12 +7,18 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.shoreline.client.util.Globals;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 // Optifine capes
 public class CapeManager implements Globals {
+
+    // TODO: this is a workaround to a rare crash, possibly save to FS like real Optifine?
+    // im open to better solutions because this could get pretty bad pretty quick
+    private static final Map<UUID, Identifier> CAPE_TEXTURE_CACHE = new HashMap<>();
 
     /**
      * @param profile
@@ -20,35 +26,30 @@ public class CapeManager implements Globals {
      * @return
      */
     public void loadPlayerCape(GameProfile profile, CapeTexture texture) {
-        try {
-            Util.getMainWorkerExecutor().execute(() -> {
-                String uuid = profile.getId().toString();
-                String url = String.format("http://s.optifine.net/capes/%s.png", profile.getName());
-                try {
-                    URL optifineUrl = new URL(url);
-                    InputStream stream = optifineUrl.openStream();
-                    NativeImage cape = null;
-                    try {
-                        cape = NativeImage.read(stream);
-                    } catch (IOException e) {
-                        // e.printStackTrace();
-                    }
-                    if (cape != null) {
-                        NativeImage nativeImage = imageFromStream(cape);
-                        if (nativeImage == null) {
-                            return;
-                        }
-                        NativeImageBackedTexture t = new NativeImageBackedTexture(nativeImage);
-                        Identifier identifier = mc.getTextureManager().registerDynamicTexture("of-capes-" + uuid, t);
-                        texture.returnId(identifier);
-                    }
-                } catch (IOException ignored) {
 
-                }
-            });
-        } catch (NullPointerException ignored) {
-
+        if (CAPE_TEXTURE_CACHE.containsKey(profile.getId())) {
+            texture.callback(CAPE_TEXTURE_CACHE.get(profile.getId()));
+            return;
         }
+
+        Util.getMainWorkerExecutor().execute(() -> {
+            String uuid = profile.getId().toString();
+            String url = String.format("http://s.optifine.net/capes/%s.png", profile.getName());
+            try {
+                URL optifineUrl = new URL(url);
+                InputStream stream = optifineUrl.openStream();
+                NativeImage cape = NativeImage.read(stream);
+                NativeImage nativeImage = imageFromStream(cape);
+                NativeImageBackedTexture t = new NativeImageBackedTexture(nativeImage);
+                Identifier identifier = mc.getTextureManager().registerDynamicTexture("of-capes-" + uuid, t);
+                texture.callback(identifier);
+                stream.close();
+
+                CAPE_TEXTURE_CACHE.put(profile.getId(), identifier);
+            } catch (Exception ignored) {
+
+            }
+        });
     }
 
     /**
@@ -76,6 +77,6 @@ public class CapeManager implements Globals {
     }
 
     public interface CapeTexture {
-        void returnId(Identifier id);
+        void callback(Identifier id);
     }
 }
