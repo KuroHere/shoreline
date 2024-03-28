@@ -32,8 +32,7 @@ public class AutoWalkModule extends ToggleModule {
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE) {
             mc.options.forwardKey.setPressed(!mc.options.sneakKey.isPressed()
-                    && (!lockConfig.getValue() || (!mc.options.jumpKey.isPressed()
-                    && mc.player.isOnGround())));
+                    && (!lockConfig.getValue() || (!mc.options.jumpKey.isPressed() && mc.player.isOnGround())));
         }
     }
 }

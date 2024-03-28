@@ -6,6 +6,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.util.Util;
@@ -18,6 +19,8 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Programs;
 import net.shoreline.client.mixin.accessor.AccessorBufferBuilderStorage;
 import net.shoreline.client.util.Globals;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,6 +45,12 @@ public class MixinGameRenderer implements Globals {
     @Shadow
     @Final
     MinecraftClient client;
+
+    @Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", ordinal = 1))
+    private void hookRenderWorld(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo ci) {
+        RenderWorldEvent.Game renderWorldEvent = new RenderWorldEvent.Game(matrices, tickDelta);
+        Shoreline.EVENT_HANDLER.dispatch(renderWorldEvent);
+    }
 
     /**
      * @param matrices

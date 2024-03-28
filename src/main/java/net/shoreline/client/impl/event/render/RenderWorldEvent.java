@@ -33,4 +33,15 @@ public class RenderWorldEvent extends Event {
     public float getTickDelta() {
         return tickDelta;
     }
+
+    public static class Game extends RenderWorldEvent {
+
+        /**
+         * @param matrices
+         * @param tickDelta
+         */
+        public Game(MatrixStack matrices, float tickDelta) {
+            super(matrices, tickDelta);
+        }
+    }
 }

@@ -323,14 +323,14 @@ public class LongJumpModule extends ToggleModule {
      */
     private double getJumpCollisions(PlayerEntity player, double d) {
         /*
-        List<VoxelShape> colls = Lists.newArrayList(mc.world.getCollisions(
+        List<VoxelShape> collisions = Lists.newArrayList(mc.world.getCollisions(
                 player, player.getBoundingBox().expand(0.0, -d, 0.0)));
-        if (colls.isEmpty())
+        if (collisions.isEmpty())
         {
             return 0.0;
         }
         d = 0.0;
-        for (VoxelShape coll : colls)
+        for (VoxelShape coll : collisions)
         {
             Box bb = coll.getBoundingBox();
             if (bb.maxY <= d)

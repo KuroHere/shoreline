@@ -75,8 +75,7 @@ public class InventoryManager implements Globals {
      */
     public void setClientSlot(final int barSlot) {
         if (mc.player.getInventory().selectedSlot != barSlot
-            && PlayerInventory.isValidHotbarIndex(barSlot))
-        {
+            && PlayerInventory.isValidHotbarIndex(barSlot)) {
             mc.player.getInventory().selectedSlot = barSlot;
             setSlotForced(barSlot);
         }
