@@ -11,19 +11,10 @@ import net.fabricmc.loader.api.FabricLoader;
  * @since 1.0
  */
 public class ShorelineMod implements ClientModInitializer {
-    // Mod identifier
-    public static final String MOD_ID = "shoreline";
-    // Mod name
     public static final String MOD_NAME = "Shoreline";
-    // Mod version - should comply with https://semver.org/
-    // UPDATE BEFORE RELEASE
-    public static final String MOD_VER = "1.0";
-    // Build number - updated every time a major change happens
-    // This is more of debug information and could be formatted as:
-    // Name 1.0.{BUILD_NUMBER}-{GIT_HASH}
-    public static final String MOD_BUILD_NUMBER = "b5";
-    // Mod mc version
-    public static final String MOD_MC_VER = "1.19.4";
+    public static final String MOD_VER = BuildConfig.VERSION;
+    public static final String MOD_BUILD_NUMBER = BuildConfig.BUILD_IDENTIFIER + BuildConfig.BUILD_NUMBER;
+    public static final String MOD_MC_VER = "1.20.4";
 
     /**
      * This code runs as soon as Minecraft is in a mod-load-ready state.

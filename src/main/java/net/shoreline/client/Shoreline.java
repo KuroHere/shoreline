@@ -40,7 +40,11 @@ public class Shoreline {
      */
     public static void preInit() {
         LOGGER = LogManager.getLogger("Shoreline");
+
+        // Debug information - required when submitting a crash / bug report
+        info("This build of Shoreline is on Git hash {} and was compiled on {}", BuildConfig.HASH, BuildConfig.BUILD_TIME);
         info("Starting preInit ...");
+
         EXECUTOR = Executors.newFixedThreadPool(1);
         // Create event handler instance
         EVENT_HANDLER = new EventBus();

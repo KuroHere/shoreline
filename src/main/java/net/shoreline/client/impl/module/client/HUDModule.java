@@ -13,6 +13,7 @@ import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import net.shoreline.client.BuildConfig;
 import net.shoreline.client.ShorelineMod;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
@@ -100,9 +101,10 @@ public class HUDModule extends ToggleModule {
                 topRight += 27.0f;
             }
             if (watermarkConfig.getValue()) {
-                RenderManager.renderText(event.getContext(), String.format("%s %s-%s",
+                RenderManager.renderText(event.getContext(), String.format("%s %s (%s-%s)",
                                 ShorelineMod.MOD_NAME, ShorelineMod.MOD_VER,
-                                ShorelineMod.MOD_BUILD_NUMBER), 2.0f, topLeft, getHudColor(rainbowOffset));
+                                ShorelineMod.MOD_BUILD_NUMBER,
+                                BuildConfig.HASH), 2.0f, topLeft, getHudColor(rainbowOffset));
                 // topLeft += 9.0f;
             }
             if (arraylistConfig.getValue()) {
