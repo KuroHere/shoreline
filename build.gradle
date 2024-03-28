@@ -29,11 +29,6 @@ loom {
     accessWidenerPath = file("src/main/resources/shoreline.accesswidener")
 }
 
-configurations {
-    // xgraza 03/27/24 - Do not remove, allows BuildConfig to work
-    create("compile")
-}
-
 repositories {
     mavenCentral() {
         url "https://jitpack.io"
