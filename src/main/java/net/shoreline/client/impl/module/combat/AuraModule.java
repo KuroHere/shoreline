@@ -16,6 +16,8 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -26,6 +28,7 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
+import net.shoreline.client.impl.event.network.ReachEvent;
 import net.shoreline.client.impl.manager.world.tick.TickSync;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
@@ -155,7 +158,7 @@ public class AuraModule extends RotationModule {
         if (attackDelayConfig.getValue()) {
             float ticks = 20.0f - Managers.TICK.getTickSync(tpsSyncConfig.getValue());
             float progress = mc.player.getAttackCooldownProgress(ticks);
-            if (progress >= 0.9f && attackTarget(entityTarget)) {
+            if (progress >= 0.9f && attackTarget()) {
                 mc.player.resetLastAttackedTicks();
             }
         } else {
@@ -163,10 +166,17 @@ public class AuraModule extends RotationModule {
                 randomDelay = (long) RANDOM.nextFloat((randomSpeedConfig.getValue() * 10.0f) + 1.0f);
             }
             float delay = (attackSpeedConfig.getValue() * 50.0f) + randomDelay;
-            if (attackTimer.passed(1000.0f - delay) && attackTarget(entityTarget)) {
+            if (attackTimer.passed(1000.0f - delay) && attackTarget()) {
                 randomDelay = -1;
                 attackTimer.reset();
             }
+        }
+    }
+
+    @EventListener
+    public void onReach(final ReachEvent event) {
+        if (entityTarget != null) {
+            event.setReach(rangeConfig.getValue() - 3.0f);
         }
     }
 
@@ -193,7 +203,21 @@ public class AuraModule extends RotationModule {
         }
     }
 
-    private boolean attackTarget(Entity entity) {
+    private boolean attackTarget() {
+
+        Entity castEntity;
+
+        // validate our server-sided rotations
+        if (mc.crosshairTarget == null || mc.crosshairTarget.getType() != HitResult.Type.ENTITY) {
+            return false;
+        }
+
+        // Get the entity raycasted & then check. If invalid, fail
+        castEntity = ((EntityHitResult) mc.crosshairTarget).getEntity();
+        if (castEntity == null || !castEntity.isAttackable()) {
+            return false;
+        }
+
         if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
                 || mc.options.attackKey.isPressed()) {
             autoSwapTimer.reset();
@@ -211,16 +235,20 @@ public class AuraModule extends RotationModule {
             return false;
         }
         preAttackTarget();
-        // preMotionAttackTarget();
-        PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(entity,
-                Managers.POSITION.isSneaking());
-        Managers.NETWORK.sendPacket(packet);
-        postAttackTarget(entity);
-        if (swingConfig.getValue()) {
-            mc.player.swingHand(Hand.MAIN_HAND);
-        } else {
-            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-        }
+        mc.doAttack();
+        postAttackTarget(castEntity);
+
+//        // preMotionAttackTarget();
+//        PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(entity,
+//                Managers.POSITION.isSneaking());
+//        Managers.NETWORK.sendPacket(packet);
+//        postAttackTarget(entity);
+//        if (swingConfig.getValue()) {
+//            mc.player.swingHand(Hand.MAIN_HAND);
+//        } else {
+//            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+//        }
+
         return true;
     }
 

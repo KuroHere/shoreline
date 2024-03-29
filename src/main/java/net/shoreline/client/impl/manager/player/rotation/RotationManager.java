@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.manager.player.rotation;
 
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -8,15 +9,19 @@ import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.render.Interpolation;
+import net.shoreline.client.impl.event.entity.EntityRotationVectorEvent;
+import net.shoreline.client.impl.event.entity.JumpRotationEvent;
 import net.shoreline.client.impl.event.entity.UpdateVelocityEvent;
 import net.shoreline.client.impl.event.entity.player.PlayerJumpEvent;
 import net.shoreline.client.impl.event.keyboard.KeyboardTickEvent;
 import net.shoreline.client.impl.event.network.MovementPacketsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
+import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.impl.event.render.entity.RenderPlayerEvent;
+import net.shoreline.client.impl.imixin.IClientPlayerEntity;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.Globals;
-import org.jetbrains.annotations.Nullable;
+import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,10 +35,11 @@ import java.util.Map;
 public class RotationManager implements Globals {
     private static final Map<String, Integer> ROTATE_PRIORITY = new HashMap<>();
     private final List<RotationRequest> requests = new ArrayList<>();
-    //
-    private float yaw, pitch, lastYaw, lastPitch, prevJumpYaw, prevYaw, prevPitch;
+    // Relevant rotation values
+    private float serverYaw, serverPitch, lastServerYaw, lastServerPitch, prevJumpYaw, prevYaw, prevPitch;
     boolean rotate;
-    //
+
+    // The current in use rotation
     private RotationRequest rotation;
     private RotationModule rotateModule;
     private int rotateTicks;
@@ -60,15 +66,11 @@ public class RotationManager implements Globals {
         if (event.getPacket() instanceof PlayerMoveC2SPacket packet && packet.changesLook()) {
             float packetYaw = packet.getYaw(0.0f);
             float packetPitch = packet.getPitch(0.0f);
-            yaw = packetYaw;
-            pitch = packetPitch;
+            serverYaw = packetYaw;
+            serverPitch = packetPitch;
         }
     }
 
-    /*
-        priority -1 not worked
-        @EventHandler(priority = -1)
-    */
     public void onUpdate() {
         if (requests.isEmpty()) {
             rotation = null;
@@ -91,13 +93,7 @@ public class RotationManager implements Globals {
         if (rotation == null) {
             return;
         }
-        float serverYawChange = rotation.getYaw() - getWrappedYaw();
-        float serverPitchChange = rotation.getPitch() - getPitch();
-        float yaw1 = yaw + serverYawChange;
-        float pitch1 = pitch + serverPitchChange;
         rotateTicks = 0;
-        lastYaw = yaw1;
-        lastPitch = pitch1;
         rotate = true;
     }
 
@@ -106,32 +102,27 @@ public class RotationManager implements Globals {
         if (rotate) {
             removeRotation(rotation.getModule());
             event.cancel();
-            event.setYaw(lastYaw);
-            event.setPitch(lastPitch);
+            event.setYaw(rotation.getYaw());
+            event.setPitch(rotation.getPitch());
             rotate = false;
         }
     }
 
-    @Nullable
-    private RotationRequest getRotationRequest() {
-        if (requests.isEmpty()) {
-            return null;
+    @EventListener
+    public void onEntityRotationVector(final EntityRotationVectorEvent event) {
+        if (event.getEntity() instanceof ClientPlayerEntity) {
+            final float rotX = MathHelper.lerp(event.getTickDelta(), serverPitch, lastServerPitch);
+            final float rotY = MathHelper.lerp(event.getTickDelta(), serverYaw, lastServerYaw);
+            event.setPosition(RotationUtil.getRotationVector(rotX, rotY));
         }
-        RotationRequest rotationRequest = null;
-        int priority = 0;
-        long time = 0;
-        for (RotationRequest request : requests) {
-            if (!request.getModule().isEnabled()) {
-                continue;
-            }
-            if (request.getPriority() > priority ||
-                    request.getPriority() == priority && request.getTime() > time) {
-                rotationRequest = request;
-                priority = request.getPriority();
-                time = request.getTime();
-            }
+    }
+
+    @EventListener
+    public void onPlayerUpdate(final PlayerUpdateEvent event) {
+        if (event.getStage() == EventStage.POST) {
+            lastServerYaw = ((IClientPlayerEntity) mc.player).getLastSpoofedYaw();
+            lastServerPitch = ((IClientPlayerEntity) mc.player).getLastSpoofedPitch();
         }
-        return rotationRequest;
     }
 
     @EventListener
@@ -157,23 +148,18 @@ public class RotationManager implements Globals {
     }
 
     @EventListener
-    public void onPlayerJump(PlayerJumpEvent event) {
-        if (rotation != null && Modules.ROTATIONS.getMovementFix()) {
-            if (event.getStage() == EventStage.PRE) {
-                prevJumpYaw = mc.player.getYaw();
-                mc.player.setYaw(rotation.getYaw());
-            } else {
-                mc.player.setYaw(prevJumpYaw);
-            }
+    public void onJumpRotation(JumpRotationEvent event) {
+        if (rotation != null && Modules.ROTATIONS.getMovementFix() && event.getEntity() instanceof ClientPlayerEntity) {
+            event.setYaw(rotation.getYaw());
         }
     }
 
     @EventListener
     public void onRenderPlayer(RenderPlayerEvent event) {
-        if (event.getEntity() == mc.player) {
+        if (event.getEntity() == mc.player && rotation != null) {
             // Match packet server rotations
-            event.setYaw(Interpolation.interpolateFloat(prevYaw, getYaw(), mc.getTickDelta()));
-            event.setPitch(Interpolation.interpolateFloat(prevPitch, getPitch(), mc.getTickDelta()));
+            event.setYaw(Interpolation.interpolateFloat(prevYaw, getServerYaw(), mc.getTickDelta()));
+            event.setPitch(Interpolation.interpolateFloat(prevPitch, getServerPitch(), mc.getTickDelta()));
             prevYaw = event.getYaw();
             prevPitch = event.getPitch();
             event.cancel();
@@ -256,22 +242,22 @@ public class RotationManager implements Globals {
     /**
      * @return
      */
-    public float getYaw() {
-        return yaw;
+    public float getServerYaw() {
+        return serverYaw;
     }
 
     /**
      * @return
      */
     public float getWrappedYaw() {
-        return MathHelper.wrapDegrees(yaw);
+        return MathHelper.wrapDegrees(serverYaw);
     }
 
     /**
      * @return
      */
-    public float getPitch() {
-        return pitch;
+    public float getServerPitch() {
+        return serverPitch;
     }
 
     //
@@ -284,5 +270,23 @@ public class RotationManager implements Globals {
         float f = MathHelper.sin(yaw * MathHelper.RADIANS_PER_DEGREE);
         float g = MathHelper.cos(yaw * MathHelper.RADIANS_PER_DEGREE);
         return new Vec3d(vec3d.x * (double) g - vec3d.z * (double) f, vec3d.y, vec3d.z * (double) g + vec3d.x * (double) f);
+    }
+
+    private RotationRequest getRotationRequest() {
+        RotationRequest rotationRequest = null;
+        int priority = 0;
+        long time = 0;
+        for (RotationRequest request : requests) {
+            if (!request.getModule().isEnabled()) {
+                continue;
+            }
+            if (request.getPriority() > priority ||
+                    request.getPriority() == priority && request.getTime() > time) {
+                rotationRequest = request;
+                priority = request.getPriority();
+                time = request.getTime();
+            }
+        }
+        return rotationRequest;
     }
 }

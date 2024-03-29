@@ -17,6 +17,7 @@ import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.impl.event.entity.SwingEvent;
 import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.impl.event.network.*;
+import net.shoreline.client.impl.imixin.IClientPlayerEntity;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 import org.spongepowered.asm.mixin.Final;
@@ -35,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * @since 1.0
  */
 @Mixin(ClientPlayerEntity.class)
-public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity implements Globals {
+public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity implements Globals, IClientPlayerEntity {
     //
     @Shadow
     @Final
@@ -313,5 +314,15 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     private void hookSwingHand(Hand hand, CallbackInfo ci) {
         SwingEvent swingEvent = new SwingEvent(hand);
         Shoreline.EVENT_HANDLER.dispatch(swingEvent);
+    }
+
+    @Override
+    public float getLastSpoofedYaw() {
+        return lastYaw;
+    }
+
+    @Override
+    public float getLastSpoofedPitch() {
+        return lastPitch;
     }
 }

@@ -4,17 +4,13 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.MovementType;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.entity.SlowMovementEvent;
-import net.shoreline.client.impl.event.entity.StepEvent;
-import net.shoreline.client.impl.event.entity.UpdateVelocityEvent;
-import net.shoreline.client.impl.event.entity.VelocityMultiplierEvent;
+import net.shoreline.client.impl.event.entity.*;
 import net.shoreline.client.impl.event.entity.decoration.TeamColorEvent;
 import net.shoreline.client.impl.event.entity.player.PushEntityEvent;
-import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.util.Globals;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,6 +41,20 @@ public abstract class MixinEntity implements Globals {
 
     @Shadow
     public abstract Box getBoundingBox();
+
+    /**
+     *
+     * @param tickDelta
+     * @param info
+     * @author xgraza
+     */
+    @Inject(method = "getRotationVec", at = @At("RETURN"), cancellable = true)
+    public void hookGetCameraPosVec(final float tickDelta, final CallbackInfoReturnable<Vec3d> info) {
+        final EntityRotationVectorEvent event = new EntityRotationVectorEvent(
+                tickDelta, (Entity) (Object) this, info.getReturnValue());
+        Shoreline.EVENT_HANDLER.dispatch(event);
+        info.setReturnValue(event.getPosition());
+    }
 
     /**
      * @param movement

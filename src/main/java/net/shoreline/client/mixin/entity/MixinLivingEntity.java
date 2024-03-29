@@ -5,6 +5,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.entity.ConsumeItemEvent;
+import net.shoreline.client.impl.event.entity.JumpRotationEvent;
 import net.shoreline.client.impl.event.entity.LevitationEvent;
 import net.shoreline.client.util.Globals;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,6 +31,13 @@ public abstract class MixinLivingEntity implements Globals {
      */
     @Shadow
     public abstract boolean hasStatusEffect(StatusEffect effect);
+
+    @Redirect(method = "jump", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getYaw()F"))
+    private float hookJump$getYaw(LivingEntity entity) {
+        final JumpRotationEvent event = new JumpRotationEvent(entity, entity.getYaw());
+        Shoreline.EVENT_HANDLER.dispatch(event);
+        return event.getYaw();
+    }
 
     /**
      * @param instance

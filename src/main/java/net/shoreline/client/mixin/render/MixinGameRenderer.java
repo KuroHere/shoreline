@@ -6,7 +6,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.util.Util;
@@ -16,19 +15,14 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.render.RenderLayersClient;
 import net.shoreline.client.impl.event.network.ReachEvent;
 import net.shoreline.client.impl.event.render.*;
-import net.shoreline.client.init.Managers;
+import net.shoreline.client.impl.event.world.UpdateCrosshairTargetEvent;
 import net.shoreline.client.init.Programs;
 import net.shoreline.client.mixin.accessor.AccessorBufferBuilderStorage;
 import net.shoreline.client.util.Globals;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -55,6 +49,13 @@ public class MixinGameRenderer implements Globals {
     private void hookRenderWorld(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo ci) {
         RenderWorldEvent.Game renderWorldEvent = new RenderWorldEvent.Game(matrices, tickDelta);
         Shoreline.EVENT_HANDLER.dispatch(renderWorldEvent);
+    }
+
+    @Inject(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;push(Ljava/lang/String;)V", shift = At.Shift.AFTER))
+    private void hookUpdateTargetedEntity$1(final float tickDelta, final CallbackInfo info) {
+        UpdateCrosshairTargetEvent event = new UpdateCrosshairTargetEvent(
+                tickDelta, client.getCameraEntity());
+        Shoreline.EVENT_HANDLER.dispatch(event);
     }
 
     /**
@@ -126,7 +127,7 @@ public class MixinGameRenderer implements Globals {
                     "Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/" +
                     "math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/" +
                     "util/hit/EntityHitResult;"), cancellable = true)
-    private void hookUpdateTargetedEntity(float tickDelta, CallbackInfo info) {
+    private void hookUpdateTargetedEntity$2(float tickDelta, CallbackInfo info) {
         TargetEntityEvent targetEntityEvent = new TargetEntityEvent();
         Shoreline.EVENT_HANDLER.dispatch(targetEntityEvent);
         if (targetEntityEvent.isCanceled() && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
