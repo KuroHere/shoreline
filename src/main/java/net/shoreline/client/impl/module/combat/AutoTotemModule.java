@@ -62,8 +62,10 @@ public final class AutoTotemModule extends ToggleModule {
     }
 
     private int getSlotFor(final Item item) {
+        // Only take totems from the hotbar
+        final int startSlot = item == Items.TOTEM_OF_UNDYING ? 0 : 9;
         // Search through our inventory
-        for (int slot = 0; slot < 36; ++slot) {
+        for (int slot = startSlot; slot < 36; ++slot) {
             final ItemStack itemStack = mc.player.getInventory().getStack(slot);
             if (!itemStack.isEmpty() && itemStack.getItem() == item) {
                 return slot;
