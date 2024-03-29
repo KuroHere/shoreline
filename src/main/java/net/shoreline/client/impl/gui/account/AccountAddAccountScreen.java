@@ -51,12 +51,10 @@ public final class AccountAddAccountScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-
         context.drawTextWithShadow(client.textRenderer, "*",
                 email.getX() - 10,
                 email.getY() + (email.getHeight() / 2) - (client.textRenderer.fontHeight / 2),
                 (email.getText().length() >= 3 ? Color.green : Color.red).getRGB());
-
         context.drawCenteredTextWithShadow(client.textRenderer,
                 "Add an Account", width / 2, height / 2 - 120, -1);
     }
@@ -81,21 +79,17 @@ public final class AccountAddAccountScreen extends Screen {
         if (accountEmail.length() < 3 && id != 4) {
             return;
         }
-
         final Account account = new Account(accountEmail, accountPassword);
-
         if (id == 0) {
             account.login();
         } else if (id == 1 || id == 2) {
             Managers.ACCOUNT.register(account);
             client.setScreen(parent);
-
             if (id == 2) {
                 account.login();
             }
         } else {
             client.setScreen(parent);
         }
-
     }
 }

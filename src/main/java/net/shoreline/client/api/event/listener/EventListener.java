@@ -23,5 +23,5 @@ public @interface EventListener {
     /**
      * @return Whether canceled events can be dispatched
      */
-    boolean receiveCanceled() default false;
+    boolean receiveCanceled() default true;
 }

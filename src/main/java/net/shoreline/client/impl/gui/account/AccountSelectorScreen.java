@@ -20,27 +20,24 @@ import net.shoreline.client.init.Managers;
 public final class AccountSelectorScreen extends Screen {
 
     private final Screen parent;
-    private final AccountListWidget accountListWidget;
+    private AccountListWidget accountListWidget;
     private TextFieldWidget searchWidget;
 
     public AccountSelectorScreen(final Screen parent) {
         super(Text.of("Account Selector"));
         this.parent = parent;
-        accountListWidget = new AccountListWidget(client, width, height - 64 - 32, 32, 25);
     }
 
     @Override
     protected void init() {
+        accountListWidget = new AccountListWidget(client, width, height - 64 - 32, 32, 25);
         clearChildren();
-
         accountListWidget.setDimensionsAndPosition(width, height - 64 - 32, 0, 32);
         accountListWidget.populateEntries();
         accountListWidget.setSearchFilter(null);
-
         addDrawableChild(searchWidget = new TextFieldWidget(client.textRenderer, 135, 20, Text.of("Search...")));
         searchWidget.setPosition(width / 2 - searchWidget.getWidth() / 2, 4);
         searchWidget.setPlaceholder(Text.of("Search..."));
-
         final int buttonWidth = 110;
         final int buttonHeight = 20;
 
@@ -51,26 +48,22 @@ public final class AccountSelectorScreen extends Screen {
                         accountListWidget.getHeight() + 40,
                         buttonWidth, buttonHeight)
                 .build());
-
         addDrawableChild(ButtonWidget.builder(Text.of("Login"), (action) -> {
             final AccountEntry entry = accountListWidget.getSelectedOrNull();
             if (entry != null) {
                 entry.getAccount().login();
             }
         }).dimensions(width / 2 + 2, accountListWidget.getHeight() + 40, buttonWidth, buttonHeight).build());
-
         addDrawableChild(ButtonWidget.builder(Text.of("Back"),
                 (action) -> client.setScreen(parent))
                 .dimensions(width / 2 - buttonWidth - 2,
                         accountListWidget.getHeight() + 40 + buttonHeight + 2,
                         buttonWidth, buttonHeight).build());
-
         addDrawableChild(ButtonWidget.builder(Text.of("Delete"), (action) -> {
             final AccountEntry entry = accountListWidget.getSelectedOrNull();
             if (entry == null) {
                 return;
             }
-
             // bypass if the user is holding down shift
             if (InputUtil.isKeyPressed(client.getWindow().getHandle(),
                     InputUtil.GLFW_KEY_LEFT_SHIFT)) {
@@ -78,12 +71,10 @@ public final class AccountSelectorScreen extends Screen {
                 client.setScreen(this);
                 return;
             }
-
             client.setScreen(new ConfirmScreen((value) -> {
                 if (value) {
                     Managers.ACCOUNT.unregister(entry.getAccount());
                 }
-
                 client.setScreen(this);
             }, Text.of("Delete account?"),
                 Text.of("Are you absolutely sure you would like to delete " + entry.getAccount().getEmail() + "?"),
@@ -98,18 +89,14 @@ public final class AccountSelectorScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         accountListWidget.render(context, mouseX, mouseY, delta);
-
         context.drawTextWithShadow(client.textRenderer,
-                Text.of("Logged in as " + client.getSession().getUsername()),
-                2, 2, 0xAAAAAA);
-
+                Text.of("Logged in as " + client.getSession().getUsername()), 2, 2, 0xAAAAAA);
         if (searchWidget.isSelected()) {
             String content = searchWidget.getText();
             if (content == null || content.isEmpty()) {
                 accountListWidget.setSearchFilter(null);
                 return;
             }
-
             accountListWidget.setSearchFilter(content.replaceAll("\\s*", ""));
         }
     }

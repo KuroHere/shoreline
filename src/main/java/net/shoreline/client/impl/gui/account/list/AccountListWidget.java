@@ -23,13 +23,11 @@ public final class AccountListWidget extends AlwaysSelectedEntryListWidget<Accou
 
     public void populateEntries() {
         clearEntries();
-
         final List<Account> accounts = Managers.ACCOUNT.getAccounts();
         if (!accounts.isEmpty()) {
             for (final Account account : accounts) {
                 addEntry(new AccountEntry(account));
             }
-
             setSelected(getEntry(0));
         }
     }
@@ -37,7 +35,6 @@ public final class AccountListWidget extends AlwaysSelectedEntryListWidget<Accou
     @Override
     protected void renderList(DrawContext context, int mouseX, int mouseY, float delta) {
         // i love this shit
-
         List<AccountEntry> entries = children();
         if (searchFilter != null && !searchFilter.isEmpty()) {
             entries = entries.stream()
@@ -47,47 +44,38 @@ public final class AccountListWidget extends AlwaysSelectedEntryListWidget<Accou
                             .contains(searchFilter.toLowerCase()))
                     .toList();
         }
-
         // below is pretty much just MC code
-
         int x = getRowLeft();
         int width = getRowWidth();
         int height = itemHeight - 4;
         int size = entries.size();
-
         for (int i = 0; i < size; ++i) {
             int y = getRowTop(i);
             int m = getRowBottom(i);
             if (m >= getY() && y <= getBottom()) {
-
-                final Entry<AccountEntry> entry = entries.get(i);
+                AccountEntry entry = entries.get(i);
                 final boolean isHovered = Objects.equals(getHoveredEntry(), entry);
-
                 entry.drawBorder(context, i, y, x, width, height, mouseX, mouseY, isHovered, delta);
                 if (Objects.equals(getSelectedOrNull(), entry)) {
                     int color = isFocused() ? -1 : -8355712;
                     drawSelectionHighlight(context, y, width, height, color, -16777216);
                 }
-
-                entry.render(context, i, y, x, width, height, mouseX, mouseY, isHovered, delta);
+                boolean selected = client != null && client.getSession().getUsername().equalsIgnoreCase(entry.getAccount().getUsername());
+                entry.render(context, i, y, x, width, height, mouseX, mouseY, selected, delta);
             }
         }
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-
         updateScrollingState(mouseX, mouseY, button);
-
         final AccountEntry entry = getEntryAtPosition(mouseX, mouseY);
         if (entry != null) {
             setSelected(entry);
         }
-
         if (getSelectedOrNull() != null) {
             return getSelectedOrNull().mouseClicked(mouseX, mouseY, button);
         }
-
         return true;
     }
 

@@ -17,7 +17,6 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
 public class AccountEntry extends AlwaysSelectedEntryListWidget.Entry<AccountEntry> implements Globals {
 
     private static final TextureDownloader FACE_DOWNLOADER = new TextureDownloader();
-
     private final Account account;
     private long lastClickTime = -1;
 
@@ -27,46 +26,37 @@ public class AccountEntry extends AlwaysSelectedEntryListWidget.Entry<AccountEnt
 
     @Override
     public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-
         context.drawTextWithShadow(mc.textRenderer,
                 Text.of(account.getUsernameOrEmail()),
-                x + 20, y + (entryHeight / 2) - (mc.textRenderer.fontHeight / 2), -1);
-
+                x + 20, y + (entryHeight / 2) - (mc.textRenderer.fontHeight / 2), hovered ? 0x55ff55 : -1);
         if (account.isUsernameSet())
         {
             final String id = "face_" + account.getUsername().toLowerCase();
-
             if (!FACE_DOWNLOADER.exists(id)) {
                 if (!FACE_DOWNLOADER.isDownloading(id)) {
                     FACE_DOWNLOADER.downloadTexture(id,
                             "https://minotar.net/helm/" + account.getUsername() + "/15", false);
                 }
-
                 return;
             }
-
             final Identifier texture = FACE_DOWNLOADER.get(id);
             if (texture != null) {
                 context.drawTexture(texture, x + 2, y + 2, 0, 0, 15, 15, 15, 15);
             }
-
         }
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == GLFW_MOUSE_BUTTON_1) {
-
             // fuck this game
             final long time = System.currentTimeMillis() - lastClickTime;
             if (time > 0L && time < 500L) {
                 account.login();
             }
-
             lastClickTime = System.currentTimeMillis();
             return false;
         }
-
         return super.mouseClicked(mouseX, mouseY, button);
     }
 

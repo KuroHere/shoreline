@@ -71,8 +71,7 @@ public class FastPlaceModule extends ToggleModule {
         if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet
                 && ghostFixConfig.getValue() && !event.isClientPacket()
                 && placeCheck(mc.player.getStackInHand(packet.getHand()))) {
-            final BlockState state = mc.world.getBlockState(
-                    packet.getBlockHitResult().getBlockPos());
+            BlockState state = mc.world.getBlockState(packet.getBlockHitResult().getBlockPos());
             if (!SneakBlocks.isSneakBlock(state)) {
                 event.cancel();
             }

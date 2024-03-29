@@ -59,7 +59,6 @@ public class BlockHighlightModule extends ToggleModule {
                 render = entity.getBoundingBox();
                 distance = pos.distanceTo(entity.getPos());
             } else if (result.getType() == HitResult.Type.BLOCK) {
-
                 BlockPos hpos = ((BlockHitResult) result).getBlockPos();
                 BlockState state = mc.world.getBlockState(hpos);
                 VoxelShape outlineShape = state.getOutlineShape(mc.world, hpos);

@@ -17,7 +17,7 @@ public class ColorsModule extends ConcurrentModule {
     //
     Config<Integer> hueConfig = new NumberConfig<>("Hue", "The saturation of colors", 0, 0, 360);
     Config<Integer> saturationConfig = new NumberConfig<>("Saturation", "The saturation of colors", 0, 50, 100);
-    Config<Integer> brightnessConfig = new NumberConfig<>("Brightness", "The brightness of colors", 0, 100, 100);
+    Config<Integer> brightnessConfig = new NumberConfig<>("Brightness", "The brightness of colors", 0, 50, 100);
     Config<Boolean> rainbowConfig = new BooleanConfig("Rainbow", "Renders rainbow colors for modules", false);
 
     /**

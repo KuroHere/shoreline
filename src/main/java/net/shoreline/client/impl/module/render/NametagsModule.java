@@ -220,8 +220,7 @@ public class NametagsModule extends ToggleModule {
         matrixStack.scale(2.0f, 2.0f, 2.0f);
     }
 
-    private void renderItem(ItemStack stack, ModelTransformationMode renderMode,
-                            int light, int overlay, MatrixStack matrices,
+    private void renderItem(ItemStack stack, ModelTransformationMode renderMode, int light, int overlay, MatrixStack matrices,
                             VertexConsumerProvider vertexConsumers, World world, int seed) {
         BakedModel bakedModel = mc.getItemRenderer().getModel(stack, world, null, seed);
         boolean bl;
