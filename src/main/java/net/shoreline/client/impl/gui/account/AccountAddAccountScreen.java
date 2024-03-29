@@ -6,7 +6,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.shoreline.client.api.account.Account;
-import net.shoreline.client.api.account.AccountType;
 import net.shoreline.client.init.Managers;
 
 import java.awt.*;
@@ -83,14 +82,7 @@ public final class AccountAddAccountScreen extends Screen {
             return;
         }
 
-        AccountType type = AccountType.CRACKED;
-
-        // TODO: use proper checking (ex RegExp)
-        if ((accountEmail.contains("@") && accountEmail.contains(".")) && !accountPassword.isEmpty()) {
-            type = AccountType.MICROSOFT;
-        }
-
-        final Account account = new Account(type, accountEmail, accountPassword);
+        final Account account = new Account(accountEmail, accountPassword);
 
         if (id == 0) {
             account.login();

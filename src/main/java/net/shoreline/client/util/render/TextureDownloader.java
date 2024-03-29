@@ -36,7 +36,8 @@ public final class TextureDownloader implements Globals {
     public void downloadTexture(final String id, final String url, final boolean force) {
         if (!downloading.add(id) || cache.containsKey(id)) return;
 
-        Shoreline.EXECUTOR.execute(() -> {
+        Shoreline.EXECUTOR.execute(() ->
+        {
             final HttpGet request = new HttpGet(url);
             try (CloseableHttpResponse response = client.execute(request)) {
                 final InputStream stream = response.getEntity().getContent();

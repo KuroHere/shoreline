@@ -3,7 +3,6 @@ package net.shoreline.client.impl.gui.account.list;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
-import net.minecraft.text.Text;
 import net.shoreline.client.api.account.Account;
 import net.shoreline.client.init.Managers;
 
@@ -43,8 +42,9 @@ public final class AccountListWidget extends AlwaysSelectedEntryListWidget<Accou
         if (searchFilter != null && !searchFilter.isEmpty()) {
             entries = entries.stream()
                     // i know this looks bad... but hear me out -
-                    .filter((entry) -> entry.getAccount().getName().toLowerCase().contains(searchFilter.toLowerCase())
-                            || entry.getAccount().getUsername().toLowerCase().contains(searchFilter.toLowerCase()))
+                    .filter((entry) -> entry.getAccount().getUsernameOrEmail()
+                            .toLowerCase()
+                            .contains(searchFilter.toLowerCase()))
                     .toList();
         }
 

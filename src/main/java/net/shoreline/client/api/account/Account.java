@@ -6,6 +6,7 @@ import net.shoreline.client.api.account.microsoft.MicrosoftAuthException;
 import net.shoreline.client.api.account.microsoft.MicrosoftAuthenticator;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.ConfigContainer;
+import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.StringConfig;
 import net.shoreline.client.impl.manager.client.AccountManager;
 import net.shoreline.client.mixin.accessor.AccessorMinecraftClient;
@@ -17,44 +18,51 @@ import java.util.UUID;
 
 /**
  * @author linus
- * @see AccountType
  * @see MicrosoftAuthenticator
  * @since 1.0
  */
 public class Account extends ConfigContainer implements Globals {
-    //
-    private final AccountType type;
 
-    //
+    private boolean premium;
+
     Config<String> password = new StringConfig("Password", "Password login " +
             "field of the account.", "");
+    Config<String> email = new StringConfig("Email",
+            "The email for this account", "");
     Config<String> username = new StringConfig("Username",
-            "The Minecraft username for this account", "");
+            "The cached username for this account", "");
+
 
     /**
-     * @param type
-     * @param username
+     * @param email
      * @param password
      */
-    public Account(AccountType type, String username, String password) {
-        super(username);
-        this.type = type;
+    public Account(String email, String password) {
+        super(email);
+        this.email.setValue(email);
         this.password.setValue(password);
+
+        // TODO: email should be further vaildated with a Regex
+        premium = email.contains("@") && !password.isEmpty();
+
+        if (!premium) {
+            username.setValue(email);
+        }
     }
 
     /**
      *
      */
     public void login() {
-        switch (type)
-        {
-            case MICROSOFT -> Shoreline.EXECUTOR.execute(() ->
+
+        if (premium) {
+            Shoreline.EXECUTOR.execute(() ->
             {
                 try
                 {
                     ((AccessorMinecraftClient) mc).setSession(AccountManager.MICROSOFT_AUTH.login(
                             getName(), password.getValue()));
-                    username.setValue(mc.getSession().getUsername());
+                    setUsername(mc.getSession().getUsername());
                     Shoreline.info("Logged into MSA account {} named {}", getName(), mc.getSession().getUsername());
                 } catch (MicrosoftAuthException | IOException e)
                 {
@@ -62,13 +70,16 @@ public class Account extends ConfigContainer implements Globals {
                     e.printStackTrace();
                 }
             });
-             case CRACKED -> {
-                 ((AccessorMinecraftClient) mc).setSession(new Session(getName(),
-                         UUID.randomUUID(), "", Optional.empty(),
-                         Optional.empty(), Session.AccountType.LEGACY));
-                 username.setValue(getName());
-             }
+        } else {
+            ((AccessorMinecraftClient) mc).setSession(new Session(getName(),
+                    UUID.randomUUID(), "", Optional.empty(),
+                    Optional.empty(), Session.AccountType.LEGACY));
+            setUsername(getName());
         }
+    }
+
+    public String getEmail() {
+        return email.getValue();
     }
 
     /**
@@ -78,22 +89,29 @@ public class Account extends ConfigContainer implements Globals {
         return password.getValue();
     }
 
-    /**
-     * @return
-     */
-    public AccountType getType() {
-        return type;
+    public String getUsername() {
+        return username.getValue();
     }
 
-    public String getUsername() {
-        final String value = username.getValue();
-        if (value == null || value.isEmpty()) {
-            return getName();
+    public void setUsername(final String username) {
+        this.username.setValue(username);
+    }
+
+    public String getUsernameOrEmail() {
+
+        final String username = getUsername();
+        if (username == null || username.isEmpty()) {
+            return getEmail();
         }
-        return value;
+
+        return username;
     }
 
     public boolean isUsernameSet() {
         return username.getValue() != null && !username.getValue().isEmpty();
+    }
+
+    public boolean isPremium() {
+        return premium;
     }
 }

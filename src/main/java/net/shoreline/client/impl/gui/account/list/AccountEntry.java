@@ -29,19 +29,17 @@ public class AccountEntry extends AlwaysSelectedEntryListWidget.Entry<AccountEnt
     public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 
         context.drawTextWithShadow(mc.textRenderer,
-                Text.of(account.getUsername()),
+                Text.of(account.getUsernameOrEmail()),
                 x + 20, y + (entryHeight / 2) - (mc.textRenderer.fontHeight / 2), -1);
 
+        if (account.isUsernameSet())
         {
-            final String searchFor = account.isUsernameSet()
-                    ? account.getUsername()
-                    : account.getName();
-            final String id = "face_" + searchFor.toLowerCase();
+            final String id = "face_" + account.getUsername().toLowerCase();
 
             if (!FACE_DOWNLOADER.exists(id)) {
                 if (!FACE_DOWNLOADER.isDownloading(id)) {
                     FACE_DOWNLOADER.downloadTexture(id,
-                            "https://minotar.net/helm/" + searchFor + "/15", false);
+                            "https://minotar.net/helm/" + account.getUsername() + "/15", false);
                 }
 
                 return;
@@ -74,7 +72,7 @@ public class AccountEntry extends AlwaysSelectedEntryListWidget.Entry<AccountEnt
 
     @Override
     public Text getNarration() {
-        return Text.of(account.getUsername());
+        return Text.of(account.getUsernameOrEmail());
     }
 
     public Account getAccount() {

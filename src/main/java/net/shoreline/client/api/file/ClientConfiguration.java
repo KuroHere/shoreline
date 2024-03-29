@@ -2,7 +2,6 @@ package net.shoreline.client.api.file;
 
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.account.AccountFile;
-import net.shoreline.client.api.account.AccountType;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ModuleFile;
 import net.shoreline.client.api.social.SocialFile;
@@ -84,9 +83,7 @@ public class ClientConfiguration implements Globals {
         for (SocialRelation relation : SocialRelation.values()) {
             files.add(new SocialFile(clientDir, relation));
         }
-        for (AccountType accountType : AccountType.values()) {
-            files.add(new AccountFile(clientDir.resolve("Accounts"), accountType));
-        }
+        files.add(new AccountFile(clientDir));
     }
 
     /**
