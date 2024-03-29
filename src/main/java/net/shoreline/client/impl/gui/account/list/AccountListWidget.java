@@ -60,7 +60,7 @@ public final class AccountListWidget extends AlwaysSelectedEntryListWidget<Accou
                     int color = isFocused() ? -1 : -8355712;
                     drawSelectionHighlight(context, y, width, height, color, -16777216);
                 }
-                boolean selected = client != null && client.getSession().getUsername().equalsIgnoreCase(entry.getAccount().getUsername());
+                boolean selected = client.getSession() != null && client.getSession().getUsername().equalsIgnoreCase(entry.getAccount().getUsername());
                 entry.render(context, i, y, x, width, height, mouseX, mouseY, selected, delta);
             }
         }
