@@ -2,6 +2,7 @@ package net.shoreline.client.api.account.microsoft;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraft.client.session.Session;
 import net.shoreline.client.api.account.microsoft.data.MinecraftProfile;
 import net.shoreline.client.api.account.microsoft.data.OAuthData;
 import net.shoreline.client.api.account.microsoft.data.XboxLoginData;
@@ -10,10 +11,7 @@ import net.shoreline.client.util.network.RequestUtil;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,8 +35,6 @@ public class MicrosoftAuthenticator {
             "https://api.minecraftservices.com/minecraft/profile";
     private static final Pattern SFTT_TAG_PATTERN = Pattern.compile("value=\"(.+?)\"");
     private static final Pattern POST_URL_PATTERN = Pattern.compile("urlPost:'(.+?)'");
-    //
-    private static final JsonParser PARSER = new JsonParser();
 
     /**
      * Logs into a Microsoft account with a username and password
@@ -49,18 +45,25 @@ public class MicrosoftAuthenticator {
      * @throws IOException
      * @throws MicrosoftAuthException
      */
-//    public Session login(String email, String password)
-//            throws MicrosoftAuthException, IOException
-//    {
-//        MinecraftProfile profile = getProfileData(email, password);
-//        if (profile != null)
-//        {
-//            return new Session(profile.username(), profile.id(),
-//                    profile.accessToken(), Optional.empty(),
-//                    Optional.empty(), Session.AccountType.MSA);
-//        }
-//        return null;
-//    }
+    public Session login(String email, String password)
+            throws MicrosoftAuthException, IOException
+    {
+        MinecraftProfile profile = getProfileData(email, password);
+        if (profile != null)
+        {
+            return new Session(profile.username(), UUID.fromString(parseMSAUUID(profile.id())),
+                    profile.accessToken(), Optional.empty(),
+                    Optional.empty(), Session.AccountType.MSA);
+        }
+        return null;
+    }
+
+    private String parseMSAUUID(final String profileId) {
+        // absolute autism
+        // this is needed because the API returns a UUID without the dashes, which causes an exception on Java
+        // yummy
+        return profileId.replaceFirst("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5");
+    }
 
     /**
      * Gets the profile data for an email and a password
@@ -113,7 +116,7 @@ public class MicrosoftAuthenticator {
         if (data == null) {
             return null;
         }
-        JsonObject obj = PARSER.parse(data).getAsJsonObject();
+        JsonObject obj = JsonParser.parseString(data).getAsJsonObject();
         return new MinecraftProfile(obj.get("name").getAsString(),
                 obj.get("id").getAsString(), accessToken, refreshToken);
     }
@@ -132,7 +135,7 @@ public class MicrosoftAuthenticator {
                 false, "{\"identityToken\":\"XBL3.0 x="
                         + data.uhs() + ";" + data.token()
                         + "\",\"ensureLegacyEnabled\":true}");
-        return content != null ? PARSER.parse(content).getAsJsonObject().get("access_token").getAsString() : null;
+        return content != null ? JsonParser.parseString(content).getAsJsonObject().get("access_token").getAsString() : null;
     }
 
     /**
@@ -152,7 +155,7 @@ public class MicrosoftAuthenticator {
         if (data == null) {
             return null;
         }
-        JsonObject obj = PARSER.parse(data).getAsJsonObject();
+        JsonObject obj = JsonParser.parseString(data).getAsJsonObject();
         String token = obj.get("Token").getAsString();
         String uhs = obj.get("DisplayClaims").getAsJsonObject().get("xui")
                 .getAsJsonArray().get(0).getAsJsonObject().get("uhs").getAsString(); // wtf
@@ -184,7 +187,7 @@ public class MicrosoftAuthenticator {
         if (content == null) {
             throw new MicrosoftAuthException("input stream cannot be null");
         }
-        JsonObject jsonObject = PARSER.parse(content).getAsJsonObject();
+        JsonObject jsonObject = JsonParser.parseString(content).getAsJsonObject();
         if (connection.getResponseCode() == 401) {
             long errCode = jsonObject.get("XErr").getAsLong();
             if (errCode == 2148916238L) {

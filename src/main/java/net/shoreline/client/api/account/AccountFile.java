@@ -45,6 +45,11 @@ public class AccountFile extends ConfigFile {
                     JsonObject json = new JsonObject();
                     json.addProperty("email", account.getName());
                     json.addProperty("password", account.getPassword());
+
+                    if (!account.username.getValue().isEmpty()) {
+                        json.addProperty("username", account.getUsername());
+                    }
+
                     array.add(json);
                 }
             }
@@ -75,8 +80,15 @@ public class AccountFile extends ConfigFile {
                     final JsonObject obj = e.getAsJsonObject();
                     final JsonElement password = obj.get("password");
                     final JsonElement email = obj.get("email");
-                    Managers.ACCOUNT.register(new Account(type,
-                            email.getAsString(), password.getAsString()));
+
+                    final Account account = new Account(type,
+                        email.getAsString(), password.getAsString());
+
+                    if (obj.has("username")) {
+                        account.username.setValue(obj.get("username").getAsString());
+                    }
+
+                    Managers.ACCOUNT.register(account);
                 }
             }
         }

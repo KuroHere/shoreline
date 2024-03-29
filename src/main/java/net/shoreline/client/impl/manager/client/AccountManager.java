@@ -36,6 +36,14 @@ public class AccountManager {
     }
 
     /**
+     *
+     * @param account
+     */
+    public void unregister(final Account account) {
+        accounts.remove(account);
+    }
+
+    /**
      * @return
      */
     public List<Account> getAccounts() {
