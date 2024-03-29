@@ -10,6 +10,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.render.item.RenderArmEvent;
@@ -73,8 +74,25 @@ public class MixinHeldItemRenderer {
                                            float pitch, Hand hand, float swingProgress,
                                            ItemStack item, float equipProgress, MatrixStack matrices,
                                            VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-        RenderFirstPersonEvent renderFirstPersonEvent = new RenderFirstPersonEvent(
-                hand, item, equipProgress, matrices);
+        RenderFirstPersonEvent renderFirstPersonEvent = new RenderFirstPersonEvent(hand, item, equipProgress, matrices);
         Shoreline.EVENT_HANDLER.dispatch(renderFirstPersonEvent);
     }
+
+//    @Inject(method = "applyEatOrDrinkTransformation", at = @At(value = "HEAD"), cancellable = true)
+//    private void hookApplyEatOrDrinkTransformation(MatrixStack matrices, float tickDelta, Arm arm, ItemStack stack, CallbackInfo ci) {
+//        ci.cancel();
+//        float h;
+//        float f = (float) client.player.getItemUseTimeLeft() - tickDelta + 1.0f;
+//        float g = f / (float)stack.getMaxUseTime();
+//        if (g < 0.8f) {
+//            h = MathHelper.abs(MathHelper.cos(f / 4.0f * (float)Math.PI) * 0.1f);
+//            matrices.translate(0.0f, h, 0.0f);
+//        }
+//        h = 1.0f - (float) Math.pow(g, 27.0);
+//        int i = arm == Arm.RIGHT ? 1 : -1;
+//        matrices.translate(h * 0.6f * (float)i, h * -0.5f, h * 0.0f);
+//        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)i * h * 90.0f));
+//        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(h * 10.0f));
+//        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float)i * h * 30.0f));
+//    }
 }

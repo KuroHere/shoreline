@@ -403,12 +403,9 @@ public class AutoCrystalModule extends RotationModule {
         if (attackCheckPre(hand)) {
             return;
         }
-        StatusEffectInstance weakness =
-                mc.player.getStatusEffect(StatusEffects.WEAKNESS);
-        StatusEffectInstance strength =
-                mc.player.getStatusEffect(StatusEffects.STRENGTH);
-        if (antiWeaknessConfig.getValue() != Swap.OFF && weakness != null
-                && (strength == null || weakness.getAmplifier() > strength.getAmplifier())) {
+        StatusEffectInstance weakness = mc.player.getStatusEffect(StatusEffects.WEAKNESS);
+        StatusEffectInstance strength = mc.player.getStatusEffect(StatusEffects.STRENGTH);
+        if (weakness != null && (strength == null || weakness.getAmplifier() > strength.getAmplifier())) {
             int prev = mc.player.getInventory().selectedSlot;
             int slot = -1;
             for (int i = 0; i < 9; ++i) {
@@ -421,8 +418,10 @@ public class AutoCrystalModule extends RotationModule {
                 }
             }
             if (slot != -1) {
-                swapTo(slot);
-                attackInternal(entity, hand);
+                if (antiWeaknessConfig.getValue() != Swap.OFF) {
+                    swapTo(slot);
+                }
+                attackInternal(entity, Hand.MAIN_HAND);
                 if (antiWeaknessConfig.getValue() == Swap.SILENT
                         || antiWeaknessConfig.getValue() == Swap.SILENT_ALT) {
                     swapTo(autoSwapConfig.getValue() == Swap.SILENT_ALT ? slot : prev);
