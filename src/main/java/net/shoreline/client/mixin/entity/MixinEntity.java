@@ -42,6 +42,14 @@ public abstract class MixinEntity implements Globals {
     @Shadow
     public abstract Box getBoundingBox();
 
+    @Shadow public abstract Vec3d getVelocity();
+
+    @Shadow public abstract void setVelocity(Vec3d velocity);
+
+    @Shadow public abstract boolean isSprinting();
+
+    @Shadow public boolean velocityDirty;
+
     /**
      *
      * @param tickDelta

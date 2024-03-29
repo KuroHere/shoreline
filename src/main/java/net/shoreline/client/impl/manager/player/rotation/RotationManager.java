@@ -149,7 +149,8 @@ public class RotationManager implements Globals {
 
     @EventListener
     public void onJumpRotation(JumpRotationEvent event) {
-        if (rotation != null && Modules.ROTATIONS.getMovementFix() && event.getEntity() instanceof ClientPlayerEntity) {
+        if (rotation != null && Modules.ROTATIONS.getMovementFix()) {
+            event.cancel();
             event.setYaw(rotation.getYaw());
         }
     }
