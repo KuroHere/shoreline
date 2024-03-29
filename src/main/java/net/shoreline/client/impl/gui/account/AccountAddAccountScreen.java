@@ -31,9 +31,8 @@ public final class AccountAddAccountScreen extends Screen {
         clearChildren();
 
         addDrawableChild(email = new TextFieldWidget(client.textRenderer, width / 2 - 75, height / 2 - 30, 150, 20, Text.of("")));
-        addDrawableChild(password = new TextFieldWidget(client.textRenderer, width / 2 - 75, height / 2 - 5, 150, 20, Text.of("")));
-
         email.setPlaceholder(Text.of("Email or Username..."));
+        addDrawableChild(password = new TextFieldWidget(client.textRenderer, width / 2 - 75, height / 2 - 5, 150, 20, Text.of("")));
         password.setPlaceholder(Text.of("Password (Optional)"));
 
         final String[] options = {"Login", "Add", "Login & Add", "Login via Browser", "Go Back"};
@@ -61,7 +60,6 @@ public final class AccountAddAccountScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-
         if (keyCode == GLFW_KEY_ESCAPE) {
             client.setScreen(parent);
             return true;
@@ -75,21 +73,27 @@ public final class AccountAddAccountScreen extends Screen {
         final String accountEmail = email.getText();
         final String accountPassword = password.getText();
 
-        // nuh uh
+        // Check if the account username / email does not precede the 3 username character
+        // limit. However, if the button id is 4 (Go Back), then ignore
         if (accountEmail.length() < 3 && id != 4) {
             return;
         }
+
         final Account account = new Account(accountEmail, accountPassword);
-        if (id == 0) {
-            account.login();
-        } else if (id == 1 || id == 2) {
-            Managers.ACCOUNT.register(account);
-            client.setScreen(parent);
-            if (id == 2) {
+
+        switch (id) {
+            case 0 -> account.login();
+            case 1 -> {
+                Managers.ACCOUNT.register(account);
+                client.setScreen(parent);
+            }
+            case 2 -> {
+                Managers.ACCOUNT.register(account);
+                client.setScreen(parent);
                 account.login();
             }
-        } else {
-            client.setScreen(parent);
+            default -> client.setScreen(parent);
         }
+
     }
 }
