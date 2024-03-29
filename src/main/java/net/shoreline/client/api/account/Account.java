@@ -6,7 +6,6 @@ import net.shoreline.client.api.account.microsoft.MicrosoftAuthException;
 import net.shoreline.client.api.account.microsoft.MicrosoftAuthenticator;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.ConfigContainer;
-import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.StringConfig;
 import net.shoreline.client.impl.manager.client.AccountManager;
 import net.shoreline.client.mixin.accessor.AccessorMinecraftClient;
@@ -23,14 +22,11 @@ import java.util.UUID;
  */
 public class Account extends ConfigContainer implements Globals {
 
-    private boolean premium;
-
-    Config<String> password = new StringConfig("Password", "Password login " +
-            "field of the account.", "");
-    Config<String> email = new StringConfig("Email",
-            "The email for this account", "");
-    Config<String> username = new StringConfig("Username",
-            "The cached username for this account", "");
+    private final boolean premium;
+    // The login information for the account
+    Config<String> password = new StringConfig("Password", "Password login " + "field of the account.", "");
+    Config<String> email = new StringConfig("Email", "The email for this account", "");
+    Config<String> username = new StringConfig("Username", "The cached username for this account", "");
 
 
     /**
@@ -41,10 +37,8 @@ public class Account extends ConfigContainer implements Globals {
         super(email);
         this.email.setValue(email);
         this.password.setValue(password);
-
         // TODO: email should be further vaildated with a Regex
         premium = email.contains("@") && !password.isEmpty();
-
         if (!premium) {
             username.setValue(email);
         }
@@ -54,14 +48,12 @@ public class Account extends ConfigContainer implements Globals {
      *
      */
     public void login() {
-
         if (premium) {
             Shoreline.EXECUTOR.execute(() ->
             {
                 try
                 {
-                    ((AccessorMinecraftClient) mc).setSession(AccountManager.MICROSOFT_AUTH.login(
-                            getName(), password.getValue()));
+                    ((AccessorMinecraftClient) mc).setSession(AccountManager.MICROSOFT_AUTH.login(getEmail(), getPassword()));
                     setUsername(mc.getSession().getUsername());
                     Shoreline.info("Logged into MSA account {} named {}", getName(), mc.getSession().getUsername());
                 } catch (MicrosoftAuthException | IOException e)
@@ -98,12 +90,10 @@ public class Account extends ConfigContainer implements Globals {
     }
 
     public String getUsernameOrEmail() {
-
         final String username = getUsername();
         if (username == null || username.isEmpty()) {
             return getEmail();
         }
-
         return username;
     }
 

@@ -40,7 +40,6 @@ public final class AccountSelectorScreen extends Screen {
         searchWidget.setPlaceholder(Text.of("Search..."));
         final int buttonWidth = 110;
         final int buttonHeight = 20;
-
         // my head hurts
         addDrawableChild(ButtonWidget.builder(Text.of("Add"),
                 (action) -> client.setScreen(new AccountAddAccountScreen(this)))
@@ -77,7 +76,7 @@ public final class AccountSelectorScreen extends Screen {
                 }
                 client.setScreen(this);
             }, Text.of("Delete account?"),
-                Text.of("Are you absolutely sure you would like to delete " + entry.getAccount().getEmail() + "?"),
+                Text.of("Are you sure you would like to delete " + entry.getAccount().getEmail() + "?"),
                 Text.of("Yes"),
                 Text.of("No")));
         }).dimensions(width / 2 + 2,

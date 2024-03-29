@@ -29,21 +29,17 @@ public final class AccountAddAccountScreen extends Screen {
     @Override
     protected void init() {
         clearChildren();
-
         addDrawableChild(email = new TextFieldWidget(client.textRenderer, width / 2 - 75, height / 2 - 30, 150, 20, Text.of("")));
         email.setPlaceholder(Text.of("Email or Username..."));
         addDrawableChild(password = new TextFieldWidget(client.textRenderer, width / 2 - 75, height / 2 - 5, 150, 20, Text.of("")));
         password.setPlaceholder(Text.of("Password (Optional)"));
-
-        final String[] options = {"Login", "Add", "Login & Add", "Login via Browser", "Go Back"};
+        final String[] options = {"Login", "Login via Browser", "Go Back"};
         for (int i = 0; i < options.length; ++i) {
             final String option = options[i];
-
             // i fucking HATE java!!
             int finalI = i;
             addDrawableChild(ButtonWidget.builder(Text.of(option), (button) -> onButtonAction(finalI))
-                    .dimensions(width / 2 - 72, height / 2 + 20 + (i * 22), 145, 20)
-                    .build());
+                    .dimensions(width / 2 - 72, height / 2 + 20 + (i * 22), 145, 20).build());
         }
     }
 
@@ -64,36 +60,24 @@ public final class AccountAddAccountScreen extends Screen {
             client.setScreen(parent);
             return true;
         }
-
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     private void onButtonAction(final int id) {
-
         final String accountEmail = email.getText();
         final String accountPassword = password.getText();
-
         // Check if the account username / email does not precede the 3 username character
-        // limit. However, if the button id is 4 (Go Back), then ignore
-        if (accountEmail.length() < 3 && id != 4) {
+        // limit. However, if the button id is 2 (Go Back), then ignore
+        if (accountEmail.length() < 3 && id != 2) {
             return;
         }
-
         final Account account = new Account(accountEmail, accountPassword);
-
         switch (id) {
-            case 0 -> account.login();
-            case 1 -> {
+            case 0 -> {
                 Managers.ACCOUNT.register(account);
                 client.setScreen(parent);
             }
-            case 2 -> {
-                Managers.ACCOUNT.register(account);
-                client.setScreen(parent);
-                account.login();
-            }
-            default -> client.setScreen(parent);
+            case 2 -> client.setScreen(parent);
         }
-
     }
 }

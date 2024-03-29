@@ -64,8 +64,8 @@ public class ChatUtil implements Globals {
      */
     public static void serverSendMessage(PlayerEntity player, String message) {
         if (mc.player != null) {
-            String reply = "/w " + player.getName().getString() + " ";
-            mc.player.networkHandler.sendChatMessage(reply + PREFIX + message);
+            String reply = "/msg " + player.getName().getString() + " ";
+            mc.player.networkHandler.sendChatMessage(reply + message);
         }
     }
 
