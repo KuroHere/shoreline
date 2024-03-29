@@ -3,6 +3,8 @@ package net.shoreline.client.mixin.entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.entity.ConsumeItemEvent;
 import net.shoreline.client.impl.event.entity.JumpRotationEvent;
@@ -20,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @since 1.0
  */
 @Mixin(LivingEntity.class)
-public abstract class MixinLivingEntity implements Globals {
+public abstract class MixinLivingEntity extends MixinEntity implements Globals {
     //
     @Shadow
     protected ItemStack activeItemStack;
@@ -32,11 +34,29 @@ public abstract class MixinLivingEntity implements Globals {
     @Shadow
     public abstract boolean hasStatusEffect(StatusEffect effect);
 
-    @Redirect(method = "jump", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getYaw()F"))
-    private float hookJump$getYaw(LivingEntity entity) {
-        final JumpRotationEvent event = new JumpRotationEvent(entity, entity.getYaw());
+    @Shadow
+    public abstract float getYaw(float tickDelta);
+
+    @Shadow
+    protected abstract float getJumpVelocity();
+
+    @Inject(method = "jump", at = @At(value = "HEAD"), cancellable = true)
+    private void hookJump$getYaw(CallbackInfo ci) {
+        if ((LivingEntity) (Object) this != mc.player) {
+            return;
+        }
+        final JumpRotationEvent event = new JumpRotationEvent();
         Shoreline.EVENT_HANDLER.dispatch(event);
-        return event.getYaw();
+        if (event.isCanceled()) {
+            ci.cancel();
+            Vec3d vec3d = this.getVelocity();
+            setVelocity(new Vec3d(vec3d.x, getJumpVelocity(), vec3d.z));
+            if (isSprinting()) {
+                float f = event.getYaw() * ((float)Math.PI / 180);
+                setVelocity(getVelocity().add(-MathHelper.sin(f) * 0.2f, 0.0, MathHelper.cos(f) * 0.2f));
+            }
+            velocityDirty = true;
+        }
     }
 
     /**
