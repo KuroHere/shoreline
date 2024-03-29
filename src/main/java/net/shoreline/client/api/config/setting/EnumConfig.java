@@ -82,8 +82,13 @@ public class EnumConfig<T extends Enum<?>> extends Config<T> {
     public T fromJson(JsonObject jsonObj) {
         if (jsonObj.has("value")) {
             JsonElement element = jsonObj.get("value");
-            return (T) (Enum<?>) Enum.valueOf((Class<Enum>) getValue().getClass(),
-                    element.getAsString());
+
+            try {
+                return (T) (Enum<?>) Enum.valueOf((Class<Enum>) getValue().getClass(),
+                        element.getAsString());
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
         }
         return getValue();
     }

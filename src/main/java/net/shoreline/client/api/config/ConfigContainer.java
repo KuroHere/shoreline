@@ -136,7 +136,9 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>> {
                         cfg.setValue(val);
                     } else if (config instanceof EnumConfig cfg) {
                         Enum<?> val = cfg.fromJson(configObj);
-                        cfg.setValue(val);
+                        if (val != null) {
+                            cfg.setValue(val);
+                        }
                     } else if (config instanceof ListConfig cfg) {
                         List<?> val = cfg.fromJson(configObj);
                         cfg.setValue(val);
