@@ -57,7 +57,7 @@ public final class AutoTotemModule extends ToggleModule {
         if (itemSlot != -1) {
             // Do another quick swap (equivalent to hovering over an item & pressing F)
             mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
-                    itemSlot < 9 ? itemSlot + 36 : itemSlot, 45, SlotActionType.SWAP, mc.player);
+                    itemSlot < 9 ? itemSlot + 36 : itemSlot, 40, SlotActionType.SWAP, mc.player);
         }
     }
 
