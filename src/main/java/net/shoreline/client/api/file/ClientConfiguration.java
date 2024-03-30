@@ -155,6 +155,10 @@ public class ClientConfiguration implements Globals {
         this.configPreset = "Modules";
     }
 
+    public Set<String> getConfigPresets() {
+        return configPresets;
+    }
+
     /**
      * @return
      */
