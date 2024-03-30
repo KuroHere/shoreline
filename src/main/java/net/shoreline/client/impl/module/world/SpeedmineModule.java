@@ -52,16 +52,10 @@ public class SpeedmineModule extends RotationModule {
     Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best tool once the mining is complete", Swap.SILENT, Swap.values());
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates when mining the block", true);
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF);
-    Config<Boolean> fastConfig = new BooleanConfig("Fast", "Attempts to instantly remine blocks", false);
-    Config<Boolean> remineConfig = new BooleanConfig("Remine", "Attempts to remine blocks", true);
-    Config<Boolean> remineFullConfig = new BooleanConfig("Remine-Full", "Resets the block breaking state when remining", true, () -> remineConfig.getValue());
-    Config<Boolean> remineInfiniteConfig = new BooleanConfig("Remine-Infinite", "Attempts to remine blocks infinitely", false, () -> remineConfig.getValue());
-    Config<Integer> maxRemineConfig = new NumberConfig<>("MaxRemines", "Maximum remines of a block before reset", 0, 2, 10, () -> remineConfig.getValue() && !remineInfiniteConfig.getValue());
     private BlockPos mining;
     private BlockState state;
     private Direction direction;
     private float damage;
-    private int remines;
 
     public SpeedmineModule() {
         super("Speedmine", "Mines faster", ModuleCategory.WORLD);
@@ -79,8 +73,8 @@ public class SpeedmineModule extends RotationModule {
         state = null;
         direction = null;
         damage = 0.0f;
-        remines = 0;
     }
+
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() != EventStage.PRE || modeConfig.getValue() != SpeedmineMode.DAMAGE) {
@@ -106,21 +100,15 @@ public class SpeedmineModule extends RotationModule {
         state = mc.world.getBlockState(mining);
         int prev = mc.player.getInventory().selectedSlot;
         int slot = getBestTool(state);
-
         double dist = mc.player.squaredDistanceTo(mining.toCenterPos());
         if (dist > ((NumberConfig<?>) rangeConfig).getValueSq()
-            || state.isAir()
-            || damage > 3.0f
-            || !remineConfig.getValue()
-            || !remineInfiniteConfig.getValue()
-            && remines > maxRemineConfig.getValue()) {
+            || state.isAir() || damage > 3.0f) {
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                 PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, mining, Direction.DOWN));
             mining = null;
             state = null;
             direction = null;
             damage = 0.0f;
-            remines = 0;
         } else if (damage > 1.0f && !Modules.AUTO_CRYSTAL.isAttacking()
             && !Modules.AUTO_CRYSTAL.isPlacing() && !mc.player.isUsingItem()) {
             if (isRotationBlocked()) {
@@ -136,17 +124,6 @@ public class SpeedmineModule extends RotationModule {
             }
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                 PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mining, direction));
-            if (fastConfig.getValue()) {
-                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
-                    mining, direction.getOpposite()));
-                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                    PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
-                    mining, direction));
-                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                    PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                    mining, direction));
-            }
             if (swapConfig.getValue() == Swap.SILENT) {
                 if (strictConfig.getValue()) {
                     mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
@@ -155,10 +132,7 @@ public class SpeedmineModule extends RotationModule {
                     swap(prev);
                 }
             }
-            if (remineFullConfig.getValue()) {
-                damage = 0.0f;
-            }
-            remines++;
+            damage = 0.0f;
         } else {
             float delta = calcBlockBreakingDelta(state, mc.world, mining);
             damage += delta;
@@ -215,7 +189,6 @@ public class SpeedmineModule extends RotationModule {
         mining = event.getPos();
         direction = event.getDirection();
         damage = 0.0f;
-        remines = 0;
         if (mining != null && direction != null) {
             event.cancel();
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(

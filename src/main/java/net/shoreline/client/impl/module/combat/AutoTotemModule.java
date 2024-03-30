@@ -27,10 +27,9 @@ public final class AutoTotemModule extends ToggleModule {
 
     EnumConfig<OffhandItem> itemConfig = new EnumConfig<>("Item", "The item to wield in your offhand", OffhandItem.TOTEM, OffhandItem.values());
     NumberConfig<Float> healthConfig = new NumberConfig<>("Health", "The health required to fall below before swapping to a totem", 1.0f, 14.0f, 20.0f);
-    BooleanConfig gappleConfig = new BooleanConfig("Gapple", "If to equip a golden apple if holding down the item use button", true);
+    BooleanConfig gappleConfig = new BooleanConfig("OffhandGapple", "If to equip a golden apple if holding down the item use button", true);
     BooleanConfig crappleConfig = new BooleanConfig("Crapple", "If to use a normal golden apple if Absorption is present", true);
     BooleanConfig lethalGapConfig = new BooleanConfig("Lethal-Gapple", "If to not swap to a totem if the player is eating a golden apple", false);
-    BooleanConfig fallDamage = new BooleanConfig("Fall-Damage", "If to equip a totem if the distance you have fallen is lethal", true);
 
     public AutoTotemModule() {
         super("AutoTotem", "Automatically replenishes the totem in your offhand", ModuleCategory.COMBAT);
@@ -38,6 +37,9 @@ public final class AutoTotemModule extends ToggleModule {
 
     @EventListener
     public void onPlayerTick(final PlayerTickEvent event) {
+        if (mc.currentScreen != null) {
+            return;
+        }
         // Get the item to wield in our offhand, and make sure we are already not holding the item
         final Item itemToWield = getItemToWield();
         if (PlayerUtil.isHolding(itemToWield)) {
@@ -55,10 +57,7 @@ public final class AutoTotemModule extends ToggleModule {
         if (itemSlot != -1) {
             // Do another quick swap (equivalent to hovering over an item & pressing F)
             mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
-                    itemSlot < 9 ? itemSlot + 36 : itemSlot,
-                    40,
-                    SlotActionType.SWAP,
-                    mc.player);
+                    itemSlot < 9 ? itemSlot + 36 : itemSlot, 40, SlotActionType.SWAP, mc.player);
         }
     }
 
@@ -72,8 +71,6 @@ public final class AutoTotemModule extends ToggleModule {
                 return slot;
             }
         }
-
-        // Return default, as a negative integer
         return -1;
     }
 
@@ -81,7 +78,7 @@ public final class AutoTotemModule extends ToggleModule {
         // If the player's health (+absorption) falls below the "safe" amount, equip a totem
         final float health = PlayerUtil.getLocalPlayerHealth();
         if (health < healthConfig.getValue()) {
-            // If we should ignore a totem in favor for a gapple
+            // If we should ignore a totem in favor of a gapple
             if (lethalGapConfig.getValue()
                     && PlayerUtil.isHolding(getGoldenAppleType())
                     && mc.options.useKey.isPressed()) {
@@ -90,14 +87,11 @@ public final class AutoTotemModule extends ToggleModule {
 
             return Items.TOTEM_OF_UNDYING;
         }
-
-        // If we should check fall damage
-        if (fallDamage.getValue()) {
-            final float heartsTaken = (float) PlayerUtil.computeFallDamage(
-                    mc.player.fallDistance, 1.0f);
-            if (heartsTaken + 0.5f > mc.player.getHealth()) {
-                return Items.TOTEM_OF_UNDYING;
-            }
+        // Check fall damage
+        final float heartsTaken = (float) PlayerUtil.computeFallDamage(
+                mc.player.fallDistance, 1.0f);
+        if (heartsTaken + 0.5f > mc.player.getHealth()) {
+            return Items.TOTEM_OF_UNDYING;
         }
 
         // If offhand gap is enabled & the use key is pressed down, equip a golden apple.

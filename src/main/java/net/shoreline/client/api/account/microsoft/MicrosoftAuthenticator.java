@@ -35,6 +35,8 @@ public class MicrosoftAuthenticator {
             "https://api.minecraftservices.com/minecraft/profile";
     private static final Pattern SFTT_TAG_PATTERN = Pattern.compile("value=\"(.+?)\"");
     private static final Pattern POST_URL_PATTERN = Pattern.compile("urlPost:'(.+?)'");
+    //
+    private String loginStage = "";
 
     /**
      * Logs into a Microsoft account with a username and password
@@ -51,6 +53,7 @@ public class MicrosoftAuthenticator {
         MinecraftProfile profile = getProfileData(email, password);
         if (profile != null)
         {
+            loginStage = "Setting Minecraft session...";
             return new Session(profile.username(), UUID.fromString(parseMSAUUID(profile.id())),
                     profile.accessToken(), Optional.empty(),
                     Optional.empty(), Session.AccountType.MSA);
@@ -62,6 +65,7 @@ public class MicrosoftAuthenticator {
         // absolute autism
         // this is needed because the API returns a UUID without the dashes, which causes an exception on Java
         // yummy
+        loginStage = "";
         return profileId.replaceFirst("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5");
     }
 
@@ -76,16 +80,18 @@ public class MicrosoftAuthenticator {
      */
     public MinecraftProfile getProfileData(String email, String password)
             throws IOException, MicrosoftAuthException {
+        loginStage = "Retrieving OAuthData...";
         OAuthData oauthData = getOAuthData();
         if (oauthData == null) {
             throw new NullPointerException("OAuthData cannot be null");
         }
-        Map<String, String> loginData = getLoginData(oauthData, email,
-                password);
+        loginStage = "Retrieving Access token...";
+        Map<String, String> loginData = getLoginData(oauthData, email, password);
         if (loginData == null || !loginData.containsKey("access_token")) {
             throw new MicrosoftAuthException("Access token cannot be null");
         }
         // i want to kill myself
+        loginStage = "Validating access token...";
         XboxLoginData xboxLogin = loginXbox(loginData.get("access_token"));
         if (xboxLogin == null) {
             throw new MicrosoftAuthException("Xbox Login data cannot be null");
@@ -94,9 +100,9 @@ public class MicrosoftAuthenticator {
         if (xstsData == null) {
             throw new MicrosoftAuthException("XSTS data cannot be null");
         }
+        loginStage = "Authenticating...";
         String accessToken = xboxAuth(xstsData);
-        return getProfile(accessToken, loginData.getOrDefault(
-                "refresh_token", null));
+        return getProfile(accessToken, loginData.getOrDefault("refresh_token", null));
     }
 
     /**
@@ -282,5 +288,9 @@ public class MicrosoftAuthenticator {
         List<String> cookieData = connection.getHeaderFields().get("Set-Cookie");
         String cookie = String.join(";", cookieData);
         return new OAuthData(sfttTag, postUrl, cookie);
+    }
+
+    public String getLoginStage() {
+        return loginStage;
     }
 }

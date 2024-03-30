@@ -168,9 +168,7 @@ public class NoSlowModule extends ToggleModule {
                 || block instanceof SweetBerryBushBlock && berryBushConfig.getValue()) {
             if (grimConfig.getValue()) {
                 event.cancel();
-                return;
-            }
-            if (mc.player.isOnGround()) {
+            } else if (mc.player.isOnGround()) {
                 Managers.TICK.setClientTick(1.0f);
             } else {
                 Managers.TICK.setClientTick(webSpeedConfig.getValue() / 2.0f);
