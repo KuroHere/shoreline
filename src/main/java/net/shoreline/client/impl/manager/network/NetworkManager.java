@@ -6,6 +6,7 @@ import net.minecraft.network.packet.Packet;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
+import net.shoreline.client.impl.imixin.IClientPlayNetworkHandler;
 import net.shoreline.client.mixin.accessor.AccessorClientWorld;
 import net.shoreline.client.util.Globals;
 
@@ -45,6 +46,13 @@ public class NetworkManager implements Globals {
         if (mc.getNetworkHandler() != null) {
             PACKET_CACHE.add(p);
             mc.getNetworkHandler().sendPacket(p);
+        }
+    }
+
+    public void sendQuietPacket(final Packet<?> p) {
+        if (mc.getNetworkHandler() != null) {
+            PACKET_CACHE.add(p);
+            ((IClientPlayNetworkHandler) mc.getNetworkHandler()).sendQuietPacket(p);
         }
     }
 

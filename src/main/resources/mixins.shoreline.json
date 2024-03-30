@@ -12,6 +12,7 @@
     "accessor.AccessorBufferBuilderStorage",
     "accessor.AccessorChatScreen",
     "accessor.AccessorClickableWidget",
+    "accessor.AccessorClientConnection",
     "accessor.AccessorClientPlayerEntity",
     "accessor.AccessorClientPlayerInteractionManager",
     "accessor.AccessorClientWorld",
