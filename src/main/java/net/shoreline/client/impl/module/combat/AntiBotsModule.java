@@ -27,12 +27,11 @@ import java.util.Set;
  */
 public class AntiBotsModule extends ToggleModule {
 
-    private final Set<PlayerEntity> botPlayers = new HashSet<>();
-
     Config<Boolean> pingConfig = new BooleanConfig("Ping", "Checks the ping of the bot", true);
     Config<Boolean> invisibleConfig = new BooleanConfig("Invisibles", "Checks if the bot is invisible", true);
     Config<Boolean> nameConfig = new BooleanConfig("Name", "Checks the username of the bot", true);
     Config<Boolean> uuidConfig = new BooleanConfig("UUID", "Checks the UUID of the bot", true);
+    private final Set<PlayerEntity> botPlayers = new HashSet<>();
 
     public AntiBotsModule() {
         super("AntiBots", "Prevents player from interacting with bots",

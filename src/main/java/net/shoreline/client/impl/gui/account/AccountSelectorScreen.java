@@ -7,8 +7,10 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
+import net.shoreline.client.api.account.microsoft.MicrosoftAuthenticator;
 import net.shoreline.client.impl.gui.account.list.AccountEntry;
 import net.shoreline.client.impl.gui.account.list.AccountListWidget;
+import net.shoreline.client.impl.manager.client.AccountManager;
 import net.shoreline.client.init.Managers;
 
 /**
@@ -88,8 +90,7 @@ public final class AccountSelectorScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         accountListWidget.render(context, mouseX, mouseY, delta);
-        context.drawTextWithShadow(client.textRenderer,
-                Text.of("Logged in as " + client.getSession().getUsername()), 2, 2, 0xAAAAAA);
+        context.drawTextWithShadow(client.textRenderer, Text.of(getLoginInfo()), 2, 2, 0xAAAAAA);
         if (searchWidget.isSelected()) {
             String content = searchWidget.getText();
             if (content == null || content.isEmpty()) {
@@ -110,5 +111,9 @@ public final class AccountSelectorScreen extends Screen {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         accountListWidget.mouseReleased(mouseX, mouseY, button);
         return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    private String getLoginInfo() {
+        return AccountManager.MICROSOFT_AUTH.getLoginStage().isEmpty() ? "Logged in as " + client.getSession().getUsername() : AccountManager.MICROSOFT_AUTH.getLoginStage();
     }
 }

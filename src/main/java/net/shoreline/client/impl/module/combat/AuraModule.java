@@ -13,7 +13,10 @@ import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
-import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -28,8 +31,6 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.impl.event.network.ReachEvent;
-import net.shoreline.client.impl.manager.world.tick.TickSync;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.render.Interpolation;
@@ -37,7 +38,9 @@ import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
+import net.shoreline.client.impl.event.network.ReachEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
+import net.shoreline.client.impl.manager.world.tick.TickSync;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.math.timer.CacheTimer;
@@ -448,16 +451,13 @@ public class AuraModule extends RotationModule {
         return switch (hitVectorConfig.getValue()) {
             case FEET -> feetPos;
             case TORSO -> feetPos.add(0.0, entity.getHeight() / 2.0f, 0.0);
-            case EYES -> feetPos.add(0.0, entity.getStandingEyeHeight(), 0.0);
-            case AUTO -> getNearestHitVec(entity);
+            case EYES -> entity.getEyePos();
+            case AUTO -> {
+                Vec3d torsoPos = feetPos.add(0.0, entity.getHeight() / 2.0f, 0.0);
+                Vec3d eyesPos = entity.getEyePos();
+                yield Stream.of(feetPos, torsoPos, eyesPos).min(Comparator.comparing(b -> mc.player.getEyePos().squaredDistanceTo(b))).orElse(eyesPos);
+            }
         };
-    }
-
-    private Vec3d getNearestHitVec(Entity entity) {
-        Vec3d feetPos = entity.getPos();
-        Vec3d torsoPos = feetPos.add(0.0, entity.getHeight() / 2.0f, 0.0);
-        Vec3d eyesPos = feetPos.add(0.0, entity.getStandingEyeHeight(), 0.0);
-        return Stream.of(feetPos, torsoPos, eyesPos).min(Comparator.comparing(b -> Managers.POSITION.getEyePos().squaredDistanceTo(b))).orElse(eyesPos);
     }
 
     /**

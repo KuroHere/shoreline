@@ -27,7 +27,7 @@ import java.util.Set;
 public class SelfBowModule extends RotationModule {
 
     //
-    private final Set<StatusEffect> arrows = new HashSet<>();
+    private final Set<StatusEffectInstance> arrows = new HashSet<>();
     private int shootTicks;
 
     /**
@@ -44,9 +44,8 @@ public class SelfBowModule extends RotationModule {
     }
 
     @EventListener
-    public void onTick(PlayerTickEvent event) {
+    public void onPlayerTick(PlayerTickEvent event) {
         int arrowSlot = -1;
-        StatusEffect arrowEffect = null;
         for (int i = 9; i < 36; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.isEmpty() || !(stack.getItem() instanceof TippedArrowItem)) {
@@ -55,9 +54,8 @@ public class SelfBowModule extends RotationModule {
             Potion p = PotionUtil.getPotion(stack);
             for (StatusEffectInstance effect : p.getEffects()) {
                 StatusEffect type = effect.getEffectType();
-                if (type.isBeneficial() && !arrows.contains(type) && mc.player.getStatusEffect(type) == null) {
+                if (type.isBeneficial() && !arrows.contains(effect)) {
                     arrowSlot = i;
-                    arrowEffect = type;
                     break;
                 }
             }
@@ -78,26 +76,21 @@ public class SelfBowModule extends RotationModule {
             return;
         }
         setRotation(mc.player.getYaw(), -90.0f);
-        prioritizeArrow(arrowSlot, arrowEffect);
+        prioritizeArrow(arrowSlot);
         float pullTime = BowItem.getPullProgress(mc.player.getItemUseTime());
         if (pullTime >= 0.15f) {
-            arrows.add(arrowEffect);
+            ItemStack stack = mc.player.getInventory().getStack(9);
+            arrows.addAll(PotionUtil.getPotion(stack).getEffects());
             shootTicks = 0;
             mc.options.useKey.setPressed(false);
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, Direction.DOWN));
             mc.player.stopUsingItem();
-            return;
+        } else {
+            mc.options.useKey.setPressed(true);
         }
-        mc.options.useKey.setPressed(true);
     }
 
-    private void prioritizeArrow(int slot, StatusEffect statusEffect) {
-        ItemStack stack = mc.player.getInventory().getStack(9);
-        Potion p = PotionUtil.getPotion(stack);
-        boolean b1 = p.getEffects().stream().anyMatch(p1 -> p1.getEffectType() == statusEffect);
-        if (stack.getItem() instanceof TippedArrowItem && b1) {
-            return;
-        }
+    private void prioritizeArrow(int slot) {
         boolean returnClick = mc.player.currentScreenHandler.getCursorStack().isEmpty();
         Managers.INVENTORY.pickupSlot(slot);
         Managers.INVENTORY.pickupSlot(9);
