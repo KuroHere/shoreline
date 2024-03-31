@@ -13,7 +13,7 @@ float roundedBoxSDF(vec2 cpos, vec2 size, float r)
 void main()
 {
     vec2 half = size * 0.5;
-    float distance = roundedBoxSDF(half - (gl_TexCoord[0].st * rectSize),
+    float distance = roundedBoxSDF(half - (gl_TexCoord[0].st * size),
                                    half, radius);
     float a = 1.0 - smoothstep(0.0, softness * 2.0, distance);
     gl_FragColor = vec4(color.rgb, color.a * a);

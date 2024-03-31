@@ -11,9 +11,10 @@ import java.awt.*;
  */
 public class CategoryFrame extends ComponentDraggable {
 
-    public static final int HEADER = new Color(33, 33, 33).getRGB();
-    public static final int BACKGROUND = new Color(48, 48, 48).getRGB();
+    public static final Color HEADER = new Color(33, 33, 33);
+    public static final Color BACKGROUND = new Color(48, 48, 48);
     private static final float PADDING = 1.0f;
+    private static final float RADIUS = 3.5f;
 
     private final String name;
     private final float headerHeight;
@@ -29,8 +30,8 @@ public class CategoryFrame extends ComponentDraggable {
 
         //ctx.enableScissor((int) getX(), (int) getY(), (int) (getX() + getWidth()), (int) (getY() + getHeight()));
 
-        ctx.fill((int) getX(), (int) getY(), (int) (getX() + getWidth()), (int) (getY() + getHeight()), HEADER);
-        ctx.fill((int) (getX() + PADDING), (int) (getY() + headerHeight + PADDING), (int) (getX() + getWidth() - PADDING), (int) (getY() + getHeight() - PADDING), BACKGROUND);
+        drawRoundedRectangle((int) getX(), (int) getY(), (int) (getX() + getWidth()), (int) (getY() + getHeight()), RADIUS, HEADER);
+        //drawRoundedRectangle((int) (getX() + PADDING), (int) (getY() + headerHeight + PADDING), (int) (getX() + getWidth() - PADDING), (int) (getY() + getHeight() - PADDING), RADIUS, BACKGROUND);
 
         ctx.drawTextWithShadow(mc.textRenderer, name, (int) (getX() + (PADDING * 4)), (int) (getY() + 5), -1);
 

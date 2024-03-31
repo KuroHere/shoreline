@@ -27,7 +27,7 @@ public final class ModuleComponent extends AbstractComponent {
             enabled = toggle.isEnabled();
         }
 
-        ctx.fill((int) getX(), (int) getY(), (int) (getX() + getWidth()), (int) (getY() + getHeight()), (enabled ? new Color(101, 64, 152) : new Color(44, 43, 43)).getRGB());
+        drawRoundedRectangle((int) getX(), (int) getY(), (int) (getX() + getWidth()), (int) (getY() + getHeight()), 3.5f, (enabled ? new Color(101, 64, 152) : new Color(44, 43, 43)));
 
         ctx.drawTextWithShadow(mc.textRenderer, module.getName(), (int) (getX() + 2.0f), (int) (getY() + 4.0f), -1);
     }

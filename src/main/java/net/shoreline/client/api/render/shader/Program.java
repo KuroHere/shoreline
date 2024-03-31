@@ -22,12 +22,21 @@ public abstract class Program {
     public abstract void updateUniforms();
 
     public void use() {
+        GlStateManager._glUseProgram(id);
+
         if (!isInitialisedUniforms) {
             initUniforms();
             isInitialisedUniforms = true;
         }
-        updateUniforms();
         //
-        GlStateManager._glUseProgram(id);
+        updateUniforms();
+    }
+
+    public void stopUse() {
+        GlStateManager._glUseProgram(0);
+    }
+
+    public int getId() {
+        return id;
     }
 }

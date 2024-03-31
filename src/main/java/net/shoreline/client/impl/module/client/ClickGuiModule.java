@@ -14,7 +14,7 @@ import org.lwjgl.glfw.GLFW;
 public class ClickGuiModule extends ToggleModule {
     //
     private static ClickGuiScreen CLICK_GUI_SCREEN;
-    // private static ClientGuiSecondaryScreen SECONDARY_CLICK_GUI_SCREEN;
+    private static ClientGuiSecondaryScreen SECONDARY_CLICK_GUI_SCREEN;
 
     // TODO: Fix Gui scaling
     public float scaleConfig = 1.0f;
@@ -37,15 +37,15 @@ public class ClickGuiModule extends ToggleModule {
             return;
         }
         // initialize the null gui screen instance
-        if (CLICK_GUI_SCREEN == null) {
-            CLICK_GUI_SCREEN = new ClickGuiScreen(this);
-        }
-        mc.setScreen(CLICK_GUI_SCREEN);
-
-//        if (SECONDARY_CLICK_GUI_SCREEN == null) {
-//            SECONDARY_CLICK_GUI_SCREEN = new ClientGuiSecondaryScreen(this);
+//        if (CLICK_GUI_SCREEN == null) {
+//            CLICK_GUI_SCREEN = new ClickGuiScreen(this);
 //        }
-//        mc.setScreen(SECONDARY_CLICK_GUI_SCREEN);
+//        mc.setScreen(CLICK_GUI_SCREEN);
+
+        if (SECONDARY_CLICK_GUI_SCREEN == null) {
+            SECONDARY_CLICK_GUI_SCREEN = new ClientGuiSecondaryScreen(this);
+        }
+        mc.setScreen(SECONDARY_CLICK_GUI_SCREEN);
     }
 
     /**

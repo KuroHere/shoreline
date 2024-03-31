@@ -9,7 +9,7 @@ import java.util.List;
  * @author xgraza
  * @since 03/30/24
  */
-public abstract class AbstractComponent implements Component {
+public abstract class AbstractComponent implements Component, ComponentDrawHelper {
 
     private final List<Component> children = new LinkedList<>();
     private float x, y, width, height;
