@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.manager.combat.hole;
 
+import io.netty.util.internal.ConcurrentSet;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
@@ -13,7 +14,9 @@ import net.shoreline.client.util.world.BlastResistantBlocks;
 import net.shoreline.client.util.world.BlockUtil;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 
 /**
@@ -23,7 +26,7 @@ import java.util.concurrent.*;
 public class HoleManager implements Globals {
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
     //
-    private List<Hole> holes = new CopyOnWriteArrayList<>();
+    private Set<Hole> holes = new ConcurrentSet<>();
 
     public HoleManager() {
         Shoreline.EVENT_HANDLER.subscribe(this);
@@ -39,7 +42,7 @@ public class HoleManager implements Globals {
         }
         HoleTask runnable = new HoleTask(getSphere(mc.player.getPos()));
         //
-        Future<List<Hole>> result = executor.submit(runnable);
+        Future<Set<Hole>> result = executor.submit(runnable);
         try {
             holes = result.get();
         } catch (ExecutionException | InterruptedException e) {
@@ -205,11 +208,11 @@ public class HoleManager implements Globals {
     /**
      * @return
      */
-    public List<Hole> getHoles() {
+    public Set<Hole> getHoles() {
         return holes;
     }
 
-    public class HoleTask implements Callable<List<Hole>> {
+    public class HoleTask implements Callable<Set<Hole>> {
         private final List<BlockPos> blocks;
 
         public HoleTask(List<BlockPos> blocks) {
@@ -217,8 +220,8 @@ public class HoleManager implements Globals {
         }
 
         @Override
-        public List<Hole> call() throws Exception {
-            List<Hole> holes1 = new ArrayList<>();
+        public Set<Hole> call() throws Exception {
+            Set<Hole> holes1 = new HashSet<>();
             for (BlockPos blockPos : blocks) {
                 Hole hole = checkHole(blockPos);
                 if (hole != null) {

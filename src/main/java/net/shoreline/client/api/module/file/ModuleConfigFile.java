@@ -3,7 +3,6 @@ package net.shoreline.client.api.module.file;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.file.ConfigFile;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.init.Managers;
