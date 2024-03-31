@@ -90,7 +90,7 @@ public final class ClientGuiSecondaryScreen extends Screen {
     @Override
     public void close() {
         module.disable();
-        Shoreline.CONFIG.saveModulesFolder("Modules");
+        Shoreline.CONFIG.saveModuleConfiguration("Modules");
         super.close();
     }
 }

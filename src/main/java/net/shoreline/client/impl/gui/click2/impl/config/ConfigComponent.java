@@ -2,6 +2,7 @@ package net.shoreline.client.impl.gui.click2.impl.config;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.math.Vec2f;
+import net.shoreline.client.api.file.ConfigFile;
 import net.shoreline.client.impl.gui.click2.component.AbstractComponent;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
@@ -12,10 +13,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
  */
 public final class ConfigComponent extends AbstractComponent {
 
-    private final String name;
+    private final ConfigFile config;
 
-    public ConfigComponent(String name) {
-        this.name = name;
+    public ConfigComponent(ConfigFile config) {
+        this.config = config;
     }
 
     @Override

@@ -108,8 +108,8 @@ public class ClientConfiguration implements Globals {
         file.load();
     }
 
-    public Set<String> getConfigPresets() {
-        return configPresets;
+    public Set<ConfigFile> getFiles() {
+        return files;
     }
 
     /**

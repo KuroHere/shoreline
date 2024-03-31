@@ -3,6 +3,7 @@ package net.shoreline.client.impl.gui.click2.impl.config;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.math.Vec2f;
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.file.ConfigFile;
 import net.shoreline.client.impl.gui.click2.component.CategoryFrame;
 
 /**
@@ -17,8 +18,8 @@ public final class ConfigCategoryFrame extends CategoryFrame {
     public void populateChildren() {
         clearChildren();
         // Get all configuration names
-        for (final String configName : Shoreline.CONFIG.getConfigPresets()) {
-            addChild(new ConfigComponent(configName));
+        for (final ConfigFile config : Shoreline.CONFIG.getFiles()) {
+            addChild(new ConfigComponent(config));
         }
     }
 
