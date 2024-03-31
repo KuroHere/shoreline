@@ -133,6 +133,9 @@ public class SpeedmineModule extends RotationModule {
                 }
             }
             damage = 0.0f;
+            mining = null;
+            state = null;
+            direction = null;
         } else {
             float delta = calcBlockBreakingDelta(state, mc.world, mining);
             damage += delta;

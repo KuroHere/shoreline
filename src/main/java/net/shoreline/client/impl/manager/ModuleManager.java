@@ -65,7 +65,7 @@ public class ModuleManager {
                 new NoMineAnimationModule(),
                 new PacketCancelerModule(),
                 new PacketFlyModule(),
-                // new PhaseModule(),
+                new PhaseModule(),
                 new PortalGodModeModule(),
                 new ReachModule(),
                 new SwingModule(),

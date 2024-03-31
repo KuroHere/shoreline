@@ -76,7 +76,7 @@ public class JesusModule extends ToggleModule {
                 | state.getFluidState().getFluid() == Fluids.WATER)
                 || state.getBlock() == Blocks.LAVA)) {
             event.cancel();
-            event.setVoxelShape(VoxelShapes.fullCube());
+            event.setVoxelShape(VoxelShapes.cuboid(new Box(0.0, 0.0, 0.0, 1.0, 0.99, 1.0)));
             if (mc.player.getVehicle() != null) {
                 event.setVoxelShape(VoxelShapes.cuboid(new Box(0.0, 0.0, 0.0, 1.0,
                         0.949999988079071, 1.0)));
