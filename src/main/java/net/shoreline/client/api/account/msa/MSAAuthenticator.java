@@ -188,16 +188,19 @@ public final class MSAAuthenticator
         httpGet.setHeader("User-Agent", REAL_USER_AGENT);
         httpGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8");
 
-        try (final CloseableHttpResponse response = HTTP_CLIENT.execute(httpGet)) {
+        try (final CloseableHttpResponse response = HTTP_CLIENT.execute(httpGet))
+        {
             final String content = EntityUtils.toString(response.getEntity());
             final OAuthResult result = new OAuthResult();
 
             // Find these pieces of information - we cannot go on to login without them
             Matcher matcher = SFTT_TAG_PATTERN.matcher(content);
-            if (matcher.find()) {
+            if (matcher.find())
+            {
                 result.setSfttTag(matcher.group(1));
             }
-            if ((matcher = POST_URL_PATTERN.matcher(content)).find()) {
+            if ((matcher = POST_URL_PATTERN.matcher(content)).find())
+            {
                 result.setPostUrl(matcher.group(1));
             }
 
@@ -207,7 +210,9 @@ public final class MSAAuthenticator
                     .collect(Collectors.joining(";")));
 
             return result;
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             e.printStackTrace();
             throw new MSAAuthException("Failed to login with email & password.");
         }
@@ -233,8 +238,8 @@ public final class MSAAuthenticator
                 }), ContentType.create(contentTypeRaw)));
 
         final HttpClientContext ctx = HttpClientContext.create();
-        try (CloseableHttpResponse response = HTTP_CLIENT.execute(httpPost, ctx)) {
-
+        try (CloseableHttpResponse response = HTTP_CLIENT.execute(httpPost, ctx))
+        {
             final List<URI> redirectLocations = ctx.getRedirectLocations();
             if (redirectLocations != null && !redirectLocations.isEmpty())
             {
@@ -283,13 +288,12 @@ public final class MSAAuthenticator
     {
         final String body = "{\"Properties\":{\"AuthMethod\":\"RPS\",\"SiteName\":\"user.auth.xboxlive.com\",\"RpsTicket\":\""
                 + (browser ? "d=" : "") + accessToken + "\"},\"RelyingParty\":\"http://auth.xboxlive.com\",\"TokenType\":\"JWT\"}";
-
         final String content = makePostRequest(XBOX_LIVE_AUTH_URL, body, ContentType.APPLICATION_JSON);
         if (content != null && !content.isEmpty())
         {
-            final XboxLiveData data = new XboxLiveData();
             final JsonObject object = JsonParser.parseString(content).getAsJsonObject();
 
+            final XboxLiveData data = new XboxLiveData();
             data.setToken(object.get("Token").getAsString());
             data.setUserHash(object.get("DisplayClaims").getAsJsonObject()
                     .get("xui").getAsJsonArray()
@@ -298,7 +302,6 @@ public final class MSAAuthenticator
 
             return data;
         }
-
         throw new MSAAuthException("Failed to authenticate with Xbox Live account");
     }
 
@@ -306,17 +309,12 @@ public final class MSAAuthenticator
     {
         final String body = "{\"Properties\":{\"SandboxId\":\"RETAIL\",\"UserTokens\":[\""
                 + xboxLiveData.getToken() + "\"]},\"RelyingParty\":\"rp://api.minecraftservices.com/\",\"TokenType\":\"JWT\"}";
-
-        String content = makePostRequest(XBOX_XSTS_AUTH_URL, body, ContentType.APPLICATION_JSON);
+        final String content = makePostRequest(XBOX_XSTS_AUTH_URL, body, ContentType.APPLICATION_JSON);
         if (content != null && !content.isEmpty())
         {
-            JsonObject object = JsonParser.parseString(content).getAsJsonObject();
-
+            final JsonObject object = JsonParser.parseString(content).getAsJsonObject();
             if (object.has("XErr"))
             {
-                xboxLiveData.setToken(null);
-                xboxLiveData.setUserHash(null);
-
                 throw new MSAAuthException("Xbox Live Error: " + object.get("XErr").getAsString());
             }
             else
@@ -376,6 +374,7 @@ public final class MSAAuthenticator
         }
         catch (IOException e)
         {
+            Shoreline.error("Failed to make POST request to {}", url);
             e.printStackTrace();
         }
         return null;
