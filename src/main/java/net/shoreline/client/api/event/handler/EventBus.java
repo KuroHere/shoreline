@@ -35,6 +35,9 @@ public class EventBus implements EventHandler {
      */
     @Override
     public void subscribe(Object obj) {
+        if (subscribers.contains(obj)) {
+            return;
+        }
         subscribers.add(obj);
         for (Method method : obj.getClass().getMethods()) {
             method.trySetAccessible();

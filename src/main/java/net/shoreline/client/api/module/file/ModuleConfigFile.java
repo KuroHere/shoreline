@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.shoreline.client.api.file.ConfigFile;
 import net.shoreline.client.api.module.Module;
+import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.init.Managers;
 
 import java.io.IOException;
