@@ -45,16 +45,14 @@ public final class AccountSelectorScreen extends Screen {
         // my head hurts
         addDrawableChild(ButtonWidget.builder(Text.of("Add"),
                 (action) -> client.setScreen(new AccountAddAccountScreen(this)))
-                .dimensions(width / 2 - buttonWidth - 2,
-                        accountListWidget.getHeight() + 40,
-                        buttonWidth, buttonHeight)
+                .dimensions(width / 2 + 2, accountListWidget.getHeight() + 40, buttonWidth, buttonHeight)
                 .build());
         addDrawableChild(ButtonWidget.builder(Text.of("Login"), (action) -> {
             final AccountEntry entry = accountListWidget.getSelectedOrNull();
             if (entry != null) {
                 entry.getAccount().login();
             }
-        }).dimensions(width / 2 + 2, accountListWidget.getHeight() + 40, buttonWidth, buttonHeight).build());
+        }).dimensions(width / 2 - buttonWidth - 2, accountListWidget.getHeight() + 40, buttonWidth, buttonHeight).build());
         addDrawableChild(ButtonWidget.builder(Text.of("Back"),
                 (action) -> client.setScreen(parent))
                 .dimensions(width / 2 - buttonWidth - 2,

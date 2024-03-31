@@ -751,7 +751,8 @@ public class AutoCrystalModule extends RotationModule {
             BlockPos sequentialPos = null;
             if (preSequentialConfig.getValue()) {
                 List<BlockPos> blocks = getSphere(mc.player.getPos());
-                DamageData<BlockPos> sequentialCalc = calculatePlaceCrystal(blocks, Lists.newArrayList(mc.world.getEntities()));
+                DamageData<BlockPos> sequentialCalc = calculatePlaceCrystal(blocks,
+                        Lists.newArrayList(mc.world.getEntities()));
                 if (sequentialCalc != null) {
                     sequentialPos = sequentialCalc.getDamageData();
                 }
