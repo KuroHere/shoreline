@@ -1,22 +1,36 @@
-package net.shoreline.client.api.file;
+package net.shoreline.client.api.module.file;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.file.ConfigFile;
+import net.shoreline.client.api.module.Module;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ClientInfoFile extends ConfigFile {
+/**
+ * @author linus
+ * @see Module
+ * @see ConfigFile
+ * @since 1.0
+ */
+public class ModuleFile extends ConfigFile {
+    //
+    private final Module module;
 
     /**
      * @param dir
+     * @param module
      */
-    public ClientInfoFile(Path dir) {
-        super(dir, "ClientInfo");
+    public ModuleFile(Path dir, Module module) {
+        super(dir, module.getId());
+        this.module = module;
     }
 
+    /**
+     *
+     */
     @Override
     public void save() {
         try {
@@ -24,33 +38,31 @@ public class ClientInfoFile extends ConfigFile {
             if (!Files.exists(filepath)) {
                 Files.createFile(filepath);
             }
-            JsonObject json = new JsonObject();
-            json.addProperty("config", Shoreline.CONFIG.getConfigPreset());
+            JsonObject json = module.toJson();
             write(filepath, serialize(json));
         }
         // error writing file
         catch (IOException e) {
-            Shoreline.error("Could not save client info file!");
+            Shoreline.error("Could not save file for {}!", module.getName());
             e.printStackTrace();
         }
     }
 
+    /**
+     *
+     */
     @Override
     public void load() {
         try {
             Path filepath = getFilepath();
             if (Files.exists(filepath)) {
                 String content = read(filepath);
-                JsonObject json = parseObject(content);
-                if (json.has("config")) {
-                    JsonElement element = json.get("config");
-                    Shoreline.CONFIG.setConfigPreset(element.getAsString());
-                }
+                module.fromJson(parseObject(content));
             }
         }
         // error writing file
         catch (IOException e) {
-            Shoreline.error("Could not read client info file!");
+            Shoreline.error("Could not read file for {}!", module.getName());
             e.printStackTrace();
         }
     }

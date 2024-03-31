@@ -57,6 +57,7 @@ public class Modules {
     public static NoMineAnimationModule NO_MINE_ANIMATION;
     public static PacketCancelerModule PACKET_CANCELER;
     public static PacketFlyModule PACKET_FLY;
+    public static PhaseModule PHASE;
     public static PortalGodModeModule PORTAL_GOD_MODE;
     public static ReachModule REACH;
     public static SwingModule SWING;
@@ -207,6 +208,7 @@ public class Modules {
             NO_MINE_ANIMATION = (NoMineAnimationModule) getRegisteredModule("nomineanimation-module");
             PACKET_CANCELER = (PacketCancelerModule) getRegisteredModule("packetcanceler-module");
             PACKET_FLY = (PacketFlyModule) getRegisteredModule("packetfly-module");
+            PHASE = (PhaseModule) getRegisteredModule("phase-module");
             PORTAL_GOD_MODE = (PortalGodModeModule) getRegisteredModule("portalgodmode-module");
             REACH = (ReachModule) getRegisteredModule("reach-module");
             SWING = (SwingModule) getRegisteredModule("swing-module");

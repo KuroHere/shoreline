@@ -20,10 +20,10 @@ public class BlockCollisionEvent extends Event {
     //
     private VoxelShape voxelShape;
 
-    public BlockCollisionEvent(BlockPos pos, BlockState state) {
+    public BlockCollisionEvent(VoxelShape voxelShape, BlockPos pos, BlockState state) {
         this.pos = pos;
         this.state = state;
-        this.voxelShape = VoxelShapes.empty();
+        this.voxelShape = voxelShape;
     }
 
     public BlockPos getPos() {

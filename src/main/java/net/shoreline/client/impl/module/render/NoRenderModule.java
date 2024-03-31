@@ -52,7 +52,6 @@ public class NoRenderModule extends ToggleModule {
     Config<Boolean> explosionsConfig = new BooleanConfig("Explosions", "Prevents explosion particles from rendering", true);
     Config<Boolean> campfiresConfig = new BooleanConfig("Campfires", "Prevents campfire particles from rendering", false);
     Config<Boolean> totemConfig = new BooleanConfig("Totems", "Prevents totem particles from rendering", false);
-    Config<Boolean> unicodeConfig = new BooleanConfig("Chat-Unicode", "Prevents unicode characters from being rendered in chat", false);
     Config<Boolean> worldBorderConfig = new BooleanConfig("WorldBorder", "Prevents world border from rendering", false);
     Config<Boolean> interpolationConfig = new BooleanConfig("Interpolation", "Entities will be rendered at their server positions", false);
     Config<FogRender> fogConfig = new EnumConfig<>("Fog", "Prevents fog from rendering in the world", FogRender.OFF, FogRender.values());
@@ -78,16 +77,6 @@ public class NoRenderModule extends ToggleModule {
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.world == null) {
             return;
-        }
-        if (event.getPacket() instanceof ChatMessageS2CPacket packet
-                && unicodeConfig.getValue()) {
-            String msg = packet.body().content();
-            for (char c : msg.toCharArray()) {
-                if (Character.UnicodeBlock.of(c) != Character.UnicodeBlock.BASIC_LATIN) {
-                    event.cancel();
-                    break;
-                }
-            }
         }
         if (antiCrashConfig.getValue()) {
             // Out of bounds packets from server

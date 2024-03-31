@@ -39,17 +39,17 @@ public class ReplenishModule extends ToggleModule {
             }
             float total = ((float) stack.getCount() / stack.getMaxCount()) * 100.0f;
             if (total < percentConfig.getValue()) {
-                replenishStack(stack);
+                replenishStack(stack, i);
                 break;
             }
         }
     }
 
-    private void replenishStack(ItemStack item) {
+    private void replenishStack(ItemStack item, int hotbarSlot) {
         int replenishSlot = -1;
         for (int i = 9; i < 36; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
-            // We cannot merge stacks if they dont have the same name
+            // We cannot merge stacks if they don't have the same name
             if (!stack.getName().equals(item.getName())) {
                 continue;
             }
@@ -62,7 +62,12 @@ public class ReplenishModule extends ToggleModule {
             replenishSlot = i;
         }
         if (replenishSlot != -1) {
-            Managers.INVENTORY.quickMove(replenishSlot);
+            // Managers.INVENTORY.quickMove(replenishSlot);
+            Managers.INVENTORY.pickupSlot(replenishSlot);
+            Managers.INVENTORY.pickupSlot(hotbarSlot);
+            if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+                Managers.INVENTORY.pickupSlot(replenishSlot);
+            }
         }
     }
 }

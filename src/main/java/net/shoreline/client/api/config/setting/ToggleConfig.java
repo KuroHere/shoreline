@@ -32,4 +32,18 @@ public class ToggleConfig extends BooleanConfig {
             }
         }
     }
+
+    public void enable() {
+        ConfigContainer container = getContainer();
+        if (container instanceof ToggleModule toggle) {
+            toggle.enable();
+        }
+    }
+
+    public void disable() {
+        ConfigContainer container = getContainer();
+        if (container instanceof ToggleModule toggle) {
+            toggle.disable();
+        }
+    }
 }

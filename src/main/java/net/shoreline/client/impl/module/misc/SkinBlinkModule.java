@@ -44,6 +44,9 @@ public class SkinBlinkModule extends ToggleModule {
 
     @Override
     public void onDisable() {
+        if (enabledPlayerModelParts == null) {
+            return;
+        }
         for (PlayerModelPart modelPart : enabledPlayerModelParts) {
             mc.options.togglePlayerModelPart(modelPart, true);
         }

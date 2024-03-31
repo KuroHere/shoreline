@@ -1,13 +1,13 @@
 package net.shoreline.client.impl.module.combat;
 
+import net.shoreline.client.api.module.BlockPlacerModule;
 import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.PlaceBlockModule;
 
 /**
  * @author linus
  * @since 1.0
  */
-public class SelfTrapModule extends PlaceBlockModule {
+public class SelfTrapModule extends BlockPlacerModule {
     /**
      *
      */

@@ -30,10 +30,10 @@ public class ConfigCommand extends Command {
             return;
         }
         if (action.equalsIgnoreCase("save")) {
-            Shoreline.CONFIG.saveModulesFolder(name);
+            Shoreline.CONFIG.saveModuleConfiguration(name);
             ChatUtil.clientSendMessage("Saved config with name §7" + name);
         } else if (action.equalsIgnoreCase("load")) {
-            Shoreline.CONFIG.loadModulesFolder(name);
+            Shoreline.CONFIG.loadModuleConfiguration(name);
             ChatUtil.clientSendMessage("Loaded config with name §7" + name);
         }
     }

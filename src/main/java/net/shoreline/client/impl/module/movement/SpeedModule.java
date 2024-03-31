@@ -464,14 +464,14 @@ public class SpeedModule extends ToggleModule {
         if (event.getPacket() instanceof ExplosionS2CPacket packet) {
             double x = packet.getPlayerVelocityX();
             double z = packet.getPlayerVelocityZ();
-            boostSpeed = Math.sqrt(x * x + z * z);
-            boostTicks = 0;
+            // boostSpeed = Math.sqrt(x * x + z * z);
+            // boostTicks = 0;
         } else if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet
                 && packet.getId() == mc.player.getId()) {
             double x = packet.getVelocityX();
             double z = packet.getVelocityZ();
-            boostSpeed = Math.sqrt(x * x + z * z);
-            boostTicks = 0;
+            // boostSpeed = Math.sqrt(x * x + z * z);
+            // boostTicks = 0;
         } else if (event.getPacket() instanceof PlayerPositionLookS2CPacket) {
             resetStrafe();
         }

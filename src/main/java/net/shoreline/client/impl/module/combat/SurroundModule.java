@@ -18,8 +18,8 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
+import net.shoreline.client.api.module.BlockPlacerModule;
 import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.PlaceBlockModule;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.ScreenOpenEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
@@ -37,7 +37,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author linus
  * @since 1.0
  */
-public class SurroundModule extends PlaceBlockModule {
+public class SurroundModule extends BlockPlacerModule {
     //
     Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange", "The placement range for surround", 0.0f, 4.0f, 5.0f);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates to block before placing", false);

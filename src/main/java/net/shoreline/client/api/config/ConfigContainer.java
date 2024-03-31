@@ -7,6 +7,7 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.Identifiable;
 import net.shoreline.client.api.config.setting.*;
 import net.shoreline.client.api.macro.Macro;
+import net.shoreline.client.util.Globals;
 
 import java.awt.*;
 import java.lang.reflect.Field;
@@ -23,7 +24,7 @@ import java.util.concurrent.ConcurrentMap;
  * @see ConfigFactory
  * @since 1.0
  */
-public class ConfigContainer implements Identifiable, Serializable<Config<?>> {
+public class ConfigContainer implements Identifiable, Serializable<Config<?>>, Globals {
     // Container name is its UNIQUE identifier.
     protected final String name;
     // List of all configurations in the container. The configs are managed
@@ -128,7 +129,18 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>> {
                     continue;
                 }
                 try {
-                    if (config instanceof BooleanConfig cfg) {
+                    if (config instanceof ToggleConfig cfg) {
+                        Boolean val = cfg.fromJson(configObj);
+                        if (mc.world != null) {
+                            if (val) {
+                                cfg.enable();
+                            } else {
+                                cfg.disable();
+                            }
+                        } else {
+                            cfg.setValue(val);
+                        }
+                    } else if (config instanceof BooleanConfig cfg) {
                         Boolean val = cfg.fromJson(configObj);
                         cfg.setValue(val);
                     } else if (config instanceof ColorConfig cfg) {

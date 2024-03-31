@@ -28,7 +28,6 @@ public class SelfBowModule extends RotationModule {
 
     //
     private final Set<StatusEffectInstance> arrows = new HashSet<>();
-    private int shootTicks;
 
     /**
      *
@@ -46,6 +45,7 @@ public class SelfBowModule extends RotationModule {
     @EventListener
     public void onPlayerTick(PlayerTickEvent event) {
         int arrowSlot = -1;
+        StatusEffectInstance statusEffect = null;
         for (int i = 9; i < 36; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.isEmpty() || !(stack.getItem() instanceof TippedArrowItem)) {
@@ -56,6 +56,7 @@ public class SelfBowModule extends RotationModule {
                 StatusEffect type = effect.getEffectType();
                 if (type.isBeneficial() && !arrows.contains(effect)) {
                     arrowSlot = i;
+                    statusEffect = effect;
                     break;
                 }
             }
@@ -79,9 +80,7 @@ public class SelfBowModule extends RotationModule {
         prioritizeArrow(arrowSlot);
         float pullTime = BowItem.getPullProgress(mc.player.getItemUseTime());
         if (pullTime >= 0.15f) {
-            ItemStack stack = mc.player.getInventory().getStack(9);
-            arrows.addAll(PotionUtil.getPotion(stack).getEffects());
-            shootTicks = 0;
+            arrows.add(statusEffect);
             mc.options.useKey.setPressed(false);
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, Direction.DOWN));
             mc.player.stopUsingItem();
