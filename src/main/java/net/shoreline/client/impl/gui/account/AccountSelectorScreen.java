@@ -5,9 +5,9 @@ import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.session.Session;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
-import net.shoreline.client.api.account.microsoft.MicrosoftAuthenticator;
 import net.shoreline.client.impl.gui.account.list.AccountEntry;
 import net.shoreline.client.impl.gui.account.list.AccountListWidget;
 import net.shoreline.client.impl.manager.client.AccountManager;
@@ -50,7 +50,11 @@ public final class AccountSelectorScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.of("Login"), (action) -> {
             final AccountEntry entry = accountListWidget.getSelectedOrNull();
             if (entry != null) {
-                entry.getAccount().login();
+                final Session session = entry.getAccount().login();
+                if (session != null)
+                {
+                    Managers.ACCOUNT.setSession(session);
+                }
             }
         }).dimensions(width / 2 - buttonWidth - 2, accountListWidget.getHeight() + 40, buttonWidth, buttonHeight).build());
         addDrawableChild(ButtonWidget.builder(Text.of("Back"),
@@ -76,12 +80,20 @@ public final class AccountSelectorScreen extends Screen {
                 }
                 client.setScreen(this);
             }, Text.of("Delete account?"),
-                Text.of("Are you sure you would like to delete " + entry.getAccount().getEmail() + "?"),
+                Text.of("Are you sure you would like to delete " + entry.getAccount().username() + "?"),
                 Text.of("Yes"),
                 Text.of("No")));
         }).dimensions(width / 2 + 2,
                 accountListWidget.getHeight() + 40 + buttonHeight + 2,
                 buttonWidth, buttonHeight).build());
+    }
+
+    @Override
+    public void onDisplayed() {
+        if (accountListWidget != null)
+        {
+            accountListWidget.populateEntries();
+        }
     }
 
     @Override
@@ -112,6 +124,6 @@ public final class AccountSelectorScreen extends Screen {
     }
 
     private String getLoginInfo() {
-        return AccountManager.MICROSOFT_AUTH.getLoginStage().isEmpty() ? "Logged in as " + client.getSession().getUsername() : AccountManager.MICROSOFT_AUTH.getLoginStage();
+        return AccountManager.MSA_AUTHENTICATOR.getLoginStage().isEmpty() ? "Logged in as " + client.getSession().getUsername() : AccountManager.MSA_AUTHENTICATOR.getLoginStage();
     }
 }

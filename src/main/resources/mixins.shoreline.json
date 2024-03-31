@@ -6,6 +6,7 @@
   "client": [
     "MixinKeyboard",
     "MixinKeyboardInput",
+    "MixinMain",
     "MixinMinecraftClient",
     "MixinMouse",
     "accessor.AccessorAbstractBlock",

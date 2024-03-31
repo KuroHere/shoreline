@@ -4,6 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.account.type.MinecraftAccount;
+import net.shoreline.client.api.account.type.impl.CrackedAccount;
+import net.shoreline.client.api.account.type.impl.MicrosoftAccount;
 import net.shoreline.client.api.file.ConfigFile;
 import net.shoreline.client.init.Managers;
 
@@ -12,16 +15,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * @author linus
- * @see Account
- * @since 1.0
+ * @author xgraza
+ * @see MinecraftAccount
+ * @since 03/31/24
  */
-public class AccountFile extends ConfigFile {
-
+public final class AccountFile extends ConfigFile
+{
     /**
      * @param dir
      */
-    public AccountFile(Path dir) {
+    public AccountFile(Path dir)
+    {
         super(dir, "accounts");
     }
 
@@ -29,28 +33,33 @@ public class AccountFile extends ConfigFile {
      *
      */
     @Override
-    public void save() {
-        try {
-            Path filepath = getFilepath();
-            if (!Files.exists(filepath)) {
+    public void save()
+    {
+        try
+        {
+            final Path filepath = getFilepath();
+            if (!Files.exists(filepath))
+            {
                 Files.createFile(filepath);
             }
-            JsonArray array = new JsonArray();
-            for (Account account : Managers.ACCOUNT.getAccounts()) {
-                JsonObject json = new JsonObject();
-                json.addProperty("email", account.getName());
-                json.addProperty("password", account.getPassword());
 
-                if (account.isPremium() && account.isUsernameSet()) {
-                    json.addProperty("username", account.getUsernameOrEmail());
+            final JsonArray array = new JsonArray();
+            for (final MinecraftAccount account : Managers.ACCOUNT.getAccounts())
+            {
+                try
+                {
+                    array.add(account.toJSON());
                 }
-
-                array.add(json);
+                catch (RuntimeException e)
+                {
+                    Shoreline.error(e.getMessage());
+                }
             }
             write(filepath, serialize(array));
         }
         // error writing file
-        catch (IOException e) {
+        catch (IOException e)
+        {
             Shoreline.error("Could not save file for accounts.json!");
             e.printStackTrace();
         }
@@ -60,31 +69,65 @@ public class AccountFile extends ConfigFile {
      *
      */
     @Override
-    public void load() {
-        try {
-            Path filepath = getFilepath();
-            if (Files.exists(filepath)) {
+    public void load()
+    {
+        try
+        {
+            final Path filepath = getFilepath();
+            if (Files.exists(filepath))
+            {
                 final String content = read(filepath);
-                JsonArray json = parseArray(content);
-                if (json == null) {
+                final JsonArray json = parseArray(content);
+                if (json == null)
+                {
                     return;
                 }
-                for (JsonElement e : json.asList()) {
-                    final JsonObject obj = e.getAsJsonObject();
-                    final String email = obj.get("email").getAsString();
-                    final String password = obj.get("password").getAsString();
-
-                    final Account account = new Account(email, password);
-                    if (obj.has("username")) {
-                        account.setUsername(obj.get("username").getAsString());
+                for (JsonElement element : json.asList())
+                {
+                    if (!(element instanceof JsonObject object))
+                    {
+                        continue;
                     }
 
-                    Managers.ACCOUNT.register(account);
+                    MinecraftAccount account = null;
+                    if (object.has("accessToken"))
+                    {
+                        if (!object.has("username"))
+                        {
+                            Shoreline.error("Browser account does not have a username set?");
+                            continue;
+                        }
+
+                        account = new MicrosoftAccount(object.get("accessToken").getAsString());
+                        ((MicrosoftAccount) account).setUsername(object.get("username").getAsString());
+                    }
+                    else if (object.has("email") && object.has("password")) {
+                        account = new MicrosoftAccount(object.get("email").getAsString(),
+                                object.get("password").getAsString());
+
+                        if (object.has("username")) {
+                            ((MicrosoftAccount) account).setUsername(object.get("username").getAsString());
+                        }
+                    }
+                    else if (object.has("username"))
+                    {
+                        account = new CrackedAccount(object.get("username").getAsString());
+                    }
+
+                    if (account != null)
+                    {
+                        Managers.ACCOUNT.register(account);
+                    }
+                    else
+                    {
+                        Shoreline.error("Empty / Invalid account data saved");
+                    }
                 }
             }
         }
         // error reading file
-        catch (IOException e) {
+        catch (IOException e)
+        {
             Shoreline.error("Could not read file for accounts.json!");
             e.printStackTrace();
         }

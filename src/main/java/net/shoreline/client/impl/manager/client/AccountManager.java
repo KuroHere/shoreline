@@ -1,36 +1,41 @@
 package net.shoreline.client.impl.manager.client;
 
-import net.shoreline.client.api.account.Account;
-import net.shoreline.client.api.account.microsoft.MicrosoftAuthenticator;
+import net.minecraft.client.session.Session;
+import net.shoreline.client.api.account.msa.MSAAuthenticator;
+import net.shoreline.client.api.account.type.MinecraftAccount;
+import net.shoreline.client.mixin.accessor.AccessorMinecraftClient;
+import net.shoreline.client.util.Globals;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author linus
- * @see Account
- * @since 1.0
+ * @author xgraza
+ * @see MinecraftAccount,
+ * @since 03/31/24
  */
-public class AccountManager {
+public final class AccountManager implements Globals
+{
     // The Microsoft authenticator
-    public static final MicrosoftAuthenticator MICROSOFT_AUTH =
-            new MicrosoftAuthenticator();
-    //
-    private final List<Account> accounts = new ArrayList<>();
+    public static final MSAAuthenticator MSA_AUTHENTICATOR = new MSAAuthenticator();
+    private final List<MinecraftAccount> accounts = new ArrayList<>();
 
     /**
      * @param account
      */
-    public void register(Account account) {
+    public void register(MinecraftAccount account)
+    {
         accounts.add(account);
     }
 
     /**
      * @param accounts
-     * @see #register(Account)
+     * @see #register(MinecraftAccount)
      */
-    public void register(Account... accounts) {
-        for (Account account : accounts) {
+    public void register(final MinecraftAccount... accounts)
+    {
+        for (final MinecraftAccount account : accounts)
+        {
             register(account);
         }
     }
@@ -39,14 +44,21 @@ public class AccountManager {
      *
      * @param account
      */
-    public void unregister(final Account account) {
+    public void unregister(final MinecraftAccount account)
+    {
         accounts.remove(account);
+    }
+
+    public void setSession(final Session session)
+    {
+        ((AccessorMinecraftClient) mc).setSession(session);
     }
 
     /**
      * @return
      */
-    public List<Account> getAccounts() {
+    public List<MinecraftAccount> getAccounts()
+    {
         return accounts;
     }
 }

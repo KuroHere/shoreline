@@ -3,7 +3,7 @@ package net.shoreline.client.impl.gui.account.list;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
-import net.shoreline.client.api.account.Account;
+import net.shoreline.client.api.account.type.MinecraftAccount;
 import net.shoreline.client.init.Managers;
 
 import java.util.List;
@@ -23,9 +23,9 @@ public final class AccountListWidget extends AlwaysSelectedEntryListWidget<Accou
 
     public void populateEntries() {
         clearEntries();
-        final List<Account> accounts = Managers.ACCOUNT.getAccounts();
+        final List<MinecraftAccount> accounts = Managers.ACCOUNT.getAccounts();
         if (!accounts.isEmpty()) {
-            for (final Account account : accounts) {
+            for (final MinecraftAccount account : accounts) {
                 addEntry(new AccountEntry(account));
             }
             setSelected(getEntry(0));
@@ -39,7 +39,7 @@ public final class AccountListWidget extends AlwaysSelectedEntryListWidget<Accou
         if (searchFilter != null && !searchFilter.isEmpty()) {
             entries = entries.stream()
                     // i know this looks bad... but hear me out -
-                    .filter((entry) -> entry.getAccount().getUsernameOrEmail()
+                    .filter((entry) -> entry.getAccount().username()
                             .toLowerCase()
                             .contains(searchFilter.toLowerCase()))
                     .toList();
@@ -60,7 +60,7 @@ public final class AccountListWidget extends AlwaysSelectedEntryListWidget<Accou
                     int color = isFocused() ? -1 : -8355712;
                     drawSelectionHighlight(context, y, width, height, color, -16777216);
                 }
-                boolean selected = client.getSession() != null && client.getSession().getUsername().equalsIgnoreCase(entry.getAccount().getUsername());
+                boolean selected = client.getSession() != null && client.getSession().getUsername().equalsIgnoreCase(entry.getAccount().username());
                 entry.render(context, i, y, x, width, height, mouseX, mouseY, selected, delta);
             }
         }
