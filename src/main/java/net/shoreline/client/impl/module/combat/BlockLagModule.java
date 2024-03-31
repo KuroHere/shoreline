@@ -10,7 +10,7 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.PlaceBlockModule;
+import net.shoreline.client.api.module.BlockPlacerModule;
 import net.shoreline.client.impl.event.ScreenOpenEvent;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
@@ -20,7 +20,7 @@ import net.shoreline.client.init.Managers;
  * @author linus
  * @since 1.0
  */
-public class BlockLagModule extends PlaceBlockModule {
+public class BlockLagModule extends BlockPlacerModule {
     //
     Config<Boolean> selfFillConfig = new BooleanConfig("SelfFill", "Fills in the block beneath you", false);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates before placing the block", false);

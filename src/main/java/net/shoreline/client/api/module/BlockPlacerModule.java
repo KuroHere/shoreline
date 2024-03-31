@@ -13,9 +13,9 @@ import net.shoreline.client.init.Managers;
  * @see SurroundModule
  * @since 1.0
  */
-public class PlaceBlockModule extends RotationModule {
+public class BlockPlacerModule extends RotationModule {
     // TODO: series of blocks
-    public PlaceBlockModule(String name, String desc, ModuleCategory category) {
+    public BlockPlacerModule(String name, String desc, ModuleCategory category) {
         super(name, desc, category);
     }
 
