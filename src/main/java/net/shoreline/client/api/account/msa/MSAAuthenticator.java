@@ -95,8 +95,6 @@ public final class MSAAuthenticator
     {
         if (!serverOpen || localServer == null)
         {
-            LOGGER.info("Opening server");
-
             // TODO: Auto close server if no interaction in a minute or so
             localServer = HttpServer.create();
             localServer.createContext("/login", (ctx) -> {
