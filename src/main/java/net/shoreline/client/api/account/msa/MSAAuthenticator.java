@@ -2,6 +2,7 @@ package net.shoreline.client.api.account.msa;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.util.UndashedUuid;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import net.minecraft.client.session.Session;
@@ -159,7 +160,7 @@ public final class MSAAuthenticator
         final String accessToken = loginWithXboxLive(data);
         setLoginStage("Fetching MC profile...");
         final MinecraftProfile profile = fetchMinecraftProfile(accessToken);
-        return new Session(profile.username(), parseMSAUUID(profile.id()), accessToken, Optional.empty(), Optional.empty(), Session.AccountType.MSA);
+        return new Session(profile.username(), UndashedUuid.fromStringLenient(profile.id()), accessToken, Optional.empty(), Optional.empty(), Session.AccountType.MSA);
     }
 
     public String getLoginToken(final String oauthToken) throws MSAAuthException
@@ -409,11 +410,6 @@ public final class MSAAuthenticator
             parameterMap.put(kv[0], kv.length == 1 ? null : kv[1]);
         }
         return parameterMap;
-    }
-
-    private UUID parseMSAUUID(final String profileId)
-    {
-        return UUID.fromString(profileId.replaceFirst("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5"));
     }
 
     public void setLoginStage(String loginStage)

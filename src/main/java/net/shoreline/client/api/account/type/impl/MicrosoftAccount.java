@@ -118,11 +118,11 @@ public final class MicrosoftAccount implements MinecraftAccount
     @Override
     public String username()
     {
-        if (email != null)
+        if (username != null)
         {
-            return email;
+            return username;
         }
-        return username;
+        return email;
     }
 
     public void setUsername(String username)

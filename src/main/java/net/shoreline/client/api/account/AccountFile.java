@@ -82,6 +82,7 @@ public final class AccountFile extends ConfigFile
                 {
                     return;
                 }
+
                 for (JsonElement element : json.asList())
                 {
                     if (!(element instanceof JsonObject object))
@@ -90,28 +91,29 @@ public final class AccountFile extends ConfigFile
                     }
 
                     MinecraftAccount account = null;
-                    if (object.has("accessToken"))
+                    if (object.has("email") && object.has("password")) {
+                        account = new MicrosoftAccount(object.get("email").getAsString(),
+                                object.get("password").getAsString());
+                        if (object.has("username")) {
+                            ((MicrosoftAccount) account).setUsername(object.get("username").getAsString());
+                        }
+                    }
+                    else if (object.has("token"))
                     {
                         if (!object.has("username"))
                         {
                             Shoreline.error("Browser account does not have a username set?");
                             continue;
                         }
-
-                        account = new MicrosoftAccount(object.get("accessToken").getAsString());
+                        account = new MicrosoftAccount(object.get("token").getAsString());
                         ((MicrosoftAccount) account).setUsername(object.get("username").getAsString());
                     }
-                    else if (object.has("email") && object.has("password")) {
-                        account = new MicrosoftAccount(object.get("email").getAsString(),
-                                object.get("password").getAsString());
-
-                        if (object.has("username")) {
-                            ((MicrosoftAccount) account).setUsername(object.get("username").getAsString());
-                        }
-                    }
-                    else if (object.has("username"))
+                    else
                     {
-                        account = new CrackedAccount(object.get("username").getAsString());
+                        if (object.has("username"))
+                        {
+                            account = new CrackedAccount(object.get("username").getAsString());
+                        }
                     }
 
                     if (account != null)
@@ -120,7 +122,7 @@ public final class AccountFile extends ConfigFile
                     }
                     else
                     {
-                        Shoreline.error("Empty / Invalid account data saved");
+                        Shoreline.error("Could not parse account JSON.\nRaw: {}", object.toString());
                     }
                 }
             }
