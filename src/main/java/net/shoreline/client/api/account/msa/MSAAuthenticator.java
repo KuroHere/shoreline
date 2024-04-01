@@ -60,8 +60,8 @@ public final class MSAAuthenticator
             .build();
 
     // TODO: Submit application to Mojang and wait lol
-    private static final String CLIENT_ID = "";
-    private static final String CLIENT_SECRET = "";
+    private static final String CLIENT_ID = "80c6f2ee-99cd-48da-b4fc-13d08e1027ca";
+    private static final String CLIENT_SECRET = "Qhg8Q~YhxKEa~Whgf~vHosTxw~Tr2nSzYfCoBbqQ";
     private static final int PORT = 7117;
 
     private static final String REAL_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0";
@@ -178,6 +178,9 @@ public final class MSAAuthenticator
             throw new MSAAuthException("Failed to get login token from MSA OAuth");
         }
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
+        if (obj.has("error")) {
+            throw new MSAAuthException(obj.get("error").getAsString() + ": " + obj.get("error_description").getAsString());
+        }
         return obj.get("access_token").getAsString();
     }
 
@@ -323,13 +326,16 @@ public final class MSAAuthenticator
         }
     }
 
-    private String loginWithXboxLive(final XboxLiveData data)
+    private String loginWithXboxLive(final XboxLiveData data) throws MSAAuthException
     {
         final String body = "{\"ensureLegacyEnabled\":true,\"identityToken\":\"XBL3.0 x=" + data.getUserHash() + ";" + data.getToken() + "\"}";
         final String content = makePostRequest(LOGIN_WITH_XBOX_URL, body, ContentType.APPLICATION_JSON);
         if (content != null && !content.isEmpty())
         {
             final JsonObject object = JsonParser.parseString(content).getAsJsonObject();
+            if (object.has("errorMessage")) {
+                throw new MSAAuthException(object.get("errorMessage").getAsString());
+            }
             return object.get("access_token").getAsString();
         }
         return null;
