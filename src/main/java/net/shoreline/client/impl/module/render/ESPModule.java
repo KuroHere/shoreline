@@ -58,15 +58,9 @@ public class ESPModule extends ToggleModule {
     }
 
     @EventListener
-    public void onTickEvent(TickEvent event) {
-        if (modeConfig.getValue() != ESPMode.GLOW) {
-            return;
-        }
-        for (Entity entity : mc.world.getEntities()) {
-            if (checkESP(entity)) {
-                entity.setGlowing(true);
-                ((AccessorEntity) entity).hookSetFlag(6, true);
-            }
+    public void onEntityOutline(EntityOutlineEvent event) {
+        if (modeConfig.getValue() == ESPMode.GLOW && checkESP(event.getEntity())) {
+            event.cancel();
         }
     }
 

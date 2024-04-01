@@ -64,10 +64,11 @@ public class ModuleButton extends Button {
             } else if (config.getValue() instanceof Macro) {
                 configComponents.add(new BindButton(frame,
                         (Config<Macro>) config, x, y));
-            } else if (config.getValue() instanceof Color) {
-                configComponents.add(new ColorButton(frame,
-                        (Config<Color>) config, x, y));
             }
+            // else if (config.getValue() instanceof Color) {
+            //    configComponents.add(new ColorButton(frame,
+            //            (Config<Color>) config, x, y));
+            // }
         }
         open = false;
     }
