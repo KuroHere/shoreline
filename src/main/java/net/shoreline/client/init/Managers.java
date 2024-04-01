@@ -90,6 +90,7 @@ public class Managers {
             MODULE.postInit();
             MACRO.postInit();
             COMMAND.postInit();
+            ACCOUNT.postInit();
             CAPES = new CapeManager();
         }
     }

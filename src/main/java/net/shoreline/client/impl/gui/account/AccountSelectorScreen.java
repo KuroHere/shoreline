@@ -86,6 +86,16 @@ public final class AccountSelectorScreen extends Screen {
         }).dimensions(width / 2 + 2,
                 accountListWidget.getHeight() + 40 + buttonHeight + 2,
                 buttonWidth, buttonHeight).build());
+        addDrawableChild(ButtonWidget.builder(Text.of(Managers.ACCOUNT.isEncrypted() ? "Decrypt" : "Encrypt"), (action) ->
+        {
+            if (Managers.ACCOUNT.isEncrypted())
+            {
+            }
+            else
+            {
+                client.setScreen(new AccountEncryptionScreen(this));
+            }
+        }).dimensions(width - buttonWidth - 4, 6, buttonWidth, buttonHeight).build());
     }
 
     @Override

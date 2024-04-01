@@ -36,7 +36,7 @@ public class AccountEntry extends AlwaysSelectedEntryListWidget.Entry<AccountEnt
         context.drawTextWithShadow(mc.textRenderer,
                 Text.of(account.username()),
                 x + 20, y + (entryHeight / 2) - (mc.textRenderer.fontHeight / 2), hovered ? 0x55ff55 : -1);
-        if (account instanceof CrackedAccount || (account instanceof MicrosoftAccount msa && msa.username() != null))
+        if (account instanceof CrackedAccount || (account instanceof MicrosoftAccount msa && msa.getUsernameOrNull() != null))
         {
             final String id = "face_" + account.username().toLowerCase();
             if (!FACE_DOWNLOADER.exists(id))

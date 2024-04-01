@@ -1,7 +1,6 @@
 package net.shoreline.client.api.file;
 
 import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.account.AccountFile;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.file.ModuleConfigFile;
 import net.shoreline.client.api.module.file.ModuleFile;
@@ -74,7 +73,6 @@ public class ClientConfiguration implements Globals {
         for (SocialRelation relation : SocialRelation.values()) {
             files.add(new SocialFile(clientDir, relation));
         }
-        files.add(new AccountFile(clientDir));
     }
 
     /**
@@ -110,6 +108,14 @@ public class ClientConfiguration implements Globals {
 
     public Set<ConfigFile> getFiles() {
         return files;
+    }
+
+    public void addFile(final ConfigFile configFile) {
+        files.add(configFile);
+    }
+
+    public void removeFile(final ConfigFile configFile) {
+        files.remove(configFile);
     }
 
     /**

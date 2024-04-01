@@ -125,6 +125,11 @@ public final class MicrosoftAccount implements MinecraftAccount
         return email;
     }
 
+    public String getUsernameOrNull()
+    {
+        return username;
+    }
+
     public void setUsername(String username)
     {
         this.username = username;
