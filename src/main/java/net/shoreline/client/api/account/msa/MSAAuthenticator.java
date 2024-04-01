@@ -173,12 +173,10 @@ public final class MSAAuthenticator
                         new String[] { "grant_type", "authorization_code" },
                         new String[] { "redirect_uri", "http://localhost:" + PORT + "/login" }
                 }), ContentType.APPLICATION_FORM_URLENCODED);
-
         if (response == null || response.isEmpty())
         {
             throw new MSAAuthException("Failed to get login token from MSA OAuth");
         }
-
         final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
         return obj.get("access_token").getAsString();
     }
