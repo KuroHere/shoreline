@@ -23,9 +23,7 @@ public class ShorelineMod implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
-        Shoreline.preInit();
         Shoreline.init();
-        Shoreline.postInit();
     }
 
     public static boolean isBaritonePresent() {

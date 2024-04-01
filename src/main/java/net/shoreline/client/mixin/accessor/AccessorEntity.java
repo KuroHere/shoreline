@@ -16,4 +16,12 @@ public interface AccessorEntity {
      */
     @Invoker("unsetRemoved")
     void hookUnsetRemoved();
+
+    /**
+     *
+     * @param index
+     * @param value
+     */
+    @Invoker("setFlag")
+    void hookSetFlag(int index, boolean value);
 }

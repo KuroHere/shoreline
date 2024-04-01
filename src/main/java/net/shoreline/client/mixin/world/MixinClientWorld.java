@@ -23,7 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MixinClientWorld {
 
     @Shadow
-    public abstract @Nullable Entity getEntityById(int id);
+    @Nullable
+    public abstract Entity getEntityById(int id);
 
     /**
      * @param entity

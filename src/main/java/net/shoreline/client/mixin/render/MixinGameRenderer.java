@@ -41,9 +41,11 @@ public class MixinGameRenderer implements Globals {
     @Final
     MinecraftClient client;
 
-    @Shadow private float lastFovMultiplier;
+    @Shadow
+    private float lastFovMultiplier;
 
-    @Shadow private float fovMultiplier;
+    @Shadow
+    private float fovMultiplier;
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", ordinal = 1))
     private void hookRenderWorld(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo ci) {
@@ -190,27 +192,5 @@ public class MixinGameRenderer implements Globals {
             ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     private void initPrograms(ResourceFactory factory, CallbackInfo ci) {
         Programs.initPrograms();
-        SortedMap sortedMap = Util.make(new Object2ObjectLinkedOpenHashMap(), map -> {
-            map.put(TexturedRenderLayers.getEntitySolid(), mc.getBufferBuilders().getBlockBufferBuilders().get(RenderLayer.getSolid()));
-            map.put(TexturedRenderLayers.getEntityCutout(), mc.getBufferBuilders().getBlockBufferBuilders().get(RenderLayer.getCutout()));
-            map.put(TexturedRenderLayers.getBannerPatterns(), mc.getBufferBuilders().getBlockBufferBuilders().get(RenderLayer.getCutoutMipped()));
-            map.put(TexturedRenderLayers.getEntityTranslucentCull(), mc.getBufferBuilders().getBlockBufferBuilders().get(RenderLayer.getTranslucent()));
-            map.put(TexturedRenderLayers.getShieldPatterns(), new BufferBuilder(TexturedRenderLayers.getShieldPatterns().getExpectedBufferSize()));
-            map.put(TexturedRenderLayers.getBeds(), new BufferBuilder(TexturedRenderLayers.getBeds().getExpectedBufferSize()));
-            map.put(TexturedRenderLayers.getSign(), new BufferBuilder(TexturedRenderLayers.getSign().getExpectedBufferSize()));
-            map.put(TexturedRenderLayers.getHangingSign(), new BufferBuilder(TexturedRenderLayers.getHangingSign().getExpectedBufferSize()));
-            map.put(TexturedRenderLayers.getChest(), new BufferBuilder(786432));
-            map.put(RenderLayer.getArmorGlint(), new BufferBuilder(RenderLayer.getArmorGlint().getExpectedBufferSize()));
-            map.put(RenderLayer.getArmorEntityGlint(), new BufferBuilder(RenderLayer.getArmorEntityGlint().getExpectedBufferSize()));
-            map.put(RenderLayer.getGlint(), new BufferBuilder(RenderLayer.getGlint().getExpectedBufferSize()));
-            map.put(RenderLayer.getDirectGlint(), new BufferBuilder(RenderLayer.getDirectGlint().getExpectedBufferSize()));
-            map.put(RenderLayer.getGlintTranslucent(), new BufferBuilder(RenderLayer.getGlintTranslucent().getExpectedBufferSize()));
-            map.put(RenderLayer.getEntityGlint(), new BufferBuilder(RenderLayer.getEntityGlint().getExpectedBufferSize()));
-            map.put(RenderLayer.getDirectEntityGlint(), new BufferBuilder(RenderLayer.getDirectEntityGlint().getExpectedBufferSize()));
-            map.put(RenderLayer.getWaterMask(), new BufferBuilder(RenderLayer.getWaterMask().getExpectedBufferSize()));
-            map.put(RenderLayersClient.GLINT, new BufferBuilder(RenderLayersClient.GLINT.getExpectedBufferSize()));
-            ModelLoader.BLOCK_DESTRUCTION_RENDER_LAYERS.forEach(renderLayer -> map.put(renderLayer, new BufferBuilder(renderLayer.getExpectedBufferSize())));
-        });
-        ((AccessorBufferBuilderStorage) mc.getBufferBuilders()).hookSetEntityVertexConsumers(VertexConsumerProvider.immediate(sortedMap, new BufferBuilder(786432)));
     }
 }

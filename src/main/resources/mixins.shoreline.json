@@ -66,6 +66,7 @@
     "network.packet.c2s.MixinPlayerInteractEntityC2SPacket",
     "particle.MixinParticleManager",
     "render.MixinBackgroundRenderer",
+    "render.MixinBufferBuilderStorage",
     "render.MixinCamera",
     "render.MixinDimensionEffects",
     "render.MixinGameRenderer",

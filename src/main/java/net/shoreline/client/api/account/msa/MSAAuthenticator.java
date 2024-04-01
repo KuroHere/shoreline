@@ -50,7 +50,6 @@ import java.util.stream.Collectors;
  * I deeply apologize for the code you see here - this was a brain fuck
  * https://mojang-api-docs.gapple.pw/authentication/
  */
-@SuppressWarnings("deprecation")
 public final class MSAAuthenticator
 {
     private static final Logger LOGGER = LogManager.getLogger("MSA-Authenticator");
@@ -244,6 +243,7 @@ public final class MSAAuthenticator
         }
     }
 
+    @SuppressWarnings("deprecation")
     private String getOAuthLoginData(final OAuthResult result, final String email, final String password) throws MSAAuthException
     {
         final String contentTypeRaw = ContentType.APPLICATION_FORM_URLENCODED.getMimeType();

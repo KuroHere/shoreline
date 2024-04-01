@@ -36,9 +36,9 @@ public class Shoreline {
     public static Executor EXECUTOR;
 
     /**
-     * Called before {@link ShorelineMod#onInitializeClient()}
+     * Called during {@link ShorelineMod#onInitializeClient()}
      */
-    public static void preInit() {
+    public static void init() {
         LOGGER = LogManager.getLogger("Shoreline");
 
         // Debug information - required when submitting a crash / bug report
@@ -48,22 +48,10 @@ public class Shoreline {
         EXECUTOR = Executors.newFixedThreadPool(1);
         // Create event handler instance
         EVENT_HANDLER = new EventBus();
-    }
-
-    /**
-     * Called during {@link ShorelineMod#onInitializeClient()}
-     */
-    public static void init() {
         info("Starting init ...");
         Managers.init();
         Modules.init();
         // Commands.init();
-    }
-
-    /**
-     * Called after {@link ShorelineMod#onInitializeClient()}
-     */
-    public static void postInit() {
         info("Starting postInit ...");
         CONFIG = new ClientConfiguration();
         Managers.postInit();
