@@ -71,6 +71,7 @@ public final class MicrosoftAccount implements MinecraftAccount
         }
         catch (MSAAuthException e)
         {
+            e.printStackTrace();
             AccountManager.MSA_AUTHENTICATOR.setLoginStage(e.getMessage());
             return null;
         }

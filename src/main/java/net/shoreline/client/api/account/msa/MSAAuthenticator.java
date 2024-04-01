@@ -12,6 +12,7 @@ import net.shoreline.client.api.account.msa.model.MinecraftProfile;
 import net.shoreline.client.api.account.msa.model.OAuthResult;
 import net.shoreline.client.api.account.msa.model.XboxLiveData;
 import net.shoreline.client.api.account.msa.callback.BrowserLoginCallback;
+import net.shoreline.client.api.account.msa.security.PKCEData;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -34,6 +35,8 @@ import java.io.OutputStream;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -60,13 +63,12 @@ public final class MSAAuthenticator
             .build();
 
     // TODO: Submit application to Mojang and wait lol
-    private static final String CLIENT_ID = "80c6f2ee-99cd-48da-b4fc-13d08e1027ca";
-    private static final String CLIENT_SECRET = "Qhg8Q~YhxKEa~Whgf~vHosTxw~Tr2nSzYfCoBbqQ";
-    private static final int PORT = 7117;
+    private static final String CLIENT_ID = "d1bbd256-3323-4ab7-940e-e8a952ebdb83";
+    private static final int PORT = 6969;
 
     private static final String REAL_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0";
     private static final String OAUTH_AUTH_DESKTOP_URL = "https://login.live.com/oauth20_authorize.srf?client_id=000000004C12AE6F&redirect_uri=https://login.live.com/oauth20_desktop.srf&scope=service::user.auth.xboxlive.com::MBI_SSL&display=touch&response_type=token&locale=en";
-    private static final String OAUTH_AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf?response_type=code&client_id=%s&redirect_uri=http://localhost:%s/login&scope=XboxLive.signin+offline_access&state=NOT_NEEDED";
+    private static final String OAUTH_AUTHORIZE_URL = "https://login.live.com/oauth20_authorize.srf?response_type=code&client_id=%s&redirect_uri=http://localhost:%s/login&code_challenge=%s&code_challenge_method=S256&scope=XboxLive.signin+offline_access&state=NOT_NEEDED&prompt=select_account";
     private static final String OAUTH_TOKEN_URL = "https://login.live.com/oauth20_token.srf";
     private static final String XBOX_LIVE_AUTH_URL = "https://user.auth.xboxlive.com/user/authenticate";
     private static final String XBOX_XSTS_AUTH_URL = "https://xsts.auth.xboxlive.com/xsts/authorize";
@@ -79,6 +81,8 @@ public final class MSAAuthenticator
     private HttpServer localServer;
     private String loginStage = "";
     private boolean serverOpen;
+
+    private PKCEData pkceData;
 
     public Session loginWithCredentials(final String email, final String password) throws MSAAuthException
     {
@@ -130,7 +134,13 @@ public final class MSAAuthenticator
             });
         }
 
-        final String url = String.format(OAUTH_AUTHORIZE_URL, CLIENT_ID, PORT);
+        pkceData = generateKeys();
+        if (pkceData == null)
+        {
+            throw new MSAAuthException("Failed to generate PKCE keys");
+        }
+
+        final String url = String.format(OAUTH_AUTHORIZE_URL, CLIENT_ID, PORT, pkceData.challenge());
         if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
         {
             Desktop.getDesktop().browse(new URI(url));
@@ -160,28 +170,42 @@ public final class MSAAuthenticator
         final String accessToken = loginWithXboxLive(data);
         setLoginStage("Fetching MC profile...");
         final MinecraftProfile profile = fetchMinecraftProfile(accessToken);
+        pkceData = null;
         return new Session(profile.username(), UndashedUuid.fromStringLenient(profile.id()), accessToken, Optional.empty(), Optional.empty(), Session.AccountType.MSA);
     }
 
     public String getLoginToken(final String oauthToken) throws MSAAuthException
     {
-        final String response = makePostRequest(OAUTH_TOKEN_URL,
+        final HttpPost httpPost = new HttpPost(OAUTH_TOKEN_URL);
+        httpPost.setHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        httpPost.setHeader("Accept", "application/json");
+        httpPost.setHeader("Origin", "http://localhost:" + PORT + "/");
+        httpPost.setEntity(new StringEntity(
                 makeQueryString(new String[][]{
                         new String[] { "client_id", CLIENT_ID },
-                        new String[] { "client_secret", CLIENT_SECRET },
+                        new String[] { "code_verifier", pkceData.verifier() },
                         new String[] { "code", oauthToken },
                         new String[] { "grant_type", "authorization_code" },
                         new String[] { "redirect_uri", "http://localhost:" + PORT + "/login" }
-                }), ContentType.APPLICATION_FORM_URLENCODED);
-        if (response == null || response.isEmpty())
+                }), ContentType.create(
+                ContentType.APPLICATION_FORM_URLENCODED.getMimeType(), Charset.defaultCharset())));
+        try (CloseableHttpResponse response = HTTP_CLIENT.execute(httpPost))
         {
-            throw new MSAAuthException("Failed to get login token from MSA OAuth");
+            final String content = EntityUtils.toString(response.getEntity());
+            if (content == null || content.isEmpty())
+            {
+                throw new MSAAuthException("Failed to get login token from MSA OAuth");
+            }
+            final JsonObject obj = JsonParser.parseString(content).getAsJsonObject();
+            if (obj.has("error")) {
+                throw new MSAAuthException(obj.get("error").getAsString() + ": " + obj.get("error_description").getAsString());
+            }
+            return obj.get("access_token").getAsString();
         }
-        final JsonObject obj = JsonParser.parseString(response).getAsJsonObject();
-        if (obj.has("error")) {
-            throw new MSAAuthException(obj.get("error").getAsString() + ": " + obj.get("error_description").getAsString());
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new MSAAuthException("Failed to get login token");
         }
-        return obj.get("access_token").getAsString();
     }
 
     private OAuthResult getOAuth() throws MSAAuthException
@@ -414,6 +438,28 @@ public final class MSAAuthenticator
             parameterMap.put(kv[0], kv.length == 1 ? null : kv[1]);
         }
         return parameterMap;
+    }
+
+    private PKCEData generateKeys()
+    {
+        try
+        {
+            final byte[] randomBytes = new byte[32];
+            new SecureRandom().nextBytes(randomBytes);
+
+            final String verifier = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+            final byte[] verifierBytes = verifier.getBytes(StandardCharsets.US_ASCII);
+            final MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(verifierBytes, 0, verifierBytes.length);
+
+            final byte[] d = digest.digest();
+            final String challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(d);
+            return new PKCEData(challenge, verifier);
+        }
+        catch (Exception ignored)
+        {
+        }
+        return null;
     }
 
     public void setLoginStage(String loginStage)
