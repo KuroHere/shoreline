@@ -23,7 +23,7 @@ public class MixinGameOptions {
     @Final
     private SimpleOption<Integer> fov;
 
-    @Inject(method = "<init>", at = @At(value = "TAIL"))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/GameOptions;load()V", shift = At.Shift.BEFORE))
     private void hookInit(MinecraftClient client, File optionsFile, CallbackInfo ci) {
         fov = new SimpleOption<>("options.fov", SimpleOption.emptyTooltip(), (optionText, value) -> switch (value) {
             case 70 -> GameOptions.getGenericValueText(optionText, Text.translatable("options.fov.min"));
