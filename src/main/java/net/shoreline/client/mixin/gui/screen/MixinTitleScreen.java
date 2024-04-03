@@ -15,6 +15,8 @@ import net.minecraft.client.gui.widget.PressableTextWidget;
 import net.minecraft.client.gui.widget.TextIconButtonWidget;
 import net.minecraft.client.realms.gui.screen.RealmsNotificationsScreen;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.BuildConfig;
 import net.shoreline.client.ShorelineMod;
 import net.shoreline.client.impl.gui.account.AccountSelectorScreen;
@@ -54,17 +56,30 @@ public abstract class MixinTitleScreen extends Screen {
     @Shadow
     protected abstract boolean isRealmsNotificationsGuiDisplayed();
 
+    @Shadow
+    private long backgroundFadeStart;
+
+    @Shadow
+    @Final
+    private boolean doBackgroundFade;
+
     public MixinTitleScreen(Text title) {
         super(title);
     }
 
     @Inject(method = "render", at = @At("TAIL"))
     public void hookRender(final DrawContext context, final int mouseX, final int mouseY, final float delta, final CallbackInfo info) {
+        float f = this.doBackgroundFade ? (float)(Util.getMeasuringTimeMs() - this.backgroundFadeStart) / 1000.0f : 1.0f;
+        float g = this.doBackgroundFade ? MathHelper.clamp(f - 1.0f, 0.0f, 1.0f) : 1.0f;
+        int i = MathHelper.ceil(g * 255.0f) << 24;
+        if ((i & 0xFC000000) == 0) {
+            return;
+        }
         context.drawTextWithShadow(client.textRenderer,
                 "Shoreline " + ShorelineMod.MOD_VER
                         + " (" + ShorelineMod.MOD_BUILD_NUMBER
                         + "-" + BuildConfig.HASH + ")",
-                2, height - (client.textRenderer.fontHeight * 2) - 2, -1);
+                2, height - (client.textRenderer.fontHeight * 2) - 2, 0xffffff | i);
     }
 
     // Autism

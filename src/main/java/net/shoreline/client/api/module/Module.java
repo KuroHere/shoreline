@@ -25,7 +25,6 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Module extends ConfigContainer implements Globals {
     //
-    public static final Random RANDOM = ThreadLocalRandom.current();
     public static final String MODULE_ID_FORMAT = "%s-module";
     // Concise module description, displayed in the ClickGui to help users
     // understand the functionality of the module.

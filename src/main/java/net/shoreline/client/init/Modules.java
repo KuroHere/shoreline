@@ -115,7 +115,6 @@ public class Modules {
     public static NameProtectModule NAME_PROTECT;
     public static HoleESPModule HOLE_ESP;
     public static NametagsModule NAMETAGS;
-    public static NoBobModule NO_BOB;
     public static NoRenderModule NO_RENDER;
     public static NoRotateModule NO_ROTATE;
     public static NoWeatherModule NO_WEATHER;
@@ -263,7 +262,6 @@ public class Modules {
             HOLE_ESP = (HoleESPModule) getRegisteredModule("holeesp-module");
             NAME_PROTECT = (NameProtectModule) getRegisteredModule("nameprotect-module");
             NAMETAGS = (NametagsModule) getRegisteredModule("nametags-module");
-            NO_BOB = (NoBobModule) getRegisteredModule("nobob-module");
             NO_RENDER = (NoRenderModule) getRegisteredModule("norender-module");
             NO_ROTATE = (NoRotateModule) getRegisteredModule("norotate-module");
             NO_WEATHER = (NoWeatherModule) getRegisteredModule("noweather-module");
@@ -299,7 +297,7 @@ public class Modules {
     /**
      * Returns <tt>true</tt> if the {@link Module} instances have been
      * initialized. This should always return <tt>true</tt> if
-     * {@link Shoreline#preInit()} has finished running.
+     * {@link Shoreline#init()} has finished running.
      *
      * @return <tt>true</tt> if the module instances have been initialized
      * @see #init()

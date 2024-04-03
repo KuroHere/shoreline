@@ -127,7 +127,6 @@ public class ModuleManager {
                 new HoleESPModule(),
                 new NameProtectModule(),
                 new NametagsModule(),
-                new NoBobModule(),
                 new NoRenderModule(),
                 new NoRotateModule(),
                 new NoWeatherModule(),

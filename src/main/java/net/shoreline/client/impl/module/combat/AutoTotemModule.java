@@ -22,14 +22,13 @@ import net.shoreline.client.util.player.PlayerUtil;
  */
 public final class AutoTotemModule extends ToggleModule {
 
-    // The player inventory sync ID
-    private static final int INVENTORY_SYNC_ID = 0;
-
     EnumConfig<OffhandItem> itemConfig = new EnumConfig<>("Item", "The item to wield in your offhand", OffhandItem.TOTEM, OffhandItem.values());
     NumberConfig<Float> healthConfig = new NumberConfig<>("Health", "The health required to fall below before swapping to a totem", 1.0f, 14.0f, 20.0f);
     BooleanConfig gappleConfig = new BooleanConfig("OffhandGapple", "If to equip a golden apple if holding down the item use button", true);
     BooleanConfig crappleConfig = new BooleanConfig("Crapple", "If to use a normal golden apple if Absorption is present", true);
     BooleanConfig lethalGapConfig = new BooleanConfig("Lethal-Gapple", "If to not swap to a totem if the player is eating a golden apple", false);
+    // The player inventory sync ID
+    private static final int INVENTORY_SYNC_ID = 0;
 
     public AutoTotemModule() {
         super("AutoTotem", "Automatically replenishes the totem in your offhand", ModuleCategory.COMBAT);

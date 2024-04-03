@@ -18,8 +18,8 @@ import net.shoreline.client.impl.event.render.item.RenderFirstPersonEvent;
 public class ViewModelModule extends ToggleModule {
 
     // Config<Boolean> eatingConfig = new BooleanConfig("Eating", "Modifies eating transformations", true);
-    Config<Boolean> customFovConfig = new BooleanConfig("CustomFov", "Change field of view", false);
-    Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view", 10.0f, 120.0f, 180.0f);
+    // Config<Boolean> customFovConfig = new BooleanConfig("CustomFov", "Change field of view", false);
+    // Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view", 10.0f, 120.0f, 180.0f);
     Config<Float> positionXConfig = new NumberConfig<>("X", "Translation in x-direction", -3.0f, 0.0f, 3.0f);
     Config<Float> positionYConfig = new NumberConfig<>("Y", "Translation in y-direction", -3.0f, 0.0f, 3.0f);
     Config<Float> positionZConfig = new NumberConfig<>("Z", "Translation in z-direction", -3.0f, 0.0f, 3.0f);
@@ -32,14 +32,6 @@ public class ViewModelModule extends ToggleModule {
 
     public ViewModelModule() {
         super("ViewModel", "Changes the first-person viewmodel", ModuleCategory.RENDER);
-    }
-
-    @EventListener
-    public void onFov(FovEvent event) {
-        if (customFovConfig.getValue()) {
-            event.cancel();
-            event.setFov(fovConfig.getValue());
-        }
     }
 
     @EventListener

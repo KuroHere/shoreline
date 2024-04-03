@@ -77,7 +77,6 @@ public abstract class MixinClientPlayerInteractionManager implements Globals {
         if (reachEvent.isCanceled()) {
             cir.cancel();
             float reach = gameMode.isCreative() ? 5.0f : 4.5f;
-            ;
             cir.setReturnValue(reach + reachEvent.getReach());
         }
     }

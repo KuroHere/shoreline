@@ -70,7 +70,7 @@ public class NoSlowModule extends ToggleModule {
         if (MOVE_KEYBINDS != null) {
             return;
         }
-        MOVE_KEYBINDS = new KeyBinding[]{mc.options.jumpKey, mc.options.sneakKey, mc.options.forwardKey, mc.options.backKey, mc.options.rightKey, mc.options.leftKey};
+        MOVE_KEYBINDS = new KeyBinding[]{mc.options.jumpKey, mc.options.forwardKey, mc.options.backKey, mc.options.rightKey, mc.options.leftKey};
     }
 
     @Override
@@ -102,7 +102,6 @@ public class NoSlowModule extends ToggleModule {
         if (event.getStage() == EventStage.PRE && grimConfig.getValue()
                 && mc.player.isUsingItem() && !mc.player.isSneaking() && itemsConfig.getValue()) {
             ItemStack offHandStack = mc.player.getOffHandStack();
-            //
             if (mc.player.getActiveHand() == Hand.OFF_HAND) {
                 Managers.INVENTORY.setSlotForced(mc.player.getInventory().selectedSlot % 8 + 1);
                 Managers.INVENTORY.syncToClient();
@@ -234,12 +233,11 @@ public class NoSlowModule extends ToggleModule {
     }
 
     public boolean checkSlowed() {
-        ItemStack offHandStack = mc.player.getOffHandStack();
-        if ((offHandStack.isFood() || offHandStack.getItem() == Items.BOW || offHandStack.getItem() == Items.CROSSBOW || offHandStack.getItem() == Items.SHIELD) && grimConfig.getValue()) {
-            return false;
-        }
-        return !mc.player.isRiding() && !mc.player.isSneaking() && !mc.player.isFallFlying()
-                && (mc.player.isUsingItem() && itemsConfig.getValue() || mc.player.isBlocking() && shieldsConfig.getValue() && !grimConfig.getValue());
+//        ItemStack offHandStack = mc.player.getOffHandStack();
+//        if ((offHandStack.isFood() || offHandStack.getItem() == Items.BOW || offHandStack.getItem() == Items.CROSSBOW || offHandStack.getItem() == Items.SHIELD) && grimConfig.getValue()) {
+//            return false;
+//        }
+        return !mc.player.isRiding() && !mc.player.isSneaking() && (mc.player.isUsingItem() && itemsConfig.getValue() || mc.player.isBlocking() && shieldsConfig.getValue() && !grimConfig.getValue());
     }
 
     public boolean checkScreen() {

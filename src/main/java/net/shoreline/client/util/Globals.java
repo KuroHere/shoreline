@@ -2,6 +2,9 @@ package net.shoreline.client.util;
 
 import net.minecraft.client.MinecraftClient;
 
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * TERRIBLE CODING PRACTICE
  *
@@ -11,4 +14,6 @@ import net.minecraft.client.MinecraftClient;
 public interface Globals {
     // Minecraft game instance
     MinecraftClient mc = MinecraftClient.getInstance();
+    //
+    Random RANDOM = ThreadLocalRandom.current();
 }

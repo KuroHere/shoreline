@@ -16,8 +16,7 @@ public class ParkourModule extends ToggleModule {
      *
      */
     public ParkourModule() {
-        super("Parkour", "Automatically jumps at the edge of blocks",
-                ModuleCategory.MOVEMENT);
+        super("Parkour", "Automatically jumps at the edge of blocks", ModuleCategory.MOVEMENT);
     }
 
     @EventListener

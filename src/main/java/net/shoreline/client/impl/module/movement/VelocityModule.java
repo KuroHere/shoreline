@@ -37,6 +37,8 @@ import java.text.DecimalFormat;
  * @since 1.0
  */
 public class VelocityModule extends ToggleModule {
+    Config<Boolean> knockbackConfig = new BooleanConfig("Knockback", "Removes player knockback velocity", true);
+    Config<Boolean> explosionConfig = new BooleanConfig("Explosion", "Removes player explosion velocity", true);
     Config<VelocityMode> modeConfig = new EnumConfig<>("Mode", "The mode for velocity", VelocityMode.NORMAL, VelocityMode.values());
     Config<Float> horizontalConfig = new NumberConfig<>("Horizontal", "How much horizontal knock-back to take", 0.0f, 0.0f, 100.0f, NumberDisplay.PERCENT, () -> modeConfig.getValue() == VelocityMode.NORMAL);
     Config<Float> verticalConfig = new NumberConfig<>("Vertical", "How much vertical knock-back to take", 0.0f, 0.0f, 100.0f, NumberDisplay.PERCENT, () -> modeConfig.getValue() == VelocityMode.NORMAL);
@@ -76,7 +78,7 @@ public class VelocityModule extends ToggleModule {
         if (mc.player == null || mc.world == null) {
             return;
         }
-        if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet) {
+        if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet && knockbackConfig.getValue()) {
             if (packet.getId() != mc.player.getId()) {
                 return;
             }
@@ -102,7 +104,7 @@ public class VelocityModule extends ToggleModule {
                     cancelVelocity = true;
                 }
             }
-        } else if (event.getPacket() instanceof ExplosionS2CPacket packet) {
+        } else if (event.getPacket() instanceof ExplosionS2CPacket packet && explosionConfig.getValue()) {
             switch (modeConfig.getValue()) {
                 case NORMAL -> {
                     if (horizontalConfig.getValue() == 0.0f
