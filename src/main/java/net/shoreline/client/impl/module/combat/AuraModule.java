@@ -251,7 +251,6 @@ public class AuraModule extends RotationModule {
 //        } else {
 //            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
 //        }
-
         return true;
     }
 
@@ -279,8 +278,7 @@ public class AuraModule extends RotationModule {
         // Shield state
         shielding = false;
         if (stopShieldConfig.getValue()) {
-            shielding = offhand.getItem() == Items.SHIELD
-                    && mc.player.isBlocking();
+            shielding = offhand.getItem() == Items.SHIELD && mc.player.isBlocking();
             if (shielding) {
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.RELEASE_USE_ITEM,
                         Managers.POSITION.getBlockPos(), Direction.getFacing(mc.player.getX(),

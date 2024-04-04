@@ -126,7 +126,7 @@ public class LongJumpModule extends ToggleModule {
     public void onPlayerUpdate(PlayerUpdateEvent event) {
         // Direkt LongJump
         if (event.getStage() == EventStage.PRE
-                && modeConfig.getValue() == JumpMode.COWABUNGA) {
+                && modeConfig.getValue() == JumpMode.GLIDE) {
             if (Modules.FLIGHT.isEnabled() || mc.player.isFallFlying()
                     || mc.player.isHoldingOntoLadder()
                     || mc.player.isTouchingWater()) {
@@ -346,6 +346,6 @@ public class LongJumpModule extends ToggleModule {
 
     public enum JumpMode {
         NORMAL,
-        COWABUNGA
+        GLIDE
     }
 }

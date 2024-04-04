@@ -8,6 +8,7 @@ import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
@@ -36,7 +37,6 @@ import net.shoreline.client.util.world.FakePlayerEntity;
  */
 public class SpeedModule extends ToggleModule {
     //
-    Config<Boolean> directionalConfig = new BooleanConfig("Directional", "Allows player to move in all directions", true);
     Config<Speed> speedModeConfig = new EnumConfig<>("Mode", "Speed mode", Speed.STRAFE, Speed.values());
     Config<Boolean> vanillaStrafeConfig = new BooleanConfig("Strafe-Vanilla", "Applies strafe speeds to vanilla speed", false, () -> speedModeConfig.getValue() == Speed.VANILLA);
     Config<Float> speedConfig = new NumberConfig<>("Speed", "The speed for alternative modes", 0.1f, 4.0f, 10.0f);
@@ -105,9 +105,8 @@ public class SpeedModule extends ToggleModule {
             distance = Math.sqrt(dx * dx + dz * dz);
             if (speedModeConfig.getValue() == Speed.GRIM_COLLIDE && MovementUtil.isInputtingMovement()) {
                 int collisions = 0;
-                Box box = mc.player.getBoundingBox().expand(1.0);
                 for (Entity entity : mc.world.getEntities()) {
-                    if (checkIsCollidingEntity(entity) && entity.getBoundingBox().intersects(box)) {
+                    if (checkIsCollidingEntity(entity) && MathHelper.sqrt((float) mc.player.squaredDistanceTo(entity)) <= 1.5) {
                         collisions++;
                     }
                 }
