@@ -188,7 +188,7 @@ public class AuraModule extends RotationModule {
         if (attackDelayConfig.getValue()) {
             float ticks = 20.0f - Managers.TICK.getTickSync(tpsSyncConfig.getValue());
             float progress = mc.player.getAttackCooldownProgress(ticks);
-            if (progress >= 0.9f && attackTarget(entityTarget)) {
+            if (progress >= 1.0f && attackTarget(entityTarget)) {
                 mc.player.resetLastAttackedTicks();
             }
         } else {
@@ -221,7 +221,7 @@ public class AuraModule extends RotationModule {
         if (entityTarget != null && renderConfig.getValue() && isHoldingSword()) {
             int attackDelay = 0;
             if (attackDelayConfig.getValue()) {
-                float animFactor = 0.9f - mc.player.getAttackCooldownProgress(0.0f);
+                float animFactor = 1.0f - mc.player.getAttackCooldownProgress(0.0f);
                 attackDelay = (int) (60.0 * animFactor);
             }
             RenderManager.renderBox(event.getMatrices(),
