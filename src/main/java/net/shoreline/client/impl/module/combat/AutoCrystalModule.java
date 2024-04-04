@@ -84,17 +84,10 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swing hand when placing and attacking crystals", true);
     // ROTATE SETTINGS
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate before placing and breaking", false);
-    Config<Rotate> strictRotateConfig = new EnumConfig<>("Rotate-Strict", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", Rotate.OFF, Rotate.values(), () -> rotateConfig.getValue());
-    Config<Integer> rotateLimitConfig = new NumberConfig<>("RotateLimit", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
-    Config<Integer> rotateTicksConfig = new NumberConfig<>("RotateTicks", "Minimum ticks to rotate yaw", 1, 1, 5, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
-    Config<Integer> rotateMaxConfig = new NumberConfig<>("Rotate-LeniencyTicks", "Maximum ticks the current rotation has to complete before the next rotation overrides the rotation", 0, 1, 3, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
+    Config<Rotate> strictRotateConfig = new EnumConfig<>("RotateStrict", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", Rotate.OFF, Rotate.values(), () -> rotateConfig.getValue());
+    Config<Integer> rotateLimitConfig = new NumberConfig<>("Rotate-Yaw", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
     Config<Boolean> rotateTickFactorConfig = new BooleanConfig("Rotate-TickReduction", "Factors in angles when calculating crystals to minimize attack ticks and speed up the break/place loop", false, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
-    Config<Float> rotateDamageConfig = new NumberConfig<>("Rotate-MaxDamage", "Maximum allowed damage loss when minimizing tick rotations", 0.0f, 2.0f, 10.0f, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF && rotateTickFactorConfig.getValue());
-    Config<Integer> rotateTimeoutConfig = new NumberConfig<>("RotateTimeout", "Minimum ticks to hold the rotation yaw after reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
-    Config<Boolean> vectorBorderConfig = new BooleanConfig("VectorBorder", "Rotates to the border between attack/place", true, () -> rotateConfig.getValue());
-    Config<Boolean> randomVectorConfig = new BooleanConfig("RandomVector", "Randomizes attack rotations", false, () -> rotateConfig.getValue());
-    Config<Boolean> offsetFacingConfig = new BooleanConfig("InteractOffset", "Rotates to the side of interact (only applies to PLACE rotations)", false, () -> rotateConfig.getValue());
-    Config<Integer> rotatePreserveTicksConfig = new NumberConfig<>("PreserveTicks", "Time to preserve rotations before switching back", 0, 20, 20, () -> rotateConfig.getValue());
+
     // ENEMY SETTINGS
     Config<Boolean> playersConfig = new BooleanConfig("Players", "Target players", true);
     Config<Boolean> monstersConfig = new BooleanConfig("Monsters", "Target monsters", false);
@@ -119,8 +112,7 @@ public class AutoCrystalModule extends RotationModule {
     // shortterm:
     //        ticks: 8
     Config<Boolean> setDeadConfig = new BooleanConfig("SetDead", "Removes crystals faster client-side", false);
-    Config<Boolean> breakCommitConfig = new BooleanConfig("BreakCommit", "Completes the pre-check calculations for crystals and skips the \"post processing\" of calculations", false);
-    Config<Inhibit> inhibitConfig = new EnumConfig<>("Inhibit", "Prevents excessive attacks", Inhibit.NONE, Inhibit.values());
+    Config<Boolean> inhibitConfig = new BooleanConfig("Inhibit", "Prevents excessive attacks", true);
     // default NCP config
     // limitforseconds:
     //        half: 8
@@ -128,8 +120,6 @@ public class AutoCrystalModule extends RotationModule {
     //        two: 30
     //        four: 60
     //        eight: 100
-    Config<Integer> inhibitTicksConfig = new NumberConfig<>("InhibitTicks", "Counts crystals for x amount of ticks before determining that the attack won't violate NCP attack speeds (aka shortterm ticks)", 5, 8, 15, () -> inhibitConfig.getValue() == Inhibit.FULL);
-    Config<Integer> inhibitLimitConfig = new NumberConfig<>("InhibitLimit", "Limit to crystal attacks that would flag NCP attack limits", 1, 13, 20, () -> inhibitConfig.getValue() == Inhibit.FULL);
     Config<Boolean> manualConfig = new BooleanConfig("Manual", "Always breaks manually placed crystals", false);
     // PLACE SETTINGS
     Config<Boolean> placeConfig = new BooleanConfig("Place", "Places crystals to damage enemies. Place settings will only function if this setting is enabled.", true);
@@ -181,6 +171,8 @@ public class AutoCrystalModule extends RotationModule {
     private BlockPos renderSpawnPos;
     //
     private Vec3d crystalRotation;
+    private boolean attackRotate;
+    private boolean rotated;
     //
     private static final Box FULL_CRYSTAL_BB = new Box(0.0, 0.0, 0.0, 1.0, 2.0, 1.0);
     private static final Box HALF_CRYSTAL_BB = new Box(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
@@ -245,11 +237,45 @@ public class AutoCrystalModule extends RotationModule {
             attackCrystal = calculateAttackCrystal(entities);
             placeCrystal = calculatePlaceCrystal(blocks, entities);
         }
+        attackRotate = attackCrystal != null && attackDelayConfig.getValue() <= 0.0
+                && lastAttackTimer.passed(1000.0f - breakSpeedConfig.getValue() * 50.0f);
+        if (attackCrystal != null) {
+            crystalRotation = attackCrystal.damageData.getPos();
+        } else if (placeCrystal != null) {
+            crystalRotation = placeCrystal.damageData.toCenterPos().add(0.0, 0.5, 0.0);
+        }
+        if (rotateConfig.getValue() && crystalRotation != null) {
+            float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
+            if (strictRotateConfig.getValue() == Rotate.FULL || strictRotateConfig.getValue() == Rotate.SEMI && attackRotate) {
+                float serverYaw = Managers.ROTATION.getWrappedYaw();
+                float diff = serverYaw - rotations[0];
+                float diff1 = Math.abs(diff);
+                if (diff1 > 180.0f) {
+                    diff += diff > 0.0f ? -360.0f : 360.0f;
+                }
+                int dir = diff > 0.0f ? -1 : 1;
+                float deltaYaw = dir * rotateLimitConfig.getValue();
+                float yaw;
+                if (diff1 > rotateLimitConfig.getValue()) {
+                    yaw = serverYaw + deltaYaw;
+                    rotated = false;
+                } else {
+                    yaw = rotations[0];
+                    rotated = true;
+                }
+                setRotation(yaw, rotations[1]);
+            } else {
+                setRotation(rotations[0], rotations[1]);
+                rotated = true;
+            }
+        }
+        if (!rotated) {
+            return;
+        }
         final Hand hand = getCrystalHand();
         if (attackCrystal != null) {
             // ChatUtil.clientSendMessage("yaw: " + rotations[0] + ", pitch: " + rotations[1]);
-            if (attackDelayConfig.getValue() <= 0.0
-                    && lastAttackTimer.passed(1000.0f - breakSpeedConfig.getValue() * 50.0f)) {
+            if (attackRotate) {
                 attackCrystal(attackCrystal.getDamageData(), hand);
                 setStage("ATTACKING");
                 lastAttackTimer.reset();
@@ -262,11 +288,6 @@ public class AutoCrystalModule extends RotationModule {
                 setStage("PLACING");
                 lastPlaceTimer.reset();
             }
-        }
-        if (rotateConfig.getValue() && crystalRotation != null) {
-            float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
-            setRotation(rotations[0], rotations[1]);
-            crystalRotation = null;
         }
     }
 
@@ -325,7 +346,8 @@ public class AutoCrystalModule extends RotationModule {
         BlockPos blockPos = BlockPos.ofFloored(crystalPos.add(0.0, -1.0, 0.0));
         renderSpawnPos = blockPos;
         Long time = placePackets.remove(blockPos);
-        if (time != null) {
+        attackRotate = time != null;
+        if (attackRotate) {
             attackInternal(crystalEntity, getCrystalHand());
             setStage("ATTACKING");
             lastAttackTimer.reset();
@@ -355,9 +377,10 @@ public class AutoCrystalModule extends RotationModule {
                 double damage = EndCrystalUtil.getDamageTo(entity,
                         crystalPos, blockDestructionConfig.getValue());
                 // WTFRICK
-                if (damage > instantDamageConfig.getValue() || attackCrystal != null
+                attackRotate = damage > instantDamageConfig.getValue() || attackCrystal != null
                         && damage >= attackCrystal.getDamage() && instantMaxConfig.getValue()
-                        || entity instanceof LivingEntity entity1 && isCrystalLethalTo(damage, entity1)) {
+                        || entity instanceof LivingEntity entity1 && isCrystalLethalTo(damage, entity1);
+                if (attackRotate) {
                     attackInternal(crystalEntity, getCrystalHand());
                     setStage("ATTACKING");
                     lastAttackTimer.reset();
@@ -436,7 +459,6 @@ public class AutoCrystalModule extends RotationModule {
         hand = hand != null ? hand : Hand.MAIN_HAND;
         // ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(id);
         Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(crystalEntity, mc.player.isSneaking()));
-        crystalRotation = crystalEntity.getPos();
         if (setDeadConfig.getValue()) {
             mc.world.removeEntity(crystalEntity.getId(), Entity.RemovalReason.KILLED);
         }
@@ -484,7 +506,6 @@ public class AutoCrystalModule extends RotationModule {
         if (hand == null || !isHoldingCrystal()) {
             return;
         }
-        crystalRotation = result.getBlockPos().toCenterPos().add(0.0, 0.5, 0.0);
         Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractBlockC2SPacket(hand, result, id));
         if (swingConfig.getValue()) {
             mc.player.swingHand(hand);
@@ -562,8 +583,8 @@ public class AutoCrystalModule extends RotationModule {
             if (!(crystal instanceof EndCrystalEntity crystal1) || !crystal.isAlive()) {
                 continue;
             }
-            if (crystal.age < ticksExistedConfig.getValue()
-                    && inhibitConfig.getValue() == Inhibit.NONE) {
+            if ((crystal.age < ticksExistedConfig.getValue() || attackPackets.containsKey(crystal.getId()))
+                    && inhibitConfig.getValue()) {
                 continue;
             }
             if (attackRangeCheck(crystal1)) {
@@ -919,12 +940,6 @@ public class AutoCrystalModule extends RotationModule {
     public enum Placements {
         NATIVE,
         PROTOCOL
-    }
-
-    public enum Inhibit {
-        FULL,
-        SEMI,
-        NONE
     }
 
     public enum Rotate {

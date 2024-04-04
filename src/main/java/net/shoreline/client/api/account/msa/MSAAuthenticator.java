@@ -360,7 +360,9 @@ public final class MSAAuthenticator
             if (object.has("errorMessage")) {
                 throw new MSAAuthException(object.get("errorMessage").getAsString());
             }
-            return object.get("access_token").getAsString();
+            if (object.has("access_token")) {
+                return object.get("access_token").getAsString();
+            }
         }
         return null;
     }
