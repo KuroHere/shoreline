@@ -2,6 +2,8 @@ package net.shoreline.client.impl.module.render;
 
 import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.world.biome.BiomeParticleConfig;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -10,6 +12,7 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.TickEvent;
+import net.shoreline.client.impl.event.biome.BiomeEffectsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.util.string.EnumFormatter;
 
@@ -63,9 +66,17 @@ public class NoWeatherModule extends ToggleModule {
         }
     }
 
+    @EventListener
+    public void onBiomeEffects(BiomeEffectsEvent event) {
+        if (weatherConfig.getValue() == Weather.ASH) {
+            event.cancel();
+            event.setParticleConfig(new BiomeParticleConfig(ParticleTypes.WHITE_ASH, 0.118093334f));
+        }
+    }
+
     private void setWeather(Weather weather) {
         switch (weather) {
-            case CLEAR -> {
+            case CLEAR, ASH -> {
                 mc.world.getLevelProperties().setRaining(false);
                 mc.world.setRainGradient(0.0f);
                 mc.world.setThunderGradient(0.0f);

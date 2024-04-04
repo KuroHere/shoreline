@@ -64,7 +64,7 @@ public abstract class MixinClientWorld {
         Shoreline.EVENT_HANDLER.dispatch(skyboxEvent);
         if (skyboxEvent.isCanceled()) {
             cir.cancel();
-            cir.setReturnValue(skyboxEvent.getColor());
+            cir.setReturnValue(skyboxEvent.getColorVec());
         }
     }
 
@@ -79,7 +79,7 @@ public abstract class MixinClientWorld {
         Shoreline.EVENT_HANDLER.dispatch(skyboxEvent);
         if (skyboxEvent.isCanceled()) {
             cir.cancel();
-            cir.setReturnValue(skyboxEvent.getColor());
+            cir.setReturnValue(skyboxEvent.getColorVec());
         }
     }
 }

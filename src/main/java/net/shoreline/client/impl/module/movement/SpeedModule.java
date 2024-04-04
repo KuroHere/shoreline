@@ -529,6 +529,7 @@ public class SpeedModule extends ToggleModule {
         V_HOP,
         B_HOP,
         VANILLA,
-        GRIM_COLLIDE
+        GRIM_COLLIDE,
+        FIREWORK
     }
 }

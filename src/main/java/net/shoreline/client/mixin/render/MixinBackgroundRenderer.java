@@ -10,6 +10,7 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.render.RenderFogEvent;
 import net.shoreline.client.impl.event.world.BlindnessEvent;
 import net.shoreline.client.impl.event.world.SkyboxEvent;
+import net.shoreline.client.util.chat.ChatUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,14 +24,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(BackgroundRenderer.class)
 public class MixinBackgroundRenderer {
-    @Shadow
-    private static float red;
 
-    @Shadow
-    private static float green;
+    @Shadow private static float red;
 
-    @Shadow
-    private static float blue;
+    @Shadow private static float green;
+
+    @Shadow private static float blue;
 
     /**
      * @param camera
@@ -43,13 +42,6 @@ public class MixinBackgroundRenderer {
     @Inject(method = "applyFog", at = @At(value = "TAIL"))
     private static void hookApplyFog(Camera camera, BackgroundRenderer.FogType fogType,
                                      float viewDistance, boolean thickFog, float tickDelta, CallbackInfo ci) {
-        SkyboxEvent.Fog skyboxEvent = new SkyboxEvent.Fog(tickDelta);
-        Shoreline.EVENT_HANDLER.dispatch(skyboxEvent);
-        if (skyboxEvent.isCanceled()) {
-            // ci.cancel();
-            Vec3d vec3d = skyboxEvent.getColor();
-            RenderSystem.setShaderFogColor((float) (vec3d.x / 255.0f), (float) (vec3d.y / 255.0f), (float) (vec3d.z / 255.0f));
-        }
         if (fogType != BackgroundRenderer.FogType.FOG_TERRAIN) {
             return;
         }
@@ -61,25 +53,16 @@ public class MixinBackgroundRenderer {
         }
     }
 
-    /**
-     *
-     * @param camera
-     * @param tickDelta
-     * @param world
-     * @param viewDistance
-     * @param skyDarkness
-     * @param ci
-     */
     @Inject(method = "render", at = @At(value = "HEAD"), cancellable = true)
     private static void hookRender(Camera camera, float tickDelta, ClientWorld world, int viewDistance, float skyDarkness, CallbackInfo ci) {
         SkyboxEvent.Fog skyboxEvent = new SkyboxEvent.Fog(tickDelta);
         Shoreline.EVENT_HANDLER.dispatch(skyboxEvent);
         if (skyboxEvent.isCanceled()) {
             ci.cancel();
-            Vec3d vec3d = skyboxEvent.getColor();
-            red = (float) (vec3d.x / 255.0f);
-            green = (float) (vec3d.y / 255.0f);
-            blue = (float) (vec3d.z / 255.0f);
+            Vec3d vec3d = skyboxEvent.getColorVec();
+            red = (float) vec3d.x;
+            green = (float) vec3d.y;
+            blue = (float) vec3d.z;
             RenderSystem.clearColor(red, green, blue, 0.0f);
         }
     }

@@ -34,6 +34,8 @@
     "accessor.AccessorTextFieldWidget",
     "accessor.AccessorTextRenderer",
     "accessor.AccessorWorldRenderer",
+    "biome.MixinBiome",
+    "biome.MixinBiomeEffects",
     "block.MixinBlock",
     "block.MixinSlimeBlock",
     "chunk.light.MixinChunkSkylightProvider",

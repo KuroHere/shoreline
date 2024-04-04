@@ -11,17 +11,21 @@ import java.awt.*;
  * @since 1.0
  */
 public class SkyboxEvent extends Event {
-    private Vec3d color;
+    private Color color;
 
-    public Vec3d getColor() {
+    public Color getColor() {
         return color;
     }
 
-    public void setColor(Color color) {
-        setColor(new Vec3d(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0));
+    public Vec3d getColorVec() {
+        return new Vec3d(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0);
     }
 
-    public void setColor(Vec3d color) {
+    public int getRGB() {
+        return color.getRGB();
+    }
+
+    public void setColor(Color color) {
         this.color = color;
     }
 
