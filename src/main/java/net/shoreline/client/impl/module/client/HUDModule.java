@@ -261,8 +261,8 @@ public class HUDModule extends ToggleModule {
                 double y = mc.player.getY();
                 double z = mc.player.getZ();
                 boolean nether = mc.world.getRegistryKey() == World.NETHER;
-                double nx = mc.player.getX() * 8;
-                double nz = mc.player.getZ() * 8;
+                double nx = mc.player.getX() / 8;
+                double nz = mc.player.getZ() / 8;
                 RenderManager.renderText(event.getContext(), String.format(
                                 "XYZ §f%s, %s, %s " + (netherCoordsConfig.getValue() ?
                                         "§7[§f%s, %s§7]" : ""),
