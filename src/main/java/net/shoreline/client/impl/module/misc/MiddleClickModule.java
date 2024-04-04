@@ -75,15 +75,4 @@ public class MiddleClickModule extends ToggleModule {
             }
         }
     }
-
-    public enum Action {
-        FRIEND,
-        DUEL
-    }
-
-    public enum MissAction {
-        PEARL,
-        FIREWORK,
-        OFF
-    }
 }
