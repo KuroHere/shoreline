@@ -108,14 +108,14 @@ public class RotationManager implements Globals {
         }
     }
 
-    @EventListener
-    public void onEntityRotationVector(final EntityRotationVectorEvent event) {
-        if (event.getEntity() instanceof ClientPlayerEntity && rotation != null) {
-            final float rotX = MathHelper.lerp(event.getTickDelta(), serverPitch, lastServerPitch);
-            final float rotY = MathHelper.lerp(event.getTickDelta(), serverYaw, lastServerYaw);
-            event.setPosition(RotationUtil.getRotationVector(rotX, rotY));
-        }
-    }
+//    @EventListener
+//    public void onEntityRotationVector(final EntityRotationVectorEvent event) {
+//        if (event.getEntity() instanceof ClientPlayerEntity && rotation != null) {
+//            final float rotX = MathHelper.lerp(event.getTickDelta(), serverPitch, lastServerPitch);
+//            final float rotY = MathHelper.lerp(event.getTickDelta(), serverYaw, lastServerYaw);
+//            event.setPosition(RotationUtil.getRotationVector(rotX, rotY));
+//        }
+//    }
 
     @EventListener
     public void onPlayerUpdate(final PlayerUpdateEvent event) {

@@ -13,14 +13,9 @@ import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -38,7 +33,6 @@ import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
-import net.shoreline.client.impl.event.network.ReachEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.manager.world.tick.TickSync;
 import net.shoreline.client.init.Managers;
@@ -78,8 +72,7 @@ public class AuraModule extends RotationModule {
     Config<Vector> hitVectorConfig = new EnumConfig<>("HitVector", "The vector to aim for when attacking entities", Vector.FEET, Vector.values());
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate before attacking", false);
     Config<Boolean> strictRotateConfig = new BooleanConfig("RotateStrict", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", false, () -> rotateConfig.getValue());
-    Config<Integer> rotateLimitConfig = new NumberConfig<>("RotateLimit", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
-    Config<Integer> yawTicksConfig = new NumberConfig<>("YawTicks", "Minimum ticks to rotate yaw", 1, 1, 5, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
+    Config<Integer> rotateLimitConfig = new NumberConfig<>("Rotate-Yaw", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
     Config<Integer> rotateTimeoutConfig = new NumberConfig<>("RotateTimeout", "Minimum ticks to hold the rotation yaw after reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted", "The minimum age of the entity to be considered for attack", 0, 50, 200);
     Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck", "Checks if target has armor before attacking", false);
@@ -97,7 +90,6 @@ public class AuraModule extends RotationModule {
     private Entity entityTarget;
     private long randomDelay = -1;
     //
-    private int rotating;
     private boolean shielding;
     private boolean sneaking;
     private boolean sprinting;
@@ -106,6 +98,7 @@ public class AuraModule extends RotationModule {
     private final Timer critTimer = new CacheTimer();
     private final Timer autoSwapTimer = new CacheTimer();
     private final Timer switchTimer = new CacheTimer();
+    private boolean rotated;
 
     /**
      *
@@ -122,7 +115,6 @@ public class AuraModule extends RotationModule {
     @Override
     public void onDisable() {
         entityTarget = null;
-        rotating = 0;
     }
 
     @EventListener
@@ -133,8 +125,7 @@ public class AuraModule extends RotationModule {
     @EventListener
     public void onPlayerUpdate(PlayerTickEvent event) {
         if (Modules.AUTO_CRYSTAL.isAttacking()
-                || Modules.AUTO_CRYSTAL.isPlacing()
-                || rotating > 0) {
+                || Modules.AUTO_CRYSTAL.isPlacing()) {
             return;
         }
         final Vec3d eyepos = Managers.POSITION.getEyePos();
@@ -150,18 +141,54 @@ public class AuraModule extends RotationModule {
         if (entityTarget == null || !switchTimer.passed(swapDelayConfig.getValue() * 25.0f)) {
             return;
         }
+        if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
+                || mc.options.attackKey.isPressed()) {
+            autoSwapTimer.reset();
+        }
+        // END PRE
+        boolean sword = mc.player.getMainHandStack().getItem() instanceof SwordItem;
+        if (autoSwapConfig.getValue() && autoSwapTimer.passed(500) && !sword) {
+            int slot = getSwordSlot();
+            if (slot != -1) {
+                Managers.INVENTORY.setClientSlot(slot);
+            }
+        }
+        if (!isHoldingSword()) {
+            return;
+        }
         if (rotateConfig.getValue()) {
             float[] rotation = RotationUtil.getRotationsTo(mc.player.getEyePos(),
                     getAttackRotateVec(entityTarget));
-            setRotation(rotation[0], rotation[1]);
+            if (strictRotateConfig.getValue()) {
+                float serverYaw = Managers.ROTATION.getWrappedYaw();
+                float diff = serverYaw - rotation[0];
+                float diff1 = Math.abs(diff);
+                if (diff1 > 180.0f) {
+                    diff += diff > 0.0f ? -360.0f : 360.0f;
+                }
+                int dir = diff > 0.0f ? -1 : 1;
+                float deltaYaw = dir * rotateLimitConfig.getValue();
+                float yaw;
+                if (diff1 > rotateLimitConfig.getValue()) {
+                    yaw = serverYaw + deltaYaw;
+                    rotated = false;
+                } else {
+                    yaw = rotation[0];
+                    rotated = true;
+                }
+                setRotation(yaw, rotation[1]);
+            } else {
+                setRotation(rotation[0], rotation[1]);
+                rotated = true;
+            }
         }
-        if (isRotationBlocked()) {
+        if (isRotationBlocked() || !shouldWaitCrit() || !rotated) {
             return;
         }
         if (attackDelayConfig.getValue()) {
             float ticks = 20.0f - Managers.TICK.getTickSync(tpsSyncConfig.getValue());
             float progress = mc.player.getAttackCooldownProgress(ticks);
-            if (progress >= 0.9f && attackTarget()) {
+            if (progress >= 0.9f && attackTarget(entityTarget)) {
                 mc.player.resetLastAttackedTicks();
             }
         } else {
@@ -169,17 +196,10 @@ public class AuraModule extends RotationModule {
                 randomDelay = (long) RANDOM.nextFloat((randomSpeedConfig.getValue() * 10.0f) + 1.0f);
             }
             float delay = (attackSpeedConfig.getValue() * 50.0f) + randomDelay;
-            if (attackTimer.passed(1000.0f - delay) && attackTarget()) {
+            if (attackTimer.passed(1000.0f - delay) && attackTarget(entityTarget)) {
                 randomDelay = -1;
                 attackTimer.reset();
             }
-        }
-    }
-
-    @EventListener
-    public void onReach(final ReachEvent event) {
-        if (entityTarget != null) {
-            event.setReach(rangeConfig.getValue() - 3.0f);
         }
     }
 
@@ -199,58 +219,42 @@ public class AuraModule extends RotationModule {
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (entityTarget != null && renderConfig.getValue() && isHoldingSword()) {
+            int attackDelay = 0;
+            if (attackDelayConfig.getValue()) {
+                float animFactor = 0.9f - mc.player.getAttackCooldownProgress(0.0f);
+                attackDelay = (int) (60.0 * animFactor);
+            }
             RenderManager.renderBox(event.getMatrices(),
-                    Interpolation.getInterpolatedEntityBox(entityTarget), Modules.COLORS.getRGB(60));
+                    Interpolation.getInterpolatedEntityBox(entityTarget), Modules.COLORS.getRGB(60 + attackDelay));
             RenderManager.renderBoundingBox(event.getMatrices(),
                     Interpolation.getInterpolatedEntityBox(entityTarget), 1.5f, Modules.COLORS.getRGB(145));
         }
     }
 
-    private boolean attackTarget() {
-
-        Entity castEntity;
-
-        // validate our server-sided rotations
-        if (mc.crosshairTarget == null || mc.crosshairTarget.getType() != HitResult.Type.ENTITY) {
-            return false;
-        }
-
-        // Get the entity raycasted & then check. If invalid, fail
-        castEntity = ((EntityHitResult) mc.crosshairTarget).getEntity();
-        if (castEntity == null || !castEntity.isAttackable()) {
-            return false;
-        }
-
-        if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
-                || mc.options.attackKey.isPressed()) {
-            autoSwapTimer.reset();
-            return false;
-        }
-        // END PRE
-        boolean sword = mc.player.getMainHandStack().getItem() instanceof SwordItem;
-        if (autoSwapConfig.getValue() && autoSwapTimer.passed(500) && !sword) {
-            int slot = getSwordSlot();
-            if (slot != -1) {
-                Managers.INVENTORY.setClientSlot(slot);
-            }
-        }
-        if (!isHoldingSword() || !shouldWaitCrit()) {
-            return false;
-        }
-        preAttackTarget();
-        mc.doAttack();
-        postAttackTarget(castEntity);
-
-//        // preMotionAttackTarget();
-//        PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(entity,
-//                Managers.POSITION.isSneaking());
-//        Managers.NETWORK.sendPacket(packet);
-//        postAttackTarget(entity);
-//        if (swingConfig.getValue()) {
-//            mc.player.swingHand(Hand.MAIN_HAND);
-//        } else {
-//            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+    private boolean attackTarget(Entity entity) {
+//        Entity castEntity;
+//        // validate our server-sided rotations
+//        if (mc.crosshairTarget == null || mc.crosshairTarget.getType() != HitResult.Type.ENTITY) {
+//            return false;
 //        }
+//        // Get the entity raycasted & then check. If invalid, fail
+//        castEntity = ((EntityHitResult) mc.crosshairTarget).getEntity();
+//        if (castEntity == null || !castEntity.isAttackable()) {
+//            return false;
+//        }
+//        preAttackTarget();
+//        mc.doAttack();
+//        postAttackTarget(castEntity);
+        preAttackTarget();
+        PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(entity,
+                Managers.POSITION.isSneaking());
+        Managers.NETWORK.sendPacket(packet);
+        postAttackTarget(entity);
+        if (swingConfig.getValue()) {
+            mc.player.swingHand(Hand.MAIN_HAND);
+        } else {
+            Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        }
         return true;
     }
 
@@ -456,58 +460,6 @@ public class AuraModule extends RotationModule {
                 yield Stream.of(feetPos, torsoPos, eyesPos).min(Comparator.comparing(b -> mc.player.getEyePos().squaredDistanceTo(b))).orElse(eyesPos);
             }
         };
-    }
-
-    /**
-     * Returns the number of ticks the rotation will last after setting the
-     * player rotations to the dest rotations. Yaws are only calculated in
-     * this method, the yaw will not be updated until the main
-     * loop runs.
-     *
-     * @param dest The rotation
-     * @return
-     */
-    private float[] getLimitRotation(float dest) {
-        int tick;
-        float[] yawLimits;
-        if (strictRotateConfig.getValue()) {
-            float diff = dest - Managers.ROTATION.getWrappedYaw(); // yaw diff
-            float magnitude = Math.abs(diff);
-            if (magnitude > 180.0f) {
-                diff += diff > 0.0f ? -360.0f : 360.0f;
-            }
-            final int dir = diff > 0.0f ? 1 : -1;
-            tick = yawTicksConfig.getValue();
-            // partition yaw
-            float deltaYaw = magnitude / tick;
-            if (deltaYaw > rotateLimitConfig.getValue()) {
-                tick = MathHelper.ceil(magnitude / rotateLimitConfig.getValue());
-                deltaYaw = magnitude / tick;
-            }
-            deltaYaw *= dir;
-            int yawCount = tick;
-            tick += rotateTimeoutConfig.getValue();
-            yawLimits = new float[tick];
-            int off = tick - 1;
-            float yawTotal = 0.0f;
-            for (int i = 0; i < tick; ++i) {
-                if (i > yawCount) {
-                    yawLimits[off - i] = 0.0f;
-                    continue;
-                }
-                yawTotal += deltaYaw;
-                yawLimits[off - i] = yawTotal;
-            }
-        } else {
-            tick = rotateTimeoutConfig.getValue() + 1;
-            yawLimits = new float[tick];
-            int off = tick - 1;
-            yawLimits[off] = dest;
-            for (int i = 1; i < tick; ++i) {
-                yawLimits[off - i] = 0.0f;
-            }
-        }
-        return yawLimits;
     }
 
     /**

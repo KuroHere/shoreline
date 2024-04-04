@@ -75,7 +75,6 @@ public class SurroundModule extends BlockPlacerModule {
             double z = Math.floor(mc.player.getZ()) + 0.5;
             Managers.MOVEMENT.setMotionXZ((x - mc.player.getX()) / 2.0, (z - mc.player.getZ()) / 2.0);
         }
-        // mc.inGameHud.getChatHud().addMessage();
         prevY = mc.player.getY();
     }
 
