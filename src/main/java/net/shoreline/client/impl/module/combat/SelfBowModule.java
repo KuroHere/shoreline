@@ -78,7 +78,7 @@ public class SelfBowModule extends RotationModule {
             return;
         }
         setRotation(mc.player.getYaw(), -90.0f);
-        mc.interactionManager.clickSlot(0, arrowSlot < 9 ? arrowSlot + 36 : arrowSlot, 9, SlotActionType.SWAP, mc.player);
+        mc.interactionManager.clickSlot(0, arrowSlot, 9, SlotActionType.SWAP, mc.player);
         float pullTime = BowItem.getPullProgress(mc.player.getItemUseTime());
         if (pullTime >= 0.15f) {
             arrows.add(statusEffect);

@@ -11,10 +11,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
@@ -45,6 +42,7 @@ import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.impl.imixin.IPlayerInteractEntityC2SPacket;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.EvictingQueue;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.network.InteractType;
@@ -53,10 +51,7 @@ import net.shoreline.client.util.world.EndCrystalUtil;
 import net.shoreline.client.util.world.EntityUtil;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -98,6 +93,7 @@ public class AutoCrystalModule extends RotationModule {
     Config<Float> attackDelayConfig = new NumberConfig<>("AttackDelay", "Added delays", 0.0f, 0.0f, 5.0f);
     Config<Integer> attackFactorConfig = new NumberConfig<>("AttackFactor", "Factor of attack delay", 0, 0, 3, () -> attackDelayConfig.getValue() > 0.0);
     Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed", "Randomized delay for breaking crystals", 0.0f, 0.0f, 10.0f);
+    Config<Boolean> breakDelayConfig = new BooleanConfig("BreakDelay", "Uses attack latency to calculate break delays", false);
     Config<Float> breakTimeoutConfig = new NumberConfig<>("BreakTimeout", "Time after waiting for the average break time before considering a crystal attack failed", 0.0f, 3.0f, 10.0f);
     Config<Float> minTimeoutConfig = new NumberConfig<>("MinTimeout", "Minimum time before considering a crystal break/place failed", 0.0f, 5.0f, 20.0f);
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted", "Minimum ticks alive to consider crystals for attack", 0, 0, 10);
@@ -124,7 +120,6 @@ public class AutoCrystalModule extends RotationModule {
     // PLACE SETTINGS
     Config<Boolean> placeConfig = new BooleanConfig("Place", "Places crystals to damage enemies. Place settings will only function if this setting is enabled.", true);
     Config<Float> placeSpeedConfig = new NumberConfig<>("PlaceSpeed", "Speed to place crystals", 0.1f, 18.0f, 20.0f, () -> placeConfig.getValue());
-    Config<Float> placeTimeoutConfig = new NumberConfig<>("PlaceTimeout", "Time after waiting for the average place time before considering a crystal placement failed", 0.0f, 3.0f, 10.0f, () -> placeConfig.getValue());
     Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange", "Range to place crystals", 0.1f, 4.0f, 5.0f, () -> placeConfig.getValue());
     Config<Float> strictPlaceRangeConfig = new NumberConfig<>("StrictPlaceRange", "NCP range to place crystals", 0.1f, 4.0f, 5.0f, () -> placeConfig.getValue());
     Config<Float> placeWallRangeConfig = new NumberConfig<>("PlaceWallRange", "Range to place crystals through walls", 0.1f, 4.0f, 5.0f, () -> placeConfig.getValue());
@@ -161,6 +156,7 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> renderAttackConfig = new BooleanConfig("Render-Attack", "Renders the current attack", false);
     Config<Boolean> renderSpawnConfig = new BooleanConfig("Render-Spawn", "Indicates if the current placement was spawned", false);
     Config<Boolean> damageNametagConfig = new BooleanConfig("Render-Damage", "Renders the current expected damage of a place/attack", false, () -> renderConfig.getValue());
+    Config<Boolean> breakDebugConfig = new BooleanConfig("Break-Debug", "Debugs break ms in data", false);
     //
     private DamageData<EndCrystalEntity> attackCrystal;
     private DamageData<BlockPos> placeCrystal;
@@ -181,6 +177,7 @@ public class AutoCrystalModule extends RotationModule {
     private final Timer lastSwapTimer = new CacheTimer();
     private final Timer autoSwapTimer = new CacheTimer();
     //
+    private final ArrayDeque<Long> attackLatency = new EvictingQueue<>(20);
     private final Map<Integer, Long> attackPackets =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
     private final Map<BlockPos, Long> placePackets =
@@ -194,6 +191,14 @@ public class AutoCrystalModule extends RotationModule {
     public AutoCrystalModule() {
         super("AutoCrystal", "Attacks entities with end crystals",
                 ModuleCategory.COMBAT);
+    }
+
+    @Override
+    public String getModuleData() {
+        if (breakDebugConfig.getValue()) {
+            return String.format("%dms", getBreakMs());
+        }
+        return "ARRAYLIST_INFO";
     }
 
     @Override
@@ -237,8 +242,11 @@ public class AutoCrystalModule extends RotationModule {
             attackCrystal = calculateAttackCrystal(entities);
             placeCrystal = calculatePlaceCrystal(blocks, entities);
         }
-        attackRotate = attackCrystal != null && attackDelayConfig.getValue() <= 0.0
-                && lastAttackTimer.passed(1000.0f - breakSpeedConfig.getValue() * 50.0f);
+        float breakDelay = 1000.0f - breakSpeedConfig.getValue() * 50.0f;
+        if (breakDelayConfig.getValue()) {
+            breakDelay = Math.max(minTimeoutConfig.getValue() * 50.0f, getBreakMs() + breakTimeoutConfig.getValue() * 50.0f);
+        }
+        attackRotate = attackCrystal != null && attackDelayConfig.getValue() <= 0.0 && lastAttackTimer.passed(breakDelay);
         if (attackCrystal != null) {
             crystalRotation = attackCrystal.damageData.getPos();
         } else if (placeCrystal != null) {
@@ -392,10 +400,16 @@ public class AutoCrystalModule extends RotationModule {
 
     @EventListener
     public void onRemoveEntity(RemoveEntityEvent event) {
-        if (sequentialConfig.getValue() != Sequential.STRICT || !(event.getEntity() instanceof EndCrystalEntity crystalEntity)) {
+        if (!(event.getEntity() instanceof EndCrystalEntity crystalEntity)) {
             return;
         }
-        placeSequential(crystalEntity);
+        Long time = attackPackets.remove(crystalEntity.getId());
+        if (time != null) {
+            attackLatency.add(System.currentTimeMillis() - time);
+        }
+        if (sequentialConfig.getValue() == Sequential.NORMAL) {
+            placeSequential(crystalEntity, time);
+        }
     }
 
     @EventListener
@@ -410,7 +424,31 @@ public class AutoCrystalModule extends RotationModule {
             lastSwapTimer.reset();
         } else if (event.getPacket() instanceof IPlayerInteractEntityC2SPacket packet && packet.getType() == InteractType.ATTACK
                 && packet.getEntity() instanceof EndCrystalEntity crystalEntity && sequentialConfig.getValue() == Sequential.NORMAL) {
-            placeSequential(crystalEntity);
+            placeSequential(crystalEntity, 1L);
+        } else if (event.getPacket() instanceof PlayerActionC2SPacket packet && packet.getAction() == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK
+                && minePlaceConfig.getValue() && canUseCrystalOnBlock(packet.getPos())) {
+//            Vec3d crystalPos = crystalDamageVec(packet.getPos());
+//            for (Entity entity : mc.world.getEntities()) {
+//                if (entity == null || !entity.isAlive() || entity == mc.player
+//                        || !isValidTarget(entity)
+//                        || Managers.SOCIAL.isFriend(entity.getUuid())) {
+//                    continue;
+//                }
+//                double crystalDist = crystalPos.squaredDistanceTo(entity.getPos());
+//                if (crystalDist > 144.0f) {
+//                    continue;
+//                }
+//                double dist = mc.player.squaredDistanceTo(entity);
+//                if (dist > targetRangeConfig.getValue() * targetRangeConfig.getValue()) {
+//                    continue;
+//                }
+//                double damage = EndCrystalUtil.getDamageTo(entity,
+//                        crystalPos, blockDestructionConfig.getValue());
+//                if (!targetDamageCheck(damage, entity)) {
+//                    placeCrystal(packet.getPos(), getCrystalHand());
+//                    break;
+//                }
+//            }
         }
     }
 
@@ -583,8 +621,9 @@ public class AutoCrystalModule extends RotationModule {
             if (!(crystal instanceof EndCrystalEntity crystal1) || !crystal.isAlive()) {
                 continue;
             }
-            if ((crystal.age < ticksExistedConfig.getValue() || attackPackets.containsKey(crystal.getId()))
-                    && inhibitConfig.getValue()) {
+            Long time = attackPackets.get(crystal.getId());
+            boolean attacked = time != null && time < getBreakMs();
+            if ((crystal.age < ticksExistedConfig.getValue() || attacked) && inhibitConfig.getValue()) {
                 continue;
             }
             if (attackRangeCheck(crystal1)) {
@@ -766,8 +805,7 @@ public class AutoCrystalModule extends RotationModule {
         return false;
     }
 
-    private void placeSequential(EndCrystalEntity crystalEntity) {
-        Long time = attackPackets.remove(crystalEntity.getId());
+    private void placeSequential(EndCrystalEntity crystalEntity, Long time) {
         if (time != null) {
             BlockPos sequentialPos = null;
             if (preSequentialConfig.getValue()) {
@@ -922,6 +960,19 @@ public class AutoCrystalModule extends RotationModule {
     // Debug info
     public void setStage(String crystalStage) {
         this.crystalStage = crystalStage;
+    }
+
+    public int getBreakMs() {
+        float avg = 0.0f;
+        // fix ConcurrentModificationException
+        ArrayList<Long> latencyCopy = Lists.newArrayList(attackLatency);
+        if (!latencyCopy.isEmpty()) {
+            for (float t : latencyCopy) {
+                avg += t;
+            }
+            avg /= latencyCopy.size();
+        }
+        return (int) avg;
     }
 
     public enum Swap {
