@@ -25,11 +25,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BackgroundRenderer.class)
 public class MixinBackgroundRenderer {
 
-    @Shadow private static float red;
+    @Shadow
+    private static float red;
 
-    @Shadow private static float green;
+    @Shadow
+    private static float green;
 
-    @Shadow private static float blue;
+    @Shadow
+    private static float blue;
 
     /**
      * @param camera

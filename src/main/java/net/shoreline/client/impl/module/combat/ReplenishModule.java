@@ -1,6 +1,7 @@
 package net.shoreline.client.impl.module.combat;
 
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 import net.shoreline.client.api.config.Config;
@@ -60,7 +61,10 @@ public class ReplenishModule extends ToggleModule {
             if (stack.getItem() != item.getItem()) {
                 continue;
             }
-            replenishSlot = i;
+            float total = ((float) (item.getCount() + stack.getCount()) / item.getMaxCount()) * 100.0f;
+            if (total >= percentConfig.getValue()) {
+                replenishSlot = i;
+            }
         }
         if (replenishSlot != -1) {
             mc.interactionManager.clickSlot(0, replenishSlot, hotbarSlot, SlotActionType.SWAP, mc.player);

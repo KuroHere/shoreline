@@ -28,7 +28,6 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.impl.manager.world.tick.TickSync;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.render.RenderManager;
@@ -40,6 +39,7 @@ import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.impl.imixin.IPlayerInteractEntityC2SPacket;
+import net.shoreline.client.impl.manager.world.tick.TickSync;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.EvictingQueue;
@@ -251,7 +251,7 @@ public class AutoCrystalModule extends RotationModule {
         } else if (placeCrystal != null) {
             crystalRotation = placeCrystal.damageData.toCenterPos().add(0.0, 0.5, 0.0);
         }
-        if (rotateConfig.getValue() && crystalRotation != null) {
+        if (rotateConfig.getValue() && crystalRotation != null && (placeCrystal == null || isHoldingCrystal())) {
             float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
             if (strictRotateConfig.getValue() == Rotate.FULL || strictRotateConfig.getValue() == Rotate.SEMI && attackRotate) {
                 float serverYaw = Managers.ROTATION.getWrappedYaw();
@@ -269,11 +269,13 @@ public class AutoCrystalModule extends RotationModule {
                 } else {
                     yaw = rotations[0];
                     rotated = true;
+                    crystalRotation = null;
                 }
                 setRotation(yaw, rotations[1]);
             } else {
                 setRotation(rotations[0], rotations[1]);
                 rotated = true;
+                crystalRotation = null;
             }
         }
         if (!rotated) {
