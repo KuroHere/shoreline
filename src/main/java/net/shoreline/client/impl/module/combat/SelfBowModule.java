@@ -9,6 +9,7 @@ import net.minecraft.item.TippedArrowItem;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.shoreline.client.api.event.listener.EventListener;
@@ -77,7 +78,7 @@ public class SelfBowModule extends RotationModule {
             return;
         }
         setRotation(mc.player.getYaw(), -90.0f);
-        prioritizeArrow(arrowSlot);
+        mc.interactionManager.clickSlot(0, arrowSlot < 9 ? arrowSlot + 36 : arrowSlot, 9, SlotActionType.SWAP, mc.player);
         float pullTime = BowItem.getPullProgress(mc.player.getItemUseTime());
         if (pullTime >= 0.15f) {
             arrows.add(statusEffect);
@@ -86,15 +87,6 @@ public class SelfBowModule extends RotationModule {
             mc.player.stopUsingItem();
         } else {
             mc.options.useKey.setPressed(true);
-        }
-    }
-
-    private void prioritizeArrow(int slot) {
-        boolean returnClick = mc.player.currentScreenHandler.getCursorStack().isEmpty();
-        Managers.INVENTORY.pickupSlot(slot);
-        Managers.INVENTORY.pickupSlot(9);
-        if (returnClick && !mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
-            Managers.INVENTORY.pickupSlot(slot);
         }
     }
 }

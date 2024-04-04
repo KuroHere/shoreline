@@ -1,11 +1,14 @@
 package net.shoreline.client.impl.module.combat;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
 import net.minecraft.screen.slot.SlotActionType;
+import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
@@ -13,8 +16,10 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.player.InventoryUtil;
 import net.shoreline.client.util.player.PlayerUtil;
+import net.shoreline.client.util.world.EndCrystalUtil;
 
 /**
  * @author xgraza
@@ -23,15 +28,20 @@ import net.shoreline.client.util.player.PlayerUtil;
 public final class AutoTotemModule extends ToggleModule {
 
     EnumConfig<OffhandItem> itemConfig = new EnumConfig<>("Item", "The item to wield in your offhand", OffhandItem.TOTEM, OffhandItem.values());
-    NumberConfig<Float> healthConfig = new NumberConfig<>("Health", "The health required to fall below before swapping to a totem", 1.0f, 14.0f, 20.0f);
+    NumberConfig<Float> healthConfig = new NumberConfig<>("Health", "The health required to fall below before swapping to a totem", 0.0f, 14.0f, 20.0f);
     BooleanConfig gappleConfig = new BooleanConfig("OffhandGapple", "If to equip a golden apple if holding down the item use button", true);
     BooleanConfig crappleConfig = new BooleanConfig("Crapple", "If to use a normal golden apple if Absorption is present", true);
-    BooleanConfig lethalGapConfig = new BooleanConfig("Lethal-Gapple", "If to not swap to a totem if the player is eating a golden apple", false);
+    Config<Boolean> lethalConfig = new BooleanConfig("Lethal", "Calculate lethal damage sources", false);
     // The player inventory sync ID
     private static final int INVENTORY_SYNC_ID = 0;
 
     public AutoTotemModule() {
         super("AutoTotem", "Automatically replenishes the totem in your offhand", ModuleCategory.COMBAT);
+    }
+
+    @Override
+    public String getModuleData() {
+        return String.valueOf(Managers.INVENTORY.count(Items.TOTEM_OF_UNDYING));
     }
 
     @EventListener
@@ -45,12 +55,10 @@ public final class AutoTotemModule extends ToggleModule {
             // ChatUtil.clientSendMessage("Holding item needed to swap, returning");
             return;
         }
-
 //        // Only swap to a golden apple if the item in our main hand is not consumable
 //        if ((itemToWield == Items.GOLDEN_APPLE || itemToWield == Items.ENCHANTED_GOLDEN_APPLE)) {
 //            return;
 //        }
-
         // Find the item in our inventory
         final int itemSlot = getSlotFor(itemToWield);
         if (itemSlot != -1) {
@@ -64,9 +72,9 @@ public final class AutoTotemModule extends ToggleModule {
         // Only take totems from the hotbar
         final int startSlot = item == Items.TOTEM_OF_UNDYING ? 0 : 9;
         // Search through our inventory
-        for (int slot = startSlot; slot < 36; ++slot) {
+        for (int slot = startSlot; slot < 36; slot++) {
             final ItemStack itemStack = mc.player.getInventory().getStack(slot);
-            if (!itemStack.isEmpty() && itemStack.getItem() == item) {
+            if (itemStack.getItem() == item) {
                 return slot;
             }
         }
@@ -76,29 +84,33 @@ public final class AutoTotemModule extends ToggleModule {
     private Item getItemToWield() {
         // If the player's health (+absorption) falls below the "safe" amount, equip a totem
         final float health = PlayerUtil.getLocalPlayerHealth();
-        if (health < healthConfig.getValue()) {
-            // If we should ignore a totem in favor of a gapple
-            if (lethalGapConfig.getValue()
-                    && PlayerUtil.isHolding(getGoldenAppleType())
-                    && mc.options.useKey.isPressed()) {
-                return getGoldenAppleType();
-            }
-
+        if (health <= healthConfig.getValue()) {
             return Items.TOTEM_OF_UNDYING;
         }
         // Check fall damage
-        final float heartsTaken = (float) PlayerUtil.computeFallDamage(
-                mc.player.fallDistance, 1.0f);
+        final float heartsTaken = (float) PlayerUtil.computeFallDamage(mc.player.fallDistance, 1.0f);
         if (heartsTaken + 0.5f > mc.player.getHealth()) {
             return Items.TOTEM_OF_UNDYING;
         }
-
+        if (lethalConfig.getValue()) {
+            for (Entity e : mc.world.getEntities()) {
+                if (e == null || !e.isAlive() || !(e instanceof EndCrystalEntity crystal)) {
+                    continue;
+                }
+                if (mc.player.squaredDistanceTo(e) > 144.0) {
+                    continue;
+                }
+                double potential = EndCrystalUtil.getDamageTo(mc.player, crystal.getPos());
+                if (health + 0.5 > potential) {
+                    continue;
+                }
+                return Items.TOTEM_OF_UNDYING;
+            }
+        }
         // If offhand gap is enabled & the use key is pressed down, equip a golden apple.
         if (gappleConfig.getValue() && mc.options.useKey.isPressed() && mc.player.getMainHandStack().getItem() instanceof SwordItem) {
             return getGoldenAppleType();
         }
-
-        // Else, return the default item
         return itemConfig.getValue().getItem();
     }
 

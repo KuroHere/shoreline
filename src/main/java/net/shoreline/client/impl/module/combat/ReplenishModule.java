@@ -2,6 +2,7 @@ package net.shoreline.client.impl.module.combat;
 
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.SlotActionType;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.EventStage;
@@ -62,12 +63,7 @@ public class ReplenishModule extends ToggleModule {
             replenishSlot = i;
         }
         if (replenishSlot != -1) {
-            // Managers.INVENTORY.quickMove(replenishSlot);
-            Managers.INVENTORY.pickupSlot(replenishSlot);
-            Managers.INVENTORY.pickupSlot(hotbarSlot);
-            if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
-                Managers.INVENTORY.pickupSlot(replenishSlot);
-            }
+            mc.interactionManager.clickSlot(0, replenishSlot < 9 ? replenishSlot + 36 : replenishSlot, hotbarSlot, SlotActionType.SWAP, mc.player);
         }
     }
 }

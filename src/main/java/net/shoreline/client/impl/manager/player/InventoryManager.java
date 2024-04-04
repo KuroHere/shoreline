@@ -17,7 +17,6 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.mixin.accessor.AccessorClientPlayerInteractionManager;
 import net.shoreline.client.util.Globals;
 
 import java.util.ArrayList;
@@ -150,8 +149,9 @@ public class InventoryManager implements Globals {
      * @return
      */
     public int count(Item item) {
-        int itemCount = 0;
-        for (int i = 9; i < 45; i++) {
+        ItemStack offhandStack = mc.player.getOffHandStack();
+        int itemCount = offhandStack.getItem() == item ? offhandStack.getCount() : 0;
+        for (int i = 0; i < 36; i++) {
             ItemStack slot = mc.player.getInventory().getStack(i);
             if (slot.getItem() == item) {
                 itemCount += slot.getCount();
