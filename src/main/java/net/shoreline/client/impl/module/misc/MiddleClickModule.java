@@ -1,10 +1,12 @@
 package net.shoreline.client.impl.module.misc;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.shoreline.client.api.config.Config;
+import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -21,8 +23,9 @@ import org.lwjgl.glfw.GLFW;
 public class MiddleClickModule extends ToggleModule {
 
     //
-    Config<MissAction> missActionConfig = new EnumConfig<>("Action", "Throws a pearl if looking at air", MissAction.PEARL, MissAction.values());
-    Config<Action> actionConfig = new EnumConfig<>("Action-Player", "The action to perform when middle-clicking", Action.FRIEND, Action.values());
+    Config<Boolean> friendConfig = new BooleanConfig("Friend", "Friends players when middle click", true);
+    Config<Boolean> pearlConfig = new BooleanConfig("Pearl", "Throws a pearl when middle click", true);
+    Config<Boolean> fireworkConfig = new BooleanConfig("Firework", "Uses firework to boost elytra when middle click", false);
 
     /**
      *
@@ -39,24 +42,26 @@ public class MiddleClickModule extends ToggleModule {
         }
         if (event.getButton() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE
                 && event.getAction() == GLFW.GLFW_PRESS && mc.currentScreen == null) {
-            if (mc.targetedEntity instanceof PlayerEntity target) {
-                switch (actionConfig.getValue()) {
-                    case FRIEND -> {
-                        if (Managers.SOCIAL.isFriend(target.getUuid())) {
-                            Managers.SOCIAL.remove(target.getUuid());
-                        } else {
-                            Managers.SOCIAL.addFriend(target.getUuid());
-                        }
-                    }
-                    case DUEL -> {
-                        ChatUtil.serverSendMessage("/duel " + target.getName());
-                    }
+            if (mc.targetedEntity instanceof PlayerEntity target && friendConfig.getValue()) {
+                if (Managers.SOCIAL.isFriend(target.getUuid())) {
+                    Managers.SOCIAL.remove(target.getUuid());
+                } else {
+                    Managers.SOCIAL.addFriend(target.getUuid());
                 }
-            } else if (mc.targetedEntity == null && missActionConfig.getValue() != MissAction.OFF) {
+            } else if (mc.targetedEntity == null) {
+                Item item = null;
+                if (mc.player.isFallFlying() && fireworkConfig.getValue()) {
+                    item = Items.FIREWORK_ROCKET;
+                } else if (pearlConfig.getValue()) {
+                    item = Items.ENDER_PEARL;
+                }
+                if (item == null) {
+                    return;
+                }
                 int slot = -1;
                 for (int i = 0; i < 9; i++) {
                     ItemStack stack = mc.player.getInventory().getStack(i);
-                    if (stack.getItem() == (missActionConfig.getValue() == MissAction.PEARL ? Items.ENDER_PEARL : Items.FIREWORK_ROCKET)) {
+                    if (stack.getItem() == item) {
                         slot = i;
                         break;
                     }
