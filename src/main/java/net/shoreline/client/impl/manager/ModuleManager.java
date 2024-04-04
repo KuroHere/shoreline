@@ -46,7 +46,7 @@ public class ModuleManager {
                 new BlockLagModule(),
                 new BowAimModule(),
                 new CriticalsModule(),
-                // new HoleFillModule(),
+                new HoleFillModule(),
                 new NoHitDelayModule(),
                 new ReplenishModule(),
                 new SelfBowModule(),

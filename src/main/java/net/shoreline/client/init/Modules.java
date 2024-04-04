@@ -40,6 +40,7 @@ public class Modules {
     public static BlockLagModule BLOCK_LAG;
     public static BowAimModule BOW_AIM;
     public static CriticalsModule CRITICALS;
+    public static HoleFillModule HOLE_FILL;
     public static NoHitDelayModule NO_HIT_DELAY;
     public static ReplenishModule REPLENISH;
     public static SelfBowModule SELF_BOW;
@@ -191,6 +192,7 @@ public class Modules {
             BLOCK_LAG = (BlockLagModule) getRegisteredModule("blocklag-module");
             BOW_AIM = (BowAimModule) getRegisteredModule("bowaim-module");
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
+            HOLE_FILL = (HoleFillModule) getRegisteredModule("holefill-module");
             NO_HIT_DELAY = (NoHitDelayModule) getRegisteredModule("nohitdelay-module");
             REPLENISH = (ReplenishModule) getRegisteredModule("replenish-module");
             SELF_BOW = (SelfBowModule) getRegisteredModule("selfbow-module");

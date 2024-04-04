@@ -16,7 +16,6 @@ import net.minecraft.util.math.Direction;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
-import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.BlockPlacerModule;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -24,7 +23,7 @@ import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.ScreenOpenEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
-import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
+import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
@@ -91,10 +90,7 @@ public class SurroundModule extends BlockPlacerModule {
     }
 
     @EventListener
-    public void onPlayerUpdate(PlayerUpdateEvent event) {
-        if (event.getStage() != EventStage.POST) {
-            return;
-        }
+    public void onPlayerTick(PlayerTickEvent event) {
         // Do we need this check?? Surround is always highest prio
         blocksPlaced = 0;
         if (jumpDisableConfig.getValue() && mc.player.getY() > prevY) {

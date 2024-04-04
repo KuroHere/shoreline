@@ -123,7 +123,6 @@ public class AutoCrystalModule extends RotationModule {
     Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange", "Range to place crystals", 0.1f, 4.0f, 5.0f, () -> placeConfig.getValue());
     Config<Float> strictPlaceRangeConfig = new NumberConfig<>("StrictPlaceRange", "NCP range to place crystals", 0.1f, 4.0f, 5.0f, () -> placeConfig.getValue());
     Config<Float> placeWallRangeConfig = new NumberConfig<>("PlaceWallRange", "Range to place crystals through walls", 0.1f, 4.0f, 5.0f, () -> placeConfig.getValue());
-    Config<Boolean> minePlaceConfig = new BooleanConfig("MinePlace", "Places on mining blocks that when broken, can be placed on to damage enemies. Instantly destroys items spawned from breaking block and allows faster placing", false, () -> placeConfig.getValue());
     Config<Boolean> boundsConfig = new BooleanConfig("Bounds", "Targets closest bounded rotations", false);
     Config<Boolean> placeRangeEyeConfig = new BooleanConfig("PlaceRangeEye", "Calculates place ranges starting from the eye position of the player", false, () -> placeConfig.getValue());
     Config<Boolean> placeRangeCenterConfig = new BooleanConfig("PlaceRangeCenter", "Calculates place ranges to the center of the block", true, () -> placeConfig.getValue());
@@ -131,7 +130,7 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> antiTotemConfig = new BooleanConfig("AntiTotem", "Predicts totems and places crystals to instantly double pop and kill the target", false, () -> placeConfig.getValue());
     Config<Swap> autoSwapConfig = new EnumConfig<>("Swap", "Swaps to an end crystal before placing if the player is not holding one", Swap.OFF, Swap.values(), () -> placeConfig.getValue());
     Config<Float> alternateSpeedConfig = new NumberConfig<>("AlternateSpeed", "Speed for alternative swapping crystals", 1.0f, 18.0f, 20.0f, () -> placeConfig.getValue() && autoSwapConfig.getValue() == Swap.SILENT_ALT);
-    Config<Boolean> antiSurroundConfig = new BooleanConfig("AntiSurround", "Places crystals to block the enemy's feet and prevent them from using Surround", false, () -> placeConfig.getValue());
+    Config<Boolean> antiSurroundConfig = new BooleanConfig("AntiSurround", "Places on mining blocks that when broken, can be placed on to damage enemies. Instantly destroys items spawned from breaking block and allows faster placing", false, () -> placeConfig.getValue());
     Config<Boolean> breakValidConfig = new BooleanConfig("BreakValid-Test", "Only places crystals that can be attacked", false, () -> placeConfig.getValue());
     Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Interacts with only visible directions when placing crystals", false, () -> placeConfig.getValue());
     Config<Boolean> exposedDirectionConfig = new BooleanConfig("StrictDirection-Exposed", "Interacts with only exposed directions when placing crystals", false, () -> placeConfig.getValue());
@@ -426,7 +425,7 @@ public class AutoCrystalModule extends RotationModule {
                 && packet.getEntity() instanceof EndCrystalEntity crystalEntity && sequentialConfig.getValue() == Sequential.NORMAL) {
             placeSequential(crystalEntity, 1L);
         } else if (event.getPacket() instanceof PlayerActionC2SPacket packet && packet.getAction() == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK
-                && minePlaceConfig.getValue() && canUseCrystalOnBlock(packet.getPos())) {
+                && antiSurroundConfig.getValue() && canUseCrystalOnBlock(packet.getPos())) {
 //            Vec3d crystalPos = crystalDamageVec(packet.getPos());
 //            for (Entity entity : mc.world.getEntities()) {
 //                if (entity == null || !entity.isAlive() || entity == mc.player
