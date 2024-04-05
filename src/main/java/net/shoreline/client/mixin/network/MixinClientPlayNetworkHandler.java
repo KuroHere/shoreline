@@ -23,7 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class MixinClientPlayNetworkHandler implements IClientPlayNetworkHandler {
-    @Shadow public abstract ClientConnection getConnection();
+    @Shadow
+    public abstract ClientConnection getConnection();
 
     /**
      * @param content

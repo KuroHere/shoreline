@@ -55,8 +55,7 @@ public class MixinGameRenderer implements Globals {
 
     @Inject(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;push(Ljava/lang/String;)V", shift = At.Shift.AFTER))
     private void hookUpdateTargetedEntity$1(final float tickDelta, final CallbackInfo info) {
-        UpdateCrosshairTargetEvent event = new UpdateCrosshairTargetEvent(
-                tickDelta, client.getCameraEntity());
+        UpdateCrosshairTargetEvent event = new UpdateCrosshairTargetEvent(tickDelta, client.getCameraEntity());
         Shoreline.EVENT_HANDLER.dispatch(event);
     }
 

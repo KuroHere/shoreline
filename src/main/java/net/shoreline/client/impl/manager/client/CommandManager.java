@@ -52,7 +52,8 @@ public class CommandManager implements Globals {
                 new OpenFolderCommand(),
                 new BindCommand(),
                 new VanishCommand(),
-                new ConfigCommand()
+                new ConfigCommand(),
+                new DisableAllCommand()
         );
         //
         for (Module module : Managers.MODULE.getModules()) {
