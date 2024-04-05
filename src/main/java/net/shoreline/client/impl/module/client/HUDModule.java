@@ -347,6 +347,7 @@ public class HUDModule extends ToggleModule {
             case OFF -> Modules.COLORS.getRGB();
             case STATIC -> rainbow(1L);
             case GRADIENT -> rainbow(rainbowOffset);
+            // case ALPHA -> alpha(rainbowOffset);
         };
     }
 
@@ -365,6 +366,17 @@ public class HUDModule extends ToggleModule {
                 / (30000 / (rainbowDifferenceConfig.getValue() / 20.0f)));
         return Color.HSBtoRGB(hue, rainbowSaturationConfig.getValue() / 100.0f,
                 rainbowBrightnessConfig.getValue() / 100.0f);
+    }
+
+    public static int alpha(long offset) {
+        offset = (offset * 2) + 10;
+        float[] hsb = new float[3];
+        Color color = Modules.COLORS.getColor();
+        Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsb);
+        float brightness = Math.abs(((float) (System.currentTimeMillis() % 2000L) / 1000 + 50.0f / (float) offset * 2) % 2 - 1);
+        brightness = 0.5f + 0.5f * brightness;
+        hsb[2] = brightness % 2;
+        return Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]);
     }
 
     public enum VanillaHud {
@@ -387,5 +399,6 @@ public class HUDModule extends ToggleModule {
         OFF,
         GRADIENT,
         STATIC
+        // ALPHA
     }
 }

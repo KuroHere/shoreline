@@ -251,7 +251,7 @@ public class AutoCrystalModule extends RotationModule {
         } else if (placeCrystal != null) {
             crystalRotation = placeCrystal.damageData.toCenterPos().add(0.0, 0.5, 0.0);
         }
-        if (rotateConfig.getValue() && crystalRotation != null && (placeCrystal == null || isHoldingCrystal())) {
+        if (rotateConfig.getValue() && crystalRotation != null && (placeCrystal != null && (isHoldingCrystal() || canAutoSwap()))) {
             float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
             if (strictRotateConfig.getValue() == Rotate.FULL || strictRotateConfig.getValue() == Rotate.SEMI && attackRotate) {
                 float serverYaw = Managers.ROTATION.getWrappedYaw();
@@ -278,7 +278,7 @@ public class AutoCrystalModule extends RotationModule {
                 crystalRotation = null;
             }
         }
-        if (!rotated) {
+        if (isRotationBlocked() || !rotated) {
             return;
         }
         final Hand hand = getCrystalHand();
@@ -510,9 +510,6 @@ public class AutoCrystalModule extends RotationModule {
     }
 
     private void placeCrystal(BlockPos blockPos, Hand hand) {
-        if (isRotationBlocked()) {
-            return;
-        }
         Direction sidePlace = getPlaceDirection(blockPos);
         // Vec3d vec3d = mc.player.getCameraPosVec(1.0f);
         // Vec3d vec3d1 = RotationUtil.getRotationVector();
@@ -846,7 +843,7 @@ public class AutoCrystalModule extends RotationModule {
             return multitaskConfig.getValue() && mc.player.isUsingItem()
                     || !whileMiningConfig.getValue() && mc.interactionManager.isBreakingBlock();
         }
-        return isRotationBlocked();
+        return false;
     }
 
     private boolean isHoldingCrystal() {
@@ -945,6 +942,10 @@ public class AutoCrystalModule extends RotationModule {
             }
         }
         return sphere;
+    }
+
+    private boolean canAutoSwap() {
+        return autoSwapConfig.getValue() != Swap.OFF && getCrystalSlot() != -1;
     }
 
     private Hand getCrystalHand() {

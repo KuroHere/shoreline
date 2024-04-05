@@ -73,7 +73,7 @@ public class HoleManager implements Globals {
      */
     public Hole checkHole(BlockPos pos) {
         if (pos.getY() == mc.world.getBottomY() && !BlastResistantBlocks.isUnbreakable(pos)) {
-            return new Hole(pos, HoleSafety.VOID);
+            return new Hole(pos, HoleType.VOID);
         }
         int resistant = 0;
         int unbreakable = 0;
@@ -123,8 +123,8 @@ public class HoleManager implements Globals {
                 if (resistant != 8 && unbreakable != 8 && resistant + unbreakable != 8) {
                     return null;
                 }
-                Hole quadHole = new Hole(pos, resistant == 8 ? HoleSafety.RESISTANT :
-                        unbreakable == 8 ? HoleSafety.UNBREAKABLE : HoleSafety.MIXED,
+                Hole quadHole = new Hole(pos, resistant == 8 ? HoleType.OBSIDIAN :
+                        unbreakable == 8 ? HoleType.BEDROCK : HoleType.OBSIDIAN_BEDROCK,
                         pos1, pos2, pos3, pos4, pos5);
                 quadHole.addHoleOffsets(quad);
                 return quadHole;
@@ -149,8 +149,8 @@ public class HoleManager implements Globals {
                 if (resistant != 6 && unbreakable != 6 && resistant + unbreakable != 6) {
                     return null;
                 }
-                Hole doubleZHole = new Hole(pos, resistant == 6 ? HoleSafety.RESISTANT :
-                        unbreakable == 6 ? HoleSafety.UNBREAKABLE : HoleSafety.MIXED,
+                Hole doubleZHole = new Hole(pos, resistant == 6 ? HoleType.OBSIDIAN :
+                        unbreakable == 6 ? HoleType.BEDROCK : HoleType.OBSIDIAN_BEDROCK,
                         pos1, pos2, pos3);
                 doubleZHole.addHoleOffsets(doubleZ);
                 return doubleZHole;
@@ -175,8 +175,8 @@ public class HoleManager implements Globals {
                 if (resistant != 6 && unbreakable != 6 && resistant + unbreakable != 6) {
                     return null;
                 }
-                Hole doubleXHole = new Hole(pos, resistant == 6 ? HoleSafety.RESISTANT :
-                        unbreakable == 6 ? HoleSafety.UNBREAKABLE : HoleSafety.MIXED,
+                Hole doubleXHole = new Hole(pos, resistant == 6 ? HoleType.OBSIDIAN :
+                        unbreakable == 6 ? HoleType.BEDROCK : HoleType.OBSIDIAN_BEDROCK,
                         pos1, pos2, pos4);
                 doubleXHole.addHoleOffsets(doubleX);
                 return doubleXHole;
@@ -197,8 +197,8 @@ public class HoleManager implements Globals {
                 if (resistant != 4 && unbreakable != 4 && resistant + unbreakable != 4) {
                     return null;
                 }
-                return new Hole(pos, resistant == 4 ? HoleSafety.RESISTANT :
-                        unbreakable == 4 ? HoleSafety.UNBREAKABLE : HoleSafety.MIXED,
+                return new Hole(pos, resistant == 4 ? HoleType.OBSIDIAN :
+                        unbreakable == 4 ? HoleType.BEDROCK : HoleType.OBSIDIAN_BEDROCK,
                         pos1, pos2, pos3, pos4);
             }
         }

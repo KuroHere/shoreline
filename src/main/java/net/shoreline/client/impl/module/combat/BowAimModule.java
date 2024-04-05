@@ -10,7 +10,7 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
@@ -20,7 +20,7 @@ import net.shoreline.client.util.world.EntityUtil;
  * @author linus
  * @since 1.0
  */
-public class BowAimModule extends ToggleModule {
+public class BowAimModule extends RotationModule {
     //
     Config<Boolean> playersConfig = new BooleanConfig("Players", "Aims bow at players", true);
     Config<Boolean> monstersConfig = new BooleanConfig("Monsters", "Aims bow at monsters", false);
@@ -60,7 +60,7 @@ public class BowAimModule extends ToggleModule {
             }
             if (aimTarget instanceof LivingEntity target) {
                 float[] rots = getBowRotationsTo(target);
-                Managers.ROTATION.setRotationClient(rots[0], rots[1]);
+                setRotationClient(rots[0], rots[1]);
             }
         }
     }

@@ -18,14 +18,14 @@ public class Hole implements Position {
     private final List<BlockPos> holeOffsets;
     //
     private final BlockPos origin;
-    private final HoleSafety safety;
+    private final HoleType safety;
 
     /**
      * @param origin
      * @param safety
      * @param holeOffsets
      */
-    public Hole(BlockPos origin, HoleSafety safety, BlockPos... holeOffsets) {
+    public Hole(BlockPos origin, HoleType safety, BlockPos... holeOffsets) {
         this.origin = origin;
         this.safety = safety;
         this.holeOffsets = Lists.newArrayList(holeOffsets);
@@ -61,7 +61,7 @@ public class Hole implements Position {
         return holeOffsets.size() == 12;
     }
 
-    public HoleSafety getSafety() {
+    public HoleType getSafety() {
         return safety;
     }
 

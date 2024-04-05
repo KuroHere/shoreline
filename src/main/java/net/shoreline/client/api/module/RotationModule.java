@@ -4,7 +4,7 @@ import net.shoreline.client.init.Managers;
 
 /**
  * @author linus
- * @see net.shoreline.client.api.manager.player.rotation.RotationManager
+ * @see net.shoreline.client.impl.manager.player.rotation.RotationManager
  * @since 1.0
  */
 public class RotationModule extends ToggleModule {
@@ -23,6 +23,15 @@ public class RotationModule extends ToggleModule {
      */
     protected void setRotation(float yaw, float pitch) {
         Managers.ROTATION.setRotation(this, yaw, pitch);
+    }
+
+    /**
+     * Sets client look yaw and pitch
+     * @param yaw
+     * @param pitch
+     */
+    protected void setRotationClient(float yaw, float pitch) {
+        Managers.ROTATION.setRotationClient(yaw, pitch);
     }
 
     /**

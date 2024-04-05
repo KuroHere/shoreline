@@ -1,6 +1,5 @@
 package net.shoreline.client.impl.manager.player.rotation;
 
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -9,10 +8,8 @@ import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.render.Interpolation;
-import net.shoreline.client.impl.event.entity.EntityRotationVectorEvent;
 import net.shoreline.client.impl.event.entity.JumpRotationEvent;
 import net.shoreline.client.impl.event.entity.UpdateVelocityEvent;
-import net.shoreline.client.impl.event.entity.player.PlayerJumpEvent;
 import net.shoreline.client.impl.event.keyboard.KeyboardTickEvent;
 import net.shoreline.client.impl.event.network.MovementPacketsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
@@ -21,7 +18,6 @@ import net.shoreline.client.impl.event.render.entity.RenderPlayerEvent;
 import net.shoreline.client.impl.imixin.IClientPlayerEntity;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.Globals;
-import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +32,7 @@ public class RotationManager implements Globals {
     private static final Map<String, Integer> ROTATE_PRIORITY = new HashMap<>();
     private final List<RotationRequest> requests = new ArrayList<>();
     // Relevant rotation values
-    private float serverYaw, serverPitch, lastServerYaw, lastServerPitch, prevJumpYaw, prevYaw, prevPitch;
+    private float serverYaw, serverPitch, lastServerYaw, lastServerPitch, prevYaw, prevPitch;
     boolean rotate;
 
     // The current in use rotation
@@ -51,9 +47,10 @@ public class RotationManager implements Globals {
         Shoreline.EVENT_HANDLER.subscribe(this);
         //
         ROTATE_PRIORITY.put("Surround", 1000);
-        ROTATE_PRIORITY.put("Speedmine", 950);
-        ROTATE_PRIORITY.put("AutoCrystal", 900);
-        ROTATE_PRIORITY.put("Aura", 800);
+        ROTATE_PRIORITY.put("Phase", 950);
+        ROTATE_PRIORITY.put("Speedmine", 900);
+        ROTATE_PRIORITY.put("AutoCrystal", 800);
+        ROTATE_PRIORITY.put("Aura", 700);
         // AntiAim should always have lowest prio?
         ROTATE_PRIORITY.put("AntiAim", 50);
     }
@@ -173,17 +170,30 @@ public class RotationManager implements Globals {
      * @param pitch
      */
     public void setRotation(RotationModule requester, float yaw, float pitch) {
-        for (RotationRequest r : requests) {
-            if (requester == r.getModule()) {
-                // r.setPriority();
-                r.setTime(System.currentTimeMillis());
-                r.setYaw(yaw);
-                r.setPitch(pitch);
-                return;
-            }
+        RotationRequest request = requests.stream().filter(r -> requester == r.getModule()).findFirst().orElse(null);
+        if (request == null) {
+            requests.add(new RotationRequest(requester, false,
+                    ROTATE_PRIORITY.getOrDefault(requester.getName(), 100), yaw, pitch));
+        } else {
+            // r.setPriority();
+            request.setTime(System.currentTimeMillis());
+            request.setYaw(yaw);
+            request.setPitch(pitch);
         }
-        requests.add(new RotationRequest(requester,
-                ROTATE_PRIORITY.getOrDefault(requester.getName(), 100), yaw, pitch));
+    }
+
+    /**
+     * @param yaw
+     * @param pitch
+     */
+    public void setRotationClient(float yaw, float pitch) {
+        if (mc.player == null) {
+            return;
+        }
+        mc.player.setYaw(yaw);
+        // mc.player.setHeadYaw(yaw);
+        // mc.player.setBodyYaw(yaw);
+        mc.player.setPitch(pitch);
     }
 
     /**
@@ -198,20 +208,6 @@ public class RotationManager implements Globals {
      */
     public void removeRotation(RotationModule requester) {
         requests.removeIf(r -> requester == r.getModule());
-    }
-
-    /**
-     * @param yaw
-     * @param pitch
-     */
-    public void setRotationClient(float yaw, float pitch) {
-        if (mc.player == null) {
-            return;
-        }
-        mc.player.setYaw(yaw);
-        mc.player.setHeadYaw(yaw);
-        mc.player.setBodyYaw(yaw);
-        mc.player.setPitch(pitch);
     }
 
     /**

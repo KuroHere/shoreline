@@ -16,6 +16,7 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -57,6 +58,7 @@ public class AuraModule extends RotationModule {
     Config<Priority> priorityConfig = new EnumConfig<>("Priority", "The value to prioritize when searching for targets", Priority.HEALTH, Priority.values());
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to attack entities", 1.0f, 4.5f, 5.0f);
     Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to attack entities through walls", 1.0f, 4.5f, 5.0f);
+    // Config<Boolean> vanillaRangeConfig = new BooleanConfig("VanillaRange", "Only attack within vanilla range", false);
     Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to attack entities", 1.0f, 180.0f, 180.0f);
     Config<Boolean> latencyPositionConfig = new BooleanConfig("LatencyPosition", "Targets the latency positions of enemies", false);
     Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency", "Maximum latency factor when calculating positions", 50, 250,1000, () -> latencyPositionConfig.getValue());
@@ -74,7 +76,6 @@ public class AuraModule extends RotationModule {
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate before attacking", false);
     Config<Boolean> strictRotateConfig = new BooleanConfig("RotateStrict", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", false, () -> rotateConfig.getValue());
     Config<Integer> rotateLimitConfig = new NumberConfig<>("Rotate-Yaw", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
-    Config<Integer> rotateTimeoutConfig = new NumberConfig<>("RotateTimeout", "Minimum ticks to hold the rotation yaw after reaching the rotation", 0, 0, 5, () -> rotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted", "The minimum age of the entity to be considered for attack", 0, 50, 200);
     Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck", "Checks if target has armor before attacking", false);
     Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock", "Automatically blocks after attack", false);
@@ -415,6 +416,16 @@ public class AuraModule extends RotationModule {
      * @return
      */
     public boolean isInAttackRange(double dist, Vec3d pos, Entity entity) {
+//        if (vanillaRangeConfig.getValue()) {
+//            double d = mc.interactionManager.getReachDistance();
+//            Vec3d vec3d = mc.player.getCameraPosVec(0.0f);
+//            float[] rotations = RotationUtil.getRotationsTo(vec3d, pos);
+//            Vec3d vec3d2 = RotationUtil.getRotationVector(rotations[0], rotations[1]);
+//            Vec3d vec3d3 = vec3d.add(vec3d2.x * d, vec3d2.y * d, vec3d2.z * d);
+//            HitResult result = mc.world.raycast(new RaycastContext(vec3d, vec3d3,
+//                    RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+//            return result != null && result.getType() == HitResult.Type.ENTITY;
+//        }
         if (dist > rangeConfig.getValue()) {
             return false;
         }
