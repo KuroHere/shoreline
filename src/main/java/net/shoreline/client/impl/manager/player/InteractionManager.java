@@ -5,7 +5,6 @@ import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -16,7 +15,6 @@ import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
-import net.shoreline.client.util.player.RayCastUtil;
 import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.world.SneakBlocks;
 
@@ -109,7 +107,7 @@ public class InteractionManager implements Globals {
         }
         if (rotate)
         {
-            Managers.ROTATION.submitInstant(angles[0], angles[1], grim);
+            Managers.ROTATION.setRotationSilent(angles[0], angles[1], grim);
         }
         final ActionResult actionResult = mc.interactionManager.interactBlock(mc.player, hand, hitResult);
         final boolean success = actionResult.isAccepted();
@@ -175,24 +173,26 @@ public class InteractionManager implements Globals {
      * @param strictDirection
      * @return
      */
-    private Direction getInteractDirection(BlockPos blockPos, boolean strictDirection) {
+    public Direction getInteractDirection(BlockPos blockPos, boolean strictDirection) {
         Set<Direction> ncpDirections = Managers.NCP.getPlaceDirectionsNCP(mc.player.getEyePos(), blockPos.toCenterPos());
         Direction interactDirection = null;
         for (Direction dir : Direction.values()) {
             BlockPos pos1 = blockPos.offset(dir);
-            Direction opposite = dir.getOpposite();
             BlockState state = mc.world.getBlockState(pos1);
             //
             if (state.isAir() || !state.getFluidState().isEmpty()) {
                 continue;
             }
-            if (strictDirection && !ncpDirections.contains(opposite)) {
+            if (strictDirection && !ncpDirections.contains(dir.getOpposite())) {
                 continue;
             }
-            interactDirection = opposite;
+            interactDirection = dir;
             break;
         }
-        return interactDirection;
+        if (interactDirection == null) {
+            return null;
+        }
+        return interactDirection.getOpposite();
     }
 
     /**

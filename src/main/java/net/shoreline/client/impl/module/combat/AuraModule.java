@@ -263,7 +263,7 @@ public class AuraModule extends RotationModule {
 
         if (silentRotateConfig.getValue() && silentRotations != null)
         {
-            Managers.ROTATION.submitInstant(silentRotations[0], silentRotations[1], true);
+            Managers.ROTATION.setRotationSilent(silentRotations[0], silentRotations[1], true);
         }
 
         PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(entity,

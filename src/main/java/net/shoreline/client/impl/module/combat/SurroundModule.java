@@ -27,8 +27,10 @@ import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.chat.ChatUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -43,7 +45,7 @@ public class SurroundModule extends BlockPlacerModule {
     Config<Boolean> attackConfig = new BooleanConfig("Attack", "Attacks crystals in the way of surround", true);
     Config<Boolean> centerConfig = new BooleanConfig("Center", "Centers the player before placing blocks", false);
     Config<Boolean> extendConfig = new BooleanConfig("Extend", "Extends surround if the player is not in the center of a block", true, () -> !centerConfig.getValue());
-    Config<Boolean> floorConfig = new BooleanConfig("Floor", "Creates a floor for the surround if there is none", false);
+    Config<Boolean> supportConfig = new BooleanConfig("Support", "Creates a floor for the surround if there is none", false);
     Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The number of blocks to place per tick", 1, 2, 5);
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> jumpDisableConfig = new BooleanConfig("AutoDisable", "Disables after moving out of the hole", true);
@@ -117,10 +119,6 @@ public class SurroundModule extends BlockPlacerModule {
         }
     }
 
-    public boolean isPlacing() {
-        return isEnabled() && !placements.isEmpty();
-    }
-
     public List<BlockPos> getSurroundPositions(BlockPos pos) {
         List<BlockPos> entities = new ArrayList<>();
         entities.add(pos);
@@ -157,34 +155,18 @@ public class SurroundModule extends BlockPlacerModule {
                 blocks.add(pos2);
             }
         }
-        if (floorConfig.getValue()) {
-            for (BlockPos blockPos : blocks) {
-                boolean support = true;
-                for (Direction dir : Direction.values()) {
-                    BlockPos offset = blockPos.offset(dir);
-                    if (!mc.world.isAir(offset)) {
-                        support = false;
-                        break;
-                    }
+        if (supportConfig.getValue()) {
+            for (BlockPos block : blocks) {
+                Direction direction = Managers.INTERACT.getInteractDirection(block, false);
+                if (direction == null) {
+                    blocks.add(block.down());
                 }
-                if (support) {
-                    BlockPos floor = blockPos.down();
-                    double dist = mc.player.squaredDistanceTo(floor.toCenterPos());
-                    if (dist > ((NumberConfig) placeRangeConfig).getValueSq()) {
-                        continue;
-                    }
-                    blocks.add(floor);
-                }
-            }
-            for (BlockPos epos1 : entities) {
-                BlockPos floor = epos1.down();
-                double dist = mc.player.squaredDistanceTo(floor.toCenterPos());
-                if (dist > ((NumberConfig) placeRangeConfig).getValueSq()) {
-                    continue;
-                }
-                blocks.add(floor);
             }
         }
+        for (BlockPos entityPos : entities) {
+            blocks.add(entityPos.down());
+        }
+        Collections.reverse(blocks);
         return blocks;
     }
 
@@ -219,7 +201,7 @@ public class SurroundModule extends BlockPlacerModule {
         if (event.getPacket() instanceof BlockUpdateS2CPacket packet) {
             final BlockState state = packet.getState();
             final BlockPos targetPos = packet.getPos();
-            if (surround.contains(targetPos) && state.isAir()) {
+            if (surround.contains(targetPos) && state.isReplaceable()) {
                 placeObsidianBlock(targetPos, rotateConfig.getValue());
                 blocksPlaced++;
                 // shiftDelay = 0;

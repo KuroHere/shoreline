@@ -8,7 +8,6 @@ import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.render.Interpolation;
 import net.shoreline.client.impl.event.entity.JumpRotationEvent;
 import net.shoreline.client.impl.event.entity.UpdateVelocityEvent;
@@ -23,9 +22,7 @@ import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.Globals;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author linus, bon55
@@ -180,7 +177,7 @@ public class RotationManager implements Globals {
         mc.player.setPitch(pitch);
     }
 
-    public void submitInstant(final float yaw, final float pitch, final boolean grim)
+    public void setRotationSilent(final float yaw, final float pitch, final boolean grim)
     {
         if (grim)
         {
