@@ -58,6 +58,7 @@
     "gui.screen.MixinScreen",
     "gui.screen.MixinTitleScreen",
     "item.MixinItemStack",
+    "item.MixinItemUsageContext",
     "item.MixinFireworkRocketItem",
     "network.MixinClientConnection",
     "network.MixinClientPlayerEntity",

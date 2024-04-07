@@ -1,6 +1,8 @@
 package net.shoreline.client.api.module;
 
+import net.shoreline.client.impl.manager.player.rotation.Rotation;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.init.Modules;
 
 /**
  * @author linus
@@ -8,6 +10,10 @@ import net.shoreline.client.init.Managers;
  * @since 1.0
  */
 public class RotationModule extends ToggleModule {
+
+    private int rotationPriority;
+    private boolean hasSetPriority = false;
+
     /**
      * @param name     The module unique identifier
      * @param desc     The module description
@@ -22,7 +28,12 @@ public class RotationModule extends ToggleModule {
      * @param pitch
      */
     protected void setRotation(float yaw, float pitch) {
-        Managers.ROTATION.setRotation(this, yaw, pitch);
+        setRotation(yaw, pitch, (int)Modules.ROTATIONS.getPreserveTicks());
+    }
+
+    protected void setRotation(float yaw, float pitch, int time)
+    {
+        Managers.ROTATION.submit(new Rotation(getRotationPriority(), time, yaw, pitch));
     }
 
     /**
@@ -31,17 +42,19 @@ public class RotationModule extends ToggleModule {
      * @param pitch
      */
     protected void setRotationClient(float yaw, float pitch) {
-        Managers.ROTATION.setRotationClient(yaw, pitch);
+        Managers.ROTATION.submitClient(yaw, pitch);
     }
 
-    /**
-     * @return
-     */
-    public boolean isRotationBlocked() {
-        RotationModule head = Managers.ROTATION.getRotatingModule();
-        if (head != null) {
-            return head != this;
-        }
-        return false;
+    protected void setRotationPriority(int rotationPriority) {
+        this.rotationPriority = rotationPriority;
+        hasSetPriority = true;
+    }
+
+    protected boolean isRotationBlocked() {
+        return Managers.ROTATION.isRotationBlocked(getRotationPriority());
+    }
+
+    protected int getRotationPriority() {
+        return hasSetPriority ? rotationPriority : 10;
     }
 }

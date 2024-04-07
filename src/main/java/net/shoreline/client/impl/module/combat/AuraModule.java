@@ -75,6 +75,7 @@ public class AuraModule extends RotationModule {
     Config<Vector> hitVectorConfig = new EnumConfig<>("HitVector", "The vector to aim for when attacking entities", Vector.FEET, Vector.values());
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate before attacking", false);
     Config<Boolean> strictRotateConfig = new BooleanConfig("RotateStrict", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", false, () -> rotateConfig.getValue());
+    Config<Boolean> silentRotateConfig = new BooleanConfig("SilentRotate", "autism", false, () -> rotateConfig.getValue());
     Config<Integer> rotateLimitConfig = new NumberConfig<>("Rotate-Yaw", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted", "The minimum age of the entity to be considered for attack", 0, 50, 200);
     Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck", "Checks if target has armor before attacking", false);
@@ -102,6 +103,8 @@ public class AuraModule extends RotationModule {
     private final Timer switchTimer = new CacheTimer();
     private boolean rotated;
 
+    private float[] silentRotations;
+
     /**
      *
      */
@@ -117,6 +120,7 @@ public class AuraModule extends RotationModule {
     @Override
     public void onDisable() {
         entityTarget = null;
+        silentRotations = null;
     }
 
     @EventListener
@@ -141,6 +145,7 @@ public class AuraModule extends RotationModule {
             }
         }
         if (entityTarget == null || !switchTimer.passed(swapDelayConfig.getValue() * 25.0f)) {
+            silentRotations = null;
             return;
         }
         if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
@@ -178,10 +183,20 @@ public class AuraModule extends RotationModule {
                     yaw = rotation[0];
                     rotated = true;
                 }
-                setRotation(yaw, rotation[1]);
+                rotation[0] = yaw;
             } else {
-                setRotation(rotation[0], rotation[1]);
                 rotated = true;
+            }
+
+            // what what you cannot hop in my car
+            // bentley coupe ridin with stars
+            if (silentRotateConfig.getValue())
+            {
+                silentRotations = rotation;
+            }
+            else
+            {
+                setRotation(rotation[0], rotation[1]);
             }
         }
         if (isRotationBlocked() || !shouldWaitCrit() || !rotated) {
@@ -248,6 +263,12 @@ public class AuraModule extends RotationModule {
 //        mc.doAttack();
 //        postAttackTarget(castEntity);
         preAttackTarget();
+
+        if (silentRotateConfig.getValue() && silentRotations != null)
+        {
+            Managers.ROTATION.submitInstant(silentRotations[0], silentRotations[1], true);
+        }
+
         PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(entity,
                 Managers.POSITION.isSneaking());
         Managers.NETWORK.sendPacket(packet);

@@ -49,16 +49,10 @@ public class BlockPlacerModule extends RotationModule {
      * @param strictDirection
      */
     protected float[] placeBlock(int slot, BlockPos pos, boolean rotate, boolean strictDirection) {
-        int prev = mc.player.getInventory().selectedSlot;
-        if (prev != slot) {
-            mc.player.getInventory().selectedSlot = slot;
-            Managers.INVENTORY.setSlot(slot);
-        }
+
+        //Managers.INVENTORY.setSlot(slot);
         float[] rotations = Managers.INTERACT.placeBlock(pos, rotate, strictDirection);
-        if (prev != slot) {
-            mc.player.getInventory().selectedSlot = prev;
-            Managers.INVENTORY.setSlot(prev);
-        }
+        //.INVENTORY.syncToClient();
         return rotations;
     }
 
