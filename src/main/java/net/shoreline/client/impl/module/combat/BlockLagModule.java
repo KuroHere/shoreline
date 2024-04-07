@@ -85,7 +85,7 @@ public class BlockLagModule extends BlockPlacerModule {
                     mc.player.getZ(), true));
             Managers.POSITION.setPosition(mc.player.getX(),
                     mc.player.getY() + 1.16610926093821, mc.player.getZ());
-            placeBlockResistant(pos);
+            placeObsidianBlock(pos);
             if (selfFillConfig.getValue()) {
                 Managers.POSITION.setPosition(mc.player.getX(),
                         mc.player.getY() - 0.16610926093821,

@@ -28,7 +28,6 @@ public class HoleFillModule extends BlockPlacerModule {
     Config<Float> proximityRangeConfig = new NumberConfig<>("Range", "The range from the target to the hole", 0.5f, 1.0f, 4.0f, () -> proximityConfig.getValue());
     Config<Float> enemyRangeConfig = new NumberConfig<>("EnemyRange", "The maximum range of targets", 0.1f, 10.0f, 15.0f);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates to block before placing", false);
-    Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Places only on visible sides", false);
     Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The number of blocks to place per tick", 1, 2, 5);
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable", "Disables after filling all holes", false);

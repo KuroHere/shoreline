@@ -5,6 +5,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import net.shoreline.client.api.config.Config;
+import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.impl.module.combat.SurroundModule;
 import net.shoreline.client.init.Managers;
 
@@ -14,38 +16,38 @@ import net.shoreline.client.init.Managers;
  * @since 1.0
  */
 public class BlockPlacerModule extends RotationModule {
+
+    Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Places on visible sides only", false);
+    Config<Boolean> grimConfig = new BooleanConfig("Grim", "Places using grim instant rotations", false);
+
     // TODO: series of blocks
     public BlockPlacerModule(String name, String desc, ModuleCategory category) {
         super(name, desc, category);
+        register(strictDirectionConfig, grimConfig);
     }
 
     public BlockPlacerModule(String name, String desc, ModuleCategory category, int rotationPriority) {
         super(name, desc, category, rotationPriority);
-    }
-
-
-    protected void placeBlockResistant(BlockPos pos) {
-        placeBlockResistant(pos, false);
+        register(strictDirectionConfig, grimConfig);
     }
 
     /**
      * @param pos
-     * @param strictDirection
      */
-    protected float[] placeBlockResistant(BlockPos pos, boolean rotate, boolean strictDirection) {
+    protected void placeObsidianBlock(BlockPos pos, boolean rotate) {
         int slot = getResistantBlockItem();
         if (slot == -1) {
-            return null;
+            return;
         }
-        return placeBlock(slot, pos, rotate, strictDirection);
+        placeBlock(slot, pos, rotate, strictDirectionConfig.getValue(), grimConfig.getValue());
     }
 
-    protected float[] placeBlockResistant(BlockPos pos, boolean strictDirection) {
-        return placeBlockResistant(pos, false, strictDirection);
+    protected void placeObsidianBlock(BlockPos pos) {
+        placeObsidianBlock(pos, false);
     }
 
-    protected float[] placeBlock(int slot, BlockPos pos, boolean strictDirection) {
-        return placeBlock(slot, pos, false, strictDirection);
+    protected void placeBlock(int slot, BlockPos pos) {
+        placeBlock(slot, pos, false, strictDirectionConfig.getValue(), grimConfig.getValue());
     }
 
     /**
@@ -53,12 +55,11 @@ public class BlockPlacerModule extends RotationModule {
      * @param pos
      * @param strictDirection
      */
-    protected float[] placeBlock(int slot, BlockPos pos, boolean rotate, boolean strictDirection) {
+    protected void placeBlock(int slot, BlockPos pos, boolean rotate, boolean strictDirection, boolean grim) {
         int prev = mc.player.getInventory().selectedSlot;
         Managers.INVENTORY.setSlot(slot);
-        float[] rotations = Managers.INTERACT.placeBlock(pos, rotate, strictDirection);
+        float[] rotations = Managers.INTERACT.placeBlock(pos, rotate, strictDirection, grim);
         Managers.INVENTORY.setSlot(prev);
-        return rotations;
     }
 
     /**

@@ -40,7 +40,6 @@ public class SurroundModule extends BlockPlacerModule {
     //
     Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange", "The placement range for surround", 0.0f, 4.0f, 5.0f);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates to block before placing", false);
-    Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Places on visible sides only", false);
     Config<Boolean> attackConfig = new BooleanConfig("Attack", "Attacks crystals in the way of surround", true);
     Config<Boolean> centerConfig = new BooleanConfig("Center", "Centers the player before placing blocks", false);
     Config<Boolean> extendConfig = new BooleanConfig("Extend", "Extends surround if the player is not in the center of a block", true, () -> !centerConfig.getValue());
@@ -114,7 +113,7 @@ public class SurroundModule extends BlockPlacerModule {
             shiftDelay = 0;
             // All rotations for shift ticks must send extra packet
             // This may not work on all servers
-            placeBlockResistant(targetPos, rotateConfig.getValue(), strictDirectionConfig.getValue());
+            placeObsidianBlock(targetPos, rotateConfig.getValue());
         }
     }
 
@@ -221,7 +220,7 @@ public class SurroundModule extends BlockPlacerModule {
             final BlockState state = packet.getState();
             final BlockPos targetPos = packet.getPos();
             if (surround.contains(targetPos) && state.isAir()) {
-                placeBlockResistant(targetPos, rotateConfig.getValue(), strictDirectionConfig.getValue());
+                placeObsidianBlock(targetPos, rotateConfig.getValue());
                 blocksPlaced++;
                 // shiftDelay = 0;
             }
@@ -230,7 +229,7 @@ public class SurroundModule extends BlockPlacerModule {
                 && packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
             BlockPos targetPos = BlockPos.ofFloored(packet.getX(), packet.getY(), packet.getZ());
             if (surround.contains(targetPos)) {
-                placeBlockResistant(targetPos, rotateConfig.getValue(), strictDirectionConfig.getValue());
+                placeObsidianBlock(targetPos, rotateConfig.getValue());
                 blocksPlaced++;
                 // shiftDelay = 0;
             }

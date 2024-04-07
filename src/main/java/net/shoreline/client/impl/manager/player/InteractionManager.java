@@ -18,6 +18,7 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 import net.shoreline.client.util.player.RayCastUtil;
 import net.shoreline.client.util.player.RotationUtil;
+import net.shoreline.client.util.world.SneakBlocks;
 
 import java.util.Set;
 
@@ -73,16 +74,8 @@ public class InteractionManager implements Globals {
         }
     }
 
-    public float[] placeBlock(BlockPos pos, boolean rotate, boolean strictDirection) {
-        return placeBlock(pos, Hand.MAIN_HAND, rotate, strictDirection);
-    }
-
-    public float[] placeBlock(BlockPos pos, Hand hand, boolean rotate) {
-        return placeBlock(pos, hand, rotate, false);
-    }
-
-    public float[] placeBlock(BlockPos pos) {
-        return placeBlock(pos, Hand.MAIN_HAND, false);
+    public float[] placeBlock(BlockPos pos, boolean rotate, boolean strictDirection, boolean grim) {
+        return placeBlock(pos, Hand.MAIN_HAND, rotate, strictDirection, grim);
     }
 
     /**
@@ -90,7 +83,7 @@ public class InteractionManager implements Globals {
      * @param hand
      * @param strictDirection
      */
-    public float[] placeBlock(BlockPos pos, Hand hand, boolean rotate, boolean strictDirection)
+    public float[] placeBlock(BlockPos pos, Hand hand, boolean rotate, boolean strictDirection, boolean grim)
     {
         final BlockState state = mc.world.getBlockState(pos);
         // Get the first usable side
@@ -99,47 +92,36 @@ public class InteractionManager implements Globals {
         {
             return null;
         }
-
-        final BlockPos neigbor = pos.offset(side.getOpposite());
-        final Vec3d rotateVec = neigbor.toCenterPos();
-
+        final BlockPos neighbor = pos.offset(side.getOpposite());
+        final BlockState state1 = mc.world.getBlockState(neighbor);
+        final Vec3d rotateVec = neighbor.toCenterPos();
         // Calculate rotations towards block
         float[] angles = new float[] { Managers.ROTATION.getServerYaw(), Managers.ROTATION.getServerPitch() };
         if (rotate)
         {
             angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), rotateVec);
         }
-
-        BlockHitResult hitResult;
-        if (strictDirection)
-        {
-            final HitResult rayCastResult = RayCastUtil.rayCast(4.0, angles);
-            if (!(rayCastResult instanceof BlockHitResult blockHitResult))
-            {
-                return null;
-            }
-
-            hitResult = blockHitResult;
+        BlockHitResult hitResult = new BlockHitResult(rotateVec, side, neighbor, false);
+        boolean sneaking = !mc.player.isSneaking() && SneakBlocks.isSneakBlock(state1.getBlock());
+        if (sneaking) {
+            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                    ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
         }
-        else
-        {
-            hitResult = new BlockHitResult(rotateVec, side, neigbor, false);
-        }
-
         if (rotate)
         {
-            Managers.ROTATION.submitInstant(angles[0], angles[1], true);
+            Managers.ROTATION.submitInstant(angles[0], angles[1], grim);
         }
-
         final ActionResult actionResult = mc.interactionManager.interactBlock(mc.player, hand, hitResult);
         final boolean success = actionResult.isAccepted();
         if (success && actionResult.shouldSwingHand())
         {
             mc.player.swingHand(hand);
         }
-
+        if (sneaking) {
+            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+                    ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+        }
         return angles;
-
 //        BlockState state = mc.world.getBlockState(pos);
 //        Direction sideHit = getInteractDirection(pos, strictDirection);
 //        if (!state.isReplaceable() || sideHit == null) {
