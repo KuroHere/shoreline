@@ -62,7 +62,7 @@ public class ModuleConfigFile extends ConfigFile {
                         if (module == null) {
                             return;
                         }
-                        module.fromJson(object);
+                        module.fromJson(object, false);
                     }
                 }
             }
