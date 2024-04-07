@@ -251,7 +251,7 @@ public class AutoCrystalModule extends RotationModule {
         } else if (placeCrystal != null) {
             crystalRotation = placeCrystal.damageData.toCenterPos().add(0.0, 0.5, 0.0);
         }
-        if (rotateConfig.getValue() && crystalRotation != null && (placeCrystal != null && (isHoldingCrystal() || canAutoSwap()))) {
+        if (rotateConfig.getValue() && crystalRotation != null && (placeCrystal == null || canHoldCrystal())) {
             float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
             if (strictRotateConfig.getValue() == Rotate.FULL || strictRotateConfig.getValue() == Rotate.SEMI && attackRotate) {
                 float serverYaw = Managers.ROTATION.getWrappedYaw();
@@ -278,7 +278,7 @@ public class AutoCrystalModule extends RotationModule {
                 crystalRotation = null;
             }
         }
-        if (isRotationBlocked() || !rotated) {
+        if (isRotationBlocked() || !rotated && rotateConfig.getValue()) {
             return;
         }
         final Hand hand = getCrystalHand();
@@ -748,7 +748,7 @@ public class AutoCrystalModule extends RotationModule {
         if (dist > placeRangeConfig.getValue() * placeRangeConfig.getValue()) {
             return true;
         }
-        Vec3d raytrace = pos.toCenterPos().add(0.0, raytraceConfig.getValue() ? 2.200000047683716 : 0.5, 0.0);
+        Vec3d raytrace = Vec3d.of(pos).add(0.0, raytraceConfig.getValue() ? 2.700000047683716 : 1.0, 0.0);
         BlockHitResult result = mc.world.raycast(new RaycastContext(
                 mc.player.getEyePos(), raytrace,
                 RaycastContext.ShapeType.COLLIDER,
@@ -765,10 +765,9 @@ public class AutoCrystalModule extends RotationModule {
     }
 
     private boolean targetDamageCheck(double bestDamage, Entity attackTarget) {
-        final double damageFactor = 3.0; // Adjust for damage config scale
-        double minDmg = minDamageConfig.getValue() * damageFactor;
+        double minDmg = minDamageConfig.getValue();
         if (attackTarget instanceof LivingEntity entity && isCrystalLethalTo(bestDamage, entity)) {
-            minDmg = 6.0;
+            minDmg = 2.0;
         }
         return bestDamage < minDmg;
     }
@@ -779,8 +778,7 @@ public class AutoCrystalModule extends RotationModule {
             if (safetyConfig.getValue() && playerDamage >= health + 0.5f) {
                 return true;
             }
-            final double damageFactor = 3.0;
-            return playerDamage > maxLocalDamageConfig.getValue() * damageFactor;
+            return playerDamage > maxLocalDamageConfig.getValue();
         }
         return false;
     }
@@ -825,14 +823,6 @@ public class AutoCrystalModule extends RotationModule {
             setStage("PLACING");
             lastPlaceTimer.reset();
         }
-    }
-
-    private float[] calculateRotations() {
-        // Vec3d aimPos = RotationUtil.getRotationsTo(mc.player.getEyePos(), );
-        if (strictRotateConfig.getValue() != Rotate.OFF) {
-
-        }
-        return null;
     }
 
     private boolean attackCheckPre(Hand hand) {
@@ -944,8 +934,8 @@ public class AutoCrystalModule extends RotationModule {
         return sphere;
     }
 
-    private boolean canAutoSwap() {
-        return autoSwapConfig.getValue() != Swap.OFF && getCrystalSlot() != -1;
+    private boolean canHoldCrystal() {
+        return isHoldingCrystal() || autoSwapConfig.getValue() != Swap.OFF && getCrystalSlot() != -1;
     }
 
     private Hand getCrystalHand() {

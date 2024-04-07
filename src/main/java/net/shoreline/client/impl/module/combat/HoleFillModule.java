@@ -97,7 +97,11 @@ public class HoleFillModule extends BlockPlacerModule {
             shiftDelay = 0;
             // All rotations for shift ticks must send extra packet
             // This may not work on all servers
-            placeBlockResistant(targetPos, rotateConfig.getValue(), strictDirectionConfig.getValue());
+//            blockInteraction = placeBlockResistant(targetPos, strictDirectionConfig.getValue());
+//            if (rotateConfig.getValue() && blockInteraction != null) {
+//                float[] rotations = blockInteraction.rotations();
+//                setRotation(rotations[0], rotations[1]);
+//            }
         }
     }
 }

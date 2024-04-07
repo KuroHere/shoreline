@@ -11,6 +11,7 @@ import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
+import net.shoreline.client.impl.event.entity.LookDirectionEvent;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
@@ -27,6 +28,8 @@ public class BowAimModule extends RotationModule {
     Config<Boolean> neutralsConfig = new BooleanConfig("Neutrals", "Aims bow at neutrals", false);
     Config<Boolean> animalsConfig = new BooleanConfig("Animals", "Aims bow at animals", false);
     Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles", "Aims bow at invisible entities", false);
+    //
+    private Entity aimTarget;
 
     /**
      *
@@ -44,7 +47,7 @@ public class BowAimModule extends RotationModule {
         if (mc.player.getMainHandStack().getItem() instanceof BowItem
                 && mc.player.getItemUseTime() >= 3) {
             double minDist = Double.MAX_VALUE;
-            Entity aimTarget = null;
+            aimTarget = null;
             for (Entity entity : mc.world.getEntities()) {
                 if (entity == null || entity == mc.player || !entity.isAlive()
                         || !isValidAimTarget(entity)
@@ -62,6 +65,13 @@ public class BowAimModule extends RotationModule {
                 float[] rots = getBowRotationsTo(target);
                 setRotationClient(rots[0], rots[1]);
             }
+        }
+    }
+
+    @EventListener
+    public void onLookDirection(LookDirectionEvent event) {
+        if (aimTarget != null) {
+            event.cancel();
         }
     }
 
