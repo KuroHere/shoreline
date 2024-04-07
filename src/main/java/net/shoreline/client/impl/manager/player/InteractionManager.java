@@ -2,8 +2,10 @@ package net.shoreline.client.impl.manager.player;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -14,8 +16,8 @@ import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
+import net.shoreline.client.util.player.RayCastUtil;
 import net.shoreline.client.util.player.RotationUtil;
-import net.shoreline.client.util.world.SneakBlocks;
 
 import java.util.Set;
 
@@ -88,37 +90,102 @@ public class InteractionManager implements Globals {
      * @param hand
      * @param strictDirection
      */
-    public float[] placeBlock(BlockPos pos, Hand hand, boolean rotate, boolean strictDirection) {
-        BlockState state = mc.world.getBlockState(pos);
-        Direction sideHit = getInteractDirection(pos, strictDirection);
-        if (!state.isReplaceable() || sideHit == null) {
+    public float[] placeBlock(BlockPos pos, Hand hand, boolean rotate, boolean strictDirection)
+    {
+        final BlockState state = mc.world.getBlockState(pos);
+        // Get the first usable side
+        final Direction side = getInteractDirection(pos, strictDirection);
+        if (!state.isReplaceable() || side == null)
+        {
             return null;
         }
-        BlockPos offsetPos = pos.offset(sideHit.getOpposite());
-        Vec3d hitVec = Vec3d.ofCenter(offsetPos);
-        BlockState state1 = mc.world.getBlockState(offsetPos);
-        boolean sneaking = !mc.player.isSneaking() && SneakBlocks.isSneakBlock(state1.getBlock());
-        if (sneaking) {
-            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                    ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+
+        final BlockPos neigbor = pos.offset(side.getOpposite());
+        final Vec3d rotateVec = neigbor.toCenterPos();
+
+        // Calculate rotations towards block
+        float[] angles = Managers.ROTATION.getServer();
+        if (rotate)
+        {
+            angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), rotateVec);
         }
-        // sideHit = sideHit.getOpposite();
-        hitVec = hitVec.add(sideHit.getOffsetX() * 0.5, sideHit.getOffsetY() * 0.5, sideHit.getOffsetZ() * 0.5);
-        float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitVec);
-        if (rotate) {
-            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
-                    rotations[0], rotations[1], mc.player.isOnGround()));
+
+        BlockHitResult hitResult;
+        if (strictDirection)
+        {
+            final HitResult rayCastResult = RayCastUtil.rayCast(4.0, angles);
+            if (!(rayCastResult instanceof BlockHitResult blockHitResult))
+            {
+                return null;
+            }
+
+            hitResult = blockHitResult;
         }
-        BlockHitResult result = new BlockHitResult(hitVec, sideHit, offsetPos, false);
-        Managers.NETWORK.sendSequencedPacket(id ->
-                new PlayerInteractBlockC2SPacket(hand, result, id));
-        // Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
-        mc.player.swingHand(hand);
-        if (sneaking) {
-            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
-                    ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+        else
+        {
+            hitResult = new BlockHitResult(rotateVec, side, neigbor, false);
         }
-        return rotations;
+
+        if (rotate)
+        {
+            Managers.ROTATION.submitInstant(angles[0], angles[1], true);
+        }
+
+        final ActionResult actionResult = mc.interactionManager.interactBlock(mc.player, hand, hitResult);
+        final boolean success = actionResult.isAccepted();
+        if (success && actionResult.shouldSwingHand())
+        {
+            mc.player.swingHand(hand);
+        }
+
+        return angles;
+
+//        BlockState state = mc.world.getBlockState(pos);
+//        Direction sideHit = getInteractDirection(pos, strictDirection);
+//        if (!state.isReplaceable() || sideHit == null) {
+//            return null;
+//        }
+//        BlockPos offsetPos = pos.offset(sideHit.getOpposite());
+//        Vec3d rotateVec = Vec3d.ofCenter(offsetPos);
+//        BlockState state1 = mc.world.getBlockState(offsetPos);
+//        rotateVec = rotateVec.add(sideHit.getOffsetX() * 0.5, sideHit.getOffsetY() * 0.5, sideHit.getOffsetZ() * 0.5);
+//        float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), rotateVec);
+//
+//        HitResult result = RayCastUtil.rayCast(4.0, rotations);//new BlockHitResult(hitVec, sideHit, offsetPos, false);
+//        if (!(result instanceof BlockHitResult blockHitResult))
+//        {
+//            return null;
+//        }
+//
+//        if (rotate) {
+////            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
+////                    rotations[0], rotations[1], mc.player.isOnGround()));
+//            Managers.ROTATION.submitInstant(rotations[0], rotations[1], true);
+//        }
+//
+//        boolean sneaking = !mc.player.isSneaking() && SneakBlocks.isSneakBlock(state1.getBlock());
+//        if (sneaking) {
+//            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+//                    ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+//        }
+//
+//        final ActionResult actionResult = mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, blockHitResult);
+//        final boolean success = actionResult.equals(ActionResult.SUCCESS);
+//        if (success && actionResult.shouldSwingHand())
+//        {
+//            mc.player.swingHand(Hand.MAIN_HAND);
+//        }
+//
+////        Managers.NETWORK.sendSequencedPacket(id ->
+////                new PlayerInteractBlockC2SPacket(hand, blockHitResult, id));
+////        // Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
+////        mc.player.swingHand(hand);
+//
+//        if (sneaking) {
+//            Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
+//                    ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+//        }
+//        return success ? rotations : null;
     }
 
     /**

@@ -29,6 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
@@ -131,8 +132,8 @@ public abstract class MixinClientPlayerInteractionManager implements Globals {
         float pitch = mc.player.getPitch();
         if (Managers.ROTATION.isRotating())
         {
-            yaw = Managers.ROTATION.getRotationYaw();
-            pitch = Managers.ROTATION.getRotationPitch();
+            yaw = Managers.ROTATION.getServerYaw();
+            pitch = Managers.ROTATION.getServerPitch();
         }
         if (!Modules.NO_SLOW.isEnabled() || !Modules.NO_SLOW.getStrafeFix())
         {
@@ -156,5 +157,28 @@ public abstract class MixinClientPlayerInteractionManager implements Globals {
             return playerInteractItemC2SPacket;
         });
         cir.setReturnValue((ActionResult) ((Object) mutableObject.getValue()));
+    }
+
+    @Redirect(
+        method = "interactBlockInternal",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/network/ClientPlayerEntity;getStackInHand(Lnet/minecraft/util/Hand;)Lnet/minecraft/item/ItemStack;"))
+    private ItemStack hookRedirectInteractBlockInternal$getStackInHand(ClientPlayerEntity entity, Hand hand) {
+        if (hand.equals(Hand.OFF_HAND))
+        {
+            return entity.getStackInHand(hand);
+        }
+        return Managers.INVENTORY.isDesynced() ? Managers.INVENTORY.getServerItem() : entity.getStackInHand(Hand.MAIN_HAND);
+    }
+
+    @Redirect(
+        method = "interactBlockInternal",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/item/ItemStack;isEmpty()Z",
+            ordinal = 0))
+    private boolean hookRedirectInteractBlockInternal$getMainHandStack(ItemStack instance) {
+        return Managers.INVENTORY.isDesynced() ? Managers.INVENTORY.getServerItem().isEmpty() : instance.isEmpty();
     }
 }

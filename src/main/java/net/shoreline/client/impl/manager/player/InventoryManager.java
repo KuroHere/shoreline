@@ -35,7 +35,6 @@ public class InventoryManager implements Globals {
      *
      */
     public InventoryManager() {
-        slot = -1;
         Shoreline.EVENT_HANDLER.subscribe(this);
     }
 
@@ -92,9 +91,14 @@ public class InventoryManager implements Globals {
      * Syncs the server slot to the client slot
      */
     public void syncToClient() {
-        if (mc.player.getInventory().selectedSlot != slot) {
+        if (isDesynced()) {
             setSlotForced(mc.player.getInventory().selectedSlot);
         }
+    }
+
+    public boolean isDesynced()
+    {
+        return mc.player.getInventory().selectedSlot != slot;
     }
 
     //
@@ -164,14 +168,18 @@ public class InventoryManager implements Globals {
      * @return
      */
     public int getServerSlot() {
-        return slot;
+        if (mc.player == null)
+        {
+            return -1;
+        }
+        return slot == -1 ? mc.player.getInventory().selectedSlot : slot;
     }
 
     /**
      * @return
      */
     public ItemStack getServerItem() {
-        if (mc.player != null) {
+        if (mc.player != null && getServerSlot() != -1) {
             return mc.player.getInventory().getStack(getServerSlot());
         }
         return null;
