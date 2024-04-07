@@ -152,8 +152,8 @@ public class VelocityModule extends ToggleModule {
                 float pitch = mc.player.getPitch();
                 if (Managers.ROTATION.isRotating())
                 {
-                    yaw = Managers.ROTATION.getServerYaw();
-                    pitch = Managers.ROTATION.getServerPitch();
+                    yaw = Managers.ROTATION.getRotationYaw();
+                    pitch = Managers.ROTATION.getRotationPitch();
                 }
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
                         mc.player.getY(), mc.player.getZ(), yaw, pitch, mc.player.isOnGround()));

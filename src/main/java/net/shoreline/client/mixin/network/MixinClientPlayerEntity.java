@@ -180,6 +180,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     private void hookTickPre(CallbackInfo ci) {
         PlayerTickEvent playerTickEvent = new PlayerTickEvent();
         Shoreline.EVENT_HANDLER.dispatch(playerTickEvent);
+        Managers.ROTATION.onUpdate();
     }
 
     /**

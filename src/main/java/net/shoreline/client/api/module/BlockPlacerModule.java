@@ -19,6 +19,11 @@ public class BlockPlacerModule extends RotationModule {
         super(name, desc, category);
     }
 
+    public BlockPlacerModule(String name, String desc, ModuleCategory category, int rotationPriority) {
+        super(name, desc, category, rotationPriority);
+    }
+
+
     protected void placeBlockResistant(BlockPos pos) {
         placeBlockResistant(pos, false);
     }
@@ -49,10 +54,10 @@ public class BlockPlacerModule extends RotationModule {
      * @param strictDirection
      */
     protected float[] placeBlock(int slot, BlockPos pos, boolean rotate, boolean strictDirection) {
-
-        //Managers.INVENTORY.setSlot(slot);
+        int prev = mc.player.getInventory().selectedSlot;
+        Managers.INVENTORY.setSlot(slot);
         float[] rotations = Managers.INTERACT.placeBlock(pos, rotate, strictDirection);
-        //.INVENTORY.syncToClient();
+        Managers.INVENTORY.setSlot(prev);
         return rotations;
     }
 

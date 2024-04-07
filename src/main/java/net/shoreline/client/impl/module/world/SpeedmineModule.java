@@ -58,7 +58,7 @@ public class SpeedmineModule extends RotationModule {
     private float damage;
 
     public SpeedmineModule() {
-        super("Speedmine", "Mines faster", ModuleCategory.WORLD);
+        super("Speedmine", "Mines faster", ModuleCategory.WORLD, 900);
     }
 
     @Override

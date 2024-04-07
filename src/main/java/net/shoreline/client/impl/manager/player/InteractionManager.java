@@ -104,7 +104,7 @@ public class InteractionManager implements Globals {
         final Vec3d rotateVec = neigbor.toCenterPos();
 
         // Calculate rotations towards block
-        float[] angles = Managers.ROTATION.getServer();
+        float[] angles = new float[] { Managers.ROTATION.getServerYaw(), Managers.ROTATION.getServerPitch() };
         if (rotate)
         {
             angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), rotateVec);

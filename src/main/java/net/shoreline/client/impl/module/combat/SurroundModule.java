@@ -61,7 +61,7 @@ public class SurroundModule extends BlockPlacerModule {
      *
      */
     public SurroundModule() {
-        super("Surround", "Surrounds feet with obsidian", ModuleCategory.COMBAT);
+        super("Surround", "Surrounds feet with obsidian", ModuleCategory.COMBAT, 1000);
     }
 
     @Override

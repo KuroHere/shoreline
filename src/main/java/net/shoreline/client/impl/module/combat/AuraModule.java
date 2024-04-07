@@ -16,7 +16,6 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -38,7 +37,6 @@ import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.manager.world.tick.TickSync;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
-import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.player.RotationUtil;
@@ -75,7 +73,7 @@ public class AuraModule extends RotationModule {
     Config<Vector> hitVectorConfig = new EnumConfig<>("HitVector", "The vector to aim for when attacking entities", Vector.FEET, Vector.values());
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate before attacking", false);
     Config<Boolean> strictRotateConfig = new BooleanConfig("RotateStrict", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", false, () -> rotateConfig.getValue());
-    Config<Boolean> silentRotateConfig = new BooleanConfig("SilentRotate", "autism", false, () -> rotateConfig.getValue());
+    Config<Boolean> silentRotateConfig = new BooleanConfig("RotateSilent", "Rotates silently to server", false, () -> rotateConfig.getValue());
     Config<Integer> rotateLimitConfig = new NumberConfig<>("Rotate-Yaw", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted", "The minimum age of the entity to be considered for attack", 0, 50, 200);
     Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck", "Checks if target has armor before attacking", false);
@@ -109,7 +107,7 @@ public class AuraModule extends RotationModule {
      *
      */
     public AuraModule() {
-        super("Aura", "Attacks nearby entities", ModuleCategory.COMBAT);
+        super("Aura", "Attacks nearby entities", ModuleCategory.COMBAT, 700);
     }
 
     @Override
@@ -187,7 +185,6 @@ public class AuraModule extends RotationModule {
             } else {
                 rotated = true;
             }
-
             // what what you cannot hop in my car
             // bentley coupe ridin with stars
             if (silentRotateConfig.getValue())

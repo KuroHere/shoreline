@@ -11,8 +11,7 @@ import net.shoreline.client.init.Modules;
  */
 public class RotationModule extends ToggleModule {
 
-    private int rotationPriority;
-    private boolean hasSetPriority = false;
+    private final int rotationPriority;
 
     /**
      * @param name     The module unique identifier
@@ -21,19 +20,22 @@ public class RotationModule extends ToggleModule {
      */
     public RotationModule(String name, String desc, ModuleCategory category) {
         super(name, desc, category);
+        this.rotationPriority = 100;
     }
 
     /**
-     * @param yaw
-     * @param pitch
+     * @param name     The module unique identifier
+     * @param desc     The module description
+     * @param category The module category
      */
-    protected void setRotation(float yaw, float pitch) {
-        setRotation(yaw, pitch, (int)Modules.ROTATIONS.getPreserveTicks());
+    public RotationModule(String name, String desc, ModuleCategory category, int rotationPriority) {
+        super(name, desc, category);
+        this.rotationPriority = rotationPriority;
     }
 
-    protected void setRotation(float yaw, float pitch, int time)
+    protected void setRotation(float yaw, float pitch)
     {
-        Managers.ROTATION.submit(new Rotation(getRotationPriority(), time, yaw, pitch));
+        Managers.ROTATION.setRotation(new Rotation(getRotationPriority(), yaw, pitch));
     }
 
     /**
@@ -42,12 +44,7 @@ public class RotationModule extends ToggleModule {
      * @param pitch
      */
     protected void setRotationClient(float yaw, float pitch) {
-        Managers.ROTATION.submitClient(yaw, pitch);
-    }
-
-    protected void setRotationPriority(int rotationPriority) {
-        this.rotationPriority = rotationPriority;
-        hasSetPriority = true;
+        Managers.ROTATION.setRotationClient(yaw, pitch);
     }
 
     protected boolean isRotationBlocked() {
@@ -55,6 +52,6 @@ public class RotationModule extends ToggleModule {
     }
 
     protected int getRotationPriority() {
-        return hasSetPriority ? rotationPriority : 10;
+        return rotationPriority;
     }
 }

@@ -132,8 +132,8 @@ public abstract class MixinClientPlayerInteractionManager implements Globals {
         float pitch = mc.player.getPitch();
         if (Managers.ROTATION.isRotating())
         {
-            yaw = Managers.ROTATION.getServerYaw();
-            pitch = Managers.ROTATION.getServerPitch();
+            yaw = Managers.ROTATION.getRotationYaw();
+            pitch = Managers.ROTATION.getRotationPitch();
         }
         if (!Modules.NO_SLOW.isEnabled() || !Modules.NO_SLOW.getStrafeFix())
         {
