@@ -51,8 +51,7 @@ public class BowAimModule extends RotationModule {
             for (Entity entity : mc.world.getEntities()) {
                 if (entity == null || entity == mc.player || !entity.isAlive()
                         || !isValidAimTarget(entity)
-                        || Managers.SOCIAL.isFriend(entity.getUuid())
-                        || entity instanceof PlayerEntity player && Modules.ANTI_BOTS.contains(player)) {
+                        || Managers.SOCIAL.isFriend(entity.getUuid())) {
                     continue;
                 }
                 double dist = mc.player.distanceTo(entity);
