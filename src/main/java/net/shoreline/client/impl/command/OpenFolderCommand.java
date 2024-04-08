@@ -23,7 +23,7 @@ public class OpenFolderCommand extends Command {
     @Override
     public void onCommandInput() {
         try {
-            Desktop.getDesktop().open(Paths.get("Shoreline").toFile());
+            Desktop.getDesktop().open(Paths.get(System.getProperty("user.home"), "Shoreline").toFile());
         } catch (IOException e) {
             e.printStackTrace();
             ChatUtil.error("Failed to open client folder!");
