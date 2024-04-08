@@ -39,16 +39,9 @@ public class InventoryManager implements Globals {
     }
 
     @EventListener
-    public void onPacketInbound(PacketEvent.Inbound event) {
+    public void onPacketOutBound(PacketEvent.Outbound event) {
         if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket packet) {
             slot = packet.getSelectedSlot();
-        }
-    }
-
-    @EventListener
-    public void onPacketOutBound(PacketEvent.Outbound event) {
-        if (event.getPacket() instanceof UpdateSelectedSlotS2CPacket packet) {
-            slot = packet.getSlot();
         }
     }
 
@@ -168,11 +161,7 @@ public class InventoryManager implements Globals {
      * @return
      */
     public int getServerSlot() {
-        if (mc.player == null)
-        {
-            return -1;
-        }
-        return slot == -1 ? mc.player.getInventory().selectedSlot : slot;
+        return slot;
     }
 
     /**

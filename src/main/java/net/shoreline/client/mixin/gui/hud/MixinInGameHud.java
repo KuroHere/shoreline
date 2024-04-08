@@ -3,10 +3,13 @@ package net.shoreline.client.mixin.gui.hud;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.gui.hud.RenderOverlayEvent;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,6 +44,11 @@ public class MixinInGameHud implements Globals {
         RenderOverlayEvent.Post renderOverlayEvent =
                 new RenderOverlayEvent.Post(context, tickDelta);
         Shoreline.EVENT_HANDLER.dispatch(renderOverlayEvent);
+    }
+
+    @Redirect(method = "renderHotbar", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerInventory;selectedSlot:I"))
+    private int hookRenderHotbar$selectedSlot(PlayerInventory instance) {
+        return Managers.INVENTORY.getServerSlot();
     }
 
     /**

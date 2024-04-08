@@ -22,22 +22,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinClientConnection {
     /**
      * @param packet
-     * @param ci
-     */
-    @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V",
-            at = @At(value = "HEAD"), cancellable = true)
-    private void hookSend(Packet<?> packet, CallbackInfo ci) {
-        PacketEvent.Outbound packetOutboundEvent =
-                new PacketEvent.Outbound(packet);
-        Shoreline.EVENT_HANDLER.dispatch(packetOutboundEvent);
-        // prevent client from sending packet to server
-        if (packetOutboundEvent.isCanceled()) {
-            ci.cancel();
-        }
-    }
-
-    /**
-     * @param packet
      * @param callbacks
      * @param ci
      */
