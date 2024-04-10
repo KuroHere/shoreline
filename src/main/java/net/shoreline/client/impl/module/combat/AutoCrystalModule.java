@@ -461,7 +461,7 @@ public class AutoCrystalModule extends RotationModule {
         return placeCrystal != null && isHoldingCrystal();
     }
 
-    private void attackCrystal(EndCrystalEntity entity, Hand hand) {
+    public void attackCrystal(EndCrystalEntity entity, Hand hand) {
         if (attackCheckPre(hand)) {
             return;
         }

@@ -6,10 +6,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -25,6 +28,7 @@ import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
+import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 
@@ -114,8 +118,19 @@ public class SurroundModule extends BlockPlacerModule {
             shiftDelay = 0;
             // All rotations for shift ticks must send extra packet
             // This may not work on all servers
-            placeObsidianBlock(targetPos, rotateConfig.getValue());
+            attackPlace(targetPos);
         }
+    }
+
+    private void attackPlace(BlockPos targetPos) {
+        if (attackConfig.getValue()) {
+            List<Entity> entities = mc.world.getOtherEntities(null, new Box(targetPos)).stream().filter(e -> e instanceof EndCrystalEntity).toList();
+            for (Entity entity : entities) {
+                Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(entity, mc.player.isSneaking()));
+                Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+            }
+        }
+        placeObsidianBlock(targetPos, rotateConfig.getValue());
     }
 
     public List<BlockPos> getSurroundPositions(BlockPos pos) {
@@ -193,6 +208,20 @@ public class SurroundModule extends BlockPlacerModule {
     }
 
     @EventListener
+    public void onAddEntity(AddEntityEvent event) {
+        if (!(event.getEntity() instanceof EndCrystalEntity crystalEntity) || !attackConfig.getValue()) {
+            return;
+        }
+        for (BlockPos blockPos : surround) {
+            if (crystalEntity.getBlockPos() == blockPos) {
+                Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(crystalEntity, mc.player.isSneaking()));
+                Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                break;
+            }
+        }
+    }
+
+    @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null) {
             return;
@@ -201,7 +230,7 @@ public class SurroundModule extends BlockPlacerModule {
             final BlockState state = packet.getState();
             final BlockPos targetPos = packet.getPos();
             if (surround.contains(targetPos) && state.isReplaceable()) {
-                placeObsidianBlock(targetPos, rotateConfig.getValue());
+                attackPlace(targetPos);
                 blocksPlaced++;
                 // shiftDelay = 0;
             }
@@ -210,7 +239,7 @@ public class SurroundModule extends BlockPlacerModule {
                 && packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
             BlockPos targetPos = BlockPos.ofFloored(packet.getX(), packet.getY(), packet.getZ());
             if (surround.contains(targetPos)) {
-                placeObsidianBlock(targetPos, rotateConfig.getValue());
+                attackPlace(targetPos);
                 blocksPlaced++;
                 // shiftDelay = 0;
             }
