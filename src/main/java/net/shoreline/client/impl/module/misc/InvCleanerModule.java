@@ -111,9 +111,11 @@ public class InvCleanerModule extends ToggleModule {
                 if (Files.exists(filepath)) {
                     String content = read(filepath);
                     JsonObject object = parseObject(content);
-                    JsonArray jsonArray = object.getAsJsonArray("items");
-                    for (JsonElement element : jsonArray) {
-                        // blacklist.add(Registries.ITEM.get(new Identifier(element.getAsString())));
+                    if (object != null && object.has("items")) {
+                        JsonArray jsonArray = object.getAsJsonArray("items");
+                        for (JsonElement element : jsonArray) {
+                            // blacklist.add(Registries.ITEM.get(new Identifier(element.getAsString())));
+                        }
                     }
                 }
             }
