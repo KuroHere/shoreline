@@ -14,6 +14,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnchantedGoldenAppleItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
@@ -255,16 +256,15 @@ public class NametagsModule extends ToggleModule {
             // this.matrices.translate(0.0f, 0.0f, 200.0f);
             Fonts.VANILLA.drawWithShadow(matrixStack, string, x + 17 - mc.textRenderer.getWidth(string), y + 9.0f, -1);
         }
-        // dont need this cuz durability render
-//        if (stack.isItemBarVisible())
-//        {
-//            int i = stack.getItemBarStep();
-//            int j = stack.getItemBarColor();
-//            int k = x + 2;
-//            int l = y + 13;
-//            RenderManager.rect(matrixStack, k, l, 13, 2, Colors.BLACK);
-//            RenderManager.rect(matrixStack, k, l, i, 2, j | Colors.BLACK);
-//        }
+        if (stack.isItemBarVisible())
+        {
+            int i = stack.getItemBarStep();
+            int j = stack.getItemBarColor();
+            int k = x + 2;
+            int l = y + 13;
+            RenderManager.rect(matrixStack, k, l, 13, 2, Colors.BLACK);
+            RenderManager.rect(matrixStack, k, l, i, 2, j | Colors.BLACK);
+        }
         matrixStack.pop();
     }
 
