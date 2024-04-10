@@ -6,6 +6,9 @@ import net.shoreline.client.api.macro.Macro;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.api.render.RenderManager;
+import net.shoreline.client.api.render.anim.Animation;
+import net.shoreline.client.api.render.anim.Easing;
+import net.shoreline.client.impl.gui.click.ClickGuiScreen;
 import net.shoreline.client.impl.gui.click.component.Button;
 import net.shoreline.client.impl.gui.click.impl.config.setting.*;
 import net.shoreline.client.init.Modules;
@@ -27,7 +30,10 @@ public class ModuleButton extends Button {
     private final List<ConfigButton<?>> configComponents =
             new CopyOnWriteArrayList<>();
     //
+    private float off;
+    //
     private boolean open;
+    private final Animation settingsAnimation = new Animation(Easing.CUBIC_IN_OUT, 200);
 
     /**
      * @param module
@@ -37,38 +43,37 @@ public class ModuleButton extends Button {
      */
     @SuppressWarnings("unchecked")
     public ModuleButton(Module module, CategoryFrame frame, float x, float y) {
-        super(frame, x, y, 86.0f, 15.0f);
+        super(frame, x, y, 103.0f, 13.0f);
         this.module = module;
         for (Config<?> config : module.getConfigs()) {
             if (config.getName().equalsIgnoreCase("Enabled")) {
                 continue;
             }
             if (config.getValue() instanceof Boolean) {
-                configComponents.add(new CheckboxButton(frame,
+                configComponents.add(new CheckboxButton(frame, this,
                         (Config<Boolean>) config, x, y));
             } else if (config.getValue() instanceof Double) {
-                configComponents.add(new SliderButton<>(frame,
+                configComponents.add(new SliderButton<>(frame, this,
                         (Config<Double>) config, x, y));
             } else if (config.getValue() instanceof Float) {
-                configComponents.add(new SliderButton<>(frame,
+                configComponents.add(new SliderButton<>(frame, this,
                         (Config<Float>) config, x, y));
             } else if (config.getValue() instanceof Integer) {
-                configComponents.add(new SliderButton<>(frame,
+                configComponents.add(new SliderButton<>(frame, this,
                         (Config<Integer>) config, x, y));
             } else if (config.getValue() instanceof Enum<?>) {
-                configComponents.add(new DropdownButton(frame,
+                configComponents.add(new DropdownButton(frame, this,
                         (Config<Enum<?>>) config, x, y));
             } else if (config.getValue() instanceof String) {
-                configComponents.add(new TextButton(frame,
+                configComponents.add(new TextButton(frame, this,
                         (Config<String>) config, x, y));
             } else if (config.getValue() instanceof Macro) {
-                configComponents.add(new BindButton(frame,
+                configComponents.add(new BindButton(frame, this,
                         (Config<Macro>) config, x, y));
+            } else if (config.getValue() instanceof Color) {
+                configComponents.add(new ColorButton(frame, this,
+                        (Config<Color>) config, x, y));
             }
-            // else if (config.getValue() instanceof Color) {
-            //    configComponents.add(new ColorButton(frame,
-            //            (Config<Color>) config, x, y));
-            // }
         }
         open = false;
     }
@@ -94,17 +99,34 @@ public class ModuleButton extends Button {
                        float mouseY, float delta) {
         x = ix;
         y = iy;
-        boolean fill = !(module instanceof ToggleModule t) || t.isEnabled();
-        rect(context, fill ? Modules.COLORS.getRGB() : 0x55555555);
-        RenderManager.renderText(context, module.getName(), ix + 2, iy + 4, -1);
-        if (open) {
-            float off = y + height + 0.5f;
+        float scaledTime = 1.0f;
+        boolean fill = !(module instanceof ToggleModule t) || (scaledTime = t.getAnimation().getScaledTime()) > 0.01f;
+        scaledTime *= 1.7f;
+        rectGradient(context, fill ? Modules.CLICK_GUI.getColor(scaledTime) : 0x555555, fill ? Modules.CLICK_GUI.getColor1(scaledTime) : 0x555555);
+        RenderManager.renderText(context, module.getName(), ix + 2, iy + 3.5f, scaledTime > 0.99f ? -1 : 0xaaaaaa);
+        if (settingsAnimation.getScaledTime() > 0.01f) {
+            off = y + height + 1.0f;
+            float fheight = 0.0f;
+            for (ConfigButton<?> configButton : configComponents) {
+                fheight += configButton.getHeight();
+                if (configButton instanceof ColorButton colorPicker && colorPicker.getScaledTime() > 0.01f) {
+                    fheight += colorPicker.getPickerHeight() * colorPicker.getScaledTime();
+                }
+            }
+            enableScissor(ClickGuiScreen.SCISSOR_STACK, (int) x, (int) (off - 1.0f), (int) (x + width), (int) (off + 2.0f + (fheight * settingsAnimation.getScaledTime())));
             for (ConfigButton<?> configButton : configComponents) {
                 // run draw event
-                configButton.render(context, ix + 0.5f, off, mouseX, mouseY, delta);
-                ((CategoryFrame) frame).offset(15.0f);
-                off += 15.0f;
+                configButton.render(context, ix + 2.0f, off, mouseX, mouseY, delta);
+                ((CategoryFrame) frame).offset(configButton.getHeight() * settingsAnimation.getScaledTime());
+                off += configButton.getHeight();
             }
+            if (fill) {
+                fill(context, ix, y + height, 1.0f, off - (y + height) + 1.0f, Modules.CLICK_GUI.getColor1(scaledTime));
+                fill(context, ix + width - 1.0f, y + height, 1.0f, off - (y + height) + 1.0f, Modules.CLICK_GUI.getColor(scaledTime));
+                fillGradient(context, ix, off + 1.0f, ix + width, off + 2.0f, Modules.CLICK_GUI.getColor(scaledTime),  Modules.CLICK_GUI.getColor1(scaledTime));
+            }
+            disableScissor(ClickGuiScreen.SCISSOR_STACK);
+            ((CategoryFrame) frame).offset(3.0f * settingsAnimation.getScaledTime());
         }
     }
 
@@ -116,14 +138,13 @@ public class ModuleButton extends Button {
     @Override
     public void mouseClicked(double mouseX, double mouseY, int button) {
         if (isWithin(mouseX, mouseY)) {
-            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT
-                    && module instanceof ToggleModule t) {
+            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && module instanceof ToggleModule t) {
                 t.toggle();
-                //
                 // ToggleGuiEvent toggleGuiEvent = new ToggleGuiEvent(t);
                 // Caspian.EVENT_HANDLER.dispatch(toggleGuiEvent);
             } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                 open = !open;
+                settingsAnimation.setState(open);
             }
         }
         if (open) {
@@ -162,10 +183,21 @@ public class ModuleButton extends Button {
     }
 
     /**
+     * @param in
+     */
+    public void offset(float in) {
+        off += in;
+    }
+
+    /**
      * @return
      */
     public boolean isOpen() {
         return open;
+    }
+
+    public float getScaledTime() {
+        return settingsAnimation.getScaledTime();
     }
 
     /**

@@ -7,6 +7,7 @@ import net.shoreline.client.api.config.setting.MacroConfig;
 import net.shoreline.client.api.macro.Macro;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
+import net.shoreline.client.impl.gui.click.impl.config.ModuleButton;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -23,8 +24,8 @@ public class BindButton extends ConfigButton<Macro> {
      * @param x
      * @param y
      */
-    public BindButton(CategoryFrame frame, Config<Macro> config, float x, float y) {
-        super(frame, config, x, y);
+    public BindButton(CategoryFrame frame, ModuleButton moduleButton, Config<Macro> config, float x, float y) {
+        super(frame, moduleButton, config, x, y);
     }
 
     /**

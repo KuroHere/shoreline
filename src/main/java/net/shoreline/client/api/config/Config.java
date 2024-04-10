@@ -6,6 +6,8 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.Identifiable;
 import net.shoreline.client.api.config.setting.*;
 import net.shoreline.client.api.event.EventStage;
+import net.shoreline.client.api.render.anim.Animation;
+import net.shoreline.client.api.render.anim.Easing;
 import net.shoreline.client.impl.event.config.ConfigUpdateEvent;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
@@ -46,6 +48,8 @@ public abstract class Config<T> implements Identifiable, Serializable<T> {
     private ConfigContainer container;
     //
     private Supplier<Boolean> visible;
+    //
+    protected final Animation configAnimation = new Animation(Easing.CUBIC_IN_OUT, 200);
 
     /**
      * Initializes the config with a default value. This constructor should
@@ -133,8 +137,7 @@ public abstract class Config<T> implements Identifiable, Serializable<T> {
      */
     @Override
     public String getId() {
-        return String.format("%s-%s-config", container.getName().toLowerCase(),
-                name.toLowerCase());
+        return String.format("%s-%s-config", container.getName().toLowerCase(), name.toLowerCase());
     }
 
     /**
@@ -194,6 +197,10 @@ public abstract class Config<T> implements Identifiable, Serializable<T> {
      */
     public void setContainer(final ConfigContainer cont) {
         container = cont;
+    }
+
+    public Animation getAnimation() {
+        return configAnimation;
     }
 
     /**

@@ -1,5 +1,7 @@
 package net.shoreline.client.api.render.anim;
 
+import net.minecraft.util.math.MathHelper;
+
 /**
  * @author linus, Gavin
  * @since 1.0
@@ -46,7 +48,7 @@ public class Animation {
         if (!state) {
             linear = 1.0 - linear;
         }
-        return (float) Math.min(Math.max(easing.ease(linear), 0.0), 1.0);
+        return (float) MathHelper.clamp(easing.ease(linear), 0.0, 1.0);
     }
 
     /**

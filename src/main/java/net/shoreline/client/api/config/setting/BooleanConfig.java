@@ -20,6 +20,12 @@ public class BooleanConfig extends Config<Boolean> {
         super(name, desc, val, visible);
     }
 
+    @Override
+    public void setValue(Boolean in) {
+        super.setValue(in);
+        configAnimation.setState(in);
+    }
+
     /**
      * @return
      */

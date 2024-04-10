@@ -2,7 +2,6 @@ package net.shoreline.client.impl.gui.click.component;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.render.*;
@@ -11,11 +10,9 @@ import net.minecraft.client.util.Window;
 import net.minecraft.util.math.ColorHelper;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.util.Globals;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -25,8 +22,6 @@ import java.util.function.BiConsumer;
  * @since 1.0
  */
 public abstract class Component implements Drawable, Globals {
-    //
-    private static final ScissorStack SCISSOR_STACK = new ScissorStack();
     //
     protected float x, y, width, height;
 
@@ -45,6 +40,18 @@ public abstract class Component implements Drawable, Globals {
      */
     protected void rect(DrawContext context, int color) {
         fill(context, x, y, width, height, color);
+    }
+
+    /**
+     * @param context
+     * @param color1
+     */
+    protected void rectGradient(DrawContext context, int color1, int color2) {
+        fillGradient(context, x, y, x + width, y + height, color1, color2);
+    }
+
+    protected void scale(DrawContext context, float scale) {
+
     }
 
     protected void drawRoundedRect(DrawContext context, double x1, double y1,
@@ -136,30 +143,6 @@ public abstract class Component implements Drawable, Globals {
         fill(context, x, y1 + 1, x + 1, y1 + y2, color);
     }
 
-    public void enableScissor(int x1, int y1, int x2, int y2) {
-        setScissor(SCISSOR_STACK.push(new ScreenRect(x1, y1, x2 - x1, y2 - y1)));
-    }
-
-    public void disableScissor() {
-        setScissor(SCISSOR_STACK.pop());
-    }
-
-    private void setScissor(ScreenRect rect) {
-        if (rect != null) {
-            Window window = MinecraftClient.getInstance().getWindow();
-            int i = window.getFramebufferHeight();
-            double d = window.getScaleFactor();
-            double e = (double) rect.getLeft() * d;
-            double f = (double) i - (double) rect.getBottom() * d;
-            double g = (double) rect.width() * d;
-            double h = (double) rect.height() * d;
-            RenderSystem.enableScissor((int) e, (int) f, Math.max(0, (int) g),
-                    Math.max(0, (int) h));
-        } else {
-            RenderSystem.disableScissor();
-        }
-    }
-
     public void fill(DrawContext context, double x1, double y1, double x2,
                      double y2, int color) {
         fill(context, x1, y1, x2, y2, 0.0, color);
@@ -202,14 +185,14 @@ public abstract class Component implements Drawable, Globals {
         RenderSystem.disableBlend();
     }
 
-    protected void fillGradient(DrawContext context, int startX,
-                                int startY, int endX, int endY,
+    protected void fillGradient(DrawContext context, double startX,
+                                double startY, double endX, double endY,
                                 int colorStart, int colorEnd) {
         fillGradient(context, startX, startY, endX, endY, colorStart, colorEnd, 0);
     }
 
-    protected void fillGradient(DrawContext context, int startX,
-                                int startY, int endX, int endY,
+    protected void fillGradient(DrawContext context, double startX,
+                                double startY, double endX, double endY,
                                 int colorStart, int colorEnd, int z) {
         RenderSystem.enableBlend();
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
@@ -235,13 +218,45 @@ public abstract class Component implements Drawable, Globals {
         float l = (float) ColorHelper.Argb.getGreen(colorEnd) / 255.0f;
         float m = (float) ColorHelper.Argb.getBlue(colorEnd) / 255.0f;
         builder.vertex(matrix, (float) startX, (float) startY, (float) z)
-                .color(g, h, i, f).next();
+                .color(k, l, m, j).next();
         builder.vertex(matrix, (float) startX, (float) endY, (float) z)
                 .color(k, l, m, j).next();
         builder.vertex(matrix, (float) endX, (float) endY, (float) z)
-                .color(k, l, m, j).next();
+                .color(g, h, i, f).next();
         builder.vertex(matrix, (float) endX, (float) startY, (float) z)
                 .color(g, h, i, f).next();
+    }
+
+    protected void fillGradientQuad(DrawContext context, float x1, float y1, float x2, float y2, 
+                                    int startColor, int endColor, boolean sideways) {
+        float f = (float) (startColor >> 24 & 255) / 255.0F;
+        float f1 = (float) (startColor >> 16 & 255) / 255.0F;
+        float f2 = (float) (startColor >> 8 & 255) / 255.0F;
+        float f3 = (float) (startColor & 255) / 255.0F;
+        float f4 = (float) (endColor >> 24 & 255) / 255.0F;
+        float f5 = (float) (endColor >> 16 & 255) / 255.0F;
+        float f6 = (float) (endColor >> 8 & 255) / 255.0F;
+        float f7 = (float) (endColor & 255) / 255.0F;
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+        Matrix4f posMatrix = context.getMatrices().peek().getPositionMatrix();
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+        if (sideways) {
+            bufferBuilder.vertex(posMatrix, x1, y1, 0.0F).color(f1, f2, f3, f).next();
+            bufferBuilder.vertex(posMatrix, x1, y2, 0.0F).color(f1, f2, f3, f).next();
+            bufferBuilder.vertex(posMatrix, x2, y2, 0.0F).color(f5, f6, f7, f4).next();
+            bufferBuilder.vertex(posMatrix, x2, y1, 0.0F).color(f5, f6, f7, f4).next();
+        } else {
+            bufferBuilder.vertex(posMatrix, x2, y1, 0.0F).color(f1, f2, f3, f).next();
+            bufferBuilder.vertex(posMatrix, x1, y1, 0.0F).color(f1, f2, f3, f).next();
+            bufferBuilder.vertex(posMatrix, x1, y2, 0.0F).color(f5, f6, f7, f4).next();
+            bufferBuilder.vertex(posMatrix, x2, y2, 0.0F).color(f5, f6, f7, f4).next();
+        }
+        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        RenderSystem.disableBlend();
     }
 
 
@@ -284,8 +299,7 @@ public abstract class Component implements Drawable, Globals {
 
     public void drawTexture(DrawContext context, int x, int y, int u,
                             int v, int width, int height) {
-        drawTexture(context, x, y, 0, (float) u, (float) v, width, height,
-                256, 256);
+        drawTexture(context, x, y, 0, (float) u, (float) v, width, height, 256, 256);
     }
 
     public void drawTexture(DrawContext context, int x, int y, int z,
@@ -425,40 +439,26 @@ public abstract class Component implements Drawable, Globals {
         setHeight(height);
     }
 
-    /**
-     *
-     */
-    private static class ScissorStack {
-        // 
-        private final Deque<ScreenRect> stack = new ArrayDeque<>();
+    public void enableScissor(ScissorStack scissorStack, int x1, int y1, int x2, int y2) {
+        setScissor(scissorStack.push(new ScreenRect(x1, y1, x2 - x1, y2 - y1)));
+    }
 
-        /**
-         * @param rect
-         * @return
-         */
-        public ScreenRect push(ScreenRect rect) {
-            ScreenRect screenRect = stack.peekLast();
-            if (screenRect != null) {
-                ScreenRect screenRect2 = Objects.requireNonNullElse(
-                        rect.intersection(screenRect), ScreenRect.empty());
-                stack.addLast(screenRect2);
-                return screenRect2;
-            } else {
-                stack.addLast(rect);
-                return rect;
-            }
-        }
+    public void disableScissor(ScissorStack scissorStack) {
+        setScissor(scissorStack.pop());
+    }
 
-        /**
-         * @return
-         */
-        public ScreenRect pop() {
-            if (stack.isEmpty()) {
-                throw new IllegalStateException("Scissor stack underflow");
-            } else {
-                stack.removeLast();
-                return stack.peekLast();
-            }
+    private void setScissor(ScreenRect rect) {
+        if (rect != null) {
+            Window window = mc.getWindow();
+            int i = window.getFramebufferHeight();
+            double d = window.getScaleFactor();
+            double e = (double)rect.getLeft() * d;
+            double f = (double)i - (double)rect.getBottom() * d;
+            double g = (double)rect.width() * d;
+            double h = (double)rect.height() * d;
+            RenderSystem.enableScissor((int)e, (int)f, Math.max(0, (int)g), Math.max(0, (int)h));
+        } else {
+            RenderSystem.disableScissor();
         }
     }
 }

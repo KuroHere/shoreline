@@ -2,6 +2,7 @@ package net.shoreline.client.impl.module.client;
 
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
+import net.shoreline.client.api.config.setting.ColorConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.module.ConcurrentModule;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -15,9 +16,8 @@ import java.awt.*;
  */
 public class ColorsModule extends ConcurrentModule {
     //
-    Config<Integer> hueConfig = new NumberConfig<>("Hue", "The saturation of colors", 0, 0, 360);
-    Config<Integer> saturationConfig = new NumberConfig<>("Saturation", "The saturation of colors", 0, 50, 100);
-    Config<Integer> brightnessConfig = new NumberConfig<>("Brightness", "The brightness of colors", 0, 50, 100);
+    Config<Color> colorConfig = new ColorConfig("Color", "The primary client color", new Color(255, 0, 0), false);
+    // Config<Color> color1Config = new ColorConfig("Accent-Color", "The accent client color", new Color());
     Config<Boolean> rainbowConfig = new BooleanConfig("Rainbow", "Renders rainbow colors for modules", false);
 
     /**
@@ -28,11 +28,12 @@ public class ColorsModule extends ConcurrentModule {
     }
 
     public Color getColor() {
-        return ColorUtil.hslToColor(hueConfig.getValue(), saturationConfig.getValue(), brightnessConfig.getValue(), 1.0f);
+        return colorConfig.getValue();
     }
 
     public Color getColor(int alpha) {
-        return ColorUtil.hslToColor(hueConfig.getValue(), saturationConfig.getValue(), brightnessConfig.getValue(), alpha / 255.0f);
+        ColorConfig config = (ColorConfig) colorConfig;
+        return new Color(config.getRed(), config.getGreen(), config.getBlue(), alpha);
     }
 
     public Integer getRGB() {

@@ -4,6 +4,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.impl.gui.click.component.Button;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
+import net.shoreline.client.impl.gui.click.impl.config.ModuleButton;
 
 /**
  * @param <T>
@@ -13,13 +14,15 @@ import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 public abstract class ConfigButton<T> extends Button {
     //
     protected final Config<T> config;
+    protected final ModuleButton moduleButton;
 
     /**
      * @param frame
      * @param config
      */
-    public ConfigButton(CategoryFrame frame, Config<T> config, float x, float y) {
-        super(frame, x, y, 85.0f, 15.0f);
+    public ConfigButton(CategoryFrame frame, ModuleButton moduleButton, Config<T> config, float x, float y) {
+        super(frame, x, y, 99.0f, 13.0f);
+        this.moduleButton = moduleButton;
         this.config = config;
     }
 

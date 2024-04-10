@@ -8,6 +8,7 @@ import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.gui.click.ClickGuiScreen;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
+import net.shoreline.client.impl.gui.click.impl.config.ModuleButton;
 import net.shoreline.client.init.Modules;
 
 import java.math.BigDecimal;
@@ -26,8 +27,8 @@ public class SliderButton<T extends Number> extends ConfigButton<T> {
      * @param frame
      * @param config
      */
-    public SliderButton(CategoryFrame frame, Config<T> config, float x, float y) {
-        super(frame, config, x, y);
+    public SliderButton(CategoryFrame frame, ModuleButton moduleButton, Config<T> config, float x, float y) {
+        super(frame, moduleButton, config, x, y);
         //
         final String sval = String.valueOf(config.getValue());
         scale = sval.substring(sval.indexOf(".") + 1).length();
@@ -82,7 +83,7 @@ public class SliderButton<T extends Number> extends ConfigButton<T> {
         // slider fill
         float fill = (config.getValue().floatValue() - min.floatValue())
                 / (max.floatValue() - min.floatValue());
-        fill(context, ix, iy, (fill * width), height, Modules.COLORS.getRGB());
+        fillGradient(context, ix, iy, ix + (fill * width), iy + height, Modules.CLICK_GUI.getColor(), Modules.CLICK_GUI.getColor1());
         RenderManager.renderText(context, config.getName() + Formatting.GRAY
                 + " " + config.getValue(), ix + 2.0f, iy + 4.0f, -1);
     }

@@ -3,7 +3,9 @@ package net.shoreline.client.impl.gui.click.impl.config.setting;
 import net.minecraft.client.gui.DrawContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.render.RenderManager;
+import net.shoreline.client.api.render.anim.Animation;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
+import net.shoreline.client.impl.gui.click.impl.config.ModuleButton;
 import net.shoreline.client.init.Modules;
 
 /**
@@ -12,13 +14,13 @@ import net.shoreline.client.init.Modules;
  * @since 1.0
  */
 public class CheckboxButton extends ConfigButton<Boolean> {
+
     /**
      * @param frame
      * @param config
      */
-    public CheckboxButton(CategoryFrame frame, Config<Boolean> config,
-                          float x, float y) {
-        super(frame, config, x, y);
+    public CheckboxButton(CategoryFrame frame, ModuleButton moduleButton, Config<Boolean> config, float x, float y) {
+        super(frame, moduleButton, config, x, y);
     }
 
     /**
@@ -34,10 +36,10 @@ public class CheckboxButton extends ConfigButton<Boolean> {
                        float mouseY, float delta) {
         x = ix;
         y = iy;
-        boolean val = config.getValue();
-        rect(context, val ? Modules.COLORS.getRGB() : 0x00000000);
-        RenderManager.renderText(context, config.getName(), ix + 2.0f,
-                iy + 4.0f, -1);
+        Animation checkboxAnimation = config.getAnimation();
+        rectGradient(context, checkboxAnimation.getScaledTime() > 0.01f ?  Modules.CLICK_GUI.getColor(checkboxAnimation.getScaledTime()) : 0x00000000,
+                checkboxAnimation.getScaledTime() > 0.01f ?  Modules.CLICK_GUI.getColor1(checkboxAnimation.getScaledTime()) : 0x00000000);
+        RenderManager.renderText(context, config.getName(), ix + 2.0f, iy + 4.0f, -1);
     }
 
     /**

@@ -1,9 +1,12 @@
 package net.shoreline.client.impl.gui.click;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.shoreline.client.api.module.ModuleCategory;
+import net.shoreline.client.impl.gui.click.component.Component;
+import net.shoreline.client.impl.gui.click.component.ScissorStack;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 import net.shoreline.client.impl.gui.click.impl.config.ModuleButton;
 import net.shoreline.client.impl.gui.click.impl.config.setting.ConfigButton;
@@ -28,6 +31,8 @@ public class ClickGuiScreen extends Screen implements Globals {
     public static boolean MOUSE_RIGHT_HOLD;
     public static boolean MOUSE_LEFT_CLICK;
     public static boolean MOUSE_LEFT_HOLD;
+    //
+    public static final ScissorStack SCISSOR_STACK = new ScissorStack();
     private final List<CategoryFrame> frames = new CopyOnWriteArrayList<>();
     private final ClickGuiModule module;
     //
@@ -41,8 +46,9 @@ public class ClickGuiScreen extends Screen implements Globals {
         this.module = module;
         float x = 2.0f;
         for (ModuleCategory category : ModuleCategory.values()) {
-            frames.add(new CategoryFrame(category, x, 10.0f));
-            x += 90.0f;
+            CategoryFrame frame = new CategoryFrame(category, x, 10.0f);
+            frames.add(frame);
+            x += frame.getWidth() + 2.0f;
         }
     }
 
@@ -54,10 +60,12 @@ public class ClickGuiScreen extends Screen implements Globals {
      */
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
         for (CategoryFrame frame : frames) {
             if (frame.isWithinTotal(mouseX, mouseY)) {
                 focus = frame;
+            }
+            if (frame.isWithin(mouseX, mouseY) && MOUSE_LEFT_HOLD && checkDragging()) {
+                frame.setDragging(true);
             }
             frame.render(context, mouseX, mouseY, delta);
             float scale = module.getScale();
@@ -172,5 +180,14 @@ public class ClickGuiScreen extends Screen implements Globals {
         MOUSE_RIGHT_CLICK = false;
         MOUSE_RIGHT_HOLD = false;
         super.close();
+    }
+
+    private boolean checkDragging() {
+        for (CategoryFrame frame : frames) {
+            if (frame.isDragging()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -9,10 +9,11 @@ import net.shoreline.client.api.config.Config;
  * @since 1.0
  */
 public class StringConfig extends Config<String> {
+
     /**
      * Initializes the config with a default value. This constructor should
      * not be used to initialize a configuration, instead use the explicit
-     * definitions of the configs in {@link com.caspian.client.api.config.setting}.
+     * definitions of the configs in {@link net.shoreline.client.api.config.setting}.
      *
      * @param name  The unique config identifier
      * @param desc  The config description
