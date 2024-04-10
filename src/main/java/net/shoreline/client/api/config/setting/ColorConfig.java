@@ -99,7 +99,7 @@ public class ColorConfig extends Config<Color> {
         this.global = global;
         configAnimation.setState(global);
         if (global && Modules.CLICK_GUI != null) {
-            setValue(Modules.CLICK_GUI.getColor(220));
+            setValue(Modules.COLORS.getColor(220));
         }
     }
 
