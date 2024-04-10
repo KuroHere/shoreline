@@ -1,6 +1,7 @@
 package net.shoreline.client.impl.module.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.model.BakedModel;
@@ -262,8 +263,8 @@ public class NametagsModule extends ToggleModule {
             int j = stack.getItemBarColor();
             int k = x + 2;
             int l = y + 13;
-            RenderManager.rect(matrixStack, k, l, 13, 2, Colors.BLACK);
-            RenderManager.rect(matrixStack, k, l, i, 2, j | Colors.BLACK);
+            RenderManager.rect(matrixStack, k, l, 13, 1, Colors.BLACK);
+            RenderManager.rect(matrixStack, k, l, i, 1, j | Colors.BLACK);
         }
         matrixStack.pop();
     }
