@@ -20,12 +20,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class EventBus implements EventHandler {
     // Active subscriber cache. Used to check if a class is already
     // subscribed to this EventHandler.
-    private final Set<Object> subscribers =
-            Collections.synchronizedSet(new HashSet<>());
+    private final Set<Object> subscribers = Collections.synchronizedSet(new HashSet<>());
     // Map of events and their associated listeners. All listeners in a class
     // will be added when the class is subscribed to this EventHandler.
-    private final Map<Object, List<Listener>> listeners =
-            Collections.synchronizedMap(new ConcurrentHashMap<>());
+    private final Map<Object, List<Listener>> listeners = new ConcurrentHashMap<>();
 
     /**
      * Subscribes a {@link Object} to the EventHandler and adds all

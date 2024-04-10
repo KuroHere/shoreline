@@ -62,7 +62,7 @@ public class ColorButton extends ConfigButton<Color> {
                 colorConfig.setValue(color);
             }
             int color = Color.HSBtoRGB(selectedColor[0], 1.0f, 1.0f);
-            enableScissor(ClickGuiScreen.SCISSOR_STACK, (int) x, (int) (y + height), (int) (x + width), (int) (y + height + (getPickerHeight() * getScaledTime())));
+            enableScissor((int) x, (int) (y + height), (int) (x + width), (int) (y + height + (getPickerHeight() * getScaledTime())));
             for (float i = 0.0f; i < width - 2.0f; i += 1.0f) {
                 float hue = i / (width - 2.0f);
                 fill(context, x + 1.0f + i, y + height + 4.0f + width, 1.0f, 10.0f, Color.getHSBColor(hue, 1.0f, 1.0f).getRGB());
@@ -84,7 +84,7 @@ public class ColorButton extends ConfigButton<Color> {
             }
             moduleButton.offset(getPickerHeight() * pickerAnimation.getScaledTime());
             ((CategoryFrame) frame).offset(getPickerHeight() * pickerAnimation.getScaledTime() * moduleButton.getScaledTime());
-            disableScissor(ClickGuiScreen.SCISSOR_STACK);
+            disableScissor();
         }
     }
 

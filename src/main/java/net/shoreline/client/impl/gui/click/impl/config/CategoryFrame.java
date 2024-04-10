@@ -1,7 +1,6 @@
 package net.shoreline.client.impl.gui.click.impl.config;
 
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.Identifier;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -88,7 +87,6 @@ public class CategoryFrame extends Frame {
             y += ClickGuiScreen.MOUSE_Y - py;
         }
         // draw the component
-        // context.drawTexture(categoryIcon, (int) (x + 2.0f), (int) (y + 2.0f), 0, 0, 16, 16, 16, 16);
         // context.drawTexture(categoryIcon, (int) (x + 2.0f), (int) (y + 1.0f), 0, 0, 12, 12, 12, 12);
         fheight = 2.0f;
         for (ModuleButton moduleButton : moduleButtons) {
@@ -115,7 +113,7 @@ public class CategoryFrame extends Frame {
         rect(context, Modules.CLICK_GUI.getColor(1.7f));
         RenderManager.renderText(context, name, x + 3.0f, y + 4.0f, -1);
         if (categoryAnimation.getScaledTime() > 0.01f) {
-            enableScissor(ClickGuiScreen.SCISSOR_STACK, (int) x, (int) (y + height), (int) (x + width), (int) (y + height + fheight * categoryAnimation.getScaledTime()));
+            enableScissor((int) x, (int) (y + height), (int) (x + width), (int) (y + height + fheight * categoryAnimation.getScaledTime()));
             fill(context, x, y + height, width, fheight, 0x77000000);
             off = y + height + 1.0f;
             inner = off;
@@ -124,7 +122,7 @@ public class CategoryFrame extends Frame {
                 off += (moduleButton.getHeight() + 1.0f) * categoryAnimation.getScaledTime();
                 inner += moduleButton.getHeight() + 1.0f;
             }
-            disableScissor(ClickGuiScreen.SCISSOR_STACK);
+            disableScissor();
         }
         // update previous position
         px = ClickGuiScreen.MOUSE_X;

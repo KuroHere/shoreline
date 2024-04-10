@@ -110,10 +110,10 @@ public class ModuleButton extends Button {
             for (ConfigButton<?> configButton : configComponents) {
                 fheight += configButton.getHeight();
                 if (configButton instanceof ColorButton colorPicker && colorPicker.getScaledTime() > 0.01f) {
-                    fheight += colorPicker.getPickerHeight() * colorPicker.getScaledTime();
+                    fheight += colorPicker.getPickerHeight() * colorPicker.getScaledTime() * getScaledTime();
                 }
             }
-            enableScissor(ClickGuiScreen.SCISSOR_STACK, (int) x, (int) (off - 1.0f), (int) (x + width), (int) (off + 2.0f + (fheight * settingsAnimation.getScaledTime())));
+            enableScissor((int) x, (int) (off - 1.0f), (int) (x + width), (int) (off + 2.0f + (fheight * settingsAnimation.getScaledTime())));
             for (ConfigButton<?> configButton : configComponents) {
                 // run draw event
                 configButton.render(context, ix + 2.0f, off, mouseX, mouseY, delta);
@@ -125,7 +125,7 @@ public class ModuleButton extends Button {
                 fill(context, ix + width - 1.0f, y + height, 1.0f, off - (y + height) + 1.0f, Modules.CLICK_GUI.getColor(scaledTime));
                 fillGradient(context, ix, off + 1.0f, ix + width, off + 2.0f, Modules.CLICK_GUI.getColor(scaledTime),  Modules.CLICK_GUI.getColor1(scaledTime));
             }
-            disableScissor(ClickGuiScreen.SCISSOR_STACK);
+            disableScissor();
             ((CategoryFrame) frame).offset(3.0f * settingsAnimation.getScaledTime());
         }
     }

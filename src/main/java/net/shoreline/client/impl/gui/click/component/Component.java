@@ -9,6 +9,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.Window;
 import net.minecraft.util.math.ColorHelper;
 import net.shoreline.client.api.render.RenderManager;
+import net.shoreline.client.impl.gui.click.ClickGuiScreen;
 import net.shoreline.client.util.Globals;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -439,12 +440,12 @@ public abstract class Component implements Drawable, Globals {
         setHeight(height);
     }
 
-    public void enableScissor(ScissorStack scissorStack, int x1, int y1, int x2, int y2) {
-        setScissor(scissorStack.push(new ScreenRect(x1, y1, x2 - x1, y2 - y1)));
+    public void enableScissor(int x1, int y1, int x2, int y2) {
+        setScissor(ClickGuiScreen.SCISSOR_STACK.push(new ScreenRect(x1, y1, x2 - x1, y2 - y1)));
     }
 
-    public void disableScissor(ScissorStack scissorStack) {
-        setScissor(scissorStack.pop());
+    public void disableScissor() {
+        setScissor(ClickGuiScreen.SCISSOR_STACK.pop());
     }
 
     private void setScissor(ScreenRect rect) {
