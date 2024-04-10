@@ -1,9 +1,7 @@
 package net.shoreline.client.impl.module.combat;
 
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.SlotActionType;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.EventStage;
@@ -39,16 +37,15 @@ public class ReplenishModule extends ToggleModule {
             if (stack.isEmpty() || !stack.isStackable()) {
                 continue;
             }
-            float total = ((float) stack.getCount() / stack.getMaxCount()) * 100.0f;
-            if (total < percentConfig.getValue()) {
+            float stackPercent = ((float) stack.getCount() / stack.getMaxCount()) * 100.0f;
+            if (stackPercent < percentConfig.getValue()) {
                 replenishStack(stack, i);
-                break;
             }
         }
     }
 
     private void replenishStack(ItemStack item, int hotbarSlot) {
-        int replenishSlot = -1;
+        int total = item.getCount();
         for (int i = 9; i < 36; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
             // We cannot merge stacks if they don't have the same name
@@ -61,13 +58,14 @@ public class ReplenishModule extends ToggleModule {
             if (stack.getItem() != item.getItem()) {
                 continue;
             }
-            float total = ((float) (item.getCount() + stack.getCount()) / item.getMaxCount()) * 100.0f;
-            if (total >= percentConfig.getValue()) {
-                replenishSlot = i;
+            if (total < stack.getMaxCount()) {
+                Managers.INVENTORY.pickupSlot(i);
+                Managers.INVENTORY.pickupSlot(hotbarSlot + 36);
+                if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+                    Managers.INVENTORY.pickupSlot(i);
+                }
+                total += stack.getCount();
             }
-        }
-        if (replenishSlot != -1) {
-            mc.interactionManager.clickSlot(0, replenishSlot, hotbarSlot, SlotActionType.SWAP, mc.player);
         }
     }
 }
