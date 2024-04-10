@@ -102,6 +102,9 @@ public class ModuleButton extends Button {
         float scaledTime = 1.0f;
         boolean fill = !(module instanceof ToggleModule t) || (scaledTime = t.getAnimation().getScaledTime()) > 0.01f;
         scaledTime *= 1.7f;
+        if (module.getName().equalsIgnoreCase("ClickGui")) {
+            scaledTime = 1.7f;
+        }
         rectGradient(context, fill ? Modules.CLICK_GUI.getColor(scaledTime) : 0x555555, fill ? Modules.CLICK_GUI.getColor1(scaledTime) : 0x555555);
         RenderManager.renderText(context, module.getName(), ix + 2, iy + 3.5f, scaledTime > 0.99f ? -1 : 0xaaaaaa);
         if (settingsAnimation.getScaledTime() > 0.01f) {

@@ -5,6 +5,8 @@ import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.shoreline.client.api.module.ModuleCategory;
+import net.shoreline.client.api.render.anim.Animation;
+import net.shoreline.client.api.render.anim.Easing;
 import net.shoreline.client.impl.gui.click.component.Component;
 import net.shoreline.client.impl.gui.click.component.ScissorStack;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
@@ -37,6 +39,7 @@ public class ClickGuiScreen extends Screen implements Globals {
     private final ClickGuiModule module;
     //
     private CategoryFrame focus;
+    //
 
     /**
      *

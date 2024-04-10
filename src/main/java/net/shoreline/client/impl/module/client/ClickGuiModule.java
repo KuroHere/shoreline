@@ -2,6 +2,8 @@ package net.shoreline.client.impl.module.client;
 
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.api.render.anim.Animation;
+import net.shoreline.client.api.render.anim.Easing;
 import net.shoreline.client.impl.gui.click.ClickGuiScreen;
 import net.shoreline.client.impl.gui.click2.ClientGuiSecondaryScreen;
 import net.shoreline.client.init.Modules;
@@ -23,6 +25,7 @@ public class ClickGuiModule extends ToggleModule {
 //    Config<Integer> alphaConfig = new NumberConfig<>("Alpha", "The alpha of colors", 0, 100, 100);
     //
     private static ClickGuiScreen CLICK_GUI_SCREEN;
+    private final Animation openCloseAnimation = new Animation(Easing.CUBIC_IN_OUT, 300);
     private static ClientGuiSecondaryScreen SECONDARY_CLICK_GUI_SCREEN;
 
     // TODO: Fix Gui scaling
@@ -36,9 +39,6 @@ public class ClickGuiModule extends ToggleModule {
                 GLFW.GLFW_KEY_RIGHT_SHIFT);
     }
 
-    /**
-     *
-     */
     @Override
     public void onEnable() {
         if (mc.player == null || mc.world == null) {
@@ -50,6 +50,7 @@ public class ClickGuiModule extends ToggleModule {
             CLICK_GUI_SCREEN = new ClickGuiScreen(this);
         }
         mc.setScreen(CLICK_GUI_SCREEN);
+        openCloseAnimation.setState(true);
 
 //        if (SECONDARY_CLICK_GUI_SCREEN == null) {
 //            SECONDARY_CLICK_GUI_SCREEN = new ClientGuiSecondaryScreen(this);
@@ -57,29 +58,6 @@ public class ClickGuiModule extends ToggleModule {
 //        mc.setScreen(SECONDARY_CLICK_GUI_SCREEN);
     }
 
-    public int getColor() {
-        return Modules.COLORS.getColor(100).getRGB();
-        // return ColorUtil.hslToColor(hueConfig.getValue(), saturationConfig.getValue(), brightnessConfig.getValue(), alphaConfig.getValue() / 100.0f).getRGB();
-    }
-
-    public int getColor1() {
-        return Modules.COLORS.getColor(100).getRGB();
-        // return ColorUtil.hslToColor(hue1Config.getValue(), saturation1Config.getValue(), brightness1Config.getValue(), alphaConfig.getValue() / 100.0f).getRGB();
-    }
-
-    public int getColor(float alpha) {
-        return Modules.COLORS.getColor((int) (100 * alpha)).getRGB();
-        // return ColorUtil.hslToColor(hueConfig.getValue(), saturationConfig.getValue(), brightnessConfig.getValue(), MathHelper.clamp(alphaConfig.getValue() * alpha / 100.0f, 0.0f, 1.0f)).getRGB();
-    }
-
-    public int getColor1(float alpha) {
-        return Modules.COLORS.getColor((int) (100 * alpha)).getRGB();
-        // return ColorUtil.hslToColor(hue1Config.getValue(), saturation1Config.getValue(), brightness1Config.getValue(), MathHelper.clamp(alphaConfig.getValue() * alpha / 100.0f, 0.0f, 1.0f)).getRGB();
-    }
-
-    /**
-     *
-     */
     @Override
     public void onDisable() {
         if (mc.player == null || mc.world == null) {
@@ -87,6 +65,27 @@ public class ClickGuiModule extends ToggleModule {
             return;
         }
         mc.player.closeScreen();
+        openCloseAnimation.setStateHard(false);
+    }
+
+    public int getColor() {
+        return Modules.COLORS.getColor((int) (100 * openCloseAnimation.getScaledTime())).getRGB();
+        // return ColorUtil.hslToColor(hueConfig.getValue(), saturationConfig.getValue(), brightnessConfig.getValue(), alphaConfig.getValue() / 100.0f).getRGB();
+    }
+
+    public int getColor1() {
+        return Modules.COLORS.getColor((int) (100 * openCloseAnimation.getScaledTime())).getRGB();
+        // return ColorUtil.hslToColor(hue1Config.getValue(), saturation1Config.getValue(), brightness1Config.getValue(), alphaConfig.getValue() / 100.0f).getRGB();
+    }
+
+    public int getColor(float alpha) {
+        return Modules.COLORS.getColor((int) (100 * alpha * openCloseAnimation.getScaledTime())).getRGB();
+        // return ColorUtil.hslToColor(hueConfig.getValue(), saturationConfig.getValue(), brightnessConfig.getValue(), MathHelper.clamp(alphaConfig.getValue() * alpha / 100.0f, 0.0f, 1.0f)).getRGB();
+    }
+
+    public int getColor1(float alpha) {
+        return Modules.COLORS.getColor((int) (100 * alpha * openCloseAnimation.getScaledTime())).getRGB();
+        // return ColorUtil.hslToColor(hue1Config.getValue(), saturation1Config.getValue(), brightness1Config.getValue(), MathHelper.clamp(alphaConfig.getValue() * alpha / 100.0f, 0.0f, 1.0f)).getRGB();
     }
 
     /**
