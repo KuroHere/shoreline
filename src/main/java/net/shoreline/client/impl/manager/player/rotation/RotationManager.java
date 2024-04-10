@@ -11,6 +11,7 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.render.Interpolation;
 import net.shoreline.client.impl.event.entity.JumpRotationEvent;
 import net.shoreline.client.impl.event.entity.UpdateVelocityEvent;
+import net.shoreline.client.impl.event.entity.player.PlayerJumpEvent;
 import net.shoreline.client.impl.event.keyboard.KeyboardTickEvent;
 import net.shoreline.client.impl.event.network.MovementPacketsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
@@ -31,7 +32,7 @@ import java.util.List;
 public class RotationManager implements Globals {
     private final List<Rotation> requests = new ArrayList<>();
     // Relevant rotation values
-    private float serverYaw, serverPitch, lastServerYaw, lastServerPitch, prevYaw, prevPitch;
+    private float serverYaw, serverPitch, lastServerYaw, lastServerPitch, prevJumpYaw, prevYaw, prevPitch;
     boolean rotate;
 
     // The current in use rotation
@@ -132,10 +133,14 @@ public class RotationManager implements Globals {
     }
 
     @EventListener
-    public void onJumpRotation(JumpRotationEvent event) {
+    public void onPlayerJump(PlayerJumpEvent event) {
         if (rotation != null && Modules.ROTATIONS.getMovementFix()) {
-            event.cancel();
-            event.setYaw(rotation.getYaw());
+            if (event.getStage() == EventStage.PRE) {
+                prevJumpYaw = mc.player.getYaw();
+                mc.player.setYaw(rotation.getYaw());
+            } else {
+                mc.player.setYaw(prevJumpYaw);
+            }
         }
     }
 
