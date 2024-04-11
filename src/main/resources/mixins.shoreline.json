@@ -60,6 +60,7 @@
     "item.MixinItemStack",
     "item.MixinItemUsageContext",
     "item.MixinFireworkRocketItem",
+    "item.MixinTridentItem",
     "network.MixinClientConnection",
     "network.MixinClientPlayerEntity",
     "network.MixinClientPlayerInteractionManager",

@@ -261,16 +261,14 @@ public class HUDModule extends ToggleModule {
                 double y = mc.player.getY();
                 double z = mc.player.getZ();
                 boolean nether = mc.world.getRegistryKey() == World.NETHER;
-                double nx = mc.player.getX() / 8;
-                double nz = mc.player.getZ() / 8;
                 RenderManager.renderText(event.getContext(), String.format(
                                 "XYZ §f%s, %s, %s " + (netherCoordsConfig.getValue() ?
                                         "§7[§f%s, %s§7]" : ""),
-                                nether ? decimal.format(nx) : decimal.format(x),
+                                decimal.format(x),
                                 decimal.format(y),
-                                nether ? decimal.format(nz) : decimal.format(z),
-                                nether ? decimal.format(x) : decimal.format(nx),
-                                nether ? decimal.format(z) : decimal.format(nz)),
+                                decimal.format(z),
+                                nether ? decimal.format(x * 8) : decimal.format(x / 8),
+                                nether ? decimal.format(z * 8) : decimal.format(z / 8)),
                         2, bottomLeft, getHudColor(rainbowOffset));
                 bottomLeft -= 9.0f;
                 rainbowOffset++;

@@ -79,6 +79,7 @@ public class Modules {
     public static ElytraFlyModule ELYTRA_FLY;
     public static EntityControlModule ENTITY_CONTROL;
     public static EntitySpeedModule ENTITY_SPEED;
+    // public static FakeLagModule FAKE_LAG;
     public static FastFallModule FAST_FALL;
     public static FlightModule FLIGHT;
     public static IceSpeedModule ICE_SPEED;
@@ -91,6 +92,7 @@ public class Modules {
     public static SprintModule SPRINT;
     public static StepModule STEP;
     public static TickShiftModule TICK_SHIFT;
+    public static TridentFlyModule TRIDENT_FLY;
     public static VelocityModule VELOCITY;
     public static YawModule YAW;
     // Render
@@ -215,6 +217,7 @@ public class Modules {
             ELYTRA_FLY = (ElytraFlyModule) getRegisteredModule("elytrafly-module");
             ENTITY_CONTROL = (EntityControlModule) getRegisteredModule("entitycontrol-module");
             ENTITY_SPEED = (EntitySpeedModule) getRegisteredModule("entityspeed-module");
+            // FAKE_LAG = (FakeLagModule) getRegisteredModule("fakelag-module");
             FAST_FALL = (FastFallModule) getRegisteredModule("fastfall-module");
             FLIGHT = (FlightModule) getRegisteredModule("flight-module");
             ICE_SPEED = (IceSpeedModule) getRegisteredModule("icespeed-module");
@@ -227,6 +230,7 @@ public class Modules {
             SPRINT = (SprintModule) getRegisteredModule("sprint-module");
             STEP = (StepModule) getRegisteredModule("step-module");
             TICK_SHIFT = (TickShiftModule) getRegisteredModule("tickshift-module");
+            TRIDENT_FLY = (TridentFlyModule) getRegisteredModule("tridentfly-module");
             VELOCITY = (VelocityModule) getRegisteredModule("velocity-module");
             YAW = (YawModule) getRegisteredModule("yaw-module");
             BLOCK_HIGHLIGHT = (BlockHighlightModule) getRegisteredModule("blockhighlight-module");

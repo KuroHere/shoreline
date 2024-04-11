@@ -82,8 +82,7 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
      * @param ci
      */
     @Inject(method = "run", at = @At(value = "INVOKE", target = "Lnet" +
-            "/minecraft/client/MinecraftClient;render(Z)V", shift =
-            At.Shift.BEFORE))
+            "/minecraft/client/MinecraftClient;render(Z)V", shift = At.Shift.BEFORE))
     private void hookRun(CallbackInfo ci) {
         final RunTickEvent runTickEvent = new RunTickEvent();
         Shoreline.EVENT_HANDLER.dispatch(runTickEvent);

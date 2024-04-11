@@ -101,6 +101,7 @@ public class ModuleManager {
                 new SprintModule(),
                 new StepModule(),
                 new TickShiftModule(),
+                new TridentFlyModule(),
                 new VelocityModule(),
                 new YawModule(),
                 // Render

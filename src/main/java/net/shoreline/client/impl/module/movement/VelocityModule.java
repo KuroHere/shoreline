@@ -84,8 +84,7 @@ public class VelocityModule extends ToggleModule {
             }
             switch (modeConfig.getValue()) {
                 case NORMAL -> {
-                    if (horizontalConfig.getValue() == 0.0f
-                            && verticalConfig.getValue() == 0.0f) {
+                    if (horizontalConfig.getValue() == 0.0f && verticalConfig.getValue() == 0.0f) {
                         event.cancel();
                         return;
                     }
@@ -107,8 +106,7 @@ public class VelocityModule extends ToggleModule {
         } else if (event.getPacket() instanceof ExplosionS2CPacket packet && explosionConfig.getValue()) {
             switch (modeConfig.getValue()) {
                 case NORMAL -> {
-                    if (horizontalConfig.getValue() == 0.0f
-                            && verticalConfig.getValue() == 0.0f) {
+                    if (horizontalConfig.getValue() == 0.0f && verticalConfig.getValue() == 0.0f) {
                         event.cancel();
                     } else {
                         ((AccessorExplosionS2CPacket) packet).setPlayerVelocityX(packet.getPlayerVelocityX()
