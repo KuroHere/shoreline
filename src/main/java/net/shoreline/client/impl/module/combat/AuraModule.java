@@ -13,6 +13,7 @@ import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
+import net.minecraft.item.TridentItem;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -292,6 +293,14 @@ public class AuraModule extends RotationModule {
                     sharp = dmg;
                     slot = i;
                 }
+            } else if (stack.getItem() instanceof TridentItem) {
+                float sharpness = EnchantmentHelper.getLevel(
+                        Enchantments.SHARPNESS, stack) * 0.5f + 0.5f;
+                float dmg = TridentItem.ATTACK_DAMAGE + sharpness;
+                if (dmg > sharp) {
+                    sharp = dmg;
+                    slot = i;
+                }
             }
         }
         return slot;
@@ -464,7 +473,8 @@ public class AuraModule extends RotationModule {
     }
 
     public boolean isHoldingSword() {
-        return !swordCheckConfig.getValue() || mc.player.getMainHandStack().getItem() instanceof SwordItem;
+        return !swordCheckConfig.getValue() || mc.player.getMainHandStack().getItem() instanceof SwordItem
+                || mc.player.getMainHandStack().getItem() instanceof TridentItem;
     }
 
     public boolean shouldWaitCrit() {

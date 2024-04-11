@@ -55,7 +55,6 @@ public class NoSlowModule extends ToggleModule {
     //
     private boolean sneaking;
     //
-    private static KeyBinding[] MOVE_KEYBINDS;
 
     /**
      *
@@ -64,15 +63,6 @@ public class NoSlowModule extends ToggleModule {
         super("NoSlow", "Prevents items from slowing down player",
                 ModuleCategory.MOVEMENT);
     }
-
-    @Override
-    public void onEnable() {
-        if (MOVE_KEYBINDS != null) {
-            return;
-        }
-        MOVE_KEYBINDS = new KeyBinding[]{mc.options.jumpKey, mc.options.forwardKey, mc.options.backKey, mc.options.rightKey, mc.options.leftKey};
-    }
-
     @Override
     public void onDisable() {
         if (airStrictConfig.getValue() && sneaking) {
@@ -126,10 +116,10 @@ public class NoSlowModule extends ToggleModule {
                 //        new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND,
                 //                new BlockHitResult(mc.player.getPos(), Direction.UP, BlockPos.ORIGIN, false), id));
             }
-            if (inventoryMoveConfig.getValue() && checkScreen()
-                    && MOVE_KEYBINDS != null) {
+            if (inventoryMoveConfig.getValue() && checkScreen()) {
                 final long handle = mc.getWindow().getHandle();
-                for (KeyBinding binding : MOVE_KEYBINDS) {
+                KeyBinding[] keys = new KeyBinding[]{mc.options.jumpKey, mc.options.forwardKey, mc.options.backKey, mc.options.rightKey, mc.options.leftKey};
+                for (KeyBinding binding : keys) {
                     binding.setPressed(InputUtil.isKeyPressed(handle,
                             binding.getDefaultKey().getCode()));
                 }
