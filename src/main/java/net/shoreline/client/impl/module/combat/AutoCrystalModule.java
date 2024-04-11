@@ -156,6 +156,7 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> renderSpawnConfig = new BooleanConfig("Render-Spawn", "Indicates if the current placement was spawned", false);
     Config<Boolean> damageNametagConfig = new BooleanConfig("Render-Damage", "Renders the current expected damage of a place/attack", false, () -> renderConfig.getValue());
     Config<Boolean> breakDebugConfig = new BooleanConfig("Break-Debug", "Debugs break ms in data", false);
+    Config<Boolean> disableDeathConfig = new BooleanConfig("DisableOnDeath", "Disables during disconnect/death", false);
     //
     private DamageData<EndCrystalEntity> attackCrystal;
     private DamageData<BlockPos> placeCrystal;
@@ -213,7 +214,9 @@ public class AutoCrystalModule extends RotationModule {
 
     @EventListener
     public void onDisconnect(DisconnectEvent event) {
-        disable();
+        if (disableDeathConfig.getValue()) {
+            disable();
+        }
     }
 
     @EventListener
@@ -401,6 +404,9 @@ public class AutoCrystalModule extends RotationModule {
 
     @EventListener
     public void onRemoveEntity(RemoveEntityEvent event) {
+        if (disableDeathConfig.getValue() && event.getEntity() == mc.player) {
+            disable();
+        }
         if (!(event.getEntity() instanceof EndCrystalEntity crystalEntity)) {
             return;
         }

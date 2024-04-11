@@ -73,6 +73,7 @@ public class ModuleManager {
                 new AutoReconnectModule(),
                 new AutoRespawnModule(),
                 new BeaconSelectorModule(),
+                new ChestSwapModule(),
                 // new ChestStealerModule(),
                 new FakePlayerModule(),
                 new InvCleanerModule(),

@@ -1,7 +1,6 @@
 package net.shoreline.client.impl.module.combat;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ItemEntity;
@@ -23,12 +22,12 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.BlockPlacerModule;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.render.RenderManager;
-import net.shoreline.client.impl.event.ScreenOpenEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.world.AddEntityEvent;
+import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 
@@ -53,6 +52,7 @@ public class SurroundModule extends BlockPlacerModule {
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> jumpDisableConfig = new BooleanConfig("AutoDisable", "Disables after moving out of the hole", true);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders block placements of the surround", false);
+
     //
     private List<BlockPos> surround = new ArrayList<>();
     private List<BlockPos> placements = new ArrayList<>();
@@ -87,8 +87,8 @@ public class SurroundModule extends BlockPlacerModule {
     }
 
     @EventListener
-    public void onScreenOpen(ScreenOpenEvent event) {
-        if (event.getScreen() instanceof DeathScreen) {
+    public void onRemoveEntity(RemoveEntityEvent event) {
+        if (event.getEntity() == mc.player) {
             disable();
         }
     }

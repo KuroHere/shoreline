@@ -35,6 +35,7 @@ import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
+import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.impl.manager.world.tick.TickSync;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
@@ -88,6 +89,7 @@ public class AuraModule extends RotationModule {
     Config<Boolean> animalsConfig = new BooleanConfig("Animals", "Target animals", false);
     Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles", "Target invisible entities", true);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders an indicator over the target", true);
+    Config<Boolean> disableDeathConfig = new BooleanConfig("DisableOnDeath", "Disables during disconnect/death", false);
     //
     private Entity entityTarget;
     private long randomDelay = -1;
@@ -124,7 +126,16 @@ public class AuraModule extends RotationModule {
 
     @EventListener
     public void onDisconnect(DisconnectEvent event) {
-        disable();
+        if (disableDeathConfig.getValue()) {
+            disable();
+        }
+    }
+
+    @EventListener
+    public void onRemoveEntity(RemoveEntityEvent event) {
+        if (disableDeathConfig.getValue() && event.getEntity() == mc.player) {
+            disable();
+        }
     }
 
     @EventListener

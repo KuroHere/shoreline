@@ -80,7 +80,7 @@ public class ColorButton extends ConfigButton<Color> {
                 if (globalAnimation.getScaledTime() > 0.01) {
                     fill(context, x + 1.0f, y + height + (colorConfig.allowAlpha() ? 29.0f : 17.0f) + width, width - 2.0f, 13.0f, Modules.CLICK_GUI.getColor(globalAnimation.getScaledTime()));
                 }
-                RenderManager.renderText(context, "ClientColor", x + 3.0f, y + height + (colorConfig.allowAlpha() ? 31.0f : 22.0f) + width, -1);
+                RenderManager.renderText(context, "ClientColor", x + 3.0f, y + height + (colorConfig.allowAlpha() ? 30.0f : 21.0f) + width, -1);
             }
             moduleButton.offset(getPickerHeight() * pickerAnimation.getScaledTime());
             ((CategoryFrame) frame).offset(getPickerHeight() * pickerAnimation.getScaledTime() * moduleButton.getScaledTime());

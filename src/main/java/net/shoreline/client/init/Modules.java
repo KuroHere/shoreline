@@ -65,6 +65,7 @@ public class Modules {
     public static AutoReconnectModule AUTO_RECONNECT;
     public static AutoRespawnModule AUTO_RESPAWN;
     public static BeaconSelectorModule BEACON_SELECTOR;
+    public static ChestSwapModule CHEST_SWAP;
     public static FakePlayerModule FAKE_PLAYER;
     public static InvCleanerModule INV_CLEANER;
     public static MiddleClickModule MIDDLE_CLICK;
@@ -204,6 +205,7 @@ public class Modules {
             AUTO_RECONNECT = (AutoReconnectModule) getRegisteredModule("autoreconnect-module");
             AUTO_RESPAWN = (AutoRespawnModule) getRegisteredModule("autorespawn-module");
             BEACON_SELECTOR = (BeaconSelectorModule) getRegisteredModule("beaconselector-module");
+            CHEST_SWAP = (ChestSwapModule) getRegisteredModule("chestswap-module");
             FAKE_PLAYER = (FakePlayerModule) getRegisteredModule("fakeplayer-module");
             INV_CLEANER = (InvCleanerModule) getRegisteredModule("invcleaner-module");
             MIDDLE_CLICK = (MiddleClickModule) getRegisteredModule("middleclick-module");
