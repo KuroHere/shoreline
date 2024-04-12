@@ -43,7 +43,7 @@ public class NoSlowModule extends ToggleModule {
     Config<Boolean> airStrictConfig = new BooleanConfig("AirStrict", "Strict NCP bypass for air slowdowns", false);
     Config<Boolean> grimConfig = new BooleanConfig("Grim", "Strict Grim bypass for slowdown", false);
     Config<Boolean> strafeFixConfig = new BooleanConfig("StrafeFix", "Old NCP bypass for strafe", false);
-    Config<Boolean> inventoryMoveConfig = new BooleanConfig("InventoryMove", "Allows the player to move while in inventories or screens", false);
+    Config<Boolean> inventoryMoveConfig = new BooleanConfig("InventoryMove", "Allows the player to move while in inventories or screens", true);
     Config<Boolean> arrowMoveConfig = new BooleanConfig("ArrowMove", "Allows the player to look while in inventories or screens by using the arrow keys", false);
     Config<Boolean> itemsConfig = new BooleanConfig("Items", "Removes the slowdown effect caused by using items", true);
     Config<Boolean> shieldsConfig = new BooleanConfig("Shields", "Removes the slowdown effect caused by shields", true);
