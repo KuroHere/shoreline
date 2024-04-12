@@ -17,11 +17,11 @@ import java.awt.*;
 public class SkyboxModule extends ToggleModule {
 
     Config<Boolean> skyConfig = new BooleanConfig("Sky", "Changes the world skybox color", true);
-    Config<Color> skyColorConfig = new ColorConfig("SkyColor", "The color for the world skybox", new Color(255, 0, 0));
+    Config<Color> skyColorConfig = new ColorConfig("SkyColor", "The color for the world skybox", new Color(255, 0, 0), false, true);
     Config<Boolean> cloudConfig = new BooleanConfig("Cloud", "Changes the world cloud color", false);
-    Config<Color> cloudColorConfig = new ColorConfig("CloudColor", "The color for the world clouds", new Color(255, 0, 0));
+    Config<Color> cloudColorConfig = new ColorConfig("CloudColor", "The color for the world clouds", new Color(255, 0, 0), false, true);
     Config<Boolean> fogConfig = new BooleanConfig("Fog", "Changes the world fog color", false);
-    Config<Color> fogColorConfig = new ColorConfig("FogColor", "The color for the world fog", new Color(255, 0, 0));
+    Config<Color> fogColorConfig = new ColorConfig("FogColor", "The color for the world fog", new Color(255, 0, 0), false, true);
 
     public SkyboxModule() {
         super("Skybox", "Changes the rendering of the world skybox", ModuleCategory.RENDER);

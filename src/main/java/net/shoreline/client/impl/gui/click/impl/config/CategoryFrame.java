@@ -97,6 +97,9 @@ public class CategoryFrame extends Frame {
             }
             fheight += 3.0f * moduleButton.getScaledTime();
             for (ConfigButton<?> configButton : moduleButton.getConfigButtons()) {
+                if (!configButton.getConfig().isVisible()) {
+                    continue;
+                }
                 // config button height may vary
                 fheight += configButton.getHeight() * moduleButton.getScaledTime();
                 if (configButton instanceof ColorButton colorPicker && colorPicker.getScaledTime() > 0.01f) {

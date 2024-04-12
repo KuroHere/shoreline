@@ -16,6 +16,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
+import net.shoreline.client.api.config.setting.ColorConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -43,6 +44,7 @@ public class ChamsModule extends ToggleModule {
     Config<Boolean> animalsConfig = new BooleanConfig("Animals", "Render chams on animals", true);
     Config<Boolean> otherConfig = new BooleanConfig("Others", "Render chams on crystals", true);
     Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles", "Render chams on invisible entities", true);
+    Config<Color> colorConfig = new ColorConfig("Color", "The color of the chams", new Color(255, 0, 0, 60));
 
     private static final float SINE_45_DEGREES = (float) Math.sin(0.7853981633974483);
 
@@ -83,12 +85,12 @@ public class ChamsModule extends ToggleModule {
         RenderSystem.setShader(GameRenderer::getPositionProgram);
         RenderSystem.lineWidth(2.0f);
         vertexConsumer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
-        Color color = Modules.COLORS.getColor();
+        Color color = colorConfig.getValue();
         float n;
         Direction direction;
         event.matrixStack.push();
         RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f,
-                color.getBlue() / 255.0f, 60 / 255.0f);
+                color.getBlue() / 255.0f, color.getAlpha() / 255.0f);
         event.model.handSwingProgress = event.entity.getHandSwingProgress(event.g);
         event.model.riding = ((Entity) event.entity).hasVehicle();
         event.model.child = ((LivingEntity) event.entity).isBaby();
@@ -207,7 +209,7 @@ public class ChamsModule extends ToggleModule {
         event.matrixStack.push();
         Color color = Modules.COLORS.getColor();
         RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f,
-                color.getBlue() / 255.0f, 60 / 255.0f);
+                color.getBlue() / 255.0f, color.getAlpha() / 255.0f);
         event.matrixStack.scale(2.0f, 2.0f, 2.0f);
         event.matrixStack.translate(0.0f, -0.5f, 0.0f);
         int k = OverlayTexture.DEFAULT_UV;
@@ -247,7 +249,8 @@ public class ChamsModule extends ToggleModule {
             vertexConsumer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
             event.matrices.push();
             Color color = Modules.COLORS.getColor();
-            RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, 100 / 255.0f);
+            RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f,
+                    MathHelper.clamp((color.getAlpha() + 40.0f) / 255.0f, 0.0f, 1.0f));
             boolean bl = event.arm != Arm.LEFT;
             float f = bl ? 1.0f : -1.0f;
             float g = MathHelper.sqrt(event.swingProgress);

@@ -61,26 +61,27 @@ public class ColorButton extends ConfigButton<Color> {
                 color = new Color(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, MathHelper.clamp(selectedColor[3], 0.0f, 1.0f));
                 colorConfig.setValue(color);
             }
-            int color = Color.HSBtoRGB(selectedColor[0], 1.0f, 1.0f);
+            float[] hsb = colorConfig.getHsb();
+            int color = colorConfig.getRgb(255);
             enableScissor((int) x, (int) (y + height), (int) (x + width), (int) (y + height + (getPickerHeight() * getScaledTime())));
             for (float i = 0.0f; i < width - 2.0f; i += 1.0f) {
                 float hue = i / (width - 2.0f);
                 fill(context, x + 1.0f + i, y + height + 4.0f + width, 1.0f, 10.0f, Color.getHSBColor(hue, 1.0f, 1.0f).getRGB());
             }
-            fill(context, x + 1.0f + ((width - 2.0f) * selectedColor[0]), y + height + 4.0f + width, 1.0f, 10.0f, -1);
+            fill(context, x + 1.0f + ((width - 2.0f) * hsb[0]), y + height + 4.0f + width, 1.0f, 10.0f, -1);
             fillGradientQuad(context, x + 1.0f, y + height + 2.0f, x + width - 1.0f, y + height + 2.0f + width, 0xffffffff, color, true);
             fillGradientQuad(context, x + 1.0f, y + height + 2.0f, x + width - 1.0f, y + height + 2.0f + width, 0, 0xff000000, false);
-            fill(context, x + (width * selectedColor[1]), y + height + 1.0f + (width * selectedColor[2]), 2.0f, 2.0f, -1);
+            fill(context, x + (width * hsb[1]), y + height + 1.0f + (width * (1.0f - hsb[2])), 2.0f, 2.0f, -1);
             if (colorConfig.allowAlpha()) {
                 fillGradient(context, x + 1.0f, y + height + 17.0f + width, x + width - 1.0f, y + height + 27.0f + width, color, 0xff000000);
-                fill(context, x + 1.0f + ((width - 2.0f) * selectedColor[3]), y + height + 17.0f + width, 1.0f, 10.0f, -1);
+                fill(context, x + 1.0f + ((width - 2.0f) * hsb[3]), y + height + 17.0f + width, 1.0f, 10.0f, -1);
             }
             if (!config.getContainer().getName().equalsIgnoreCase("Colors")) {
                 Animation globalAnimation = colorConfig.getAnimation();
                 if (globalAnimation.getScaledTime() > 0.01) {
                     fill(context, x + 1.0f, y + height + (colorConfig.allowAlpha() ? 29.0f : 17.0f) + width, width - 2.0f, 13.0f, Modules.CLICK_GUI.getColor(globalAnimation.getScaledTime()));
                 }
-                RenderManager.renderText(context, "ClientColor", x + 3.0f, y + height + (colorConfig.allowAlpha() ? 30.0f : 21.0f) + width, -1);
+                RenderManager.renderText(context, "ClientColor", x + 3.0f, y + height + (colorConfig.allowAlpha() ? 31.0f : 21.0f) + width, -1);
             }
             moduleButton.offset(getPickerHeight() * pickerAnimation.getScaledTime());
             ((CategoryFrame) frame).offset(getPickerHeight() * pickerAnimation.getScaledTime() * moduleButton.getScaledTime());

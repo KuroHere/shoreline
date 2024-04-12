@@ -49,7 +49,7 @@ public class ClickGuiScreen extends Screen implements Globals {
         this.module = module;
         float x = 2.0f;
         for (ModuleCategory category : ModuleCategory.values()) {
-            CategoryFrame frame = new CategoryFrame(category, x, 10.0f);
+            CategoryFrame frame = new CategoryFrame(category, x, 15.0f);
             frames.add(frame);
             x += frame.getWidth() + 2.0f;
         }

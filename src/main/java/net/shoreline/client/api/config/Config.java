@@ -207,7 +207,10 @@ public abstract class Config<T> implements Identifiable, Serializable<T> {
      * @return
      */
     public boolean isVisible() {
-        return visible.get();
+        if (visible != null) {
+            return visible.get();
+        }
+        return true;
     }
 
     /**

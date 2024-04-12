@@ -111,6 +111,9 @@ public class ModuleButton extends Button {
             off = y + height + 1.0f;
             float fheight = 0.0f;
             for (ConfigButton<?> configButton : configComponents) {
+                if (!configButton.getConfig().isVisible()) {
+                    continue;
+                }
                 fheight += configButton.getHeight();
                 if (configButton instanceof ColorButton colorPicker && colorPicker.getScaledTime() > 0.01f) {
                     fheight += colorPicker.getPickerHeight() * colorPicker.getScaledTime() * getScaledTime();
@@ -118,6 +121,9 @@ public class ModuleButton extends Button {
             }
             enableScissor((int) x, (int) (off - 1.0f), (int) (x + width), (int) (off + 2.0f + (fheight * settingsAnimation.getScaledTime())));
             for (ConfigButton<?> configButton : configComponents) {
+                if (!configButton.getConfig().isVisible()) {
+                    continue;
+                }
                 // run draw event
                 configButton.render(context, ix + 2.0f, off, mouseX, mouseY, delta);
                 ((CategoryFrame) frame).offset(configButton.getHeight() * settingsAnimation.getScaledTime());

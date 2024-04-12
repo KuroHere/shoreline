@@ -47,8 +47,7 @@ public class AutoArmorModule extends ToggleModule {
      *
      */
     public AutoArmorModule() {
-        super("AutoArmor", "Automatically replaces broken armor pieces",
-                ModuleCategory.COMBAT);
+        super("AutoArmor", "Automatically replaces armor pieces", ModuleCategory.COMBAT);
     }
 
     @EventListener
@@ -56,8 +55,7 @@ public class AutoArmorModule extends ToggleModule {
         if (event.getStage() != EventStage.PRE) {
             return;
         }
-        if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen
-                && inventoryConfig.getValue())) {
+        if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen && inventoryConfig.getValue())) {
             return;
         }
         //
@@ -191,13 +189,16 @@ public class AutoArmorModule extends ToggleModule {
 
         @Override
         public int compareTo(ArmorSlot other) {
+            if (armorType != other.armorType) {
+                return 0;
+            }
             final ItemStack otherStack = other.getArmorStack();
             ArmorItem armorItem = (ArmorItem) armorStack.getItem();
             ArmorItem otherItem = (ArmorItem) otherStack.getItem();
-            float durabilityDiff = otherItem.getMaterial().getDurability(otherItem.getType())
-                    - armorItem.getMaterial().getDurability(armorItem.getType());
-            if (durabilityDiff != 0.0f) {
-                return (int) durabilityDiff;
+            int durabilityDiff = armorItem.getMaterial().getProtection(armorItem.getType())
+                    - otherItem.getMaterial().getProtection(otherItem.getType());
+            if (durabilityDiff != 0) {
+                return durabilityDiff;
             }
             Enchantment enchantment = priorityConfig.getValue().getEnchantment();
             if (blastLeggingsConfig.getValue() && armorType == 2
