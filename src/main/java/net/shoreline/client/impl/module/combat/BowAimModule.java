@@ -4,7 +4,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
-import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.event.EventStage;
@@ -14,7 +13,6 @@ import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.impl.event.entity.LookDirectionEvent;
 import net.shoreline.client.impl.event.network.PlayerUpdateEvent;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.world.EntityUtil;
 
 /**
@@ -35,8 +33,7 @@ public class BowAimModule extends RotationModule {
      *
      */
     public BowAimModule() {
-        super("BowAim", "Automatically aims charged bow at nearby entities",
-                ModuleCategory.COMBAT);
+        super("BowAim", "Automatically aims charged bow at nearby entities", ModuleCategory.COMBAT);
     }
 
     @EventListener
@@ -44,10 +41,10 @@ public class BowAimModule extends RotationModule {
         if (event.getStage() != EventStage.PRE) {
             return;
         }
+        aimTarget = null;
         if (mc.player.getMainHandStack().getItem() instanceof BowItem
                 && mc.player.getItemUseTime() >= 3) {
             double minDist = Double.MAX_VALUE;
-            aimTarget = null;
             for (Entity entity : mc.world.getEntities()) {
                 if (entity == null || entity == mc.player || !entity.isAlive()
                         || !isValidAimTarget(entity)
@@ -61,8 +58,8 @@ public class BowAimModule extends RotationModule {
                 }
             }
             if (aimTarget instanceof LivingEntity target) {
-                float[] rots = getBowRotationsTo(target);
-                setRotationClient(rots[0], rots[1]);
+                float[] rotations = getBowRotationsTo(target);
+                setRotationClient(rotations[0], rotations[1]);
             }
         }
     }
@@ -74,25 +71,42 @@ public class BowAimModule extends RotationModule {
         }
     }
 
-    private float[] getBowRotationsTo(LivingEntity target) {
-        float velocity = (72000.0f - mc.player.getItemUseTimeLeft()) / 20.0f;
-        velocity = Math.min(1.0f, (velocity * velocity + velocity * 2) / 3.0f);
-        Vec3d newTargetVec = target.getPos().add(target.getVelocity());
-        double d = mc.player.getEyePos().distanceTo(target.getBoundingBox().offset(target.getVelocity()).getCenter());
-        double x = newTargetVec.x + (newTargetVec.x - target.getX()) * d - mc.player.getX();
-        double y = newTargetVec.y + (newTargetVec.y - target.getY()) * d + target.getHeight() * 0.5 - mc.player.getY() - mc.player.getEyeHeight(mc.player.getPose());
-        double z = newTargetVec.z + (newTargetVec.z - target.getZ()) * d - mc.player.getZ();
-        double hDistance = Math.sqrt(x * x + z * z);
-        double hDistanceSq = hDistance * hDistance;
-        float g = 0.006f;
-        float velocitySq = velocity * velocity;
-        float velocityPow4 = velocitySq * velocitySq;
-        float yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90.0f;
-        float pitch = (float) -Math.toDegrees(Math.atan((velocitySq - Math.sqrt(velocityPow4 - g * (g * hDistanceSq + 2.0f * y * velocitySq))) / (g * hDistance)));
-        return new float[]
-                {
-                        yaw, pitch
-                };
+    private float[] getBowRotationsTo(Entity entity) {
+        float duration = (float) (mc.player.getActiveItem().getMaxUseTime() - mc.player.getItemUseTime()) / 20.0f;
+        duration = (duration * duration + duration * 2.0f) / 3.0f;
+        if (duration >= 1.0f) {
+            duration = 1.0f;
+        }
+        double duration1 = duration * 3.0f;
+        double coeff = 0.05000000074505806;
+        float pitch = (float)(-Math.toDegrees(calculateArc(entity, duration1, coeff)));
+        double ix = entity.getX() - entity.prevX;
+        double iz = entity.getZ() - entity.prevZ;
+        double d = mc.player.distanceTo(entity);
+        d -= d % 2.0;
+        ix = d / 2.0 * ix * (mc.player.isSprinting() ? 1.3 : 1.1);
+        iz = d / 2.0 * iz * (mc.player.isSprinting() ? 1.3 : 1.1);
+        float yaw = (float)Math.toDegrees(Math.atan2(entity.getZ() + iz - mc.player.getZ(), entity.getX() + ix - mc.player.getX())) - 90.0f;
+        return new float[] { yaw, pitch };
+    }
+
+    private float calculateArc(Entity target, double duration, double coeff) {
+        double yArc = target.getY() + (double)(target.getStandingEyeHeight() / 2.0f) - (mc.player.getY() + (double)mc.player.getStandingEyeHeight());
+        double dX = target.getX() - mc.player.getX();
+        double dZ = target.getZ() - mc.player.getZ();
+        double dirRoot = Math.sqrt(dX * dX + dZ * dZ);
+        return calculateArc(duration, coeff, dirRoot, yArc);
+    }
+
+    private float calculateArc(double duration, double coeff, double root, double yArc) {
+        double dirCoeff = coeff * (root * root);
+        yArc = 2.0 * yArc * (duration * duration);
+        yArc = coeff * (dirCoeff + yArc);
+        yArc = Math.sqrt(duration * duration * duration * duration - yArc);
+        duration = duration * duration - yArc;
+        yArc = Math.atan2(duration * duration + yArc, coeff * root);
+        duration = Math.atan2(duration, coeff * root);
+        return (float)Math.min(yArc, duration);
     }
 
     private boolean isValidAimTarget(Entity entity) {
