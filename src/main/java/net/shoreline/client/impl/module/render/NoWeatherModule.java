@@ -1,12 +1,10 @@
 package net.shoreline.client.impl.module.render;
 
 import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
-import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.world.biome.BiomeParticleConfig;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.EnumConfig;
-import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -23,7 +21,6 @@ import net.shoreline.client.util.string.EnumFormatter;
 public class NoWeatherModule extends ToggleModule {
 
     Config<Weather> weatherConfig = new EnumConfig<>("Weather", "The world weather", Weather.CLEAR, Weather.values());
-    Config<Integer> dayTimeConfig = new NumberConfig<>("Time", "The world time of day", 0, 6000, 24000);
     // The current weather mode
     private Weather weather;
 
@@ -47,7 +44,6 @@ public class NoWeatherModule extends ToggleModule {
                 weather = Weather.CLEAR;
             }
             setWeather(weatherConfig.getValue());
-            mc.world.setTimeOfDay(dayTimeConfig.getValue());
         }
     }
 
@@ -62,7 +58,6 @@ public class NoWeatherModule extends ToggleModule {
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.POST) {
             setWeather(weatherConfig.getValue());
-            mc.world.setTimeOfDay(dayTimeConfig.getValue());
         }
     }
 
@@ -103,8 +98,6 @@ public class NoWeatherModule extends ToggleModule {
                     || packet.getReason() == GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED) {
                 event.cancel();
             }
-        } else if (event.getPacket() instanceof WorldTimeUpdateS2CPacket) {
-            event.cancel();
         }
     }
 
