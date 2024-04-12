@@ -207,7 +207,7 @@ public class ChamsModule extends ToggleModule {
         RenderSystem.lineWidth(2.0f);
         vertexConsumer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
         event.matrixStack.push();
-        Color color = Modules.COLORS.getColor();
+        Color color = colorConfig.getValue();
         RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f,
                 color.getBlue() / 255.0f, color.getAlpha() / 255.0f);
         event.matrixStack.scale(2.0f, 2.0f, 2.0f);
@@ -248,7 +248,7 @@ public class ChamsModule extends ToggleModule {
             RenderSystem.lineWidth(2.0f);
             vertexConsumer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
             event.matrices.push();
-            Color color = Modules.COLORS.getColor();
+            Color color = colorConfig.getValue();
             RenderSystem.setShaderColor(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f,
                     MathHelper.clamp((color.getAlpha() + 40.0f) / 255.0f, 0.0f, 1.0f));
             boolean bl = event.arm != Arm.LEFT;
