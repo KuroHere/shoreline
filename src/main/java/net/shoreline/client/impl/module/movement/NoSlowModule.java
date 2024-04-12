@@ -27,6 +27,7 @@ import net.shoreline.client.impl.event.entity.SlowMovementEvent;
 import net.shoreline.client.impl.event.entity.VelocityMultiplierEvent;
 import net.shoreline.client.impl.event.network.*;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.mixin.accessor.AccessorKeyBinding;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -120,8 +121,7 @@ public class NoSlowModule extends ToggleModule {
                 final long handle = mc.getWindow().getHandle();
                 KeyBinding[] keys = new KeyBinding[]{mc.options.jumpKey, mc.options.forwardKey, mc.options.backKey, mc.options.rightKey, mc.options.leftKey};
                 for (KeyBinding binding : keys) {
-                    binding.setPressed(InputUtil.isKeyPressed(handle,
-                            binding.getDefaultKey().getCode()));
+                    binding.setPressed(InputUtil.isKeyPressed(handle, ((AccessorKeyBinding) binding).getBoundKey().getCode()));
                 }
                 if (arrowMoveConfig.getValue()) {
                     float yaw = mc.player.getYaw();
