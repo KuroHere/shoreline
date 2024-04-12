@@ -14,30 +14,36 @@ import java.util.function.Supplier;
  */
 public class ColorConfig extends Config<Color> {
     // RGB value of the current Color value
-    private float[] hsb;
-    private boolean allowAlpha;
+    private final boolean allowAlpha;
     //
     private boolean global;
 
-    public ColorConfig(String name, String desc, Color value, boolean allowAlpha) {
+    public ColorConfig(String name, String desc, Color value, boolean allowAlpha, boolean global) {
         super(name, desc, value);
-        float[] hsbVals = Color.RGBtoHSB(value.getRed(), value.getGreen(), value.getBlue(), null);
-        hsb = new float[] { hsbVals[0], hsbVals[1], hsbVals[2], value.getAlpha() / 255.0f};
         this.allowAlpha = allowAlpha;
+        setGlobal(global);
     }
 
     public ColorConfig(String name, String desc, Color value) {
-        this(name, desc, value, true);
+        this(name, desc, value, true, true);
+    }
+
+    public ColorConfig(String name, String desc, Color value, boolean allowAlpha, boolean global, Supplier<Boolean> visible) {
+        super(name, desc, value, visible);
+        this.allowAlpha = allowAlpha;
+        setGlobal(global);
+    }
+
+    public ColorConfig(String name, String desc, Color value, boolean allowAlpha, Supplier<Boolean> visible) {
+        this(name, desc, value, allowAlpha, true, visible);
     }
 
     public ColorConfig(String name, String desc, Color value, Supplier<Boolean> visible) {
-        super(name, desc, value, visible);
-        float[] hsbVals = Color.RGBtoHSB(value.getRed(), value.getGreen(), value.getBlue(), null);
-        hsb = new float[] { hsbVals[0], hsbVals[1], hsbVals[2], value.getAlpha() / 255.0f};
+        this(name, desc, value, true, visible);
     }
 
     public ColorConfig(String name, String desc, Integer rgb, boolean allowAlpha) {
-        this(name, desc, new Color(rgb, (rgb & 0xff000000) != 0xff000000), allowAlpha);
+        this(name, desc, new Color(rgb, (rgb & 0xff000000) != 0xff000000), allowAlpha, true);
     }
 
     public ColorConfig(String name, String desc, Integer value) {
@@ -45,10 +51,18 @@ public class ColorConfig extends Config<Color> {
     }
 
     @Override
-    public void setValue(Color val) {
-        super.setValue(val);
-        float[] hsbVals = Color.RGBtoHSB(val.getRed(), val.getGreen(), val.getBlue(), null);
-        hsb = new float[] { hsbVals[0], hsbVals[1], hsbVals[2], val.getAlpha() / 255.0f};
+    public Color getValue() {
+        if (Modules.COLORS != null && global) {
+            return Modules.COLORS.getColor(getAlpha());
+        }
+        return new Color(value.getRed(), value.getGreen(), value.getBlue(), allowAlpha ? value.getAlpha() : 255);
+    }
+
+    public Color getValue(int alpha) {
+        if (Modules.COLORS != null && global) {
+            return Modules.COLORS.getColor(alpha);
+        }
+        return new Color(value.getRed(), value.getGreen(), value.getBlue(), alpha);
     }
 
     /**
@@ -60,7 +74,11 @@ public class ColorConfig extends Config<Color> {
     }
 
     public int getRgb() {
-        return value.getRGB();
+        return getValue().getRGB();
+    }
+
+    public int getRgb(int alpha) {
+        return getValue(alpha).getRGB();
     }
 
     public int getRed() {
@@ -80,11 +98,12 @@ public class ColorConfig extends Config<Color> {
     }
 
     public int getAlpha() {
-        return value.getAlpha();
+        return allowAlpha ? value.getAlpha() : 255;
     }
 
     public float[] getHsb() {
-        return hsb;
+        float[] hsbVals = Color.RGBtoHSB(value.getRed(), value.getGreen(), value.getBlue(), null);
+        return new float[] { hsbVals[0], hsbVals[1], hsbVals[2], allowAlpha ? value.getAlpha() / 255.0f : 1.0f };
     }
 
     public boolean isGlobal() {
@@ -98,8 +117,8 @@ public class ColorConfig extends Config<Color> {
     public void setGlobal(boolean global) {
         this.global = global;
         configAnimation.setState(global);
-        if (global && Modules.CLICK_GUI != null) {
-            setValue(Modules.COLORS.getColor(220));
+        if (Modules.COLORS != null && global) {
+            setValue(Modules.COLORS.getColor(getAlpha()));
         }
     }
 
@@ -129,7 +148,8 @@ public class ColorConfig extends Config<Color> {
                 JsonElement element1 = jsonObj.get("global");
                 setGlobal(element1.getAsBoolean());
             }
-            return parseColor(hex);
+            Color color = parseColor(hex);
+            return color;
         }
         return null;
     }
@@ -142,7 +162,7 @@ public class ColorConfig extends Config<Color> {
     private Color parseColor(String colorString) {
         if (colorString.startsWith("0x")) {
             colorString = colorString.substring(2);
-            return new Color((int) Long.parseLong(colorString, 16));
+            return new Color((int) Long.parseLong(colorString, 16), true);
         }
         throw new IllegalArgumentException("Unknown color: " + colorString);
     }
