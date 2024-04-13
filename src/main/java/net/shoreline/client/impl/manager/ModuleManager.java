@@ -90,7 +90,7 @@ public class ModuleManager {
                 new ElytraFlyModule(),
                 new EntityControlModule(),
                 new EntitySpeedModule(),
-                // new FakeLagModule(),
+                new FakeLagModule(),
                 new FastFallModule(),
                 new FlightModule(),
                 new IceSpeedModule(),

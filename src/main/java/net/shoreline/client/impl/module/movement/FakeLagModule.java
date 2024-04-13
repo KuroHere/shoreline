@@ -83,10 +83,7 @@ public class FakeLagModule extends ToggleModule {
         if (mc.player == null || mc.player.isRiding()) {
             return;
         }
-        if (!(event.getPacket() instanceof ChatMessageC2SPacket
-                || event.getPacket() instanceof TeleportConfirmC2SPacket
-                || event.getPacket() instanceof KeepAliveC2SPacket
-                || event.getPacket() instanceof ClientStatusC2SPacket)) {
+        if (event.getPacket() instanceof TeleportConfirmC2SPacket) {
             event.cancel();
             packets.add(event.getPacket());
         }
