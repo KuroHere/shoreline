@@ -125,6 +125,7 @@ public class Modules {
     public static FastPlaceModule FAST_PLACE;
     public static MultitaskModule MULTITASK;
     public static NoGlitchBlocksModule NO_GLITCH_BLOCKS;
+    public static ScaffoldModule SCAFFOLD;
     public static SpeedmineModule SPEEDMINE;
     // The initialized state of the modules. Once this is true, all modules
     // have been initialized and the init process is complete. As a general
@@ -264,6 +265,7 @@ public class Modules {
             FAST_PLACE = (FastPlaceModule) getRegisteredModule("fastplace-module");
             MULTITASK = (MultitaskModule) getRegisteredModule("multitask-module");
             NO_GLITCH_BLOCKS = (NoGlitchBlocksModule) getRegisteredModule("noglitchblocks-module");
+            SCAFFOLD = (ScaffoldModule) getRegisteredModule("scaffold-module");
             SPEEDMINE = (SpeedmineModule) getRegisteredModule("speedmine-module");
             initialized = true;
             // reflect configuration properties for each cached module

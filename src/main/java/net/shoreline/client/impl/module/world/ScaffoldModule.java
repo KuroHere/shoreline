@@ -5,12 +5,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.shoreline.client.api.config.Config;
+import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.BlockPlacerModule;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.util.chat.ChatUtil;
 
 /**
  * @author xgraza
@@ -18,6 +20,8 @@ import net.shoreline.client.util.chat.ChatUtil;
  */
 public final class ScaffoldModule extends BlockPlacerModule
 {
+    Config<Boolean> tower = new BooleanConfig("Tower", "Towers up lol", true);
+
     public ScaffoldModule()
     {
         super("Scaffold", "Rapidly places blocks under your feet", ModuleCategory.WORLD);
@@ -50,7 +54,16 @@ public final class ScaffoldModule extends BlockPlacerModule
         }
 
         // TODO: needs raytracing for Grim (linus removed it :( )
-        placeBlock(blockSlot, data.pos(), data.direction(), true, grimConfig.getValue());
+        final float[] angles = placeBlock(blockSlot, data.pos(), data.direction(), true, grimConfig.getValue());
+        if (angles != null && tower.getValue() && mc.options.jumpKey.isPressed())
+        {
+            final Vec3d velocity = mc.player.getVelocity();
+            final double velocityY = velocity.y;
+            if ((mc.player.isOnGround() || velocityY < 0.1) || velocityY <= 0.16477328182606651)
+            {
+                mc.player.setVelocity(velocity.x, 0.42f, velocity.z);
+            }
+        }
     }
 
     private int getBlockSlot()

@@ -64,12 +64,13 @@ public class BlockPlacerModule extends RotationModule {
         Managers.INVENTORY.setSlot(prev);
     }
 
-    protected void placeBlock(int slot, BlockPos pos, Direction direction, boolean rotate, boolean grim)
+    protected float[] placeBlock(int slot, BlockPos pos, Direction direction, boolean rotate, boolean grim)
     {
         int prev = mc.player.getInventory().selectedSlot;
         Managers.INVENTORY.setSlot(slot);
         float[] rotations = Managers.INTERACT.placeBlock(pos, direction, Hand.MAIN_HAND, rotate, grim);
         Managers.INVENTORY.setSlot(prev);
+        return rotations;
     }
 
     /**

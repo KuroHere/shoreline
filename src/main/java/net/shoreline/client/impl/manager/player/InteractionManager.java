@@ -5,6 +5,7 @@ import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -16,6 +17,7 @@ import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.Globals;
+import net.shoreline.client.util.player.RayCastUtil;
 import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.world.SneakBlocks;
 
@@ -117,6 +119,16 @@ public class InteractionManager implements Globals {
             angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), rotateVec);
         }
         BlockHitResult hitResult = new BlockHitResult(rotateVec, side, pos, false);
+
+        if (grim)
+        {
+            final HitResult result = RayCastUtil.rayCast(4.0, angles);
+            if (result instanceof BlockHitResult blockHitResult)
+            {
+                hitResult = blockHitResult;
+            }
+        }
+
         boolean sneaking = !mc.player.isSneaking() && SneakBlocks.isSneakBlock(state.getBlock());
         if (sneaking) {
             Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
@@ -136,7 +148,7 @@ public class InteractionManager implements Globals {
             Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                 ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         }
-        return angles;
+        return success ? angles : null;
     }
 
     /**
