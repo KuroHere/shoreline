@@ -11,7 +11,7 @@ import net.shoreline.client.api.event.StageEvent;
  */
 @Cancelable
 public class RenderTooltipEvent extends StageEvent {
-    private final DrawContext context;
+    public final DrawContext context;
     private final ItemStack stack;
     //
     private final int x, y;

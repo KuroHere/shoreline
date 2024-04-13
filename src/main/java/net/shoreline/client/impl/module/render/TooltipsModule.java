@@ -1,6 +1,5 @@
 package net.shoreline.client.impl.module.render;
 
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
@@ -22,7 +21,7 @@ import net.shoreline.client.init.Modules;
  */
 public class TooltipsModule extends ToggleModule {
 
-    Config<Boolean> enderChestsConfig = new BooleanConfig("EnderChests", "Renders all the contents of ender chests in tooltips", false);
+    // Config<Boolean> enderChestsConfig = new BooleanConfig("EnderChests", "Renders all the contents of ender chests in tooltips", false);
     Config<Boolean> shulkersConfig = new BooleanConfig("Shulkers", "Renders all the contents of shulkers in tooltips", true);
     Config<Boolean> mapsConfig = new BooleanConfig("Maps", "Renders a preview of maps in tooltips", false);
 
@@ -41,23 +40,22 @@ public class TooltipsModule extends ToggleModule {
         if (shulkersConfig.getValue() && nbtCompound != null
                 && nbtCompound.contains("Items", NbtElement.LIST_TYPE)) {
             event.cancel();
-            MatrixStack stack1 = new MatrixStack();
-            stack1.push();
-            stack1.translate(0.0f, 0.0f, 600.0f);
+            event.context.getMatrices().push();
+            event.context.getMatrices().translate(0.0f, 0.0f, 600.0f);
             DefaultedList<ItemStack> defaultedList = DefaultedList.ofSize(27, ItemStack.EMPTY);
             Inventories.readNbt(nbtCompound, defaultedList);
-            RenderManager.rect(stack1, event.getX() + 8.0,
-                    event.getY() - 21.0, 150.0, 14.0, Modules.COLORS.getRGB());
-            RenderManager.rect(stack1, event.getX() + 8.0,
-                    event.getY() - 7.0, 150.0, 55.0, 0x77000000);
-            for (int i = 0; i < defaultedList.size(); i++) {
-                event.getContext().drawItem(defaultedList.get(i), event.getX() + (i % 9) * 16 + 9, event.getY() + (i / 9) * 16 - 5);
-                event.getContext().drawItemInSlot(mc.textRenderer, defaultedList.get(i),
-                        event.getX() + (i % 9) * 16 + 9, event.getY() + (i / 9) * 16 - 5);
-            }
+            RenderManager.rect(event.context.getMatrices(), event.getX() + 8.0,
+                    event.getY() - 21.0, 150.0, 13.0, Modules.COLORS.getRGB(170));
             RenderManager.renderText(event.getContext(), stack.getName().getString(),
                     event.getX() + 11.0f, event.getY() - 18.0f, -1);
-            stack1.pop();
+            RenderManager.rect(event.context.getMatrices(), event.getX() + 8.0,
+                    event.getY() - 7.0, 150.0, 55.0, 0x77000000);
+            for (int i = 0; i < defaultedList.size(); i++) {
+                event.context.drawItem(defaultedList.get(i), event.getX() + (i % 9) * 16 + 9, event.getY() + (i / 9) * 16 - 5);
+                event.context.drawItemInSlot(mc.textRenderer, defaultedList.get(i),
+                        event.getX() + (i % 9) * 16 + 9, event.getY() + (i / 9) * 16 - 5);
+            }
+            event.context.getMatrices().pop();
         }
     }
 }
