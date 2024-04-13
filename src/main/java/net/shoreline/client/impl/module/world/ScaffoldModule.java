@@ -105,8 +105,7 @@ public final class ScaffoldModule extends BlockPlacerModule
 
             if (grimConfig.getValue())
             {
-                Managers.ROTATION.setRotationSilent(Managers.ROTATION.getServerYaw(),
-                        Managers.ROTATION.getServerPitch(), true);
+                Managers.ROTATION.setRotationSilentSync(true);
             }
         }
 
@@ -118,7 +117,7 @@ public final class ScaffoldModule extends BlockPlacerModule
         // insane 10/10 code (will NOT lag your game!!!)
         // TODO: make actual rotations instead of this retarded hardcode
         float[] angles = new float[2];
-        angles[0] = mc.player.getYaw() - 180;
+        angles[0] = Math.round(((mc.player.getYaw() - 180) + 1) / 45) * 45;
 
         for (float yaw = 80.0f; yaw <= 90.0f; yaw += 0.5f)
         {

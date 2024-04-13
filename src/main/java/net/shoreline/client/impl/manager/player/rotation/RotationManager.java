@@ -24,6 +24,8 @@ import net.shoreline.client.util.Globals;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Integer.MAX_VALUE;
+
 /**
  * @author linus, bon55
  * @since 1.0
@@ -83,12 +85,21 @@ public class RotationManager implements Globals {
 
     @EventListener
     public void onMovementPackets(MovementPacketsEvent event) {
-        if (rotate) {
-            removeRotation(rotation);
-            event.cancel();
-            event.setYaw(rotation.getYaw());
-            event.setPitch(rotation.getPitch());
-            rotate = false;
+        if (rotation != null) {
+
+            if (rotate)
+            {
+                removeRotation(rotation);
+                event.cancel();
+                event.setYaw(rotation.getYaw());
+                event.setPitch(rotation.getPitch());
+                rotate = false;
+            }
+
+            if (rotation.isSnap())
+            {
+                rotation = null;
+            }
         }
     }
 
@@ -159,6 +170,12 @@ public class RotationManager implements Globals {
      * @param rotation
      */
     public void setRotation(Rotation rotation) {
+
+        if (rotation.getPriority() == MAX_VALUE)
+        {
+            this.rotation = rotation;
+        }
+
         Rotation request = requests.stream().filter(r -> rotation.getPriority() == r.getPriority()).findFirst().orElse(null);
         if (request == null) {
             requests.add(rotation);
@@ -185,6 +202,25 @@ public class RotationManager implements Globals {
     {
         if (grim)
         {
+            setRotation(new Rotation(MAX_VALUE, yaw, pitch, true));
+            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(
+                    mc.player.getX(), mc.player.getY(), mc.player.getZ(), yaw, pitch, mc.player.isOnGround()));
+            Managers.NETWORK.sendSequencedPacket((s) ->
+                    new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, s));
+        }
+        else
+        {
+            Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, mc.player.isOnGround()));
+        }
+    }
+
+    public void setRotationSilentSync(boolean grim)
+    {
+        float yaw = getServerYaw();
+        float pitch = getServerPitch();
+        if (grim)
+        {
+            setRotation(new Rotation(MAX_VALUE, yaw, pitch, true));
             Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(
                     mc.player.getX(), mc.player.getY(), mc.player.getZ(), yaw, pitch, mc.player.isOnGround()));
             Managers.NETWORK.sendSequencedPacket((s) ->
