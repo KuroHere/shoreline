@@ -1,9 +1,13 @@
 package net.shoreline.client.mixin.gui.screen;
 
 import net.minecraft.client.gui.screen.DisconnectedScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.DirectionalLayoutWidget;
+import net.minecraft.client.gui.widget.MultilineTextWidget;
+import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.text.Text;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
@@ -26,6 +30,22 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
     @Shadow
     @Final
     private DirectionalLayoutWidget grid;
+    @Shadow
+    @Final
+    private Text reason;
+    @Shadow
+    @Final
+    private Text buttonLabel;
+    @Shadow
+    @Final
+    private Screen parent;
+    @Shadow
+    @Final
+    private static Text TO_TITLE_TEXT;
+
+    @Shadow
+    protected abstract void initTabNavigation();
+
     //
     @Unique
     private long reconnectSeconds;
@@ -33,11 +53,10 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
     /**
      * @param ci
      */
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/" +
-            "widget/DirectionalLayoutWidget;add(Lnet/minecraft/client/gui/widget/Widget;)" +
-            "Lnet/minecraft/client/gui/widget/Widget;", ordinal = 2))
+    @Inject(method = "init", at = @At(value = "HEAD"), cancellable = true)
     private void hookInit(CallbackInfo ci) {
-        grid.getMainPositioner().margin(2);
+        ci.cancel();
+        grid.getMainPositioner().alignHorizontalCenter().margin(2);
         ButtonWidget.Builder reconnectButton = ButtonWidget.builder(Text.of("Reconnect"),
                 (button) ->
                 {
@@ -54,8 +73,15 @@ public abstract class MixinDisconnectedScreen extends MixinScreen implements Glo
                         reconnectSeconds = Math.round(Modules.AUTO_RECONNECT.getDelay() * 20.0f);
                     }
                 });
+        grid.add(new TextWidget(title, mc.textRenderer));
+        grid.add(new MultilineTextWidget(reason, mc.textRenderer).setMaxWidth(width - 50).setCentered(true));
+        ButtonWidget.Builder buttonWidget = mc.isMultiplayerEnabled() ? ButtonWidget.builder(buttonLabel, button -> mc.setScreen(parent)) : ButtonWidget.builder(TO_TITLE_TEXT, button -> mc.setScreen(new TitleScreen()));
         grid.add(reconnectButton.build());
         grid.add(autoReconnectButton.build());
+        grid.add(buttonWidget.build());
+        grid.refreshPositions();
+        grid.forEachChild(this::addDrawableChild);
+        initTabNavigation();
         // addDrawableChild(reconnectButton.dimensions(width / 2 - 100,
         //        height / 2 + mc.textRenderer.fontHeight + 24, 200, 20).build());
         // addDrawableChild(autoReconnectButton.dimensions(width / 2 - 100,
