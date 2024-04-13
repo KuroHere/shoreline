@@ -119,6 +119,16 @@ public class InteractionManager implements Globals {
             angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), rotateVec);
         }
         BlockHitResult hitResult = new BlockHitResult(rotateVec, side, pos, false);
+
+        if (grim)
+        {
+            final HitResult result = RayCastUtil.rayCast(4.0, angles);
+            if (result instanceof BlockHitResult blockHitResult && blockHitResult.getBlockPos().equals(pos))
+            {
+                hitResult = blockHitResult;
+            }
+        }
+
         boolean sneaking = !mc.player.isSneaking() && SneakBlocks.isSneakBlock(state.getBlock());
         if (sneaking) {
             Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
