@@ -4,7 +4,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.impl.module.combat.SurroundModule;
@@ -17,8 +19,8 @@ import net.shoreline.client.init.Managers;
  */
 public class BlockPlacerModule extends RotationModule {
 
-    Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Places on visible sides only", false);
-    Config<Boolean> grimConfig = new BooleanConfig("Grim", "Places using grim instant rotations", false);
+    protected Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Places on visible sides only", false);
+    protected Config<Boolean> grimConfig = new BooleanConfig("Grim", "Places using grim instant rotations", false);
 
     // TODO: series of blocks
     public BlockPlacerModule(String name, String desc, ModuleCategory category) {
@@ -59,6 +61,14 @@ public class BlockPlacerModule extends RotationModule {
         int prev = mc.player.getInventory().selectedSlot;
         Managers.INVENTORY.setSlot(slot);
         float[] rotations = Managers.INTERACT.placeBlock(pos, rotate, strictDirection, grim);
+        Managers.INVENTORY.setSlot(prev);
+    }
+
+    protected void placeBlock(int slot, BlockPos pos, Direction direction, boolean rotate, boolean grim)
+    {
+        int prev = mc.player.getInventory().selectedSlot;
+        Managers.INVENTORY.setSlot(slot);
+        float[] rotations = Managers.INTERACT.placeBlock(pos, direction, Hand.MAIN_HAND, rotate, grim);
         Managers.INVENTORY.setSlot(prev);
     }
 

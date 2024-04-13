@@ -127,13 +127,14 @@ public class ModuleManager {
                 new ViewModelModule(),
                 // new WaypointsModule(),
                 // World
+                new AirPlaceModule(),
                 new AntiInteractModule(),
                 new AvoidModule(),
                 new FastDropModule(),
                 new FastPlaceModule(),
                 new MultitaskModule(),
                 new NoGlitchBlocksModule(),
-                // new ScaffoldModule(),
+                new ScaffoldModule(),
                 new SpeedmineModule()
                 // new WallhackModule()
         );

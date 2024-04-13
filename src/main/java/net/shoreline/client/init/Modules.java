@@ -117,6 +117,7 @@ public class Modules {
     public static ViewModelModule VIEW_MODEL;
     // public static WaypointsModule WAYPOINTS;
     // World
+    public static AirPlaceModule AIR_PLACE;
     public static AntiInteractModule ANTI_INTERACT;
     public static AvoidModule AVOID;
     public static FastDropModule FAST_DROP;
@@ -254,6 +255,7 @@ public class Modules {
             VIEW_CLIP = (ViewClipModule) getRegisteredModule("viewclip-module");
             VIEW_MODEL = (ViewModelModule) getRegisteredModule("viewmodel-module");
             // WAYPOINTS = (WaypointsModule) getRegisteredModule("waypoints-module");
+            AIR_PLACE = (AirPlaceModule) getRegisteredModule("airplace-module");
             ANTI_INTERACT = (AntiInteractModule) getRegisteredModule("antiinteract-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");
             FAST_DROP = (FastDropModule) getRegisteredModule("fastdrop-module");
