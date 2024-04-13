@@ -138,6 +138,10 @@ public class InteractionManager implements Globals {
             Managers.NETWORK.sendPacket(new ClientCommandC2SPacket(mc.player,
                 ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         }
+        if (rotate)
+        {
+            Managers.ROTATION.setRotationSilentSync(grim);
+        }
         return success ? angles : null;
     }
 
