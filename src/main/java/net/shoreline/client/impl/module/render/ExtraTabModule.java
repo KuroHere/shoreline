@@ -11,7 +11,6 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.gui.hud.PlayerListEvent;
 import net.shoreline.client.impl.event.gui.hud.PlayerListNameEvent;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.util.chat.ChatUtil;
 
 /**
  * @author linus

@@ -62,7 +62,7 @@ public class ColorButton extends ConfigButton<Color> {
                 colorConfig.setValue(color);
             }
             float[] hsb = colorConfig.getHsb();
-            int color = colorConfig.getRgb(255);
+            int color = Color.HSBtoRGB(hsb[0], 1.0f, 1.0f);
             enableScissor((int) x, (int) (y + height), (int) (x + width), (int) (y + height + (getPickerHeight() * getScaledTime())));
             for (float i = 0.0f; i < width - 2.0f; i += 1.0f) {
                 float hue = i / (width - 2.0f);
