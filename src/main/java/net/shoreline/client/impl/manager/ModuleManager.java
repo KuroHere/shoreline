@@ -30,6 +30,7 @@ public class ModuleManager {
         // MAINTAIN ALPHABETICAL ORDER
         register(
                 // Client
+                new CapesModule(),
                 new ClickGuiModule(),
                 new ColorsModule(),
                 new HUDModule(),

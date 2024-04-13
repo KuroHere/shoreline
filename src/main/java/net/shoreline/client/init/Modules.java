@@ -28,6 +28,7 @@ public class Modules {
     public static HUDModule HUD;
     public static RotationsModule ROTATIONS;
     public static BaritoneModule BARITONE;
+    public static CapesModule CAPES;
     // Combat
     public static AuraModule AURA;
     public static AutoArmorModule AUTO_ARMOR;
@@ -174,6 +175,7 @@ public class Modules {
             if (ShorelineMod.isBaritonePresent()) {
                 BARITONE = (BaritoneModule) getRegisteredModule("baritone-module");
             }
+            CAPES = (CapesModule) getRegisteredModule("capes-module");
             AURA = (AuraModule) getRegisteredModule("aura-module");
             AUTO_ARMOR = (AutoArmorModule) getRegisteredModule("autoarmor-module");
             AUTO_BOW_RELEASE = (AutoBowReleaseModule) getRegisteredModule("autobowrelease-module");
