@@ -54,6 +54,7 @@ public class ModuleManager {
                 new AntiHungerModule(),
                 new ChorusControlModule(),
                 new CrasherModule(),
+                new DisablerModule(),
                 new ExtendedFireworkModule(),
                 new FakeLatencyModule(),
                 new FastProjectileModule(),
