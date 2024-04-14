@@ -7,13 +7,11 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
-import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.MouseClickEvent;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.util.chat.ChatUtil;
 import org.lwjgl.glfw.GLFW;
 
 /**

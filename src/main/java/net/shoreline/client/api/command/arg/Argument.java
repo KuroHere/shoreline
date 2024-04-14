@@ -2,8 +2,8 @@ package net.shoreline.client.api.command.arg;
 
 import net.shoreline.client.api.command.Command;
 import net.shoreline.client.api.config.Config;
-import net.shoreline.client.impl.manager.client.CommandManager;
 import net.shoreline.client.impl.event.gui.chat.ChatInputEvent;
+import net.shoreline.client.impl.manager.client.CommandManager;
 
 import java.util.Collection;
 

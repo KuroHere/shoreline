@@ -8,7 +8,6 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.api.render.anim.Animation;
 import net.shoreline.client.api.render.anim.Easing;
-import net.shoreline.client.impl.gui.click.ClickGuiScreen;
 import net.shoreline.client.impl.gui.click.component.Button;
 import net.shoreline.client.impl.gui.click.impl.config.setting.*;
 import net.shoreline.client.init.Modules;

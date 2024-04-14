@@ -1,7 +1,5 @@
 package net.shoreline.client.api.account.config;
 
-import net.shoreline.client.api.file.ConfigFile;
-
 import java.nio.file.Path;
 
 /**

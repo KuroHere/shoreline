@@ -6,7 +6,6 @@ import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Identifier;
 import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
 

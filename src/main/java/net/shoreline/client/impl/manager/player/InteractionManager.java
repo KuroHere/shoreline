@@ -14,6 +14,7 @@ import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
+import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.Globals;
@@ -65,14 +66,11 @@ public class InteractionManager implements Globals {
      * @param event
      */
     @EventListener
-    public void onTick(TickEvent event) {
-        if (event.getStage() == EventStage.PRE) {
-            blockCancel = false;
-        } else if (event.getStage() == EventStage.POST) {
-            if (!blockCancel && mc.interactionManager != null) {
-                mc.interactionManager.cancelBlockBreaking();
-            }
+    public void onPlayerTick(PlayerTickEvent event) {
+        if (blockCancel && mc.interactionManager != null) {
+            mc.interactionManager.cancelBlockBreaking();
         }
+        blockCancel = false;
     }
 
     public float[] placeBlock(BlockPos pos, boolean rotate, boolean strictDirection, boolean grim) {

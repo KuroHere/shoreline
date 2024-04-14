@@ -5,8 +5,6 @@ import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 import net.shoreline.client.impl.gui.click.impl.config.ModuleButton;
-import net.shoreline.client.util.KeyboardUtil;
-import org.lwjgl.glfw.GLFW;
 
 /**
  * @author linus

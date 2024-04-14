@@ -10,7 +10,6 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.impl.event.*;
 import net.shoreline.client.impl.imixin.IMinecraftClient;
-import net.shoreline.client.init.Managers;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

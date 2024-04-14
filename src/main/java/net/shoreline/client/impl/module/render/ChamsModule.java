@@ -24,7 +24,6 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.render.entity.RenderCrystalEvent;
 import net.shoreline.client.impl.event.render.entity.RenderEntityEvent;
 import net.shoreline.client.impl.event.render.item.RenderArmEvent;
-import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.world.EntityUtil;
 import org.joml.Quaternionf;
 

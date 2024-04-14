@@ -10,7 +10,6 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.render.RenderFogEvent;
 import net.shoreline.client.impl.event.world.BlindnessEvent;
 import net.shoreline.client.impl.event.world.SkyboxEvent;
-import net.shoreline.client.util.chat.ChatUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;

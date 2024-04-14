@@ -1,13 +1,9 @@
 package net.shoreline.client.impl.gui.click;
 
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.render.anim.Animation;
-import net.shoreline.client.api.render.anim.Easing;
-import net.shoreline.client.impl.gui.click.component.Component;
 import net.shoreline.client.impl.gui.click.component.ScissorStack;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 import net.shoreline.client.impl.gui.click.impl.config.ModuleButton;

@@ -1,10 +1,8 @@
 package net.shoreline.client.mixin.render;
 
 import net.minecraft.client.render.DimensionEffects;
-import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.world.SkyboxEvent;
-import net.shoreline.client.util.chat.ChatUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

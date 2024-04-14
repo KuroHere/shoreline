@@ -2,9 +2,7 @@ package net.shoreline.client.impl.manager.anticheat;
 
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket;
 import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.util.Globals;

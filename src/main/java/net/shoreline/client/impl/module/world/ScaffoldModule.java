@@ -59,7 +59,7 @@ public final class ScaffoldModule extends BlockPlacerModule
             return;
         }
 
-        Vec3d hitVec = data.pos().toCenterPos();
+        final Vec3d hitVec = data.pos().toCenterPos();
         BlockHitResult hitResult = new BlockHitResult(hitVec, data.direction(), data.pos(), false);
         if (grimConfig.getValue())
         {
@@ -102,11 +102,6 @@ public final class ScaffoldModule extends BlockPlacerModule
                     mc.player.setVelocity(velocity.x, 0.42f, velocity.z);
                 }
             }
-
-            if (grimConfig.getValue())
-            {
-                Managers.ROTATION.setRotationSilentSync(true);
-            }
         }
 
         Managers.INVENTORY.syncToClient();
@@ -115,20 +110,21 @@ public final class ScaffoldModule extends BlockPlacerModule
     private GrimPlaceResult getRotationAnglesFor(final BlockData data)
     {
         // insane 10/10 code (will NOT lag your game!!!)
-        // TODO: make actual rotations instead of this retarded hardcode
-        float[] angles = new float[2];
-        angles[0] = Math.round(((mc.player.getYaw() - 180) + 1) / 45) * 45;
-
-        for (float yaw = 80.0f; yaw <= 90.0f; yaw += 0.5f)
+        final float rotationYaw = mc.player.getYaw() - 180;
+        for (float yaw = rotationYaw - 45; yaw <= rotationYaw + 45; yaw += 1)
         {
-            angles[1] = yaw;
-            final HitResult result = RayCastUtil.rayCast(4.0, angles);
-            if (result instanceof BlockHitResult hitResult && hitResult.getBlockPos().equals(data.pos()) && hitResult.getSide() == data.direction())
+            for (float pitch = 75; pitch <= 90; pitch += 1)
             {
-                return new GrimPlaceResult(hitResult, angles);
+                final float[] angles = { yaw, pitch };
+                final HitResult result = RayCastUtil.rayCast(4.0, angles);
+                if (result instanceof BlockHitResult hitResult
+                        && hitResult.getBlockPos().equals(data.pos())
+                        && hitResult.getSide() == data.direction())
+                {
+                    return new GrimPlaceResult(hitResult, angles);
+                }
             }
         }
-
         return null;
     }
 
@@ -140,6 +136,7 @@ public final class ScaffoldModule extends BlockPlacerModule
         {
             final ItemStack stack = mc.player.getInventory().getStack(i);
             final int stackCount = stack.getCount();
+            // TODO: block blacklist
             if (!stack.isEmpty() && stack.getItem() instanceof BlockItem)
             {
                 if (stackCount > count || slot == -1)

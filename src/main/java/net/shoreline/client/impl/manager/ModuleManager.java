@@ -42,7 +42,6 @@ public class ModuleManager {
                 new AutoCrystalModule(),
                 new AutoLogModule(),
                 new AutoTotemModule(),
-                new AutoXPModule(),
                 new BlockLagModule(),
                 new BowAimModule(),
                 new CriticalsModule(),

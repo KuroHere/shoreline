@@ -56,6 +56,7 @@ public class AuraModule extends RotationModule {
     Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swings the hand after attacking", true);
     Config<TargetMode> modeConfig = new EnumConfig<>("Mode", "The mode for targeting entities to attack", TargetMode.SWITCH, TargetMode.values());
     Config<Priority> priorityConfig = new EnumConfig<>("Priority", "The value to prioritize when searching for targets", Priority.HEALTH, Priority.values());
+    Config<Float> searchRangeConfig = new NumberConfig<>("SearchRange", "Range to search for targets", 1.0f, 5.0f, 6.0f);
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to attack entities", 1.0f, 4.5f, 5.0f);
     Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to attack entities through walls", 1.0f, 4.5f, 5.0f);
     // Config<Boolean> vanillaRangeConfig = new BooleanConfig("VanillaRange", "Only attack within vanilla range", false);
@@ -208,7 +209,7 @@ public class AuraModule extends RotationModule {
                 setRotation(rotation[0], rotation[1]);
             }
         }
-        if (isRotationBlocked() || !shouldWaitCrit() || !rotated) {
+        if (isRotationBlocked() || !shouldWaitCrit() || !rotated || !isInAttackRange(eyepos, entityTarget)) {
             return;
         }
         if (attackDelayConfig.getValue()) {
@@ -395,7 +396,7 @@ public class AuraModule extends RotationModule {
                 continue;
             }
             double dist = pos.distanceTo(entity.getPos());
-            if (isInAttackRange(dist, pos, entity)) {
+            if (dist <= searchRangeConfig.getValue()) {
                 if (entity.age < ticksExistedConfig.getValue()) {
                     continue;
                 }
@@ -526,6 +527,10 @@ public class AuraModule extends RotationModule {
                 || EntityUtil.isMonster(e) && monstersConfig.getValue()
                 || EntityUtil.isNeutral(e) && neutralsConfig.getValue()
                 || EntityUtil.isPassive(e) && animalsConfig.getValue();
+    }
+
+    public Entity getEntityTarget() {
+        return entityTarget;
     }
 
     public enum TargetMode {

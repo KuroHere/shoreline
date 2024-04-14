@@ -14,10 +14,7 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.EntityOutlineEvent;
-import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.impl.event.entity.decoration.TeamColorEvent;
-import net.shoreline.client.init.Modules;
-import net.shoreline.client.mixin.accessor.AccessorEntity;
 import net.shoreline.client.util.world.EntityUtil;
 
 import java.awt.*;
