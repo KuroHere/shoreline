@@ -3,10 +3,8 @@ package net.shoreline.client.impl.module.client;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.ColorConfig;
-import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.module.ConcurrentModule;
 import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.util.render.ColorUtil;
 
 import java.awt.*;
 

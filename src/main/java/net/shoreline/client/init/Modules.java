@@ -2,8 +2,8 @@ package net.shoreline.client.init;
 
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.ShorelineMod;
-import net.shoreline.client.impl.manager.ModuleManager;
 import net.shoreline.client.api.module.Module;
+import net.shoreline.client.impl.manager.ModuleManager;
 import net.shoreline.client.impl.module.client.*;
 import net.shoreline.client.impl.module.combat.*;
 import net.shoreline.client.impl.module.exploit.*;

@@ -1,33 +1,30 @@
 package net.shoreline.client.mixin.render;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ResourceFactory;
-import net.minecraft.util.Util;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.render.RenderLayersClient;
 import net.shoreline.client.impl.event.network.ReachEvent;
 import net.shoreline.client.impl.event.render.*;
 import net.shoreline.client.impl.event.world.UpdateCrosshairTargetEvent;
 import net.shoreline.client.init.Programs;
-import net.shoreline.client.mixin.accessor.AccessorBufferBuilderStorage;
 import net.shoreline.client.util.Globals;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.util.SortedMap;
 
 /**
  * @author linus

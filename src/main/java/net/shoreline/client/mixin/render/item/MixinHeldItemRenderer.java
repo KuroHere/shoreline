@@ -10,8 +10,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.render.item.RenderArmEvent;
 import net.shoreline.client.impl.event.render.item.RenderFirstPersonEvent;

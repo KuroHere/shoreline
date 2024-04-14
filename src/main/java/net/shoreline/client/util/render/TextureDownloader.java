@@ -2,18 +2,13 @@ package net.shoreline.client.util.render;
 
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.util.Identifier;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.util.Globals;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.LaxRedirectStrategy;
 
 import java.io.IOException;
 import java.io.InputStream;

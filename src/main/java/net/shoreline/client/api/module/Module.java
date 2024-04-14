@@ -6,9 +6,6 @@ import net.shoreline.client.api.config.Serializable;
 import net.shoreline.client.util.Globals;
 import net.shoreline.client.util.chat.ChatUtil;
 
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
-
 /**
  * General client feature that will appear in the ClickGui. Module have a
  * unique name which is also used as the module identifier. Modules are

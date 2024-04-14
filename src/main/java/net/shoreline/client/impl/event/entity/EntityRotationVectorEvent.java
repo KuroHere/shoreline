@@ -1,7 +1,6 @@
 package net.shoreline.client.impl.event.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.event.Event;
 

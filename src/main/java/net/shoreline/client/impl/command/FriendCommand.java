@@ -11,8 +11,6 @@ import net.shoreline.client.api.command.arg.arguments.StringArgument;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.chat.ChatUtil;
 
-import java.util.Arrays;
-
 /**
  * @author linus
  * @since 1.0

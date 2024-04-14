@@ -1,13 +1,10 @@
 package net.shoreline.client.impl.gui.click2.component;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.*;
 import net.shoreline.client.init.Programs;
 
 import java.awt.*;
-
-import static org.lwjgl.opengl.GL11.*;
 
 /**
  * @author xgraza

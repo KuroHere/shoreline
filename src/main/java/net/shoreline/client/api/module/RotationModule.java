@@ -2,7 +2,6 @@ package net.shoreline.client.api.module;
 
 import net.shoreline.client.impl.manager.player.rotation.Rotation;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.init.Modules;
 
 /**
  * @author linus

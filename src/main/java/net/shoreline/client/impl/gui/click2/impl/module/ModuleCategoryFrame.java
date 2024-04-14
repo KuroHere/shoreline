@@ -2,7 +2,6 @@ package net.shoreline.client.impl.gui.click2.impl.module;
 
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.gui.click2.component.CategoryFrame;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.string.EnumFormatter;

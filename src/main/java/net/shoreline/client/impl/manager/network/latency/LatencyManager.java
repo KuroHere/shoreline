@@ -1,15 +1,7 @@
 package net.shoreline.client.impl.manager.network.latency;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.math.Vec3d;
-import net.shoreline.client.Shoreline;
-import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.util.Globals;
 import net.shoreline.client.util.world.FakePlayerEntity;
 

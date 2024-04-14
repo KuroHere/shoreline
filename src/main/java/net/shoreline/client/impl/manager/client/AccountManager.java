@@ -9,7 +9,6 @@ import net.shoreline.client.api.account.type.MinecraftAccount;
 import net.shoreline.client.mixin.accessor.AccessorMinecraftClient;
 import net.shoreline.client.util.Globals;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
