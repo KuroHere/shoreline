@@ -72,6 +72,7 @@ public class AutoXPModule extends RotationModule {
         Managers.INVENTORY.setSlot(slot);
         if (rotateConfig.getValue()) {
             setRotation(mc.player.getYaw(), rotatePitchConfig.getValue());
+            if (isRotationBlocked()) return;
         }
         Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, id));
         if (swingConfig.getValue()) {
