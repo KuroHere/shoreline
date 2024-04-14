@@ -102,11 +102,6 @@ public final class ScaffoldModule extends BlockPlacerModule
                     mc.player.setVelocity(velocity.x, 0.42f, velocity.z);
                 }
             }
-
-            if (grimConfig.getValue())
-            {
-                Managers.ROTATION.setRotationSilentSync(true);
-            }
         }
 
         Managers.INVENTORY.syncToClient();
@@ -118,7 +113,7 @@ public final class ScaffoldModule extends BlockPlacerModule
         final float rotationYaw = mc.player.getYaw() - 180;
         for (float yaw = rotationYaw - 45; yaw <= rotationYaw + 45; yaw += 1)
         {
-            for (float pitch = 80; pitch <= 90; pitch += 1)
+            for (float pitch = 75; pitch <= 90; pitch += 1)
             {
                 final float[] angles = { yaw, pitch };
                 final HitResult result = RayCastUtil.rayCast(4.0, angles);
