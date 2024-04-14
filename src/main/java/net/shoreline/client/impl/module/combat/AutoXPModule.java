@@ -14,6 +14,7 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
+import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.module.exploit.PhaseModule;
@@ -26,23 +27,25 @@ import net.shoreline.client.util.player.RotationUtil;
  * @author hockeyl8
  * @since 1.0
  */
-public class AutoXPModule extends ToggleModule {
+public class AutoXPModule extends RotationModule {
 
-    Config<Float> delay = new NumberConfig<>("Delay", "Delay to throw xp in ticks.", 1.0f, 1.0f, 10.0f, NumberDisplay.DEFAULT);
+    Config<Float> delayConfig = new NumberConfig<>("Delay", "Delay to throw xp in ticks.", 1.0f, 1.0f, 10.0f, NumberDisplay.DEFAULT);
     Config<Boolean> durabilityCheckConfig = new BooleanConfig("DurabilityCheck", "Check if your armor and held item durability is full then disables if it is.", true);
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates the player while throwing xp.", false);
+    Config<Float> rotatePitchConfig = new NumberConfig<>("RotatePitch", "Delay to throw xp in ticks.", 1.0f, 90.0f, 90.0f, NumberDisplay.DEFAULT);
     Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swings hand while throwing xp.", false);
 
     private final TickTimer delayTimer = new TickTimer();
 
 
     public AutoXPModule() {
-        super("AutoXP", "Automatically throws xp silently.", ModuleCategory.COMBAT);
+        super("AutoXP", "Automatically throws xp silently.", ModuleCategory.COMBAT, 850);
     }
 
     @EventListener
     public void onPlayerTick(PlayerTickEvent event) {
 
-        if (mc.player == null || !delayTimer.passed(delay.getValue())) return;
+        if (mc.player == null || !delayTimer.passed(delayConfig.getValue())) return;
 
         if (durabilityCheckConfig.getValue() && areItemsFullDura(mc.player)) {
             disable();
@@ -62,12 +65,20 @@ public class AutoXPModule extends ToggleModule {
             disable();
             return;
         }
+
+        float prevYaw = mc.player.getYaw();
+        float prevPitch = mc.player.getPitch();
+
         Managers.INVENTORY.setSlot(slot);
+        if (rotateConfig.getValue()) {
+            setRotation(mc.player.getYaw(), rotatePitchConfig.getValue());
+        }
         Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, id));
         if (swingConfig.getValue()) {
             mc.player.swingHand(Hand.MAIN_HAND);
         }
         Managers.INVENTORY.setSlot(prev);
+        setRotationClient(prevYaw, prevPitch);
         delayTimer.reset();
     }
 
