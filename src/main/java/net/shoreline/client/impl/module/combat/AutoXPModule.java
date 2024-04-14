@@ -36,7 +36,7 @@ public class AutoXPModule extends ToggleModule {
 
 
     public AutoXPModule() {
-        super("AutoXP", "Automatically throws xp silently", ModuleCategory.COMBAT);
+        super("AutoXP", "Automatically throws xp silently.", ModuleCategory.COMBAT);
     }
 
     @EventListener
@@ -45,6 +45,7 @@ public class AutoXPModule extends ToggleModule {
         if (mc.player == null || !delayTimer.passed(delay.getValue())) return;
 
         if (durabilityCheckConfig.getValue() && areItemsFullDura(mc.player)) {
+            disable();
             return;
         }
 
