@@ -190,7 +190,7 @@ public class AutoCrystalModule extends RotationModule {
      */
     public AutoCrystalModule() {
         super("AutoCrystal", "Attacks entities with end crystals",
-                ModuleCategory.COMBAT, 800);
+                ModuleCategory.COMBAT, 750);
     }
 
     @Override
