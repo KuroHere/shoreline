@@ -22,6 +22,7 @@ import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.manager.player.rotation.Rotation;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.player.RotationUtil;
 
 import static net.shoreline.client.impl.module.world.AutoToolModule.getBestTool;
@@ -85,7 +86,7 @@ public final class AutoMineModule extends ToggleModule
 
         if (data != null)
         {
-            if (data.pos().equals(pos) && data.direction() == direction)
+            if (data.pos().equals(pos) && data.direction() == direction && blockDamage >= 1.0f)
             {
                 canRemine = true;
             }
@@ -95,6 +96,8 @@ public final class AutoMineModule extends ToggleModule
                         PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
                         data.pos(), data.direction()));
                 data = null;
+                blockDamage = 0.0f;
+                canRemine = false;
             }
         }
 
@@ -223,15 +226,15 @@ public final class AutoMineModule extends ToggleModule
                     }
                 }
 
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                        PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                        data.pos(), data.direction()));
                 if (canRemine)
                 {
                     Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                             PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
                             data.pos().up(500), data.direction()));
                 }
-                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                        PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                        data.pos(), data.direction()));
 
                 //Managers.INVENTORY.syncToClient();
             }
