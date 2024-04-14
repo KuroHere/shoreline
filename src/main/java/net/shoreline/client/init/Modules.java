@@ -2,8 +2,8 @@ package net.shoreline.client.init;
 
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.ShorelineMod;
-import net.shoreline.client.api.module.Module;
 import net.shoreline.client.impl.manager.ModuleManager;
+import net.shoreline.client.api.module.Module;
 import net.shoreline.client.impl.module.client.*;
 import net.shoreline.client.impl.module.combat.*;
 import net.shoreline.client.impl.module.exploit.*;
@@ -36,7 +36,7 @@ public class Modules {
     public static AutoCrystalModule AUTO_CRYSTAL;
     public static AutoLogModule AUTO_LOG;
     public static AutoTotemModule AUTO_TOTEM;
-    public static BackTrackModule BACK_TRACK;
+    public static AutoXPModule AUTO_XP;
     public static BlockLagModule BLOCK_LAG;
     public static BowAimModule BOW_AIM;
     public static CriticalsModule CRITICALS;
@@ -52,7 +52,6 @@ public class Modules {
     public static DisablerModule DISABLER;
     public static ExtendedFireworkModule EXTENDED_FIREWORK;
     public static FakeLatencyModule FAKE_LATENCY;
-    public static FastEatModule FAST_EAT;
     public static FastProjectileModule FAST_PROJECTILE;
     public static PacketCancelerModule PACKET_CANCELER;
     public static PacketFlyModule PACKET_FLY;
@@ -185,7 +184,7 @@ public class Modules {
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule("autocrystal-module");
             AUTO_LOG = (AutoLogModule) getRegisteredModule("autolog-module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule("autototem-module");
-            BACK_TRACK = (BackTrackModule) getRegisteredModule("backtrack-module");
+            AUTO_XP = (AutoXPModule) getRegisteredModule("autoxp-module");
             BLOCK_LAG = (BlockLagModule) getRegisteredModule("blocklag-module");
             BOW_AIM = (BowAimModule) getRegisteredModule("bowaim-module");
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
@@ -200,7 +199,6 @@ public class Modules {
             DISABLER = (DisablerModule) getRegisteredModule("disabler-module");
             EXTENDED_FIREWORK = (ExtendedFireworkModule) getRegisteredModule("extendedfirework-module");
             FAKE_LATENCY = (FakeLatencyModule) getRegisteredModule("fakelatency-module");
-            FAST_EAT = (FastEatModule) getRegisteredModule("fasteat-module");
             FAST_PROJECTILE = (FastProjectileModule) getRegisteredModule("fastprojectile-module");
             PACKET_CANCELER = (PacketCancelerModule) getRegisteredModule("packetcanceler-module");
             PACKET_FLY = (PacketFlyModule) getRegisteredModule("packetfly-module");

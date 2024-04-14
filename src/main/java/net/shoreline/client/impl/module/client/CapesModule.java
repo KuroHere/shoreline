@@ -16,7 +16,6 @@ public final class CapesModule extends ToggleModule
     public CapesModule()
     {
         super("Capes", "real", ModuleCategory.CLIENT);
-        setHidden(true);
         enable();
     }
 
