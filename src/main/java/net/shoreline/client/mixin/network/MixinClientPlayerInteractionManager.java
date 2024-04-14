@@ -62,7 +62,6 @@ public abstract class MixinClientPlayerInteractionManager implements Globals {
                 pos, state, direction);
         Shoreline.EVENT_HANDLER.dispatch(attackBlockEvent);
         if (attackBlockEvent.isCanceled()) {
-            System.out.println("canceled lol");
             cir.cancel();
             // cir.setReturnValue(false);
         }
