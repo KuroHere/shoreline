@@ -32,7 +32,7 @@ public class AutoXPModule extends RotationModule {
     Config<Float> delayConfig = new NumberConfig<>("Delay", "Delay to throw xp in ticks.", 1.0f, 1.0f, 10.0f, NumberDisplay.DEFAULT);
     Config<Boolean> durabilityCheckConfig = new BooleanConfig("DurabilityCheck", "Check if your armor and held item durability is full then disables if it is.", true);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates the player while throwing xp.", false);
-    Config<Float> rotatePitchConfig = new NumberConfig<>("RotatePitch", "Delay to throw xp in ticks.", 1.0f, 90.0f, 90.0f, NumberDisplay.DEFAULT);
+    Config<Float> rotatePitchConfig = new NumberConfig<>("RotatePitch", "Delay to throw xp in ticks.", 1.0f, 90.0f, 90.0f, NumberDisplay.DEFAULT, () -> rotateConfig.getValue());
     Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swings hand while throwing xp.", false);
 
     private final TickTimer delayTimer = new TickTimer();
