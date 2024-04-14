@@ -123,6 +123,7 @@ public class Modules {
     // World
     public static AirPlaceModule AIR_PLACE;
     public static AntiInteractModule ANTI_INTERACT;
+    public static AutoMineModule AUTO_MINE;
     public static AvoidModule AVOID;
     public static FastDropModule FAST_DROP;
     public static FastPlaceModule FAST_PLACE;
@@ -266,6 +267,7 @@ public class Modules {
             // WAYPOINTS = (WaypointsModule) getRegisteredModule("waypoints-module");
             AIR_PLACE = (AirPlaceModule) getRegisteredModule("airplace-module");
             ANTI_INTERACT = (AntiInteractModule) getRegisteredModule("antiinteract-module");
+            AUTO_MINE = (AutoMineModule) getRegisteredModule("automine-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");
             FAST_DROP = (FastDropModule) getRegisteredModule("fastdrop-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule("fastplace-module");

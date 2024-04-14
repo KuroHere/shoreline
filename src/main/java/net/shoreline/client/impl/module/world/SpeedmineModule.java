@@ -39,6 +39,8 @@ import net.shoreline.client.util.player.RotationUtil;
 
 import java.text.DecimalFormat;
 
+import static net.shoreline.client.impl.module.world.AutoToolModule.getBestTool;
+
 /**
  * @author linus
  * @since 1.0
@@ -206,28 +208,7 @@ public class SpeedmineModule extends RotationModule {
         }
     }
 
-    public int getBestTool(BlockState state) {
-        int slot = mc.player.getInventory().selectedSlot;
-        float bestTool = 0.0f;
-        for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.isEmpty() || !(stack.getItem() instanceof ToolItem)) {
-                continue;
-            }
-            float speed = stack.getMiningSpeedMultiplier(state);
-            int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, stack);
-            if (efficiency > 0) {
-                speed += efficiency * efficiency + 1.0f;
-            }
-            if (speed > bestTool) {
-                bestTool = speed;
-                slot = i;
-            }
-        }
-        return slot;
-    }
-
-    private float calcBlockBreakingDelta(BlockState state, BlockView world,
+    float calcBlockBreakingDelta(BlockState state, BlockView world,
                                          BlockPos pos) {
         if (swapConfig.getValue() == Swap.OFF) {
             return state.calcBlockBreakingDelta(mc.player, mc.world, pos);

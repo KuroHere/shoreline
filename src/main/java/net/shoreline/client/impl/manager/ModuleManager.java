@@ -133,6 +133,8 @@ public class ModuleManager {
                 // World
                 new AirPlaceModule(),
                 new AntiInteractModule(),
+                new AutoMineModule(),
+                new AutoToolModule(),
                 new AvoidModule(),
                 new FastDropModule(),
                 new FastPlaceModule(),
