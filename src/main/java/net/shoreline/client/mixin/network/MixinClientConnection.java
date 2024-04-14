@@ -3,6 +3,7 @@ package net.shoreline.client.mixin.network;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketCallbacks;
+import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.text.Text;
 import net.shoreline.client.Shoreline;
@@ -10,6 +11,7 @@ import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -20,6 +22,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(ClientConnection.class)
 public class MixinClientConnection {
+    @Shadow @Nullable private volatile PacketListener packetListener;
+
     /**
      * @param packet
      * @param callbacks
@@ -48,7 +52,7 @@ public class MixinClientConnection {
     private void hookChannelRead0(ChannelHandlerContext channelHandlerContext,
                                   Packet<?> packet, CallbackInfo ci) {
         PacketEvent.Inbound packetInboundEvent =
-                new PacketEvent.Inbound(packet);
+                new PacketEvent.Inbound(packetListener, packet);
         Shoreline.EVENT_HANDLER.dispatch(packetInboundEvent);
         // prevent client from receiving packet from server
         if (packetInboundEvent.isCanceled()) {

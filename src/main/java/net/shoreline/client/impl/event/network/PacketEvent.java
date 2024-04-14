@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.event.network;
 
+import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.shoreline.client.api.event.Cancelable;
 import net.shoreline.client.api.event.Event;
@@ -32,11 +33,19 @@ public class PacketEvent extends Event {
      */
     @Cancelable
     public static class Inbound extends PacketEvent {
+
+        private final PacketListener packetListener;
+
         /**
          * @param packet
          */
-        public Inbound(Packet<?> packet) {
+        public Inbound(PacketListener packetListener, Packet<?> packet) {
             super(packet);
+            this.packetListener = packetListener;
+        }
+
+        public PacketListener getPacketListener() {
+            return packetListener;
         }
     }
 
