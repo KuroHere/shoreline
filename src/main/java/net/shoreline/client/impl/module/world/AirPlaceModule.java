@@ -21,7 +21,7 @@ import net.shoreline.client.impl.event.network.PlayerTickEvent;
  */
 public final class AirPlaceModule extends ToggleModule
 {
-    Config<Integer> range = new NumberConfig<>("Range", "", 1, 4, 10, NumberDisplay.DEFAULT);
+    Config<Float> range = new NumberConfig<>("Range", "", 1.0f, 4.0f, 10.0f, NumberDisplay.DEFAULT);
     Config<Boolean> fluids = new BooleanConfig("Fluids", "", false);
 
     public AirPlaceModule()
