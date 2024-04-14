@@ -3,8 +3,6 @@ package net.shoreline.client.impl.module.combat;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.common.CommonPongC2SPacket;
-import net.minecraft.network.packet.c2s.common.KeepAliveC2SPacket;
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket;
 import net.minecraft.network.packet.s2c.common.KeepAliveS2CPacket;
 import net.minecraft.network.packet.s2c.play.*;
@@ -21,7 +19,6 @@ import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
-import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.TickTimer;
 import net.shoreline.client.util.math.timer.Timer;
 
@@ -68,17 +65,6 @@ public final class BackTrackModule extends ToggleModule
     }
 
     @EventListener
-    public void onPacketOutbound(final PacketEvent.Outbound event)
-    {
-        // On anticheats like Grim, this prevents the retarded skipped transactions retardation
-        // I hate new anticheats
-        if (blockingPackets && (event.getPacket() instanceof CommonPongC2SPacket || event.getPacket() instanceof KeepAliveC2SPacket))
-        {
-            //event.setCanceled(true);
-        }
-    }
-
-    @EventListener
     public void onPacketInbound(final PacketEvent.Inbound event)
     {
         if (mc.world != null && mc.player != null)
@@ -97,13 +83,6 @@ public final class BackTrackModule extends ToggleModule
             {
                 lastServerPos = serverPos;
                 serverPos = new Vec3d(packet.getX(), packet.getY(), packet.getZ());
-            }
-        }
-        else if (event.getPacket() instanceof EntityVelocityUpdateS2CPacket packet)
-        {
-            if (attackingEntity != null && attackingEntity.getId() == packet.getId() && serverPos != null)
-            {
-                serverPos.add(packet.getVelocityX() / 8000.0, packet.getVelocityY() / 8000.0, packet.getVelocityZ() / 8000.0);
             }
         }
 
