@@ -9,7 +9,7 @@ package net.shoreline.client.api.font;
  * @param width
  * @param height
  */
-record Glyph(char c, int textureX, int textureY, int width, int height)
+public record Glyph(char c, int textureX, int textureY, int width, int height)
 {
 
 }
