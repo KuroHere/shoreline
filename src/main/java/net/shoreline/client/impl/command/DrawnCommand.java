@@ -6,7 +6,7 @@ import net.shoreline.client.api.command.arg.Argument;
 import net.shoreline.client.api.command.arg.arguments.ModuleArgument;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ToggleModule;
-import net.shoreline.client.api.render.Hideable;
+import net.shoreline.client.api.Hideable;
 import net.shoreline.client.util.chat.ChatUtil;
 
 /**
