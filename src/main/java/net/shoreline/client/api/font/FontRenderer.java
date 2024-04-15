@@ -30,15 +30,4 @@ public interface FontRenderer extends Globals
 
     Glyph getGlyph(final char c);
     Glyph[] getGlyphMap();
-
-    @FunctionalInterface
-    interface GlyphVisitor
-    {
-        int draw(final FontRenderer fontRenderer, final char c, final double x, final double y, final int color, final boolean shadow);
-    }
-
-    record Glyph(char c, int textureX, int textureY, int width, int height)
-    {
-
-    }
 }
