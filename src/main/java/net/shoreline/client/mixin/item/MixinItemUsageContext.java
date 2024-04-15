@@ -15,7 +15,7 @@ public final class MixinItemUsageContext implements Globals
     @Inject(method = "getStack", at = @At("RETURN"), cancellable = true)
     public void hookGetStack(final CallbackInfoReturnable<ItemStack> info)
     {
-        if (info.getReturnValue().equals(mc.player.getMainHandStack()) && Managers.INVENTORY.isDesynced())
+        if (mc.player != null && info.getReturnValue().equals(mc.player.getMainHandStack()) && Managers.INVENTORY.isDesynced())
         {
             info.setReturnValue(Managers.INVENTORY.getServerItem());
         }
