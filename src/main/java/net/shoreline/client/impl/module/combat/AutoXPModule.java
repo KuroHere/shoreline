@@ -66,9 +66,6 @@ public class AutoXPModule extends RotationModule {
             return;
         }
 
-        float prevYaw = mc.player.getYaw();
-        float prevPitch = mc.player.getPitch();
-
         Managers.INVENTORY.setSlot(slot);
         if (rotateConfig.getValue()) {
             setRotation(mc.player.getYaw(), rotatePitchConfig.getValue());
@@ -79,7 +76,6 @@ public class AutoXPModule extends RotationModule {
             mc.player.swingHand(Hand.MAIN_HAND);
         }
         Managers.INVENTORY.setSlot(prev);
-        setRotationClient(prevYaw, prevPitch);
         delayTimer.reset();
     }
 
