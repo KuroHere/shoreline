@@ -8,7 +8,6 @@ import net.shoreline.client.api.file.ConfigFile;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.util.chat.ChatUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
