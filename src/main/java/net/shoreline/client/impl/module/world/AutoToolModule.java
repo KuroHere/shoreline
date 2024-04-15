@@ -18,7 +18,7 @@ public final class AutoToolModule extends ToggleModule
 {
     public AutoToolModule()
     {
-        super("AutoTool", "yes", ModuleCategory.WORLD);
+        super("AutoTool", "Automatically switches to a tool before mining", ModuleCategory.WORLD);
     }
 
     @EventListener

@@ -105,6 +105,7 @@ public class Modules {
     public static ChamsModule CHAMS;
     public static ESPModule ESP;
     public static ExtraTabModule EXTRA_TAB;
+    public static FreecamModule FREECAM;
     public static FullbrightModule FULLBRIGHT;
     public static NameProtectModule NAME_PROTECT;
     public static HoleESPModule HOLE_ESP;
@@ -249,6 +250,7 @@ public class Modules {
             CHAMS = (ChamsModule) getRegisteredModule("chams-module");
             ESP = (ESPModule) getRegisteredModule("esp-module");
             EXTRA_TAB = (ExtraTabModule) getRegisteredModule("extratab-module");
+            // FREECAM = (FreecamModule) getRegisteredModule("freecam-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule("fullbright-module");
             HOLE_ESP = (HoleESPModule) getRegisteredModule("holeesp-module");
             NAME_PROTECT = (NameProtectModule) getRegisteredModule("nameprotect-module");
@@ -265,7 +267,7 @@ public class Modules {
             // WAYPOINTS = (WaypointsModule) getRegisteredModule("waypoints-module");
             AIR_PLACE = (AirPlaceModule) getRegisteredModule("airplace-module");
             ANTI_INTERACT = (AntiInteractModule) getRegisteredModule("antiinteract-module");
-            AUTO_MINE = (AutoMineModule) getRegisteredModule("automine-module");
+            // AUTO_MINE = (AutoMineModule) getRegisteredModule("automine-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");
             FAST_DROP = (FastDropModule) getRegisteredModule("fastdrop-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule("fastplace-module");
