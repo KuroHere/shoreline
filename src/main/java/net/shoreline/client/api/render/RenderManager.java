@@ -9,10 +9,11 @@ import net.shoreline.client.init.Fonts;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorWorldRenderer;
 import net.shoreline.client.util.Globals;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
-import static net.shoreline.client.api.render.Buffers.*;
+import java.awt.*;
 
 /**
  * @author linus
@@ -22,6 +23,26 @@ public class RenderManager implements Globals {
     //
     public static final Tessellator TESSELLATOR = RenderSystem.renderThreadTesselator();
     public static final BufferBuilder BUFFER = TESSELLATOR.getBuffer();
+
+    /**
+     *
+     */
+    private static void preRenderWorld() {
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        GL11.glEnable(GL11.GL_CULL_FACE);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+    }
+
+    /**
+     *
+     */
+    private static void postRenderWorld() {
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+    }
 
     /**
      * @param matrices
@@ -42,7 +63,16 @@ public class RenderManager implements Globals {
             return;
         }
         matrices.push();
-        drawBox(matrices, box, color);
+        preRenderWorld();
+        Color c = new Color(color, true);
+        RenderSystem.setShaderColor(c.getRed() / 255.0f, c.getGreen() / 255.0f,
+                c.getBlue() / 255.0f, c.getAlpha() / 255.0f);
+        RenderSystem.setShader(GameRenderer::getPositionProgram);
+        BUFFER.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
+        drawBox(matrices, box);
+        TESSELLATOR.draw();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        postRenderWorld();
         matrices.pop();
     }
 
@@ -50,8 +80,8 @@ public class RenderManager implements Globals {
      * @param matrices
      * @param box
      */
-    public static void drawBox(MatrixStack matrices, Box box, int color) {
-        drawBox(matrices, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, color);
+    public static void drawBox(MatrixStack matrices, Box box) {
+        drawBox(matrices, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
     }
 
     /**
@@ -71,19 +101,39 @@ public class RenderManager implements Globals {
      * @param z2
      */
     public static void drawBox(MatrixStack matrices, double x1, double y1,
-                               double z1, double x2, double y2, double z2, int color) {
+                               double z1, double x2, double y2, double z2) {
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-        QUADS.begin(matrix4f);
-        QUADS.color(color);
-
-        QUADS.vertex(x1, y1, z1).vertex(x2, y1, z1).vertex(x2, y1, z2).vertex(x1, y1, z2);
-        QUADS.vertex(x1, y2, z1).vertex(x1, y2, z2).vertex(x2, y2, z2).vertex(x2, y2, z1);
-        QUADS.vertex(x1, y1, z1).vertex(x1, y2, z1).vertex(x2, y2, z1).vertex(x2, y1, z1);
-        QUADS.vertex(x2, y1, z1).vertex(x2, y2, z1).vertex(x2, y2, z2).vertex(x2, y1, z2);
-        QUADS.vertex(x1, y1, z2).vertex(x2, y1, z2).vertex(x2, y2, z2).vertex(x1, y2, z2);
-        QUADS.vertex(x1, y1, z1).vertex(x1, y1, z2).vertex(x1, y2, z2).vertex(x1, y2, z1);
-
-        QUADS.end();
+        Matrix3f matrix3f = matrices.peek().getNormalMatrix();
+        float f = (float) x1;
+        float g = (float) y1;
+        float h = (float) z1;
+        float i = (float) x2;
+        float j = (float) y2;
+        float k = (float) z2;
+        BUFFER.vertex(matrix4f, f, g, h).next();
+        BUFFER.vertex(matrix4f, i, g, h).next();
+        BUFFER.vertex(matrix4f, i, g, k).next();
+        BUFFER.vertex(matrix4f, f, g, k).next();
+        BUFFER.vertex(matrix4f, f, j, h).next();
+        BUFFER.vertex(matrix4f, f, j, k).next();
+        BUFFER.vertex(matrix4f, i, j, k).next();
+        BUFFER.vertex(matrix4f, i, j, h).next();
+        BUFFER.vertex(matrix4f, f, g, h).next();
+        BUFFER.vertex(matrix4f, f, j, h).next();
+        BUFFER.vertex(matrix4f, i, j, h).next();
+        BUFFER.vertex(matrix4f, i, g, h).next();
+        BUFFER.vertex(matrix4f, i, g, h).next();
+        BUFFER.vertex(matrix4f, i, j, h).next();
+        BUFFER.vertex(matrix4f, i, j, k).next();
+        BUFFER.vertex(matrix4f, i, g, k).next();
+        BUFFER.vertex(matrix4f, f, g, k).next();
+        BUFFER.vertex(matrix4f, i, g, k).next();
+        BUFFER.vertex(matrix4f, i, j, k).next();
+        BUFFER.vertex(matrix4f, f, j, k).next();
+        BUFFER.vertex(matrix4f, f, g, h).next();
+        BUFFER.vertex(matrix4f, f, g, k).next();
+        BUFFER.vertex(matrix4f, f, j, k).next();
+        BUFFER.vertex(matrix4f, f, j, h).next();
     }
 
     /**
@@ -107,8 +157,17 @@ public class RenderManager implements Globals {
             return;
         }
         matrices.push();
+        preRenderWorld();
+        Color c = new Color(color, true);
+        RenderSystem.setShaderColor(c.getRed() / 255.0f, c.getGreen() / 255.0f,
+                c.getBlue() / 255.0f, c.getAlpha() / 255.0f);
+        RenderSystem.setShader(GameRenderer::getPositionProgram);
         RenderSystem.lineWidth(width);
-        drawBoundingBox(matrices, box, color);
+        BUFFER.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION);
+        drawBoundingBox(matrices, box);
+        TESSELLATOR.draw();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        postRenderWorld();
         matrices.pop();
     }
 
@@ -116,8 +175,8 @@ public class RenderManager implements Globals {
      * @param matrices
      * @param box
      */
-    public static void drawBoundingBox(MatrixStack matrices, Box box, int color) {
-        drawBoundingBox(matrices, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, color);
+    public static void drawBoundingBox(MatrixStack matrices, Box box) {
+        drawBoundingBox(matrices, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
     }
 
     /**
@@ -130,27 +189,39 @@ public class RenderManager implements Globals {
      * @param z2
      */
     public static void drawBoundingBox(MatrixStack matrices, double x1, double y1,
-                                       double z1, double x2, double y2, double z2, int color) {
+                                       double z1, double x2, double y2, double z2) {
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-        LINES.begin(matrix4f);
-        LINES.color(color);
-
-        LINES.vertex(x1, y1, z1).vertex(x2, y1, z1);
-        LINES.vertex(x2, y1, z1).vertex(x2, y1, z2);
-        LINES.vertex(x2, y1, z2).vertex(x1, y1, z2);
-        LINES.vertex(x1, y1, z2).vertex(x1, y1, z1);
-
-        LINES.vertex(x1, y1, z1).vertex(x1, y2, z1);
-        LINES.vertex(x2, y1, z1).vertex(x2, y2, z1);
-        LINES.vertex(x2, y1, z2).vertex(x2, y2, z2);
-        LINES.vertex(x1, y1, z2).vertex(x1, y2, z2);
-
-        LINES.vertex(x1, y2, z1).vertex(x2, y2, z1);
-        LINES.vertex(x2, y2, z1).vertex(x2, y2, z2);
-        LINES.vertex(x2, y2, z2).vertex(x1, y2, z2);
-        LINES.vertex(x1, y2, z2).vertex(x1, y2, z1);
-
-        LINES.end();
+        Matrix3f matrix3f = matrices.peek().getNormalMatrix();
+        float f = (float) x1;
+        float g = (float) y1;
+        float h = (float) z1;
+        float i = (float) x2;
+        float j = (float) y2;
+        float k = (float) z2;
+        BUFFER.vertex(matrix4f, f, g, h).next();
+        BUFFER.vertex(matrix4f, i, g, h).next();
+        BUFFER.vertex(matrix4f, i, g, h).next();
+        BUFFER.vertex(matrix4f, i, g, k).next();
+        BUFFER.vertex(matrix4f, i, g, k).next();
+        BUFFER.vertex(matrix4f, f, g, k).next();
+        BUFFER.vertex(matrix4f, f, g, k).next();
+        BUFFER.vertex(matrix4f, f, g, h).next();
+        BUFFER.vertex(matrix4f, f, g, h).next();
+        BUFFER.vertex(matrix4f, f, j, h).next();
+        BUFFER.vertex(matrix4f, i, g, h).next();
+        BUFFER.vertex(matrix4f, i, j, h).next();
+        BUFFER.vertex(matrix4f, i, g, k).next();
+        BUFFER.vertex(matrix4f, i, j, k).next();
+        BUFFER.vertex(matrix4f, f, g, k).next();
+        BUFFER.vertex(matrix4f, f, j, k).next();
+        BUFFER.vertex(matrix4f, f, j, h).next();
+        BUFFER.vertex(matrix4f, i, j, h).next();
+        BUFFER.vertex(matrix4f, i, j, h).next();
+        BUFFER.vertex(matrix4f, i, j, k).next();
+        BUFFER.vertex(matrix4f, i, j, k).next();
+        BUFFER.vertex(matrix4f, f, j, k).next();
+        BUFFER.vertex(matrix4f, f, j, k).next();
+        BUFFER.vertex(matrix4f, f, j, h).next();
     }
 
     /**
@@ -178,8 +249,17 @@ public class RenderManager implements Globals {
                                   double z1, double x2, double y2, double z2,
                                   float width, int color) {
         matrices.push();
+        preRenderWorld();
+        Color c = new Color(color, true);
+        RenderSystem.setShaderColor(c.getRed() / 255.0f, c.getGreen() / 255.0f,
+                c.getBlue() / 255.0f, c.getAlpha() / 255.0f);
+        RenderSystem.setShader(GameRenderer::getPositionProgram);
         RenderSystem.lineWidth(width);
-        drawLine(matrices, x1, y1, z1, x2, y2, z2, color);
+        BUFFER.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION);
+        drawLine(matrices, x1, y1, z1, x2, y2, z2);
+        TESSELLATOR.draw();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        postRenderWorld();
         matrices.pop();
     }
 
@@ -193,13 +273,16 @@ public class RenderManager implements Globals {
      * @param z2
      */
     public static void drawLine(MatrixStack matrices, double x1, double y1,
-                                double z1, double x2, double y2, double z2, int color) {
+                                double z1, double x2, double y2, double z2) {
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-        LINES.begin(matrix4f);
-        LINES.color(color);
-        LINES.vertex(x1, y1, z1);
-        LINES.vertex(x2, y2, z2);
-        LINES.end();
+        float f = (float) x1;
+        float g = (float) y1;
+        float h = (float) z1;
+        float i = (float) x2;
+        float j = (float) y2;
+        float k = (float) z2;
+        BUFFER.vertex(matrix4f, f, g, h).next();
+        BUFFER.vertex(matrix4f, i, j, k).next();
     }
 
     /**
@@ -294,14 +377,24 @@ public class RenderManager implements Globals {
             y1 = y2;
             y2 = i;
         }
-
-        QUADS.begin(matrix4f);
-        QUADS.color(color);
-        QUADS.vertex(x1, y1, z);
-        QUADS.vertex(x1, y2, z);
-        QUADS.vertex(x2, y2, z);
-        QUADS.vertex(x2, y1, z);
-        QUADS.end();
+        float f = (float) ColorHelper.Argb.getAlpha(color) / 255.0f;
+        float g = (float) ColorHelper.Argb.getRed(color) / 255.0f;
+        float h = (float) ColorHelper.Argb.getGreen(color) / 255.0f;
+        float j = (float) ColorHelper.Argb.getBlue(color) / 255.0f;
+        RenderSystem.enableBlend();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        BUFFER.begin(VertexFormat.DrawMode.QUADS,
+                VertexFormats.POSITION_COLOR);
+        BUFFER.vertex(matrix4f, (float) x1, (float) y1, (float) z)
+                .color(g, h, j, f).next();
+        BUFFER.vertex(matrix4f, (float) x1, (float) y2, (float) z)
+                .color(g, h, j, f).next();
+        BUFFER.vertex(matrix4f, (float) x2, (float) y2, (float) z)
+                .color(g, h, j, f).next();
+        BUFFER.vertex(matrix4f, (float) x2, (float) y1, (float) z)
+                .color(g, h, j, f).next();
+        BufferRenderer.drawWithGlobalProgram(BUFFER.end());
+        RenderSystem.disableBlend();
     }
 
     /**
