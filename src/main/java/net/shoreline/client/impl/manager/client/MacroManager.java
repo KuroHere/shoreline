@@ -14,6 +14,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * @author linus
@@ -42,15 +43,6 @@ public class MacroManager implements Globals {
             return;
         }
         // module keybind impl
-        for (Module module : Managers.MODULE.getModules()) {
-            if (module instanceof ToggleModule toggle) {
-                final Macro keybind = toggle.getKeybinding();
-                if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
-                        && event.getKeycode() == keybind.getKeycode()) {
-                    keybind.runMacro();
-                }
-            }
-        }
         //
         if (macros.isEmpty()) {
             return;
@@ -71,6 +63,10 @@ public class MacroManager implements Globals {
         // TODO
     }
 
+    public void setMacro(Macro macro, int keycode) {
+        getMacro(m -> m.getId().equals(macro.getId())).setKeycode(keycode);
+    }
+
     /**
      * @param macros
      */
@@ -85,6 +81,10 @@ public class MacroManager implements Globals {
      */
     public void register(Macro macro) {
         macros.add(macro);
+    }
+
+    public Macro getMacro(Predicate<? super Macro> predicate) {
+        return macros.stream().filter(predicate).findFirst().orElse(null);
     }
 
     /**

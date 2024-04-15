@@ -25,6 +25,7 @@ import java.util.concurrent.*;
  */
 public class HoleManager implements Globals {
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
+    private Future<Set<Hole>> result;
     //
     private Set<Hole> holes = new ConcurrentSet<>();
 
@@ -41,13 +42,7 @@ public class HoleManager implements Globals {
             return;
         }
         HoleTask runnable = new HoleTask(getSphere(mc.player.getPos()));
-        //
-        Future<Set<Hole>> result = executor.submit(runnable);
-        try {
-            holes = result.get();
-        } catch (ExecutionException | InterruptedException e) {
-
-        }
+        result = executor.submit(runnable);
     }
 
     public List<BlockPos> getSphere(Vec3d start) {
@@ -209,6 +204,13 @@ public class HoleManager implements Globals {
      * @return
      */
     public Set<Hole> getHoles() {
+        if (result != null) {
+            try {
+                holes = result.get();
+            } catch (ExecutionException | InterruptedException e) {
+
+            }
+        }
         return holes;
     }
 

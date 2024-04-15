@@ -1,6 +1,7 @@
 package net.shoreline.client.api.file;
 
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.macro.MacroFile;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.file.ModuleConfigFile;
 import net.shoreline.client.api.module.file.ModuleFile;
@@ -65,6 +66,7 @@ public class ClientConfiguration implements Globals {
                 }
             }
         }
+        files.add(new MacroFile(clientDir));
         for (Module module : Managers.MODULE.getModules()) {
             // files.add(new ModulePreset(clientDir.resolve("Defaults"), module));
             files.add(new ModuleFile(clientDir.resolve("Modules"), module));
