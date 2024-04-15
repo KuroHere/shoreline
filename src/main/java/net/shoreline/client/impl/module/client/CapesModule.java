@@ -15,7 +15,7 @@ public final class CapesModule extends ToggleModule
 
     public CapesModule()
     {
-        super("Capes", "real", ModuleCategory.CLIENT);
+        super("Capes", "Shows player capes", ModuleCategory.CLIENT);
         enable();
     }
 
