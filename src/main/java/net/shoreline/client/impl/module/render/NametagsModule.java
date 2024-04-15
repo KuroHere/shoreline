@@ -110,6 +110,8 @@ public class NametagsModule extends ToggleModule {
                         rx, ry, rz, camera, scaling);
             }
         }
+
+        RenderSystem.enableBlend();
     }
 
     @EventListener
@@ -131,7 +133,6 @@ public class NametagsModule extends ToggleModule {
                 z - pos.getZ());
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-camera.getYaw()));
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-        RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         matrices.scale(-scaling, -scaling, -1.0f);
         GL11.glDepthFunc(GL11.GL_ALWAYS);
@@ -154,7 +155,6 @@ public class NametagsModule extends ToggleModule {
         if (armorConfig.getValue()) {
             renderItems(matrices, entity);
         }
-        RenderSystem.disableBlend();
         GL11.glDepthFunc(GL11.GL_LEQUAL);
         matrices.pop();
     }
