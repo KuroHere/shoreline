@@ -12,19 +12,15 @@ import net.shoreline.client.impl.event.TickEvent;
 import net.shoreline.client.init.Managers;
 
 /**
- * @author linus
+ * @author linus & hockeyl8
  * @since 1.0
  */
 public class ReplenishModule extends ToggleModule {
-    //
+
     Config<Integer> percentConfig = new NumberConfig<>("Percent", "The minimum percent of total stack before replenishing", 1, 25, 80);
 
-    /**
-     *
-     */
     public ReplenishModule() {
-        super("Replenish", "Automatically replaces items in your hotbar",
-                ModuleCategory.COMBAT);
+        super("Replenish", "Automatically replaces items in your hotbar", ModuleCategory.COMBAT);
     }
 
     @EventListener
@@ -38,7 +34,7 @@ public class ReplenishModule extends ToggleModule {
                 continue;
             }
             float stackPercent = ((float) stack.getCount() / stack.getMaxCount()) * 100.0f;
-            if (stackPercent < percentConfig.getValue()) {
+            if (Math.max(stackPercent, (1.0 / stack.getMaxCount()) * 100) <= percentConfig.getValue()) {
                 replenishStack(stack, i);
             }
         }
