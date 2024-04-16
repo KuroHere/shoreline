@@ -72,9 +72,9 @@ public class AuraModule extends RotationModule {
     // ROTATE
     Config<Vector> hitVectorConfig = new EnumConfig<>("HitVector", "The vector to aim for when attacking entities", Vector.FEET, Vector.values());
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate before attacking", false);
-    Config<Boolean> strictRotateConfig = new BooleanConfig("RotateStrict", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", false, () -> rotateConfig.getValue());
     Config<Boolean> silentRotateConfig = new BooleanConfig("RotateSilent", "Rotates silently to server", false, () -> rotateConfig.getValue());
-    Config<Integer> rotateLimitConfig = new NumberConfig<>("Rotate-Yaw", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
+    Config<Boolean> strictRotateConfig = new BooleanConfig("YawStep", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", false, () -> rotateConfig.getValue());
+    Config<Integer> rotateLimitConfig = new NumberConfig<>("YawStep-Limit", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted", "The minimum age of the entity to be considered for attack", 0, 50, 200);
     Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck", "Checks if target has armor before attacking", false);
     // Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock", "Automatically blocks after attack", false);
@@ -171,7 +171,7 @@ public class AuraModule extends RotationModule {
         if (rotateConfig.getValue()) {
             float[] rotation = RotationUtil.getRotationsTo(mc.player.getEyePos(),
                     getAttackRotateVec(entityTarget));
-            if (strictRotateConfig.getValue()) {
+            if (!silentRotateConfig.getValue() && strictRotateConfig.getValue()) {
                 float serverYaw = Managers.ROTATION.getWrappedYaw();
                 float diff = serverYaw - rotation[0];
                 float diff1 = Math.abs(diff);
@@ -203,7 +203,7 @@ public class AuraModule extends RotationModule {
                 setRotation(rotation[0], rotation[1]);
             }
         }
-        if (isRotationBlocked() || !shouldWaitCrit() || !rotated || !isInAttackRange(eyepos, entityTarget)) {
+        if (isRotationBlocked() || !shouldWaitCrit() || !rotated && rotateConfig.getValue() || !isInAttackRange(eyepos, entityTarget)) {
             return;
         }
         if (attackDelayConfig.getValue()) {
@@ -277,7 +277,7 @@ public class AuraModule extends RotationModule {
 
         if (silentRotateConfig.getValue() && silentRotations != null)
         {
-            Managers.ROTATION.setRotationSilent(silentRotations[0], silentRotations[1], true);
+            setRotationSilent(silentRotations[0], silentRotations[1]);
         }
 
         PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(entity,
