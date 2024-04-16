@@ -77,7 +77,7 @@ public class AuraModule extends RotationModule {
     Config<Integer> rotateLimitConfig = new NumberConfig<>("Rotate-Yaw", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted", "The minimum age of the entity to be considered for attack", 0, 50, 200);
     Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck", "Checks if target has armor before attacking", false);
-    //    Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock", "Automatically blocks after attack", false);
+//    Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock", "Automatically blocks after attack", false);
     Config<Boolean> stopSprintConfig = new BooleanConfig("StopSprint", "Stops sprinting before attacking to maintain vanilla behavior", false);
     Config<Boolean> stopShieldConfig = new BooleanConfig("StopShield", "Automatically handles shielding before attacking", false);
 
