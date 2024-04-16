@@ -10,7 +10,7 @@ import net.shoreline.client.api.account.type.impl.CrackedAccount;
 import net.shoreline.client.api.account.type.impl.MicrosoftAccount;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
-import net.shoreline.client.util.network.TextureDownloader;
+import net.shoreline.client.util.render.TextureDownloader;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
 

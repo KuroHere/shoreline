@@ -1,8 +1,8 @@
 package net.shoreline.client.init;
 
-import net.shoreline.client.impl.font.VanillaTextRenderer;
+import net.shoreline.client.font.CustomTextRenderer;
 
 public class Fonts {
     //
-    public static final VanillaTextRenderer VANILLA = new VanillaTextRenderer();
+    public static final CustomTextRenderer VANILLA = new CustomTextRenderer();
 }

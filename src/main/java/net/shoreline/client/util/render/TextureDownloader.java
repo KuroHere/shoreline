@@ -1,4 +1,4 @@
-package net.shoreline.client.util.network;
+package net.shoreline.client.util.render;
 
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;

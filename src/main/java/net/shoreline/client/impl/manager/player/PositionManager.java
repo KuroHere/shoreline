@@ -11,6 +11,7 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
+import net.shoreline.client.util.world.VecUtil;
 
 /**
  * @author linus
@@ -80,7 +81,7 @@ public class PositionManager implements Globals {
      * @return
      */
     public Vec3d getEyePos() {
-        return getPos().add(0.0, mc.player.getStandingEyeHeight(), 0.0);
+        return VecUtil.toEyePos(mc.player, getPos());
     }
 
     /**

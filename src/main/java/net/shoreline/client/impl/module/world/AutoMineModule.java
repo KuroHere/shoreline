@@ -22,7 +22,10 @@ import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.manager.player.rotation.Rotation;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.player.RotationUtil;
+
+import static net.shoreline.client.impl.module.world.AutoToolModule.getBestTool;
 
 /**
  * @author xgraza
@@ -204,7 +207,7 @@ public final class AutoMineModule extends ToggleModule
     {
         if (data != null)
         {
-            final int slot = Modules.AUTO_TOOL.getBestTool(data.getBlockState());
+            final int slot = getBestTool(data.getBlockState());
             if (blockDamage >= 0.95f || canRemine)
             {
                 //Managers.INVENTORY.setSlot(slot);
