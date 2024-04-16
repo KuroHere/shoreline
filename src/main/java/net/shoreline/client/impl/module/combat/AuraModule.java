@@ -9,14 +9,15 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.NumberDisplay;
@@ -56,7 +57,7 @@ public class AuraModule extends RotationModule {
     Config<Float> searchRangeConfig = new NumberConfig<>("SearchRange", "Range to search for targets", 1.0f, 5.0f, 6.0f);
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to attack entities", 1.0f, 4.5f, 5.0f);
     Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to attack entities through walls", 1.0f, 4.5f, 5.0f);
-    // Config<Boolean> vanillaRangeConfig = new BooleanConfig("VanillaRange", "Only attack within vanilla range", false);
+    Config<Boolean> vanillaRangeConfig = new BooleanConfig("VanillaRange", "Only attack within vanilla range", false);
     Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to attack entities", 1.0f, 180.0f, 180.0f);
     // Config<Boolean> latencyPositionConfig = new BooleanConfig("LatencyPosition", "Targets the latency positions of enemies", false);
     // Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency", "Maximum latency factor when calculating positions", 50, 250,1000, () -> latencyPositionConfig.getValue());
@@ -240,7 +241,7 @@ public class AuraModule extends RotationModule {
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (entityTarget != null && renderConfig.getValue() && isHoldingSword()) {
-            int attackDelay = 0;
+            int attackDelay;
             float delay = (attackSpeedConfig.getValue() * 50.0f) + randomDelay;
             if (attackDelayConfig.getValue()) {
                 float animFactor = 1.0f - mc.player.getAttackCooldownProgress(0.0f);
@@ -453,8 +454,9 @@ public class AuraModule extends RotationModule {
     }
 
     public boolean isInAttackRange(Vec3d pos, Entity entity) {
-        double dist = pos.distanceTo(entity.getPos());
-        return isInAttackRange(dist, pos, entity);
+        final Vec3d entityPos = getAttackRotateVec(entity);
+        double dist = pos.distanceTo(entityPos);
+        return isInAttackRange(dist, pos, entityPos);
     }
 
     /**
@@ -463,31 +465,22 @@ public class AuraModule extends RotationModule {
      * @param entity
      * @return
      */
-    public boolean isInAttackRange(double dist, Vec3d pos, Entity entity) {
-/*
-        if (vanillaRangeConfig.getValue()) {
-            double d = mc.interactionManager.getReachDistance();
-            Vec3d vec3d = mc.player.getCameraPosVec(0.0f);
-            float[] rotations = RotationUtil.getRotationsTo(vec3d, pos);
-            Vec3d vec3d2 = RotationUtil.getRotationVector(rotations[0], rotations[1]);
-            Vec3d vec3d3 = vec3d.add(vec3d2.x * d, vec3d2.y * d, vec3d2.z * d);
-            HitResult result = mc.world.raycast(new RaycastContext(vec3d, vec3d3,
-                    RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
-            return result != null && result.getType() == HitResult.Type.ENTITY;
+    public boolean isInAttackRange(double dist, Vec3d pos, Vec3d entityPos) {
+        if (vanillaRangeConfig.getValue() && dist > 3.0f) {
+            return false;
         }
-*/
         if (dist > rangeConfig.getValue()) {
             return false;
         }
         BlockHitResult result = mc.world.raycast(new RaycastContext(
-                pos, entity.getPos(),
+                pos, entityPos,
                 RaycastContext.ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE, mc.player));
         if (result != null && dist > wallRangeConfig.getValue()) {
             return false;
         }
         if (fovConfig.getValue() != 180.0f) {
-            float[] rots = RotationUtil.getRotationsTo(pos, entity.getPos());
+            float[] rots = RotationUtil.getRotationsTo(pos, entityPos);
             float diff = MathHelper.wrapDegrees(mc.player.getYaw()) - rots[0];
             float magnitude = Math.abs(diff);
             return magnitude <= fovConfig.getValue();

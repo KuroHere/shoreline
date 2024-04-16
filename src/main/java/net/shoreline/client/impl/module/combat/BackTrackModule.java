@@ -127,7 +127,7 @@ public final class BackTrackModule extends ToggleModule
         {
             final Vec3d eyes = Managers.POSITION.getEyePos();
             final double dist = eyes.distanceTo(attackingEntity.getPos());
-            if (!auraModule.isInAttackRange(dist, eyes, attackingEntity) && dist <= auraModule.searchRangeConfig.getValue())
+            if (!auraModule.isInAttackRange(dist, eyes, attackingEntity.getPos()) && dist <= auraModule.searchRangeConfig.getValue())
             {
                 blockingPackets = true;
             }

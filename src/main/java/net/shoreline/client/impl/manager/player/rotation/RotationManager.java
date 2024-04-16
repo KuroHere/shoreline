@@ -223,8 +223,7 @@ public class RotationManager implements Globals {
             setRotation(new Rotation(MAX_VALUE, yaw, pitch, true));
             Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(
                     mc.player.getX(), mc.player.getY(), mc.player.getZ(), yaw, pitch, mc.player.isOnGround()));
-            Managers.NETWORK.sendSequencedPacket((s) ->
-                    new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, s));
+            Managers.NETWORK.sendSequencedPacket((s) -> new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, s));
         }
         else
         {
