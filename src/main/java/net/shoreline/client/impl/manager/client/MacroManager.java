@@ -64,7 +64,10 @@ public class MacroManager implements Globals {
     }
 
     public void setMacro(Macro macro, int keycode) {
-        getMacro(m -> m.getId().equals(macro.getId())).setKeycode(keycode);
+        Macro m1 = getMacro(m -> m.getId().equals(macro.getId()));
+        if (m1 != null) {
+           m1.setKeycode(keycode);
+        }
     }
 
     /**
