@@ -8,7 +8,7 @@ import net.minecraft.item.ToolItem;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
-import net.shoreline.client.impl.event.network.BreakBlockEvent;
+import net.shoreline.client.impl.event.network.AttackBlockEvent;
 
 /**
  * @author xgraza
@@ -22,7 +22,7 @@ public final class AutoToolModule extends ToggleModule
     }
 
     @EventListener
-    public void onBreakBlock(final BreakBlockEvent event)
+    public void onBreakBlock(final AttackBlockEvent event)
     {
         final BlockState state = mc.world.getBlockState(event.getPos());
         final int blockSlot = getBestTool(state);
@@ -32,7 +32,7 @@ public final class AutoToolModule extends ToggleModule
         }
     }
 
-    static int getBestTool(final BlockState state)
+    public int getBestTool(final BlockState state)
     {
         int slot = -1;
         float bestTool = 0.0f;

@@ -7,7 +7,6 @@ import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.registry.tag.FluidTags;
@@ -38,8 +37,6 @@ import net.shoreline.client.mixin.accessor.AccessorClientPlayerInteractionManage
 import net.shoreline.client.util.player.RotationUtil;
 
 import java.text.DecimalFormat;
-
-import static net.shoreline.client.impl.module.world.AutoToolModule.getBestTool;
 
 /**
  * @author linus
@@ -101,7 +98,7 @@ public class SpeedmineModule extends RotationModule {
         }
         state = mc.world.getBlockState(mining);
         int prev = mc.player.getInventory().selectedSlot;
-        int slot = getBestTool(state);
+        int slot = Modules.AUTO_TOOL.getBestTool(state);
         double dist = mc.player.squaredDistanceTo(mining.toCenterPos());
         if (dist > ((NumberConfig<?>) rangeConfig).getValueSq()
             || state.isAir() || damage > 3.0f) {
@@ -223,7 +220,7 @@ public class SpeedmineModule extends RotationModule {
     }
 
     private float getBlockBreakingSpeed(BlockState block) {
-        int tool = getBestTool(block);
+        int tool = Modules.AUTO_TOOL.getBestTool(block);
         float f = mc.player.getInventory().getStack(tool).getMiningSpeedMultiplier(block);
         if (f > 1.0F) {
             ItemStack stack = mc.player.getInventory().getStack(tool);
@@ -256,7 +253,7 @@ public class SpeedmineModule extends RotationModule {
 
     private boolean canHarvest(BlockState state) {
         if (state.isToolRequired()) {
-            int tool = getBestTool(state);
+            int tool = Modules.AUTO_TOOL.getBestTool(state);
             return mc.player.getInventory().getStack(tool).isSuitableFor(state);
         }
         return true;

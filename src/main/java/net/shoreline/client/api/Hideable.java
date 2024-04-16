@@ -1,4 +1,4 @@
-package net.shoreline.client.api.render;
+package net.shoreline.client.api;
 
 public interface Hideable {
     /**
