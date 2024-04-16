@@ -2,6 +2,7 @@ package net.shoreline.client.init;
 
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.ShorelineMod;
+import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.manager.ModuleManager;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.impl.module.client.*;
@@ -124,6 +125,7 @@ public class Modules {
     public static AirPlaceModule AIR_PLACE;
     public static AntiInteractModule ANTI_INTERACT;
     public static AutoMineModule AUTO_MINE;
+    public static AutoToolModule AUTO_TOOL;
     public static AvoidModule AVOID;
     public static FastDropModule FAST_DROP;
     public static FastPlaceModule FAST_PLACE;
@@ -268,6 +270,7 @@ public class Modules {
             AIR_PLACE = (AirPlaceModule) getRegisteredModule("airplace-module");
             ANTI_INTERACT = (AntiInteractModule) getRegisteredModule("antiinteract-module");
             // AUTO_MINE = (AutoMineModule) getRegisteredModule("automine-module");
+            AUTO_TOOL = (AutoToolModule) getRegisteredModule("autotool-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");
             FAST_DROP = (FastDropModule) getRegisteredModule("fastdrop-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule("fastplace-module");
@@ -282,6 +285,9 @@ public class Modules {
                     continue;
                 }
                 module.reflectConfigs();
+                if (module instanceof ToggleModule t) {
+                    Managers.MACRO.register(t.getKeybinding());
+                }
             }
             CACHE.clear();
         } else {

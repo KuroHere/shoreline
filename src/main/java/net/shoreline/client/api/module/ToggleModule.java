@@ -5,10 +5,9 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.MacroConfig;
 import net.shoreline.client.api.config.setting.ToggleConfig;
 import net.shoreline.client.api.macro.Macro;
-import net.shoreline.client.api.render.Hideable;
+import net.shoreline.client.api.Hideable;
 import net.shoreline.client.api.render.anim.Animation;
 import net.shoreline.client.api.render.anim.Easing;
-import net.shoreline.client.init.Managers;
 import org.lwjgl.glfw.GLFW;
 
 /**
