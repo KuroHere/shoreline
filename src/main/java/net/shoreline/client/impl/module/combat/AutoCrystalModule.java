@@ -95,7 +95,6 @@ public class AutoCrystalModule extends RotationModule {
     //        limit: 13
     // shortterm:
     //        ticks: 8
-    Config<Boolean> setDeadConfig = new BooleanConfig("SetDead", "Removes crystals faster client-side", false);
     Config<Boolean> inhibitConfig = new BooleanConfig("Inhibit", "Prevents excessive attacks", true);
     // default NCP config
     // limitforseconds:
@@ -465,9 +464,6 @@ public class AutoCrystalModule extends RotationModule {
         hand = hand != null ? hand : Hand.MAIN_HAND;
         // ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(id);
         Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(crystalEntity, mc.player.isSneaking()));
-        if (setDeadConfig.getValue()) {
-            mc.world.removeEntity(crystalEntity.getId(), Entity.RemovalReason.KILLED);
-        }
         attackPackets.put(crystalEntity.getId(), System.currentTimeMillis());
         if (swingConfig.getValue()) {
             mc.player.swingHand(hand);
