@@ -58,12 +58,12 @@ public class AuraModule extends RotationModule {
     Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to attack entities through walls", 1.0f, 4.5f, 5.0f);
     // Config<Boolean> vanillaRangeConfig = new BooleanConfig("VanillaRange", "Only attack within vanilla range", false);
     Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to attack entities", 1.0f, 180.0f, 180.0f);
-    //Config<Boolean> latencyPositionConfig = new BooleanConfig("LatencyPosition", "Targets the latency positions of enemies", false);
-    //Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency", "Maximum latency factor when calculating positions", 50, 250,1000, () -> latencyPositionConfig.getValue());
+    // Config<Boolean> latencyPositionConfig = new BooleanConfig("LatencyPosition", "Targets the latency positions of enemies", false);
+    // Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency", "Maximum latency factor when calculating positions", 50, 250,1000, () -> latencyPositionConfig.getValue());
     Config<Boolean> attackDelayConfig = new BooleanConfig("AttackDelay", "Delays attacks according to minecraft hit delays for maximum damage per attack", true);
     Config<Float> attackSpeedConfig = new NumberConfig<>("AttackSpeed", "Delay for attacks (Only functions if AttackDelay is off)", 1.0f,20.0f, 20.0f, () -> !attackDelayConfig.getValue());
     Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed", "Randomized delay for attacks (Only functions if AttackDelay is off)", 0.0f, 0.0f, 10.0f,() -> !attackDelayConfig.getValue());
-    //Config<Integer> packetsConfig = new NumberConfig<>("Packets", "Maximum attack packets to send in a single tick", 0, 1, 20);
+    // Config<Integer> packetsConfig = new NumberConfig<>("Packets", "Maximum attack packets to send in a single tick", 0, 1, 20);
     Config<Float> swapDelayConfig = new NumberConfig<>("SwapPenalty", "Delay for attacking after swapping items which prevents NCP flags", 0.0f,0.0f, 10.0f);
     Config<TickSync> tpsSyncConfig = new EnumConfig<>("TPS-Sync", "Syncs the attacks with the server TPS", TickSync.NONE, TickSync.values());
     Config<Boolean> awaitCritsConfig = new BooleanConfig("AwaitCriticals", "Aura will wait for a critical hit when falling", false);
@@ -77,7 +77,7 @@ public class AuraModule extends RotationModule {
     Config<Integer> rotateLimitConfig = new NumberConfig<>("Rotate-Yaw", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted", "The minimum age of the entity to be considered for attack", 0, 50, 200);
     Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck", "Checks if target has armor before attacking", false);
-//    Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock", "Automatically blocks after attack", false);
+    // Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock", "Automatically blocks after attack", false);
     Config<Boolean> stopSprintConfig = new BooleanConfig("StopSprint", "Stops sprinting before attacking to maintain vanilla behavior", false);
     Config<Boolean> stopShieldConfig = new BooleanConfig("StopShield", "Automatically handles shielding before attacking", false);
 
