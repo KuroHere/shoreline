@@ -39,7 +39,6 @@ import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.EvictingQueue;
-import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.player.RotationUtil;
@@ -300,7 +299,7 @@ public class AutoCrystalModule extends RotationModule {
 
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
-        if (renderPos != null && getCrystalHand() != null) {
+        if (renderPos != null && isHoldingCrystal()) {
             RenderManager.renderBox(event.getMatrices(), renderPos, Modules.COLORS.getRGB(80));
             RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
                     Modules.COLORS.getRGB(145));
@@ -488,26 +487,26 @@ public class AutoCrystalModule extends RotationModule {
         //        RaycastContext.FluidHandling.NONE, mc.player));
         BlockHitResult result = new BlockHitResult(blockPos.toCenterPos(), sidePlace, blockPos, false);
         if (autoSwapConfig.getValue() != Swap.OFF
-                && hand != Hand.OFF_HAND && !isHoldingCrystal()) {
+                && hand != Hand.OFF_HAND && getCrystalHand() == null) {
             int prev = mc.player.getInventory().selectedSlot;
             int crystalSlot = getCrystalSlot();
             if (crystalSlot != -1) {
                 swapTo(crystalSlot);
-                placeInternal(result, hand);
+                placeInternal(result, Hand.MAIN_HAND);
                 placePackets.put(blockPos, System.currentTimeMillis());
                 if (autoSwapConfig.getValue() == Swap.SILENT
                         || autoSwapConfig.getValue() == Swap.SILENT_ALT) {
                     swapTo(autoSwapConfig.getValue() == Swap.SILENT_ALT ? crystalSlot : prev);
                 }
             }
-        } else {
+        } else if (isHoldingCrystal()) {
             placeInternal(result, hand);
             placePackets.put(blockPos, System.currentTimeMillis());
         }
     }
 
     private void placeInternal(BlockHitResult result, Hand hand) {
-        if (hand == null || !isHoldingCrystal()) {
+        if (hand == null) {
             return;
         }
         Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractBlockC2SPacket(hand, result, id));
