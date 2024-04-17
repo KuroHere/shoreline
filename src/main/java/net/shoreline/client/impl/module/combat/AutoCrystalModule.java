@@ -40,6 +40,7 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.EvictingQueue;
 import net.shoreline.client.util.math.timer.CacheTimer;
+import net.shoreline.client.util.math.timer.TickTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.world.EndCrystalUtil;
@@ -66,7 +67,7 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swing hand when placing and attacking crystals", true);
     // ROTATE SETTINGS
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate before placing and breaking", false);
-    Config<Boolean> rotateSilentConfig = new BooleanConfig("RotateSilent", "Silently updates rotations to server", false);
+    // Config<Boolean> rotateSilentConfig = new BooleanConfig("RotateSilent", "Silently updates rotations to server", false);
     Config<Rotate> strictRotateConfig = new EnumConfig<>("YawStep", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", Rotate.OFF, Rotate.values(), () -> rotateConfig.getValue());
     Config<Integer> rotateLimitConfig = new NumberConfig<>("YawStep-Limit", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
     // Config<Boolean> rotateTickFactorConfig = new BooleanConfig("Rotate-TickReduction", "Factors in angles when calculating crystals to minimize attack ticks and speed up the break/place loop", false, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
@@ -126,6 +127,7 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> armorBreakerConfig = new BooleanConfig("ArmorBreaker", "Attempts to break enemy armor with crystals", true);
     Config<Float> armorScaleConfig = new NumberConfig<>("ArmorScale", "Armor damage scale before attempting to break enemy armor with crystals", 1.0f, 5.0f, 20.0f, NumberDisplay.PERCENT, () -> armorBreakerConfig.getValue());
     Config<Float> lethalMultiplier = new NumberConfig<>("LethalMultiplier", "If we can kill an enemy with this many crystals, disregard damage values", 0.0f, 1.5f, 4.0f);
+    Config<Boolean> lethalDamageConfig = new BooleanConfig("Lethal-DamageTick", "Places lethal crystals only on ticks where they damage entities", false);
     Config<Boolean> safetyConfig = new BooleanConfig("Safety", "Accounts for total player safety when attacking and placing crystals", true);
     Config<Boolean> safetyOverride = new BooleanConfig("SafetyOverride", "Overrides the safety checks if the crystal will kill an enemy", false);
     Config<Float> maxLocalDamageConfig = new NumberConfig<>("MaxLocalDamage", "The maximum player damage", 4.0f, 12.0f, 20.0f);
@@ -159,6 +161,7 @@ public class AutoCrystalModule extends RotationModule {
     private final Timer lastPlaceTimer = new CacheTimer();
     private final Timer lastSwapTimer = new CacheTimer();
     private final Timer autoSwapTimer = new CacheTimer();
+    private final Timer hurtTimer = new TickTimer();
     //
     private final ArrayDeque<Long> attackLatency = new EvictingQueue<>(20);
     private final Map<Integer, Long> attackPackets =
@@ -226,7 +229,7 @@ public class AutoCrystalModule extends RotationModule {
         }
         if (rotateConfig.getValue() && crystalRotation != null && (placeCrystal == null || canHoldCrystal())) {
             float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), crystalRotation);
-            if (!rotateSilentConfig.getValue() && (strictRotateConfig.getValue() == Rotate.FULL || strictRotateConfig.getValue() == Rotate.SEMI && attackRotate)) {
+            if (strictRotateConfig.getValue() == Rotate.FULL || strictRotateConfig.getValue() == Rotate.SEMI && attackRotate) {
                 float yaw;
                 float serverYaw = Managers.ROTATION.getWrappedYaw();
                 float diff = serverYaw - rotations[0];
@@ -249,20 +252,16 @@ public class AutoCrystalModule extends RotationModule {
                 rotated = true;
                 crystalRotation = null;
             }
-            if (rotateSilentConfig.getValue()) {
-                silentRotations = rotations;
-            } else {
-                setRotation(rotations[0], rotations[1]);
-            }
+            setRotation(rotations[0], rotations[1]);
         } else {
             silentRotations = null;
         }
         if (isRotationBlocked() || !rotated && rotateConfig.getValue()) {
             return;
         }
-        if (rotateSilentConfig.getValue() && silentRotations != null) {
-            setRotationSilent(silentRotations[0], silentRotations[1]);
-        }
+//        if (rotateSilentConfig.getValue() && silentRotations != null) {
+//            setRotationSilent(silentRotations[0], silentRotations[1]);
+//        }
         final Hand hand = getCrystalHand();
         if (attackCrystal != null) {
             // ChatUtil.clientSendMessage("yaw: " + rotations[0] + ", pitch: " + rotations[1]);
@@ -467,6 +466,7 @@ public class AutoCrystalModule extends RotationModule {
         // ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(id);
         Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(crystalEntity, mc.player.isSneaking()));
         attackPackets.put(crystalEntity.getId(), System.currentTimeMillis());
+        hurtTimer.reset();
         if (swingConfig.getValue()) {
             mc.player.swingHand(hand);
         } else {
@@ -748,6 +748,9 @@ public class AutoCrystalModule extends RotationModule {
     }
 
     private boolean isCrystalLethalTo(double damage, LivingEntity entity) {
+        if (lethalDamageConfig.getValue()) {
+            return entity.hurtTime == 0 && hurtTimer.passed(5);
+        }
         float health = entity.getHealth() + entity.getAbsorptionAmount();
         if (damage * (1.0f + lethalMultiplier.getValue()) >= health + 0.5f) {
             return true;

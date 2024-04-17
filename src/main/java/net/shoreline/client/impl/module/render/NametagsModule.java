@@ -65,14 +65,6 @@ public class NametagsModule extends ToggleModule {
         super("Nametags", "Renders info on player nametags", ModuleCategory.RENDER);
     }
 
-    public static VertexConsumer getItemGlintConsumer(VertexConsumerProvider vertexConsumers,
-                                                      RenderLayer layer, boolean glint) {
-        if (glint) {
-            return VertexConsumers.union(vertexConsumers.getBuffer(RenderLayersClient.GLINT), vertexConsumers.getBuffer(layer));
-        }
-        return vertexConsumers.getBuffer(layer);
-    }
-
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (mc.gameRenderer == null || mc.getCameraEntity() == null) {
@@ -220,12 +212,11 @@ public class NametagsModule extends ToggleModule {
     private void renderItem(ItemStack stack, ModelTransformationMode renderMode, int light, int overlay, MatrixStack matrices,
                             VertexConsumerProvider vertexConsumers, World world, int seed) {
         BakedModel bakedModel = mc.getItemRenderer().getModel(stack, world, null, seed);
-        boolean bl;
         if (stack.isEmpty()) {
             return;
         }
         matrices.push();
-        boolean bl2 = bl = renderMode == ModelTransformationMode.GUI || renderMode == ModelTransformationMode.GROUND || renderMode == ModelTransformationMode.FIXED;
+        boolean bl = renderMode == ModelTransformationMode.GUI || renderMode == ModelTransformationMode.GROUND || renderMode == ModelTransformationMode.FIXED;
         if (bl) {
             if (stack.isOf(Items.TRIDENT)) {
                 bakedModel = mc.getItemRenderer().getModels().getModelManager().getModel(ModelIdentifier.ofVanilla("trident", "inventory"));
@@ -243,6 +234,14 @@ public class NametagsModule extends ToggleModule {
                     overlay, matrices, getItemGlintConsumer(vertexConsumers, RenderLayers.getItemLayer(stack, false), stack.hasGlint()));
         }
         matrices.pop();
+    }
+
+    public static VertexConsumer getItemGlintConsumer(VertexConsumerProvider vertexConsumers,
+                                                      RenderLayer layer, boolean glint) {
+        if (glint) {
+            return VertexConsumers.union(vertexConsumers.getBuffer(RenderLayersClient.GLINT), vertexConsumers.getBuffer(layer));
+        }
+        return vertexConsumers.getBuffer(layer);
     }
 
     private void renderItemOverlay(MatrixStack matrixStack, ItemStack stack, int x, int y) {
