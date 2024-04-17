@@ -78,13 +78,13 @@ public class NametagsModule extends ToggleModule {
         if (mc.gameRenderer == null || mc.getCameraEntity() == null) {
             return;
         }
-        Vec3d interpolate = Interpolation.getRenderPosition(
-                mc.getCameraEntity(), mc.getTickDelta());
+
+        Vec3d interpolate = Interpolation.getRenderPosition(mc.getCameraEntity(), mc.getTickDelta());
         Camera camera = mc.gameRenderer.getCamera();
+
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity player) {
-                if (player == null || !player.isAlive() || player == mc.player
-                        || !invisiblesConfig.getValue() && player.isInvisible()) {
+                if (!player.isAlive() || player == mc.player || !invisiblesConfig.getValue() && player.isInvisible()) {
                     continue;
                 }
                 String info = getNametagInfo(player);
@@ -123,7 +123,6 @@ public class NametagsModule extends ToggleModule {
                             double x, double y, double z, Camera camera, float scaling) {
         final Vec3d pos = camera.getPos();
         MatrixStack matrices = new MatrixStack();
-        matrices.push();
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0f));
         matrices.translate(x - pos.getX(),
@@ -131,32 +130,25 @@ public class NametagsModule extends ToggleModule {
                 z - pos.getZ());
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-camera.getYaw()));
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
         matrices.scale(-scaling, -scaling, -1.0f);
-        GL11.glDepthFunc(GL11.GL_ALWAYS);
-        VertexConsumerProvider.Immediate vertexConsumers =
-                VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
         if (borderedConfig.getValue()) {
             RenderManager.rect(matrices, -width - 1.0f, -1.0f, width * 2.0f + 2.0f,
                     mc.textRenderer.fontHeight + 1.0f, 0.0, 0x55000400);
         }
         int color = getNametagColor(entity);
-        Fonts.VANILLA.drawWithShadow(matrices, info, -width, 0.0f, color);
-        // drawInternal(info, -width + 1.0f, 1.0f, getNametagColor(entity),
-        //        true, matrices.peek().getPositionMatrix(), vertexConsumers,
-        //        TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
-        // drawInternal(info, -width, 0.0f, getNametagColor(entity),
-        //        false, matrices.peek().getPositionMatrix(), vertexConsumers,
-        //        TextRenderer.TextLayerType.NORMAL, 0, 0xf000f0);
-        // matrices.translate(1.0, 1.0, 0.0);
-        vertexConsumers.draw();
-        if (armorConfig.getValue()) {
-            renderItems(matrices, entity);
-        }
-        RenderSystem.disableBlend();
-        GL11.glDepthFunc(GL11.GL_LEQUAL);
-        matrices.pop();
+        RenderManager.post(() -> {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            GL11.glDepthFunc(GL11.GL_ALWAYS);
+
+            Fonts.VANILLA.drawWithShadow(matrices, info, -width, 0.0f, color);
+            if (armorConfig.getValue()) {
+                renderItems(matrices, entity);
+            }
+
+            GL11.glDepthFunc(GL11.GL_LEQUAL);
+            RenderSystem.disableBlend();
+        });
     }
 
     private void renderItems(MatrixStack matrixStack, PlayerEntity player) {

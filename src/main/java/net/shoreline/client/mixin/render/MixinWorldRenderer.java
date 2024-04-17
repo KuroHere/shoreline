@@ -7,6 +7,7 @@ import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.render.RenderBuffers;
 import net.shoreline.client.impl.event.render.RenderWorldBorderEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.util.Globals;
@@ -42,9 +43,14 @@ public class MixinWorldRenderer implements Globals {
                             Matrix4f positionMatrix, CallbackInfo ci) {
         Vec3d pos = mc.getBlockEntityRenderDispatcher().camera.getPos();
         matrices.translate(-pos.x, -pos.y, -pos.z);
+
+        RenderBuffers.preRender();
+
         final RenderWorldEvent renderWorldEvent =
                 new RenderWorldEvent(matrices, tickDelta);
         Shoreline.EVENT_HANDLER.dispatch(renderWorldEvent);
+
+        RenderBuffers.postRender();
     }
 
     /**

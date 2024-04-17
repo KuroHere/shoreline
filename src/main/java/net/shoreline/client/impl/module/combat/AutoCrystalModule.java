@@ -304,8 +304,10 @@ public class AutoCrystalModule extends RotationModule {
                     Modules.COLORS.getRGB(145));
             if (damageNametagConfig.getValue() && placeCrystal != null) {
                 DecimalFormat format = new DecimalFormat("0.0");
-                RenderManager.renderSign(event.getMatrices(),
-                        format.format(placeCrystal.getDamage()), renderPos.toCenterPos());
+                RenderManager.post(() -> {
+                    RenderManager.renderSign(event.getMatrices(),
+                            format.format(placeCrystal.getDamage()), renderPos.toCenterPos());
+                });
             }
         }
     }
