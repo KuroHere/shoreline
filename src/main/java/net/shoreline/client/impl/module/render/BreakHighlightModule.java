@@ -1,6 +1,7 @@
 package net.shoreline.client.impl.module.render;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.BlockBreakingInfo;
 import net.minecraft.util.math.BlockPos;
@@ -37,7 +38,7 @@ public class BreakHighlightModule extends ToggleModule {
         Int2ObjectMap<BlockBreakingInfo> blockBreakProgressions =
                 ((AccessorWorldRenderer) mc.worldRenderer).getBlockBreakingProgressions();
         for (Int2ObjectMap.Entry<BlockBreakingInfo> info :
-                blockBreakProgressions.int2ObjectEntrySet()) {
+                Int2ObjectMaps.fastIterable(blockBreakProgressions)) {
             BlockPos pos = info.getValue().getPos();
             double dist = mc.player.squaredDistanceTo(pos.toCenterPos());
             if (dist > ((NumberConfig) rangeConfig).getValueSq()) {

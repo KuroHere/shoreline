@@ -28,6 +28,7 @@ import net.shoreline.client.api.render.anim.Animation;
 import net.shoreline.client.impl.event.gui.hud.RenderOverlayEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.StreamUtils;
 import net.shoreline.client.util.render.ColorUtil;
 import net.shoreline.client.util.string.EnumFormatter;
 
@@ -35,6 +36,7 @@ import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * @author linus
@@ -54,7 +56,7 @@ public class HUDModule extends ToggleModule {
     Config<Boolean> potionColorsConfig = new BooleanConfig("PotionColors", "Displays active potion colors", true);
     Config<Boolean> durabilityConfig = new BooleanConfig("Durability", "Displays the current held items durability", false);
     Config<Boolean> coordsConfig = new BooleanConfig("Coords", "Displays world coordinates", true);
-    Config<Boolean> netherCoordsConfig = new BooleanConfig("NetherCoords", "Displays nether coordinates", true, () -> coordsConfig.getValue());
+    Config<Boolean> netherCoordsConfig = new BooleanConfig("NetherCoords", "Displays nether coordinates", true);
     Config<Boolean> serverBrandConfig = new BooleanConfig("ServerBrand", "Displays the current server brand", false);
     Config<Boolean> speedConfig = new BooleanConfig("Speed", "Displays the current movement speed of the player in kmh", true);
     Config<Boolean> pingConfig = new BooleanConfig("Ping", "Display server response time in ms", true);
@@ -71,9 +73,33 @@ public class HUDModule extends ToggleModule {
     Config<Float> rainbowDifferenceConfig = new NumberConfig<>("Rainbow-Difference", "The difference offset for rainbow colors", 0.1f, 40.0f, 100.0f);
     //
     private final DecimalFormat decimal = new DecimalFormat("0.0");
+
+    int rainbowOffset;
+    float topLeft, topRight, bottomLeft, bottomRight;
+    boolean renderingUp;
+
     public HUDModule() {
         super("HUD", "Displays the HUD (heads up display) screen.",
                 ModuleCategory.CLIENT);
+    }
+
+    private void arrayListRenderModule(RenderOverlayEvent.Post event, ToggleModule toggleModule) {
+        final Animation anim = toggleModule.getAnimation();
+        float factor = anim.getScaledTime();
+        if (factor <= 0.01f || toggleModule.isHidden()) {
+            return;
+        }
+        String text = getFormattedModule(toggleModule);
+        int width = RenderManager.textWidth(text);
+        RenderManager.renderText(event.getContext(), text,
+                mc.getWindow().getScaledWidth() - width * factor - 1.0f,
+                renderingUp ? topRight : bottomRight, getHudColor(rainbowOffset));
+        if (renderingUp) {
+            topRight += 9.0f;
+        } else {
+            bottomRight -= 9.0f;
+        }
+        rainbowOffset++;
     }
 
     @EventListener
@@ -84,14 +110,14 @@ public class HUDModule extends ToggleModule {
             }
             Window res = mc.getWindow();
             //
-            int rainbowOffset = 0;
+            rainbowOffset = 0;
             // Render offsets for each corner of the screen.
-            float topLeft = 2.0f;
-            float topRight = topLeft;
-            float bottomLeft = res.getScaledHeight() - 11.0f;
-            float bottomRight = bottomLeft;
+            topLeft = 2.0f;
+            topRight = topLeft;
+            bottomLeft = res.getScaledHeight() - 11.0f;
+            bottomRight = bottomLeft;
             // center = res.getScaledHeight() - 11 / 2.0f
-            boolean renderingUp = renderingConfig.getValue() == Rendering.UP;
+            renderingUp = renderingConfig.getValue() == Rendering.UP;
             if (mc.currentScreen instanceof ChatScreen) {
                 bottomLeft -= 14.0f;
                 bottomRight -= 14.0f;
@@ -102,40 +128,23 @@ public class HUDModule extends ToggleModule {
             }
             if (watermarkConfig.getValue()) {
                 RenderManager.renderText(event.getContext(), String.format("%s %s (%s%s)",
-                                ShorelineMod.MOD_NAME, ShorelineMod.MOD_VER,
-                                ShorelineMod.MOD_BUILD_NUMBER, !BuildConfig.HASH.equals("null") ? "-" + BuildConfig.HASH : ""), 2.0f, topLeft, getHudColor(rainbowOffset));
+                        ShorelineMod.MOD_NAME, ShorelineMod.MOD_VER,
+                        ShorelineMod.MOD_BUILD_NUMBER, !BuildConfig.HASH.equals("null") ? "-" + BuildConfig.HASH : ""), 2.0f, topLeft, getHudColor(rainbowOffset));
                 // topLeft += 9.0f;
             }
             if (arraylistConfig.getValue()) {
                 List<Module> modules = Managers.MODULE.getModules();
-                modules = switch (orderingConfig.getValue()) {
-                    case ALPHABETICAL -> modules.stream()
-                            .sorted(Comparator.comparing(m -> m.getName()))
-                            .toList();
-                    case LENGTH -> modules.stream()
-                            .sorted(Comparator.comparing(m -> -RenderManager.textWidth(getFormattedModule(m))))
-                            .toList();
+
+                Stream<ToggleModule> moduleStream = modules.stream()
+                        .filter(ToggleModule.class::isInstance)
+                        .map(ToggleModule.class::cast);
+
+                moduleStream = switch (orderingConfig.getValue()) {
+                    case ALPHABETICAL -> StreamUtils.sortCached(moduleStream, Module::getName);
+                    case LENGTH -> StreamUtils.sortCached(moduleStream, m -> -RenderManager.textWidth(getFormattedModule(m)));
                 };
-                for (Module m : modules) {
-                    if (m instanceof ToggleModule t) {
-                        final Animation anim = t.getAnimation();
-                        float factor = anim.getScaledTime();
-                        if (factor <= 0.01f || t.isHidden()) {
-                            continue;
-                        }
-                        String text = getFormattedModule(m);
-                        int width = RenderManager.textWidth(text);
-                        RenderManager.renderText(event.getContext(), text,
-                                res.getScaledWidth() - width * factor - 1.0f,
-                                renderingUp ? topRight : bottomRight, getHudColor(rainbowOffset));
-                        if (renderingUp) {
-                            topRight += 9.0f;
-                        } else {
-                            bottomRight -= 9.0f;
-                        }
-                        rainbowOffset++;
-                    }
-                }
+
+                moduleStream.forEach(t -> arrayListRenderModule(event, t));
             }
             if (potionEffectsConfig.getValue()) {
                 for (StatusEffectInstance e : mc.player.getStatusEffects()) {
