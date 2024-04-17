@@ -185,11 +185,12 @@ public class NametagsModule extends ToggleModule {
             matrixStack.scale(16.0f, 16.0f, 0.0f);
             matrixStack.multiplyPositionMatrix(new Matrix4f().scaling(1.0f, -1.0f, 0.0f));
             DiffuseLighting.disableGuiDepthLighting();
-            renderItem(stack, ModelTransformationMode.GUI, 0xf000f0, OverlayTexture.DEFAULT_UV,
+            renderItem(stack, ModelTransformationMode.GUI, 0xff00f0, OverlayTexture.DEFAULT_UV,
                     matrixStack, mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
             mc.getBufferBuilders().getEntityVertexConsumers().draw();
             DiffuseLighting.enableGuiDepthLighting();
             matrixStack.pop();
+            matrixStack.push();
             renderItemOverlay(matrixStack, stack, (int) n10, (int) m2);
             // int n4 = (n11 > 4) ? ((n11 - 4) * 8 / 2) : 0;
             // mc.getItemRenderer().renderInGui(matrixStack, mc.textRenderer, stack, n10, m2);
@@ -201,6 +202,7 @@ public class NametagsModule extends ToggleModule {
                 renderEnchants(matrixStack, stack, n10 + 2.0f, m2);
             }
             matrixStack.scale(2.0f, 2.0f, 2.0f);
+            matrixStack.pop();
             n10 += 16;
         }
         //
