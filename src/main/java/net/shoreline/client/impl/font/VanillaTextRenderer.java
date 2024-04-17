@@ -1,4 +1,4 @@
-package net.shoreline.client.font;
+package net.shoreline.client.impl.font;
 
 import net.minecraft.client.font.*;
 import net.minecraft.client.render.Tessellator;
@@ -16,7 +16,8 @@ import org.joml.Matrix4f;
 
 import java.util.List;
 
-public class CustomTextRenderer implements Globals {
+@Deprecated
+public class VanillaTextRenderer implements Globals {
     // Autism
     public void drawWithShadow(MatrixStack matrices, String text, float x, float y, int color) {
         draw(matrices, text, x + 1.0f, y + 1.0f, color, true);

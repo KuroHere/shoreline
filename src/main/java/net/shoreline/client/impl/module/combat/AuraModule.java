@@ -9,17 +9,15 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
-import net.minecraft.item.TridentItem;
+import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.NumberDisplay;
@@ -49,7 +47,7 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 
 /**
- * @author linus
+ * @author linus & hockeyl8
  * @since 1.0
  */
 public class AuraModule extends RotationModule {
@@ -59,14 +57,14 @@ public class AuraModule extends RotationModule {
     Config<Float> searchRangeConfig = new NumberConfig<>("SearchRange", "Range to search for targets", 1.0f, 5.0f, 6.0f);
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range to attack entities", 1.0f, 4.5f, 5.0f);
     Config<Float> wallRangeConfig = new NumberConfig<>("WallRange", "Range to attack entities through walls", 1.0f, 4.5f, 5.0f);
-    // Config<Boolean> vanillaRangeConfig = new BooleanConfig("VanillaRange", "Only attack within vanilla range", false);
+    Config<Boolean> vanillaRangeConfig = new BooleanConfig("VanillaRange", "Only attack within vanilla range", false);
     Config<Float> fovConfig = new NumberConfig<>("FOV", "Field of view to attack entities", 1.0f, 180.0f, 180.0f);
-    Config<Boolean> latencyPositionConfig = new BooleanConfig("LatencyPosition", "Targets the latency positions of enemies", false);
-    Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency", "Maximum latency factor when calculating positions", 50, 250,1000, () -> latencyPositionConfig.getValue());
+    // Config<Boolean> latencyPositionConfig = new BooleanConfig("LatencyPosition", "Targets the latency positions of enemies", false);
+    // Config<Integer> maxLatencyConfig = new NumberConfig<>("MaxLatency", "Maximum latency factor when calculating positions", 50, 250,1000, () -> latencyPositionConfig.getValue());
     Config<Boolean> attackDelayConfig = new BooleanConfig("AttackDelay", "Delays attacks according to minecraft hit delays for maximum damage per attack", true);
     Config<Float> attackSpeedConfig = new NumberConfig<>("AttackSpeed", "Delay for attacks (Only functions if AttackDelay is off)", 1.0f,20.0f, 20.0f, () -> !attackDelayConfig.getValue());
     Config<Float> randomSpeedConfig = new NumberConfig<>("RandomSpeed", "Randomized delay for attacks (Only functions if AttackDelay is off)", 0.0f, 0.0f, 10.0f,() -> !attackDelayConfig.getValue());
-    Config<Integer> packetsConfig = new NumberConfig<>("Packets", "Maximum attack packets to send in a single tick", 0, 1, 20);
+    // Config<Integer> packetsConfig = new NumberConfig<>("Packets", "Maximum attack packets to send in a single tick", 0, 1, 20);
     Config<Float> swapDelayConfig = new NumberConfig<>("SwapPenalty", "Delay for attacking after swapping items which prevents NCP flags", 0.0f,0.0f, 10.0f);
     Config<TickSync> tpsSyncConfig = new EnumConfig<>("TPS-Sync", "Syncs the attacks with the server TPS", TickSync.NONE, TickSync.values());
     Config<Boolean> awaitCritsConfig = new BooleanConfig("AwaitCriticals", "Aura will wait for a critical hit when falling", false);
@@ -75,15 +73,15 @@ public class AuraModule extends RotationModule {
     // ROTATE
     Config<Vector> hitVectorConfig = new EnumConfig<>("HitVector", "The vector to aim for when attacking entities", Vector.FEET, Vector.values());
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate before attacking", false);
-    Config<Boolean> strictRotateConfig = new BooleanConfig("RotateStrict", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", false, () -> rotateConfig.getValue());
     Config<Boolean> silentRotateConfig = new BooleanConfig("RotateSilent", "Rotates silently to server", false, () -> rotateConfig.getValue());
-    Config<Integer> rotateLimitConfig = new NumberConfig<>("Rotate-Yaw", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
+    Config<Boolean> strictRotateConfig = new BooleanConfig("YawStep", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", false, () -> rotateConfig.getValue());
+    Config<Integer> rotateLimitConfig = new NumberConfig<>("YawStep-Limit", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue());
     Config<Integer> ticksExistedConfig = new NumberConfig<>("TicksExisted", "The minimum age of the entity to be considered for attack", 0, 50, 200);
     Config<Boolean> armorCheckConfig = new BooleanConfig("ArmorCheck", "Checks if target has armor before attacking", false);
-    Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock", "Automatically blocks after attack", false);
+    // Config<Boolean> autoBlockConfig = new BooleanConfig("AutoBlock", "Automatically blocks after attack", false);
     Config<Boolean> stopSprintConfig = new BooleanConfig("StopSprint", "Stops sprinting before attacking to maintain vanilla behavior", false);
     Config<Boolean> stopShieldConfig = new BooleanConfig("StopShield", "Automatically handles shielding before attacking", false);
-    //
+
     Config<Boolean> playersConfig = new BooleanConfig("Players", "Target players", true);
     Config<Boolean> monstersConfig = new BooleanConfig("Monsters", "Target monsters", false);
     Config<Boolean> neutralsConfig = new BooleanConfig("Neutrals", "Target neutrals", false);
@@ -91,14 +89,14 @@ public class AuraModule extends RotationModule {
     Config<Boolean> invisiblesConfig = new BooleanConfig("Invisibles", "Target invisible entities", true);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders an indicator over the target", true);
     Config<Boolean> disableDeathConfig = new BooleanConfig("DisableOnDeath", "Disables during disconnect/death", false);
-    //
+
     private Entity entityTarget;
     private long randomDelay = -1;
-    //
+
     private boolean shielding;
     private boolean sneaking;
     private boolean sprinting;
-    //
+
     private final Timer attackTimer = new CacheTimer();
     private final Timer critTimer = new CacheTimer();
     private final Timer autoSwapTimer = new CacheTimer();
@@ -107,9 +105,6 @@ public class AuraModule extends RotationModule {
 
     private float[] silentRotations;
 
-    /**
-     *
-     */
     public AuraModule() {
         super("Aura", "Attacks nearby entities", ModuleCategory.COMBAT, 700);
     }
@@ -177,7 +172,7 @@ public class AuraModule extends RotationModule {
         if (rotateConfig.getValue()) {
             float[] rotation = RotationUtil.getRotationsTo(mc.player.getEyePos(),
                     getAttackRotateVec(entityTarget));
-            if (strictRotateConfig.getValue()) {
+            if (!silentRotateConfig.getValue() && strictRotateConfig.getValue()) {
                 float serverYaw = Managers.ROTATION.getWrappedYaw();
                 float diff = serverYaw - rotation[0];
                 float diff1 = Math.abs(diff);
@@ -209,7 +204,7 @@ public class AuraModule extends RotationModule {
                 setRotation(rotation[0], rotation[1]);
             }
         }
-        if (isRotationBlocked() || !shouldWaitCrit() || !rotated || !isInAttackRange(eyepos, entityTarget)) {
+        if (isRotationBlocked() || !shouldWaitCrit() || !rotated && rotateConfig.getValue() || !isInAttackRange(eyepos, entityTarget)) {
             return;
         }
         if (attackDelayConfig.getValue()) {
@@ -246,10 +241,15 @@ public class AuraModule extends RotationModule {
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
         if (entityTarget != null && renderConfig.getValue() && isHoldingSword()) {
-            int attackDelay = 0;
+            int attackDelay;
+            float delay = (attackSpeedConfig.getValue() * 50.0f) + randomDelay;
             if (attackDelayConfig.getValue()) {
                 float animFactor = 1.0f - mc.player.getAttackCooldownProgress(0.0f);
-                attackDelay = (int) (60.0 * animFactor);
+                attackDelay = (int) (100.0 * animFactor);
+            }
+            else {
+                float animFactor = 1.0f - MathHelper.clamp(attackTimer.getElapsedTime() / (1000f - delay), 0.0f, 1.0f);
+                attackDelay = (int) (100.0 * animFactor);
             }
             RenderManager.renderBox(event.getMatrices(),
                     Interpolation.getInterpolatedEntityBox(entityTarget), Modules.COLORS.getRGB(60 + attackDelay));
@@ -259,24 +259,26 @@ public class AuraModule extends RotationModule {
     }
 
     private boolean attackTarget(Entity entity) {
-//        Entity castEntity;
-//        // validate our server-sided rotations
-//        if (mc.crosshairTarget == null || mc.crosshairTarget.getType() != HitResult.Type.ENTITY) {
-//            return false;
-//        }
-//        // Get the entity raycasted & then check. If invalid, fail
-//        castEntity = ((EntityHitResult) mc.crosshairTarget).getEntity();
-//        if (castEntity == null || !castEntity.isAttackable()) {
-//            return false;
-//        }
-//        preAttackTarget();
-//        mc.doAttack();
-//        postAttackTarget(castEntity);
+/*
+        Entity castEntity;
+        // validate our server-sided rotations
+        if (mc.crosshairTarget == null || mc.crosshairTarget.getType() != HitResult.Type.ENTITY) {
+            return false;
+        }
+        // Get the entity raycasted & then check. If invalid, fail
+        castEntity = ((EntityHitResult) mc.crosshairTarget).getEntity();
+        if (castEntity == null || !castEntity.isAttackable()) {
+            return false;
+        }
+        preAttackTarget();
+        mc.doAttack();
+        postAttackTarget(castEntity);
+*/
         preAttackTarget();
 
         if (silentRotateConfig.getValue() && silentRotations != null)
         {
-            Managers.ROTATION.setRotationSilent(silentRotations[0], silentRotations[1], true);
+            setRotationSilent(silentRotations[0], silentRotations[1]);
         }
 
         PlayerInteractEntityC2SPacket packet = PlayerInteractEntityC2SPacket.attack(entity,
@@ -301,6 +303,14 @@ public class AuraModule extends RotationModule {
                 float sharpness = EnchantmentHelper.getLevel(
                         Enchantments.SHARPNESS, stack) * 0.5f + 0.5f;
                 float dmg = swordItem.getAttackDamage() + sharpness;
+                if (dmg > sharp) {
+                    sharp = dmg;
+                    slot = i;
+                }
+            } else if (stack.getItem() instanceof AxeItem axeItem) {
+                float sharpness = EnchantmentHelper.getLevel(
+                        Enchantments.SHARPNESS, stack) * 0.5f + 0.5f;
+                float dmg = axeItem.getAttackDamage() + sharpness;
                 if (dmg > sharp) {
                     sharp = dmg;
                     slot = i;
@@ -444,8 +454,9 @@ public class AuraModule extends RotationModule {
     }
 
     public boolean isInAttackRange(Vec3d pos, Entity entity) {
-        double dist = pos.distanceTo(entity.getPos());
-        return isInAttackRange(dist, pos, entity);
+        final Vec3d entityPos = getAttackRotateVec(entity);
+        double dist = pos.distanceTo(entityPos);
+        return isInAttackRange(dist, pos, entityPos);
     }
 
     /**
@@ -454,29 +465,22 @@ public class AuraModule extends RotationModule {
      * @param entity
      * @return
      */
-    public boolean isInAttackRange(double dist, Vec3d pos, Entity entity) {
-//        if (vanillaRangeConfig.getValue()) {
-//            double d = mc.interactionManager.getReachDistance();
-//            Vec3d vec3d = mc.player.getCameraPosVec(0.0f);
-//            float[] rotations = RotationUtil.getRotationsTo(vec3d, pos);
-//            Vec3d vec3d2 = RotationUtil.getRotationVector(rotations[0], rotations[1]);
-//            Vec3d vec3d3 = vec3d.add(vec3d2.x * d, vec3d2.y * d, vec3d2.z * d);
-//            HitResult result = mc.world.raycast(new RaycastContext(vec3d, vec3d3,
-//                    RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
-//            return result != null && result.getType() == HitResult.Type.ENTITY;
-//        }
+    public boolean isInAttackRange(double dist, Vec3d pos, Vec3d entityPos) {
+        if (vanillaRangeConfig.getValue() && dist > 3.0f) {
+            return false;
+        }
         if (dist > rangeConfig.getValue()) {
             return false;
         }
         BlockHitResult result = mc.world.raycast(new RaycastContext(
-                pos, entity.getPos(),
+                pos, entityPos,
                 RaycastContext.ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE, mc.player));
         if (result != null && dist > wallRangeConfig.getValue()) {
             return false;
         }
         if (fovConfig.getValue() != 180.0f) {
-            float[] rots = RotationUtil.getRotationsTo(pos, entity.getPos());
+            float[] rots = RotationUtil.getRotationsTo(pos, entityPos);
             float diff = MathHelper.wrapDegrees(mc.player.getYaw()) - rots[0];
             float magnitude = Math.abs(diff);
             return magnitude <= fovConfig.getValue();
@@ -486,6 +490,7 @@ public class AuraModule extends RotationModule {
 
     public boolean isHoldingSword() {
         return !swordCheckConfig.getValue() || mc.player.getMainHandStack().getItem() instanceof SwordItem
+                || mc.player.getMainHandStack().getItem() instanceof AxeItem
                 || mc.player.getMainHandStack().getItem() instanceof TridentItem;
     }
 

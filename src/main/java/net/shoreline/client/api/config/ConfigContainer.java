@@ -96,6 +96,9 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>, G
         out.addProperty("id", getId());
         final JsonArray array = new JsonArray();
         for (Config<?> config : getConfigs()) {
+            if (config.getValue() instanceof Macro) {
+                continue;
+            }
             array.add(config.toJson());
         }
         out.add("configs", array);
@@ -112,16 +115,6 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>, G
      */
     @Override
     public Config<?> fromJson(JsonObject jsonObj) {
-        return fromJson(jsonObj, true);
-    }
-
-    /**
-     *
-     * @param jsonObj
-     * @param loadKeybinds
-     * @return
-     */
-    public Config<?> fromJson(JsonObject jsonObj, boolean loadKeybinds) {
         if (jsonObj.has("configs")) {
             JsonElement element = jsonObj.get("configs");
             if (!element.isJsonArray()) {
@@ -163,9 +156,6 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>, G
                         }
                     } else if (config instanceof ListConfig cfg) {
                         List<?> val = cfg.fromJson(configObj);
-                        cfg.setValue(val);
-                    } else if (config instanceof MacroConfig cfg && loadKeybinds) {
-                        Macro val = cfg.fromJson(configObj);
                         cfg.setValue(val);
                     } else if (config instanceof NumberConfig cfg) {
                         Number val = cfg.fromJson(configObj);

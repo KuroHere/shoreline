@@ -64,7 +64,6 @@ public final class MSAAuthenticator
             .disableDefaultUserAgent()
             .build();
 
-    // TODO: Submit application to Mojang and wait lol
     private static final String CLIENT_ID = "d1bbd256-3323-4ab7-940e-e8a952ebdb83";
     private static final int PORT = 6969;
 

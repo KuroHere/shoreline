@@ -1,6 +1,7 @@
 package net.shoreline.client.api.file;
 
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.api.macro.MacroFile;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.file.ModuleConfigFile;
 import net.shoreline.client.api.module.file.ModuleFile;
@@ -64,7 +65,19 @@ public class ClientConfiguration implements Globals {
                     e.printStackTrace();
                 }
             }
+            Path configDir = clientDir.resolve("Configs");
+            if (!Files.exists(configDir)) {
+                try {
+                    Files.createDirectory(configDir);
+                }
+                // write error
+                catch (IOException e) {
+                    Shoreline.error("Could not create config dir");
+                    e.printStackTrace();
+                }
+            }
         }
+        files.add(new MacroFile(clientDir));
         for (Module module : Managers.MODULE.getModules()) {
             // files.add(new ModulePreset(clientDir.resolve("Defaults"), module));
             files.add(new ModuleFile(clientDir.resolve("Modules"), module));
@@ -97,12 +110,12 @@ public class ClientConfiguration implements Globals {
     }
 
     public void saveModuleConfiguration(String configFile) {
-        ModuleConfigFile file = new ModuleConfigFile(clientDir, configFile);
+        ModuleConfigFile file = new ModuleConfigFile(clientDir.resolve("Configs"), configFile);
         file.save();
     }
 
     public void loadModuleConfiguration(String configFile) {
-        ModuleConfigFile file = new ModuleConfigFile(clientDir, configFile);
+        ModuleConfigFile file = new ModuleConfigFile(clientDir.resolve("Configs"), configFile);
         file.load();
     }
 

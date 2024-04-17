@@ -1,6 +1,9 @@
 package net.shoreline.client.api.macro;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.shoreline.client.api.Identifiable;
+import net.shoreline.client.api.config.Serializable;
 import net.shoreline.client.impl.manager.client.MacroManager;
 import org.lwjgl.glfw.GLFW;
 
@@ -9,7 +12,7 @@ import org.lwjgl.glfw.GLFW;
  * @see MacroManager
  * @since 1.0
  */
-public class Macro implements Identifiable {
+public class Macro implements Identifiable, Serializable<Macro> {
     //
     private final String name;
     // Runnable macro which represents the functionality of the keybind. This
@@ -91,5 +94,23 @@ public class Macro implements Identifiable {
             return name != null ? name.toUpperCase() : "NONE";
         }
         return "NONE";
+    }
+
+    @Override
+    public JsonObject toJson() {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("id", getId());
+        // obj.addProperty("key", getKeyName());
+        obj.addProperty("value", getKeycode());
+        return obj;
+    }
+
+    @Override
+    public Macro fromJson(JsonObject jsonObj) {
+        if (jsonObj.has("value")) {
+            JsonElement element = jsonObj.get("value");
+            return new Macro(getId(), element.getAsInt(), getRunnable());
+        }
+        return null;
     }
 }

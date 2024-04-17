@@ -37,6 +37,10 @@ public class RotationModule extends ToggleModule {
         Managers.ROTATION.setRotation(new Rotation(getRotationPriority(), yaw, pitch));
     }
 
+    protected void setRotationSilent(float yaw, float pitch) {
+        Managers.ROTATION.setRotationSilent(yaw, pitch, true);
+    }
+
     /**
      * Sets client look yaw and pitch
      * @param yaw

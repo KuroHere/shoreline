@@ -54,7 +54,7 @@ public class HUDModule extends ToggleModule {
     Config<Boolean> potionColorsConfig = new BooleanConfig("PotionColors", "Displays active potion colors", true);
     Config<Boolean> durabilityConfig = new BooleanConfig("Durability", "Displays the current held items durability", false);
     Config<Boolean> coordsConfig = new BooleanConfig("Coords", "Displays world coordinates", true);
-    Config<Boolean> netherCoordsConfig = new BooleanConfig("NetherCoords", "Displays nether coordinates", true);
+    Config<Boolean> netherCoordsConfig = new BooleanConfig("NetherCoords", "Displays nether coordinates", true, () -> coordsConfig.getValue());
     Config<Boolean> serverBrandConfig = new BooleanConfig("ServerBrand", "Displays the current server brand", false);
     Config<Boolean> speedConfig = new BooleanConfig("Speed", "Displays the current movement speed of the player in kmh", true);
     Config<Boolean> pingConfig = new BooleanConfig("Ping", "Display server response time in ms", true);
