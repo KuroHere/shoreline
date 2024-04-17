@@ -1,5 +1,6 @@
 package net.shoreline.client.util.world;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -10,21 +11,21 @@ import java.util.Set;
 
 public class BlastResistantBlocks implements Globals {
     // All blocks that are resistant to explosions
-    private static final Set<Block> BLAST_RESISTANT = Set.of(
+    private static final Set<Block> BLAST_RESISTANT = new ReferenceOpenHashSet<>(Set.of(
             Blocks.OBSIDIAN,
             Blocks.ANVIL,
             Blocks.ENCHANTING_TABLE,
             Blocks.ENDER_CHEST,
             Blocks.BEACON
-    );
+    ));
     // All blocks that are unbreakable with tools in survival mode
-    private static final Set<Block> UNBREAKABLE = Set.of(
+    private static final Set<Block> UNBREAKABLE = new ReferenceOpenHashSet<>(Set.of(
             Blocks.BEDROCK,
             Blocks.COMMAND_BLOCK,
             Blocks.CHAIN_COMMAND_BLOCK,
             Blocks.END_PORTAL_FRAME,
             Blocks.BARRIER
-    );
+    ));
 
     /**
      * @param pos
