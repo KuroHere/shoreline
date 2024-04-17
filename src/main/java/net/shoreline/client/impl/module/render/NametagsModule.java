@@ -137,7 +137,7 @@ public class NametagsModule extends ToggleModule {
             RenderManager.rect(matrices, -width - 1.0f, -1.0f, width * 2.0f + 2.0f,
                     mc.textRenderer.fontHeight + 1.0f, 0.0, 0x55000400);
         }
-        int color = getNametagColor(entity
+        int color = getNametagColor(entity);
         RenderManager.post(() -> {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
