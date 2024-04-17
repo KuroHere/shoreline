@@ -2,20 +2,17 @@ package net.shoreline.client.util.world;
 
 import com.google.common.collect.Multimap;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
-import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
-import net.minecraft.world.RaycastContext;
 import net.shoreline.client.util.Globals;
+
+import java.util.function.BiFunction;
 
 /**
  * @author linus
@@ -78,7 +75,7 @@ public class EndCrystalUtil implements Globals {
         double dz = pos.getZ() - bb.minZ;
         final Box box = bb.offset(dx, dy, dz);
         //
-        double ab = getExposure(crystal, entity, box, ignoreTerrain);
+        double ab = getExposure(crystal, box, ignoreTerrain);
         double w = Math.sqrt(pos.squaredDistanceTo(crystal)) / 12.0;
         double ac = (1.0 - w) * ab;
         double dmg = (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * 12.0 + 1.0));
@@ -146,123 +143,88 @@ public class EndCrystalUtil implements Globals {
                                      final Entity entity,
                                      final boolean ignoreTerrain) {
         final Box box = entity.getBoundingBox();
-        return getExposure(source, entity, box, ignoreTerrain);
+        return getExposure(source, box, ignoreTerrain);
     }
 
     /**
      * @param source
-     * @param entity
      * @param box
      * @param ignoreTerrain
      * @return
      */
     private static float getExposure(final Vec3d source,
-                                     final Entity entity,
                                      final Box box,
                                      final boolean ignoreTerrain) {
-        double d = 1.0 / ((box.maxX - box.minX) * 2.0 + 1.0);
-        double e = 1.0 / ((box.maxY - box.minY) * 2.0 + 1.0);
-        double f = 1.0 / ((box.maxZ - box.minZ) * 2.0 + 1.0);
-        double g = (1.0 - Math.floor(1.0 / d) * d) / 2.0;
-        double h = (1.0 - Math.floor(1.0 / f) * f) / 2.0;
-        if (d >= 0.0 && e >= 0.0 && f >= 0.0) {
-            int i = 0;
-            int j = 0;
-            for (double k = 0.0; k <= 1.0; k += d) {
-                for (double l = 0.0; l <= 1.0; l += e) {
-                    for (double m = 0.0; m <= 1.0; m += f) {
-                        double n = MathHelper.lerp(k, box.minX, box.maxX);
-                        double o = MathHelper.lerp(l, box.minY, box.maxY);
-                        double p = MathHelper.lerp(m, box.minZ, box.maxZ);
-                        final Vec3d vec3d = new Vec3d(n + g, o, p + h);
-                        RaycastContext ctx = new RaycastContext(vec3d, source,
-                                RaycastContext.ShapeType.COLLIDER,
-                                RaycastContext.FluidHandling.NONE, entity);
-                        BlockHitResult result = ignoreTerrain ?
-                                raycastIgnoreTerrain(ctx) : raycast(ctx);
-                        if (result.getType() == HitResult.Type.MISS) {
-                            ++i;
-                        }
-                        ++j;
+        RaycastFactory raycastFactory = getRaycastFactory(ignoreTerrain);
+
+        double xDiff = box.maxX - box.minX;
+        double yDiff = box.maxY - box.minY;
+        double zDiff = box.maxZ - box.minZ;
+
+        double xStep = 1 / (xDiff * 2 + 1);
+        double yStep = 1 / (yDiff * 2 + 1);
+        double zStep = 1 / (zDiff * 2 + 1);
+
+        if (xStep > 0 && yStep > 0 && zStep > 0) {
+            int misses = 0;
+            int hits = 0;
+
+            double xOffset = (1 - Math.floor(1 / xStep) * xStep) * 0.5;
+            double zOffset = (1 - Math.floor(1 / zStep) * zStep) * 0.5;
+
+            xStep = xStep * xDiff;
+            yStep = yStep * yDiff;
+            zStep = zStep * zDiff;
+
+            double startX = box.minX + xOffset;
+            double startY = box.minY;
+            double startZ = box.minZ + zOffset;
+            double endX = box.maxX + xOffset;
+            double endY = box.maxY;
+            double endZ = box.maxZ + zOffset;
+
+            for (double x = startX; x <= endX; x += xStep) {
+                for (double y = startY; y <= endY; y += yStep) {
+                    for (double z = startZ; z <= endZ; z += zStep) {
+                        Vec3d position = new Vec3d(x, y, z);
+
+                        if (raycast(new ExposureRaycastContext(position, source), raycastFactory) == null) misses++;
+
+                        hits++;
                     }
                 }
             }
-            return (float) i / (float) j;
+
+            return (float) misses / hits;
+        }
+
+        return 0f;
+    }
+
+    private static RaycastFactory getRaycastFactory(boolean ignoreTerrain) {
+        if (ignoreTerrain) {
+            return (context, blockPos) -> {
+                BlockState blockState = mc.world.getBlockState(blockPos);
+                if (blockState.getBlock().getBlastResistance() < 600) return null;
+
+                return blockState.getCollisionShape(mc.world, blockPos).raycast(context.start(), context.end(), blockPos);
+            };
         } else {
-            return 0.0f;
+            return (context, blockPos) -> {
+                BlockState blockState = mc.world.getBlockState(blockPos);
+                return blockState.getCollisionShape(mc.world, blockPos).raycast(context.start(), context.end(), blockPos);
+            };
         }
     }
 
-    /**
-     * @param context
-     * @return
-     */
-    private static BlockHitResult raycast(final RaycastContext context) {
-        return BlockView.raycast(context.getStart(), context.getEnd(),
-                context, (contextx, pos) ->
-                {
-                    BlockState blockState = mc.world.getBlockState(pos);
-                    FluidState fluidState = mc.world.getFluidState(pos);
-                    Vec3d vec3d = contextx.getStart();
-                    Vec3d vec3d2 = contextx.getEnd();
-                    VoxelShape voxelShape = contextx.getBlockShape(blockState,
-                            mc.world, pos);
-                    BlockHitResult blockHitResult = mc.world.raycastBlock(vec3d,
-                            vec3d2, pos, voxelShape, blockState);
-                    VoxelShape voxelShape2 = contextx.getFluidShape(fluidState,
-                            mc.world, pos);
-                    BlockHitResult blockHitResult2 = voxelShape2.raycast(vec3d,
-                            vec3d2, pos);
-                    double d = blockHitResult == null ? Double.MAX_VALUE :
-                            contextx.getStart().squaredDistanceTo(blockHitResult.getPos());
-                    double e = blockHitResult2 == null ? Double.MAX_VALUE :
-                            contextx.getStart().squaredDistanceTo(blockHitResult2.getPos());
-                    return d <= e ? blockHitResult : blockHitResult2;
-                },
-                (contextx) ->
-                {
-                    Vec3d vec3d = contextx.getStart().subtract(contextx.getEnd());
-                    return BlockHitResult.createMissed(contextx.getEnd(),
-                            Direction.getFacing(vec3d.x, vec3d.y, vec3d.z),
-                            BlockPos.ofFloored(contextx.getEnd()));
-                });
+    /* Raycasts */
+
+    private static BlockHitResult raycast(ExposureRaycastContext context, RaycastFactory raycastFactory) {
+        return BlockView.raycast(context.start, context.end, context, raycastFactory, ctx -> null);
     }
 
-    /**
-     * @param context
-     * @return
-     */
-    private static BlockHitResult raycastIgnoreTerrain(final RaycastContext context) {
-        return BlockView.raycast(context.getStart(), context.getEnd(),
-                context, (contextx, pos) ->
-                {
-                    BlockState blockState = mc.world.getBlockState(pos);
-                    if (blockState.getBlock().getBlastResistance() < 600) {
-                        blockState = Blocks.AIR.getDefaultState();
-                    }
-                    FluidState fluidState = mc.world.getFluidState(pos);
-                    Vec3d vec3d = contextx.getStart();
-                    Vec3d vec3d2 = contextx.getEnd();
-                    VoxelShape voxelShape = contextx.getBlockShape(blockState,
-                            mc.world, pos);
-                    BlockHitResult blockHitResult = mc.world.raycastBlock(vec3d,
-                            vec3d2, pos, voxelShape, blockState);
-                    VoxelShape voxelShape2 = contextx.getFluidShape(fluidState,
-                            mc.world, pos);
-                    BlockHitResult blockHitResult2 = voxelShape2.raycast(vec3d,
-                            vec3d2, pos);
-                    double d = blockHitResult == null ? Double.MAX_VALUE :
-                            contextx.getStart().squaredDistanceTo(blockHitResult.getPos());
-                    double e = blockHitResult2 == null ? Double.MAX_VALUE :
-                            contextx.getStart().squaredDistanceTo(blockHitResult2.getPos());
-                    return d <= e ? blockHitResult : blockHitResult2;
-                },
-                (contextx) ->
-                {
-                    Vec3d vec3d = contextx.getStart().subtract(contextx.getEnd());
-                    return BlockHitResult.createMissed(contextx.getEnd(),
-                            Direction.getFacing(vec3d.x, vec3d.y, vec3d.z),
-                            BlockPos.ofFloored(contextx.getEnd()));
-                });
-    }
+    public record ExposureRaycastContext(Vec3d start, Vec3d end) {}
+
+    @FunctionalInterface
+    public interface RaycastFactory extends BiFunction<ExposureRaycastContext, BlockPos, BlockHitResult> {}
 }
