@@ -42,16 +42,14 @@ public class TotemManager implements Globals {
                             totems.get(entity.getUuid()) + 1 : 1);
                 }
             }
-            else if (event.getPacket() instanceof PlayerRemoveS2CPacket packet) {
-                for (UUID uuid : packet.profileIds()) {
-                    totems.remove(uuid);
-                }
-            }
         }
     }
 
     @EventListener
     public void onRemoveEntity(RemoveEntityEvent event) {
+        if (event.getEntity() == mc.player) {
+            return;
+        }
         totems.remove(event.getEntity().getUuid());
     }
 

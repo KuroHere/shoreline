@@ -320,8 +320,6 @@ public class AutoCrystalModule extends RotationModule {
                 if (entity instanceof EndCrystalEntity && entity.squaredDistanceTo(packet.getX(), packet.getY(), packet.getZ()) < 144.0) {
                     mc.executeSync(() -> {
                         mc.world.removeEntity(entity.getId(), Entity.RemovalReason.KILLED);
-                        // entity.remove(Entity.RemovalReason.KILLED);
-                        // entity.setRemoved(Entity.RemovalReason.KILLED);
                     });
                 }
             }
@@ -367,7 +365,7 @@ public class AutoCrystalModule extends RotationModule {
                 }
                 double damage = EndCrystalUtil.getDamageTo(entity,
                         crystalPos, blockDestructionConfig.getValue());
-                // WTFRICK
+                // TODO: Test this
                 attackRotate = damage > instantDamageConfig.getValue() || attackCrystal != null
                         && damage >= attackCrystal.getDamage() && instantMaxConfig.getValue()
                         || entity instanceof LivingEntity entity1 && isCrystalLethalTo(damage, entity1);
@@ -611,7 +609,7 @@ public class AutoCrystalModule extends RotationModule {
                 }
                 double damage = EndCrystalUtil.getDamageTo(entity,
                         crystal.getPos(), blockDestructionConfig.getValue());
-                if (safetyOverride.getValue() && unsafeToPlayer && damage < EntityUtil.getHealth(entity) + 0.5) {
+                if (checkOverrideSafety(unsafeToPlayer, damage, entity)) {
                     continue;
                 }
                 if (damage > bestDamage) {
@@ -654,8 +652,7 @@ public class AutoCrystalModule extends RotationModule {
                 && dist > breakWallRangeConfig.getValue() * breakWallRangeConfig.getValue();
     }
 
-    private DamageData<BlockPos> calculatePlaceCrystal(List<BlockPos> placeBlocks,
-                                                       List<Entity> entities) {
+    private DamageData<BlockPos> calculatePlaceCrystal(List<BlockPos> placeBlocks, List<Entity> entities) {
         if (placeBlocks.isEmpty() || entities.isEmpty()) {
             return null;
         }
@@ -689,7 +686,7 @@ public class AutoCrystalModule extends RotationModule {
                 }
                 double damage = EndCrystalUtil.getDamageTo(entity,
                         crystalDamageVec(pos), blockDestructionConfig.getValue());
-                if (safetyOverride.getValue() && unsafeToPlayer && damage < EntityUtil.getHealth(entity) + 0.5) {
+                if (checkOverrideSafety(unsafeToPlayer, damage, entity)) {
                     continue;
                 }
                 if (damage > bestDamage) {
@@ -731,6 +728,10 @@ public class AutoCrystalModule extends RotationModule {
             }
         }
         return breakValidConfig.getValue() && dist > maxDist;
+    }
+
+    private boolean checkOverrideSafety(boolean unsafeToPlayer, double damage, Entity entity) {
+        return safetyOverride.getValue() && unsafeToPlayer && damage < EntityUtil.getHealth(entity) + 0.5;
     }
 
     private boolean targetDamageCheck(double bestDamage, Entity attackTarget) {
@@ -851,7 +852,7 @@ public class AutoCrystalModule extends RotationModule {
                 entities.remove(entity);
             } else if (entity instanceof EndCrystalEntity entity1
                     // && !intersectingCrystalCheck(entity1) // TODO: More advanced check for intersecting crystals
-                    && entity.getPos().squaredDistanceTo(box.minX, box.minY, box.minZ) <= 1.0) {
+                    && entity1.getBoundingBox().intersects(box) || attackPackets.containsKey(entity.getId()) && entity.age < ticksExistedConfig.getValue()) {
                 entities.remove(entity);
             }
         }
