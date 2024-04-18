@@ -1,6 +1,7 @@
 package net.shoreline.client.util.world;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.AmbientEntity;
 import net.minecraft.entity.mob.Angerable;
 import net.minecraft.entity.mob.Monster;
@@ -16,6 +17,18 @@ import net.minecraft.entity.vehicle.MinecartEntity;
  * @since 1.0
  */
 public class EntityUtil {
+
+    /**
+     * @param entity
+     * @return
+     */
+    public static float getHealth(Entity entity) {
+        if (entity instanceof LivingEntity e) {
+            return e.getHealth() + e.getAbsorptionAmount();
+        }
+        return 0.0f;
+    }
+
     /**
      * @param e
      * @return

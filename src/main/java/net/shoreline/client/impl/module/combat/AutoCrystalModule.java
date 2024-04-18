@@ -40,7 +40,6 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.EvictingQueue;
 import net.shoreline.client.util.math.timer.CacheTimer;
-import net.shoreline.client.util.math.timer.TickTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.world.EndCrystalUtil;
@@ -127,7 +126,7 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> armorBreakerConfig = new BooleanConfig("ArmorBreaker", "Attempts to break enemy armor with crystals", true);
     Config<Float> armorScaleConfig = new NumberConfig<>("ArmorScale", "Armor damage scale before attempting to break enemy armor with crystals", 1.0f, 5.0f, 20.0f, NumberDisplay.PERCENT, () -> armorBreakerConfig.getValue());
     Config<Float> lethalMultiplier = new NumberConfig<>("LethalMultiplier", "If we can kill an enemy with this many crystals, disregard damage values", 0.0f, 1.5f, 4.0f);
-    Config<Boolean> lethalDamageConfig = new BooleanConfig("Lethal-DamageTick", "Places lethal crystals only on ticks where they damage entities", false);
+    Config<Boolean> lethalDamageConfig = new BooleanConfig("Lethal-DamageTick", "Places lethal crystals on ticks where they damage entities", false);
     Config<Boolean> safetyConfig = new BooleanConfig("Safety", "Accounts for total player safety when attacking and placing crystals", true);
     Config<Boolean> safetyOverride = new BooleanConfig("SafetyOverride", "Overrides the safety checks if the crystal will kill an enemy", false);
     Config<Float> maxLocalDamageConfig = new NumberConfig<>("MaxLocalDamage", "The maximum player damage", 4.0f, 12.0f, 20.0f);
@@ -161,7 +160,6 @@ public class AutoCrystalModule extends RotationModule {
     private final Timer lastPlaceTimer = new CacheTimer();
     private final Timer lastSwapTimer = new CacheTimer();
     private final Timer autoSwapTimer = new CacheTimer();
-    private final Timer hurtTimer = new TickTimer();
     //
     private final ArrayDeque<Long> attackLatency = new EvictingQueue<>(20);
     private final Map<Integer, Long> attackPackets =
@@ -466,7 +464,6 @@ public class AutoCrystalModule extends RotationModule {
         // ((AccessorPlayerInteractEntityC2SPacket) packet).hookSetEntityId(id);
         Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(crystalEntity, mc.player.isSneaking()));
         attackPackets.put(crystalEntity.getId(), System.currentTimeMillis());
-        hurtTimer.reset();
         if (swingConfig.getValue()) {
             mc.player.swingHand(hand);
         } else {
@@ -594,7 +591,8 @@ public class AutoCrystalModule extends RotationModule {
             }
             double selfDamage = EndCrystalUtil.getDamageTo(mc.player,
                     crystal.getPos(), blockDestructionConfig.getValue());
-            if (playerDamageCheck(selfDamage)) {
+            boolean unsafeToPlayer = playerDamageCheck(selfDamage);
+            if (unsafeToPlayer && !safetyOverride.getValue()) {
                 continue;
             }
             for (Entity entity : entities) {
@@ -613,6 +611,9 @@ public class AutoCrystalModule extends RotationModule {
                 }
                 double damage = EndCrystalUtil.getDamageTo(entity,
                         crystal.getPos(), blockDestructionConfig.getValue());
+                if (safetyOverride.getValue() && unsafeToPlayer && damage < EntityUtil.getHealth(entity) + 0.5) {
+                    continue;
+                }
                 if (damage > bestDamage) {
                     bestDamage = damage;
                     playerDamage = selfDamage;
@@ -668,7 +669,8 @@ public class AutoCrystalModule extends RotationModule {
             }
             double selfDamage = EndCrystalUtil.getDamageTo(mc.player,
                     crystalDamageVec(pos), blockDestructionConfig.getValue());
-            if (playerDamageCheck(selfDamage)) {
+            boolean unsafeToPlayer = playerDamageCheck(selfDamage);
+            if (unsafeToPlayer && !safetyOverride.getValue()) {
                 continue;
             }
             for (Entity entity : entities) {
@@ -687,6 +689,9 @@ public class AutoCrystalModule extends RotationModule {
                 }
                 double damage = EndCrystalUtil.getDamageTo(entity,
                         crystalDamageVec(pos), blockDestructionConfig.getValue());
+                if (safetyOverride.getValue() && unsafeToPlayer && damage < EntityUtil.getHealth(entity) + 0.5) {
+                    continue;
+                }
                 if (damage > bestDamage) {
                     bestDamage = damage;
                     playerDamage = selfDamage;
@@ -749,7 +754,7 @@ public class AutoCrystalModule extends RotationModule {
 
     private boolean isCrystalLethalTo(double damage, LivingEntity entity) {
         if (lethalDamageConfig.getValue()) {
-            return entity.hurtTime == 0 && hurtTimer.passed(5);
+            return entity.hurtTime == 0 && lastAttackTimer.passed(100);
         }
         float health = entity.getHealth() + entity.getAbsorptionAmount();
         if (damage * (1.0f + lethalMultiplier.getValue()) >= health + 0.5f) {

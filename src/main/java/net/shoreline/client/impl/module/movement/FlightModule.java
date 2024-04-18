@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.module.movement;
 
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -12,6 +13,7 @@ import net.shoreline.client.impl.event.config.ConfigUpdateEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.math.timer.CacheTimer;
+import net.shoreline.client.util.math.timer.TickTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.string.EnumFormatter;
 
@@ -28,6 +30,7 @@ public class FlightModule extends ToggleModule {
     Config<Boolean> antiKickConfig = new BooleanConfig("AntiKick", "Prevents vanilla flight detection", true);
     //
     private final Timer antiKickTimer = new CacheTimer();
+    private final Timer antiKick2Timer = new CacheTimer();
 
     /**
      *
@@ -45,6 +48,7 @@ public class FlightModule extends ToggleModule {
     @Override
     public void onEnable() {
         antiKickTimer.reset();
+        antiKick2Timer.reset();
         if (modeConfig.getValue() == FlightMode.VANILLA) {
             enableVanillaFly();
         }
@@ -61,18 +65,21 @@ public class FlightModule extends ToggleModule {
     public void onPlayerTick(PlayerTickEvent event) {
         event.cancel();
         // Vanilla fly kick checks every 80 ticks
-        if (antiKickTimer.passed(3800) && antiKickConfig.getValue()) {
+        if (antiKickTimer.passed(3900) && antiKickConfig.getValue()) {
             Managers.MOVEMENT.setMotionY(-0.04);
             antiKickTimer.reset();
+        } else if (antiKick2Timer.passed(4000) && antiKickConfig.getValue()) {
+            Managers.MOVEMENT.setMotionY(0.04);
+            antiKick2Timer.reset();
         } else if (modeConfig.getValue() == FlightMode.CREATIVE) {
             Managers.MOVEMENT.setMotionY(0.0);
-        }
-        if (modeConfig.getValue() == FlightMode.CREATIVE) {
             if (mc.options.jumpKey.isPressed()) {
                 Managers.MOVEMENT.setMotionY(vspeedConfig.getValue());
             } else if (mc.options.sneakKey.isPressed()) {
                 Managers.MOVEMENT.setMotionY(-vspeedConfig.getValue());
             }
+        }
+        if (modeConfig.getValue() == FlightMode.CREATIVE) {
             float speed = Math.max(speedConfig.getValue(), 0.2873f);;
             float forward = mc.player.input.movementForward;
             float strafe = mc.player.input.movementSideways;
