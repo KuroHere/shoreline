@@ -271,7 +271,7 @@ public class SpeedmineModule extends RotationModule {
                 mining.getZ() + render1.minZ, mining.getX() + render1.maxX,
                 mining.getY() + render1.maxY, mining.getZ() + render1.maxZ);
         Vec3d center = render.getCenter();
-        float scale = MathHelper.clamp(damage + event.getTickDelta(), 0, damage);
+        float scale = MathHelper.clamp(damage, 0.0f, 1.0f);
         if (scale > 1.0f) {
             scale = 1.0f;
         }

@@ -102,7 +102,7 @@ public class AutoMineModule extends RotationModule {
                     mining.getZ() + render1.minZ, mining.getX() + render1.maxX,
                     mining.getY() + render1.maxY, mining.getZ() + render1.maxZ);
             Vec3d center = render.getCenter();
-            float scale = MathHelper.clamp(miningData.getDamage() / miningData.getBreakSpeed() + event.getTickDelta(), 0, miningData.getDamage());
+            float scale = MathHelper.clamp(miningData.getDamage() / miningData.getBreakSpeed(), 0, 1.0f);
             if (scale > 1.0f) {
                 scale = 1.0f;
             }
