@@ -269,7 +269,7 @@ public class Modules {
             // WAYPOINTS = (WaypointsModule) getRegisteredModule("waypoints-module");
             AIR_PLACE = (AirPlaceModule) getRegisteredModule("airplace-module");
             ANTI_INTERACT = (AntiInteractModule) getRegisteredModule("antiinteract-module");
-            // AUTO_MINE = (AutoMineModule) getRegisteredModule("automine-module");
+            AUTO_MINE = (AutoMineModule) getRegisteredModule("automine-module");
             AUTO_TOOL = (AutoToolModule) getRegisteredModule("autotool-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");
             FAST_DROP = (FastDropModule) getRegisteredModule("fastdrop-module");

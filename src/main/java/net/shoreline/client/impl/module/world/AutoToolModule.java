@@ -25,14 +25,22 @@ public final class AutoToolModule extends ToggleModule
     public void onBreakBlock(final AttackBlockEvent event)
     {
         final BlockState state = mc.world.getBlockState(event.getPos());
-        final int blockSlot = getBestTool(state);
+        final int blockSlot = getBestToolNoFallback(state);
         if (blockSlot != -1)
         {
             mc.player.getInventory().selectedSlot = blockSlot;
         }
     }
 
-    public int getBestTool(final BlockState state)
+    public int getBestTool(final BlockState state) {
+        int slot = getBestToolNoFallback(state);
+        if (slot != -1) {
+            return slot;
+        }
+        return mc.player.getInventory().selectedSlot;
+    }
+
+    public int getBestToolNoFallback(final BlockState state)
     {
         int slot = -1;
         float bestTool = 0.0f;
