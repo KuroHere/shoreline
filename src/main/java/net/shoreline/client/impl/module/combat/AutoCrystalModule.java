@@ -761,8 +761,8 @@ public class AutoCrystalModule extends RotationModule {
             if (!direction.getAxis().isHorizontal()) {
                 continue;
             }
-            BlockPos feet = pos1.offset(direction);
-            if (mc.world.getBlockState(pos1).isReplaceable()) {
+            BlockPos pos2 = pos1.offset(direction);
+            if (mc.world.getBlockState(pos2).isReplaceable()) {
                 return false;
             }
         }
