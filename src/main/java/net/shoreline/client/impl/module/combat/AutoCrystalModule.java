@@ -42,6 +42,7 @@ import net.shoreline.client.util.EvictingQueue;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.player.RotationUtil;
+import net.shoreline.client.util.world.BlastResistantBlocks;
 import net.shoreline.client.util.world.EndCrystalUtil;
 import net.shoreline.client.util.world.EntityUtil;
 
@@ -735,7 +736,7 @@ public class AutoCrystalModule extends RotationModule {
     private boolean targetDamageCheck(DamageData<?> crystal) {
         double minDmg = minDamageConfig.getValue();
         if (crystal.getAttackTarget() instanceof LivingEntity entity && isCrystalLethalTo(crystal, entity)) {
-            return false;
+            minDmg = 2.0f;
         }
         return crystal.getDamage() < minDmg;
     }
@@ -751,22 +752,25 @@ public class AutoCrystalModule extends RotationModule {
         return false;
     }
 
-    private boolean isFeet(BlockPos pos, LivingEntity entity) {
+    private boolean isFeetSurrounded(LivingEntity entity) {
         BlockPos pos1 = entity.getBlockPos();
+        if (BlastResistantBlocks.isBlastResistant(pos1) || BlastResistantBlocks.isUnbreakable(pos1)) {
+            return true;
+        }
         for (Direction direction : Direction.values()) {
             if (!direction.getAxis().isHorizontal()) {
                 continue;
             }
             BlockPos feet = pos1.offset(direction);
-            if (feet.equals(pos)) {
-                return true;
+            if (!BlastResistantBlocks.isBlastResistant(feet) && !BlastResistantBlocks.isUnbreakable(pos1)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private boolean isCrystalLethalTo(DamageData<?> crystal, LivingEntity entity) {
-        if (!isFeet(crystal.getBlockPos(), entity)) {
+        if (!isFeetSurrounded(entity)) {
             return false;
         }
         if (lethalDamageConfig.getValue()) {
