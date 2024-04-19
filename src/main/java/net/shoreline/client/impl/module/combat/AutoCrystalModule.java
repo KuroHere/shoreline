@@ -754,7 +754,7 @@ public class AutoCrystalModule extends RotationModule {
 
     private boolean isFeetSurrounded(LivingEntity entity) {
         BlockPos pos1 = entity.getBlockPos();
-        if (BlastResistantBlocks.isBlastResistant(pos1) || BlastResistantBlocks.isUnbreakable(pos1)) {
+        if (!mc.world.getBlockState(pos1).isReplaceable()) {
             return true;
         }
         for (Direction direction : Direction.values()) {
@@ -762,7 +762,7 @@ public class AutoCrystalModule extends RotationModule {
                 continue;
             }
             BlockPos feet = pos1.offset(direction);
-            if (!BlastResistantBlocks.isBlastResistant(feet) && !BlastResistantBlocks.isUnbreakable(pos1)) {
+            if (mc.world.getBlockState(pos1).isReplaceable()) {
                 return false;
             }
         }
