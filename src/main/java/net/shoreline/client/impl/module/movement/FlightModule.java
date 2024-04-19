@@ -83,6 +83,7 @@ public class FlightModule extends ToggleModule {
         // Vanilla fly kick checks every 80 ticks
         if (antiKickTimer.passed(3900) && antiKickConfig.getValue()) {
             Managers.MOVEMENT.setMotionY(-0.04);
+            sendModuleMessage("aaa");
             antiKickTimer.reset();
         } else if (antiKick2Timer.passed(4000) && antiKickConfig.getValue()) {
             Managers.MOVEMENT.setMotionY(0.04);
