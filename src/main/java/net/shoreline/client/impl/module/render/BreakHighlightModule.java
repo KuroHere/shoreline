@@ -8,6 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.shape.VoxelShape;
 import net.shoreline.client.api.config.Config;
+import net.shoreline.client.api.config.setting.ColorConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -17,6 +18,8 @@ import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorWorldRenderer;
 
+import java.awt.*;
+
 /**
  * @author linus
  * @since 1.0
@@ -24,6 +27,9 @@ import net.shoreline.client.mixin.accessor.AccessorWorldRenderer;
 public class BreakHighlightModule extends ToggleModule {
 
     Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to render breaking blocks", 5.0f, 20.0f, 50.0f);
+    Config<Color> colorConfig = new ColorConfig("Fill", "The color to render the blocks being broken.", new Color(255, 255, 255, 60), true, false);
+    Config<Color> lineColorConfig = new ColorConfig("Line", "The color to render the blocks being broken.", new Color(255, 255, 255, 190), true, false);
+
 
     public BreakHighlightModule() {
         super("BreakHighlight", "Highlights blocks that are being broken",
@@ -60,9 +66,9 @@ public class BreakHighlightModule extends ToggleModule {
             double sizeY = damage * ((bb.maxY - y) / 9.0);
             double sizeZ = damage * ((bb.maxZ - z) / 9.0);
             RenderManager.renderBox(event.getMatrices(), new Box(x - sizeX,
-                            y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ), Modules.COLORS.getRGB(60));
+                            y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ), colorConfig.getValue().getRGB());
             RenderManager.renderBoundingBox(event.getMatrices(), new Box(x - sizeX,
-                            y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ), 1.5f, Modules.COLORS.getRGB());
+                            y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ), 1.5f, lineColorConfig.getValue().getRGB());
         }
     }
 }

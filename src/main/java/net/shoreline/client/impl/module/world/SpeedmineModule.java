@@ -11,10 +11,7 @@ import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.shoreline.client.api.config.Config;
@@ -50,6 +47,7 @@ public class SpeedmineModule extends RotationModule {
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range for mine", 1.0f, 4.5f, 5.0f, () -> modeConfig.getValue() == SpeedmineMode.PACKET);
     Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best tool once the mining is complete", Swap.SILENT, Swap.values(), () -> modeConfig.getValue() == SpeedmineMode.PACKET);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates when mining the block", true, () -> modeConfig.getValue() == SpeedmineMode.PACKET);
+    Config<Boolean> smoothenConfig = new BooleanConfig("Smoothen", "israeli rendering technique", true, () -> true);
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF || modeConfig.getValue() == SpeedmineMode.DAMAGE);
     private BlockPos mining;
     private BlockState state;
@@ -274,7 +272,8 @@ public class SpeedmineModule extends RotationModule {
                 mining.getZ() + render1.minZ, mining.getX() + render1.maxX,
                 mining.getY() + render1.maxY, mining.getZ() + render1.maxZ);
         Vec3d center = render.getCenter();
-        float scale = damage;
+        float scale = MathHelper.clamp(damage + event.getTickDelta(), 0, damage);
+
         if (scale > 1.0f) {
             scale = 1.0f;
         }

@@ -297,7 +297,7 @@ public class AutoCrystalModule extends RotationModule {
 
     @EventListener
     public void onRenderWorld(RenderWorldEvent event) {
-        if (renderPos != null && isHoldingCrystal()) {
+        if (renderPos != null && isHoldingCrystal() && renderConfig.getValue()) {
             RenderManager.renderBox(event.getMatrices(), renderPos, Modules.COLORS.getRGB(80));
             RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
                     Modules.COLORS.getRGB(145));
