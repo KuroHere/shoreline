@@ -46,11 +46,11 @@ public class SpeedmineModule extends RotationModule {
 
     Config<SpeedmineMode> modeConfig = new EnumConfig<>("Mode", "The mining mode for speedmine", SpeedmineMode.PACKET, SpeedmineMode.values());
     Config<Float> mineSpeedConfig = new NumberConfig<>("Speed", "The speed to mine blocks", 0.0f, 0.7f, 0.9f, () -> modeConfig.getValue() == SpeedmineMode.DAMAGE);
-    Config<Boolean> instantConfig = new BooleanConfig("Instant", "Instantly removes the mining block", false);
-    Config<Float> rangeConfig = new NumberConfig<>("Range", "Range for mine", 1.0f, 4.5f, 5.0f);
-    Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best tool once the mining is complete", Swap.SILENT, Swap.values());
-    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates when mining the block", true);
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF);
+    Config<Boolean> instantConfig = new BooleanConfig("Instant", "Instantly removes the mining block", false, () -> modeConfig.getValue() == SpeedmineMode.PACKET);
+    Config<Float> rangeConfig = new NumberConfig<>("Range", "Range for mine", 1.0f, 4.5f, 5.0f, () -> modeConfig.getValue() == SpeedmineMode.PACKET);
+    Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best tool once the mining is complete", Swap.SILENT, Swap.values(), () -> modeConfig.getValue() == SpeedmineMode.PACKET);
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates when mining the block", true, () -> modeConfig.getValue() == SpeedmineMode.PACKET);
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF || modeConfig.getValue() == SpeedmineMode.DAMAGE);
     private BlockPos mining;
     private BlockState state;
     private Direction direction;
@@ -88,7 +88,7 @@ public class SpeedmineModule extends RotationModule {
 
     @EventListener
     public void onPlayerTick(PlayerTickEvent event) {
-        if (modeConfig.getValue() != SpeedmineMode.PACKET || mc.player.isCreative()) {
+        if (modeConfig.getValue() != SpeedmineMode.PACKET || Modules.AUTO_MINE.isEnabled() || mc.player.isCreative()) {
             return;
         }
 
@@ -157,7 +157,7 @@ public class SpeedmineModule extends RotationModule {
                 && packet.getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK
                 && modeConfig.getValue() == SpeedmineMode.DAMAGE && strictConfig.getValue()) {
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, packet.getPos().up(), packet.getDirection()));
+                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, packet.getPos().up(500), packet.getDirection()));
         }
         if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket) {
             damage = 0.0f;
@@ -176,7 +176,7 @@ public class SpeedmineModule extends RotationModule {
 
     @EventListener
     public void onAttackBlock(AttackBlockEvent event) {
-        if (modeConfig.getValue() != SpeedmineMode.PACKET) {
+        if (modeConfig.getValue() != SpeedmineMode.PACKET || Modules.AUTO_MINE.isEnabled()) {
             return;
         }
         if (mc.player == null || mc.world == null

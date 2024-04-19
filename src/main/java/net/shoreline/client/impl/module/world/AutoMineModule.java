@@ -151,9 +151,6 @@ public class AutoMineModule extends RotationModule {
         boolean failMine = data instanceof FailMiningData;
         float delta = Modules.SPEEDMINE.calcBlockBreakingDelta(data.getState(), mc.world, data.getPos());
         data.setDamage(delta);
-        if (Modules.AUTO_CRYSTAL.isAttacking() || Modules.AUTO_CRYSTAL.isPlacing() || mc.player.isUsingItem()) {
-            return;
-        }
         if (data.getDamage() > data.getBreakSpeed() && !data.getState().isAir()) {
             if (rotateConfig.getValue()) {
                 float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), data.getPos().toCenterPos());
