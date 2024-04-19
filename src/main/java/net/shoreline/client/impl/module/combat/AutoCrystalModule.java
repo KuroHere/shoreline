@@ -371,9 +371,11 @@ public class AutoCrystalModule extends RotationModule {
                 double damage = EndCrystalUtil.getDamageTo(entity,
                         crystalPos, blockDestructionConfig.getValue());
                 // TODO: Test this
+                DamageData<EndCrystalEntity> data = new DamageData<>(crystalEntity,
+                        entity, damage, selfDamage, crystalEntity.getBlockPos().down());
                 attackRotate = damage > instantDamageConfig.getValue() || attackCrystal != null
                         && damage >= attackCrystal.getDamage() && instantMaxConfig.getValue()
-                        || entity instanceof LivingEntity entity1 && isCrystalLethalTo(damage, entity1);
+                        || entity instanceof LivingEntity entity1 && isCrystalLethalTo(data, entity1);
                 if (attackRotate) {
                     attackInternal(crystalEntity, getCrystalHand());
                     setStage("ATTACKING");
@@ -580,10 +582,7 @@ public class AutoCrystalModule extends RotationModule {
         if (entities.isEmpty()) {
             return null;
         }
-        double playerDamage = 0.0;
-        double bestDamage = 0.0;
-        EndCrystalEntity crystalEntity = null;
-        Entity attackTarget = null;
+        DamageData<EndCrystalEntity> data = null;
         for (Entity crystal : entities) {
             if (!(crystal instanceof EndCrystalEntity crystal1) || !crystal.isAlive()) {
                 continue;
@@ -621,19 +620,16 @@ public class AutoCrystalModule extends RotationModule {
                 if (checkOverrideSafety(unsafeToPlayer, damage, entity)) {
                     continue;
                 }
-                if (damage > bestDamage) {
-                    bestDamage = damage;
-                    playerDamage = selfDamage;
-                    crystalEntity = crystal1;
-                    attackTarget = entity;
+                if (data == null || damage > data.getDamage()) {
+                    data = new DamageData<>(crystal1, entity,
+                            damage, selfDamage, crystal1.getBlockPos().down());
                 }
             }
         }
-        if (crystalEntity == null || targetDamageCheck(bestDamage, attackTarget)) {
+        if (data == null || targetDamageCheck(data)) {
             return null;
         }
-        return new DamageData<>(crystalEntity, attackTarget,
-                bestDamage, playerDamage);
+        return data;
     }
 
     private boolean attackRangeCheck(EndCrystalEntity entity) {
@@ -665,10 +661,7 @@ public class AutoCrystalModule extends RotationModule {
         if (placeBlocks.isEmpty() || entities.isEmpty()) {
             return null;
         }
-        double playerDamage = 0.0;
-        double bestDamage = 0.0;
-        BlockPos placeCrystal = null;
-        Entity attackTarget = null;
+        DamageData<BlockPos> data = null;
         for (BlockPos pos : placeBlocks) {
             if (!canUseCrystalOnBlock(pos) || placeRangeCheck(pos)) {
                 continue;
@@ -698,19 +691,15 @@ public class AutoCrystalModule extends RotationModule {
                 if (checkOverrideSafety(unsafeToPlayer, damage, entity)) {
                     continue;
                 }
-                if (damage > bestDamage) {
-                    bestDamage = damage;
-                    playerDamage = selfDamage;
-                    placeCrystal = pos;
-                    attackTarget = entity;
+                if (data == null || damage > data.getDamage()) {
+                    data = new DamageData<>(pos, entity, damage, selfDamage);
                 }
             }
         }
-        if (placeCrystal == null || targetDamageCheck(bestDamage, attackTarget)) {
+        if (data == null || targetDamageCheck(data)) {
             return null;
         }
-        return new DamageData<>(placeCrystal, attackTarget,
-                bestDamage, playerDamage);
+        return data;
     }
 
     /**
@@ -743,12 +732,12 @@ public class AutoCrystalModule extends RotationModule {
         return safetyOverride.getValue() && unsafeToPlayer && damage < EntityUtil.getHealth(entity) + 0.5;
     }
 
-    private boolean targetDamageCheck(double bestDamage, Entity attackTarget) {
+    private boolean targetDamageCheck(DamageData<?> crystal) {
         double minDmg = minDamageConfig.getValue();
-        if (attackTarget instanceof LivingEntity entity && isCrystalLethalTo(bestDamage, entity)) {
-            minDmg = 2.0;
+        if (crystal.getAttackTarget() instanceof LivingEntity entity && isCrystalLethalTo(crystal, entity)) {
+            return false;
         }
-        return bestDamage < minDmg;
+        return crystal.getDamage() < minDmg;
     }
 
     private boolean playerDamageCheck(double playerDamage) {
@@ -762,12 +751,29 @@ public class AutoCrystalModule extends RotationModule {
         return false;
     }
 
-    private boolean isCrystalLethalTo(double damage, LivingEntity entity) {
+    private boolean isFeet(BlockPos pos, LivingEntity entity) {
+        BlockPos pos1 = entity.getBlockPos();
+        for (Direction direction : Direction.values()) {
+            if (!direction.getAxis().isHorizontal()) {
+                continue;
+            }
+            BlockPos feet = pos1.offset(direction);
+            if (feet.equals(pos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isCrystalLethalTo(DamageData<?> crystal, LivingEntity entity) {
+        if (!isFeet(crystal.getBlockPos(), entity)) {
+            return false;
+        }
         if (lethalDamageConfig.getValue()) {
-            return entity.hurtTime == 0 && lastAttackTimer.passed(100) || lastAttackTimer.passed(500);
+            return lastAttackTimer.passed(500);
         }
         float health = entity.getHealth() + entity.getAbsorptionAmount();
-        if (damage * (1.0f + lethalMultiplier.getValue()) >= health + 0.5f) {
+        if (crystal.getDamage() * (1.0f + lethalMultiplier.getValue()) >= health + 0.5f) {
             return true;
         }
         if (armorBreakerConfig.getValue()) {
@@ -954,6 +960,7 @@ public class AutoCrystalModule extends RotationModule {
         private final List<String> tags = new ArrayList<>();
         private T damageData;
         private Entity attackTarget;
+        private BlockPos blockPos;
         //
         private double damage, selfDamage;
 
@@ -962,11 +969,20 @@ public class AutoCrystalModule extends RotationModule {
 
         }
 
-        public DamageData(T damageData, Entity attackTarget, double damage, double selfDamage) {
+        public DamageData(BlockPos damageData, Entity attackTarget, double damage, double selfDamage) {
+            this.damageData = (T) damageData;
+            this.attackTarget = attackTarget;
+            this.damage = damage;
+            this.selfDamage = selfDamage;
+            this.blockPos = damageData;
+        }
+
+        public DamageData(T damageData, Entity attackTarget, double damage, double selfDamage, BlockPos blockPos) {
             this.damageData = damageData;
             this.attackTarget = attackTarget;
             this.damage = damage;
             this.selfDamage = selfDamage;
+            this.blockPos = blockPos;
         }
 
         //
@@ -995,6 +1011,10 @@ public class AutoCrystalModule extends RotationModule {
 
         public double getSelfDamage() {
             return selfDamage;
+        }
+
+        public BlockPos getBlockPos() {
+            return blockPos;
         }
     }
 
