@@ -1,6 +1,5 @@
 package net.shoreline.client.impl.module.movement;
 
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -13,31 +12,30 @@ import net.shoreline.client.impl.event.config.ConfigUpdateEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.math.timer.CacheTimer;
-import net.shoreline.client.util.math.timer.TickTimer;
 import net.shoreline.client.util.math.timer.Timer;
+import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.string.EnumFormatter;
 
 /**
- * @author linus
+ * @author linus & hockeyl8
  * @since 1.0
  */
 public class FlightModule extends ToggleModule {
 
-    //
-    Config<FlightMode> modeConfig = new EnumConfig<>("Mode", "The mode for vanilla flight", FlightMode.CREATIVE, FlightMode.values());
+    Config<FlightMode> modeConfig = new EnumConfig<>("Mode", "The mode for vanilla flight", FlightMode.NORMAL, FlightMode.values());
     Config<Float> speedConfig = new NumberConfig<>("Speed", "The horizontal flight speed", 0.1f, 2.5f, 10.0f);
     Config<Float> vspeedConfig = new NumberConfig<>("VerticalSpeed", "The vertical flight speed", 0.1f, 1.0f, 5.0f);
     Config<Boolean> antiKickConfig = new BooleanConfig("AntiKick", "Prevents vanilla flight detection", true);
-    //
+    Config<Boolean> accelerateConfig = new BooleanConfig("Accelerate", "Accelerate as you fly", false);
+    Config<Float> accelerateSpeedConfig = new NumberConfig<>("AccelerateSpeed", "Speed to accelerate as", 0.01f, 0.2f, 1.0f, () -> accelerateConfig.getValue());
+    Config<Float> maxSpeedConfig = new NumberConfig<>("MaxSpeed", "Max speed to acceleratee to", 1.0f, 5.0f, 10.0f, () -> accelerateConfig.getValue());
+
+    private double speed;
     private final Timer antiKickTimer = new CacheTimer();
     private final Timer antiKick2Timer = new CacheTimer();
 
-    /**
-     *
-     */
     public FlightModule() {
-        super("Flight", "Allows the player to fly in survival",
-                ModuleCategory.MOVEMENT);
+        super("Flight", "Allows the player to fly in survival", ModuleCategory.MOVEMENT);
     }
 
     @Override
@@ -52,6 +50,7 @@ public class FlightModule extends ToggleModule {
         if (modeConfig.getValue() == FlightMode.VANILLA) {
             enableVanillaFly();
         }
+        speed = 0.0;
     }
 
     @Override
@@ -63,15 +62,33 @@ public class FlightModule extends ToggleModule {
 
     @EventListener
     public void onPlayerTick(PlayerTickEvent event) {
-        event.cancel();
+        if (accelerateConfig.getValue()) {
+            if (!MovementUtil.isInputtingMovement() || mc.player.horizontalCollision) {
+                speed = 0.0f;
+            }
+            speed += accelerateSpeedConfig.getValue();
+            if (speed > maxSpeedConfig.getValue()) {
+                speed = maxSpeedConfig.getValue();
+            }
+        }
+        else {
+            speed = speedConfig.getValue();
+        }
+        if (modeConfig.getValue().equals(FlightMode.VANILLA)) {
+            mc.player.getAbilities().setFlySpeed((float) (speed * 0.05f));
+        }
+        else {
+            mc.player.getAbilities().setFlySpeed(0.05f);
+        }
         // Vanilla fly kick checks every 80 ticks
         if (antiKickTimer.passed(3900) && antiKickConfig.getValue()) {
             Managers.MOVEMENT.setMotionY(-0.04);
+            sendModuleMessage("aaa");
             antiKickTimer.reset();
         } else if (antiKick2Timer.passed(4000) && antiKickConfig.getValue()) {
             Managers.MOVEMENT.setMotionY(0.04);
             antiKick2Timer.reset();
-        } else if (modeConfig.getValue() == FlightMode.CREATIVE) {
+        } else if (modeConfig.getValue() == FlightMode.NORMAL) {
             Managers.MOVEMENT.setMotionY(0.0);
             if (mc.options.jumpKey.isPressed()) {
                 Managers.MOVEMENT.setMotionY(vspeedConfig.getValue());
@@ -79,8 +96,8 @@ public class FlightModule extends ToggleModule {
                 Managers.MOVEMENT.setMotionY(-vspeedConfig.getValue());
             }
         }
-        if (modeConfig.getValue() == FlightMode.CREATIVE) {
-            float speed = Math.max(speedConfig.getValue(), 0.2873f);;
+        if (modeConfig.getValue() == FlightMode.NORMAL) {
+            speed = Math.max(speed, 0.2873f);
             float forward = mc.player.input.movementForward;
             float strafe = mc.player.input.movementSideways;
             float yaw = mc.player.getYaw();
@@ -109,7 +126,6 @@ public class FlightModule extends ToggleModule {
     private void enableVanillaFly() {
         mc.player.getAbilities().allowFlying = true;
         mc.player.getAbilities().flying = true;
-        mc.player.getAbilities().setFlySpeed(speedConfig.getValue() * 0.05f);
     }
 
     private void disableVanillaFly() {
@@ -121,7 +137,7 @@ public class FlightModule extends ToggleModule {
     }
 
     public enum FlightMode {
-        CREATIVE,
+        NORMAL,
         VANILLA
     }
 }
