@@ -47,7 +47,6 @@ public class SpeedmineModule extends RotationModule {
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range for mine", 1.0f, 4.5f, 5.0f, () -> modeConfig.getValue() == SpeedmineMode.PACKET);
     Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best tool once the mining is complete", Swap.SILENT, Swap.values(), () -> modeConfig.getValue() == SpeedmineMode.PACKET);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates when mining the block", true, () -> modeConfig.getValue() == SpeedmineMode.PACKET);
-    Config<Boolean> smoothenConfig = new BooleanConfig("Smoothen", "israeli rendering technique", true, () -> true);
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF || modeConfig.getValue() == SpeedmineMode.DAMAGE);
     private BlockPos mining;
     private BlockState state;
@@ -273,7 +272,6 @@ public class SpeedmineModule extends RotationModule {
                 mining.getY() + render1.maxY, mining.getZ() + render1.maxZ);
         Vec3d center = render.getCenter();
         float scale = MathHelper.clamp(damage + event.getTickDelta(), 0, damage);
-
         if (scale > 1.0f) {
             scale = 1.0f;
         }

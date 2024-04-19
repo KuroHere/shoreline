@@ -27,9 +27,6 @@ import java.awt.*;
 public class BreakHighlightModule extends ToggleModule {
 
     Config<Float> rangeConfig = new NumberConfig<>("Range", "The range to render breaking blocks", 5.0f, 20.0f, 50.0f);
-    Config<Color> colorConfig = new ColorConfig("Fill", "The color to render the blocks being broken.", new Color(255, 255, 255, 60), true, false);
-    Config<Color> lineColorConfig = new ColorConfig("Line", "The color to render the blocks being broken.", new Color(255, 255, 255, 190), true, false);
-
 
     public BreakHighlightModule() {
         super("BreakHighlight", "Highlights blocks that are being broken",
@@ -66,9 +63,9 @@ public class BreakHighlightModule extends ToggleModule {
             double sizeY = damage * ((bb.maxY - y) / 9.0);
             double sizeZ = damage * ((bb.maxZ - z) / 9.0);
             RenderManager.renderBox(event.getMatrices(), new Box(x - sizeX,
-                            y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ), colorConfig.getValue().getRGB());
+                            y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ), Modules.COLORS.getRGB(60));
             RenderManager.renderBoundingBox(event.getMatrices(), new Box(x - sizeX,
-                            y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ), 1.5f, lineColorConfig.getValue().getRGB());
+                            y - sizeY, z - sizeZ, x + sizeX, y + sizeY, z + sizeZ), 1.5f, Modules.COLORS.getRGB(125));
         }
     }
 }
