@@ -5,7 +5,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
@@ -28,8 +27,6 @@ public final class ScaffoldModule extends BlockPlacerModule
     Config<Boolean> towerConfig = new BooleanConfig("Tower", "Goes up faster when holding down space", true);
     Config<Boolean> keepYConfig = new BooleanConfig("KeepY", "Keeps your Y level", false);
 
-    private int posY = -1;
-
     public ScaffoldModule()
     {
         super("Scaffold", "Rapidly places blocks under your feet", ModuleCategory.WORLD);
@@ -39,12 +36,10 @@ public final class ScaffoldModule extends BlockPlacerModule
     protected void onDisable()
     {
         super.onDisable();
-
         if (mc.player != null)
         {
             Managers.INVENTORY.syncToClient();
         }
-        posY = -1;
     }
 
     @EventListener
@@ -119,21 +114,6 @@ public final class ScaffoldModule extends BlockPlacerModule
     {
         final float rotationYaw = MovementUtil.getYawOffset(
             mc.player.getYaw() - 180);
-
-        if (data.getSide() == Direction.UP)
-        {
-            final float[] angles = { rotationYaw, 90.0f };
-            final HitResult result = RayCastUtil.rayCast(4.0, angles);
-            if (result instanceof BlockHitResult hitResult
-                && hitResult.getBlockPos().equals(data.getPos())
-                && hitResult.getSide() == data.getSide())
-            {
-                data.setHitResult(hitResult);
-                data.setAngles(angles);
-                return;
-            }
-        }
-
         for (float yaw = rotationYaw - 45; yaw <= rotationYaw + 45; yaw += 1)
         {
             for (float pitch = 75; pitch <= 90; pitch += 1)
@@ -157,12 +137,13 @@ public final class ScaffoldModule extends BlockPlacerModule
 
     private BlockData getBlockData()
     {
+        double posY = mc.player.getY();
         if (!keepYConfig.getValue() || mc.player.isOnGround())
         {
             posY = (int) Math.round(mc.player.getY());
         }
 
-        final BlockPos pos = PlayerUtil.getRoundedBlockPos().down();
+        final BlockPos pos = PlayerUtil.getRoundedBlockPos(posY).down();
 
         for (final Direction direction : Direction.values())
         {

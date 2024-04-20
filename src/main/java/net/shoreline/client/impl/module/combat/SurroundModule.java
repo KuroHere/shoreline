@@ -104,7 +104,7 @@ public class SurroundModule extends BlockPlacerModule {
             disable();
             return;
         }
-        BlockPos pos = PlayerUtil.getRoundedBlockPos();
+        BlockPos pos = PlayerUtil.getRoundedBlockPos(mc.player.getY());
         if (shiftDelay < shiftDelayConfig.getValue()) {
             shiftDelay++;
             return;
