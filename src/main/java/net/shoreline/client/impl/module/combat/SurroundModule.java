@@ -30,6 +30,7 @@ import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.player.PlayerUtil;
 import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.ArrayList;
@@ -103,7 +104,7 @@ public class SurroundModule extends BlockPlacerModule {
             disable();
             return;
         }
-        BlockPos pos = mc.player.getBlockPos();
+        BlockPos pos = PlayerUtil.getRoundedBlockPos();
         if (shiftDelay < shiftDelayConfig.getValue()) {
             shiftDelay++;
             return;

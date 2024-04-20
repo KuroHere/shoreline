@@ -15,6 +15,7 @@ import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.player.MovementUtil;
+import net.shoreline.client.util.player.PlayerUtil;
 import net.shoreline.client.util.player.RayCastUtil;
 import net.shoreline.client.util.player.RotationUtil;
 
@@ -161,7 +162,7 @@ public final class ScaffoldModule extends BlockPlacerModule
             posY = (int) Math.round(mc.player.getY());
         }
 
-        final BlockPos pos = new BlockPos(MathHelper.floor(mc.player.getX()), posY, MathHelper.floor(mc.player.getZ())).down();
+        final BlockPos pos = PlayerUtil.getRoundedBlockPos().down();
 
         for (final Direction direction : Direction.values())
         {
