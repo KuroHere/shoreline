@@ -1,6 +1,5 @@
 package net.shoreline.client.api.module;
 
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -9,7 +8,8 @@ import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.impl.module.combat.SurroundModule;
 
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -19,11 +19,12 @@ import java.util.function.Predicate;
  */
 public class BlockPlacerModule extends RotationModule
 {
-    private static final Set<Block> RESISTANT_BLOCKS = new ReferenceOpenHashSet<>(Set.of(
-            Blocks.OBSIDIAN,
-            Blocks.CRYING_OBSIDIAN,
-            Blocks.ENDER_CHEST
-    ));
+    private static final List<Block> RESISTANT_BLOCKS = new LinkedList<>()
+    {{
+       add(Blocks.OBSIDIAN);
+       add(Blocks.CRYING_OBSIDIAN);
+       add(Blocks.ENDER_CHEST);
+    }};
 
     protected Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Places on visible sides only", false);
     protected Config<Boolean> grimConfig = new BooleanConfig("Grim", "Places using grim instant rotations", false);

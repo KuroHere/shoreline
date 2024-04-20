@@ -158,7 +158,7 @@ public final class ScaffoldModule extends BlockPlacerModule
     {
         if (!keepYConfig.getValue() || mc.player.isOnGround())
         {
-            posY = MathHelper.floor(mc.player.getY());
+            posY = (int) Math.round(mc.player.getY());
         }
 
         final BlockPos pos = new BlockPos(MathHelper.floor(mc.player.getX()), posY, MathHelper.floor(mc.player.getZ())).down();
