@@ -34,6 +34,7 @@ import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -162,7 +163,7 @@ public class SurroundModule extends BlockPlacerModule {
     }
 
     public List<BlockPos> getSurroundPositions(BlockPos pos) {
-        List<BlockPos> entities = new ArrayList<>();
+        List<BlockPos> entities = new LinkedList<>();
         entities.add(pos);
         if (extendConfig.getValue()) {
             for (Direction dir : Direction.values()) {
