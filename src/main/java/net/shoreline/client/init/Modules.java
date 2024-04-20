@@ -38,6 +38,7 @@ public class Modules {
     public static AutoLogModule AUTO_LOG;
     public static AutoTotemModule AUTO_TOTEM;
     public static AutoXPModule AUTO_XP;
+    public static BackTrackModule BACK_TRACK;
     public static BlockLagModule BLOCK_LAG;
     public static BowAimModule BOW_AIM;
     public static CriticalsModule CRITICALS;
@@ -49,6 +50,7 @@ public class Modules {
     // Exploit
     public static AntiHungerModule ANTI_HUNGER;
     public static ChorusControlModule CHORUS_CONTROL;
+    public static ClientSpooferModule CLIENT_SPOOFER;
     public static CrasherModule CRASHER;
     public static DisablerModule DISABLER;
     public static ExtendedFireworkModule EXTENDED_FIREWORK;
@@ -188,6 +190,7 @@ public class Modules {
             AUTO_LOG = (AutoLogModule) getRegisteredModule("autolog-module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule("autototem-module");
             AUTO_XP = (AutoXPModule) getRegisteredModule("autoxp-module");
+            // BACK_TRACK = (BackTrackModule) getRegisteredModule("backtrack-module");
             BLOCK_LAG = (BlockLagModule) getRegisteredModule("blocklag-module");
             BOW_AIM = (BowAimModule) getRegisteredModule("bowaim-module");
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
@@ -198,6 +201,7 @@ public class Modules {
             TRIGGER = (TriggerModule) getRegisteredModule("trigger-module");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule("antihunger-module");
             CHORUS_CONTROL = (ChorusControlModule) getRegisteredModule("choruscontrol-module");
+            CLIENT_SPOOFER = (ClientSpooferModule) getRegisteredModule("clientspoofer-module");
             CRASHER = (CrasherModule) getRegisteredModule("crasher-module");
             DISABLER = (DisablerModule) getRegisteredModule("disabler-module");
             EXTENDED_FIREWORK = (ExtendedFireworkModule) getRegisteredModule("extendedfirework-module");

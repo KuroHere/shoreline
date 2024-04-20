@@ -43,6 +43,7 @@ public class ModuleManager {
                 new AutoLogModule(),
                 new AutoTotemModule(),
                 new AutoXPModule(),
+                // new BackTrackModule(),
                 new BlockLagModule(),
                 new BowAimModule(),
                 new CriticalsModule(),
@@ -55,6 +56,7 @@ public class ModuleManager {
                 // Exploit
                 new AntiHungerModule(),
                 new ChorusControlModule(),
+                new ClientSpooferModule(),
                 new CrasherModule(),
                 new DisablerModule(),
                 new ExtendedFireworkModule(),
