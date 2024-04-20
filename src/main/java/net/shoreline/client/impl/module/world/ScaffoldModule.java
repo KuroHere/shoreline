@@ -1,9 +1,6 @@
 package net.shoreline.client.impl.module.world;
 
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -17,6 +14,7 @@ import net.shoreline.client.api.module.BlockPlacerModule;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.player.RayCastUtil;
 import net.shoreline.client.util.player.RotationUtil;
 
@@ -26,7 +24,10 @@ import net.shoreline.client.util.player.RotationUtil;
  */
 public final class ScaffoldModule extends BlockPlacerModule
 {
-    Config<Boolean> tower = new BooleanConfig("Tower", "Goes up faster when holding down space", true);
+    Config<Boolean> towerConfig = new BooleanConfig("Tower", "Goes up faster when holding down space", true);
+    Config<Boolean> keepYConfig = new BooleanConfig("KeepY", "Keeps your Y level", false);
+
+    private int posY = -1;
 
     public ScaffoldModule()
     {
@@ -42,6 +43,7 @@ public final class ScaffoldModule extends BlockPlacerModule
         {
             Managers.INVENTORY.syncToClient();
         }
+        posY = -1;
     }
 
     @EventListener
@@ -53,47 +55,54 @@ public final class ScaffoldModule extends BlockPlacerModule
             return;
         }
 
-        final int blockSlot = getBlockSlot();
+        final int blockSlot = getSlot(
+                (stack) -> stack.getItem() instanceof BlockItem);
         if (blockSlot == -1)
         {
             return;
         }
 
-        final Vec3d hitVec = data.pos().toCenterPos();
-        BlockHitResult hitResult = new BlockHitResult(hitVec, data.direction(), data.pos(), false);
         if (grimConfig.getValue())
         {
-            final GrimPlaceResult placeResult = getRotationAnglesFor(data);
-            if (placeResult == null)
+            getRotationAnglesFor(data);
+            if (data.getHitResult() == null)
             {
                 return;
             }
-
-            hitResult = placeResult.result();
-            float[] angles = placeResult.angles();
-            Managers.ROTATION.setRotationSilent(angles[0], angles[1], true);
         }
         else
         {
-            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitVec);
-            setRotation(angles[0], angles[1]);
+            data.setAngles(RotationUtil.getRotationsTo(mc.player.getEyePos(), data.getHitResult().getPos()));
         }
 
-        if (Managers.INVENTORY.getServerSlot() != blockSlot)
+        final boolean result = Managers.INTERACT.placeBlock(data.getHitResult(), blockSlot, false, (state) ->
         {
-            Managers.INVENTORY.setSlot(blockSlot);
-        }
-
-        final ActionResult result = mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hitResult);
-        if (result.isAccepted())
-        {
-            if (result.shouldSwingHand())
+            float[] angles = data.getAngles();
+            if (angles == null)
             {
-                mc.player.swingHand(Hand.MAIN_HAND);
+                return;
             }
+            if (grimConfig.getValue())
+            {
+                if (state)
+                {
+                    Managers.ROTATION.setRotationSilent(angles[0], angles[1], true);
+                }
+                else
+                {
+                    Managers.ROTATION.setRotationSilentSync(true);
+                }
+            }
+            else if (state)
+            {
+                setRotation(angles[0], angles[1]);
+            }
+        });
 
+        if (result)
+        {
             // if someone uses this on grim and complains "it doesnt work!!!" im gonna find their house
-            if (tower.getValue() && mc.options.jumpKey.isPressed())
+            if (towerConfig.getValue() && mc.options.jumpKey.isPressed())
             {
                 final Vec3d velocity = mc.player.getVelocity();
                 final double velocityY = velocity.y;
@@ -103,14 +112,27 @@ public final class ScaffoldModule extends BlockPlacerModule
                 }
             }
         }
-
-        Managers.INVENTORY.syncToClient();
     }
 
-    private GrimPlaceResult getRotationAnglesFor(final BlockData data)
+    private void getRotationAnglesFor(final BlockData data)
     {
-        // insane 10/10 code (will NOT lag your game!!!)
-        final float rotationYaw = mc.player.getYaw() - 180;
+        final float rotationYaw = MovementUtil.getYawOffset(
+            mc.player.getYaw() - 180);
+
+        if (data.getSide() == Direction.UP)
+        {
+            final float[] angles = { rotationYaw, 90.0f };
+            final HitResult result = RayCastUtil.rayCast(4.0, angles);
+            if (result instanceof BlockHitResult hitResult
+                && hitResult.getBlockPos().equals(data.getPos())
+                && hitResult.getSide() == data.getSide())
+            {
+                data.setHitResult(hitResult);
+                data.setAngles(angles);
+                return;
+            }
+        }
+
         for (float yaw = rotationYaw - 45; yaw <= rotationYaw + 45; yaw += 1)
         {
             for (float pitch = 75; pitch <= 90; pitch += 1)
@@ -118,40 +140,28 @@ public final class ScaffoldModule extends BlockPlacerModule
                 final float[] angles = { yaw, pitch };
                 final HitResult result = RayCastUtil.rayCast(4.0, angles);
                 if (result instanceof BlockHitResult hitResult
-                        && hitResult.getBlockPos().equals(data.pos())
-                        && hitResult.getSide() == data.direction())
+                        && hitResult.getBlockPos().equals(data.getPos())
+                        && hitResult.getSide() == data.getSide())
                 {
-                    return new GrimPlaceResult(hitResult, angles);
+                    data.setHitResult(hitResult);
+                    data.setAngles(angles);
+                    return;
                 }
             }
         }
-        return null;
-    }
 
-    private int getBlockSlot()
-    {
-        int slot = -1;
-        int count = 0;
-        for (int i = 0; i < 9; ++i)
-        {
-            final ItemStack stack = mc.player.getInventory().getStack(i);
-            final int stackCount = stack.getCount();
-            // TODO: block blacklist
-            if (!stack.isEmpty() && stack.getItem() instanceof BlockItem)
-            {
-                if (stackCount > count || slot == -1)
-                {
-                    slot = i;
-                    count = stackCount;
-                }
-            }
-        }
-        return slot;
+        data.setHitResult(null);
+        data.setAngles(null);
     }
 
     private BlockData getBlockData()
     {
-        final BlockPos pos = new BlockPos(MathHelper.floor(mc.player.getX()), MathHelper.floor(mc.player.getY()), MathHelper.floor(mc.player.getZ())).down();
+        if (!keepYConfig.getValue() || mc.player.isOnGround())
+        {
+            posY = MathHelper.floor(mc.player.getY());
+        }
+
+        final BlockPos pos = new BlockPos(MathHelper.floor(mc.player.getX()), posY, MathHelper.floor(mc.player.getZ())).down();
 
         for (final Direction direction : Direction.values())
         {
@@ -181,9 +191,51 @@ public final class ScaffoldModule extends BlockPlacerModule
         return null;
     }
 
-    private record BlockData(BlockPos pos, Direction direction)
+    private static class BlockData
     {
+        private BlockHitResult hitResult;
+        private float[] angles;
 
+        public BlockData(final BlockPos pos, final Direction direction)
+        {
+            this(new BlockHitResult(pos.toCenterPos(), direction, pos, false), null);
+        }
+
+        public BlockData(final BlockHitResult hitResult, final float[] angles)
+        {
+            this.hitResult = hitResult;
+            this.angles = angles;
+        }
+
+        public BlockHitResult getHitResult()
+        {
+            return hitResult;
+        }
+
+        public void setHitResult(BlockHitResult hitResult)
+        {
+            this.hitResult = hitResult;
+        }
+
+        public BlockPos getPos()
+        {
+            return hitResult.getBlockPos();
+        }
+
+        public Direction getSide()
+        {
+            return hitResult.getSide();
+        }
+
+        public float[] getAngles()
+        {
+            return angles;
+        }
+
+        public void setAngles(float[] angles)
+        {
+            this.angles = angles;
+        }
     }
 
     private record GrimPlaceResult(BlockHitResult result, float[] angles)

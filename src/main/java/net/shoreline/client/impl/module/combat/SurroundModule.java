@@ -30,6 +30,7 @@ import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -130,7 +131,34 @@ public class SurroundModule extends BlockPlacerModule {
                 Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
         }
-        placeObsidianBlock(targetPos, rotateConfig.getValue());
+
+        final int slot = getResistantBlockItem();
+        if (slot == -1)
+        {
+            return;
+        }
+        Managers.INTERACT.placeBlock(targetPos, slot, strictDirectionConfig.getValue(), false, (state) ->
+        {
+            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), targetPos.toCenterPos());
+            if (rotateConfig.getValue())
+            {
+                if (grimConfig.getValue())
+                {
+                    if (state)
+                    {
+                        Managers.ROTATION.setRotationSilent(angles[0], angles[1], true);
+                    }
+                    else
+                    {
+                        Managers.ROTATION.setRotationSilentSync(true);
+                    }
+                }
+                else if (state)
+                {
+                    setRotation(angles[0], angles[1]);
+                }
+            }
+        });
     }
 
     public List<BlockPos> getSurroundPositions(BlockPos pos) {

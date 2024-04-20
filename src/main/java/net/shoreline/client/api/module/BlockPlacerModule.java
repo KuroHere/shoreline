@@ -1,26 +1,33 @@
 package net.shoreline.client.api.module;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.impl.module.combat.SurroundModule;
-import net.shoreline.client.init.Managers;
+
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * @author linus
  * @see SurroundModule
  * @since 1.0
  */
-public class BlockPlacerModule extends RotationModule {
+public class BlockPlacerModule extends RotationModule
+{
+    private static final Set<Block> RESISTANT_BLOCKS = new ReferenceOpenHashSet<>(Set.of(
+            Blocks.OBSIDIAN,
+            Blocks.CRYING_OBSIDIAN,
+            Blocks.ENDER_CHEST
+    ));
 
     protected Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Places on visible sides only", false);
     protected Config<Boolean> grimConfig = new BooleanConfig("Grim", "Places using grim instant rotations", false);
 
-    // TODO: series of blocks
     public BlockPlacerModule(String name, String desc, ModuleCategory category) {
         super(name, desc, category);
         register(strictDirectionConfig, grimConfig);
@@ -31,61 +38,46 @@ public class BlockPlacerModule extends RotationModule {
         register(strictDirectionConfig, grimConfig);
     }
 
-    /**
-     * @param pos
-     */
-    protected void placeObsidianBlock(BlockPos pos, boolean rotate) {
-        int slot = getResistantBlockItem();
-        if (slot == -1) {
-            return;
+    protected int getSlot(final Predicate<ItemStack> filter)
+    {
+        for (int i = 0; i < 9; ++i)
+        {
+            final ItemStack itemStack = mc.player.getInventory().getStack(i);
+            if (!itemStack.isEmpty() && filter.test(itemStack))
+            {
+                return i;
+            }
         }
-        placeBlock(slot, pos, rotate, strictDirectionConfig.getValue(), grimConfig.getValue());
-    }
-
-    protected void placeObsidianBlock(BlockPos pos) {
-        placeObsidianBlock(pos, false);
-    }
-
-    protected void placeBlock(int slot, BlockPos pos) {
-        placeBlock(slot, pos, false, strictDirectionConfig.getValue(), grimConfig.getValue());
-    }
-
-    /**
-     * @param slot
-     * @param pos
-     * @param strictDirection
-     */
-    protected void placeBlock(int slot, BlockPos pos, boolean rotate, boolean strictDirection, boolean grim) {
-        int prev = mc.player.getInventory().selectedSlot;
-        Managers.INVENTORY.setSlot(slot);
-        float[] rotations = Managers.INTERACT.placeBlock(pos, rotate, strictDirection, grim);
-        Managers.INVENTORY.setSlot(prev);
+        return -1;
     }
 
     /**
      * @return
      */
-    public int getResistantBlockItem() {
-        int slot = getBlockItemSlot(Blocks.OBSIDIAN);
-        if (slot == -1) {
-            slot = getBlockItemSlot(Blocks.CRYING_OBSIDIAN);
-        }
-        if (slot == -1) {
-            return getBlockItemSlot(Blocks.ENDER_CHEST);
-        }
-        return slot;
-    }
-
-    public int getBlockItemSlot(Block block) {
-        int slot = -1;
-        for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.getItem() instanceof BlockItem block1
-                    && block1.getBlock() == block) {
-                slot = i;
-                break;
+    protected int getResistantBlockItem()
+    {
+        for (final Block type : RESISTANT_BLOCKS)
+        {
+            final int slot = getBlockItemSlot(type);
+            if (slot != -1)
+            {
+                return slot;
             }
         }
-        return slot;
+        return -1;
+    }
+
+    protected int getBlockItemSlot(final Block block)
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            final ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.getItem() instanceof BlockItem blockItem
+                    && blockItem.getBlock() == block)
+            {
+                return i;
+            }
+        }
+        return -1;
     }
 }

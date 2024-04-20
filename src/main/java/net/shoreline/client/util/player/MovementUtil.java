@@ -35,4 +35,21 @@ public class MovementUtil implements Globals {
         double f = mc.player.getZ() - mc.player.lastZ;
         return MathHelper.squaredMagnitude(d, e, f) > MathHelper.square(2.0e-4);
     }
+
+    public static float getYawOffset(float rotationYaw)
+    {
+        if (mc.player.forwardSpeed < 0.0f) rotationYaw += 180.0f;
+
+        float forward = 1.0f;
+        if (mc.player.forwardSpeed < 0.0f) {
+            forward = -0.5f;
+        } else if (mc.player.forwardSpeed > 0.0f) {
+            forward = 0.5f;
+        }
+
+        float strafe = mc.player.input.movementSideways;
+        if (strafe > 0.0f) rotationYaw -= 90.0f * forward;
+        if (strafe < 0.0f) rotationYaw += 90.0f * forward;
+        return rotationYaw;
+    }
 }
