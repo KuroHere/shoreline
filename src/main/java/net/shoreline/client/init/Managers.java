@@ -8,7 +8,6 @@ import net.shoreline.client.impl.manager.client.*;
 import net.shoreline.client.impl.manager.combat.TotemManager;
 import net.shoreline.client.impl.manager.combat.hole.HoleManager;
 import net.shoreline.client.impl.manager.network.NetworkManager;
-import net.shoreline.client.impl.manager.network.latency.LatencyManager;
 import net.shoreline.client.impl.manager.player.InventoryManager;
 import net.shoreline.client.impl.manager.player.MovementManager;
 import net.shoreline.client.impl.manager.player.PositionManager;
@@ -42,7 +41,6 @@ public class Managers {
     public static HoleManager HOLE;
     public static TotemManager TOTEM;
     public static InteractionManager INTERACT;
-    public static LatencyManager LATENCY;
     public static SoundManager SOUND;
     public static CapeManager CAPES;
     // The initialized state of the managers. If this is true, all managers
@@ -74,7 +72,6 @@ public class Managers {
             HOLE = new HoleManager();
             TOTEM = new TotemManager();
             INTERACT = new InteractionManager();
-            LATENCY = new LatencyManager();
             COMMAND = new CommandManager();
             SOUND = new SoundManager();
             initialized = true;
