@@ -6,6 +6,7 @@ import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.*;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
@@ -57,7 +58,7 @@ public class AutoMineModule extends RotationModule {
             List<BlockPos> autoMines = getAutoMineTarget();
             if (!autoMines.isEmpty()) {
                 BlockPos mineTarget = autoMines.get(0);
-                if (miningData == null || miningData.getDamage() > 1.0f) {
+                if (miningData == null || !miningData.getPos().equals(mineTarget)) {
                     startMiningPos(mineTarget, Direction.UP);
                 }
             }
@@ -94,9 +95,7 @@ public class AutoMineModule extends RotationModule {
         if (miningData != null) {
             BlockPos mining = miningData.getPos();
             VoxelShape outlineShape = miningData.getState().getOutlineShape(mc.world, mining);
-            if (outlineShape.isEmpty()) {
-                return;
-            }
+            outlineShape = outlineShape.isEmpty() ? VoxelShapes.fullCube() : outlineShape;
             Box render1 = outlineShape.getBoundingBox();
             Box render = new Box(mining.getX() + render1.minX, mining.getY() + render1.minY,
                     mining.getZ() + render1.minZ, mining.getX() + render1.maxX,
@@ -149,6 +148,9 @@ public class AutoMineModule extends RotationModule {
         float delta = Modules.SPEEDMINE.calcBlockBreakingDelta(data.getState(), mc.world, data.getPos());
         data.setDamage(delta);
         if (data.getDamage() > data.getBreakSpeed() && !data.getState().isAir()) {
+            if (mc.player.isUsingItem()) {
+                return;
+            }
             if (rotateConfig.getValue()) {
                 float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), data.getPos().toCenterPos());
                 Managers.ROTATION.setRotationSilent(rotations[0], rotations[1], grimConfig.getValue());

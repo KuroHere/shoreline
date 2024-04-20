@@ -206,6 +206,10 @@ public class CommandManager implements Globals {
         return commands;
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
+
     /**
      * @param prefix
      * @param prefixKey
