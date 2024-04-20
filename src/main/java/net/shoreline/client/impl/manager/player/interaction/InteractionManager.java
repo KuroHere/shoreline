@@ -35,7 +35,7 @@ public final class InteractionManager implements Globals
                               final RotationCallback rotationCallback)
     {
         Direction direction = getInteractDirection(pos, strictDirection);
-        if (isAirPlaceEnabled() && direction == null && !strictDirection)
+        if (Modules.AIR_PLACE.isEnabled() && direction == null && !strictDirection)
         {
             // TODO: this should be not like this
             direction = Direction.UP;
@@ -155,10 +155,5 @@ public final class InteractionManager implements Globals
             return null;
         }
         return interactDirection.getOpposite();
-    }
-
-    private boolean isAirPlaceEnabled()
-    {
-        return Modules.AIR_PLACE.isEnabled();
     }
 }
