@@ -260,18 +260,22 @@ public class SurroundModule extends BlockPlacerModule {
             final BlockState state = packet.getState();
             final BlockPos targetPos = packet.getPos();
             if (surround.contains(targetPos) && state.isReplaceable()) {
-                attackPlace(targetPos);
-                blocksPlaced++;
-                // shiftDelay = 0;
+                mc.executeSync(() -> {
+                    attackPlace(targetPos);
+                    blocksPlaced++;
+                    // shiftDelay = 0;
+                });
             }
         } else if (event.getPacket() instanceof PlaySoundS2CPacket packet
                 && packet.getCategory() == SoundCategory.BLOCKS
                 && packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
             BlockPos targetPos = BlockPos.ofFloored(packet.getX(), packet.getY(), packet.getZ());
             if (surround.contains(targetPos)) {
-                attackPlace(targetPos);
-                blocksPlaced++;
-                // shiftDelay = 0;
+                mc.executeSync(() -> {
+                    attackPlace(targetPos);
+                    blocksPlaced++;
+                    // shiftDelay = 0;
+                });
             }
         }
     }
