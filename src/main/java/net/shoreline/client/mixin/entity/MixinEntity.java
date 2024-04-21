@@ -140,7 +140,7 @@ public abstract class MixinEntity implements Globals {
      */
     @Inject(method = "pushAwayFrom", at = @At(value = "HEAD"), cancellable = true)
     private void hookPushAwayFrom(Entity entity, CallbackInfo ci) {
-        PushEntityEvent pushEntityEvent = new PushEntityEvent();
+        PushEntityEvent pushEntityEvent = new PushEntityEvent((Entity) (Object) this, entity);
         Shoreline.EVENT_HANDLER.dispatch(pushEntityEvent);
         if (pushEntityEvent.isCanceled()) {
             ci.cancel();

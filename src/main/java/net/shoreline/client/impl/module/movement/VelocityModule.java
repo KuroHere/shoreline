@@ -164,7 +164,7 @@ public class VelocityModule extends ToggleModule {
 
     @EventListener
     public void onPushEntity(PushEntityEvent event) {
-        if (pushEntitiesConfig.getValue()) {
+        if (pushEntitiesConfig.getValue() && event.getPushed().equals(mc.player)) {
             event.cancel();
         }
     }

@@ -3,6 +3,7 @@ package net.shoreline.client.impl.module.misc;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.impl.event.entity.player.PushEntityEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.util.world.FakePlayerEntity;
 
@@ -43,5 +44,16 @@ public class FakePlayerModule extends ToggleModule {
     public void onDisconnect(DisconnectEvent event) {
         fakePlayer = null;
         disable();
+    }
+
+    @EventListener
+    public void onPushEntity(PushEntityEvent event)
+    {
+        // Prevents Simulation flags (as the FakePlayer is client only, so Grim rightfully
+        // flags us for that push motion that shouldn't happen
+        if (event.getPushed().equals(mc.player) && event.getPusher().equals(fakePlayer))
+        {
+            event.setCanceled(true);
+        }
     }
 }
