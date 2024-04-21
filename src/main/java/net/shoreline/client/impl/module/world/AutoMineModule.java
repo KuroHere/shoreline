@@ -20,6 +20,7 @@ import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.ArrayList;
@@ -41,12 +42,41 @@ public class AutoMineModule extends RotationModule {
     Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF);
     Config<Boolean> grimConfig = new BooleanConfig("Grim", "Uses grim block breaking speeds", false);
     Config<Boolean> remineConfig = new BooleanConfig("Remine", "Automatically remines mined blocks", true);
+    Config<Boolean> debugConfig = new BooleanConfig("Debug", "If to show debug information in the module metadata", false);
     //
     private MiningData miningData;
     private FailMiningData failMiningData;
+    private boolean tryBreak;
 
     public AutoMineModule() {
         super("AutoMine", "Automatically mines enemy blocks", ModuleCategory.WORLD);
+    }
+
+    @Override
+    public String getModuleData() {
+        if (debugConfig.getValue() && miningData != null && !miningData.getState().isReplaceable())
+        {
+            final float damage = miningData.damage;
+            if (damage == Float.POSITIVE_INFINITY)
+            {
+                return "Remine";
+            }
+            else if (damage > 1.0f)
+            {
+                return "Break";
+            }
+            return String.format("%.1f", damage * 100.0f) + "%";
+        }
+        return super.getModuleData();
+    }
+
+    @Override
+    protected void onDisable() {
+        super.onDisable();
+        if (mc.player != null)
+        {
+            Managers.INVENTORY.syncToClient();
+        }
     }
 
     @EventListener
@@ -64,10 +94,16 @@ public class AutoMineModule extends RotationModule {
             }
         }
         if (miningData != null) {
+            if (miningData.getState().isReplaceable() && miningData.getBreakState())
+            {
+                miningData.setBreakState(false);
+            }
+
             double dist = mc.player.squaredDistanceTo(miningData.getPos().toCenterPos());
             if (dist > ((NumberConfig<?>) rangeConfig).getValueSq()) {
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                        PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, miningData.getPos(), Direction.DOWN));
+                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, miningData.getPos(), Direction.DOWN));
+                Managers.INVENTORY.syncToClient();
                 miningData = null;
             }
         }
@@ -92,7 +128,7 @@ public class AutoMineModule extends RotationModule {
         if (mc.player.isCreative()) {
             return;
         }
-        if (miningData != null) {
+        if (miningData != null && !miningData.getState().isReplaceable()) {
             BlockPos mining = miningData.getPos();
             VoxelShape outlineShape = miningData.getState().getOutlineShape(mc.world, mining);
             outlineShape = outlineShape.isEmpty() ? VoxelShapes.fullCube() : outlineShape;
@@ -146,11 +182,12 @@ public class AutoMineModule extends RotationModule {
         }
         boolean failMine = data instanceof FailMiningData;
         float delta = Modules.SPEEDMINE.calcBlockBreakingDelta(data.getState(), mc.world, data.getPos());
-        data.setDamage(delta);
+        data.damageBlock(delta);
         if (data.getDamage() > data.getBreakSpeed() && !data.getState().isAir()) {
             if (mc.player.isUsingItem()) {
                 return;
             }
+            // data.setBreakState(true);
             if (rotateConfig.getValue()) {
                 float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), data.getPos().toCenterPos());
                 Managers.ROTATION.setRotationSilent(rotations[0], rotations[1], grimConfig.getValue());
@@ -171,8 +208,21 @@ public class AutoMineModule extends RotationModule {
         }
         if (miningData == null || pos != miningData.getPos()) {
             miningData = new MiningData(pos, dir, speedConfig.getValue());
+
+            // Grim does not check for slot changes, and it bases its original predicted block
+            // break calculation on the ItemStack you have when you first send the START_DESTROY_BLOCK
+            // https://github.com/GrimAnticheat/Grim/blob/2.0/src/main/java/ac/grim/grimac/checks/impl/misc/FastBreak.java#L76
+            // https://github.com/GrimAnticheat/Grim/blob/2.0/src/main/java/ac/grim/grimac/checks/impl/misc/FastBreak.java#L98
+            // To prevent a FastBreak flag, we should just swap quickly so grim can calculate and fuck off
+            // This should also work on other AntiCheats that do the same thing
+            final int slot = Modules.AUTO_TOOL.getBestToolNoFallback(mc.world.getBlockState(pos));
+            if (slot != -1)
+            {
+                Managers.INVENTORY.setSlot(slot);
+            }
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                     PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, pos, dir));
+            Managers.INVENTORY.syncToClient();
             failMiningData = null;
         }
 //        if (doubleBreakConfig.getValue()) {
@@ -212,7 +262,7 @@ public class AutoMineModule extends RotationModule {
                 mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
                         slot + 36, prev, SlotActionType.SWAP, mc.player);
             } else {
-                Managers.INVENTORY.setSlot(prev);
+                Managers.INVENTORY.syncToClient();
             }
         }
     }
@@ -264,6 +314,7 @@ public class AutoMineModule extends RotationModule {
         private final Direction direction;
         private float damage;
         private final float speed;
+        private boolean breakState;
 
         public MiningData(BlockPos mining, Direction direction, float speed) {
             this.mining = mining;
@@ -280,7 +331,7 @@ public class AutoMineModule extends RotationModule {
             return damage;
         }
 
-        public void setDamage(float damage) {
+        public void damageBlock(float damage) {
             this.damage += damage;
         }
 
@@ -294,6 +345,14 @@ public class AutoMineModule extends RotationModule {
 
         public BlockState getState() {
             return mc.world.getBlockState(mining);
+        }
+
+        public void setBreakState(boolean breakState) {
+            this.breakState = breakState;
+        }
+
+        public boolean getBreakState() {
+            return breakState;
         }
     }
 }
