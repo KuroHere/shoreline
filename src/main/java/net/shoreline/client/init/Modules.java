@@ -256,7 +256,7 @@ public class Modules {
             CHAMS = (ChamsModule) getRegisteredModule("chams-module");
             ESP = (ESPModule) getRegisteredModule("esp-module");
             EXTRA_TAB = (ExtraTabModule) getRegisteredModule("extratab-module");
-            // FREECAM = (FreecamModule) getRegisteredModule("freecam-module");
+            FREECAM = (FreecamModule) getRegisteredModule("freecam-module");
             FULLBRIGHT = (FullbrightModule) getRegisteredModule("fullbright-module");
             HOLE_ESP = (HoleESPModule) getRegisteredModule("holeesp-module");
             NAME_PROTECT = (NameProtectModule) getRegisteredModule("nameprotect-module");

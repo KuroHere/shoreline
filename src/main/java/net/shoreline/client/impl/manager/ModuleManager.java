@@ -116,7 +116,7 @@ public class ModuleManager {
                 new ChamsModule(),
                 new ESPModule(),
                 new ExtraTabModule(),
-                // new FreecamModule(),
+                new FreecamModule(),
                 new FullbrightModule(),
                 new HoleESPModule(),
                 new NameProtectModule(),

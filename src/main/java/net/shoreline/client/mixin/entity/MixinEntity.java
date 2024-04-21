@@ -171,7 +171,8 @@ public abstract class MixinEntity implements Globals {
     @Inject(method = "changeLookDirection", at = @At(value = "HEAD"), cancellable = true)
     private void hookChangeLookDirection(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
         if ((Object) this == mc.player) {
-            LookDirectionEvent lookDirectionEvent = new LookDirectionEvent();
+            LookDirectionEvent lookDirectionEvent = new LookDirectionEvent(
+                    (Entity) (Object) this, cursorDeltaX, cursorDeltaY);
             Shoreline.EVENT_HANDLER.dispatch(lookDirectionEvent);
             if (lookDirectionEvent.isCanceled()) {
                 ci.cancel();

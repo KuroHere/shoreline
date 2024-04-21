@@ -113,6 +113,7 @@ public final class ScaffoldModule extends BlockPlacerModule
     private void getRotationAnglesFor(final BlockData data)
     {
         final float rotationYaw = MovementUtil.getYawOffset(
+                mc.player.input,
             mc.player.getYaw() - 180);
         for (float yaw = rotationYaw - 45; yaw <= rotationYaw + 45; yaw += 1)
         {
