@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.manager.anticheat;
 
+import net.minecraft.client.network.ServerInfo;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -7,6 +8,7 @@ import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.network.PacketEvent;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
@@ -103,6 +105,14 @@ public class NCPManager implements Timer, Globals {
             dirs.add(ydiff > 0 ? Direction.UP : Direction.DOWN);
         }
         return dirs;
+    }
+
+    public boolean isCrystalPvpCC() {
+        ServerInfo info = Managers.NETWORK.getInfo();
+        if (info != null) {
+            return info.address.equalsIgnoreCase("us.crystalpvp.cc") || info.address.equalsIgnoreCase("crystalpvp.cc");
+        }
+        return false;
     }
 
     /**

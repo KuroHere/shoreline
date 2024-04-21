@@ -20,7 +20,6 @@ import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
-import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.ArrayList;
@@ -73,6 +72,7 @@ public class AutoMineModule extends RotationModule {
     @Override
     protected void onDisable() {
         super.onDisable();
+        miningData = null;
         if (mc.player != null)
         {
             Managers.INVENTORY.syncToClient();
