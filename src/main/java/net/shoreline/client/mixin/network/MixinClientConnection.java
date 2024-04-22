@@ -31,7 +31,7 @@ public class MixinClientConnection {
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
     private void hookExceptionCaught(ChannelHandlerContext context, Throwable ex, CallbackInfo ci) {
-        if (Modules.ANTI_SERVER.isPacketKick()) {
+        if (Modules.SERVER.isPacketKick()) {
             LOGGER.error("Exception caught on network thread:", ex);
             ci.cancel();
         }
