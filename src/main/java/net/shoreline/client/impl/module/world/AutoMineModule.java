@@ -88,7 +88,7 @@ public class AutoMineModule extends RotationModule {
             List<BlockPos> autoMines = getAutoMineTarget();
             if (!autoMines.isEmpty()) {
                 BlockPos mineTarget = autoMines.get(0);
-                if (miningData == null || !miningData.getPos().equals(mineTarget)) {
+                if (miningData == null || miningData.getState().isAir()) {
                     startMiningPos(mineTarget, Direction.UP);
                 }
             }
