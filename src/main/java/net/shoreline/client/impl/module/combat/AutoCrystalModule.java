@@ -39,11 +39,9 @@ import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.EvictingQueue;
-import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.player.RotationUtil;
-import net.shoreline.client.util.world.BlastResistantBlocks;
 import net.shoreline.client.util.world.EndCrystalUtil;
 import net.shoreline.client.util.world.EntityUtil;
 
@@ -56,7 +54,7 @@ import java.util.concurrent.*;
  * @since 1.0
  */
 public class AutoCrystalModule extends RotationModule {
-    // GENERAL SETTINGS
+
     Config<Boolean> multitaskConfig = new BooleanConfig("Multitask", "Allows attacking while using items", false);
     Config<Boolean> whileMiningConfig = new BooleanConfig("WhileMining", "Allows attacking while mining blocks", false);
     Config<Float> targetRangeConfig = new NumberConfig<>("EnemyRange", "Range to search for potential enemies", 1.0f, 10.0f, 13.0f);
@@ -73,7 +71,6 @@ public class AutoCrystalModule extends RotationModule {
     Config<Integer> rotateLimitConfig = new NumberConfig<>("YawStep-Limit", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
     // Config<Boolean> rotateTickFactorConfig = new BooleanConfig("Rotate-TickReduction", "Factors in angles when calculating crystals", false, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
 
-    // ENEMY SETTINGS
     Config<Boolean> playersConfig = new BooleanConfig("Players", "Target players", true);
     Config<Boolean> monstersConfig = new BooleanConfig("Monsters", "Target monsters", false);
     Config<Boolean> neutralsConfig = new BooleanConfig("Neutrals", "Target neutrals", false);
@@ -105,7 +102,6 @@ public class AutoCrystalModule extends RotationModule {
     //        two: 30
     //        four: 60
     //        eight: 100
-    // PLACE SETTINGS
     Config<Boolean> manualConfig = new BooleanConfig("ManualCrystal", "Always breaks manually placed crystals", false);
     Config<Boolean> placeConfig = new BooleanConfig("Place", "Places crystals to damage enemies. Place settings will only function if this setting is enabled.", true);
     Config<Float> placeSpeedConfig = new NumberConfig<>("PlaceSpeed", "Speed to place crystals", 0.1f, 18.0f, 20.0f, () -> placeConfig.getValue());
@@ -122,7 +118,6 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Interacts with only visible directions when placing crystals", false, () -> placeConfig.getValue());
     Config<Boolean> exposedDirectionConfig = new BooleanConfig("StrictDirection-Exposed", "Interacts with only exposed directions when placing crystals", false, () -> placeConfig.getValue());
     Config<Placements> placementsConfig = new EnumConfig<>("Placements", "Version standard for placing end crystals", Placements.NATIVE, Placements.values(), () -> placeConfig.getValue());
-    // DAMAGE SETTINGS
     Config<Float> minDamageConfig = new NumberConfig<>("MinDamage", "Minimum damage required to consider attacking or placing an end crystal", 1.0f, 4.0f, 10.0f);
     Config<Boolean> armorBreakerConfig = new BooleanConfig("ArmorBreaker", "Attempts to break enemy armor with crystals", true);
     Config<Float> armorScaleConfig = new NumberConfig<>("ArmorScale", "Armor damage scale before attempting to break enemy armor with crystals", 1.0f, 5.0f, 20.0f, NumberDisplay.PERCENT, () -> armorBreakerConfig.getValue());
@@ -132,10 +127,8 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> safetyOverride = new BooleanConfig("SafetyOverride", "Overrides the safety checks if the crystal will kill an enemy", false);
     Config<Float> maxLocalDamageConfig = new NumberConfig<>("MaxLocalDamage", "The maximum player damage", 4.0f, 12.0f, 20.0f);
     Config<Boolean> blockDestructionConfig = new BooleanConfig("BlockDestruction", "Accounts for explosion block destruction when calculating damages", false);
-    // EXTRAPOLATION
     Config<Boolean> extrapolateRangeConfig = new BooleanConfig("ExtrapolateRange", "Accounts for motion when calculating ranges", false);
     Config<Integer> extrapolateTicksConfig = new NumberConfig<>("ExtrapolationTicks", "Accounts for motion when calculating enemy positions, not fully accurate.", 0, 0, 10);
-    // RENDER SETTINGS
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders the current placement", true);
     Config<Boolean> damageNametagConfig = new BooleanConfig("Render-Damage", "Renders the current expected damage of a place/attack", false, () -> renderConfig.getValue());
     Config<Boolean> breakDebugConfig = new BooleanConfig("Break-Debug", "Debugs break ms in data", false);
@@ -144,8 +137,6 @@ public class AutoCrystalModule extends RotationModule {
     //
     private DamageData<EndCrystalEntity> attackCrystal;
     private DamageData<BlockPos> placeCrystal;
-    // This is retarded
-    private String crystalStage;
     //
     private BlockPos renderPos;
     private BlockPos renderSpawnPos;
@@ -216,7 +207,9 @@ public class AutoCrystalModule extends RotationModule {
         ArrayList<Entity> entities = Lists.newArrayList(mc.world.getEntities());
         List<BlockPos> blocks = getSphere(mc.player.getPos());
         attackCrystal = calculateAttackCrystal(entities);
-        placeCrystal = calculatePlaceCrystal(blocks, entities);
+        if (placeConfig.getValue()) {
+            placeCrystal = calculatePlaceCrystal(blocks, entities);
+        }
         float breakDelay = 1000.0f - breakSpeedConfig.getValue() * 50.0f;
         if (breakDelayConfig.getValue()) {
             breakDelay = Math.max(minTimeoutConfig.getValue() * 50.0f, getBreakMs() + breakTimeoutConfig.getValue() * 50.0f);
@@ -482,6 +475,9 @@ public class AutoCrystalModule extends RotationModule {
     }
 
     private void placeCrystal(BlockPos blockPos, Hand hand) {
+        if (checkMultitask()) {
+            return;
+        }
         Direction sidePlace = getPlaceDirection(blockPos);
         // Vec3d vec3d = mc.player.getCameraPosVec(1.0f);
         // Vec3d vec3d1 = RotationUtil.getRotationVector();
@@ -798,14 +794,18 @@ public class AutoCrystalModule extends RotationModule {
             return true;
         }
         if (hand == Hand.MAIN_HAND) {
-            return multitaskConfig.getValue() && mc.player.isUsingItem()
-                    || !whileMiningConfig.getValue() && mc.interactionManager.isBreakingBlock();
+            return checkMultitask();
         }
         return false;
     }
 
+    private boolean checkMultitask() {
+        return !multitaskConfig.getValue() && mc.player.isUsingItem()
+                || !whileMiningConfig.getValue() && mc.interactionManager.isBreakingBlock();
+    }
+
     private boolean isHoldingCrystal() {
-        if (autoSwapConfig.getValue() == Swap.SILENT || autoSwapConfig.getValue() == Swap.SILENT_ALT) {
+        if (!checkMultitask() && (autoSwapConfig.getValue() == Swap.SILENT || autoSwapConfig.getValue() == Swap.SILENT_ALT)) {
             return true;
         }
         return getCrystalHand() != null;
@@ -918,7 +918,7 @@ public class AutoCrystalModule extends RotationModule {
 
     // Debug info
     public void setStage(String crystalStage) {
-        this.crystalStage = crystalStage;
+        // this.crystalStage = crystalStage;
     }
 
     public int getBreakMs() {
