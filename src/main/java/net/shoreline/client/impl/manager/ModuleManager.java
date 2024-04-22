@@ -125,6 +125,7 @@ public class ModuleManager {
                 new NoRenderModule(),
                 new NoRotateModule(),
                 new NoWeatherModule(),
+                new ParticlesModule(),
                 new SkeletonModule(),
                 new SkyboxModule(),
                 new TooltipsModule(),

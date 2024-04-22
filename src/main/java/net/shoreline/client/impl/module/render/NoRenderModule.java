@@ -224,13 +224,6 @@ public class NoRenderModule extends ToggleModule {
         }
     }
 
-//    @EventListener
-//    public void onParticleEmitter(ParticleEvent.Emitter event) {
-//        if (totemConfig.getValue() && event.getParticleType() == ParticleTypes.TOTEM_OF_UNDYING) {
-//            event.cancel();
-//        }
-//    }
-
     @EventListener
     public void onRenderFloatingItem(RenderFloatingItemEvent event) {
         if (totemConfig.getValue() && event.getFloatingItem() == Items.TOTEM_OF_UNDYING) {
