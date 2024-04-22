@@ -57,7 +57,7 @@ public class ModuleManager {
                 // Exploit
                 new AntiHungerModule(),
                 new ChorusControlModule(),
-                new ClientSpooferModule(),
+                new ClientSpoofModule(),
                 new CrasherModule(),
                 new DisablerModule(),
                 new ExtendedFireworkModule(),

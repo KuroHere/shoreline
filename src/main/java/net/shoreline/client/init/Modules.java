@@ -51,7 +51,7 @@ public class Modules {
     // Exploit
     public static AntiHungerModule ANTI_HUNGER;
     public static ChorusControlModule CHORUS_CONTROL;
-    public static ClientSpooferModule CLIENT_SPOOFER;
+    public static ClientSpoofModule CLIENT_SPOOFER;
     public static CrasherModule CRASHER;
     public static DisablerModule DISABLER;
     public static ExtendedFireworkModule EXTENDED_FIREWORK;
@@ -203,7 +203,7 @@ public class Modules {
             TRIGGER = (TriggerModule) getRegisteredModule("trigger-module");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule("antihunger-module");
             CHORUS_CONTROL = (ChorusControlModule) getRegisteredModule("choruscontrol-module");
-            CLIENT_SPOOFER = (ClientSpooferModule) getRegisteredModule("clientspoofer-module");
+            CLIENT_SPOOFER = (ClientSpoofModule) getRegisteredModule("clientspoof-module");
             CRASHER = (CrasherModule) getRegisteredModule("crasher-module");
             DISABLER = (DisablerModule) getRegisteredModule("disabler-module");
             EXTENDED_FIREWORK = (ExtendedFireworkModule) getRegisteredModule("extendedfirework-module");
