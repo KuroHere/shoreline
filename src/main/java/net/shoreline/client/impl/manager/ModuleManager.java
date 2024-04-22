@@ -130,6 +130,7 @@ public class ModuleManager {
                 new SkyboxModule(),
                 new TooltipsModule(),
                 new TracersModule(),
+                new TrueSightModule(),
                 new ViewClipModule(),
                 new ViewModelModule(),
                 // new WaypointsModule(),

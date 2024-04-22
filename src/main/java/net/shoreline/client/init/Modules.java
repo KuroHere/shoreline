@@ -122,6 +122,7 @@ public class Modules {
     public static SkyboxModule SKYBOX;
     public static TooltipsModule TOOLTIPS;
     public static TracersModule TRACERS;
+    public static TrueSightModule TRUE_SIGHT;
     public static ViewClipModule VIEW_CLIP;
     public static ViewModelModule VIEW_MODEL;
     // public static WaypointsModule WAYPOINTS;
@@ -272,6 +273,7 @@ public class Modules {
             SKYBOX = (SkyboxModule) getRegisteredModule("skybox-module");
             TOOLTIPS = (TooltipsModule) getRegisteredModule("tooltips-module");
             TRACERS = (TracersModule) getRegisteredModule("tracers-module");
+            TRUE_SIGHT = (TrueSightModule) getRegisteredModule("truesight-module");
             VIEW_CLIP = (ViewClipModule) getRegisteredModule("viewclip-module");
             VIEW_MODEL = (ViewModelModule) getRegisteredModule("viewmodel-module");
             // WAYPOINTS = (WaypointsModule) getRegisteredModule("waypoints-module");

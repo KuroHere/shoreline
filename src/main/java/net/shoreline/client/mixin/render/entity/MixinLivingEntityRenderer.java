@@ -7,13 +7,14 @@ import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.render.entity.RenderEntityEvent;
+import net.shoreline.client.impl.event.render.entity.RenderEntityInvisibleEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
@@ -49,5 +50,16 @@ public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extend
         if (renderEntityEvent.isCanceled()) {
             ci.cancel();
         }
+    }
+
+    @Redirect(method = "render*", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z"))
+    private boolean redirectRender$isInvisibleTo(LivingEntity entity, PlayerEntity player) {
+        final RenderEntityInvisibleEvent event = new RenderEntityInvisibleEvent(entity);
+        Shoreline.EVENT_HANDLER.dispatch(event);
+        if (event.isCanceled())
+        {
+            return false;
+        }
+        return entity.isInvisibleTo(player);
     }
 }
