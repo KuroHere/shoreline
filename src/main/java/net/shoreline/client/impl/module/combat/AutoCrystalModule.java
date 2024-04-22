@@ -39,6 +39,7 @@ import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.EvictingQueue;
+import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.player.RotationUtil;
@@ -70,7 +71,7 @@ public class AutoCrystalModule extends RotationModule {
     // Config<Boolean> rotateSilentConfig = new BooleanConfig("RotateSilent", "Silently updates rotations to server", false);
     Config<Rotate> strictRotateConfig = new EnumConfig<>("YawStep", "Rotates yaw over multiple ticks to prevent certain rotation flags in NCP", Rotate.OFF, Rotate.values(), () -> rotateConfig.getValue());
     Config<Integer> rotateLimitConfig = new NumberConfig<>("YawStep-Limit", "Maximum yaw rotation in degrees for one tick", 1, 180, 180, NumberDisplay.DEGREES, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
-    // Config<Boolean> rotateTickFactorConfig = new BooleanConfig("Rotate-TickReduction", "Factors in angles when calculating crystals to minimize attack ticks and speed up the break/place loop", false, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
+    // Config<Boolean> rotateTickFactorConfig = new BooleanConfig("Rotate-TickReduction", "Factors in angles when calculating crystals", false, () -> rotateConfig.getValue() && strictRotateConfig.getValue() != Rotate.OFF);
 
     // ENEMY SETTINGS
     Config<Boolean> playersConfig = new BooleanConfig("Players", "Target players", true);
@@ -113,7 +114,6 @@ public class AutoCrystalModule extends RotationModule {
     Config<Float> placeWallRangeConfig = new NumberConfig<>("PlaceWallRange", "Range to place crystals through walls", 0.1f, 4.0f, 5.0f, () -> placeConfig.getValue());
     Config<Boolean> placeRangeEyeConfig = new BooleanConfig("PlaceRangeEye", "Calculates place ranges starting from the eye position of the player", false, () -> placeConfig.getValue());
     Config<Boolean> placeRangeCenterConfig = new BooleanConfig("PlaceRangeCenter", "Calculates place ranges to the center of the block", true, () -> placeConfig.getValue());
-    Config<Boolean> halfCrystalConfig = new BooleanConfig("HalfBB-Place", "Allow placements at a lower bounding", false, () -> placeConfig.getValue());
     Config<Boolean> antiTotemConfig = new BooleanConfig("AntiTotem", "Predicts totems and places crystals to instantly double pop and kill the target", false, () -> placeConfig.getValue());
     Config<Swap> autoSwapConfig = new EnumConfig<>("Swap", "Swaps to an end crystal before placing if the player is not holding one", Swap.OFF, Swap.values(), () -> placeConfig.getValue());
     Config<Float> alternateSpeedConfig = new NumberConfig<>("AlternateSpeed", "Speed for alternative swapping crystals", 1.0f, 18.0f, 20.0f, () -> placeConfig.getValue() && autoSwapConfig.getValue() == Swap.SILENT_ALT);
@@ -850,8 +850,7 @@ public class AutoCrystalModule extends RotationModule {
         if (!mc.world.isAir(p2) && !state2.isOf(Blocks.FIRE)) {
             return false;
         } else {
-            final Box bb = halfCrystalConfig.getValue() ? HALF_CRYSTAL_BB :
-                    FULL_CRYSTAL_BB;
+            final Box bb = Managers.NCP.isCrystalPvpCC() ? HALF_CRYSTAL_BB : FULL_CRYSTAL_BB;
             double d = p2.getX();
             double e = p2.getY();
             double f = p2.getZ();

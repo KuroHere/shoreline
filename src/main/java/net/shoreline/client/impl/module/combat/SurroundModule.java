@@ -125,12 +125,16 @@ public class SurroundModule extends BlockPlacerModule {
         }
     }
 
+    private void attack(Entity entity) {
+        Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(entity, mc.player.isSneaking()));
+        Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+    }
+
     private void attackPlace(BlockPos targetPos) {
         if (attackConfig.getValue()) {
             List<Entity> entities = mc.world.getOtherEntities(null, new Box(targetPos)).stream().filter(e -> e instanceof EndCrystalEntity).toList();
             for (Entity entity : entities) {
-                Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.attack(entity, mc.player.isSneaking()));
-                Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                attack(entity);
             }
         }
 
@@ -140,6 +144,43 @@ public class SurroundModule extends BlockPlacerModule {
             return;
         }
         Managers.INTERACT.placeBlock(targetPos, slot, strictDirectionConfig.getValue(), false, (state) ->
+        {
+            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), targetPos.toCenterPos());
+            if (rotateConfig.getValue())
+            {
+                if (grimConfig.getValue())
+                {
+                    if (state)
+                    {
+                        Managers.ROTATION.setRotationSilent(angles[0], angles[1], true);
+                    }
+                    else
+                    {
+                        Managers.ROTATION.setRotationSilentSync(true);
+                    }
+                }
+                else if (state)
+                {
+                    setRotation(angles[0], angles[1]);
+                }
+            }
+        });
+    }
+
+    private void attackPlacePacket(BlockPos targetPos) {
+        if (attackConfig.getValue()) {
+            List<Entity> entities = mc.world.getOtherEntities(null, new Box(targetPos)).stream().filter(e -> e instanceof EndCrystalEntity).toList();
+            for (Entity entity : entities) {
+                attack(entity);
+            }
+        }
+
+        final int slot = getResistantBlockItem();
+        if (slot == -1)
+        {
+            return;
+        }
+        Managers.INTERACT.placeBlockPacket(targetPos, slot, strictDirectionConfig.getValue(), false, (state) ->
         {
             float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), targetPos.toCenterPos());
             if (rotateConfig.getValue())
@@ -260,22 +301,18 @@ public class SurroundModule extends BlockPlacerModule {
             final BlockState state = packet.getState();
             final BlockPos targetPos = packet.getPos();
             if (surround.contains(targetPos) && state.isReplaceable()) {
-                mc.executeSync(() -> {
-                    attackPlace(targetPos);
-                    blocksPlaced++;
-                    // shiftDelay = 0;
-                });
+                attackPlacePacket(targetPos);
+                blocksPlaced++;
+                // shiftDelay = 0;
             }
         } else if (event.getPacket() instanceof PlaySoundS2CPacket packet
                 && packet.getCategory() == SoundCategory.BLOCKS
                 && packet.getSound().value() == SoundEvents.ENTITY_GENERIC_EXPLODE) {
             BlockPos targetPos = BlockPos.ofFloored(packet.getX(), packet.getY(), packet.getZ());
             if (surround.contains(targetPos)) {
-                mc.executeSync(() -> {
-                    attackPlace(targetPos);
-                    blocksPlaced++;
-                    // shiftDelay = 0;
-                });
+                attackPlacePacket(targetPos);
+                blocksPlaced++;
+                // shiftDelay = 0;
             }
         }
     }
