@@ -24,6 +24,7 @@ import java.util.Set;
  */
 public class Modules {
     // Module instances.
+    public static AntiServerModule ANTI_SERVER;
     public static ClickGuiModule CLICK_GUI;
     public static ColorsModule COLORS;
     public static HUDModule HUD;
@@ -175,6 +176,7 @@ public class Modules {
     public static void init() {
         if (Managers.isInitialized()) {
             CACHE = new HashSet<>();
+            ANTI_SERVER = (AntiServerModule) getRegisteredModule("antiserver-module");
             CLICK_GUI = (ClickGuiModule) getRegisteredModule("clickgui-module");
             COLORS = (ColorsModule) getRegisteredModule("colors-module");
             HUD = (HUDModule) getRegisteredModule("hud-module");

@@ -9,6 +9,7 @@ import net.minecraft.text.Text;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
+import net.shoreline.client.init.Modules;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
@@ -30,8 +31,10 @@ public class MixinClientConnection {
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
     private void hookExceptionCaught(ChannelHandlerContext context, Throwable ex, CallbackInfo ci) {
-        LOGGER.error("Exception caught on network thread:", ex);
-        ci.cancel();
+        if (Modules.ANTI_SERVER.isPacketKick()) {
+            LOGGER.error("Exception caught on network thread:", ex);
+            ci.cancel();
+        }
     }
 
     /**
