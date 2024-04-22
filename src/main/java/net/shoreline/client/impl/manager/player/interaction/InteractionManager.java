@@ -64,8 +64,7 @@ public final class InteractionManager implements Globals
                               final boolean clientSwing,
                               final RotationCallback rotationCallback)
     {
-        final int previousSlot = mc.player.getInventory().selectedSlot;
-        final boolean isSpoofing = slot != previousSlot;
+        final boolean isSpoofing = slot != Managers.INVENTORY.getServerSlot();
         if (isSpoofing)
         {
             Managers.INVENTORY.setSlot(slot);
