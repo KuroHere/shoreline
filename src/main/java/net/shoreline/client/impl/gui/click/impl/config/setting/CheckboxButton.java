@@ -21,6 +21,7 @@ public class CheckboxButton extends ConfigButton<Boolean> {
      */
     public CheckboxButton(CategoryFrame frame, ModuleButton moduleButton, Config<Boolean> config, float x, float y) {
         super(frame, moduleButton, config, x, y);
+        config.getAnimation().setStateHard(config.getValue());
     }
 
     /**

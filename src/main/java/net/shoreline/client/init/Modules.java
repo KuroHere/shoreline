@@ -176,11 +176,11 @@ public class Modules {
     public static void init() {
         if (Managers.isInitialized()) {
             CACHE = new HashSet<>();
-            SERVER = (ServerModule) getRegisteredModule("antiserver-module");
             CLICK_GUI = (ClickGuiModule) getRegisteredModule("clickgui-module");
             COLORS = (ColorsModule) getRegisteredModule("colors-module");
             HUD = (HUDModule) getRegisteredModule("hud-module");
             ROTATIONS = (RotationsModule) getRegisteredModule("rotations-module");
+            SERVER = (ServerModule) getRegisteredModule("server-module");
             if (ShorelineMod.isBaritonePresent()) {
                 BARITONE = (BaritoneModule) getRegisteredModule("baritone-module");
             }

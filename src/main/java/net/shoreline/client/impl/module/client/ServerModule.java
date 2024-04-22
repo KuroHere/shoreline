@@ -17,8 +17,8 @@ import static net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket.DEM
  */
 public final class ServerModule extends ConcurrentModule
 {
-    Config<Boolean> packetKickConfig = new BooleanConfig("PacketKick", "If to prevent thrown exceptions from kicking you", true);
-    Config<Boolean> demoConfig = new BooleanConfig("Demo", "If to prevent servers from forcing you to a demo screen", true);
+    Config<Boolean> packetKickConfig = new BooleanConfig("NoPacketKick", "If to prevent thrown exceptions from kicking you", true);
+    Config<Boolean> demoConfig = new BooleanConfig("NoDemo", "If to prevent servers from forcing you to a demo screen", true);
 
     public ServerModule()
     {
@@ -33,7 +33,7 @@ public final class ServerModule extends ConcurrentModule
             if (packet.getReason() == DEMO_MESSAGE_SHOWN && !mc.isDemo() && demoConfig.getValue())
             {
                 Shoreline.info("Server attempted to use Demo mode features on you!");
-                event.setCanceled(true);
+                event.cancel();
             }
         }
     }
