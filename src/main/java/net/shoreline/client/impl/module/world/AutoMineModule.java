@@ -31,6 +31,7 @@ import java.util.List;
  */
 public class AutoMineModule extends RotationModule {
 
+    Config<Boolean> multitaskConfig = new BooleanConfig("Multitask", "Allows mining while using items", false);
     Config<Boolean> autoConfig = new BooleanConfig("Auto", "Automatically mines nearby players feet", false);
     Config<Float> enemyRangeConfig = new NumberConfig<>("EnemyRange", "Range to search for targets", 1.0f, 5.0f, 10.0f, () -> autoConfig.getValue());
     // Config<Boolean> doubleBreakConfig = new BooleanConfig("DoubleBreak", "Allows you to mine two blocks at once", false);
@@ -64,7 +65,7 @@ public class AutoMineModule extends RotationModule {
             {
                 return "Break";
             }
-            return String.format("%.1f", damage * 100.0f) + "%";
+            return String.format("%.1f", damage);
         }
         return super.getModuleData();
     }
@@ -99,10 +100,9 @@ public class AutoMineModule extends RotationModule {
                 miningData.setBreakState(false);
             }
 
-            double dist = mc.player.squaredDistanceTo(miningData.getPos().toCenterPos());
+            double dist = mc.player.getEyePos().squaredDistanceTo(miningData.getPos().toCenterPos());
             if (dist > ((NumberConfig<?>) rangeConfig).getValueSq()) {
-                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
-                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, miningData.getPos(), Direction.DOWN));
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, miningData.getPos(), miningData.getDirection()));
                 Managers.INVENTORY.syncToClient();
                 miningData = null;
             }
@@ -184,7 +184,7 @@ public class AutoMineModule extends RotationModule {
         float delta = Modules.SPEEDMINE.calcBlockBreakingDelta(data.getState(), mc.world, data.getPos());
         data.damageBlock(delta);
         if (data.getDamage() > data.getBreakSpeed() && !data.getState().isAir()) {
-            if (mc.player.isUsingItem()) {
+            if (mc.player.isUsingItem() && !multitaskConfig.getValue()) {
                 return;
             }
             // data.setBreakState(true);
@@ -207,6 +207,9 @@ public class AutoMineModule extends RotationModule {
             return;
         }
         if (miningData == null || pos != miningData.getPos()) {
+            if (miningData != null) {
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, pos, dir));
+            }
             miningData = new MiningData(pos, dir, speedConfig.getValue());
 
             // Grim does not check for slot changes, and it bases its original predicted block
@@ -278,7 +281,7 @@ public class AutoMineModule extends RotationModule {
                 continue;
             }
             BlockPos pos = player.getBlockPos();
-            if (!mc.world.isAir(pos)) {
+            if (!mc.world.isAir(pos) && mc.player.getEyePos().distanceTo(pos.toCenterPos()) <= rangeConfig.getValue()) {
                 mineTargets.add(pos);
             }
             for (Direction direction : Direction.values()) {
@@ -287,7 +290,7 @@ public class AutoMineModule extends RotationModule {
                 }
                 BlockPos minePos = pos.offset(direction);
                 BlockState state = mc.world.getBlockState(minePos);
-                if (state.isAir()) {
+                if (state.isAir() || mc.player.getEyePos().distanceTo(minePos.toCenterPos()) > rangeConfig.getValue()) {
                     continue;
                 }
                 mineTargets.add(minePos);

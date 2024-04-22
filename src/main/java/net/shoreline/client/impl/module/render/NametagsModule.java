@@ -80,8 +80,7 @@ public class NametagsModule extends ToggleModule {
                     continue;
                 }
                 String info = getNametagInfo(player);
-                Vec3d pinterpolate = Interpolation.getRenderPosition(
-                        player, mc.getTickDelta());
+                Vec3d pinterpolate = Interpolation.getRenderPosition(player, mc.getTickDelta());
                 double rx = player.getX() - pinterpolate.getX();
                 double ry = player.getY() - pinterpolate.getY();
                 double rz = player.getZ() - pinterpolate.getZ();
