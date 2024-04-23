@@ -47,7 +47,8 @@ public class SpeedmineModule extends RotationModule {
     Config<Float> rangeConfig = new NumberConfig<>("Range", "Range for mine", 1.0f, 4.5f, 5.0f, () -> modeConfig.getValue() == SpeedmineMode.PACKET);
     Config<Swap> swapConfig = new EnumConfig<>("AutoSwap", "Swaps to the best tool once the mining is complete", Swap.SILENT, Swap.values(), () -> modeConfig.getValue() == SpeedmineMode.PACKET);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates when mining the block", true, () -> modeConfig.getValue() == SpeedmineMode.PACKET);
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF || modeConfig.getValue() == SpeedmineMode.DAMAGE);
+    Config<Boolean> grimConfig = new BooleanConfig("Grim", "Uses grim block breaking speeds", false);
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Swaps to tool using alternative packets to bypass NCP silent swap", false, () -> swapConfig.getValue() != Swap.OFF && modeConfig.getValue() == SpeedmineMode.PACKET);
     private BlockPos mining;
     private BlockState state;
     private Direction direction;
@@ -120,6 +121,10 @@ public class SpeedmineModule extends RotationModule {
             }
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                 PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mining, direction));
+            if (grimConfig.getValue()) {
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
+                        PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, mining.up(500), direction));
+            }
             if (swapConfig.getValue() == Swap.SILENT) {
                 if (strictConfig.getValue()) {
                     mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
@@ -152,7 +157,7 @@ public class SpeedmineModule extends RotationModule {
         //
         if (event.getPacket() instanceof PlayerActionC2SPacket packet
                 && packet.getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK
-                && modeConfig.getValue() == SpeedmineMode.DAMAGE && strictConfig.getValue()) {
+                && modeConfig.getValue() == SpeedmineMode.DAMAGE && grimConfig.getValue()) {
             Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(
                     PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, packet.getPos().up(500), packet.getDirection()));
         }

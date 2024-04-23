@@ -64,6 +64,9 @@ public class SpeedModule extends ToggleModule {
 
     @Override
     public String getModuleData() {
+        if (speedModeConfig.getValue() == Speed.GRIM_COLLIDE) {
+            return "Grim";
+        }
         return EnumFormatter.formatEnum(speedModeConfig.getValue());
     }
 
