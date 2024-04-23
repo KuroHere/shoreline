@@ -1,9 +1,9 @@
 package net.shoreline.client.impl.command;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.command.CommandSource;
 import net.shoreline.client.api.command.Command;
-import net.shoreline.client.api.command.arg.Argument;
-import net.shoreline.client.api.command.arg.OptionalArgument;
-import net.shoreline.client.api.command.arg.arguments.CommandArgument;
+import net.shoreline.client.api.command.CommandArgumentType;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.chat.ChatUtil;
 
@@ -12,48 +12,47 @@ import net.shoreline.client.util.chat.ChatUtil;
  * @since 1.0
  */
 public class HelpCommand extends Command {
-    //
-    @OptionalArgument
-    Argument<Command> commandArgument = new CommandArgument("Command", "The specified command to display info");
 
     /**
      *
      */
     public HelpCommand() {
-        super("Help", "Displays command functionality");
-    }
-
-    @Override
-    public void onCommandInput() {
-        final Command command = commandArgument.getValue();
-        if (command != null) {
-            ChatUtil.clientSendMessage(toHelpMessage(command));
-        } else {
-            ChatUtil.clientSendMessageRaw("§7[§fCommands Help§7]");
-            boolean sent = false;
-            for (Command c : Managers.COMMAND.getCommands()) {
-                if (c instanceof ModuleCommand) {
-                    if (!sent) {
-                        ChatUtil.clientSendMessageRaw(toHelpMessage(c));
-                        sent = true;
-                    }
-                    continue;
-                }
-                ChatUtil.clientSendMessageRaw(toHelpMessage(c));
-            }
-        }
+        super("Help", "Displays command functionality", literal("help"));
     }
 
     /**
      * @param command
      * @return
      */
-    private String toHelpMessage(Command command) {
+    private static String toHelpMessage(Command command) {
         if (command instanceof ModuleCommand) {
-            return String.format("module %s- %s", command.getUsage(),
+            return String.format("Module %s- %s", command.getUsage(),
                     command.getDescription());
         }
         return String.format("%s %s- %s", command.getName(),
                 command.getUsage(), command.getDescription());
+    }
+
+    @Override
+    public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.then(argument("command", new CommandArgumentType()).executes(c -> {
+            final Command command = CommandArgumentType.getCommand(c, "command");
+            ChatUtil.clientSendMessage(toHelpMessage(command));
+            return 1;
+        })).executes(c -> {
+            ChatUtil.clientSendMessageRaw("§7[§fCommands Help§7]");
+            boolean sent = false;
+            for (Command c1 : Managers.COMMAND.getCommands()) {
+                if (c1 instanceof ModuleCommand) {
+                    if (!sent) {
+                        ChatUtil.clientSendMessageRaw(toHelpMessage(c1));
+                        sent = true;
+                    }
+                    continue;
+                }
+                ChatUtil.clientSendMessageRaw(toHelpMessage(c1));
+            }
+            return 1;
+        });
     }
 }

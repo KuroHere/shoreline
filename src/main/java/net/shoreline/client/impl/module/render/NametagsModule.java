@@ -21,6 +21,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
+import net.shoreline.client.api.config.setting.ColorConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -28,6 +29,7 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.api.render.Interpolation;
 import net.shoreline.client.api.render.RenderLayersClient;
 import net.shoreline.client.api.render.RenderManager;
+import net.shoreline.client.impl.event.gui.hud.RenderOverlayEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.render.entity.RenderLabelEvent;
 import net.shoreline.client.init.Fonts;
@@ -38,6 +40,7 @@ import net.shoreline.client.util.world.FakePlayerEntity;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
+import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +66,15 @@ public class NametagsModule extends ToggleModule {
 
     public NametagsModule() {
         super("Nametags", "Renders info on player nametags", ModuleCategory.RENDER);
+    }
+
+    @EventListener
+    public void onRenderOverlay(RenderOverlayEvent event) {
+        if (!mc.player.getMainHandStack().isEmpty()) {
+            event.getContext().getMatrices().translate(20.0f, 20.0f, 0.0f);
+            renderItem(mc.player.getMainHandStack(), ModelTransformationMode.GUI, 0xff0000, OverlayTexture.field_32953,
+                    event.getContext().getMatrices(), mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
+        }
     }
 
     @EventListener
@@ -97,8 +109,7 @@ public class NametagsModule extends ToggleModule {
                 if (dist <= 8.0) {
                     scaling = 0.0245f;
                 }
-                renderInfo(info, hwidth, player,
-                        rx, ry, rz, camera, scaling);
+                renderInfo(info, hwidth, player, rx, ry, rz, camera, scaling);
             }
         }
 
@@ -176,12 +187,11 @@ public class NametagsModule extends ToggleModule {
             matrixStack.scale(16.0f, 16.0f, 0.0f);
             matrixStack.multiplyPositionMatrix(new Matrix4f().scaling(1.0f, -1.0f, 0.0f));
             DiffuseLighting.disableGuiDepthLighting();
-            renderItem(stack, ModelTransformationMode.GUI, 0xff00f0, OverlayTexture.DEFAULT_UV,
+            renderItem(stack, ModelTransformationMode.GUI, 0xff0000, OverlayTexture.field_32953,
                     matrixStack, mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
             mc.getBufferBuilders().getEntityVertexConsumers().draw();
             DiffuseLighting.enableGuiDepthLighting();
             matrixStack.pop();
-            matrixStack.push();
             renderItemOverlay(matrixStack, stack, (int) n10, (int) m2);
             // int n4 = (n11 > 4) ? ((n11 - 4) * 8 / 2) : 0;
             // mc.getItemRenderer().renderInGui(matrixStack, mc.textRenderer, stack, n10, m2);
@@ -193,7 +203,6 @@ public class NametagsModule extends ToggleModule {
                 renderEnchants(matrixStack, stack, n10 + 2.0f, m2);
             }
             matrixStack.scale(2.0f, 2.0f, 2.0f);
-            matrixStack.pop();
             n10 += 16;
         }
         //
@@ -214,7 +223,6 @@ public class NametagsModule extends ToggleModule {
         if (stack.isEmpty()) {
             return;
         }
-        matrices.push();
         boolean bl = renderMode == ModelTransformationMode.GUI || renderMode == ModelTransformationMode.GROUND || renderMode == ModelTransformationMode.FIXED;
         if (bl) {
             if (stack.isOf(Items.TRIDENT)) {
@@ -232,7 +240,6 @@ public class NametagsModule extends ToggleModule {
             ((AccessorItemRenderer) mc.getItemRenderer()).hookRenderBakedItemModel(bakedModel, stack, light,
                     overlay, matrices, getItemGlintConsumer(vertexConsumers, RenderLayers.getItemLayer(stack, false), stack.hasGlint()));
         }
-        matrices.pop();
     }
 
     public static VertexConsumer getItemGlintConsumer(VertexConsumerProvider vertexConsumers,

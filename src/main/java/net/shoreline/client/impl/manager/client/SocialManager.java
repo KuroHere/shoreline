@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.manager.client;
 
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.shoreline.client.api.social.SocialRelation;
 import net.shoreline.client.util.Globals;
@@ -73,12 +74,33 @@ public class SocialManager implements Globals {
         addRelation(uuid, SocialRelation.FRIEND);
     }
 
+    public void addFriend(String playerName) {
+        UUID uuid = getUuidFromName(playerName);
+        if (uuid == null) {
+            return;
+        }
+        addRelation(uuid, SocialRelation.FRIEND);
+    }
+
     /**
      * @param uuid
      * @return
      */
     public SocialRelation remove(UUID uuid) {
         return relationships.remove(uuid);
+    }
+
+    public SocialRelation remove(String playerName) {
+        return relationships.remove(getUuidFromName(playerName));
+    }
+
+    private UUID getUuidFromName(String playerName) {
+        for (PlayerListEntry entry : mc.player.networkHandler.getPlayerList()) {
+            if (entry.getDisplayName() != null && entry.getDisplayName().getString().equals(playerName)) {
+                return entry.getProfile().getId();
+            }
+        }
+        return null;
     }
 
     /**

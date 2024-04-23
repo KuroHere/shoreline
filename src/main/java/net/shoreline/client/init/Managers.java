@@ -89,7 +89,6 @@ public class Managers {
         if (isInitialized()) {
             MODULE.postInit();
             MACRO.postInit();
-            COMMAND.postInit();
             ACCOUNT.postInit();
             CAPES = new CapeManager();
         }

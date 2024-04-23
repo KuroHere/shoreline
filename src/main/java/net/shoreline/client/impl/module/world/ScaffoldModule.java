@@ -28,7 +28,7 @@ public final class ScaffoldModule extends BlockPlacerModule
     Config<Boolean> towerConfig = new BooleanConfig("Tower", "Goes up faster when holding down space", true);
     Config<Boolean> keepYConfig = new BooleanConfig("KeepY", "Keeps your Y level", false);
     Config<Boolean> safeWalkConfig = new BooleanConfig("SafeWalk", "If to prevent you from falling off edges", true);
-    Config<BlockPicker> pickerConfig = new EnumConfig<>("Picker", "How to pick a block from the hotbar", BlockPicker.NORMAL, BlockPicker.values());
+    Config<BlockPicker> pickerConfig = new EnumConfig<>("BlockPicker", "How to pick a block from the hotbar", BlockPicker.NORMAL, BlockPicker.values());
 
     public ScaffoldModule()
     {

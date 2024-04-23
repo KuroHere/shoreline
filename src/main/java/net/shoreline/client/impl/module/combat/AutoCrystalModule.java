@@ -3,6 +3,7 @@ package net.shoreline.client.impl.module.combat;
 import com.google.common.collect.Lists;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.LivingEntity;
@@ -452,8 +453,7 @@ public class AutoCrystalModule extends RotationModule {
                     swapTo(slot);
                 }
                 attackInternal(entity, Hand.MAIN_HAND);
-                if (antiWeaknessConfig.getValue() == Swap.SILENT
-                        || antiWeaknessConfig.getValue() == Swap.SILENT_ALT) {
+                if (isSilentSwap(antiWeaknessConfig.getValue())) {
                     swapTo(autoSwapConfig.getValue() == Swap.SILENT_ALT ? slot : prev);
                 }
             }
@@ -487,16 +487,17 @@ public class AutoCrystalModule extends RotationModule {
         //        RaycastContext.ShapeType.OUTLINE,
         //        RaycastContext.FluidHandling.NONE, mc.player));
         BlockHitResult result = new BlockHitResult(blockPos.toCenterPos(), sidePlace, blockPos, false);
-        if (autoSwapConfig.getValue() != Swap.OFF
-                && hand != Hand.OFF_HAND && getCrystalHand() == null) {
+        if (autoSwapConfig.getValue() != Swap.OFF && hand != Hand.OFF_HAND && getCrystalHand() == null) {
+            if (isSilentSwap(autoSwapConfig.getValue()) && Managers.INVENTORY.count(Items.END_CRYSTAL) == 0) {
+                return;
+            }
             int prev = mc.player.getInventory().selectedSlot;
             int crystalSlot = getCrystalSlot();
             if (crystalSlot != -1) {
                 swapTo(crystalSlot);
                 placeInternal(result, Hand.MAIN_HAND);
                 placePackets.put(blockPos, System.currentTimeMillis());
-                if (autoSwapConfig.getValue() == Swap.SILENT
-                        || autoSwapConfig.getValue() == Swap.SILENT_ALT) {
+                if (isSilentSwap(autoSwapConfig.getValue())) {
                     swapTo(autoSwapConfig.getValue() == Swap.SILENT_ALT ? crystalSlot : prev);
                 }
             }
@@ -516,6 +517,10 @@ public class AutoCrystalModule extends RotationModule {
         } else {
             Managers.NETWORK.sendPacket(new HandSwingC2SPacket(hand));
         }
+    }
+
+    private boolean isSilentSwap(Swap swap) {
+        return swap == Swap.SILENT || swap == Swap.SILENT_ALT;
     }
 
     private void swapTo(int slot) {

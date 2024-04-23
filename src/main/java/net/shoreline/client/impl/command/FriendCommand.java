@@ -1,13 +1,12 @@
 package net.shoreline.client.impl.command;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Formatting;
 import net.shoreline.client.api.command.Command;
-import net.shoreline.client.api.command.arg.Argument;
-import net.shoreline.client.api.command.arg.OptionalArgument;
-import net.shoreline.client.api.command.arg.arguments.BooleanArgument;
-import net.shoreline.client.api.command.arg.arguments.PlayerArgument;
-import net.shoreline.client.api.command.arg.arguments.StringArgument;
+import net.shoreline.client.api.command.PlayerArgumentType;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.chat.ChatUtil;
 
@@ -16,54 +15,31 @@ import net.shoreline.client.util.chat.ChatUtil;
  * @since 1.0
  */
 public class FriendCommand extends Command {
-    //
-    @OptionalArgument
-    Argument<String> actionArgument = new StringArgument("Add/Remove", "Whether to add or remove the friend", "add", "remove", "del");
-    Argument<PlayerEntity> playerArgument = new PlayerArgument("Player", "The player to add/remove friend");
-    // Optionally notifies the player you are friending in chat
-    @OptionalArgument
-    Argument<Boolean> notifyArgument = new BooleanArgument("Notify", "Notifies the friended player in the chat");
 
     /**
      *
      */
     public FriendCommand() {
-        super("Friend", "Adds/Removes a friend from the player list");
+        super("Friend", "Adds/Removes a friend from the player list", literal("friend"));
     }
 
-    /**
-     *
-     */
     @Override
-    public void onCommandInput() {
-        final PlayerEntity player = playerArgument.getValue();
-        if (player != null) {
-            final String action = actionArgument.getValue();
-            final Boolean notify = notifyArgument.getValue();
-            if (action != null) {
-                if (action.equalsIgnoreCase("add")) {
-                    ChatUtil.clientSendMessage("Added friend with name " +
-                            Formatting.AQUA + player.getName().getString() + Formatting.RESET + "!");
-                    Managers.SOCIAL.addFriend(player.getUuid());
-                    if (notify != null && notify) {
-                        ChatUtil.serverSendMessage(player, "You were friended by %s!",
-                                mc.player.getName().getString());
+    public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.then(argument("add/del", StringArgumentType.string()).suggests(suggest("add", "del", "remove"))
+                .then(argument("friend_name", new PlayerArgumentType()).executes(c -> {
+                    PlayerEntity playerName = PlayerArgumentType.getPlayer(c, "friend_name");
+                    final String action = StringArgumentType.getString(c, "add/del");
+                    if (action.equalsIgnoreCase("add")) {
+                        ChatUtil.clientSendMessage("Added friend with name " +
+                                Formatting.AQUA + playerName.getDisplayName().getString() + Formatting.RESET + "!");
+                        Managers.SOCIAL.addFriend(playerName.getUuid());
+                    } else if (action.equalsIgnoreCase("remove")
+                            || action.equalsIgnoreCase("del")) {
+                        ChatUtil.clientSendMessage("Removed friend with name " +
+                                Formatting.RED + playerName.getDisplayName().getString() + Formatting.RESET + "!");
+                        Managers.SOCIAL.remove(playerName.getUuid());
                     }
-                } else if (action.equalsIgnoreCase("remove")
-                        || action.equalsIgnoreCase("del")) {
-                    ChatUtil.clientSendMessage("Removed friend with name " +
-                            Formatting.DARK_BLUE + player.getName().getString() + Formatting.RESET + "!");
-                    Managers.SOCIAL.remove(player.getUuid());
-                }
-            } else {
-                ChatUtil.clientSendMessage("Added friend with name " +
-                        Formatting.DARK_BLUE + player.getName().getString() + Formatting.RESET + "!");
-                Managers.SOCIAL.addFriend(player.getUuid());
-                if (notify != null && notify) {
-                    ChatUtil.serverSendMessage(player, "You were friended by %s!",
-                            mc.player.getName().getString());
-                }
-            }
-        }
+                    return 1;
+                })));
     }
 }

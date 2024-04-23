@@ -29,8 +29,7 @@ public class FullbrightModule extends ToggleModule {
     public void onEnable() {
         if (mc.player != null && mc.world != null
                 && brightnessConfig.getValue() == Brightness.POTION) {
-            mc.player.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.NIGHT_VISION, -1, 0)); // INFINITE
+            mc.player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, -1, 0)); // INFINITE
         }
     }
 
@@ -69,8 +68,7 @@ public class FullbrightModule extends ToggleModule {
     public void onTick(TickEvent event) {
         if (brightnessConfig.getValue() == Brightness.POTION
                 && !mc.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) {
-            mc.player.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.NIGHT_VISION, -1, 0));
+            mc.player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, -1, 0));
         }
     }
 

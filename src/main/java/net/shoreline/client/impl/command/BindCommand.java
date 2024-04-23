@@ -1,9 +1,10 @@
 package net.shoreline.client.impl.command;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.command.CommandSource;
 import net.shoreline.client.api.command.Command;
-import net.shoreline.client.api.command.arg.Argument;
-import net.shoreline.client.api.command.arg.arguments.ModuleArgument;
-import net.shoreline.client.api.command.arg.arguments.StringArgument;
+import net.shoreline.client.api.command.ModuleArgumentType;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.util.KeyboardUtil;
@@ -15,34 +16,38 @@ import org.lwjgl.glfw.GLFW;
  * @since 1.0
  */
 public class BindCommand extends Command {
-    //
-    Argument<Module> moduleArgument = new ModuleArgument("Module", "The param module to keybind");
-    Argument<String> keybindArgument = new StringArgument("Keybind", "The new key to bind the module");
-
     /**
      *
      */
     public BindCommand() {
-        super("Bind", "Keybinds a module");
+        super("Bind", "Keybinds a module", literal("bind"));
     }
 
     @Override
-    public void onCommandInput() {
-        Module module = moduleArgument.getValue();
-        if (module instanceof ToggleModule t) {
-            final String key = keybindArgument.getValue();
-            if (key == null || key.length() > 1) {
-                ChatUtil.error("Invalid key!");
-                return;
-            }
-            int keycode = KeyboardUtil.getKeyCode(key);
-            if (keycode == GLFW.GLFW_KEY_UNKNOWN) {
-                ChatUtil.error("Failed to parse key!");
-                return;
-            }
-            t.keybind(keycode);
-            ChatUtil.clientSendMessage("%s is now bound to %s!",
-                    module.getName(), key.toUpperCase());
-        }
+    public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.then(argument("module", new ModuleArgumentType())
+                .then(argument("key", StringArgumentType.string())
+                        .executes(c -> {
+                            Module module = ModuleArgumentType.getModule(c, "module");
+                            if (module instanceof ToggleModule t) {
+                                final String key = StringArgumentType.getString(c, "key");
+                                if (key == null || key.length() > 1) {
+                                    ChatUtil.error("Invalid key!");
+                                    return 0;
+                                }
+                                int keycode = KeyboardUtil.getKeyCode(key);
+                                if (keycode == GLFW.GLFW_KEY_UNKNOWN) {
+                                    ChatUtil.error("Failed to parse key!");
+                                    return 0;
+                                }
+                                t.keybind(keycode);
+                                ChatUtil.clientSendMessage("%s is now bound to %s!", module.getName(), key.toUpperCase());
+                            }
+                            return 1;
+                        }))
+                .executes(c -> {
+                    ChatUtil.error("Please provide a module to keybind!");
+                    return 1;
+                }));
     }
 }

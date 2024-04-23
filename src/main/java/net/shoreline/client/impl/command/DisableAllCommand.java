@@ -1,5 +1,7 @@
 package net.shoreline.client.impl.command;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.command.CommandSource;
 import net.shoreline.client.api.command.Command;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ToggleModule;
@@ -14,15 +16,18 @@ public class DisableAllCommand extends Command {
      *
      */
     public DisableAllCommand() {
-        super("DisableAll", "Disables all enabled modules");
+        super("DisableAll", "Disables all enabled modules", literal("disableall"));
     }
 
     @Override
-    public void onCommandInput() {
-        for (Module module : Managers.MODULE.getModules()) {
-            if (module instanceof ToggleModule toggleModule && toggleModule.isEnabled()) {
-                toggleModule.disable();
+    public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.executes(c -> {
+            for (Module module : Managers.MODULE.getModules()) {
+                if (module instanceof ToggleModule toggleModule && toggleModule.isEnabled()) {
+                    toggleModule.disable();
+                }
             }
-        }
+            return 1;
+        });
     }
 }

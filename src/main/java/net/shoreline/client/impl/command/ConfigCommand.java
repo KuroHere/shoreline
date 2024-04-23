@@ -1,9 +1,11 @@
 package net.shoreline.client.impl.command;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import net.minecraft.command.CommandSource;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.command.Command;
-import net.shoreline.client.api.command.arg.Argument;
-import net.shoreline.client.api.command.arg.arguments.StringArgument;
 import net.shoreline.client.util.chat.ChatUtil;
 
 /**
@@ -11,30 +13,27 @@ import net.shoreline.client.util.chat.ChatUtil;
  * @since 1.0
  */
 public class ConfigCommand extends Command {
-    //
-    Argument<String> actionArgument = new StringArgument("Action", "Whether to save or load a preset", "save", "load");
-    Argument<String> nameArgument = new StringArgument("ConfigName", "The name for the config preset");
-
     /**
      *
      */
     public ConfigCommand() {
-        super("Config", "Creates a new configuration preset");
+        super("Config", "Creates a new configuration preset", literal("config"));
     }
 
     @Override
-    public void onCommandInput() {
-        String action = actionArgument.getValue();
-        String name = nameArgument.getValue();
-        if (action == null || name == null) {
-            return;
-        }
-        if (action.equalsIgnoreCase("save")) {
-            Shoreline.CONFIG.saveModuleConfiguration(name);
-            ChatUtil.clientSendMessage("Saved config with name §7" + name);
-        } else if (action.equalsIgnoreCase("load")) {
-            Shoreline.CONFIG.loadModuleConfiguration(name);
-            ChatUtil.clientSendMessage("Loaded config with name §7" + name);
-        }
+    public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.then(argument("save/load", StringArgumentType.string()))
+                .then(argument("config_name", StringArgumentType.string()).executes(c -> {
+                    String action = StringArgumentType.getString(c, "save/load");
+                    String name = StringArgumentType.getString(c, "config_name");
+                    if (action.equalsIgnoreCase("save")) {
+                        Shoreline.CONFIG.saveModuleConfiguration(name);
+                        ChatUtil.clientSendMessage("Saved config with name §7" + name);
+                    } else if (action.equalsIgnoreCase("load")) {
+                        Shoreline.CONFIG.loadModuleConfiguration(name);
+                        ChatUtil.clientSendMessage("Loaded config with name §7" + name);
+                    }
+                    return 1;
+                }));
     }
 }
