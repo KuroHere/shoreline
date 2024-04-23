@@ -2,6 +2,7 @@ package net.shoreline.client.util.player;
 
 import net.minecraft.client.input.Input;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec2f;
 import net.shoreline.client.util.Globals;
 
 /**
@@ -35,6 +36,61 @@ public class MovementUtil implements Globals {
         double e = mc.player.getY() - mc.player.lastBaseY;
         double f = mc.player.getZ() - mc.player.lastZ;
         return MathHelper.squaredMagnitude(d, e, f) > MathHelper.square(2.0e-4);
+    }
+
+    public static Vec2f applySafewalk(final double motionX, final double motionZ)
+    {
+        final double offset = 0.05;
+
+        double moveX = motionX;
+        double moveZ = motionZ;
+
+        float fallDist = -mc.player.getStepHeight();
+        if (!mc.player.isOnGround())
+        {
+            fallDist = -1.5f;
+        }
+
+        while(moveX != 0.0 && mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(moveX, fallDist, 0.0))) {
+            if (moveX < offset && moveX >= -offset) {
+                moveX = 0.0;
+            } else if (moveX > 0.0) {
+                moveX -= offset;
+            } else {
+                moveX += offset;
+            }
+        }
+
+        while(moveZ != 0.0 && mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(0.0, fallDist, moveZ))) {
+            if (moveZ < offset && moveZ >= -offset) {
+                moveZ = 0.0;
+            } else if (moveZ > 0.0) {
+                moveZ -= offset;
+            } else {
+                moveZ += offset;
+            }
+        }
+
+        while(moveX != 0.0 && moveZ != 0.0 && mc.world.isSpaceEmpty(mc.player, mc.player.getBoundingBox().offset(moveX, fallDist, moveZ))) {
+            if (moveX < offset && moveX >= -offset) {
+                moveX = 0.0;
+            } else if (moveX > 0.0) {
+                moveX -= offset;
+            } else {
+                moveX += offset;
+            }
+
+            if (moveZ < offset && moveZ >= -offset) {
+                moveZ = 0.0;
+            } else if (moveZ > 0.0) {
+                moveZ -= offset;
+            } else {
+                moveZ += offset;
+            }
+        }
+
+        return new Vec2f((float) moveX, (float) moveZ);
+
     }
 
     public static float getYawOffset(Input input, float rotationYaw)

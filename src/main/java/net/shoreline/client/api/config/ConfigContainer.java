@@ -63,6 +63,16 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>, G
         }
     }
 
+    protected void unregister(Config<?> config) {
+        configurations.remove(config.getId());
+    }
+
+    protected void unregister(Config<?>... configs) {
+        for (Config<?> config : configs) {
+            unregister(config);
+        }
+    }
+
     /**
      * Reflect configuration fields
      */
