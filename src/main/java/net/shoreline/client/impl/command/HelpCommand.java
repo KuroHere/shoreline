@@ -25,10 +25,6 @@ public class HelpCommand extends Command {
      * @return
      */
     private static String toHelpMessage(Command command) {
-        if (command instanceof ModuleCommand) {
-            return String.format("Module %s- %s", command.getUsage(),
-                    command.getDescription());
-        }
         return String.format("%s %s- %s", command.getName(),
                 command.getUsage(), command.getDescription());
     }

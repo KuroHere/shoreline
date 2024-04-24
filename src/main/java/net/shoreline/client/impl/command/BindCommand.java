@@ -41,7 +41,7 @@ public class BindCommand extends Command {
                                     return 0;
                                 }
                                 t.keybind(keycode);
-                                ChatUtil.clientSendMessage("%s is now bound to %s!", module.getName(), key.toUpperCase());
+                                ChatUtil.clientSendMessage("§f%s §sis now bound to §f%s", module.getName(), key.toUpperCase());
                             }
                             return 1;
                         }))

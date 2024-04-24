@@ -6,6 +6,7 @@ import net.shoreline.client.api.command.Command;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.util.chat.ChatUtil;
 
 /**
  * @author Shoreline
@@ -27,6 +28,7 @@ public class DisableAllCommand extends Command {
                     toggleModule.disable();
                 }
             }
+            ChatUtil.clientSendMessage("§sDisabled all modules");
             return 1;
         });
     }

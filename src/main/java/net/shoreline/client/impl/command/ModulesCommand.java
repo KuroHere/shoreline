@@ -21,7 +21,7 @@ public class ModulesCommand extends Command {
         builder.executes(c -> {
             StringBuilder modulesList = new StringBuilder();
             for (Module module : Managers.MODULE.getModules()) {
-                Formatting formatting = module instanceof ToggleModule t && t.isEnabled() ? Formatting.GREEN : Formatting.WHITE;
+                String formatting = module instanceof ToggleModule t && t.isEnabled() ? "§s" : "§7";
                 modulesList.append(formatting);
                 modulesList.append(module.getName());
                 modulesList.append(Formatting.RESET);

@@ -68,10 +68,10 @@ public class ModuleCommand extends Command {
             List<Item> list = ((List<Item>) config.getValue());
             if (action.equalsIgnoreCase("add")) {
                 list.add(value);
-                ChatUtil.clientSendMessage("Added " + value.getName().getString() + " to " + config.getName() + "!");
+                ChatUtil.clientSendMessage("§sAdded§f " + value.getName().getString() + " §sto§f " + config.getName());
             } else if (action.equalsIgnoreCase("del") || action.equalsIgnoreCase("remove")) {
                 list.remove(value);
-                ChatUtil.clientSendMessage("Removed " + value.getName().getString() + " from " + config.getName() + "!");
+                ChatUtil.clientSendMessage("§sRemoved§f " + value.getName().getString() + " §sfrom§f " + config.getName());
             }
         }
         return 1;
@@ -82,7 +82,7 @@ public class ModuleCommand extends Command {
             List<Item> list = ((List<Item>) config.getValue());
             if (action.equalsIgnoreCase("list")) {
                 if (list.isEmpty()) {
-                    ChatUtil.clientSendMessage("There are no items in the list!");
+                    ChatUtil.clientSendMessage("§sThere are no items in the list!");
                     return 1;
                 }
                 StringBuilder listString = new StringBuilder();
@@ -144,7 +144,7 @@ public class ModuleCommand extends Command {
         } else if (config.getValue() instanceof String) {
             ((Config<String>) config).setValue(value);
         }
-        ChatUtil.clientSendMessage("§7%s§f was set to %s!", config.getName(), value);
+        ChatUtil.clientSendMessage("§7%s§s was set to §f%s", config.getName(), value);
         return 1;
     }
 }

@@ -28,10 +28,10 @@ public class ConfigCommand extends Command {
                     String name = StringArgumentType.getString(c, "config_name");
                     if (action.equalsIgnoreCase("save")) {
                         Shoreline.CONFIG.saveModuleConfiguration(name);
-                        ChatUtil.clientSendMessage("Saved config §7" + name);
+                        ChatUtil.clientSendMessage("§sSaved config §f" + name);
                     } else if (action.equalsIgnoreCase("load")) {
                         Shoreline.CONFIG.loadModuleConfiguration(name);
-                        ChatUtil.clientSendMessage("Loaded config §7" + name);
+                        ChatUtil.clientSendMessage("§sLoaded config §f" + name);
                     }
                     return 1;
                 })).executes(c -> {

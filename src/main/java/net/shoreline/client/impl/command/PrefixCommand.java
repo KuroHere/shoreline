@@ -47,8 +47,7 @@ public class PrefixCommand extends Command {
                 }
             }
             Managers.COMMAND.setPrefix(prefix, keycode);
-            ChatUtil.clientSendMessage("Client command prefix changed to " +
-                    Formatting.DARK_BLUE + prefix + Formatting.RESET + "!");
+            ChatUtil.clientSendMessage("§sClient command prefix changed to§f " + prefix);
             return 1;
         })).executes(c -> {
             ChatUtil.error("Please provide a new prefix!");
