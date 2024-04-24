@@ -33,6 +33,9 @@ public class DrawnCommand extends Command {
                                 (hide ? "hidden" : "visible") + Formatting.RESET + " in the Hud!");
                     }
                     return 1;
-                }));
+                })).executes(c -> {
+                    ChatUtil.error("Must provide module to draw!");
+                    return 1;
+                });
     }
 }

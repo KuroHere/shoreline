@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.minecraft.command.CommandSource;
 import net.shoreline.client.api.command.Command;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.util.chat.ChatUtil;
 
 /**
  * @author linus
@@ -29,6 +30,9 @@ public class HClipCommand extends Command {
             double z = Math.sin(rad) * dist;
             Managers.POSITION.setPositionXZ(x, z);
             return 1;
-        }));
+        })).executes(c -> {
+            ChatUtil.error("Must provide distance!");
+            return 1;
+        });
     }
 }

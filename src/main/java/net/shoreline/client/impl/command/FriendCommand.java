@@ -40,6 +40,12 @@ public class FriendCommand extends Command {
                         Managers.SOCIAL.remove(playerName.getUuid());
                     }
                     return 1;
-                })));
+                })).executes(c -> {
+                    ChatUtil.error("Must provide player to friend!");
+                    return 1;
+                })).executes(c -> {
+                    ChatUtil.error("Invalid usage! Usage: " + getUsage());
+                    return 1;
+                });
     }
 }

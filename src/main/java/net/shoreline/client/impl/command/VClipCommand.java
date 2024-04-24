@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.CommandSource;
 import net.shoreline.client.api.command.Command;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.util.chat.ChatUtil;
 
 /**
  * @author linus
@@ -27,6 +28,9 @@ public class VClipCommand extends Command {
                 Managers.POSITION.setPositionY(y + dist);
             }
             return 1;
-        }));
+        })).executes(c -> {
+            ChatUtil.error("Must provide distance!");
+            return 1;
+        });
     }
 }

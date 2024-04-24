@@ -46,6 +46,9 @@ public class VanishCommand extends Command {
                         mount = null;
                     }
                     return 1;
-                }));
+                })).executes(c -> {
+                    ChatUtil.error("Invalid usage! Usage: " + getUsage());
+                    return 1;
+                });
     }
 }

@@ -27,6 +27,9 @@ public class ToggleCommand extends Command {
                 ChatUtil.clientSendMessage("%s is now %s!", t.getName(), t.isEnabled() ? "§aenabled" : "§cdisabled");
             }
             return 1;
-        }));
+        })).executes(c -> {
+            ChatUtil.error("Must provide module to toggle!");
+            return 1;
+        });
     }
 }

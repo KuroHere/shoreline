@@ -21,7 +21,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
-import net.shoreline.client.api.config.setting.ColorConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -29,7 +28,6 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.api.render.Interpolation;
 import net.shoreline.client.api.render.RenderLayersClient;
 import net.shoreline.client.api.render.RenderManager;
-import net.shoreline.client.impl.event.gui.hud.RenderOverlayEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.impl.event.render.entity.RenderLabelEvent;
 import net.shoreline.client.init.Fonts;
@@ -40,7 +38,6 @@ import net.shoreline.client.util.world.FakePlayerEntity;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -66,15 +63,6 @@ public class NametagsModule extends ToggleModule {
 
     public NametagsModule() {
         super("Nametags", "Renders info on player nametags", ModuleCategory.RENDER);
-    }
-
-    @EventListener
-    public void onRenderOverlay(RenderOverlayEvent event) {
-        if (!mc.player.getMainHandStack().isEmpty()) {
-            event.getContext().getMatrices().translate(20.0f, 20.0f, 0.0f);
-            renderItem(mc.player.getMainHandStack(), ModelTransformationMode.GUI, 0xff0000, OverlayTexture.field_32953,
-                    event.getContext().getMatrices(), mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
-        }
     }
 
     @EventListener
@@ -187,7 +175,7 @@ public class NametagsModule extends ToggleModule {
             matrixStack.scale(16.0f, 16.0f, 0.0f);
             matrixStack.multiplyPositionMatrix(new Matrix4f().scaling(1.0f, -1.0f, 0.0f));
             DiffuseLighting.disableGuiDepthLighting();
-            renderItem(stack, ModelTransformationMode.GUI, 0xff0000, OverlayTexture.field_32953,
+            renderItem(stack, ModelTransformationMode.GUI, 0xff0000, OverlayTexture.DEFAULT_UV,
                     matrixStack, mc.getBufferBuilders().getEntityVertexConsumers(), mc.world, 0);
             mc.getBufferBuilders().getEntityVertexConsumers().draw();
             DiffuseLighting.enableGuiDepthLighting();

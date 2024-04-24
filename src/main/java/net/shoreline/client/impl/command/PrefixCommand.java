@@ -2,7 +2,6 @@ package net.shoreline.client.impl.command;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.util.Formatting;
 import net.shoreline.client.api.command.Command;
@@ -51,6 +50,9 @@ public class PrefixCommand extends Command {
             ChatUtil.clientSendMessage("Client command prefix changed to " +
                     Formatting.DARK_BLUE + prefix + Formatting.RESET + "!");
             return 1;
-        }));
+        })).executes(c -> {
+            ChatUtil.error("Please provide a new prefix!");
+            return 1;
+        });
     }
 }

@@ -46,8 +46,11 @@ public class BindCommand extends Command {
                             return 1;
                         }))
                 .executes(c -> {
-                    ChatUtil.error("Please provide a module to keybind!");
+                    ChatUtil.error("Must provide a module to keybind!");
                     return 1;
-                }));
+                })).executes(c -> {
+                    ChatUtil.error("Invalid usage! Usage: " + getUsage());
+                    return 1;
+                });
     }
 }

@@ -40,13 +40,10 @@ public class ModuleCommand extends Command {
 
     @Override
     public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("setting", new ConfigArgumentType(module)))
+        builder.then(argument("setting", new ConfigArgumentType(module))
                 .then(argument("value", StringArgumentType.string()).executes(c -> {
                     Config<?> config = ConfigArgumentType.getConfig(c, "setting");
                     if (config == null) {
-                        if (module instanceof ToggleModule m) { // Can use the module command to toggle
-                            m.toggle();
-                        }
                         return 0;
                     }
                     String value = StringArgumentType.getString(c, "value");
@@ -106,6 +103,14 @@ public class ModuleCommand extends Command {
                     }
                     ChatUtil.clientSendMessage("§7%s§f was set to %s!", config.getName(), value);
                     return 1;
-                }));
+                })).executes(c -> {
+                    ChatUtil.error("Must provide setting to update!");
+                    return 1;
+                })).executes(c -> {
+                    if (module instanceof ToggleModule m) { // Can use the module command to toggle
+                        m.toggle();
+                    }
+                    return 1;
+                });
     }
 }
