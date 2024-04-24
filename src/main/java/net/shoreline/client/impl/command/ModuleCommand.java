@@ -37,7 +37,6 @@ public class ModuleCommand extends Command {
         this.module = module;
     }
 
-
     @Override
     public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("setting", new ConfigArgumentType(module))

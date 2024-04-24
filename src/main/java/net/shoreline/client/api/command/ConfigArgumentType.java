@@ -28,6 +28,9 @@ public class ConfigArgumentType implements ArgumentType<Config<?>> {
         String string = reader.readString();
         Config<?> config = null;
         for (Config<?> config1 : module.getConfigs()) {
+            if (config1.getName().equalsIgnoreCase("Enabled") || config1.getName().equalsIgnoreCase("Keybind")) {
+                continue;
+            }
             if (config1.getName().equalsIgnoreCase(string)) {
                 config = config1;
                 break;

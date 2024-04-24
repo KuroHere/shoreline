@@ -41,13 +41,8 @@ public class HelpCommand extends Command {
             return 1;
         })).executes(c -> {
             ChatUtil.clientSendMessageRaw("§7[§fCommands Help§7]");
-            boolean sent = false;
             for (Command c1 : Managers.COMMAND.getCommands()) {
                 if (c1 instanceof ModuleCommand) {
-                    if (!sent) {
-                        ChatUtil.clientSendMessageRaw(toHelpMessage(c1));
-                        sent = true;
-                    }
                     continue;
                 }
                 ChatUtil.clientSendMessageRaw(toHelpMessage(c1));
