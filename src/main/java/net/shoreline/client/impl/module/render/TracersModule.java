@@ -13,6 +13,8 @@ import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.api.render.Interpolation;
+import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.world.EntityUtil;
@@ -63,9 +65,8 @@ public class TracersModule extends ToggleModule {
             }
             Color color = getTracerColor(entity);
             if (color != null) {
-                // Vec3d entityPos = Interpolation.getRenderPosition(entity.getPos().add(0.0, getTargetY(entity), 0.0), event.getTickDelta());
-                // RenderManager.renderLine(event.getMatrices(), pos, entityPos,
-                //        widthConfig.getValue(), color.getRGB());
+                // Vec3d entityPos = Interpolation.getRenderPosition(entity, event.getTickDelta()).add(0.0, getTargetY(entity), 0.0);
+                // RenderManager.renderLine(event.getMatrices(), pos, entityPos, widthConfig.getValue(), color.getRGB());
             }
         }
         mc.options.getBobView().setValue(prevBobView);
@@ -75,7 +76,7 @@ public class TracersModule extends ToggleModule {
         if (entity.isInvisible() && invisiblesConfig.getValue()) {
             return invisiblesColorConfig.getValue();
         } else if (entity instanceof PlayerEntity player && playersConfig.getValue()) {
-            if (Managers.SOCIAL.isFriend(player.getUuid())) {
+            if (player.getDisplayName() != null && Managers.SOCIAL.isFriend(player.getDisplayName())) {
                 return new Color(85, 200, 200, 255);
             }
             return playersColorConfig.getValue();

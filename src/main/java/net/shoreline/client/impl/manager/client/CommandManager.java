@@ -41,18 +41,20 @@ public class CommandManager implements Globals {
     public CommandManager() {
         Shoreline.EVENT_HANDLER.subscribe(this);
         register(
-                new HelpCommand(),
-                new ToggleCommand(),
+                new BindCommand(),
+                new ConfigCommand(),
+                new DisableAllCommand(),
+                new DrawnCommand(),
                 new FriendCommand(),
                 new HClipCommand(),
-                new VClipCommand(),
-                new PrefixCommand(),
-                new DrawnCommand(),
+                new HelpCommand(),
+                new ModulesCommand(),
+                new NbtCommand(),
                 new OpenFolderCommand(),
-                new BindCommand(),
+                new PrefixCommand(),
+                new ToggleCommand(),
                 new VanishCommand(),
-                new ConfigCommand(),
-                new DisableAllCommand()
+                new VClipCommand()
         );
         //
         for (Module module : Managers.MODULE.getModules()) {
