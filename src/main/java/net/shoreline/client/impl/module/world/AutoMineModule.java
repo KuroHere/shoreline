@@ -273,7 +273,7 @@ public class AutoMineModule extends RotationModule {
     private List<BlockPos> getAutoMineTarget() {
         List<BlockPos> mineTargets = new ArrayList<>();
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || Managers.SOCIAL.isFriend(player.getUuid())) {
+            if (player == mc.player || player.getDisplayName() != null && Managers.SOCIAL.isFriend(player.getDisplayName()) {
                 continue;
             }
             double dist = mc.player.distanceTo(player);
