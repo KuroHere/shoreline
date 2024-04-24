@@ -39,8 +39,8 @@ public class AutoAcceptModule extends ToggleModule {
             if ((text.contains("has requested to teleport to you.")
                     || text.contains("has requested you teleport to them."))
                     && acceptTimer.passed(delayConfig.getValue() * 1000)) {
-                for (PlayerEntity friend : Managers.SOCIAL.getFriendEntities()) {
-                    if (text.contains(friend.getName().getString())) {
+                for (String friend : Managers.SOCIAL.getFriends()) {
+                    if (text.contains(friend)) {
                         ChatUtil.serverSendMessage("/tpaccept");
                         break;
                     }

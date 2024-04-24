@@ -1,7 +1,6 @@
 package net.shoreline.client.impl.manager.client;
 
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.Text;
 import net.shoreline.client.api.social.SocialRelation;
 import net.shoreline.client.util.Globals;
 
@@ -21,95 +20,74 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class SocialManager implements Globals {
     //
-    private final ConcurrentMap<UUID, SocialRelation> relationships =
+    private final ConcurrentMap<String, SocialRelation> relationships =
             new ConcurrentHashMap<>();
 
     /**
-     * @param uuid
+     * @param name
      * @param relation
      * @return
      */
-    public boolean isRelation(UUID uuid, SocialRelation relation) {
-        return relationships.get(uuid) == relation;
-    }
-
-    /**
-     * @param uuid
-     * @return
-     * @see #isRelation(UUID, SocialRelation)
-     */
-    public boolean isFriend(UUID uuid) {
-        return isRelation(uuid, SocialRelation.FRIEND);
+    public boolean isRelation(String name, SocialRelation relation) {
+        return relationships.get(name) == relation;
     }
 
     /**
      * @param name
      * @return
+     * @see #isRelation(String, SocialRelation)
      */
     public boolean isFriend(String name) {
-        return getFriendEntities().stream().anyMatch(e -> e.getName().getString().equals(name));
+        return isRelation(name, SocialRelation.FRIEND);
+    }
+
+    public boolean isFriend(Text name) {
+        return isRelation(name.getString(), SocialRelation.FRIEND);
     }
 
     /**
-     * @param uuid
+     * @param name
      * @param relation
      */
-    public void addRelation(UUID uuid, SocialRelation relation) {
-        if (mc.player != null && uuid.equals(mc.player.getUuid())) {
+    public void addRelation(String name, SocialRelation relation) {
+        if (mc.player != null && name.equals(mc.player.getDisplayName().getString())) {
             return;
         }
-        final SocialRelation relationship = relationships.get(uuid);
+        final SocialRelation relationship = relationships.get(name);
         if (relationship != null) {
-            relationships.replace(uuid, relation);
+            relationships.replace(name, relation);
             return;
         }
-        relationships.put(uuid, relation);
+        relationships.put(name, relation);
     }
 
     /**
-     * @param uuid
-     * @see #addRelation(UUID, SocialRelation)
+     * @param name
+     * @see #addRelation(String, SocialRelation)
      */
-    public void addFriend(UUID uuid) {
-        addRelation(uuid, SocialRelation.FRIEND);
+    public void addFriend(String name) {
+        addRelation(name, SocialRelation.FRIEND);
     }
 
-    public void addFriend(String playerName) {
-        UUID uuid = getUuidFromName(playerName);
-        if (uuid == null) {
-            return;
-        }
-        addRelation(uuid, SocialRelation.FRIEND);
-    }
-
-    /**
-     * @param uuid
-     * @return
-     */
-    public SocialRelation remove(UUID uuid) {
-        return relationships.remove(uuid);
+    public void addFriend(Text name) {
+        addRelation(name.getString(), SocialRelation.FRIEND);
     }
 
     public SocialRelation remove(String playerName) {
-        return relationships.remove(getUuidFromName(playerName));
+        return relationships.remove(playerName);
     }
 
-    private UUID getUuidFromName(String playerName) {
-        for (PlayerListEntry entry : mc.player.networkHandler.getPlayerList()) {
-            if (entry.getDisplayName() != null && entry.getDisplayName().getString().equals(playerName)) {
-                return entry.getProfile().getId();
-            }
-        }
-        return null;
+    public SocialRelation remove(Text playerName) {
+        return relationships.remove(playerName.getString());
     }
 
     /**
      * @param relation
      * @return
      */
-    public Collection<UUID> getRelations(SocialRelation relation) {
-        final List<UUID> friends = new ArrayList<>();
-        for (Map.Entry<UUID, SocialRelation> relationship :
+    public Collection<String> getRelations(SocialRelation relation) {
+        final List<String> friends = new ArrayList<>();
+        for (Map.Entry<String, SocialRelation> relationship :
                 relationships.entrySet()) {
             if (relationship.getValue() == relation) {
                 friends.add(relationship.getKey());
@@ -122,29 +100,7 @@ public class SocialManager implements Globals {
      * @return
      * @see #getRelations(SocialRelation)
      */
-    public Collection<UUID> getFriends() {
+    public Collection<String> getFriends() {
         return getRelations(SocialRelation.FRIEND);
-    }
-
-    /**
-     * @param relation
-     * @return
-     */
-    public Collection<PlayerEntity> getEntities(SocialRelation relation) {
-        if (mc.world == null) {
-            return null;
-        }
-        Collection<PlayerEntity> entities = new ArrayList<>();
-        for (UUID uuid : getRelations(relation)) {
-            entities.add(mc.world.getPlayerByUuid(uuid));
-        }
-        return entities;
-    }
-
-    /**
-     * @return
-     */
-    public Collection<PlayerEntity> getFriendEntities() {
-        return getEntities(SocialRelation.FRIEND);
     }
 }

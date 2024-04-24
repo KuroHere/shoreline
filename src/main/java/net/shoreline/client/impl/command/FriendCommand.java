@@ -3,7 +3,6 @@ package net.shoreline.client.impl.command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Formatting;
 import net.shoreline.client.api.command.Command;
 import net.shoreline.client.api.command.PlayerArgumentType;
@@ -27,17 +26,17 @@ public class FriendCommand extends Command {
     public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("add/del", StringArgumentType.string()).suggests(suggest("add", "del", "remove"))
                 .then(argument("friend_name", new PlayerArgumentType()).executes(c -> {
-                    PlayerEntity playerName = PlayerArgumentType.getPlayer(c, "friend_name");
+                    String playerName = PlayerArgumentType.getPlayer(c, "friend_name");
                     final String action = StringArgumentType.getString(c, "add/del");
                     if (action.equalsIgnoreCase("add")) {
                         ChatUtil.clientSendMessage("Added friend with name " +
-                                Formatting.AQUA + playerName.getDisplayName().getString() + Formatting.RESET + "!");
-                        Managers.SOCIAL.addFriend(playerName.getUuid());
+                                Formatting.AQUA + playerName + Formatting.RESET + "!");
+                        Managers.SOCIAL.addFriend(playerName);
                     } else if (action.equalsIgnoreCase("remove")
                             || action.equalsIgnoreCase("del")) {
                         ChatUtil.clientSendMessage("Removed friend with name " +
-                                Formatting.RED + playerName.getDisplayName().getString() + Formatting.RESET + "!");
-                        Managers.SOCIAL.remove(playerName.getUuid());
+                                Formatting.RED + playerName + Formatting.RESET + "!");
+                        Managers.SOCIAL.remove(playerName);
                     }
                     return 1;
                 })).executes(c -> {

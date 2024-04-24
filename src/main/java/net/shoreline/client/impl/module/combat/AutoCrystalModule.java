@@ -351,7 +351,7 @@ public class AutoCrystalModule extends RotationModule {
             for (Entity entity : mc.world.getEntities()) {
                 if (entity == null || !entity.isAlive() || entity == mc.player
                         || !isValidTarget(entity)
-                        || Managers.SOCIAL.isFriend(entity.getUuid())) {
+                        || entity.getDisplayName() != null && Managers.SOCIAL.isFriend(entity.getDisplayName())) {
                     continue;
                 }
                 double crystalDist = crystalPos.squaredDistanceTo(entity.getPos());
@@ -605,7 +605,7 @@ public class AutoCrystalModule extends RotationModule {
             for (Entity entity : entities) {
                 if (entity == null || !entity.isAlive() || entity == mc.player
                         || !isValidTarget(entity)
-                        || Managers.SOCIAL.isFriend(entity.getUuid())) {
+                        || entity.getDisplayName() != null && Managers.SOCIAL.isFriend(entity.getDisplayName())) {
                     continue;
                 }
                 double crystalDist = crystal.squaredDistanceTo(entity);
@@ -676,7 +676,7 @@ public class AutoCrystalModule extends RotationModule {
             for (Entity entity : entities) {
                 if (entity == null || !entity.isAlive() || entity == mc.player
                         || !isValidTarget(entity)
-                        || Managers.SOCIAL.isFriend(entity.getUuid())) {
+                        || entity.getDisplayName() != null && Managers.SOCIAL.isFriend(entity.getDisplayName())) {
                     continue;
                 }
                 double blockDist = pos.getSquaredDistance(entity.getPos());

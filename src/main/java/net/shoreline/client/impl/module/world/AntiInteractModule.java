@@ -6,13 +6,13 @@ import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.shoreline.client.api.config.Config;
-import net.shoreline.client.api.config.setting.ListConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.network.InteractBlockEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class AntiInteractModule extends ToggleModule {
     //
-    Config<List<Block>> blocksConfig = new ListConfig<>("Blocks", "The blocks to prevent player interact", Blocks.ENDER_CHEST, Blocks.ANVIL);
+    List<Block> blacklist = Arrays.asList(Blocks.ENDER_CHEST, Blocks.ANVIL);
 
     public AntiInteractModule() {
         super("AntiInteract", "Prevents player from interacting with certain objects", ModuleCategory.WORLD);
@@ -31,7 +31,7 @@ public class AntiInteractModule extends ToggleModule {
     public void onInteractBlock(InteractBlockEvent event) {
         BlockPos pos = event.getHitResult().getBlockPos();
         BlockState state = mc.world.getBlockState(pos);
-        if (cancelInteract(state.getBlock())) {
+        if (blacklist.contains(state.getBlock())) {
             event.cancel();
             // Managers.NETWORK.sendSequencedPacket(sequence -> new PlayerInteractBlockC2SPacket(
             //        event.getHand(), event.getHitResult(), sequence));
@@ -46,13 +46,9 @@ public class AntiInteractModule extends ToggleModule {
         if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet) {
             BlockPos pos = packet.getBlockHitResult().getBlockPos();
             BlockState state = mc.world.getBlockState(pos);
-            if (cancelInteract(state.getBlock())) {
+            if (blacklist.contains(state.getBlock())) {
                 event.cancel();
             }
         }
-    }
-
-    private boolean cancelInteract(Block block) {
-        return ((ListConfig<?>) blocksConfig).contains(block);
     }
 }

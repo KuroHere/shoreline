@@ -13,21 +13,15 @@ import net.shoreline.client.util.Globals;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class PlayerArgumentType implements ArgumentType<PlayerEntity>, Globals {
+public class PlayerArgumentType implements ArgumentType<String>, Globals {
 
-    public static PlayerEntity getPlayer(final CommandContext<?> context, final String name) {
-        return context.getArgument(name, PlayerEntity.class);
+    public static String getPlayer(final CommandContext<?> context, final String name) {
+        return context.getArgument(name, String.class);
     }
 
     @Override
-    public PlayerEntity parse(StringReader reader) throws CommandSyntaxException {
-        String string = reader.readString();
-        Collection<PlayerListEntry> playerListEntries = mc.player.networkHandler.getPlayerList();
-        PlayerListEntry entry = playerListEntries.stream().filter(p -> p.getDisplayName() != null && p.getDisplayName().getString().equals(string)).findFirst().orElse(null);
-        if (entry == null) {
-            throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().createWithContext(reader, null);
-        }
-        return mc.world.getPlayerByUuid(entry.getProfile().getId());
+    public String parse(StringReader reader) throws CommandSyntaxException {
+        return reader.readString();
     }
 
     @Override

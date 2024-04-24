@@ -28,7 +28,7 @@ public class ExtraTabModule extends ToggleModule {
 
     @EventListener
     public void onPlayerListName(PlayerListNameEvent event) {
-        if (friendsConfig.getValue() && Managers.SOCIAL.isFriend(event.getId())) {
+        if (friendsConfig.getValue() && Managers.SOCIAL.isFriend(event.getPlayerName())) {
             event.cancel();
             event.setPlayerName(Text.of(Formatting.AQUA + event.getPlayerName().getString()));
         }

@@ -52,7 +52,7 @@ public class TriggerModule extends ToggleModule {
                 EntityHitResult entityHit = (EntityHitResult) mc.crosshairTarget;
                 final Entity crosshairEntity = entityHit.getEntity();
                 if (mc.player.isTeammate(crosshairEntity)
-                        || Managers.SOCIAL.isFriend(crosshairEntity.getUuid())) {
+                        || crosshairEntity.getDisplayName() != null && Managers.SOCIAL.isFriend(crosshairEntity.getDisplayName())) {
                     yield false;
                 }
                 yield true;

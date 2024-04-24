@@ -40,11 +40,11 @@ public class MiddleClickModule extends ToggleModule {
         }
         if (event.getButton() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE
                 && event.getAction() == GLFW.GLFW_PRESS && mc.currentScreen == null) {
-            if (mc.targetedEntity instanceof PlayerEntity target && friendConfig.getValue()) {
-                if (Managers.SOCIAL.isFriend(target.getUuid())) {
-                    Managers.SOCIAL.remove(target.getUuid());
+            if (mc.targetedEntity instanceof PlayerEntity target && target.getDisplayName() != null && friendConfig.getValue()) {
+                if (Managers.SOCIAL.isFriend(target.getDisplayName())) {
+                    Managers.SOCIAL.remove(target.getDisplayName());
                 } else {
-                    Managers.SOCIAL.addFriend(target.getUuid());
+                    Managers.SOCIAL.addFriend(target.getDisplayName());
                 }
             } else if (mc.targetedEntity == null) {
                 Item item = null;

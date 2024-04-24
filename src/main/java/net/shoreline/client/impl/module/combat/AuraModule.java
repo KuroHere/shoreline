@@ -392,7 +392,7 @@ public class AuraModule extends RotationModule {
         for (Entity entity : mc.world.getEntities()) {
             if (entity == null || entity == mc.player
                     || !entity.isAlive() || !isEnemy(entity)
-                    || Managers.SOCIAL.isFriend(entity.getUuid())
+                    || entity.getDisplayName() != null && Managers.SOCIAL.isFriend(entity.getDisplayName())
                     || entity instanceof EndCrystalEntity
                     || entity instanceof ItemEntity
                     || entity instanceof ArrowEntity

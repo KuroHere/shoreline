@@ -40,8 +40,8 @@ public class SocialFile extends ConfigFile {
                 Files.createFile(filepath);
             }
             final JsonArray array = new JsonArray();
-            for (UUID socials : Managers.SOCIAL.getRelations(relation)) {
-                array.add(new JsonPrimitive(socials.toString()));
+            for (String socials : Managers.SOCIAL.getRelations(relation)) {
+                array.add(new JsonPrimitive(socials));
             }
             write(filepath, serialize(array));
         }
@@ -67,8 +67,7 @@ public class SocialFile extends ConfigFile {
                     return;
                 }
                 for (JsonElement element : json.asList()) {
-                    Managers.SOCIAL.addRelation(
-                            UUID.fromString(element.getAsString()), relation);
+                    Managers.SOCIAL.addRelation(element.getAsString(), relation);
                 }
             }
         }

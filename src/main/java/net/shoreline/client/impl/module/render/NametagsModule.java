@@ -391,7 +391,7 @@ public class NametagsModule extends ToggleModule {
     }
 
     private int getNametagColor(PlayerEntity player) {
-        if (Managers.SOCIAL.isFriend(player.getUuid())) {
+        if (player.getDisplayName() != null && Managers.SOCIAL.isFriend(player.getDisplayName())) {
             return 0xff66ffff;
         }
         if (player.isInvisible()) {
