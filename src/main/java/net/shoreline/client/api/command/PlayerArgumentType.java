@@ -15,6 +15,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class PlayerArgumentType implements ArgumentType<String>, Globals {
 
+    public static PlayerArgumentType player() {
+        return new PlayerArgumentType();
+    }
+
     public static String getPlayer(final CommandContext<?> context, final String name) {
         return context.getArgument(name, String.class);
     }

@@ -11,6 +11,11 @@ import net.shoreline.client.init.Managers;
 import java.util.concurrent.CompletableFuture;
 
 public class CommandArgumentType implements ArgumentType<Command> {
+
+    public static CommandArgumentType command() {
+        return new CommandArgumentType();
+    }
+
     public static Command getCommand(final CommandContext<?> context, final String name) {
         return context.getArgument(name, Command.class);
     }

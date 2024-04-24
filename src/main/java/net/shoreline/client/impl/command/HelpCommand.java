@@ -35,7 +35,7 @@ public class HelpCommand extends Command {
 
     @Override
     public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("command", new CommandArgumentType()).executes(c -> {
+        builder.then(argument("command", CommandArgumentType.command()).executes(c -> {
             final Command command = CommandArgumentType.getCommand(c, "command");
             ChatUtil.clientSendMessage(toHelpMessage(command));
             return 1;

@@ -25,7 +25,7 @@ public class BindCommand extends Command {
 
     @Override
     public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("module", new ModuleArgumentType())
+        builder.then(argument("module", ModuleArgumentType.module())
                 .then(argument("key", StringArgumentType.string())
                         .executes(c -> {
                             Module module = ModuleArgumentType.getModule(c, "module");

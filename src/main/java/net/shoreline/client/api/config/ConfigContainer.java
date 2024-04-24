@@ -164,7 +164,7 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>, G
                         if (val != null) {
                             cfg.setValue(val);
                         }
-                    } else if (config instanceof ListConfig cfg) {
+                    } else if (config instanceof ItemListConfig cfg) {
                         List<?> val = cfg.fromJson(configObj);
                         cfg.setValue(val);
                     } else if (config instanceof NumberConfig cfg) {
@@ -177,8 +177,7 @@ public class ConfigContainer implements Identifiable, Serializable<Config<?>>, G
                 }
                 // couldn't parse Json value
                 catch (Exception e) {
-                    Shoreline.error("Couldn't parse Json for {}!",
-                            config.getName());
+                    Shoreline.error("Couldn't parse Json for {}!", config.getName());
                     e.printStackTrace();
                 }
             }

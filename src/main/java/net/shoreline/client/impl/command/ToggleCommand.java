@@ -20,7 +20,7 @@ public class ToggleCommand extends Command {
 
     @Override
     public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("module", new ModuleArgumentType()).executes(c -> {
+        builder.then(argument("module", ModuleArgumentType.module()).executes(c -> {
             Module module = ModuleArgumentType.getModule(c, "module");
             if (module instanceof ToggleModule t) {
                 t.toggle();

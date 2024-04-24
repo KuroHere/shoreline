@@ -14,6 +14,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class ItemArgumentType implements ArgumentType<Item> {
 
+    public static ItemArgumentType item() {
+        return new ItemArgumentType();
+    }
+
     public static Item getItem(final CommandContext<?> context, final String name) {
         return context.getArgument(name, Item.class);
     }
@@ -21,7 +25,7 @@ public class ItemArgumentType implements ArgumentType<Item> {
     @Override
     public Item parse(StringReader reader) throws CommandSyntaxException {
         String string = reader.readString();
-        Item item = Registries.ITEM.get(new Identifier(string));
+        Item item = Registries.ITEM.get(new Identifier("minecraft", string));
         if (item == null) {
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().createWithContext(reader, null);
         }

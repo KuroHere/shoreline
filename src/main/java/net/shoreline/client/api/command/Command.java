@@ -7,6 +7,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.command.CommandSource;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 
 /**
@@ -65,6 +66,6 @@ public abstract class Command implements Globals {
      * @return
      */
     public String getUsage() {
-        return "";
+        return Managers.COMMAND.getDispatcher().getAllUsage(builder.build(), Managers.COMMAND.getSource(), false)[0];
     }
 }

@@ -25,7 +25,7 @@ public class FriendCommand extends Command {
     @Override
     public void buildCommand(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("add/del", StringArgumentType.string()).suggests(suggest("add", "del", "remove"))
-                .then(argument("friend_name", new PlayerArgumentType()).executes(c -> {
+                .then(argument("friend_name", PlayerArgumentType.player()).executes(c -> {
                     String playerName = PlayerArgumentType.getPlayer(c, "friend_name");
                     final String action = StringArgumentType.getString(c, "add/del");
                     if (action.equalsIgnoreCase("add")) {

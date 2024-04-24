@@ -15,6 +15,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class ModuleArgumentType implements ArgumentType<Module> {
 
+    public static ModuleArgumentType module() {
+        return new ModuleArgumentType();
+    }
+
     public static Module getModule(final CommandContext<?> context, final String name) {
         return context.getArgument(name, Module.class);
     }

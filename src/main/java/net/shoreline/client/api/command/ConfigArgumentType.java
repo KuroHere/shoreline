@@ -15,8 +15,12 @@ public class ConfigArgumentType implements ArgumentType<Config<?>> {
 
     private final Module module;
 
-    public ConfigArgumentType(Module module) {
+    private ConfigArgumentType(Module module) {
         this.module = module;
+    }
+
+    public static ConfigArgumentType config(Module module) {
+        return new ConfigArgumentType(module);
     }
 
     public static Config<?> getConfig(final CommandContext<?> context, final String name) {
@@ -28,7 +32,8 @@ public class ConfigArgumentType implements ArgumentType<Config<?>> {
         String string = reader.readString();
         Config<?> config = null;
         for (Config<?> config1 : module.getConfigs()) {
-            if (config1.getName().equalsIgnoreCase("Enabled") || config1.getName().equalsIgnoreCase("Keybind")) {
+            if (config1.getName().equalsIgnoreCase("Enabled") || config1.getName().equalsIgnoreCase("Keybind")
+                    || config1.getName().equalsIgnoreCase("Hidden")) {
                 continue;
             }
             if (config1.getName().equalsIgnoreCase(string)) {
@@ -46,6 +51,10 @@ public class ConfigArgumentType implements ArgumentType<Config<?>> {
     public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context,
                                                               final SuggestionsBuilder builder) {
         for (Config<?> config : module.getConfigs()) {
+            if (config.getName().equalsIgnoreCase("Enabled") || config.getName().equalsIgnoreCase("Keybind")
+                    || config.getName().equalsIgnoreCase("Hidden")) {
+                continue;
+            }
             builder.suggest(config.getName().toLowerCase());
         }
         return builder.buildFuture();

@@ -9,7 +9,7 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
-import net.shoreline.client.api.config.setting.ListConfig;
+import net.shoreline.client.api.config.setting.ItemListConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
@@ -36,8 +36,8 @@ public class FastPlaceModule extends ToggleModule {
     Config<Integer> delayConfig = new NumberConfig<>("Delay", "Fast place click delay", 0, 1, 4);
     Config<Float> startDelayConfig = new NumberConfig<>("StartDelay", "Fast place start delay", 0.0f, 0.0f, 1.0f);
     Config<Boolean> ghostFixConfig = new BooleanConfig("GhostFix", "Fixes item ghosting issue on some servers", false);
-    Config<List<Item>> whitelistConfig = new ListConfig<>("Whitelist", "Valid item whitelist", Items.EXPERIENCE_BOTTLE, Items.SNOWBALL, Items.EGG);
-    Config<List<Item>> blacklistConfig = new ListConfig<>("Blacklist", "Valid item blacklist", Items.ENDER_PEARL, Items.ENDER_EYE);
+    Config<List<Item>> whitelistConfig = new ItemListConfig<>("Whitelist", "Valid item whitelist", Items.EXPERIENCE_BOTTLE, Items.SNOWBALL, Items.EGG);
+    Config<List<Item>> blacklistConfig = new ItemListConfig<>("Blacklist", "Valid item blacklist", Items.ENDER_PEARL, Items.ENDER_EYE);
     //
     private final CacheTimer startTimer = new CacheTimer();
 
@@ -80,9 +80,9 @@ public class FastPlaceModule extends ToggleModule {
 
     private boolean placeCheck(ItemStack held) {
         return switch (selectionConfig.getValue()) {
-            case WHITELIST -> ((ListConfig<?>) whitelistConfig)
+            case WHITELIST -> ((ItemListConfig<?>) whitelistConfig)
                     .contains(held.getItem());
-            case BLACKLIST -> !((ListConfig<?>) blacklistConfig)
+            case BLACKLIST -> !(( ItemListConfig<?>) blacklistConfig)
                     .contains(held.getItem());
             case ALL -> true;
         };
