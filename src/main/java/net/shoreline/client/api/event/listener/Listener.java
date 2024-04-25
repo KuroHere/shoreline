@@ -114,7 +114,7 @@ public class Listener implements Comparable<Listener> {
      */
     @Override
     public int compareTo(Listener other) {
-        return Integer.compare(getPriority(), other.getPriority());
+        return Integer.compare(other.getPriority(), getPriority());
     }
 
     /**
