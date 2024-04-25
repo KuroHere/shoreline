@@ -9,6 +9,7 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.entity.ConsumeItemEvent;
 import net.shoreline.client.impl.event.entity.JumpRotationEvent;
 import net.shoreline.client.impl.event.entity.LevitationEvent;
+import net.shoreline.client.impl.event.entity.EntityDeathEvent;
 import net.shoreline.client.util.Globals;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,6 +40,12 @@ public abstract class MixinLivingEntity extends MixinEntity implements Globals {
 
     @Shadow
     protected abstract float getJumpVelocity();
+
+    @Shadow
+    public abstract boolean isDead();
+
+    @Shadow
+    public int deathTime;
 
     @Inject(method = "jump", at = @At(value = "HEAD"), cancellable = true)
     private void hookJump$getYaw(CallbackInfo ci) {
@@ -89,5 +96,13 @@ public abstract class MixinLivingEntity extends MixinEntity implements Globals {
         }
         ConsumeItemEvent consumeItemEvent = new ConsumeItemEvent(activeItemStack);
         Shoreline.EVENT_HANDLER.dispatch(consumeItemEvent);
+    }
+
+    @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;tickStatusEffects()V", shift = At.Shift.BEFORE))
+    private void hookUpdatePostDeath(CallbackInfo ci) {
+        if (isDead() && deathTime == 1) {
+            EntityDeathEvent entityDeathEvent = new EntityDeathEvent((LivingEntity) (Object) this);
+            Shoreline.EVENT_HANDLER.dispatch(entityDeathEvent);
+        }
     }
 }

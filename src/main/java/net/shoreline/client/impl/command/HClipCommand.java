@@ -29,7 +29,7 @@ public class HClipCommand extends Command {
             double x = Math.cos(rad) * dist;
             double z = Math.sin(rad) * dist;
             Managers.POSITION.setPositionXZ(x, z);
-            ChatUtil.clientSendMessage("§sHorizontally clipped§f " + dist + " §sblocks");
+            ChatUtil.clientSendMessage("Horizontally clipped §s" + dist + "§f blocks");
             return 1;
         })).executes(c -> {
             ChatUtil.error("Must provide distance!");

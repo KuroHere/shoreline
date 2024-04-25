@@ -21,7 +21,7 @@ public class ModulesCommand extends Command {
         builder.executes(c -> {
             StringBuilder modulesList = new StringBuilder();
             for (Module module : Managers.MODULE.getModules()) {
-                String formatting = module instanceof ToggleModule t && t.isEnabled() ? "§s" : "§7";
+                String formatting = module instanceof ToggleModule t && t.isEnabled() ? "§s" : "§f";
                 modulesList.append(formatting);
                 modulesList.append(module.getName());
                 modulesList.append(Formatting.RESET);
@@ -30,7 +30,7 @@ public class ModulesCommand extends Command {
                     modulesList.append(", ");
                 }
             }
-            ChatUtil.clientSendMessageRaw(" Modules: " + modulesList);
+            ChatUtil.clientSendMessageRaw(" §7Modules:§f " + modulesList);
             return 1;
         });
     }

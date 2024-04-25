@@ -28,7 +28,7 @@ public class DisableAllCommand extends Command {
                     toggleModule.disable();
                 }
             }
-            ChatUtil.clientSendMessage("§sDisabled all modules");
+            ChatUtil.clientSendMessage("Disabled all modules");
             return 1;
         });
     }

@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.Item;
+import net.minecraft.util.Formatting;
 import net.shoreline.client.api.command.Command;
 import net.shoreline.client.api.command.ConfigArgumentType;
 import net.shoreline.client.api.command.ItemArgumentType;
@@ -68,10 +69,10 @@ public class ModuleCommand extends Command {
             List<Item> list = ((List<Item>) config.getValue());
             if (action.equalsIgnoreCase("add")) {
                 list.add(value);
-                ChatUtil.clientSendMessage("§sAdded§f " + value.getName().getString() + " §sto§f " + config.getName());
+                ChatUtil.clientSendMessage("Added §s" + value.getName().getString() + "§f to §7" + config.getName());
             } else if (action.equalsIgnoreCase("del") || action.equalsIgnoreCase("remove")) {
                 list.remove(value);
-                ChatUtil.clientSendMessage("§sRemoved§f " + value.getName().getString() + " §sfrom§f " + config.getName());
+                ChatUtil.clientSendMessage("Removed §c" + value.getName().getString() + "§f from §7" + config.getName());
             }
         }
         return 1;
@@ -82,7 +83,7 @@ public class ModuleCommand extends Command {
             List<Item> list = ((List<Item>) config.getValue());
             if (action.equalsIgnoreCase("list")) {
                 if (list.isEmpty()) {
-                    ChatUtil.clientSendMessage("§sThere are no items in the list!");
+                    ChatUtil.error("There are no items in the list!");
                     return 1;
                 }
                 StringBuilder listString = new StringBuilder();
@@ -93,7 +94,7 @@ public class ModuleCommand extends Command {
                         listString.append(", ");
                     }
                 }
-                ChatUtil.clientSendMessage(config.getName() + ": " + listString);
+                ChatUtil.clientSendMessage("§7" + config.getName() + "§f: " + listString);
             }
         }
         return 1;
@@ -106,18 +107,26 @@ public class ModuleCommand extends Command {
         // parse value
         try {
             if (config.getValue() instanceof Integer) {
-                ((Config<Integer>) config).setValue(Integer.parseInt(value));
+                Integer val = Integer.parseInt(value);
+                ((Config<Integer>) config).setValue(val);
+                ChatUtil.clientSendMessage("§7%s§f was set to §s%s", config.getName(), val.toString());
             } else if (config.getValue() instanceof Float) {
-                ((Config<Float>) config).setValue(Float.parseFloat(value));
+                Float val = Float.parseFloat(value);
+                ((Config<Float>) config).setValue(val);
+                ChatUtil.clientSendMessage("§7%s§f was set to §s%s", config.getName(), val.toString());
             } else if (config.getValue() instanceof Double) {
-                ((Config<Double>) config).setValue(Double.parseDouble(value));
+                Double val = Double.parseDouble(value);
+                ((Config<Double>) config).setValue(val);
+                ChatUtil.clientSendMessage("§7%s§f was set to §s%s", config.getName(), val.toString());
             }
         } catch (NumberFormatException e) {
             ChatUtil.error("Not a number!");
             // e.printStackTrace();
         }
         if (config.getValue() instanceof Boolean) {
-            ((Config<Boolean>) config).setValue(Boolean.parseBoolean(value));
+            Boolean val = Boolean.parseBoolean(value);
+            ((Config<Boolean>) config).setValue(val);
+            ChatUtil.clientSendMessage("§7%s§f was set to §s%s", config.getName(), val ? "True" : "False");
         } else if (config.getValue() instanceof Enum<?>) {
             String[] values = Arrays.stream(((Enum<?>) config.getValue()).getClass()
                     .getEnumConstants()).map(Enum::name).toArray(String[]::new);
@@ -135,16 +144,17 @@ public class ModuleCommand extends Command {
             }
             Enum<?> val = Enum.valueOf(((Enum<?>) config.getValue()).getClass(), values[ix]);
             ((Config<Enum<?>>) config).setValue(val);
+            ChatUtil.clientSendMessage("§7%s§f was set to mode §s%s", config.getName(), value);
         } else if (config.getValue() instanceof Macro macro) {
             if (config.getName().equalsIgnoreCase("Keybind")) {
                 ChatUtil.error("Use the 'bind' command to keybind modules!");
                 return 0;
             }
             ((Config<Macro>) config).setValue(new Macro(config.getId(), KeyboardUtil.getKeyCode(value), macro.getRunnable()));
+            ChatUtil.clientSendMessage("§7%s§f was set to key §s%s", config.getName(), value);
         } else if (config.getValue() instanceof String) {
             ((Config<String>) config).setValue(value);
         }
-        ChatUtil.clientSendMessage("§7%s§s was set to §f%s", config.getName(), value);
         return 1;
     }
 }

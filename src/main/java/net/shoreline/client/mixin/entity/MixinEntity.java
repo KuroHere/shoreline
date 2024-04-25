@@ -6,6 +6,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.event.GameEvent;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.event.entity.*;
 import net.shoreline.client.impl.event.entity.decoration.TeamColorEvent;
@@ -178,5 +179,11 @@ public abstract class MixinEntity implements Globals {
                 ci.cancel();
             }
         }
+    }
+
+    @Inject(method = "emitGameEvent(Lnet/minecraft/world/event/GameEvent;Lnet/minecraft/entity/Entity;)V", at = @At(value = "HEAD"))
+    private void hookEmitGameEvent(GameEvent event, Entity entity, CallbackInfo ci) {
+        EntityGameEvent entityGameEvent = new EntityGameEvent(event, entity);
+        Shoreline.EVENT_HANDLER.dispatch(entityGameEvent);
     }
 }

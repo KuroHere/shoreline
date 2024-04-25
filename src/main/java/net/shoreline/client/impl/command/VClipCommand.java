@@ -26,7 +26,7 @@ public class VClipCommand extends Command {
             double y = Managers.POSITION.getY();
             if (Math.abs(y) != 256) {
                 Managers.POSITION.setPositionY(y + dist);
-                ChatUtil.clientSendMessage("§sVertically clipped§f " + dist + " §sblocks");
+                ChatUtil.clientSendMessage("Vertically clipped §s" + dist + "§f blocks");
             }
             return 1;
         })).executes(c -> {

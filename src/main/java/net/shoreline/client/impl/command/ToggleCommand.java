@@ -24,7 +24,7 @@ public class ToggleCommand extends Command {
             Module module = ModuleArgumentType.getModule(c, "module");
             if (module instanceof ToggleModule t) {
                 t.toggle();
-                ChatUtil.clientSendMessage("%s §sis now§f %s§s§f", t.getName(), t.isEnabled() ? "§aenabled" : "§cdisabled");
+                ChatUtil.clientSendMessage("%s is now %s", "§7" + t.getName() + "§f", t.isEnabled() ? "§senabled§f" : "§cdisabled§f");
             }
             return 1;
         })).executes(c -> {

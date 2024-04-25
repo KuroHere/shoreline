@@ -31,23 +31,8 @@ public class PrefixCommand extends Command {
                 return 0;
             }
             int keycode = KeyboardUtil.getKeyCode(prefix);
-            for (Macro macro : Managers.MACRO.getMacros()) {
-                if (macro.getKeycode() == keycode) {
-                    ChatUtil.error("Macro already bound to " + prefix + "!");
-                    return 0;
-                }
-            }
-            for (Module module : Managers.MODULE.getModules()) {
-                if (module instanceof ToggleModule toggle) {
-                    Macro keybind = toggle.getKeybinding();
-                    if (keybind.getKeycode() == keycode) {
-                        ChatUtil.error(module.getName() + " already bound to " + prefix + "!");
-                        return 0;
-                    }
-                }
-            }
             Managers.COMMAND.setPrefix(prefix, keycode);
-            ChatUtil.clientSendMessage("§sClient command prefix changed to§f " + prefix);
+            ChatUtil.clientSendMessage("Command prefix changed to §s" + prefix);
             return 1;
         })).executes(c -> {
             ChatUtil.error("Please provide a new prefix!");

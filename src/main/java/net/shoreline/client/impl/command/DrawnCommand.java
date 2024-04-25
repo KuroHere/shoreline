@@ -29,8 +29,8 @@ public class DrawnCommand extends Command {
                     if (module instanceof ToggleModule toggle) {
                         boolean hide = !toggle.isHidden();
                         toggle.setHidden(hide);
-                        ChatUtil.clientSendMessage(module.getName() + " §sis now§f " +
-                                (hide ? "hidden" : "visible") + Formatting.RESET + " §sin the Hud");
+                        ChatUtil.clientSendMessage("§7" + module.getName() + "§f is now " +
+                                (hide ? "§chidden§f" : "§svisible§f") + Formatting.RESET + " in the Hud");
                     }
                     return 1;
                 })).executes(c -> {

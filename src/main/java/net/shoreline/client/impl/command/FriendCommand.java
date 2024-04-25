@@ -29,11 +29,18 @@ public class FriendCommand extends Command {
                     String playerName = PlayerArgumentType.getPlayer(c, "friend_name");
                     final String action = StringArgumentType.getString(c, "add/del");
                     if (action.equalsIgnoreCase("add")) {
-                        ChatUtil.clientSendMessage("§sAdded friend with name§f " + playerName);
+                        if (Managers.SOCIAL.isFriend(playerName)) {
+                            ChatUtil.error("Player is already friended!");
+                            return 0;
+                        }
+                        ChatUtil.clientSendMessage("Added friend with name §s" + playerName);
                         Managers.SOCIAL.addFriend(playerName);
-                    } else if (action.equalsIgnoreCase("remove")
-                            || action.equalsIgnoreCase("del")) {
-                        ChatUtil.clientSendMessage("§sRemoved friend with name§f " + playerName);
+                    } else if (action.equalsIgnoreCase("remove") || action.equalsIgnoreCase("del")) {
+                        if (!Managers.SOCIAL.isFriend(playerName)) {
+                            ChatUtil.error("Player is not friended!");
+                            return 0;
+                        }
+                        ChatUtil.clientSendMessage("Removed friend with name §c" + playerName);
                         Managers.SOCIAL.remove(playerName);
                     }
                     return 1;
