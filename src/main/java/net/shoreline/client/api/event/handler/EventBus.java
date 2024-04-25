@@ -88,7 +88,7 @@ public class EventBus implements EventHandler {
         if (active == null || active.isEmpty()) {
             return false;
         }
-        for (Listener listener : active) {
+        for (Listener listener : new ArrayList<>(active)) {
             if (event.isCanceled() && !listener.isReceiveCanceled()) {
                 continue;
             }
