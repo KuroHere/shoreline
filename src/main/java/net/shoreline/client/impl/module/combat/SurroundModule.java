@@ -144,9 +144,8 @@ public class SurroundModule extends BlockPlacerModule {
         {
             return;
         }
-        Managers.INTERACT.placeBlock(targetPos, slot, strictDirectionConfig.getValue(), false, (state) ->
+        Managers.INTERACT.placeBlock(targetPos, slot, strictDirectionConfig.getValue(), false, (state, angles) ->
         {
-            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), targetPos.toCenterPos());
             if (rotateConfig.getValue())
             {
                 if (grimConfig.getValue())

@@ -16,6 +16,7 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.Globals;
+import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.world.SneakBlocks;
 import org.apache.commons.lang3.mutable.MutableObject;
 
@@ -109,13 +110,15 @@ public final class InteractionManager implements Globals
         final boolean isRotating = rotationCallback != null;
         if (isRotating)
         {
-            rotationCallback.handleRotation(true);
+            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getBlockPos().toCenterPos());
+            rotationCallback.handleRotation(true, angles);
         }
 
         final boolean result = placeBlockImmediately(hitResult, clientSwing);
         if (isRotating)
         {
-            rotationCallback.handleRotation(false);
+            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getBlockPos().toCenterPos());
+            rotationCallback.handleRotation(false, angles);
         }
 
         if (isSpoofing)
@@ -143,13 +146,15 @@ public final class InteractionManager implements Globals
         final boolean isRotating = rotationCallback != null;
         if (isRotating)
         {
-            rotationCallback.handleRotation(true);
+            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getBlockPos().toCenterPos());
+            rotationCallback.handleRotation(true, angles);
         }
 
         final boolean result = placeBlockImmediatelyPacket(hitResult, clientSwing);
         if (isRotating)
         {
-            rotationCallback.handleRotation(false);
+            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getBlockPos().toCenterPos());
+            rotationCallback.handleRotation(false, angles);
         }
 
         if (isSpoofing)
@@ -235,8 +240,7 @@ public final class InteractionManager implements Globals
      */
     public Direction getInteractDirection(final BlockPos blockPos, final boolean strictDirection)
     {
-        final Set<Direction> ncpDirections = Managers.NCP.getPlaceDirectionsNCP(
-                mc.player.getEyePos(), blockPos.toCenterPos());
+        Set<Direction> ncpDirections = Managers.NCP.getPlaceDirectionsNCP(mc.player.getEyePos(), blockPos.toCenterPos());
         Direction interactDirection = null;
         for (final Direction direction : Direction.values())
         {

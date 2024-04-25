@@ -67,9 +67,9 @@ public final class ScaffoldModule extends BlockPlacerModule
             return;
         }
 
-        final boolean result = Managers.INTERACT.placeBlock(data.getHitResult(), blockSlot, false, (state) ->
+        final boolean result = Managers.INTERACT.placeBlock(data.getHitResult(), blockSlot, false, (state, angles) ->
         {
-            float[] angles = data.getAngles();
+            angles = data.getAngles();
             if (angles == null)
             {
                 return;

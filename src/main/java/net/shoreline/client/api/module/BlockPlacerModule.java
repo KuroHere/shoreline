@@ -19,8 +19,7 @@ import java.util.function.Predicate;
  */
 public class BlockPlacerModule extends RotationModule
 {
-    private static final List<Block> RESISTANT_BLOCKS = new LinkedList<>()
-    {{
+    private static final List<Block> RESISTANT_BLOCKS = new LinkedList<>() {{
        add(Blocks.OBSIDIAN);
        add(Blocks.CRYING_OBSIDIAN);
        add(Blocks.ENDER_CHEST);
