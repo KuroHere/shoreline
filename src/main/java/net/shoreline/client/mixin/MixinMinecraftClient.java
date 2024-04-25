@@ -136,7 +136,7 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
             tickPostEvent.setStage(EventStage.POST);
             Shoreline.EVENT_HANDLER.dispatch(tickPostEvent);
             world.getEntities().forEach(entity -> {
-                if (entity instanceof LivingEntity e && e.isDead() && e.deathTime <= 1) {
+                if (entity instanceof LivingEntity e && e.isDead()) {
                     EntityDeathEvent entityDeathEvent = new EntityDeathEvent(e);
                     Shoreline.EVENT_HANDLER.dispatch(entityDeathEvent);
                 }
