@@ -15,8 +15,7 @@ public class AntiBookBanModule extends ToggleModule {
      *
      */
     public AntiBookBanModule() {
-        super("AntiBookBan", "Prevents getting book banned (Causes connection" +
-                " issues, only use if actually book banned)", ModuleCategory.MISCELLANEOUS);
+        super("AntiBookBan", "Prevents getting book banned (Causes connection issues, only use if actually book banned)", ModuleCategory.MISCELLANEOUS);
     }
 
     @EventListener

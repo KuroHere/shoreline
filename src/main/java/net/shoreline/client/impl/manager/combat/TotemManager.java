@@ -44,7 +44,7 @@ public class TotemManager implements Globals {
         }
     }
 
-    @EventListener
+    @EventListener(priority = Integer.MAX_VALUE)
     public void onRemoveEntity(EntityDeathEvent event) {
         if (event.getEntity() == mc.player) {
             return;

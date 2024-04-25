@@ -6,10 +6,13 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.impl.event.*;
+import net.shoreline.client.impl.event.entity.EntityDeathEvent;
 import net.shoreline.client.impl.imixin.IMinecraftClient;
+import net.shoreline.client.util.chat.ChatUtil;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -132,6 +135,12 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
             TickEvent tickPostEvent = new TickEvent();
             tickPostEvent.setStage(EventStage.POST);
             Shoreline.EVENT_HANDLER.dispatch(tickPostEvent);
+            world.getEntities().forEach(entity -> {
+                if (entity instanceof LivingEntity e && e.isDead() && e.deathTime == 1) {
+                    EntityDeathEvent entityDeathEvent = new EntityDeathEvent(e);
+                    Shoreline.EVENT_HANDLER.dispatch(entityDeathEvent);
+                }
+            });
         }
     }
 

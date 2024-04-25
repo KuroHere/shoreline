@@ -97,12 +97,4 @@ public abstract class MixinLivingEntity extends MixinEntity implements Globals {
         ConsumeItemEvent consumeItemEvent = new ConsumeItemEvent(activeItemStack);
         Shoreline.EVENT_HANDLER.dispatch(consumeItemEvent);
     }
-
-    @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;tickStatusEffects()V", shift = At.Shift.BEFORE))
-    private void hookUpdatePostDeath(CallbackInfo ci) {
-        if (isDead() && deathTime == 1) {
-            EntityDeathEvent entityDeathEvent = new EntityDeathEvent((LivingEntity) (Object) this);
-            Shoreline.EVENT_HANDLER.dispatch(entityDeathEvent);
-        }
-    }
 }

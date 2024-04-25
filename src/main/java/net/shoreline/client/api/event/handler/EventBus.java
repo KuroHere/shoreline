@@ -3,6 +3,7 @@ package net.shoreline.client.api.event.handler;
 import net.shoreline.client.api.event.Event;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.event.listener.Listener;
+import net.shoreline.client.init.Managers;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -23,7 +24,7 @@ public class EventBus implements EventHandler {
     private final Set<Object> subscribers = Collections.synchronizedSet(new HashSet<>());
     // Map of events and their associated listeners. All listeners in a class
     // will be added when the class is subscribed to this EventHandler.
-    private final Map<Object, List<Listener>> listeners = new ConcurrentHashMap<>();
+    private final Map<Object, PriorityQueue<Listener>> listeners = new ConcurrentHashMap<>();
 
     /**
      * Subscribes a {@link Object} to the EventHandler and adds all
@@ -44,8 +45,8 @@ public class EventBus implements EventHandler {
                 if (method.getReturnType() == Void.TYPE) {
                     Class<?>[] params = method.getParameterTypes();
                     if (params.length == 1) {
-                        List<Listener> active = listeners.computeIfAbsent(params[0],
-                                v -> new CopyOnWriteArrayList<>());
+                        PriorityQueue<Listener> active = listeners.computeIfAbsent(params[0],
+                                v -> new PriorityQueue<>());
                         active.add(new Listener(method, obj,
                                 listener.receiveCanceled(), listener.priority()));
                     }
@@ -82,7 +83,7 @@ public class EventBus implements EventHandler {
         if (event == null) {
             return false;
         }
-        List<Listener> active = listeners.get(event.getClass());
+        PriorityQueue<Listener> active = listeners.get(event.getClass());
         // if there are no items to dispatch to, just early return
         if (active == null || active.isEmpty()) {
             return false;

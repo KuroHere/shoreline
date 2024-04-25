@@ -5,6 +5,7 @@ import net.minecraft.util.math.MathHelper;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.ColorConfig;
+import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
@@ -19,9 +20,8 @@ import java.awt.*;
  */
 public class ParticlesModule extends ToggleModule {
 
-    Config<Boolean> totemConfig = new BooleanConfig("Totem", "Renders totem particles", false);
-    Config<Boolean> totemPopConfig = new BooleanConfig("TotemPop", "Renders totem pop particles", false);
-    Config<Color> totemColorConfig = new ColorConfig("TotemColor", "Color of the totem particles", new Color(25, 120, 0), false, false, () -> !totemConfig.getValue() && totemPopConfig.getValue());
+    Config<TotemParticle> totemConfig = new EnumConfig<>("Totem", "Renders totem particles", TotemParticle.OFF, TotemParticle.values());
+    Config<Color> totemColorConfig = new ColorConfig("TotemColor", "Color of the totem particles", new Color(25, 120, 0), false, false, () -> totemConfig.getValue() == TotemParticle.COLOR);
     Config<Boolean> fireworkConfig = new BooleanConfig("Firework", "Renders firework particles", false);
     Config<Boolean> potionConfig = new BooleanConfig("Effects", "Renders potion effect particles", true);
     Config<Boolean> bottleConfig = new BooleanConfig("BottleSplash", "Render bottle splash particles", true);
@@ -43,7 +43,7 @@ public class ParticlesModule extends ToggleModule {
 
     @EventListener
     public void onTotemParticle(TotemParticleEvent event) {
-        if (totemPopConfig.getValue()) {
+        if (totemConfig.getValue() == TotemParticle.COLOR) {
             event.cancel();
             Color color = totemColorConfig.getValue();
             float r = color.getRed() / 255.0f;
@@ -57,8 +57,14 @@ public class ParticlesModule extends ToggleModule {
 
     @EventListener
     public void onParticleEmitter(ParticleEvent.Emitter event) {
-        if (totemConfig.getValue() && event.getParticleType() == ParticleTypes.TOTEM_OF_UNDYING) {
+        if (totemConfig.getValue() == TotemParticle.REMOVE && event.getParticleType() == ParticleTypes.TOTEM_OF_UNDYING) {
             event.cancel();
         }
+    }
+
+    private enum TotemParticle {
+        OFF,
+        REMOVE,
+        COLOR
     }
 }
