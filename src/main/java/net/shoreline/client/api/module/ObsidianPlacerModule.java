@@ -17,7 +17,7 @@ import java.util.function.Predicate;
  * @see SurroundModule
  * @since 1.0
  */
-public class BlockPlacerModule extends RotationModule
+public class ObsidianPlacerModule extends RotationModule
 {
     private static final List<Block> RESISTANT_BLOCKS = new LinkedList<>() {{
        add(Blocks.OBSIDIAN);
@@ -28,12 +28,12 @@ public class BlockPlacerModule extends RotationModule
     protected Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Places on visible sides only", false);
     protected Config<Boolean> grimConfig = new BooleanConfig("Grim", "Places using grim instant rotations", false);
 
-    public BlockPlacerModule(String name, String desc, ModuleCategory category) {
+    public ObsidianPlacerModule(String name, String desc, ModuleCategory category) {
         super(name, desc, category);
         register(strictDirectionConfig, grimConfig);
     }
 
-    public BlockPlacerModule(String name, String desc, ModuleCategory category, int rotationPriority) {
+    public ObsidianPlacerModule(String name, String desc, ModuleCategory category, int rotationPriority) {
         super(name, desc, category, rotationPriority);
         register(strictDirectionConfig, grimConfig);
     }

@@ -20,7 +20,7 @@ import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.module.BlockPlacerModule;
+import net.shoreline.client.api.module.ObsidianPlacerModule;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
@@ -32,7 +32,6 @@ import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.player.PlayerUtil;
-import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,7 +43,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author linus
  * @since 1.0
  */
-public class SurroundModule extends BlockPlacerModule {
+public class SurroundModule extends ObsidianPlacerModule {
     //
     Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange", "The placement range for surround", 0.0f, 4.0f, 5.0f);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates to block before placing", false);
@@ -205,7 +204,7 @@ public class SurroundModule extends BlockPlacerModule {
         }
         if (supportConfig.getValue()) {
             for (BlockPos block : blocks) {
-                Direction direction = Managers.INTERACT.getInteractDirection(block, false);
+                Direction direction = Managers.INTERACT.getInteractDirection(block, strictDirectionConfig.getValue());
                 if (direction == null) {
                     blocks.add(block.down());
                 }

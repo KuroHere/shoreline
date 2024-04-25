@@ -12,19 +12,23 @@ import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.module.BlockPlacerModule;
 import net.shoreline.client.api.module.ModuleCategory;
+import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.util.player.*;
+import net.shoreline.client.util.player.MovementUtil;
+import net.shoreline.client.util.player.PlayerUtil;
+import net.shoreline.client.util.player.RayCastUtil;
+import net.shoreline.client.util.player.RotationUtil;
 
 /**
  * @author xgraza
  * @since 04/13/24
  */
-public final class ScaffoldModule extends BlockPlacerModule
+public final class ScaffoldModule extends RotationModule
 {
+    Config<Boolean> grimConfig = new BooleanConfig("Grim", "Places using grim instant rotations", false);
     Config<Boolean> towerConfig = new BooleanConfig("Tower", "Goes up faster when holding down space", true);
     Config<Boolean> keepYConfig = new BooleanConfig("KeepY", "Keeps your Y level", false);
     Config<Boolean> safeWalkConfig = new BooleanConfig("SafeWalk", "If to prevent you from falling off edges", true);
@@ -33,7 +37,6 @@ public final class ScaffoldModule extends BlockPlacerModule
     public ScaffoldModule()
     {
         super("Scaffold", "Rapidly places blocks under your feet", ModuleCategory.WORLD);
-        unregister(strictDirectionConfig); // Legit never used lol
     }
 
     @Override
@@ -169,13 +172,15 @@ public final class ScaffoldModule extends BlockPlacerModule
 
         if (!grimConfig.getValue())
         {
-            data.setAngles(RotationUtil.getRotationsTo(mc.player.getEyePos(), pos.toCenterPos()));
+            Vec3d hitVec = pos.toCenterPos().add(new Vec3d(direction.getUnitVector()).multiply(0.5));
+            data.setAngles(RotationUtil.getRotationsTo(mc.player.getEyePos(), hitVec));
             return;
         }
 
         // I could just make dynamic rotations and call it a day
         // but what's the fun in a simple approach?
         // This is aids.
+        // youre a retard gavin - linus
 
         float yawOffset = 180;
         if (direction.equals(mc.player.getHorizontalFacing().getOpposite()))

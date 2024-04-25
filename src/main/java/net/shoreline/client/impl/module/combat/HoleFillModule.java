@@ -7,7 +7,7 @@ import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
-import net.shoreline.client.api.module.BlockPlacerModule;
+import net.shoreline.client.api.module.ObsidianPlacerModule;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
@@ -21,7 +21,7 @@ import java.util.List;
  * @author linus
  * @since 1.0
  */
-public class HoleFillModule extends BlockPlacerModule {
+public class HoleFillModule extends ObsidianPlacerModule {
     //
     Config<Float> rangeConfig = new NumberConfig<>("PlaceRange", "The range to fill nearby holes", 0.1f, 4.0f, 5.0f);
     Config<Boolean> proximityConfig = new BooleanConfig("ProximityCheck", "Fills holes when enemies are within a certain range", false);

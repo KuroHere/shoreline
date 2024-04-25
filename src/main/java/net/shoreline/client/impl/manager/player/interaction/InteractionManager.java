@@ -11,6 +11,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.init.Managers;
@@ -79,8 +80,8 @@ public final class InteractionManager implements Globals
                               final boolean clientSwing,
                               final RotationCallback rotationCallback)
     {
-        // TODO: better fake hitVec
-        return placeBlock(new BlockHitResult(pos.toCenterPos(), direction, pos, false),
+        Vec3d hitVec = pos.toCenterPos().add(new Vec3d(direction.getUnitVector()).multiply(0.5));
+        return placeBlock(new BlockHitResult(hitVec, direction, pos, false),
                 slot, clientSwing, rotationCallback);
     }
 
@@ -90,8 +91,8 @@ public final class InteractionManager implements Globals
                               final boolean clientSwing,
                               final RotationCallback rotationCallback)
     {
-        // TODO: better fake hitVec
-        return placeBlockPacket(new BlockHitResult(pos.toCenterPos(), direction, pos, false),
+        Vec3d hitVec = pos.toCenterPos().add(new Vec3d(direction.getUnitVector()).multiply(0.5));
+        return placeBlockPacket(new BlockHitResult(hitVec, direction, pos, false),
                 slot, clientSwing, rotationCallback);
     }
 
@@ -110,14 +111,14 @@ public final class InteractionManager implements Globals
         final boolean isRotating = rotationCallback != null;
         if (isRotating)
         {
-            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getBlockPos().toCenterPos());
+            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getPos());
             rotationCallback.handleRotation(true, angles);
         }
 
         final boolean result = placeBlockImmediately(hitResult, clientSwing);
         if (isRotating)
         {
-            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getBlockPos().toCenterPos());
+            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getPos());
             rotationCallback.handleRotation(false, angles);
         }
 
@@ -146,14 +147,14 @@ public final class InteractionManager implements Globals
         final boolean isRotating = rotationCallback != null;
         if (isRotating)
         {
-            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getBlockPos().toCenterPos());
+            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getPos());
             rotationCallback.handleRotation(true, angles);
         }
 
         final boolean result = placeBlockImmediatelyPacket(hitResult, clientSwing);
         if (isRotating)
         {
-            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getBlockPos().toCenterPos());
+            float[] angles = RotationUtil.getRotationsTo(mc.player.getEyePos(), hitResult.getPos());
             rotationCallback.handleRotation(false, angles);
         }
 
@@ -172,7 +173,7 @@ public final class InteractionManager implements Globals
         final boolean shouldSneak = SneakBlocks.isSneakBlock(state) && !mc.player.isSneaking();
         if (shouldSneak)
         {
-
+            
         }
 
         final ActionResult actionResult = placeBlockInternally(result);
