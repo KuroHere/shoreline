@@ -664,9 +664,19 @@ public class AutoCrystalModule extends RotationModule {
         }
         DamageData<BlockPos> data = null;
         for (BlockPos pos : placeBlocks) {
-            if (!canUseCrystalOnBlock(pos) || placeRangeCheck(pos)) {
-                continue;
+            if (placeRangeCheck(pos)) continue;
+            if (!canUseCrystalOnBlock(pos)) {
+                //place obsidian. only if there's no other place pos
+                if (placeBlocks.size() == 1) {
+                    if (mc.world.getBlockState(pos).getBlock() == Blocks.AIR) {
+                        Direction direction = Managers.INTERACT.getInteractDirection(pos, strictDirectionConfig.getValue());
+                        Vec3d hitVec = new Vec3d(pos.toCenterPos().toVector3f()).add(0.5f, 0.5f, 0.5f);
+                        Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(hitVec, direction, pos, false), id));
+                    }
+                }
             }
+            if (!canUseCrystalOnBlock(pos)) continue;
+
             double selfDamage = EndCrystalUtil.getDamageTo(mc.player,
                     crystalDamageVec(pos), blockDestructionConfig.getValue());
             boolean unsafeToPlayer = playerDamageCheck(selfDamage);
