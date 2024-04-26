@@ -110,8 +110,6 @@ public class AutoCrystalModule extends RotationModule {
     Config<Float> placeWallRangeConfig = new NumberConfig<>("PlaceWallRange", "Range to place crystals through walls", 0.1f, 4.0f, 5.0f, () -> placeConfig.getValue());
     Config<Boolean> placeRangeEyeConfig = new BooleanConfig("PlaceRangeEye", "Calculates place ranges starting from the eye position of the player", false, () -> placeConfig.getValue());
     Config<Boolean> placeRangeCenterConfig = new BooleanConfig("PlaceRangeCenter", "Calculates place ranges to the center of the block", true, () -> placeConfig.getValue());
-    Config<Boolean> obiassist = new BooleanConfig("ObiAssist", "Places obsidian to place crystals", false);
-
     Config<Boolean> antiTotemConfig = new BooleanConfig("AntiTotem", "Predicts totems and places crystals to instantly double pop and kill the target", false, () -> placeConfig.getValue());
     Config<Swap> autoSwapConfig = new EnumConfig<>("Swap", "Swaps to an end crystal before placing if the player is not holding one", Swap.OFF, Swap.values(), () -> placeConfig.getValue());
     Config<Float> alternateSpeedConfig = new NumberConfig<>("AlternateSpeed", "Speed for alternative swapping crystals", 1.0f, 18.0f, 20.0f, () -> placeConfig.getValue() && autoSwapConfig.getValue() == Swap.SILENT_ALT);
@@ -142,14 +140,13 @@ public class AutoCrystalModule extends RotationModule {
     //
     private BlockPos renderPos;
     private BlockPos lastRenderPos;
-    private BlockPos debugPos;
     private BlockPos renderSpawnPos;
     //
     private Vec3d crystalRotation;
     private boolean attackRotate;
     private boolean rotated;
     private int boxOpacity = 80;
-    private int outlineOpaity = 147;
+    private int outlineOpacity = 147;
     private float[] silentRotations;
     //
     private static final Box FULL_CRYSTAL_BB = new Box(0.0, 0.0, 0.0, 1.0, 2.0, 1.0);
@@ -279,12 +276,6 @@ public class AutoCrystalModule extends RotationModule {
                 setStage("PLACING");
                 lastPlaceTimer.reset();
             }
-            if (!canUseCrystalOnBlock(placeCrystal.getDamageData()) && mc.world.getBlockState(placeCrystal.getDamageData()).getBlock() == Blocks.AIR && obiassist.getValue()) {
-                Direction direction = Managers.INTERACT.getInteractDirection(placeCrystal.getDamageData(), strictDirectionConfig.getValue());
-                Vec3d hitVec = new Vec3d(placeCrystal.getDamageData().toCenterPos().toVector3f()).add(0.5f, 0.5f, 0.5f);
-                debugPos = renderPos;
-                Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(hitVec, direction, placeCrystal.getDamageData(), false), id));
-            }
             lastRenderPos = renderPos;
         }
     }
@@ -307,10 +298,10 @@ public class AutoCrystalModule extends RotationModule {
             if (isHoldingCrystal()) {
                 if (renderPos != null) {
                     boxOpacity = 80;
-                    outlineOpaity = 147;
+                    outlineOpacity = 147;
                     RenderManager.renderBox(event.getMatrices(), renderPos, Modules.COLORS.getRGB(boxOpacity));
                     RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
-                            Modules.COLORS.getRGB(outlineOpaity));
+                            Modules.COLORS.getRGB(outlineOpacity));
                     if (damageNametagConfig.getValue() && placeCrystal != null) {
                         DecimalFormat format = new DecimalFormat("0.0");
                         RenderManager.post(() -> {
@@ -319,15 +310,15 @@ public class AutoCrystalModule extends RotationModule {
                         });
                     }
                 } else {
-                    if (boxOpacity > 0 || outlineOpaity > 0) {
+                    if (boxOpacity > 0 || outlineOpacity > 0) {
                         boxOpacity = boxOpacity - 5;
-                        outlineOpaity = outlineOpaity - 7;
-                        boxOpacity = Math.max(0, Math.min(255, boxOpacity)); //fix IllegalArgumentException
-                        outlineOpaity = Math.max(0, Math.min(255, outlineOpaity));
+                        outlineOpacity = outlineOpacity - 7;
+                        boxOpacity = Math.max(0, Math.min(255, boxOpacity));
+                        outlineOpacity = Math.max(0, Math.min(255, outlineOpacity));
                     }
                     if (lastRenderPos != null) {
                         RenderManager.renderBox(event.getMatrices(), lastRenderPos, Modules.COLORS.getRGB(boxOpacity));
-                        RenderManager.renderBoundingBox(event.getMatrices(), lastRenderPos, 1.5f, Modules.COLORS.getRGB(outlineOpaity));
+                        RenderManager.renderBoundingBox(event.getMatrices(), lastRenderPos, 1.5f, Modules.COLORS.getRGB(outlineOpacity));
                     }
                 }
             }
@@ -575,17 +566,6 @@ public class AutoCrystalModule extends RotationModule {
         }
         return slot;
     }
-    private int getObsidianSlot() {
-        int slot = -1;
-        for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.getItem() == Items.OBSIDIAN) {
-                slot = i;
-                break;
-            }
-        }
-        return slot;
-    }
 
     private Direction getPlaceDirection(BlockPos blockPos) {
         int x = blockPos.getX();
@@ -705,8 +685,9 @@ public class AutoCrystalModule extends RotationModule {
         }
         DamageData<BlockPos> data = null;
         for (BlockPos pos : placeBlocks) {
-            if (placeRangeCheck(pos)) continue;
-            if (!canUseCrystalOnBlock(pos) && !obiassist.getValue()) continue;
+            if (!canUseCrystalOnBlock(pos) || placeRangeCheck(pos)) {
+                continue;
+            }
             double selfDamage = EndCrystalUtil.getDamageTo(mc.player,
                     crystalDamageVec(pos), blockDestructionConfig.getValue());
             boolean unsafeToPlayer = playerDamageCheck(selfDamage);
@@ -717,10 +698,6 @@ public class AutoCrystalModule extends RotationModule {
                 if (entity == null || !entity.isAlive() || entity == mc.player
                         || !isValidTarget(entity)
                         || entity.getDisplayName() != null && Managers.SOCIAL.isFriend(entity.getDisplayName())) {
-                    continue;
-                }
-
-                if (entity.getBlockPos() != null && pos != null && entity.getBlockPos() == pos) {
                     continue;
                 }
                 double blockDist = pos.getSquaredDistance(entity.getPos());
@@ -870,9 +847,6 @@ public class AutoCrystalModule extends RotationModule {
      * @return <tt>true</tt> if the entity is an enemy
      */
     private boolean isValidTarget(Entity e) {
-        //if (e.getBoundingBox().intersects()) linus you do it. {
-        //  return true;
-        // }
         return e instanceof PlayerEntity && playersConfig.getValue()
                 || EntityUtil.isMonster(e) && monstersConfig.getValue()
                 || EntityUtil.isNeutral(e) && neutralsConfig.getValue()
@@ -966,7 +940,6 @@ public class AutoCrystalModule extends RotationModule {
         }
         return null;
     }
-
 
     // Debug info
     public void setStage(String crystalStage) {
