@@ -139,6 +139,7 @@ public class AutoCrystalModule extends RotationModule {
     private DamageData<BlockPos> placeCrystal;
     //
     private BlockPos renderPos;
+    private BlockPos debugPos;
     private BlockPos renderSpawnPos;
     //
     private Vec3d crystalRotation;
@@ -273,6 +274,13 @@ public class AutoCrystalModule extends RotationModule {
                 setStage("PLACING");
                 lastPlaceTimer.reset();
             }
+            if (!canUseCrystalOnBlock(placeCrystal.getDamageData()) && mc.world.getBlockState(placeCrystal.getDamageData()).getBlock() == Blocks.AIR) {
+                Direction direction = Managers.INTERACT.getInteractDirection(placeCrystal.getDamageData(), strictDirectionConfig.getValue());
+                Vec3d hitVec = new Vec3d(placeCrystal.getDamageData().toCenterPos().toVector3f()).add(0.5f, 0.5f, 0.5f);
+                debugPos = renderPos;
+                Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(hitVec, direction, placeCrystal.getDamageData(), false), id));
+                //continue;
+            }
         }
     }
 
@@ -294,6 +302,9 @@ public class AutoCrystalModule extends RotationModule {
             RenderManager.renderBox(event.getMatrices(), renderPos, Modules.COLORS.getRGB(80));
             RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
                     Modules.COLORS.getRGB(145));
+            RenderManager.renderBox(event.getMatrices(), debugPos, Modules.COLORS.getRGB(200));
+            RenderManager.renderBoundingBox(event.getMatrices(), debugPos, 5f,
+                    Modules.COLORS.getRGB(250));
             if (damageNametagConfig.getValue() && placeCrystal != null) {
                 DecimalFormat format = new DecimalFormat("0.0");
                 RenderManager.post(() -> {
@@ -665,18 +676,6 @@ public class AutoCrystalModule extends RotationModule {
         DamageData<BlockPos> data = null;
         for (BlockPos pos : placeBlocks) {
             if (placeRangeCheck(pos)) continue;
-            if (!canUseCrystalOnBlock(pos)) {
-                //place obsidian. only if there's no other place pos
-                if (placeBlocks.size() == 1) {
-                    if (mc.world.getBlockState(pos).getBlock() == Blocks.AIR) {
-                        Direction direction = Managers.INTERACT.getInteractDirection(pos, strictDirectionConfig.getValue());
-                        Vec3d hitVec = new Vec3d(pos.toCenterPos().toVector3f()).add(0.5f, 0.5f, 0.5f);
-                        Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(hitVec, direction, pos, false), id));
-                    }
-                }
-            }
-            if (!canUseCrystalOnBlock(pos)) continue;
-
             double selfDamage = EndCrystalUtil.getDamageTo(mc.player,
                     crystalDamageVec(pos), blockDestructionConfig.getValue());
             boolean unsafeToPlayer = playerDamageCheck(selfDamage);
