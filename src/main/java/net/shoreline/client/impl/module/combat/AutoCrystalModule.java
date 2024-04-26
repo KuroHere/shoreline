@@ -110,6 +110,8 @@ public class AutoCrystalModule extends RotationModule {
     Config<Float> placeWallRangeConfig = new NumberConfig<>("PlaceWallRange", "Range to place crystals through walls", 0.1f, 4.0f, 5.0f, () -> placeConfig.getValue());
     Config<Boolean> placeRangeEyeConfig = new BooleanConfig("PlaceRangeEye", "Calculates place ranges starting from the eye position of the player", false, () -> placeConfig.getValue());
     Config<Boolean> placeRangeCenterConfig = new BooleanConfig("PlaceRangeCenter", "Calculates place ranges to the center of the block", true, () -> placeConfig.getValue());
+    Config<Boolean> obiassist = new BooleanConfig("ObiAssist", "Places obsidian to place crystals", false);
+
     Config<Boolean> antiTotemConfig = new BooleanConfig("AntiTotem", "Predicts totems and places crystals to instantly double pop and kill the target", false, () -> placeConfig.getValue());
     Config<Swap> autoSwapConfig = new EnumConfig<>("Swap", "Swaps to an end crystal before placing if the player is not holding one", Swap.OFF, Swap.values(), () -> placeConfig.getValue());
     Config<Float> alternateSpeedConfig = new NumberConfig<>("AlternateSpeed", "Speed for alternative swapping crystals", 1.0f, 18.0f, 20.0f, () -> placeConfig.getValue() && autoSwapConfig.getValue() == Swap.SILENT_ALT);
@@ -274,12 +276,11 @@ public class AutoCrystalModule extends RotationModule {
                 setStage("PLACING");
                 lastPlaceTimer.reset();
             }
-            if (!canUseCrystalOnBlock(placeCrystal.getDamageData()) && mc.world.getBlockState(placeCrystal.getDamageData()).getBlock() == Blocks.AIR) {
+            if (!canUseCrystalOnBlock(placeCrystal.getDamageData()) && mc.world.getBlockState(placeCrystal.getDamageData()).getBlock() == Blocks.AIR && obiassist.getValue()) {
                 Direction direction = Managers.INTERACT.getInteractDirection(placeCrystal.getDamageData(), strictDirectionConfig.getValue());
                 Vec3d hitVec = new Vec3d(placeCrystal.getDamageData().toCenterPos().toVector3f()).add(0.5f, 0.5f, 0.5f);
                 debugPos = renderPos;
                 Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(hitVec, direction, placeCrystal.getDamageData(), false), id));
-                //continue;
             }
         }
     }
@@ -302,9 +303,11 @@ public class AutoCrystalModule extends RotationModule {
             RenderManager.renderBox(event.getMatrices(), renderPos, Modules.COLORS.getRGB(80));
             RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
                     Modules.COLORS.getRGB(145));
-            RenderManager.renderBox(event.getMatrices(), debugPos, Modules.COLORS.getRGB(200));
-            RenderManager.renderBoundingBox(event.getMatrices(), debugPos, 5f,
-                    Modules.COLORS.getRGB(250));
+            if (debugPos != null) {
+                RenderManager.renderBox(event.getMatrices(), debugPos, Modules.COLORS.getRGB(200));
+                RenderManager.renderBoundingBox(event.getMatrices(), debugPos, 5f,
+                        Modules.COLORS.getRGB(250));
+            }
             if (damageNametagConfig.getValue() && placeCrystal != null) {
                 DecimalFormat format = new DecimalFormat("0.0");
                 RenderManager.post(() -> {
@@ -556,6 +559,17 @@ public class AutoCrystalModule extends RotationModule {
         }
         return slot;
     }
+    private int getObsidianSlot() {
+        int slot = -1;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.getItem() == Items.OBSIDIAN) {
+                slot = i;
+                break;
+            }
+        }
+        return slot;
+    }
 
     private Direction getPlaceDirection(BlockPos blockPos) {
         int x = blockPos.getX();
@@ -676,6 +690,7 @@ public class AutoCrystalModule extends RotationModule {
         DamageData<BlockPos> data = null;
         for (BlockPos pos : placeBlocks) {
             if (placeRangeCheck(pos)) continue;
+            if (!canUseCrystalOnBlock(pos) && !obiassist.getValue()) continue;
             double selfDamage = EndCrystalUtil.getDamageTo(mc.player,
                     crystalDamageVec(pos), blockDestructionConfig.getValue());
             boolean unsafeToPlayer = playerDamageCheck(selfDamage);
@@ -686,6 +701,10 @@ public class AutoCrystalModule extends RotationModule {
                 if (entity == null || !entity.isAlive() || entity == mc.player
                         || !isValidTarget(entity)
                         || entity.getDisplayName() != null && Managers.SOCIAL.isFriend(entity.getDisplayName())) {
+                    continue;
+                }
+
+                if (entity.getBlockPos() != null && pos != null && entity.getBlockPos() == pos) {
                     continue;
                 }
                 double blockDist = pos.getSquaredDistance(entity.getPos());
@@ -835,6 +854,9 @@ public class AutoCrystalModule extends RotationModule {
      * @return <tt>true</tt> if the entity is an enemy
      */
     private boolean isValidTarget(Entity e) {
+        //if (e.getBoundingBox().intersects()) linus you do it. {
+        //  return true;
+        // }
         return e instanceof PlayerEntity && playersConfig.getValue()
                 || EntityUtil.isMonster(e) && monstersConfig.getValue()
                 || EntityUtil.isNeutral(e) && neutralsConfig.getValue()
@@ -928,6 +950,7 @@ public class AutoCrystalModule extends RotationModule {
         }
         return null;
     }
+
 
     // Debug info
     public void setStage(String crystalStage) {
