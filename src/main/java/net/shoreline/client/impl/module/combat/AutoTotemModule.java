@@ -80,7 +80,7 @@ public final class AutoTotemModule extends ToggleModule
         // Only take totems from the hotbar
         final int startSlot = HOTBAR_ITEMS.contains(item) ? 0 : 9;
         // Search through our inventory
-        for (int slot = startSlot; slot < 36; slot++)
+        for (int slot = 35; slot >= startSlot; slot--)
         {
             final ItemStack itemStack = mc.player.getInventory().getStack(slot);
             if (!itemStack.isEmpty() && itemStack.getItem().equals(item))

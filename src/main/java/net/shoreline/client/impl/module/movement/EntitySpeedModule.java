@@ -52,14 +52,14 @@ public class EntitySpeedModule extends ToggleModule {
         if (event.getStage() != EventStage.PRE) {
             return;
         }
-        if (mc.player.isRiding() && mc.player.getVehicle() != null) {
+        if (mc.player.isRiding() && mc.player.getControllingVehicle() != null) {
             double d = Math.cos(Math.toRadians(mc.player.getYaw() + 90.0f));
             double d2 = Math.sin(Math.toRadians(mc.player.getYaw() + 90.0f));
             BlockPos pos1 = BlockPos.ofFloored(mc.player.getX() + (2.0 * d),
                     mc.player.getY() - 1.0, mc.player.getZ() + (2.0 * d2));
             BlockPos pos2 = BlockPos.ofFloored(mc.player.getX() + (2.0 * d),
                     mc.player.getY() - 2.0, mc.player.getZ() + (2.0 * d2));
-            if (antiStuckConfig.getValue() && !mc.player.getVehicle().isOnGround()
+            if (antiStuckConfig.getValue() && !mc.player.getControllingVehicle().isOnGround()
                     && !mc.world.getBlockState(pos1).blocksMovement()
                     && !mc.world.getBlockState(pos2).blocksMovement()) {
                 entityJumpTimer.reset();
@@ -81,18 +81,18 @@ public class EntitySpeedModule extends ToggleModule {
                 entityJumpTimer.reset();
             }
             if (entityJumpTimer.passed(10000) || !antiStuckConfig.getValue()) {
-                if (!mc.player.getVehicle().isTouchingWater() || mc.player.input.jumping
+                if (!mc.player.getControllingVehicle().isTouchingWater() || mc.player.input.jumping
                         || !entityJumpTimer.passed(1000)) {
-                    if (mc.player.getVehicle().isOnGround()) {
-                        mc.player.getVehicle().setVelocity(mc.player.getVelocity().x,
+                    if (mc.player.getControllingVehicle().isOnGround()) {
+                        mc.player.getControllingVehicle().setVelocity(mc.player.getVelocity().x,
                                 0.4, mc.player.getVelocity().z);
                     }
-                    mc.player.getVehicle().setVelocity(mc.player.getVelocity().x,
+                    mc.player.getControllingVehicle().setVelocity(mc.player.getVelocity().x,
                             -0.4, mc.player.getVelocity().z);
                 }
                 if (strictConfig.getValue()) {
                     Managers.NETWORK.sendPacket(PlayerInteractEntityC2SPacket.interact(
-                            mc.player.getVehicle(), false, Hand.MAIN_HAND));
+                            mc.player.getControllingVehicle(), false, Hand.MAIN_HAND));
                 }
                 handleEntityMotion(speedConfig.getValue(), d, d2);
                 entityJumpTimer.reset();
@@ -103,7 +103,7 @@ public class EntitySpeedModule extends ToggleModule {
     @EventListener
     public void onPacketInbound(PacketEvent.Inbound event) {
         if (mc.player == null || !mc.player.isRiding() || mc.options.sneakKey.isPressed()
-                || mc.player.getVehicle() == null) {
+                || mc.player.getControllingVehicle() == null) {
             return;
         }
         if (strictConfig.getValue()) {
@@ -116,15 +116,15 @@ public class EntitySpeedModule extends ToggleModule {
     }
 
     private void handleEntityMotion(float entitySpeed, double d, double d2) {
-        Vec3d motion = mc.player.getVehicle().getVelocity();
+        Vec3d motion = mc.player.getControllingVehicle().getVelocity();
         //
         float forward = mc.player.input.movementForward;
         float strafe = mc.player.input.movementSideways;
         if (forward == 0 && strafe == 0) {
-            mc.player.getVehicle().setVelocity(0.0, motion.y, 0.0);
+            mc.player.getControllingVehicle().setVelocity(0.0, motion.y, 0.0);
             return;
         }
-        mc.player.getVehicle().setVelocity((forward * entitySpeed * d) + (strafe * entitySpeed * d2),
+        mc.player.getControllingVehicle().setVelocity((forward * entitySpeed * d) + (strafe * entitySpeed * d2),
                 motion.y, (forward * entitySpeed * d2) - (strafe * entitySpeed * d));
     }
 }
