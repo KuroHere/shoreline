@@ -181,6 +181,7 @@ public final class ScaffoldModule extends RotationModule
         // but what's the fun in a simple approach?
         // This is aids.
         // youre a retard gavin - linus
+        // kill yourself linus - gavin
 
         float yawOffset = 180;
         if (direction.equals(mc.player.getHorizontalFacing().getOpposite()))
