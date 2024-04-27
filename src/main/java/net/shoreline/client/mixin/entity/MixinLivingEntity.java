@@ -6,10 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
-import net.shoreline.client.impl.event.entity.ConsumeItemEvent;
-import net.shoreline.client.impl.event.entity.JumpRotationEvent;
-import net.shoreline.client.impl.event.entity.LevitationEvent;
-import net.shoreline.client.impl.event.entity.EntityDeathEvent;
+import net.shoreline.client.impl.event.entity.*;
 import net.shoreline.client.util.Globals;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -46,6 +43,8 @@ public abstract class MixinLivingEntity extends MixinEntity implements Globals {
 
     @Shadow
     public int deathTime;
+
+    @Shadow private int jumpingCooldown;
 
     @Inject(method = "jump", at = @At(value = "HEAD"), cancellable = true)
     private void hookJump$getYaw(CallbackInfo ci) {
@@ -96,5 +95,14 @@ public abstract class MixinLivingEntity extends MixinEntity implements Globals {
         }
         ConsumeItemEvent consumeItemEvent = new ConsumeItemEvent(activeItemStack);
         Shoreline.EVENT_HANDLER.dispatch(consumeItemEvent);
+    }
+
+    @Inject(method = "tickMovement", at = @At(value = "HEAD"), cancellable = true)
+    private void hookTickMovement(CallbackInfo ci) {
+        JumpDelayEvent jumpDelayEvent = new JumpDelayEvent();
+        Shoreline.EVENT_HANDLER.dispatch(jumpDelayEvent);
+        if (jumpDelayEvent.isCanceled()) {
+            jumpingCooldown = 0;
+        }
     }
 }

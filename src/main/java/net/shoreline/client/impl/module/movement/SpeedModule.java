@@ -73,8 +73,7 @@ public class SpeedModule extends ToggleModule {
     @Override
     public void onEnable() {
         prevTimer = Modules.TIMER.isEnabled();
-        if (timerConfig.getValue() && !prevTimer
-                && speedModeConfig.getValue() != Speed.GRIM_COLLIDE) {
+        if (timerConfig.getValue() && !prevTimer && isStrafe()) {
             Modules.TIMER.enable();
         }
     }
@@ -480,8 +479,7 @@ public class SpeedModule extends ToggleModule {
 
     @EventListener
     public void onConfigUpdate(ConfigUpdateEvent event) {
-        if (event.getConfig() == timerConfig && event.getStage() == EventStage.POST
-                && speedModeConfig.getValue() != Speed.GRIM_COLLIDE) {
+        if (event.getConfig() == timerConfig && event.getStage() == EventStage.POST && isStrafe()) {
             if (timerConfig.getValue()) {
                 prevTimer = Modules.TIMER.isEnabled();
                 if (!prevTimer) {
@@ -520,6 +518,10 @@ public class SpeedModule extends ToggleModule {
         speed = 0.0f;
         distance = 0.0;
         accel = false;
+    }
+
+    public boolean isStrafe() {
+        return speedModeConfig.getValue() != Speed.FIREWORK && speedModeConfig.getValue() != Speed.GRIM_COLLIDE && speedModeConfig.getValue() != Speed.VANILLA;
     }
 
     private enum Speed {
