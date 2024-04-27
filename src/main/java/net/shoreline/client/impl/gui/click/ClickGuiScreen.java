@@ -81,10 +81,9 @@ public class ClickGuiScreen extends Screen implements Globals {
                     button.setDimensions(button.getWidth() * scale,
                             button.getHeight() * scale);
                     for (ConfigButton<?> component : button.getConfigButtons()) {
-                        if (component instanceof BindButton bindButton && bindButton.isListening()) {
-                            if (!button.isOpen()) {
-                                bindButton.setListening(false);
-                            }
+                        if (component instanceof BindButton bindButton && bindButton.isListening() && !button.isOpen()) {
+                            bindButton.setListening(false);
+                            setCloseOnEscape(true);
                         }
 
                         component.setDimensions(component.getWidth() * scale,
