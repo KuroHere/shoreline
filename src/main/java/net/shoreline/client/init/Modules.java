@@ -222,7 +222,7 @@ public class Modules {
             PORTAL_GOD_MODE = (PortalGodModeModule) getRegisteredModule("portalgodmode-module");
             REACH = (ReachModule) getRegisteredModule("reach-module");
             ANTI_AIM = (AntiAimModule) getRegisteredModule("antiaim-module");
-            ANTI_BOOK_BAN = (AntiBookBanModule) getRegisteredModule("antibookban-module");
+            // ANTI_BOOK_BAN = (AntiBookBanModule) getRegisteredModule("antibookban-module");
             ANTI_SPAM = (AntiSpamModule) getRegisteredModule("antispam-module");
             AUTO_ACCEPT = (AutoAcceptModule) getRegisteredModule("autoaccept-module");
             AUTO_EAT = (AutoEatModule) getRegisteredModule("autoeat-module");
