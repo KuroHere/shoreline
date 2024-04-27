@@ -2,11 +2,13 @@ package net.shoreline.client.impl.gui.click;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.impl.gui.click.component.ScissorStack;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 import net.shoreline.client.impl.gui.click.impl.config.ModuleButton;
+import net.shoreline.client.impl.gui.click.impl.config.setting.BindButton;
 import net.shoreline.client.impl.gui.click.impl.config.setting.ConfigButton;
 import net.shoreline.client.impl.module.client.ClickGuiModule;
 import net.shoreline.client.util.Globals;
@@ -14,6 +16,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_R;
+import static org.lwjgl.glfw.GLFW.GLFW_MOD_CONTROL;
 
 /**
  * @author linus
@@ -36,6 +41,7 @@ public class ClickGuiScreen extends Screen implements Globals {
     //
     private CategoryFrame focus;
     //
+    private boolean closeOnEscape = true;
 
     /**
      *
@@ -75,6 +81,12 @@ public class ClickGuiScreen extends Screen implements Globals {
                     button.setDimensions(button.getWidth() * scale,
                             button.getHeight() * scale);
                     for (ConfigButton<?> component : button.getConfigButtons()) {
+                        if (component instanceof BindButton bindButton && bindButton.isListening()) {
+                            if (!button.isOpen()) {
+                                bindButton.setListening(false);
+                            }
+                        }
+
                         component.setDimensions(component.getWidth() * scale,
                                 component.getHeight() * scale);
                     }
@@ -153,6 +165,12 @@ public class ClickGuiScreen extends Screen implements Globals {
      */
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+
+        // TODO: hard reset GUI in case something fails
+        if (keyCode == GLFW_KEY_R && (modifiers & GLFW_MOD_CONTROL) != 0) {
+            // System.out.println("Hard reset");
+        }
+
         for (CategoryFrame frame : frames) {
             frame.keyPressed(keyCode, scanCode, modifiers);
         }
@@ -181,6 +199,11 @@ public class ClickGuiScreen extends Screen implements Globals {
         super.close();
     }
 
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return closeOnEscape;
+    }
+
     private boolean checkDragging() {
         for (CategoryFrame frame : frames) {
             if (frame.isDragging()) {
@@ -188,5 +211,9 @@ public class ClickGuiScreen extends Screen implements Globals {
             }
         }
         return true;
+    }
+
+    public void setCloseOnEscape(boolean closeOnEscape) {
+        this.closeOnEscape = closeOnEscape;
     }
 }

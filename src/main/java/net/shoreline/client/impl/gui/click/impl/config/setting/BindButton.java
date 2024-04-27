@@ -8,7 +8,9 @@ import net.shoreline.client.api.macro.Macro;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.gui.click.impl.config.CategoryFrame;
 import net.shoreline.client.impl.gui.click.impl.config.ModuleButton;
-import org.lwjgl.glfw.GLFW;
+import net.shoreline.client.impl.module.client.ClickGuiModule;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 /**
  * @author linus
@@ -16,7 +18,7 @@ import org.lwjgl.glfw.GLFW;
  */
 public class BindButton extends ConfigButton<Macro> {
     // Check for whether we are listening for an input
-    private boolean listen;
+    private boolean listening;
 
     /**
      * @param frame
@@ -39,10 +41,13 @@ public class BindButton extends ConfigButton<Macro> {
     @Override
     public void render(DrawContext context, float ix, float iy, float mouseX,
                        float mouseY, float delta) {
+        // If to allow the GUI to be exited by pressing ESC
+        ClickGuiModule.CLICK_GUI_SCREEN.setCloseOnEscape(!listening);
+
         x = ix;
         y = iy;
         final Macro macro = config.getValue();
-        String val = listen ? "..." : macro.getKeyName();
+        String val = listening ? "..." : macro.getKeyName();
         rect(context, 0x00000000);
         RenderManager.renderText(context, config.getName() + Formatting.GRAY
                 + " " + val, ix + 2.0f, iy + 4.0f, -1);
@@ -56,8 +61,11 @@ public class BindButton extends ConfigButton<Macro> {
     @Override
     public void mouseClicked(double mouseX, double mouseY, int button) {
         if (isWithin(mouseX, mouseY)) {
-            if (button == 0) {
-                listen = !listen;
+            if (button == GLFW_MOUSE_BUTTON_1) {
+                listening = !listening;
+            } else if (button == GLFW_MOUSE_BUTTON_2 && !listening) {
+                // Reset the bind
+                ((MacroConfig) config).setValue(GLFW_KEY_UNKNOWN);
             }
         }
     }
@@ -79,14 +87,22 @@ public class BindButton extends ConfigButton<Macro> {
      */
     @Override
     public void keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (listen) {
+        if (listening) {
             // unbind
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE || keyCode == GLFW.GLFW_KEY_BACKSPACE) {
-                ((MacroConfig) config).setValue(GLFW.GLFW_KEY_UNKNOWN);
+            if (keyCode == GLFW_KEY_ESCAPE || keyCode == GLFW_KEY_BACKSPACE) {
+                ((MacroConfig) config).setValue(GLFW_KEY_UNKNOWN);
             } else {
                 ((MacroConfig) config).setValue(keyCode);
             }
-            listen = false;
+            listening = false;
         }
+    }
+
+    public boolean isListening() {
+        return listening;
+    }
+
+    public void setListening(boolean listening) {
+        this.listening = listening;
     }
 }

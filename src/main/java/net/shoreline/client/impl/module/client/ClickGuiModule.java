@@ -5,7 +5,6 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.api.render.anim.Animation;
 import net.shoreline.client.api.render.anim.Easing;
 import net.shoreline.client.impl.gui.click.ClickGuiScreen;
-import net.shoreline.client.impl.gui.click2.ClientGuiSecondaryScreen;
 import net.shoreline.client.init.Modules;
 import org.lwjgl.glfw.GLFW;
 
@@ -24,9 +23,8 @@ public class ClickGuiModule extends ToggleModule {
 //    Config<Integer> brightness1Config = new NumberConfig<>("Brightness1", "The brightness of colors", 0, 50, 100);
 //    Config<Integer> alphaConfig = new NumberConfig<>("Alpha", "The alpha of colors", 0, 100, 100);
     //
-    private static ClickGuiScreen CLICK_GUI_SCREEN;
+    public static ClickGuiScreen CLICK_GUI_SCREEN;
     private final Animation openCloseAnimation = new Animation(Easing.CUBIC_IN_OUT, 300);
-    private static ClientGuiSecondaryScreen SECONDARY_CLICK_GUI_SCREEN;
 
     // TODO: Fix Gui scaling
     public float scaleConfig = 1.0f;
@@ -51,11 +49,6 @@ public class ClickGuiModule extends ToggleModule {
         }
         mc.setScreen(CLICK_GUI_SCREEN);
         openCloseAnimation.setState(true);
-
-//        if (SECONDARY_CLICK_GUI_SCREEN == null) {
-//            SECONDARY_CLICK_GUI_SCREEN = new ClientGuiSecondaryScreen(this);
-//        }
-//        mc.setScreen(SECONDARY_CLICK_GUI_SCREEN);
     }
 
     @Override
