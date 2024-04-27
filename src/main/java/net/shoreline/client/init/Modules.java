@@ -44,6 +44,7 @@ public class Modules {
     public static BowAimModule BOW_AIM;
     public static CriticalsModule CRITICALS;
     public static HoleFillModule HOLE_FILL;
+    public static NoHitDelayModule NO_HIT_DELAY;
     public static ReplenishModule REPLENISH;
     public static SelfBowModule SELF_BOW;
     public static SurroundModule SURROUND;
@@ -72,6 +73,7 @@ public class Modules {
     public static AutoReconnectModule AUTO_RECONNECT;
     public static AutoRespawnModule AUTO_RESPAWN;
     public static BeaconSelectorModule BEACON_SELECTOR;
+    // public static BetterChatModule BETTER_CHAT;
     public static ChatNotifierModule CHAT_NOTIFIER;
     public static ChestSwapModule CHEST_SWAP;
     public static FakePlayerModule FAKE_PLAYER;
@@ -95,6 +97,7 @@ public class Modules {
     public static JesusModule JESUS;
     public static LongJumpModule LONG_JUMP;
     public static NoFallModule NO_FALL;
+    public static NoJumpDelayModule NO_JUMP_DELAY;
     public static NoSlowModule NO_SLOW;
     public static ParkourModule PARKOUR;
     public static SpeedModule SPEED;
@@ -200,6 +203,7 @@ public class Modules {
             BOW_AIM = (BowAimModule) getRegisteredModule("bowaim-module");
             CRITICALS = (CriticalsModule) getRegisteredModule("criticals-module");
             HOLE_FILL = (HoleFillModule) getRegisteredModule("holefill-module");
+            NO_HIT_DELAY = (NoHitDelayModule) getRegisteredModule("nohitdelay-module");
             REPLENISH = (ReplenishModule) getRegisteredModule("replenish-module");
             SELF_BOW = (SelfBowModule) getRegisteredModule("selfbow-module");
             SURROUND = (SurroundModule) getRegisteredModule("surround-module");
@@ -226,6 +230,7 @@ public class Modules {
             AUTO_RECONNECT = (AutoReconnectModule) getRegisteredModule("autoreconnect-module");
             AUTO_RESPAWN = (AutoRespawnModule) getRegisteredModule("autorespawn-module");
             BEACON_SELECTOR = (BeaconSelectorModule) getRegisteredModule("beaconselector-module");
+            // BETTER_CHAT = (BetterChatModule) getRegisteredModule("betterchat-module");
             CHAT_NOTIFIER = (ChatNotifierModule) getRegisteredModule("chatnotifier-module");
             CHEST_SWAP = (ChestSwapModule) getRegisteredModule("chestswap-module");
             FAKE_PLAYER = (FakePlayerModule) getRegisteredModule("fakeplayer-module");
@@ -248,6 +253,7 @@ public class Modules {
             JESUS = (JesusModule) getRegisteredModule("jesus-module");
             LONG_JUMP = (LongJumpModule) getRegisteredModule("longjump-module");
             NO_FALL = (NoFallModule) getRegisteredModule("nofall-module");
+            NO_JUMP_DELAY = (NoJumpDelayModule) getRegisteredModule("nojumpdelay-module");
             NO_SLOW = (NoSlowModule) getRegisteredModule("noslow-module");
             PARKOUR = (ParkourModule) getRegisteredModule("parkour-module");
             SPEED = (SpeedModule) getRegisteredModule("speed-module");
