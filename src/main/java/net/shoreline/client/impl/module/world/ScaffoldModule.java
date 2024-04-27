@@ -34,6 +34,8 @@ public final class ScaffoldModule extends RotationModule
     Config<Boolean> safeWalkConfig = new BooleanConfig("SafeWalk", "If to prevent you from falling off edges", true);
     Config<BlockPicker> pickerConfig = new EnumConfig<>("BlockPicker", "How to pick a block from the hotbar", BlockPicker.NORMAL, BlockPicker.values());
 
+    private boolean sneakOverride;
+
     public ScaffoldModule()
     {
         super("Scaffold", "Rapidly places blocks under your feet", ModuleCategory.WORLD);
@@ -47,6 +49,11 @@ public final class ScaffoldModule extends RotationModule
         {
             Managers.INVENTORY.syncToClient();
         }
+        if (sneakOverride)
+        {
+            mc.options.sneakKey.setPressed(false);
+        }
+        sneakOverride = false;
     }
 
     @EventListener
@@ -123,8 +130,9 @@ public final class ScaffoldModule extends RotationModule
                 final double deltaX = velocity.getX() - movement.x;
                 final double deltaZ = velocity.getZ() - movement.y;
 
-                mc.options.sneakKey.setPressed(Math.abs(deltaX) > 9.0E-4
-                        || Math.abs(deltaZ) > 9.0E-4);
+                sneakOverride = Math.abs(deltaX) > 9.0E-4
+                        || Math.abs(deltaZ) > 9.0E-4;
+                mc.options.sneakKey.setPressed(sneakOverride);
                 return;
             }
 
