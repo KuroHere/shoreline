@@ -86,23 +86,29 @@ public class NCPManager implements Timer, Globals {
         final double ydiff = y - dy;
         final double zdiff = z - dz;
         final Set<Direction> dirs = new HashSet<>(6);
-        if (xdiff == 0) {
-            dirs.add(Direction.EAST);
-            dirs.add(Direction.WEST);
-        } else {
-            dirs.add(xdiff > 0 ? Direction.EAST : Direction.WEST);
-        }
-        if (zdiff == 0) {
-            dirs.add(Direction.SOUTH);
-            dirs.add(Direction.NORTH);
-        } else {
-            dirs.add(zdiff > 0 ? Direction.SOUTH : Direction.NORTH);
-        }
-        if (ydiff == 0) {
+        if (ydiff > 0.5) {
             dirs.add(Direction.UP);
+        } else if (ydiff < -0.5) {
             dirs.add(Direction.DOWN);
         } else {
-            dirs.add(ydiff > 0 ? Direction.UP : Direction.DOWN);
+            dirs.add(Direction.UP);
+            dirs.add(Direction.DOWN);
+        }
+        if (xdiff > 0.5) {
+            dirs.add(Direction.EAST);
+        } else if (xdiff < -0.5) {
+            dirs.add(Direction.WEST);
+        } else {
+            dirs.add(Direction.EAST);
+            dirs.add(Direction.WEST);
+        }
+        if (zdiff > 0.5) {
+            dirs.add(Direction.SOUTH);
+        } else if (zdiff < -0.5) {
+            dirs.add(Direction.NORTH);
+        } else {
+            dirs.add(Direction.SOUTH);
+            dirs.add(Direction.NORTH);
         }
         return dirs;
     }

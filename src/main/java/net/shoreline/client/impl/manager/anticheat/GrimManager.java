@@ -1,10 +1,12 @@
 package net.shoreline.client.impl.manager.anticheat;
 
+import net.minecraft.client.network.ServerInfo;
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 
 import java.util.Arrays;
@@ -69,5 +71,10 @@ public final class GrimManager implements Globals
     public boolean isGrim()
     {
         return isGrim;
+    }
+
+    public boolean isGrimCC() {
+        ServerInfo info = Managers.NETWORK.getInfo();
+        return info != null && info.address.equalsIgnoreCase("grim.crystalpvp.cc");
     }
 }

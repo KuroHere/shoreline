@@ -230,7 +230,7 @@ public class SurroundModule extends ObsidianPlacerModule {
      * @param pos The player position
      * @return
      */
-    private List<BlockPos> getAllInBox(Box box, BlockPos pos) {
+    public List<BlockPos> getAllInBox(Box box, BlockPos pos) {
         final List<BlockPos> intersections = new ArrayList<>();
         for (int x = (int) Math.floor(box.minX); x < Math.ceil(box.maxX); x++) {
             for (int z = (int) Math.floor(box.minZ); z < Math.ceil(box.maxZ); z++) {

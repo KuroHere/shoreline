@@ -32,10 +32,7 @@ public class PlayerArgumentType implements ArgumentType<String>, Globals {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         Collection<PlayerListEntry> playerListEntries = mc.player.networkHandler.getPlayerList();
         for (PlayerListEntry playerListEntry : playerListEntries) {
-            if (playerListEntry.getDisplayName() == null) {
-                continue;
-            }
-            builder.suggest(playerListEntry.getDisplayName().getString());
+            builder.suggest(playerListEntry.getProfile().getName());
         }
         return builder.buildFuture();
     }

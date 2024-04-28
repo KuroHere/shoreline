@@ -164,7 +164,6 @@ public class FreecamModule extends ToggleModule {
                 float speed = speedConfig.getValue() / 10f;
                 float fakeMovementForward = getMovementMultiplier(options.forwardKey.isPressed(), options.backKey.isPressed());
                 float fakeMovementSideways = getMovementMultiplier(options.leftKey.isPressed(), options.rightKey.isPressed());
-                ;
                 Vec2f dir = handleVanillaMotion(speed, fakeMovementForward, fakeMovementSideways);
 
                 float y = 0;

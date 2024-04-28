@@ -10,6 +10,7 @@ import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.BlockPos;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.NumberDisplay;
 import net.shoreline.client.api.config.setting.BooleanConfig;
@@ -25,6 +26,7 @@ import net.shoreline.client.impl.event.entity.player.PushFluidsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PushOutOfBlocksEvent;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorClientWorld;
 import net.shoreline.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
 import net.shoreline.client.mixin.accessor.AccessorExplosionS2CPacket;
@@ -134,8 +136,7 @@ public class VelocityModule extends ToggleModule {
         } else if (event.getPacket() instanceof EntityStatusS2CPacket packet
                 && packet.getStatus() == EntityStatuses.PULL_HOOKED_ENTITY && pushFishhookConfig.getValue()) {
             Entity entity = packet.getEntity(mc.world);
-            if (entity instanceof FishingBobberEntity hook
-                    && hook.getHookedEntity() == mc.player) {
+            if (entity instanceof FishingBobberEntity hook && hook.getHookedEntity() == mc.player) {
                 event.cancel();
             }
         }
@@ -144,7 +145,7 @@ public class VelocityModule extends ToggleModule {
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE && cancelVelocity) {
-            if (modeConfig.getValue() == VelocityMode.GRIM && Managers.NCP.passed(100)) {
+            if (modeConfig.getValue() == VelocityMode.GRIM && checkGrimPhased() && Managers.NCP.passed(100)) {
                 // Fixes issue with rotations
                 float yaw = mc.player.getYaw();
                 float pitch = mc.player.getPitch();
@@ -181,6 +182,10 @@ public class VelocityModule extends ToggleModule {
         if (pushLiquidsConfig.getValue()) {
             event.cancel();
         }
+    }
+
+    public boolean checkGrimPhased() {
+        return !Managers.GRIM.isGrimCC() || !Modules.PHASE.isGrimPhased();
     }
 
     private enum VelocityMode {
