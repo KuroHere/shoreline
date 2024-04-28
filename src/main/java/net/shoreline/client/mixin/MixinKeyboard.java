@@ -34,8 +34,8 @@ public class MixinKeyboard {
     @Inject(method = "onKey", at = @At(value = "HEAD"), cancellable = true)
     private void hookOnKey(long window, int key, int scancode, int action,
                            int modifiers, CallbackInfo ci) {
-        if (client.getWindow().getHandle() == window && action != 0) {
-            KeyboardInputEvent keyboardInputEvent = new KeyboardInputEvent(key);
+        if (client.getWindow().getHandle() == window) {
+            KeyboardInputEvent keyboardInputEvent = new KeyboardInputEvent(key, action);
             Shoreline.EVENT_HANDLER.dispatch(keyboardInputEvent);
             // prevent keyboard input
             if (keyboardInputEvent.isCanceled()) {

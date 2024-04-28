@@ -8,6 +8,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.render.RenderBuffers;
+import net.shoreline.client.impl.event.PerspectiveEvent;
 import net.shoreline.client.impl.event.render.RenderWorldBorderEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.util.Globals;
@@ -15,6 +16,7 @@ import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -66,6 +68,18 @@ public class MixinWorldRenderer implements Globals {
             ci.cancel();
         }
     }
+
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;isThirdPerson()Z"))
+    public boolean hookRender(Camera instance) {
+        PerspectiveEvent perspectiveEvent = new PerspectiveEvent(instance);
+        Shoreline.EVENT_HANDLER.dispatch(perspectiveEvent);
+
+        if (perspectiveEvent.isCanceled()) {
+            return true;
+        }
+        return instance.isThirdPerson();
+    }
+
 
 //    /**
 //     *

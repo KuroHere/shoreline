@@ -1,40 +1,53 @@
 package net.shoreline.client.impl.module.render;
 
-import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.client.input.Input;
 import net.minecraft.client.input.KeyboardInput;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.HungerManager;
+import net.minecraft.client.option.GameOptions;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
+import net.shoreline.client.api.config.setting.MacroConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
+import net.shoreline.client.api.event.EventStage;
 import net.shoreline.client.api.event.listener.EventListener;
+import net.shoreline.client.api.macro.Macro;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
-import net.shoreline.client.impl.event.ScreenOpenEvent;
-import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
+import net.shoreline.client.impl.event.MouseUpdateEvent;
+import net.shoreline.client.impl.event.TickEvent;
+import net.shoreline.client.impl.event.camera.CameraPositionEvent;
+import net.shoreline.client.impl.event.PerspectiveEvent;
+import net.shoreline.client.impl.event.camera.CameraRotationEvent;
+import net.shoreline.client.impl.event.camera.EntityCameraPositionEvent;
+import net.shoreline.client.impl.event.entity.EntityRotationVectorEvent;
+import net.shoreline.client.impl.event.keyboard.KeyboardInputEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
-
-import java.util.Collection;
-import java.util.Map;
+import net.shoreline.client.impl.event.render.BobViewEvent;
+import net.shoreline.client.impl.manager.player.rotation.Rotation;
+import net.shoreline.client.init.Managers;
+import net.shoreline.client.util.player.RayCastUtil;
+import net.shoreline.client.util.player.RotationUtil;
+import org.lwjgl.glfw.GLFW;
 
 /**
- * @author linus
+ * @author auto
  * @since 1.0
  */
 public class FreecamModule extends ToggleModule {
 
-    Config<Float> speedConfig = new NumberConfig<>("Speed", "The move speed of the camera", 0.1f, 1.0f, 2.0f);
+    Config<Float> speedConfig = new NumberConfig<>("Speed", "The move speed of the camera", 0.1f, 4.0f, 10.0f);
+    Config<Macro> controlConfig = new MacroConfig("ControlKey", "", new Macro(getId() + "-control", GLFW.GLFW_KEY_LEFT_ALT, () -> {}));
     Config<Interact> interactConfig = new EnumConfig<>("Interact", "The interaction type of the camera", Interact.CAMERA, Interact.values());
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate to the point of interaction", false);
-    private Input freecamInput;
-    private Entity playerEntity;
-    private FreecamEntity freecamEntity;
+
+    public Vec3d position, lastPosition;
+
+    private float yaw, pitch;
+
+    private boolean control = false;
 
     public FreecamModule() {
         super("Freecam", "Allows you to control the camera separately from the player",
@@ -42,22 +55,31 @@ public class FreecamModule extends ToggleModule {
     }
 
     @Override
-    public void onEnable() {
-        if (mc.player == null || mc.world == null) {
-            return;
-        }
-        freecamEntity = new FreecamEntity(mc.world);
-        Input input = new KeyboardInput(mc.options);
-        input.tick(false, 0.3f);
-        freecamInput = input;
-        playerEntity = mc.getCameraEntity();
-        mc.setCameraEntity(freecamEntity);
+    protected void onEnable() {
+        if (mc.player == null) return;
+        control = false;
+
+        position = mc.gameRenderer.getCamera().getPos();
+        lastPosition = position;
+
+        yaw = mc.player.getYaw();
+        pitch = mc.player.getPitch();
+
+        mc.player.input = new FreecamKeyboardInput(mc.options);
     }
 
     @Override
-    public void onDisable() {
-        freecamEntity = null;
-        mc.setCameraEntity(mc.player);
+    protected void onDisable() {
+        if (mc.player == null) return;
+        mc.player.input = new KeyboardInput(mc.options);
+    }
+
+    @EventListener
+    public void onKey(KeyboardInputEvent event) {
+        // Do nothing for GLFW_REPEAT
+        if (event.getAction() != GLFW.GLFW_REPEAT && event.getKeycode() == controlConfig.getValue().getKeycode()) {
+            control = event.getAction() == GLFW.GLFW_PRESS;
+        }
     }
 
     @EventListener
@@ -66,72 +88,151 @@ public class FreecamModule extends ToggleModule {
     }
 
     @EventListener
-    public void onScreenOpen(ScreenOpenEvent event) {
-        if (event.getScreen() instanceof DeathScreen) {
-            disable();
+    public void onCameraPosition(CameraPositionEvent event) {
+        event.setPosition(lastPosition.lerp(position, event.getTickDelta()));
+    }
+
+    @EventListener
+    public void onCameraRotation(CameraRotationEvent event) {
+        event.setRotation(new Vec2f(yaw, pitch));
+    }
+
+    @EventListener
+    public void onMouseUpdate(MouseUpdateEvent event) {
+        if (!control) {
+            event.cancel();
+            changeLookDirection(event.getCursorDeltaX(), event.getCursorDeltaY());
         }
     }
 
     @EventListener
-    public void onPlayerMove(PlayerMoveEvent event) {
-        freecamInput.tick(false, 0.3f);
-        freecamEntity.setHealth(mc.player.getHealth());
-        freecamEntity.setAbsorptionAmount(mc.player.getAbsorptionAmount());
-        freecamEntity.noClip = true;
+    public void onEntityCameraPosition(EntityCameraPositionEvent event) {
+        if (event.getEntity() != mc.player) return;
+        if (!control && interactConfig.getValue() == Interact.CAMERA) {
+            event.setPosition(position);
+        }
+    }
 
+    @EventListener
+    public void onEntityRotation(EntityRotationVectorEvent event) {
+        if (event.getEntity() != mc.player) return;
+        if (!control && interactConfig.getValue() == Interact.CAMERA) {
+            event.setPosition(RotationUtil.getRotationVector(pitch, yaw));
+        }
+    }
 
-        freecamEntity.resetPosition();
-        freecamEntity.getInventory().clone(mc.player.getInventory());
-        freecamEntity.hurtTime = mc.player.hurtTime;
-        freecamEntity.maxHurtTime = mc.player.maxHurtTime;
+    @EventListener
+    public void onTick(TickEvent event) {
+        if (event.getStage() != EventStage.PRE) return;
+        if (!control && rotateConfig.getValue()) {
+            float[] currentAngles = {yaw, pitch};
+            Vec3d eyePos = position;
+            HitResult result = RayCastUtil.rayCast(mc.interactionManager.getReachDistance(), eyePos, currentAngles);
+            if (result.getType() == HitResult.Type.BLOCK) {
+                float[] newAngles = RotationUtil.getRotationsTo(mc.player.getEyePos(), result.getPos());
+                Managers.ROTATION.setRotation(new Rotation(1, newAngles[0], newAngles[1]));
+            }
+        }
+    }
+
+    // Render the player in third person
+    @EventListener
+    public void onPerspective(PerspectiveEvent event) {
+        event.cancel();
+    }
+
+    @EventListener
+    public void onBob(BobViewEvent event) {
+        if (control) event.cancel();
+    }
+
+    public class FreecamKeyboardInput extends KeyboardInput {
+
+        private final GameOptions options;
+
+        public FreecamKeyboardInput(GameOptions options) {
+            super(options);
+            this.options = options;
+        }
+
+        @Override
+        public void tick(boolean slowDown, float slowDownFactor) {
+            if (control) {
+                super.tick(slowDown, slowDownFactor);
+            } else {
+                unset();
+                float speed = speedConfig.getValue() / 10f;
+                float fakeMovementForward = getMovementMultiplier(options.forwardKey.isPressed(), options.backKey.isPressed());
+                float fakeMovementSideways = getMovementMultiplier(options.leftKey.isPressed(), options.rightKey.isPressed());
+                ;
+                Vec2f dir = handleVanillaMotion(speed, fakeMovementForward, fakeMovementSideways);
+
+                float y = 0;
+                if (options.jumpKey.isPressed()) {
+                    y += speed;
+                } else if (options.sneakKey.isPressed()) {
+                    y -= speed;
+                }
+
+                lastPosition = position;
+                position = position.add(dir.x, y, dir.y);
+            }
+        }
+
+        private void unset() {
+            this.pressingForward = false;
+            this.pressingBack = false;
+            this.pressingLeft = false;
+            this.pressingRight = false;
+            this.movementForward = 0;
+            this.movementSideways = 0;
+            this.jumping = false;
+            this.sneaking = false;
+        }
+    }
+
+    /**
+     * @see KeyboardInput#getMovementMultiplier(boolean, boolean)
+     */
+    private float getMovementMultiplier(boolean positive, boolean negative) {
+        if (positive == negative) {
+            return 0.0F;
+        } else {
+            return positive ? 1.0F : -1.0F;
+        }
+    }
+
+    /**
+     * Modified version of {@link net.shoreline.client.impl.module.movement.SpeedModule#handleVanillaMotion(float)}
+     */
+    private Vec2f handleVanillaMotion(final float speed, float forward, float strafe) {
+        if (forward == 0.0f && strafe == 0.0f) {
+            return Vec2f.ZERO;
+        } else if (forward != 0.0f && strafe != 0.0f) {
+            forward *= (float) Math.sin(0.7853981633974483);
+            strafe *= (float) Math.cos(0.7853981633974483);
+        }
+        return new Vec2f((float) (forward * speed * -Math.sin(Math.toRadians(yaw)) + strafe * speed * Math.cos(Math.toRadians(yaw))),
+                (float) (forward * speed * Math.cos(Math.toRadians(yaw)) - strafe * speed * -Math.sin(Math.toRadians(yaw))));
+    }
+
+    /**
+     *
+     * @param cursorDeltaX
+     * @param cursorDeltaY
+     * @see net.minecraft.entity.Entity#changeLookDirection(double, double)
+     */
+    private void changeLookDirection(double cursorDeltaX, double cursorDeltaY) {
+        float f = (float)cursorDeltaY * 0.15F;
+        float g = (float)cursorDeltaX * 0.15F;
+        this.pitch += f;
+        this.yaw += g;
+        this.pitch = MathHelper.clamp(pitch, -90.0F, 90.0F);
     }
 
     public enum Interact {
+        PLAYER,
         CAMERA
     }
-
-    // TODO: FIX
-
-    public static class FreecamEntity extends ClientPlayerEntity {
-
-        public FreecamEntity(ClientWorld world) {
-            super(mc, world, mc.player.networkHandler, mc.player.getStatHandler(),
-                    mc.player.getRecipeBook(), false, false);
-        }
-
-        @Override
-        public boolean hasStatusEffect(StatusEffect statusEffect) {
-            return mc.player.hasStatusEffect(statusEffect);
-        }
-
-        @Override
-        public StatusEffectInstance getStatusEffect(StatusEffect statusEffect) {
-            return mc.player.getStatusEffect(statusEffect);
-        }
-
-        @Override
-        public Collection<StatusEffectInstance> getStatusEffects() {
-            return mc.player.getStatusEffects();
-        }
-
-        @Override
-        public Map<StatusEffect, StatusEffectInstance> getActiveStatusEffects() {
-            return mc.player.getActiveStatusEffects();
-        }
-
-        @Override
-        public float getAbsorptionAmount() {
-            return mc.player.getAbsorptionAmount();
-        }
-
-        @Override
-        public int getArmor() {
-            return mc.player.getArmor();
-        }
-
-        @Override
-        public HungerManager getHungerManager() {
-            return mc.player.getHungerManager();
-        }
-    }
 }
+

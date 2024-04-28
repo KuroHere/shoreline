@@ -17,11 +17,17 @@ public class KeyboardInputEvent extends Event {
     // The inputted keycode in GLFW format
     private final int keycode;
 
+    // The current key action
+    private final int action;
+
     /**
+     *
      * @param keycode
+     * @param action
      */
-    public KeyboardInputEvent(int keycode) {
+    public KeyboardInputEvent(int keycode, int action) {
         this.keycode = keycode;
+        this.action = action;
     }
 
     /**
@@ -32,5 +38,14 @@ public class KeyboardInputEvent extends Event {
      */
     public int getKeycode() {
         return keycode;
+    }
+
+    /**
+     *  Returns the action performed on the {@link org.lwjgl.glfw.GLFW} key
+     * @return The current action
+     * @see #action
+     */
+    public int getAction() {
+        return action;
     }
 }

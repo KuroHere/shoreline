@@ -48,7 +48,7 @@ public class MacroManager implements Globals {
             return;
         }
         for (Macro macro : macros) {
-            if (event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
+            if ((event.getAction() == GLFW.GLFW_PRESS) && event.getKeycode() != GLFW.GLFW_KEY_UNKNOWN
                     && event.getKeycode() == macro.getKeycode()) {
                 macro.runMacro();
             }
