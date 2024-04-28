@@ -42,7 +42,7 @@ public abstract class Config<T> implements Identifiable, Serializable<T> {
     // the user and saved to a local JSON file.
     protected T value;
     //
-    private T defaultValue;
+    private final T defaultValue;
     // Parent container. All configs should be added to a config container,
     // otherwise they will not be saved locally.
     private ConfigContainer container;
@@ -74,7 +74,7 @@ public abstract class Config<T> implements Identifiable, Serializable<T> {
     /**
      * Initializes the config with a default value. This constructor should
      * not be used to initialize a configuration, instead use the explicit
-     * definitions of the configs in {@link com.caspian.client.api.config.setting}.
+     * definitions of the configs in {@link net.shoreline.client.api.config.setting}.
      *
      * @param name    The unique config identifier
      * @param desc    The config description
@@ -98,6 +98,7 @@ public abstract class Config<T> implements Identifiable, Serializable<T> {
     public Config(String name, String desc) {
         this.name = name;
         this.desc = desc;
+        this.defaultValue = null;
     }
 
     /**
@@ -213,9 +214,6 @@ public abstract class Config<T> implements Identifiable, Serializable<T> {
         return true;
     }
 
-    /**
-     *
-     */
     public void resetValue() {
         setValue(defaultValue);
     }
