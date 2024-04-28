@@ -8,6 +8,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.event.GameEvent;
 import net.shoreline.client.Shoreline;
+import net.shoreline.client.impl.event.camera.EntityCameraPositionEvent;
 import net.shoreline.client.impl.event.entity.*;
 import net.shoreline.client.impl.event.entity.decoration.TeamColorEvent;
 import net.shoreline.client.impl.event.entity.player.PushEntityEvent;
@@ -185,5 +186,12 @@ public abstract class MixinEntity implements Globals {
     private void hookEmitGameEvent(GameEvent event, Entity entity, CallbackInfo ci) {
         EntityGameEvent entityGameEvent = new EntityGameEvent(event, entity);
         Shoreline.EVENT_HANDLER.dispatch(entityGameEvent);
+    }
+
+    @Inject(method = "getCameraPosVec", at = @At("RETURN"), cancellable = true)
+    public void hookCameraPositionVec(float tickDelta, CallbackInfoReturnable<Vec3d> cir) {
+        EntityCameraPositionEvent cameraPositionEvent = new EntityCameraPositionEvent(cir.getReturnValue(), (Entity) (Object) this, tickDelta);
+        Shoreline.EVENT_HANDLER.dispatch(cameraPositionEvent);
+        cir.setReturnValue(cameraPositionEvent.getPosition());
     }
 }
