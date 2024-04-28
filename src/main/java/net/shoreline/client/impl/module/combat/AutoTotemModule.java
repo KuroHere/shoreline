@@ -40,6 +40,7 @@ public final class AutoTotemModule extends ToggleModule
     BooleanConfig gappleConfig = new BooleanConfig("OffhandGapple", "If to equip a golden apple if holding down the item use button", true);
     BooleanConfig crappleConfig = new BooleanConfig("Crapple", "If to use a normal golden apple if Absorption is present", true);
     Config<Boolean> lethalConfig = new BooleanConfig("Lethal", "Calculate lethal damage sources", false);
+    private int lastSlot;
 
     public AutoTotemModule()
     {
@@ -50,6 +51,12 @@ public final class AutoTotemModule extends ToggleModule
     public String getModuleData()
     {
         return String.valueOf(Managers.INVENTORY.count(Items.TOTEM_OF_UNDYING));
+    }
+
+    @Override
+    public void onEnable()
+    {
+        lastSlot = -1;
     }
 
     @EventListener
@@ -69,6 +76,9 @@ public final class AutoTotemModule extends ToggleModule
         final int itemSlot = getSlotFor(itemToWield);
         if (itemSlot != -1)
         {
+            if (itemSlot < 9) {
+                lastSlot = itemSlot;
+            }
             // Do another quick swap (equivalent to hovering over an item & pressing F)
             mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
                     itemSlot < 9 ? itemSlot + 36 : itemSlot, 40, SlotActionType.SWAP, mc.player);
@@ -77,6 +87,11 @@ public final class AutoTotemModule extends ToggleModule
 
     private int getSlotFor(final Item item)
     {
+        if (lastSlot != -1 && item.equals(mc.player.getInventory().getStack(lastSlot).getItem())) {
+            int slot = lastSlot;
+            lastSlot = -1;
+            return slot;
+        }
         // Only take totems from the hotbar
         final int startSlot = HOTBAR_ITEMS.contains(item) ? 0 : 9;
         // Search through our inventory
@@ -100,9 +115,7 @@ public final class AutoTotemModule extends ToggleModule
             return Items.TOTEM_OF_UNDYING;
         }
         // Check fall damage
-        if (PlayerUtil.computeFallDamage(
-                mc.player.fallDistance,
-                1.0f) + 0.5f > mc.player.getHealth())
+        if (PlayerUtil.computeFallDamage(mc.player.fallDistance, 1.0f) + 0.5f > mc.player.getHealth())
         {
             return Items.TOTEM_OF_UNDYING;
         }
