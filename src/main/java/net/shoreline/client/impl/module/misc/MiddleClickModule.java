@@ -46,7 +46,7 @@ public class MiddleClickModule extends ToggleModule {
                 } else {
                     Managers.SOCIAL.addFriend(target.getDisplayName());
                 }
-            } else if (mc.targetedEntity == null) {
+            } else {
                 Item item = null;
                 if (mc.player.isFallFlying() && fireworkConfig.getValue()) {
                     item = Items.FIREWORK_ROCKET;
