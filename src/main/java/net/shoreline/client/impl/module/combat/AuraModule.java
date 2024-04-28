@@ -290,6 +290,11 @@ public class AuraModule extends RotationModule {
         } else {
             Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
         }
+
+        if (silentRotateConfig.getValue())
+        {
+            Managers.ROTATION.setRotationSilentSync(true);
+        }
         return true;
     }
 

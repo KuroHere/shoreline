@@ -199,6 +199,9 @@ public class AutoMineModule extends RotationModule {
             if (!remineConfig.getValue()) {
                 miningData = null;
             }
+            if (rotateConfig.getValue()) {
+                Managers.ROTATION.setRotationSilentSync(grimConfig.getValue());
+            }
         }
     }
 
