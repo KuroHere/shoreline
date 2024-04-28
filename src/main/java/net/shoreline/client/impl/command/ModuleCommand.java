@@ -45,6 +45,10 @@ public class ModuleCommand extends Command {
                             String value = StringArgumentType.getString(c, "value");
                             if (value.equalsIgnoreCase("list")) {
                                 return listItems(config, value);
+                            } else if (value.equalsIgnoreCase("reset")) {
+                                config.resetValue();
+                                ChatUtil.clientSendMessage("§7%s§f was reset to default value", config.getName());
+                                return 1;
                             }
                             return updateValue(config, value);
                         }).then(argument("item", ItemArgumentType.item())
@@ -59,6 +63,7 @@ public class ModuleCommand extends Command {
                                 })).executes(c -> {
                                     if (module instanceof ToggleModule m) { // Can use the module command to toggle
                                         m.toggle();
+                                        ChatUtil.clientSendMessage("%s is now %s", "§7" + m.getName() + "§f", m.isEnabled() ? "§senabled§f" : "§cdisabled§f");
                                     }
                                     return 1;
                                 });

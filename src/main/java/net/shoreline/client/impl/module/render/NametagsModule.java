@@ -73,6 +73,7 @@ public class NametagsModule extends ToggleModule {
 
         Vec3d interpolate = Interpolation.getRenderPosition(mc.getCameraEntity(), mc.getTickDelta());
         Camera camera = mc.gameRenderer.getCamera();
+        Vec3d pos = camera.getPos();
 
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity player) {
@@ -86,9 +87,9 @@ public class NametagsModule extends ToggleModule {
                 double rz = player.getZ() - pinterpolate.getZ();
                 int width = RenderManager.textWidth(info);
                 float hwidth = width / 2.0f;
-                double dx = (mc.player.getX() - interpolate.getX()) - rx;
-                double dy = (mc.player.getY() - interpolate.getY()) - ry;
-                double dz = (mc.player.getZ() - interpolate.getZ()) - rz;
+                double dx = (pos.getX() - interpolate.getX()) - rx;
+                double dy = (pos.getY() - interpolate.getY()) - ry;
+                double dz = (pos.getZ() - interpolate.getZ()) - rz;
                 double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
                 if (dist > 4096.0) {
                     continue;

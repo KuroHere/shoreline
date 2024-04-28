@@ -29,7 +29,7 @@ public class ResetCommand extends Command {
                 }
                 config.resetValue();
             }
-            ChatUtil.clientSendMessage("§7 " + module.getName() + " §f settings were reset to default values");
+            ChatUtil.clientSendMessage("§7" + module.getName() + "§f settings were reset to default values");
             return 1;
         })).executes(context -> {
             ChatUtil.error("Must provide module to reset!");
