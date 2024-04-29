@@ -2,8 +2,7 @@ package net.shoreline.client.init;
 
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.manager.ModuleManager;
-import net.shoreline.client.impl.manager.anticheat.GrimManager;
-import net.shoreline.client.impl.manager.anticheat.NCPManager;
+import net.shoreline.client.impl.manager.anticheat.AntiCheatManager;
 import net.shoreline.client.impl.manager.client.*;
 import net.shoreline.client.impl.manager.combat.TotemManager;
 import net.shoreline.client.impl.manager.combat.hole.HoleManager;
@@ -35,8 +34,8 @@ public class Managers {
     public static InventoryManager INVENTORY;
     public static PositionManager POSITION;
     public static RotationManager ROTATION;
-    public static NCPManager NCP;
-    public static GrimManager GRIM;
+    //public static NCPManager NCP;
+    public static AntiCheatManager ANTICHEAT;
     public static MovementManager MOVEMENT;
     public static HoleManager HOLE;
     public static TotemManager TOTEM;
@@ -66,8 +65,7 @@ public class Managers {
             INVENTORY = new InventoryManager();
             POSITION = new PositionManager();
             ROTATION = new RotationManager();
-            NCP = new NCPManager();
-            GRIM = new GrimManager();
+            ANTICHEAT = new AntiCheatManager();
             MOVEMENT = new MovementManager();
             HOLE = new HoleManager();
             TOTEM = new TotemManager();

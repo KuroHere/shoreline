@@ -21,6 +21,7 @@ import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.world.SneakBlocks;
 import org.apache.commons.lang3.mutable.MutableObject;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -241,7 +242,7 @@ public final class InteractionManager implements Globals
      */
     public Direction getInteractDirection(final BlockPos blockPos, final boolean strictDirection)
     {
-        Set<Direction> ncpDirections = Managers.NCP.getPlaceDirectionsNCP(mc.player.getEyePos(), blockPos.toCenterPos());
+        Set<Direction> ncpDirections = getPlaceDirectionsNCP(mc.player.getEyePos(), blockPos.toCenterPos());
         Direction interactDirection = null;
         for (final Direction direction : Direction.values())
         {
@@ -262,5 +263,69 @@ public final class InteractionManager implements Globals
             return null;
         }
         return interactDirection.getOpposite();
+    }
+
+    public Direction getPlaceDirectionNCP(BlockPos blockPos, boolean visible) {
+        Vec3d eyePos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
+        if (blockPos.getX() == eyePos.getX() && blockPos.getY() == eyePos.getY() && blockPos.getZ() == eyePos.getZ()) {
+            return Direction.DOWN;
+        } else {
+            Set<Direction> ncpDirections = getPlaceDirectionsNCP(eyePos, blockPos.toCenterPos());
+            for (Direction dir : ncpDirections) {
+                if (visible && !mc.world.isAir(blockPos.offset(dir))) {
+                    continue;
+                }
+                return dir;
+            }
+        }
+        return Direction.UP;
+    }
+
+    public Set<Direction> getPlaceDirectionsNCP(Vec3d eyePos, Vec3d blockPos)
+    {
+        return getPlaceDirectionsNCP(eyePos.x, eyePos.y, eyePos.z, blockPos.x, blockPos.y, blockPos.z);
+    }
+
+    /**
+     * @param x
+     * @param y
+     * @param z
+     * @param dx
+     * @param dy
+     * @param dz
+     * @return
+     */
+    public Set<Direction> getPlaceDirectionsNCP(final double x, final double y, final double z,
+                                                final double dx, final double dy, final double dz) {
+        // directly from NCP src
+        final double xdiff = x - dx;
+        final double ydiff = y - dy;
+        final double zdiff = z - dz;
+        final Set<Direction> dirs = new HashSet<>(6);
+        if (ydiff > 0.5) {
+            dirs.add(Direction.UP);
+        } else if (ydiff < -0.5) {
+            dirs.add(Direction.DOWN);
+        } else {
+            dirs.add(Direction.UP);
+            dirs.add(Direction.DOWN);
+        }
+        if (xdiff > 0.5) {
+            dirs.add(Direction.EAST);
+        } else if (xdiff < -0.5) {
+            dirs.add(Direction.WEST);
+        } else {
+            dirs.add(Direction.EAST);
+            dirs.add(Direction.WEST);
+        }
+        if (zdiff > 0.5) {
+            dirs.add(Direction.SOUTH);
+        } else if (zdiff < -0.5) {
+            dirs.add(Direction.NORTH);
+        } else {
+            dirs.add(Direction.SOUTH);
+            dirs.add(Direction.NORTH);
+        }
+        return dirs;
     }
 }
