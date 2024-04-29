@@ -327,7 +327,7 @@ public final class AutoTrapModule extends ObsidianPlacerModule
 
     private boolean isOutOfEyeRange(final BlockPos pos)
     {
-        return strictDirectionConfig.getValue() && pos.getY() > mc.player.getY() + mc.player.getStandingEyeHeight();
+        return strictDirectionConfig.getValue() && Managers.INTERACT.isInEyeRange(pos);
     }
 
     private boolean isEntityBlockingTrap(Entity entity)
