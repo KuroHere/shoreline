@@ -15,6 +15,7 @@ import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
+import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.player.MovementUtil;
@@ -34,6 +35,7 @@ public final class ScaffoldModule extends RotationModule
     Config<Boolean> safeWalkConfig = new BooleanConfig("SafeWalk", "If to prevent you from falling off edges", true);
     Config<BlockPicker> pickerConfig = new EnumConfig<>("BlockPicker", "How to pick a block from the hotbar", BlockPicker.NORMAL, BlockPicker.values());
 
+    private BlockData lastBlockData;
     private boolean sneakOverride;
 
     public ScaffoldModule()
@@ -54,6 +56,7 @@ public final class ScaffoldModule extends RotationModule
             mc.options.sneakKey.setPressed(false);
         }
         sneakOverride = false;
+        lastBlockData = null;
     }
 
     @EventListener
@@ -64,6 +67,7 @@ public final class ScaffoldModule extends RotationModule
         {
             return;
         }
+        lastBlockData = data;
 
         final int blockSlot = getBlockSlot();
         if (blockSlot == -1)
@@ -114,6 +118,12 @@ public final class ScaffoldModule extends RotationModule
                 }
             }
         }
+    }
+
+    @EventListener
+    public void onDisconnect(final DisconnectEvent event)
+    {
+        lastBlockData = null;
     }
 
     @EventListener
@@ -228,7 +238,7 @@ public final class ScaffoldModule extends RotationModule
             posY = (int) Math.round(mc.player.getY());
         }
 
-        final BlockPos pos = PlayerUtil.getRoundedBlockPos(mc.player.getX(), mc.player.getY(), mc.player.getZ()).down();
+        final BlockPos pos = PlayerUtil.getRoundedBlockPos(mc.player.getX(), posY, mc.player.getZ()).down();
 
         for (final Direction direction : Direction.values())
         {
