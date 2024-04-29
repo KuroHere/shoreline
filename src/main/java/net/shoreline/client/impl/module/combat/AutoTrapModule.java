@@ -34,8 +34,11 @@ import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.player.PlayerUtil;
+import net.shoreline.client.util.render.animation.TimeAnimation;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -54,8 +57,12 @@ public final class AutoTrapModule extends ObsidianPlacerModule
     Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The number of blocks to place per tick", 1, 2, 5);
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders block placements of the surround", false);
+    Config<Boolean> fade = new BooleanConfig("Fade", "Fades old renders out.", false);
+    Config<Integer> fadeTime = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000);
 
     //
+    private final Map<BlockPos, TimeAnimation> fadeBoxes = new HashMap<>();
+    private final Map<BlockPos, TimeAnimation> fadeLines = new HashMap<>();
     private List<BlockPos> surround = new ArrayList<>();
     private List<BlockPos> placements = new ArrayList<>();
     private int blocksPlaced;
@@ -394,13 +401,43 @@ public final class AutoTrapModule extends ObsidianPlacerModule
     {
         if (renderConfig.getValue())
         {
+            if (fade.getValue())
+            {
+                for (Map.Entry<BlockPos, TimeAnimation> set : fadeBoxes.entrySet())
+                {
+                    set.getValue().setState(false);
+                    set.getValue().setState(false);
+                    int alpha = (int) set.getValue().getCurrent();
+                    Color color = Modules.COLORS.getColor(alpha);
+                    RenderManager.renderBox(event.getMatrices(), set.getKey(), color.getRGB());
+                }
+
+                for (Map.Entry<BlockPos, TimeAnimation> set : fadeLines.entrySet())
+                {
+                    set.getValue().setState(false);
+                    int alpha = (int) set.getValue().getCurrent();
+                    Color color = Modules.COLORS.getColor(alpha);
+                    RenderManager.renderBoundingBox(event.getMatrices(), set.getKey(), 1.5f, color.getRGB());
+                }
+            }
+
             if (surround.isEmpty() || placements.isEmpty())
             {
                 return;
             }
             for (BlockPos pos : surround)
             {
-                RenderManager.renderBox(event.getMatrices(), pos, Modules.COLORS.getRGB(60));
+                if (!fade.getValue())
+                {
+                    RenderManager.renderBox(event.getMatrices(), pos, Modules.COLORS.getRGB(60));
+                }
+                else
+                {
+                    TimeAnimation boxAnimation = new TimeAnimation(true, 0, 60, fadeTime.getValue());
+                    TimeAnimation lineAnimation = new TimeAnimation(true, 0, 145, fadeTime.getValue());
+                    fadeBoxes.put(pos, boxAnimation);
+                    fadeLines.put(pos, lineAnimation);
+                }
             }
         }
     }
