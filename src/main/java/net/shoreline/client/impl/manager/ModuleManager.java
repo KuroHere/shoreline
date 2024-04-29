@@ -43,6 +43,7 @@ public class ModuleManager {
                 new AutoCrystalModule(),
                 new AutoLogModule(),
                 new AutoTotemModule(),
+                new AutoTrapModule(),
                 new AutoXPModule(),
                 // new BackTrackModule(),
                 new BlockLagModule(),
@@ -52,7 +53,7 @@ public class ModuleManager {
                 new NoHitDelayModule(),
                 new ReplenishModule(),
                 new SelfBowModule(),
-                // new SelfTrapModule(),
+                new SelfTrapModule(),
                 new SurroundModule(),
                 new TriggerModule(),
                 // Exploit

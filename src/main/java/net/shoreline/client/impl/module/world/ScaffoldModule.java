@@ -228,7 +228,7 @@ public final class ScaffoldModule extends RotationModule
             posY = (int) Math.round(mc.player.getY());
         }
 
-        final BlockPos pos = PlayerUtil.getRoundedBlockPos(posY).down();
+        final BlockPos pos = PlayerUtil.getRoundedBlockPos(mc.player.getX(), mc.player.getY(), mc.player.getZ()).down();
 
         for (final Direction direction : Direction.values())
         {

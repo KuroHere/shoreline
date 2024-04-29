@@ -104,13 +104,26 @@ public class SurroundModule extends ObsidianPlacerModule {
             disable();
             return;
         }
-        BlockPos pos = PlayerUtil.getRoundedBlockPos(mc.player.getY());
+        BlockPos pos = PlayerUtil.getRoundedBlockPos(mc.player.getX(), mc.player.getY(), mc.player.getZ());
         if (shiftDelay < shiftDelayConfig.getValue()) {
             shiftDelay++;
             return;
         }
+
+        // Don't calculate surround positions if no resistant block is in your hotbar
+        final int slot = getResistantBlockItem();
+        if (slot == -1)
+        {
+            return;
+        }
+
         surround = getSurroundPositions(pos);
-        placements = surround.stream().filter(p -> mc.world.isAir(p)).toList();
+        placements = surround.stream().filter(mc.world::isAir).toList();
+        // We should not be doing anything if we have nothing to place
+        if (placements.isEmpty())
+        {
+            return;
+        }
         final int shiftTicks = shiftTicksConfig.getValue();
         while (blocksPlaced < shiftTicks && !placements.isEmpty()) {
             if (blocksPlaced >= placements.size()) {
@@ -121,7 +134,7 @@ public class SurroundModule extends ObsidianPlacerModule {
             shiftDelay = 0;
             // All rotations for shift ticks must send extra packet
             // This may not work on all servers
-            attackPlace(targetPos);
+            attackPlace(targetPos, slot);
         }
     }
 
@@ -130,7 +143,17 @@ public class SurroundModule extends ObsidianPlacerModule {
         Managers.NETWORK.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
     }
 
-    private void attackPlace(BlockPos targetPos) {
+    private void attackPlace(BlockPos targetPos)
+    {
+        final int slot = getResistantBlockItem();
+        if (slot == -1)
+        {
+            return;
+        }
+        attackPlace(targetPos, slot);
+    }
+
+    private void attackPlace(BlockPos targetPos, int slot) {
         if (attackConfig.getValue()) {
             List<Entity> entities = mc.world.getOtherEntities(null, new Box(targetPos)).stream().filter(e -> e instanceof EndCrystalEntity).toList();
             for (Entity entity : entities) {
@@ -138,11 +161,6 @@ public class SurroundModule extends ObsidianPlacerModule {
             }
         }
 
-        final int slot = getResistantBlockItem();
-        if (slot == -1)
-        {
-            return;
-        }
         Managers.INTERACT.placeBlock(targetPos, slot, strictDirectionConfig.getValue(), false, (state, angles) ->
         {
             if (rotateConfig.getValue())

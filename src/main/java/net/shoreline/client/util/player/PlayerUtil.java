@@ -15,11 +15,11 @@ import net.shoreline.client.util.Globals;
  */
 public final class PlayerUtil implements Globals
 {
-    public static BlockPos getRoundedBlockPos(final double posY)
+    public static BlockPos getRoundedBlockPos(final double x, final double y, final double z)
     {
-        final int flooredX = MathHelper.floor(mc.player.getX());
-        final int flooredY = (int) Math.round(posY);
-        final int flooredZ = MathHelper.floor(mc.player.getZ());
+        final int flooredX = MathHelper.floor(x);
+        final int flooredY = (int) Math.round(y);
+        final int flooredZ = MathHelper.floor(z);
         return new BlockPos(flooredX, flooredY, flooredZ);
     }
 

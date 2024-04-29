@@ -38,6 +38,7 @@ public class Modules {
     public static AutoCrystalModule AUTO_CRYSTAL;
     public static AutoLogModule AUTO_LOG;
     public static AutoTotemModule AUTO_TOTEM;
+    public static AutoTrapModule AUTO_TRAP;
     public static AutoXPModule AUTO_XP;
     public static BackTrackModule BACK_TRACK;
     public static BlockLagModule BLOCK_LAG;
@@ -47,6 +48,7 @@ public class Modules {
     public static NoHitDelayModule NO_HIT_DELAY;
     public static ReplenishModule REPLENISH;
     public static SelfBowModule SELF_BOW;
+    public static SelfTrapModule SELF_TRAP;
     public static SurroundModule SURROUND;
     public static TriggerModule TRIGGER;
     // Exploit
@@ -197,6 +199,7 @@ public class Modules {
             AUTO_CRYSTAL = (AutoCrystalModule) getRegisteredModule("autocrystal-module");
             AUTO_LOG = (AutoLogModule) getRegisteredModule("autolog-module");
             AUTO_TOTEM = (AutoTotemModule) getRegisteredModule("autototem-module");
+            AUTO_TRAP = (AutoTrapModule) getRegisteredModule("autotrap-module");
             AUTO_XP = (AutoXPModule) getRegisteredModule("autoxp-module");
             // BACK_TRACK = (BackTrackModule) getRegisteredModule("backtrack-module");
             BLOCK_LAG = (BlockLagModule) getRegisteredModule("blocklag-module");
@@ -206,6 +209,7 @@ public class Modules {
             NO_HIT_DELAY = (NoHitDelayModule) getRegisteredModule("nohitdelay-module");
             REPLENISH = (ReplenishModule) getRegisteredModule("replenish-module");
             SELF_BOW = (SelfBowModule) getRegisteredModule("selfbow-module");
+            SELF_TRAP = (SelfTrapModule) getRegisteredModule("selftrap-module");
             SURROUND = (SurroundModule) getRegisteredModule("surround-module");
             TRIGGER = (TriggerModule) getRegisteredModule("trigger-module");
             ANTI_HUNGER = (AntiHungerModule) getRegisteredModule("antihunger-module");
