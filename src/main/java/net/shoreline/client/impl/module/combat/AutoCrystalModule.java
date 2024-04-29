@@ -26,6 +26,7 @@ import net.shoreline.client.api.config.NumberDisplay;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
+import net.shoreline.client.api.event.handler.EventBus;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
@@ -42,11 +43,14 @@ import net.shoreline.client.util.EvictingQueue;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
 import net.shoreline.client.util.player.RotationUtil;
+import net.shoreline.client.util.render.animation.TimeAnimation;
 import net.shoreline.client.util.world.EndCrystalUtil;
 import net.shoreline.client.util.world.EntityUtil;
 
+import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -131,6 +135,8 @@ public class AutoCrystalModule extends RotationModule {
     Config<Integer> extrapolateTicksConfig = new NumberConfig<>("ExtrapolationTicks", "Accounts for motion when calculating enemy positions, not fully accurate.", 0, 0, 10);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders the current placement", true);
     Config<Boolean> damageNametagConfig = new BooleanConfig("Render-Damage", "Renders the current expected damage of a place/attack", false, () -> renderConfig.getValue());
+    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out", false);
+    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Timer for the fade", 0, 250, 1000);
     Config<Boolean> breakDebugConfig = new BooleanConfig("Break-Debug", "Debugs break ms in data", false);
     //
     Config<Boolean> disableDeathConfig = new BooleanConfig("DisableOnDeath", "Disables during disconnect/death", false);
@@ -159,6 +165,10 @@ public class AutoCrystalModule extends RotationModule {
             Collections.synchronizedMap(new ConcurrentHashMap<>());
     private final Map<BlockPos, Long> placePackets =
             Collections.synchronizedMap(new ConcurrentHashMap<>());
+
+    //gonna make a better solution for this in the future.
+    private final Map<BlockPos, TimeAnimation> fadeBoxes = new HashMap<>();
+    private final Map<BlockPos, TimeAnimation> fadeLines = new HashMap<>();
     //
     private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -289,18 +299,68 @@ public class AutoCrystalModule extends RotationModule {
     }
 
     @EventListener
-    public void onRenderWorld(RenderWorldEvent event) {
-        if (renderPos != null && isHoldingCrystal() && renderConfig.getValue()) {
-            RenderManager.renderBox(event.getMatrices(), renderPos, Modules.COLORS.getRGB(80));
-            RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
-                    Modules.COLORS.getRGB(145));
-            if (damageNametagConfig.getValue() && placeCrystal != null) {
-                DecimalFormat format = new DecimalFormat("0.0");
-                RenderManager.post(() -> {
-                    RenderManager.renderSign(event.getMatrices(),
-                            format.format(placeCrystal.getDamage()), renderPos.toCenterPos());
-                });
+    public void onRenderWorld(RenderWorldEvent event)
+    {
+        if (renderConfig.getValue())
+        {
+            if (fadeConfig.getValue())
+            {
+                for (Map.Entry<BlockPos, TimeAnimation> set : fadeBoxes.entrySet())
+                {
+                    if (set.getKey() == renderPos)
+                    {
+                        continue;
+                    }
+
+                    set.getValue().setState(false);
+                    int alpha = (int) set.getValue().getCurrent();
+                    Color color = Modules.COLORS.getColor(alpha);
+                    RenderManager.renderBox(event.getMatrices(), set.getKey(), color.getRGB());
+                }
+
+                for (Map.Entry<BlockPos, TimeAnimation> set : fadeLines.entrySet())
+                {
+                    if (set.getKey() == renderPos)
+                    {
+                        continue;
+                    }
+
+                    set.getValue().setState(false);
+                    int alpha = (int) set.getValue().getCurrent();
+                    Color color = Modules.COLORS.getColor(alpha);
+                    RenderManager.renderBoundingBox(event.getMatrices(), set.getKey(), 1.5f, color.getRGB());
+                }
             }
+
+            if (renderPos != null && isHoldingCrystal())
+            {
+                if (!fadeConfig.getValue())
+                {
+                    RenderManager.renderBox(event.getMatrices(), renderPos, Modules.COLORS.getRGB(80));
+                    RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
+                            Modules.COLORS.getRGB(145));
+
+                    if (damageNametagConfig.getValue() && placeCrystal != null) {
+                        DecimalFormat format = new DecimalFormat("0.0");
+                        RenderManager.post(() -> {
+                            RenderManager.renderSign(event.getMatrices(),
+                                    format.format(placeCrystal.getDamage()), renderPos.toCenterPos());
+                        });
+                    }
+                }
+                else
+                {
+                    TimeAnimation boxAnimation = new TimeAnimation(true, 0, 80, fadeTimeConfig.getValue());
+                    TimeAnimation lineAnimation = new TimeAnimation(true, 0, 145, fadeTimeConfig.getValue());
+                    fadeBoxes.put(renderPos, boxAnimation);
+                    fadeLines.put(renderPos, lineAnimation);
+                }
+            }
+
+            fadeBoxes.entrySet().removeIf(e ->
+                    e.getValue().getFactor() == 0.0);
+            fadeLines.entrySet().removeIf(e ->
+                    e.getValue().getFactor() == 0.0);
         }
     }
 
