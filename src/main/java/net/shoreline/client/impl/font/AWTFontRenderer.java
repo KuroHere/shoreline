@@ -1,5 +1,6 @@
 package net.shoreline.client.impl.font;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.shoreline.client.api.font.FontRenderer;
 import net.shoreline.client.api.font.Glyph;
@@ -16,14 +17,14 @@ public final class AWTFontRenderer implements FontRenderer
 {
     private final Font font;
 
-    public AWTFontRenderer(final Font font)
+    public AWTFontRenderer(final Font font, float size)
     {
-        this.font = font;
+        this.font = font.deriveFont(size);
     }
 
     @Override
     public void draw(Matrix4f matrix4f, String text, double x, double y, int color, boolean shadow) {
-
+        char[] chars = text.toCharArray();
     }
 
     @Override
@@ -38,6 +39,7 @@ public final class AWTFontRenderer implements FontRenderer
 
     @Override
     public int drawGlyph(FontRenderer fontRenderer, char c, double x, double y, int color, boolean shadow) {
+        RenderSystem.setShaderTexture(0, identifier);
         return 0;
     }
 

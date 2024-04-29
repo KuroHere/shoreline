@@ -10,6 +10,7 @@ import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.BlockPos;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.NumberDisplay;
 import net.shoreline.client.api.config.setting.BooleanConfig;
@@ -25,11 +26,11 @@ import net.shoreline.client.impl.event.entity.player.PushFluidsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PushOutOfBlocksEvent;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorClientWorld;
 import net.shoreline.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
 import net.shoreline.client.mixin.accessor.AccessorExplosionS2CPacket;
-import net.shoreline.client.util.chat.ChatUtil;
-import net.shoreline.client.util.player.MovementUtil;
+import net.shoreline.client.util.math.position.PositionUtil;
 import net.shoreline.client.util.string.EnumFormatter;
 
 import java.text.DecimalFormat;
@@ -98,6 +99,9 @@ public class VelocityModule extends ToggleModule {
                             * (horizontalConfig.getValue() / 100.0f)));
                 }
                 case GRIM -> {
+                    if (!Managers.NCP.passed(100)) {
+                        return;
+                    }
                     event.cancel();
                     cancelVelocity = true;
                 }
@@ -117,6 +121,9 @@ public class VelocityModule extends ToggleModule {
                     }
                 }
                 case GRIM -> {
+                    if (!Managers.NCP.passed(100)) {
+                        return;
+                    }
                     event.cancel();
                     cancelVelocity = true;
                 }
@@ -138,8 +145,8 @@ public class VelocityModule extends ToggleModule {
 
     @EventListener
     public void onTick(TickEvent event) {
-        if (event.getStage() == EventStage.PRE && cancelVelocity && Managers.NCP.passed(100)) {
-            if (modeConfig.getValue() == VelocityMode.GRIM) {
+        if (event.getStage() == EventStage.PRE && cancelVelocity) {
+            if (modeConfig.getValue() == VelocityMode.GRIM && checkGrimPhased() && Managers.NCP.passed(100)) {
                 // Fixes issue with rotations
                 float yaw = mc.player.getYaw();
                 float pitch = mc.player.getPitch();
@@ -179,7 +186,16 @@ public class VelocityModule extends ToggleModule {
     }
 
     public boolean checkGrimPhased() {
-        return !Managers.GRIM.isGrimCC() || mc.world.isAir(mc.player.getBlockPos());
+        return !Managers.GRIM.isGrimCC() || !isGrimPhased();
+    }
+
+    public boolean isGrimPhased() {
+        for (BlockPos pos : PositionUtil.getAllInBox(mc.player.getBoundingBox(), mc.player.getBlockPos())) {
+            if (!mc.world.getBlockState(pos).isAir()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private enum VelocityMode {
