@@ -53,7 +53,6 @@ public final class AutoTrapModule extends ObsidianPlacerModule
     Config<Boolean> cityConfig = new BooleanConfig("City", "If to not replace \"city\" blocks when AutoCrystal is on", true);
     Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The number of blocks to place per tick", 1, 2, 5);
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
-    Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable", "Disables after placing the blocks", true);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders block placements of the surround", false);
 
     //
@@ -106,10 +105,6 @@ public final class AutoTrapModule extends ObsidianPlacerModule
 
         // Do we need this check?? Surround is always highest prio
         blocksPlaced = 0;
-        if (autoDisableConfig.getValue() && mc.player.getY() > prevY) {
-            disable();
-            return;
-        }
         BlockPos pos = PlayerUtil.getRoundedBlockPos(target.getX(), target.getY(), target.getZ());
         if (shiftDelay < shiftDelayConfig.getValue())
         {
