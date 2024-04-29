@@ -300,7 +300,6 @@ public final class AutoTrapModule extends ObsidianPlacerModule
                     break searchForSupport;
                 }
 
-                // TODO: Visibility checks once neighbor is placed on
                 for (final Direction direction : Direction.values())
                 {
                     final BlockPos neighbor = headBlockPos.offset(direction);
@@ -313,6 +312,15 @@ public final class AutoTrapModule extends ObsidianPlacerModule
                             neighbor, strictDirectionConfig.getValue());
                     if (neighboringDirection != null)
                     {
+                        // We need to assure that the head block would have a visible side to place on
+                        // with this getInteractionDirection result
+                        // TODO: more elegant way to do this? the code also doesnt look like it'd work, but for whatever reason it does
+                        if (strictDirectionConfig.getValue() && Managers.INTERACT.getPlaceDirectionsNCP(
+                                mc.player.getEyePos(), neighbor.toCenterPos()).contains(direction))
+                        {
+                            continue;
+                        }
+
                         blocks.add(neighbor);
                         blocks.add(headBlockPos);
                         break;
