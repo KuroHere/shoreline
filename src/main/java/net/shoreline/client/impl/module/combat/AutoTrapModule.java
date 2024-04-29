@@ -282,24 +282,33 @@ public final class AutoTrapModule extends ObsidianPlacerModule
                 -> -mc.player.squaredDistanceTo(blockPos.getX(), blockPos.getY(), blockPos.getZ())));
 
         // This should be the absolute LAST thing to do, since placing around is a higher priority
-        if (headConfig.getValue() && !trapBlocks.isEmpty())
+        final BlockPos headBlockPos = pos.up(2);
+        if (headConfig.getValue() && !trapBlocks.isEmpty() && mc.world.getBlockState(headBlockPos).isAir() && !isOutOfEyeRange(headBlockPos))
         {
-            final BlockPos blockPos = pos.up(2);
-            if (mc.world.getBlockState(blockPos).isAir())
+            searchForSupport:
             {
-                for (final BlockPos trapBlockPos : trapBlocks)
+                if (Modules.AIR_PLACE.isEnabled() && !strictDirectionConfig.getValue())
                 {
-                    final Direction direction = Managers.INTERACT.getInteractDirection(
-                            trapBlockPos, strictDirectionConfig.getValue());
-                    if (direction != null)
+                    blocks.add(headBlockPos);
+                    break searchForSupport;
+                }
+
+                // TODO: Visibility checks once neighbor is placed on
+                for (final Direction direction : Direction.values())
+                {
+                    final BlockPos neighbor = headBlockPos.offset(direction);
+                    if (entities.contains(neighbor.down()) || isOutOfEyeRange(neighbor))
                     {
-                        // Add the support block & the head block
-                        final BlockPos neighbor = trapBlockPos.offset(direction);
-                        if (!isOutOfEyeRange(neighbor) && !entities.contains(neighbor))
-                        {
-                            blocks.add(neighbor);
-                            blocks.add(blockPos);
-                        }
+                        continue;
+                    }
+
+                    final Direction neighboringDirection = Managers.INTERACT.getInteractDirection(
+                            neighbor, strictDirectionConfig.getValue());
+                    if (neighboringDirection != null)
+                    {
+                        blocks.add(neighbor);
+                        blocks.add(headBlockPos);
+                        break;
                     }
                 }
             }
