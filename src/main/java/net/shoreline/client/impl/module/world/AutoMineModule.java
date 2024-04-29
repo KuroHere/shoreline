@@ -23,7 +23,9 @@ import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Shoreline
@@ -86,12 +88,9 @@ public class AutoMineModule extends RotationModule {
             return;
         }
         if (autoConfig.getValue()) {
-            List<BlockPos> autoMines = getAutoMineTarget();
-            if (!autoMines.isEmpty()) {
-                BlockPos mineTarget = autoMines.get(0);
-                if (miningData == null || miningData.getState().isAir() || miningData.getDamage() >= 1.0f) {
-                    startMiningPos(mineTarget, Direction.UP);
-                }
+            BlockPos mineTarget = getAutoMineTarget();
+            if (mineTarget != null && (miningData == null || miningData.getState().isAir() || miningData.getDamage() >= 1.0f)) {
+                startMiningPos(mineTarget, Direction.UP);
             }
         }
         if (miningData != null) {
@@ -273,33 +272,48 @@ public class AutoMineModule extends RotationModule {
         }
     }
 
-    private List<BlockPos> getAutoMineTarget() {
-        List<BlockPos> mineTargets = new ArrayList<>();
-        for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || player.getDisplayName() != null && Managers.SOCIAL.isFriend(player.getDisplayName())) {
+    private Set<BlockPos> getPotentialBlockTargets(PlayerEntity player) {
+        Set<BlockPos> potentialTargets = new HashSet<>();
+        for (BlockPos pos : Modules.SURROUND.getAllInBox(player.getBoundingBox(), player.getBlockPos())) {
+            double dist1 = mc.player.getEyePos().distanceTo(pos.toCenterPos());
+            if (dist1 > rangeConfig.getValue()) {
                 continue;
             }
-            double dist = mc.player.distanceTo(player);
-            if (dist > enemyRangeConfig.getValue()) {
-                continue;
-            }
-            BlockPos pos = player.getBlockPos();
-            if (!mc.world.isAir(pos) && mc.player.getEyePos().distanceTo(pos.toCenterPos()) <= rangeConfig.getValue()) {
-                mineTargets.add(pos);
-            }
+            potentialTargets.add(pos);
             for (Direction direction : Direction.values()) {
                 if (!direction.getAxis().isHorizontal()) {
                     continue;
                 }
-                BlockPos minePos = pos.offset(direction);
-                BlockState state = mc.world.getBlockState(minePos);
-                if (state.isAir() || mc.player.getEyePos().distanceTo(minePos.toCenterPos()) > rangeConfig.getValue()) {
+                BlockPos feetPos = pos.offset(direction);
+                double dist2 = mc.player.getEyePos().distanceTo(feetPos.toCenterPos());
+                if (dist2 > rangeConfig.getValue()) {
                     continue;
                 }
-                mineTargets.add(minePos);
+                potentialTargets.add(feetPos);
             }
         }
-        return mineTargets;
+        return potentialTargets;
+    }
+
+    private BlockPos getAutoMineTarget() {
+        BlockPos pos1 = null;
+        double minDist = Float.MAX_VALUE;
+        for (PlayerEntity player : mc.world.getPlayers()) {
+            if (player == mc.player || Managers.SOCIAL.isFriend(player.getGameProfile().getName())) {
+                continue;
+            }
+            Set<BlockPos> mineTargets = getPotentialBlockTargets(player);
+            for (BlockPos pos : mineTargets) {
+                if (!mc.world.isAir(pos)) {
+                    double dist = mc.player.getEyePos().distanceTo(pos.toCenterPos());
+                    if (dist < minDist) {
+                        minDist = dist;
+                        pos1 = pos;
+                    }
+                }
+            }
+        }
+        return pos1;
     }
 
     public enum Swap {
