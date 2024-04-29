@@ -57,8 +57,8 @@ public final class AutoTrapModule extends ObsidianPlacerModule
     Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The number of blocks to place per tick", 1, 2, 5);
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders block placements of the surround", false);
-    Config<Boolean> fade = new BooleanConfig("Fade", "Fades old renders out.", false);
-    Config<Integer> fadeTime = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000);
+    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out.", false);
+    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000);
 
     //
     private final Map<BlockPos, TimeAnimation> fadeBoxes = new HashMap<>();
@@ -401,7 +401,7 @@ public final class AutoTrapModule extends ObsidianPlacerModule
     {
         if (renderConfig.getValue())
         {
-            if (fade.getValue())
+            if (fadeConfig.getValue())
             {
                 for (Map.Entry<BlockPos, TimeAnimation> set : fadeBoxes.entrySet())
                 {
@@ -427,14 +427,14 @@ public final class AutoTrapModule extends ObsidianPlacerModule
             }
             for (BlockPos pos : surround)
             {
-                if (!fade.getValue())
+                if (!fadeConfig.getValue())
                 {
                     RenderManager.renderBox(event.getMatrices(), pos, Modules.COLORS.getRGB(60));
                 }
                 else
                 {
-                    TimeAnimation boxAnimation = new TimeAnimation(true, 0, 60, fadeTime.getValue());
-                    TimeAnimation lineAnimation = new TimeAnimation(true, 0, 145, fadeTime.getValue());
+                    TimeAnimation boxAnimation = new TimeAnimation(true, 0, 60, fadeTimeConfig.getValue());
+                    TimeAnimation lineAnimation = new TimeAnimation(true, 0, 145, fadeTimeConfig.getValue());
                     fadeBoxes.put(pos, boxAnimation);
                     fadeLines.put(pos, lineAnimation);
                 }

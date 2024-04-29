@@ -135,8 +135,8 @@ public class AutoCrystalModule extends RotationModule {
     Config<Integer> extrapolateTicksConfig = new NumberConfig<>("ExtrapolationTicks", "Accounts for motion when calculating enemy positions, not fully accurate.", 0, 0, 10);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders the current placement", true);
     Config<Boolean> damageNametagConfig = new BooleanConfig("Render-Damage", "Renders the current expected damage of a place/attack", false, () -> renderConfig.getValue());
-    Config<Boolean> fade = new BooleanConfig("Fade", "Fades old renders out", false);
-    Config<Integer> fadeTime = new NumberConfig<>("Fade-Time", "Timer for the fade", 0, 250, 1000);
+    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out", false);
+    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Timer for the fade", 0, 250, 1000);
     Config<Boolean> breakDebugConfig = new BooleanConfig("Break-Debug", "Debugs break ms in data", false);
     //
     Config<Boolean> disableDeathConfig = new BooleanConfig("DisableOnDeath", "Disables during disconnect/death", false);
@@ -303,7 +303,7 @@ public class AutoCrystalModule extends RotationModule {
     {
         if (renderConfig.getValue())
         {
-            if (fade.getValue())
+            if (fadeConfig.getValue())
             {
                 for (Map.Entry<BlockPos, TimeAnimation> set : fadeBoxes.entrySet())
                 {
@@ -334,7 +334,7 @@ public class AutoCrystalModule extends RotationModule {
 
             if (renderPos != null && isHoldingCrystal())
             {
-                if (!fade.getValue())
+                if (!fadeConfig.getValue())
                 {
                     RenderManager.renderBox(event.getMatrices(), renderPos, Modules.COLORS.getRGB(80));
                     RenderManager.renderBoundingBox(event.getMatrices(), renderPos, 1.5f,
@@ -350,8 +350,8 @@ public class AutoCrystalModule extends RotationModule {
                 }
                 else
                 {
-                    TimeAnimation boxAnimation = new TimeAnimation(true, 0, 80, fadeTime.getValue());
-                    TimeAnimation lineAnimation = new TimeAnimation(true, 0, 145, fadeTime.getValue());
+                    TimeAnimation boxAnimation = new TimeAnimation(true, 0, 80, fadeTimeConfig.getValue());
+                    TimeAnimation lineAnimation = new TimeAnimation(true, 0, 145, fadeTimeConfig.getValue());
                     fadeBoxes.put(renderPos, boxAnimation);
                     fadeLines.put(renderPos, lineAnimation);
                 }
