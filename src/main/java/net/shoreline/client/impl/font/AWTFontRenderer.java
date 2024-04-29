@@ -39,7 +39,6 @@ public final class AWTFontRenderer implements FontRenderer
 
     @Override
     public int drawGlyph(FontRenderer fontRenderer, char c, double x, double y, int color, boolean shadow) {
-        RenderSystem.setShaderTexture(0, identifier);
         return 0;
     }
 
