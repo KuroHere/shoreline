@@ -31,6 +31,7 @@ import net.shoreline.client.impl.event.world.AddEntityEvent;
 import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.math.position.PositionUtil;
 import net.shoreline.client.util.player.PlayerUtil;
 
 import java.util.ArrayList;
@@ -199,7 +200,7 @@ public class SurroundModule extends ObsidianPlacerModule {
                     continue;
                 }
                 for (Entity entity : box) {
-                    entities.addAll(getAllInBox(entity.getBoundingBox(), pos));
+                    entities.addAll(PositionUtil.getAllInBox(entity.getBoundingBox(), pos));
                 }
             }
         }
@@ -229,6 +230,9 @@ public class SurroundModule extends ObsidianPlacerModule {
             }
         }
         for (BlockPos entityPos : entities) {
+            if (entityPos == pos) {
+                continue;
+            }
             blocks.add(entityPos.down());
         }
         Collections.reverse(blocks);
@@ -238,24 +242,6 @@ public class SurroundModule extends ObsidianPlacerModule {
     private boolean isEntityBlockingSurround(Entity entity) {
         return entity instanceof ItemEntity || entity instanceof ExperienceOrbEntity
                 || (entity instanceof EndCrystalEntity && attackConfig.getValue());
-    }
-
-    /**
-     * Returns a {@link List} of all the {@link BlockPos} positions in the
-     * given {@link Box} that match the player position level
-     *
-     * @param box
-     * @param pos The player position
-     * @return
-     */
-    public List<BlockPos> getAllInBox(Box box, BlockPos pos) {
-        final List<BlockPos> intersections = new ArrayList<>();
-        for (int x = (int) Math.floor(box.minX); x < Math.ceil(box.maxX); x++) {
-            for (int z = (int) Math.floor(box.minZ); z < Math.ceil(box.maxZ); z++) {
-                intersections.add(new BlockPos(x, pos.getY(), z));
-            }
-        }
-        return intersections;
     }
 
     @EventListener

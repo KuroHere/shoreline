@@ -30,6 +30,9 @@ import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorClientWorld;
 import net.shoreline.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
 import net.shoreline.client.mixin.accessor.AccessorExplosionS2CPacket;
+import net.shoreline.client.util.math.timer.CacheTimer;
+import net.shoreline.client.util.math.timer.Timer;
+import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.string.EnumFormatter;
 
 import java.text.DecimalFormat;
@@ -98,9 +101,6 @@ public class VelocityModule extends ToggleModule {
                             * (horizontalConfig.getValue() / 100.0f)));
                 }
                 case GRIM -> {
-                    if (!Managers.NCP.passed(100)) {
-                        return;
-                    }
                     event.cancel();
                     cancelVelocity = true;
                 }
@@ -120,9 +120,6 @@ public class VelocityModule extends ToggleModule {
                     }
                 }
                 case GRIM -> {
-                    if (!Managers.NCP.passed(100)) {
-                        return;
-                    }
                     event.cancel();
                     cancelVelocity = true;
                 }
@@ -145,7 +142,7 @@ public class VelocityModule extends ToggleModule {
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE && cancelVelocity) {
-            if (modeConfig.getValue() == VelocityMode.GRIM && checkGrimPhased() && Managers.NCP.passed(100)) {
+            if (modeConfig.getValue() == VelocityMode.GRIM && checkGrimPhased()) {
                 // Fixes issue with rotations
                 float yaw = mc.player.getYaw();
                 float pitch = mc.player.getPitch();
@@ -185,7 +182,7 @@ public class VelocityModule extends ToggleModule {
     }
 
     public boolean checkGrimPhased() {
-        return !Managers.GRIM.isGrimCC() || !Modules.PHASE.isGrimPhased();
+        return !Managers.GRIM.isGrimCC() || mc.world.isAir(mc.player.getBlockPos()) || MovementUtil.isMoving();
     }
 
     private enum VelocityMode {

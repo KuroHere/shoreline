@@ -20,11 +20,10 @@ import net.shoreline.client.impl.event.network.PlayerTickEvent;
 import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
+import net.shoreline.client.util.math.position.PositionUtil;
 import net.shoreline.client.util.player.RotationUtil;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -274,7 +273,7 @@ public class AutoMineModule extends RotationModule {
 
     private Set<BlockPos> getPotentialBlockTargets(PlayerEntity player) {
         Set<BlockPos> potentialTargets = new HashSet<>();
-        for (BlockPos pos : Modules.SURROUND.getAllInBox(player.getBoundingBox(), player.getBlockPos())) {
+        for (BlockPos pos : PositionUtil.getAllInBox(player.getBoundingBox(), player.getBlockPos())) {
             double dist1 = mc.player.getEyePos().distanceTo(pos.toCenterPos());
             if (dist1 > rangeConfig.getValue()) {
                 continue;
