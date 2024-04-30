@@ -14,10 +14,13 @@ import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
+import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
+import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.player.PlayerUtil;
 import net.shoreline.client.util.player.RayCastUtil;
@@ -67,13 +70,13 @@ public final class ScaffoldModule extends RotationModule
         {
             return;
         }
-        lastBlockData = data;
 
         final int blockSlot = getBlockSlot();
         if (blockSlot == -1)
         {
             return;
         }
+        lastBlockData = data;
 
         getRotationAnglesFor(data);
         if (grimConfig.getValue() && data.getHitResult() == null)
@@ -150,6 +153,16 @@ public final class ScaffoldModule extends RotationModule
             event.setZ(movement.y);
             event.cancel();
         }
+    }
+
+    @EventListener
+    public void onRenderWorld(RenderWorldEvent event) {
+        if (lastBlockData == null || lastBlockData.getHitResult() == null)
+        {
+            return;
+        }
+
+        RenderManager.renderBox(event.getMatrices(), lastBlockData.getPos().offset(lastBlockData.getSide()), Modules.COLORS.getRGB(80));
     }
 
     private int getBlockSlot()
