@@ -134,8 +134,8 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> extrapolateRangeConfig = new BooleanConfig("ExtrapolateRange", "Accounts for motion when calculating ranges", false);
     Config<Integer> extrapolateTicksConfig = new NumberConfig<>("ExtrapolationTicks", "Accounts for motion when calculating enemy positions, not fully accurate.", 0, 0, 10);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders the current placement", true);
-    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out", false, () -> renderConfig.getValue());
-    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Timer for the fade", 0, 250, 1000, () -> renderConfig.getValue() && fadeConfig.getValue());
+    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out", true, () -> renderConfig.getValue());
+    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Timer for the fade", 0, 250, 1000, () -> false);
     Config<Boolean> damageNametagConfig = new BooleanConfig("Render-Damage", "Renders the current expected damage of a place/attack", false, () -> renderConfig.getValue());
     Config<Boolean> breakDebugConfig = new BooleanConfig("Break-Debug", "Debugs break ms in data", false, () -> renderConfig.getValue());
     //

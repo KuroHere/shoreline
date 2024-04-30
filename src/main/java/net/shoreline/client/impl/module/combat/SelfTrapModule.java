@@ -56,8 +56,8 @@ public final class SelfTrapModule extends ObsidianPlacerModule
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable", "Disables after placing the blocks", true);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders where selftrap is placing blocks", false);
-    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out.", false, () -> renderConfig.getValue());
-    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000, () -> renderConfig.getValue() && fadeConfig.getValue());
+    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out.", true, () -> renderConfig.getValue());
+    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000, () -> false);
 
     private final Map<BlockPos, TimeAnimation> fadeBoxes = new HashMap<>();
     private final Map<BlockPos, TimeAnimation> fadeLines = new HashMap<>();
@@ -384,10 +384,11 @@ public final class SelfTrapModule extends ObsidianPlacerModule
                 if (!fadeConfig.getValue())
                 {
                     RenderManager.renderBox(event.getMatrices(), pos, Modules.COLORS.getRGB(80));
+                    RenderManager.renderBoundingBox(event.getMatrices(), pos, 1.5f, Modules.COLORS.getRGB(145));
                 }
                 else
                 {
-                    TimeAnimation boxAnimation = new TimeAnimation(true, 0, 60, fadeTimeConfig.getValue());
+                    TimeAnimation boxAnimation = new TimeAnimation(true, 0, 80, fadeTimeConfig.getValue());
                     TimeAnimation lineAnimation = new TimeAnimation(true, 0, 145, fadeTimeConfig.getValue());
                     fadeBoxes.put(pos, boxAnimation);
                     fadeLines.put(pos, lineAnimation);
