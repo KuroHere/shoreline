@@ -41,11 +41,11 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * @author linus
+ * @author linus, hockeyl8 & lolwut2
  * @since 1.0
  */
 public class SurroundModule extends ObsidianPlacerModule {
-    //
+
     Config<Float> placeRangeConfig = new NumberConfig<>("PlaceRange", "The placement range for surround", 0.0f, 4.0f, 5.0f);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates to block before placing", false);
     Config<Boolean> attackConfig = new BooleanConfig("Attack", "Attacks crystals in the way of surround", true);
@@ -55,23 +55,21 @@ public class SurroundModule extends ObsidianPlacerModule {
     Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The number of blocks to place per tick", 1, 2, 5);
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> jumpDisableConfig = new BooleanConfig("AutoDisable", "Disables after moving out of the hole", true);
-    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders block placements of the surround", false);
-    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out.", false);
-    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000);
+    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders where scaffold is placing blocks", false);
+    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out.", false, () -> renderConfig.getValue());
+    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000, () -> renderConfig.getValue() && fadeConfig.getValue());
 
-    //
     private final Map<BlockPos, TimeAnimation> fadeBoxes = new HashMap<>();
     private final Map<BlockPos, TimeAnimation> fadeLines = new HashMap<>();
+
     private List<BlockPos> surround = new ArrayList<>();
     private List<BlockPos> placements = new ArrayList<>();
+
     private int blocksPlaced;
     private int shiftDelay;
-    //
+
     private double prevY;
 
-    /**
-     *
-     */
     public SurroundModule() {
         super("Surround", "Surrounds feet with obsidian", ModuleCategory.COMBAT, 950);
     }
@@ -310,15 +308,15 @@ public class SurroundModule extends ObsidianPlacerModule {
                 }
             }
 
-            if (surround.isEmpty() || placements.isEmpty())
+            if (placements.isEmpty())
             {
                 return;
             }
-            for (BlockPos pos : surround)
+            for (BlockPos pos : placements)
             {
                 if (!fadeConfig.getValue())
                 {
-                    RenderManager.renderBox(event.getMatrices(), pos, Modules.COLORS.getRGB(60));
+                    RenderManager.renderBox(event.getMatrices(), pos, Modules.COLORS.getRGB(80));
                 }
                 else
                 {
@@ -330,5 +328,4 @@ public class SurroundModule extends ObsidianPlacerModule {
             }
         }
     }
-    // Burrow support???
 }
