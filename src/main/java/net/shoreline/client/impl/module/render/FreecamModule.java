@@ -40,6 +40,7 @@ public class FreecamModule extends ToggleModule {
 
     Config<Float> speedConfig = new NumberConfig<>("Speed", "The move speed of the camera", 0.1f, 4.0f, 10.0f);
     Config<Macro> controlConfig = new MacroConfig("ControlKey", "", new Macro(getId() + "-control", GLFW.GLFW_KEY_LEFT_ALT, () -> {}));
+    Config<Boolean> toggleControlConfig = new BooleanConfig("ToggleControl", "Allows toggling control key instead of holding", false);
     Config<Interact> interactConfig = new EnumConfig<>("Interact", "The interaction type of the camera", Interact.CAMERA, Interact.values());
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotate to the point of interaction", false);
 
@@ -78,7 +79,13 @@ public class FreecamModule extends ToggleModule {
     public void onKey(KeyboardInputEvent event) {
         // Do nothing for GLFW_REPEAT
         if (event.getAction() != GLFW.GLFW_REPEAT && event.getKeycode() == controlConfig.getValue().getKeycode()) {
-            control = event.getAction() == GLFW.GLFW_PRESS;
+            if (!toggleControlConfig.getValue()) {
+                control = event.getAction() == GLFW.GLFW_PRESS;
+            } else {
+                if (event.getAction() == GLFW.GLFW_PRESS) {
+                    control = !control;
+                }
+            }
         }
     }
 
@@ -89,7 +96,7 @@ public class FreecamModule extends ToggleModule {
 
     @EventListener
     public void onCameraPosition(CameraPositionEvent event) {
-        event.setPosition(lastPosition.lerp(position, event.getTickDelta()));
+        event.setPosition(control ? position : lastPosition.lerp(position, event.getTickDelta()));
     }
 
     @EventListener
