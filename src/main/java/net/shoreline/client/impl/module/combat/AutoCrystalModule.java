@@ -182,7 +182,7 @@ public class AutoCrystalModule extends RotationModule {
         if (breakDebugConfig.getValue()) {
             return String.format("%dms", getBreakMs());
         }
-        return "ARRAYLIST_INFO";
+        return super.getModuleData();
     }
 
     @Override

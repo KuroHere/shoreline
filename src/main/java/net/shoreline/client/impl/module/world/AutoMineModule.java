@@ -27,20 +27,19 @@ import java.util.Set;
 import static net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action.*;
 
 /**
- * @author xgraza
+ * @author xgraza, Shoreline
  * @since 1.0
  */
 public final class AutoMineModule extends ToggleModule
 {
-    Config<Float> breakRangeConfig = new NumberConfig<>("BreakRange", "How far to break blocks from", 1.0f, 4.5f, 6.0f);
+    Config<Boolean> multitaskConfig = new BooleanConfig("Multitask", "Allows mining while using items", true);
+    Config<Float> breakRangeConfig = new NumberConfig<>("Range", "How far to break blocks from", 1.0f, 4.5f, 6.0f);
     Config<Float> damageConfig = new NumberConfig<>("Damage", "The minimum amount of damage done to a block before attempting to break", 0.0f, 0.7f, 1.0f, NumberDisplay.PERCENT);
-    Config<Boolean> multitaskConfig = new BooleanConfig("Multitask", "Allows mining while using items", false);
-    Config<Boolean> instantRemineConfig = new BooleanConfig("InstantRemine", "If to instantly remine a block that was previously mined", true);
-    Config<Boolean> doubleMineConfig = new BooleanConfig("DoubleMine", "If to mine two blocks at once", false);
-    Config<Boolean> autoCityConfig = new BooleanConfig("AutoCity", "Automatically mines city blocks (including burrow)", false);
-    Config<Boolean> prioritizeConfig = new BooleanConfig("Prioritize", "If to override self broken blocks for auto city", true, autoCityConfig::getValue);
+    Config<Boolean> instantRemineConfig = new BooleanConfig("Instant", "Instantly remines a block that was previously mined", true);
+    // Config<Boolean> doubleMineConfig = new BooleanConfig("DoubleMine", "If to mine two blocks at once", false);
+    Config<Boolean> autoCityConfig = new BooleanConfig("Auto", "Automatically mines city blocks (including burrow)", false);
+    Config<Boolean> autoRemineConfig = new BooleanConfig("AutoRemine", "Automatically remines blocks that were previously mined", false, () -> autoCityConfig.getValue());
     Config<Boolean> grimConfig = new BooleanConfig("Grim", "trade secrets", false);
-    Config<Boolean> debugConfig = new BooleanConfig("Debug", "Debug in metadata", false);
 
     private BlockBreakData data;
     private long lastBreakTime;
@@ -56,23 +55,7 @@ public final class AutoMineModule extends ToggleModule
     {
         if (data != null)
         {
-            String percentMeta = String.format("%.1f", Math.min(data.getBlockDamage(), 1.0f) * 100.0f);;
-            if (!debugConfig.getValue())
-            {
-                return percentMeta;
-            }
-            if (isThrottling())
-            {
-                return "Throttle, (" + (280 - (System.currentTimeMillis() - lastBreakTime)) + ")";
-            }
-            else
-            {
-                if (manualOverride)
-                {
-                    percentMeta += ", ov";
-                }
-            }
-            return percentMeta;
+            return String.format("%.1f", Math.min(data.getBlockDamage(), 1.0f));
         }
         return super.getModuleData();
     }
@@ -92,35 +75,27 @@ public final class AutoMineModule extends ToggleModule
     @EventListener
     public void onPlayerTick(final PlayerTickEvent event)
     {
-        if (mc.player.isUsingItem() && !multitaskConfig.getValue())
-        {
-            return;
-        }
-        if (autoCityConfig.getValue() && !manualOverride)
+        if (autoCityConfig.getValue() && !manualOverride && (data == null || mc.world.isAir(data.getPos())))
         {
             final BlockPos cityBlockPos = getAutoMineTarget();
-            if (cityBlockPos != null && (data == null || !data.getPos().equals(cityBlockPos)))
+            if (cityBlockPos != null  && !isThrottling())
             {
                 // If we are re-mining, bypass throttle check below
-                if (data instanceof AutoBlockBreakData && data.isRemine())
+                if (data instanceof AutoBlockBreakData && data.isRemine() && !mc.world.isAir(data.getPos()) && autoRemineConfig.getValue())
                 {
                     attemptMine(data);
-                    return;
                 }
-                if (isThrottling())
+                else if (!mc.world.isAir(cityBlockPos))
                 {
-                    return;
+                    if (data != null && data.getBlockDamage() > 0.0f)
+                    {
+                        abortMining(data);
+                    }
+                    data = new AutoBlockBreakData(cityBlockPos,
+                            Direction.UP,
+                            Modules.AUTO_TOOL.getBestToolNoFallback(mc.world.getBlockState(cityBlockPos)));
+                    startMining(data);
                 }
-                if (data != null && data.getBlockDamage() > 0.0f)
-                {
-                    abortMining(data);
-                }
-                data = new AutoBlockBreakData(cityBlockPos,
-                        Direction.UP,
-                        Modules.AUTO_TOOL.getBestToolNoFallback(mc.world.getBlockState(cityBlockPos)));
-                startMining(data);
-                // Wait a player tick before attempting to city
-                return;
             }
         }
         if (data != null)
@@ -143,10 +118,18 @@ public final class AutoMineModule extends ToggleModule
                     data = null;
                     return;
                 }
-                data.resetDamage();
                 if (instantRemineConfig.getValue())
                 {
+                    if (data instanceof AutoBlockBreakData && !autoRemineConfig.getValue()) {
+                        data = null;
+                        return;
+                    }
                     data.setRemine(true);
+                    data.setDamage(1.0f);
+                }
+                else
+                {
+                    data.resetDamage();
                 }
                 return;
             }
@@ -154,6 +137,14 @@ public final class AutoMineModule extends ToggleModule
                     data.getState(), mc.world, data.getPos());
             if (data.damage(damageDelta) >= damageConfig.getValue() || data.isRemine())
             {
+                if (mc.world.isAir(data.getPos()))
+                {
+                    return;
+                }
+                if (mc.player.isUsingItem() && !multitaskConfig.getValue())
+                {
+                    return;
+                }
                 attemptMine(data);
             }
         }
@@ -176,15 +167,10 @@ public final class AutoMineModule extends ToggleModule
             }
             abortMining(data);
         }
-        if (autoCityConfig.getValue())
+        else if (autoCityConfig.getValue())
         {
-            // Do not let the user break another block
-            if (!prioritizeConfig.getValue())
-            {
-                return;
-            }
             // Only count as an override if AutoCity is doing something
-            if (data instanceof AutoBlockBreakData && !data.getState().isReplaceable())
+            if (data instanceof AutoBlockBreakData)
             {
                 abortMining(data);
                 manualOverride = true;
@@ -249,9 +235,7 @@ public final class AutoMineModule extends ToggleModule
         }
         Managers.NETWORK.sendSequencedPacket((sequence) -> new PlayerActionC2SPacket(
                 STOP_DESTROY_BLOCK, blockBreakData.getPos(), blockBreakData.getDirection(), sequence));
-        // Do it clientside cause fuck it
-        //mc.interactionManager.breakBlock(blockBreakData.getPos());
-        if (data.isRemine() && instantRemineConfig.getValue())
+        if (grimConfig.getValue())
         {
             Managers.NETWORK.sendSequencedPacket((sequence) -> new PlayerActionC2SPacket(
                     ABORT_DESTROY_BLOCK, blockBreakData.getPos().up(500),
@@ -292,7 +276,6 @@ public final class AutoMineModule extends ToggleModule
             {
                 continue;
             }
-            potentialTargets.add(pos);
             for (final Direction direction : Direction.values())
             {
                 if (!direction.getAxis().isHorizontal())
@@ -301,6 +284,10 @@ public final class AutoMineModule extends ToggleModule
                 }
                 final BlockPos feetPos = pos.offset(direction);
                 if (mc.player.getEyePos().distanceTo(feetPos.toCenterPos()) > breakRangeConfig.getValue())
+                {
+                    continue;
+                }
+                if (!autoRemineConfig.getValue() && mc.world.isAir(feetPos))
                 {
                     continue;
                 }
@@ -320,17 +307,17 @@ public final class AutoMineModule extends ToggleModule
             {
                 continue;
             }
+            if (!mc.world.isAir(player.getBlockPos())) {
+                return player.getBlockPos();
+            }
             final Set<BlockPos> mineTargets = getPotentialBlockTargets(player);
             for (final BlockPos pos : mineTargets)
             {
-                if (!mc.world.isAir(pos))
+                final double dist = mc.player.getEyePos().distanceTo(pos.toCenterPos());
+                if (dist < minDist)
                 {
-                    final double dist = mc.player.getEyePos().distanceTo(pos.toCenterPos());
-                    if (dist < minDist)
-                    {
-                        minDist = dist;
-                        targetBlockPos = pos;
-                    }
+                    minDist = dist;
+                    targetBlockPos = pos;
                 }
             }
         }
@@ -365,6 +352,10 @@ public final class AutoMineModule extends ToggleModule
         {
             blockDamage += dmg;
             return blockDamage;
+        }
+
+        public void setDamage(float dmg) {
+            blockDamage = dmg;
         }
 
         public void resetDamage()
