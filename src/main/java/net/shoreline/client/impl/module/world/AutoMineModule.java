@@ -12,7 +12,7 @@ import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
-import net.shoreline.client.api.module.ToggleModule;
+import net.shoreline.client.api.module.RotationModule;
 import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.network.AttackBlockEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
@@ -20,6 +20,7 @@ import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.math.position.PositionUtil;
+import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,16 +31,19 @@ import static net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action
  * @author xgraza, Shoreline
  * @since 1.0
  */
-public final class AutoMineModule extends ToggleModule
+public final class AutoMineModule extends RotationModule
 {
     Config<Boolean> multitaskConfig = new BooleanConfig("Multitask", "Allows mining while using items", true);
+    Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates before mining", false);
+    Config<Boolean> autoCityConfig = new BooleanConfig("Auto", "Automatically mines city blocks (including burrow)", false);
+    Config<Float> enemyRangeConfig = new NumberConfig<>("EnemyRange", "The range to mine enemies", 1.0f, 5.0f, 10.0f);
+    Config<Boolean> autoRemineConfig = new BooleanConfig("AutoRemine", "Automatically remines blocks that were previously mined", false, () -> autoCityConfig.getValue());
+    Config<Boolean> grimConfig = new BooleanConfig("Grim", "trade secrets", false);
+    Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Only mines on visible faces", false, () -> autoCityConfig.getValue());
     Config<Float> breakRangeConfig = new NumberConfig<>("Range", "How far to break blocks from", 1.0f, 4.5f, 6.0f);
     Config<Float> damageConfig = new NumberConfig<>("Damage", "The minimum amount of damage done to a block before attempting to break", 0.0f, 0.7f, 1.0f, NumberDisplay.PERCENT);
     Config<Boolean> instantRemineConfig = new BooleanConfig("Instant", "Instantly remines a block that was previously mined", true);
     // Config<Boolean> doubleMineConfig = new BooleanConfig("DoubleMine", "If to mine two blocks at once", false);
-    Config<Boolean> autoCityConfig = new BooleanConfig("Auto", "Automatically mines city blocks (including burrow)", false);
-    Config<Boolean> autoRemineConfig = new BooleanConfig("AutoRemine", "Automatically remines blocks that were previously mined", false, () -> autoCityConfig.getValue());
-    Config<Boolean> grimConfig = new BooleanConfig("Grim", "trade secrets", false);
 
     private BlockBreakData data;
     private long lastBreakTime;
@@ -91,8 +95,12 @@ public final class AutoMineModule extends ToggleModule
                     {
                         abortMining(data);
                     }
+                    if (rotateConfig.getValue()) {
+                        float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), cityBlockPos.toCenterPos());
+                        setRotation(rotations[0], rotations[1]);
+                    }
                     data = new AutoBlockBreakData(cityBlockPos,
-                            Direction.UP,
+                            strictDirectionConfig.getValue() ? Managers.INTERACT.getPlaceDirectionNCP(cityBlockPos, false) : Direction.UP,
                             Modules.AUTO_TOOL.getBestToolNoFallback(mc.world.getBlockState(cityBlockPos)));
                     startMining(data);
                 }
@@ -144,6 +152,10 @@ public final class AutoMineModule extends ToggleModule
                 if (mc.player.isUsingItem() && !multitaskConfig.getValue())
                 {
                     return;
+                }
+                if (rotateConfig.getValue()) {
+                    float[] rotations = RotationUtil.getRotationsTo(mc.player.getEyePos(), data.getPos().toCenterPos());
+                    setRotation(rotations[0], rotations[1]);
                 }
                 attemptMine(data);
             }
@@ -304,6 +316,10 @@ public final class AutoMineModule extends ToggleModule
         for (final PlayerEntity player : mc.world.getPlayers())
         {
             if (player.equals(mc.player) || Managers.SOCIAL.isFriend(player.getGameProfile().getName()))
+            {
+                continue;
+            }
+            if (mc.player.distanceTo(player) > enemyRangeConfig.getValue())
             {
                 continue;
             }
