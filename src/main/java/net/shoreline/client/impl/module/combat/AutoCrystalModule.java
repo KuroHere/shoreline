@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- * @author linus & hockeyl8
+ * @author linus
  * @since 1.0
  */
 public class AutoCrystalModule extends RotationModule {
