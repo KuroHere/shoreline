@@ -11,6 +11,7 @@ import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.config.setting.EnumConfig;
+import net.shoreline.client.api.config.setting.NumberConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
@@ -25,6 +26,11 @@ import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.player.PlayerUtil;
 import net.shoreline.client.util.player.RayCastUtil;
 import net.shoreline.client.util.player.RotationUtil;
+import net.shoreline.client.util.render.animation.TimeAnimation;
+
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author xgraza & hockeyl8
@@ -38,7 +44,11 @@ public final class ScaffoldModule extends RotationModule
     Config<Boolean> safeWalkConfig = new BooleanConfig("SafeWalk", "If to prevent you from falling off edges", true);
     Config<BlockPicker> pickerConfig = new EnumConfig<>("BlockPicker", "How to pick a block from the hotbar", BlockPicker.NORMAL, BlockPicker.values());
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders where scaffold is placing blocks", false);
+    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out", true, () -> renderConfig.getValue());
+    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Timer for the fade", 0, 250, 1000, () -> false);
 
+    private Map<BlockPos, TimeAnimation> fadeBoxes = new HashMap<>();
+    private Map<BlockPos, TimeAnimation> fadeLines = new HashMap<>();
     private BlockData lastBlockData;
     private boolean sneakOverride;
 
@@ -157,7 +167,27 @@ public final class ScaffoldModule extends RotationModule
     }
 
     @EventListener
-    public void onRenderWorld(RenderWorldEvent event) {
+    public void onRenderWorld(RenderWorldEvent event)
+    {
+        if (fadeConfig.getValue())
+        {
+            for (Map.Entry<BlockPos, TimeAnimation> set : fadeBoxes.entrySet())
+            {
+                set.getValue().setState(false);
+                int alpha = (int) set.getValue().getCurrent();
+                Color color = Modules.COLORS.getColor(alpha);
+                RenderManager.renderBox(event.getMatrices(), set.getKey(), color.getRGB());
+            }
+
+            for (Map.Entry<BlockPos, TimeAnimation> set : fadeLines.entrySet())
+            {
+                set.getValue().setState(false);
+                int alpha = (int) set.getValue().getCurrent();
+                Color color = Modules.COLORS.getColor(alpha);
+                RenderManager.renderBoundingBox(event.getMatrices(), set.getKey(), 1.5f, color.getRGB());
+            }
+        }
+
         if (lastBlockData == null || lastBlockData.getHitResult() == null)
         {
             return;
@@ -165,7 +195,17 @@ public final class ScaffoldModule extends RotationModule
 
         if (renderConfig.getValue())
         {
-            RenderManager.renderBox(event.getMatrices(), lastBlockData.getPos().offset(lastBlockData.getSide()), Modules.COLORS.getRGB(80));
+            if (!fadeConfig.getValue())
+            {
+                RenderManager.renderBox(event.getMatrices(), lastBlockData.getPos().offset(lastBlockData.getSide()), Modules.COLORS.getRGB(80));
+            }
+            else
+            {
+                TimeAnimation box = new TimeAnimation(true, 0, 80, fadeTimeConfig.getValue());
+                TimeAnimation line = new TimeAnimation(true, 0, 150, fadeTimeConfig.getValue());
+                fadeBoxes.put(lastBlockData.getPos().offset(lastBlockData.getSide()), box);
+                fadeLines.put(lastBlockData.getPos().offset(lastBlockData.getSide()), line);
+            }
         }
     }
 
