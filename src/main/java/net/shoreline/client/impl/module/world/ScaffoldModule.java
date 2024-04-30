@@ -14,17 +14,20 @@ import net.shoreline.client.api.config.setting.EnumConfig;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.RotationModule;
+import net.shoreline.client.api.render.RenderManager;
 import net.shoreline.client.impl.event.entity.player.PlayerMoveEvent;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PlayerTickEvent;
+import net.shoreline.client.impl.event.render.RenderWorldEvent;
 import net.shoreline.client.init.Managers;
+import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.player.MovementUtil;
 import net.shoreline.client.util.player.PlayerUtil;
 import net.shoreline.client.util.player.RayCastUtil;
 import net.shoreline.client.util.player.RotationUtil;
 
 /**
- * @author xgraza
+ * @author xgraza & hockeyl8
  * @since 04/13/24
  */
 public final class ScaffoldModule extends RotationModule
@@ -34,6 +37,7 @@ public final class ScaffoldModule extends RotationModule
     Config<Boolean> keepYConfig = new BooleanConfig("KeepY", "Keeps your Y level", false);
     Config<Boolean> safeWalkConfig = new BooleanConfig("SafeWalk", "If to prevent you from falling off edges", true);
     Config<BlockPicker> pickerConfig = new EnumConfig<>("BlockPicker", "How to pick a block from the hotbar", BlockPicker.NORMAL, BlockPicker.values());
+    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders where scaffold is placing blocks", false);
 
     private BlockData lastBlockData;
     private boolean sneakOverride;
@@ -149,6 +153,19 @@ public final class ScaffoldModule extends RotationModule
             event.setX(movement.x);
             event.setZ(movement.y);
             event.cancel();
+        }
+    }
+
+    @EventListener
+    public void onRenderWorld(RenderWorldEvent event) {
+        if (lastBlockData == null || lastBlockData.getHitResult() == null)
+        {
+            return;
+        }
+
+        if (renderConfig.getValue())
+        {
+            RenderManager.renderBox(event.getMatrices(), lastBlockData.getPos().offset(lastBlockData.getSide()), Modules.COLORS.getRGB(80));
         }
     }
 

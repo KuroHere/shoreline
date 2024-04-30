@@ -32,12 +32,15 @@ import net.shoreline.client.impl.event.world.RemoveEntityEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.player.PlayerUtil;
+import net.shoreline.client.util.render.animation.TimeAnimation;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * @author xgraza
+ * @author xgraza & hockeyl8
  * @since 1.0
  */
 public final class SelfTrapModule extends ObsidianPlacerModule
@@ -52,19 +55,24 @@ public final class SelfTrapModule extends ObsidianPlacerModule
     Config<Integer> shiftTicksConfig = new NumberConfig<>("ShiftTicks", "The number of blocks to place per tick", 1, 2, 5);
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable", "Disables after placing the blocks", true);
-    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders block placements of the surround", false);
+    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders where selftrap is placing blocks", false);
+    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out.", false, () -> renderConfig.getValue());
+    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000, () -> renderConfig.getValue() && fadeConfig.getValue());
 
-    //
+    private final Map<BlockPos, TimeAnimation> fadeBoxes = new HashMap<>();
+    private final Map<BlockPos, TimeAnimation> fadeLines = new HashMap<>();
+
     private List<BlockPos> surround = new ArrayList<>();
     private List<BlockPos> placements = new ArrayList<>();
+
     private int blocksPlaced;
     private int shiftDelay;
+
     private double prevY;
 
     public SelfTrapModule()
     {
-        super("SelfTrap", "Fully surrounds the player with blocks",
-                ModuleCategory.COMBAT);
+        super("SelfTrap", "Fully surrounds the player with blocks", ModuleCategory.COMBAT);
     }
 
     @Override
@@ -170,7 +178,7 @@ public final class SelfTrapModule extends ObsidianPlacerModule
                     }
                     else
                     {
-                        //Managers.ROTATION.setRotationSilentSync(true);
+                        Managers.ROTATION.setRotationSilentSync(true);
                     }
                 }
                 else if (state)
@@ -347,13 +355,43 @@ public final class SelfTrapModule extends ObsidianPlacerModule
     {
         if (renderConfig.getValue())
         {
-            if (surround.isEmpty() || placements.isEmpty())
+            if (fadeConfig.getValue())
+            {
+                for (Map.Entry<BlockPos, TimeAnimation> set : fadeBoxes.entrySet())
+                {
+                    set.getValue().setState(false);
+                    set.getValue().setState(false);
+                    int alpha = (int) set.getValue().getCurrent();
+                    Color color = Modules.COLORS.getColor(alpha);
+                    RenderManager.renderBox(event.getMatrices(), set.getKey(), color.getRGB());
+                }
+
+                for (Map.Entry<BlockPos, TimeAnimation> set : fadeLines.entrySet())
+                {
+                    set.getValue().setState(false);
+                    int alpha = (int) set.getValue().getCurrent();
+                    Color color = Modules.COLORS.getColor(alpha);
+                    RenderManager.renderBoundingBox(event.getMatrices(), set.getKey(), 1.5f, color.getRGB());
+                }
+            }
+
+            if (placements.isEmpty())
             {
                 return;
             }
-            for (BlockPos pos : surround)
+            for (BlockPos pos : placements)
             {
-                RenderManager.renderBox(event.getMatrices(), pos, Modules.COLORS.getRGB(60));
+                if (!fadeConfig.getValue())
+                {
+                    RenderManager.renderBox(event.getMatrices(), pos, Modules.COLORS.getRGB(80));
+                }
+                else
+                {
+                    TimeAnimation boxAnimation = new TimeAnimation(true, 0, 60, fadeTimeConfig.getValue());
+                    TimeAnimation lineAnimation = new TimeAnimation(true, 0, 145, fadeTimeConfig.getValue());
+                    fadeBoxes.put(pos, boxAnimation);
+                    fadeLines.put(pos, lineAnimation);
+                }
             }
         }
     }
