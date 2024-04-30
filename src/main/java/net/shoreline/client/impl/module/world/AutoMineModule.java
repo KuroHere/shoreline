@@ -243,11 +243,6 @@ public final class AutoMineModule extends ToggleModule
 
     private void attemptMine(final BlockBreakData blockBreakData)
     {
-        // We should not affect instant re-mine by the Grim delay
-        if (!blockBreakData.isRemine())
-        {
-            lastBreakTime = System.currentTimeMillis();
-        }
         if (blockBreakData.getSlot() != -1)
         {
             Managers.INVENTORY.setSlot(blockBreakData.getSlot());
