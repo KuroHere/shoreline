@@ -27,7 +27,7 @@ import net.shoreline.client.util.player.RayCastUtil;
 import net.shoreline.client.util.player.RotationUtil;
 
 /**
- * @author xgraza
+ * @author xgraza & hockeyl8
  * @since 04/13/24
  */
 public final class ScaffoldModule extends RotationModule
@@ -37,6 +37,7 @@ public final class ScaffoldModule extends RotationModule
     Config<Boolean> keepYConfig = new BooleanConfig("KeepY", "Keeps your Y level", false);
     Config<Boolean> safeWalkConfig = new BooleanConfig("SafeWalk", "If to prevent you from falling off edges", true);
     Config<BlockPicker> pickerConfig = new EnumConfig<>("BlockPicker", "How to pick a block from the hotbar", BlockPicker.NORMAL, BlockPicker.values());
+    Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders where scaffold is placing blocks", false);
 
     private BlockData lastBlockData;
     private boolean sneakOverride;
@@ -70,13 +71,13 @@ public final class ScaffoldModule extends RotationModule
         {
             return;
         }
+        lastBlockData = data;
 
         final int blockSlot = getBlockSlot();
         if (blockSlot == -1)
         {
             return;
         }
-        lastBlockData = data;
 
         getRotationAnglesFor(data);
         if (grimConfig.getValue() && data.getHitResult() == null)
@@ -162,7 +163,10 @@ public final class ScaffoldModule extends RotationModule
             return;
         }
 
-        RenderManager.renderBox(event.getMatrices(), lastBlockData.getPos().offset(lastBlockData.getSide()), Modules.COLORS.getRGB(80));
+        if (renderConfig.getValue())
+        {
+            RenderManager.renderBox(event.getMatrices(), lastBlockData.getPos().offset(lastBlockData.getSide()), Modules.COLORS.getRGB(80));
+        }
     }
 
     private int getBlockSlot()
