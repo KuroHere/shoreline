@@ -58,7 +58,7 @@ public final class AutoTrapModule extends ObsidianPlacerModule
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders where autotrap is placing blocks", false);
     Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out.", true, () -> renderConfig.getValue());
-    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000, () -> renderConfig.getValue() && fadeConfig.getValue());
+    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000, () -> false);
 
     private final Map<BlockPos, TimeAnimation> fadeBoxes = new HashMap<>();
     private final Map<BlockPos, TimeAnimation> fadeLines = new HashMap<>();

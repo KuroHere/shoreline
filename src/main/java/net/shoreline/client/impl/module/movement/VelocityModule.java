@@ -86,9 +86,7 @@ public class VelocityModule extends ToggleModule {
                     ((AccessorEntityVelocityUpdateS2CPacket) packet).setVelocityZ((int) (packet.getVelocityZ()
                             * (horizontalConfig.getValue() / 100.0f)));
                 }
-                case GRIM -> {
-                    event.cancel();
-                }
+                case GRIM -> event.cancel();
             }
         } else if (event.getPacket() instanceof ExplosionS2CPacket packet && explosionConfig.getValue()) {
             switch (modeConfig.getValue()) {
@@ -104,9 +102,7 @@ public class VelocityModule extends ToggleModule {
                                 * (horizontalConfig.getValue() / 100.0f));
                     }
                 }
-                case GRIM -> {
-                    event.cancel();
-                }
+                case GRIM -> event.cancel();
             }
             if (event.isCanceled()) {
                 // Dumb fix bc canceling explosion velocity removes explosion handling in 1.19
@@ -125,8 +121,8 @@ public class VelocityModule extends ToggleModule {
 
     @EventListener
     public void onTick(TickEvent event) {
-        if (event.getStage() == EventStage.PRE && modeConfig.getValue().equals(VelocityMode.GRIM)) {
-            if (modeConfig.getValue() == VelocityMode.GRIM && checkGrimPhased() && Managers.ANTICHEAT.hasPassed(100)) {
+        if (event.getStage() == EventStage.PRE && modeConfig.getValue() == VelocityMode.GRIM) {
+            if (checkGrimPhased() && Managers.ANTICHEAT.hasPassed(100)) {
                 // Fixes issue with rotations
                 float yaw = mc.player.getYaw();
                 float pitch = mc.player.getPitch();
@@ -140,7 +136,6 @@ public class VelocityModule extends ToggleModule {
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
                         mc.player.getBlockPos(), mc.player.getHorizontalFacing().getOpposite()));
             }
-
         }
     }
 

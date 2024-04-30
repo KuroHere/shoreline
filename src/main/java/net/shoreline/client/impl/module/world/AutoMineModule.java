@@ -23,6 +23,7 @@ import net.shoreline.client.util.math.position.PositionUtil;
 import net.shoreline.client.util.player.RotationUtil;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action.*;
@@ -35,10 +36,10 @@ public final class AutoMineModule extends RotationModule
 {
     Config<Boolean> multitaskConfig = new BooleanConfig("Multitask", "Allows mining while using items", true);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates before mining", false);
-    Config<Boolean> autoCityConfig = new BooleanConfig("Auto", "Automatically mines city blocks (including burrow)", false);
-    Config<Float> enemyRangeConfig = new NumberConfig<>("EnemyRange", "The range to mine enemies", 1.0f, 5.0f, 10.0f);
-    Config<Boolean> autoRemineConfig = new BooleanConfig("AutoRemine", "Automatically remines blocks that were previously mined", false, () -> autoCityConfig.getValue());
     Config<Boolean> grimConfig = new BooleanConfig("Grim", "trade secrets", false);
+    Config<Boolean> autoCityConfig = new BooleanConfig("Auto", "Automatically mines city blocks (including burrow)", false);
+    Config<Float> enemyRangeConfig = new NumberConfig<>("EnemyRange", "The range to mine enemies", 1.0f, 5.0f, 10.0f, () -> autoCityConfig.getValue());
+    Config<Boolean> autoRemineConfig = new BooleanConfig("AutoRemine", "Automatically remines blocks that were previously mined", false, () -> autoCityConfig.getValue());
     Config<Boolean> strictDirectionConfig = new BooleanConfig("StrictDirection", "Only mines on visible faces", false, () -> autoCityConfig.getValue());
     Config<Float> breakRangeConfig = new NumberConfig<>("Range", "How far to break blocks from", 1.0f, 4.5f, 6.0f);
     Config<Float> damageConfig = new NumberConfig<>("Damage", "The minimum amount of damage done to a block before attempting to break", 0.0f, 0.7f, 1.0f, NumberDisplay.PERCENT);
@@ -279,10 +280,11 @@ public final class AutoMineModule extends RotationModule
         return System.currentTimeMillis() - lastBreakTime <= 280 && grimConfig.getValue();
     }
 
-    private Set<BlockPos> getPotentialBlockTargets(PlayerEntity player)
+    private Set<BlockPos> getPotentialBlockTargets(PlayerEntity player, BlockPos blockPos)
     {
         final Set<BlockPos> potentialTargets = new HashSet<>();
-        for (final BlockPos pos : PositionUtil.getAllInBox(player.getBoundingBox(), player.getBlockPos()))
+        List<BlockPos> blocks = PositionUtil.getAllInBox(player.getBoundingBox(), blockPos);
+        for (final BlockPos pos : blocks)
         {
             if (mc.player.getEyePos().distanceTo(pos.toCenterPos()) > breakRangeConfig.getValue())
             {
@@ -326,7 +328,7 @@ public final class AutoMineModule extends RotationModule
             if (!mc.world.isAir(player.getBlockPos())) {
                 return player.getBlockPos();
             }
-            final Set<BlockPos> mineTargets = getPotentialBlockTargets(player);
+            Set<BlockPos> mineTargets = getPotentialBlockTargets(player, player.getBlockPos());
             for (final BlockPos pos : mineTargets)
             {
                 final double dist = mc.player.getEyePos().distanceTo(pos.toCenterPos());
