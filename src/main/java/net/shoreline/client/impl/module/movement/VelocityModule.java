@@ -48,15 +48,9 @@ public class VelocityModule extends ToggleModule {
     Config<Boolean> pushBlocksConfig = new BooleanConfig("NoPush-Blocks", "Prevents being pushed out of blocks", true);
     Config<Boolean> pushLiquidsConfig = new BooleanConfig("NoPush-Liquids", "Prevents being pushed by flowing liquids", true);
     Config<Boolean> pushFishhookConfig = new BooleanConfig("NoPush-Fishhook", "Prevents being pulled by fishing rod hooks", true);
-    //
-    private boolean cancelVelocity;
 
-    /**
-     *
-     */
     public VelocityModule() {
-        super("Velocity", "Reduces the amount of player knockback velocity",
-                ModuleCategory.MOVEMENT);
+        super("Velocity", "Reduces the amount of player knockback velocity", ModuleCategory.MOVEMENT);
     }
 
     @Override
@@ -68,11 +62,6 @@ public class VelocityModule extends ToggleModule {
                     decimal.format(verticalConfig.getValue()));
         }
         return EnumFormatter.formatEnum(modeConfig.getValue());
-    }
-
-    @Override
-    public void onEnable() {
-        cancelVelocity = false;
     }
 
     @EventListener
@@ -98,11 +87,7 @@ public class VelocityModule extends ToggleModule {
                             * (horizontalConfig.getValue() / 100.0f)));
                 }
                 case GRIM -> {
-                    if (!Managers.ANTICHEAT.hasPassed(100)) {
-                        return;
-                    }
                     event.cancel();
-                    cancelVelocity = true;
                 }
             }
         } else if (event.getPacket() instanceof ExplosionS2CPacket packet && explosionConfig.getValue()) {
@@ -120,11 +105,7 @@ public class VelocityModule extends ToggleModule {
                     }
                 }
                 case GRIM -> {
-                    if (!Managers.ANTICHEAT.hasPassed(100)) {
-                        return;
-                    }
                     event.cancel();
-                    cancelVelocity = true;
                 }
             }
             if (event.isCanceled()) {
@@ -144,7 +125,7 @@ public class VelocityModule extends ToggleModule {
 
     @EventListener
     public void onTick(TickEvent event) {
-        if (event.getStage() == EventStage.PRE && cancelVelocity) {
+        if (event.getStage() == EventStage.PRE && modeConfig.getValue().equals(VelocityMode.GRIM)) {
             if (modeConfig.getValue() == VelocityMode.GRIM && checkGrimPhased() && Managers.ANTICHEAT.hasPassed(100)) {
                 // Fixes issue with rotations
                 float yaw = mc.player.getYaw();
@@ -159,7 +140,7 @@ public class VelocityModule extends ToggleModule {
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
                         mc.player.getBlockPos(), mc.player.getHorizontalFacing().getOpposite()));
             }
-            cancelVelocity = false;
+
         }
     }
 
