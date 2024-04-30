@@ -39,6 +39,7 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
+import net.shoreline.client.util.player.PlayerUtil;
 import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.string.EnumFormatter;
 import net.shoreline.client.util.world.EntityUtil;
@@ -155,7 +156,7 @@ public class AuraModule extends RotationModule {
             return;
         }
         if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
-                || mc.options.attackKey.isPressed()) {
+                || mc.options.attackKey.isPressed() || PlayerUtil.isHotbarKeysPressed()) {
             autoSwapTimer.reset();
         }
         // END PRE
@@ -232,9 +233,6 @@ public class AuraModule extends RotationModule {
         }
         if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket) {
             switchTimer.reset();
-            if (!event.isClientPacket()) {
-                autoSwapTimer.reset();
-            }
         }
     }
 

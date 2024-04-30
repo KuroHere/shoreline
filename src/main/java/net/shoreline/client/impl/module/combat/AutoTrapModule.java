@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * @author xgraza & hockeyl8
+ * @author xgraza
  * @since 1.0
  */
 public final class AutoTrapModule extends ObsidianPlacerModule

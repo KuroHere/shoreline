@@ -42,6 +42,7 @@ import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.EvictingQueue;
 import net.shoreline.client.util.math.timer.CacheTimer;
 import net.shoreline.client.util.math.timer.Timer;
+import net.shoreline.client.util.player.PlayerUtil;
 import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.render.animation.TimeAnimation;
 import net.shoreline.client.util.world.EndCrystalUtil;
@@ -206,11 +207,11 @@ public class AutoCrystalModule extends RotationModule {
 
     @EventListener
     public void onPlayerUpdate(PlayerTickEvent event) {
-        renderPos = null;
         if (mc.player.isUsingItem() && mc.player.getActiveHand() == Hand.MAIN_HAND
-                || mc.options.attackKey.isPressed()) {
+                || mc.options.attackKey.isPressed() || PlayerUtil.isHotbarKeysPressed()) {
             autoSwapTimer.reset();
         }
+        renderPos = null;
         ArrayList<Entity> entities = Lists.newArrayList(mc.world.getEntities());
         List<BlockPos> blocks = getSphere(mc.player.getPos());
         attackCrystal = calculateAttackCrystal(entities);
@@ -443,9 +444,6 @@ public class AutoCrystalModule extends RotationModule {
             return;
         }
         if (event.getPacket() instanceof UpdateSelectedSlotC2SPacket) {
-            if (!event.isClientPacket()) {
-                autoSwapTimer.reset();
-            }
             lastSwapTimer.reset();
         } else if (event.getPacket() instanceof PlayerInteractBlockC2SPacket packet && !event.isClientPacket()
                 && mc.player.getStackInHand(packet.getHand()).getItem() instanceof EndCrystalItem && manualConfig.getValue()) {
@@ -493,7 +491,6 @@ public class AutoCrystalModule extends RotationModule {
         StatusEffectInstance weakness = mc.player.getStatusEffect(StatusEffects.WEAKNESS);
         StatusEffectInstance strength = mc.player.getStatusEffect(StatusEffects.STRENGTH);
         if (weakness != null && (strength == null || weakness.getAmplifier() > strength.getAmplifier())) {
-            int prev = mc.player.getInventory().selectedSlot;
             int slot = -1;
             for (int i = 0; i < 9; ++i) {
                 ItemStack stack = mc.player.getInventory().getStack(i);
@@ -505,12 +502,25 @@ public class AutoCrystalModule extends RotationModule {
                 }
             }
             if (slot != -1) {
-                if (antiWeaknessConfig.getValue() != Swap.OFF) {
-                    swapTo(slot);
+                boolean canSwap = antiWeaknessConfig.getValue() != Swap.NORMAL || autoSwapTimer.passed(500);
+                if (antiWeaknessConfig.getValue() != Swap.OFF && canSwap) {
+                    if (antiWeaknessConfig.getValue() == Swap.SILENT_ALT) {
+                        mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
+                                slot + 36, mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
+                    } else if (antiWeaknessConfig.getValue() == Swap.SILENT) {
+                        Managers.INVENTORY.setSlot(slot);
+                    } else {
+                        Managers.INVENTORY.setClientSlot(slot);
+                    }
                 }
                 attackInternal(entity, Hand.MAIN_HAND);
-                if (isSilentSwap(antiWeaknessConfig.getValue())) {
-                    swapTo(autoSwapConfig.getValue() == Swap.SILENT_ALT ? slot : prev);
+                if (isSilentSwap(antiWeaknessConfig.getValue()) && canSwap) {
+                    if (antiWeaknessConfig.getValue() == Swap.SILENT_ALT) {
+                        mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
+                                slot + 36, mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
+                    } else {
+                        Managers.INVENTORY.syncToClient();
+                    }
                 }
             }
         } else {
@@ -547,14 +557,28 @@ public class AutoCrystalModule extends RotationModule {
             if (isSilentSwap(autoSwapConfig.getValue()) && Managers.INVENTORY.count(Items.END_CRYSTAL) == 0) {
                 return;
             }
-            int prev = mc.player.getInventory().selectedSlot;
             int crystalSlot = getCrystalSlot();
             if (crystalSlot != -1) {
-                swapTo(crystalSlot);
+                boolean canSwap = autoSwapConfig.getValue() != Swap.NORMAL || autoSwapTimer.passed(500);
+                if (canSwap) {
+                    if (autoSwapConfig.getValue() == Swap.SILENT_ALT) {
+                        mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
+                                crystalSlot + 36, mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
+                    } else if (autoSwapConfig.getValue() == Swap.SILENT) {
+                        Managers.INVENTORY.setSlot(crystalSlot);
+                    } else {
+                        Managers.INVENTORY.setClientSlot(crystalSlot);
+                    }
+                }
                 placeInternal(result, Hand.MAIN_HAND);
                 placePackets.put(blockPos, System.currentTimeMillis());
-                if (isSilentSwap(autoSwapConfig.getValue())) {
-                    swapTo(autoSwapConfig.getValue() == Swap.SILENT_ALT ? crystalSlot : prev);
+                if (isSilentSwap(autoSwapConfig.getValue()) && canSwap) {
+                    if (autoSwapConfig.getValue() == Swap.SILENT_ALT) {
+                        mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
+                                crystalSlot + 36, mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
+                    } else {
+                        Managers.INVENTORY.syncToClient();
+                    }
                 }
             }
         } else if (isHoldingCrystal()) {
@@ -577,18 +601,6 @@ public class AutoCrystalModule extends RotationModule {
 
     private boolean isSilentSwap(Swap swap) {
         return swap == Swap.SILENT || swap == Swap.SILENT_ALT;
-    }
-
-    private void swapTo(int slot) {
-        if (autoSwapConfig.getValue() == Swap.NORMAL && !autoSwapTimer.passed(500)) {
-            return;
-        }
-        if (autoSwapConfig.getValue() == Swap.SILENT_ALT) {
-            mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId,
-                    slot + 36, mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
-        } else {
-            Managers.INVENTORY.setClientSlot(slot);
-        }
     }
 
     private int getCrystalSlot() {

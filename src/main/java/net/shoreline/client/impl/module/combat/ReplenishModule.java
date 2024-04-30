@@ -14,7 +14,7 @@ import net.shoreline.client.init.Managers;
 import java.util.ArrayList;
 
 /**
- * @author linus & hockeyl8
+ * @author linus
  * @since 1.0
  */
 public class ReplenishModule extends ToggleModule {

@@ -1,5 +1,6 @@
 package net.shoreline.client.util.player;
 
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.Item;
@@ -52,5 +53,14 @@ public final class PlayerUtil implements Globals
         }
         itemStack = mc.player.getOffHandStack();
         return !itemStack.isEmpty() && itemStack.getItem() == item;
+    }
+
+    public static boolean isHotbarKeysPressed() {
+        for (KeyBinding binding : mc.options.hotbarKeys) {
+            if (binding.isPressed()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
