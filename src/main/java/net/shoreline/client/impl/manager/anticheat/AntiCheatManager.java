@@ -1,12 +1,12 @@
 package net.shoreline.client.impl.manager.anticheat;
 
-import net.minecraft.client.network.ServerInfo;
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.math.Vec3d;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
-import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 
 import java.util.Arrays;
@@ -15,13 +15,15 @@ import java.util.Arrays;
  * @author xgraza
  * @since 1.0
  */
-public final class GrimManager implements Globals
+public final class AntiCheatManager implements Globals
 {
+    private SetbackData lastSetback;
+
     private final int[] transactions = new int[4];
     private int index;
     private boolean isGrim;
 
-    public GrimManager()
+    public AntiCheatManager()
     {
         Shoreline.EVENT_HANDLER.subscribe(this);
         Arrays.fill(transactions, -1);
@@ -44,6 +46,11 @@ public final class GrimManager implements Globals
                 grimCheck();
             }
         }
+        else if (event.getPacket() instanceof PlayerPositionLookS2CPacket packet)
+        {
+            lastSetback = new SetbackData(new Vec3d(packet.getX(), packet.getY(), packet.getZ()),
+                    System.currentTimeMillis(), packet.getTeleportId());
+        }
     }
 
     @EventListener
@@ -63,7 +70,6 @@ public final class GrimManager implements Globals
                 break;
             }
         }
-
         isGrim = true;
         Shoreline.LOGGER.info("Server is running GrimAC.");
     }
@@ -73,8 +79,8 @@ public final class GrimManager implements Globals
         return isGrim;
     }
 
-    public boolean isGrimCC() {
-        ServerInfo info = Managers.NETWORK.getInfo();
-        return info != null && info.address.equalsIgnoreCase("grim.crystalpvp.cc");
+    public boolean hasPassed(final long timeMS)
+    {
+        return lastSetback != null && lastSetback.timeSince() >= timeMS;
     }
 }

@@ -291,24 +291,41 @@ public final class AutoTrapModule extends ObsidianPlacerModule
                 -> -mc.player.squaredDistanceTo(blockPos.getX(), blockPos.getY(), blockPos.getZ())));
 
         // This should be the absolute LAST thing to do, since placing around is a higher priority
-        if (headConfig.getValue() && !trapBlocks.isEmpty())
+        final BlockPos headBlockPos = pos.up(2);
+        if (headConfig.getValue() && !trapBlocks.isEmpty() && mc.world.getBlockState(headBlockPos).isAir() && !isOutOfEyeRange(headBlockPos))
         {
-            final BlockPos blockPos = pos.up(2);
-            if (mc.world.getBlockState(blockPos).isAir())
+            searchForSupport:
             {
-                for (final BlockPos trapBlockPos : trapBlocks)
+                if (Modules.AIR_PLACE.isEnabled() && !strictDirectionConfig.getValue())
                 {
-                    final Direction direction = Managers.INTERACT.getInteractDirection(
-                            trapBlockPos, strictDirectionConfig.getValue());
-                    if (direction != null)
+                    blocks.add(headBlockPos);
+                    break searchForSupport;
+                }
+
+                for (final Direction direction : Direction.values())
+                {
+                    final BlockPos neighbor = headBlockPos.offset(direction);
+                    if (entities.contains(neighbor.down()) || isOutOfEyeRange(neighbor))
                     {
-                        // Add the support block & the head block
-                        final BlockPos neighbor = trapBlockPos.offset(direction);
-                        if (!isOutOfEyeRange(neighbor) && !entities.contains(neighbor))
+                        continue;
+                    }
+
+                    final Direction neighboringDirection = Managers.INTERACT.getInteractDirection(
+                            neighbor, strictDirectionConfig.getValue());
+                    if (neighboringDirection != null)
+                    {
+                        // We need to assure that the head block would have a visible side to place on
+                        // with this getInteractionDirection result
+                        // TODO: more elegant way to do this? the code also doesnt look like it'd work, but for whatever reason it does
+                        if (strictDirectionConfig.getValue() && Managers.INTERACT.getPlaceDirectionsNCP(
+                                mc.player.getEyePos(), neighbor.toCenterPos()).contains(direction))
                         {
-                            blocks.add(neighbor);
-                            blocks.add(blockPos);
+                            continue;
                         }
+
+                        blocks.add(neighbor);
+                        blocks.add(headBlockPos);
+                        break;
                     }
                 }
             }
@@ -320,7 +337,7 @@ public final class AutoTrapModule extends ObsidianPlacerModule
 
     private boolean isOutOfEyeRange(final BlockPos pos)
     {
-        return strictDirectionConfig.getValue() && pos.getY() > mc.player.getY() + mc.player.getStandingEyeHeight();
+        return strictDirectionConfig.getValue() && Managers.INTERACT.isInEyeRange(pos);
     }
 
     private boolean isEntityBlockingTrap(Entity entity)

@@ -26,7 +26,6 @@ import net.shoreline.client.impl.event.entity.player.PushFluidsEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.client.impl.event.network.PushOutOfBlocksEvent;
 import net.shoreline.client.init.Managers;
-import net.shoreline.client.init.Modules;
 import net.shoreline.client.mixin.accessor.AccessorClientWorld;
 import net.shoreline.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
 import net.shoreline.client.mixin.accessor.AccessorExplosionS2CPacket;
@@ -99,7 +98,7 @@ public class VelocityModule extends ToggleModule {
                             * (horizontalConfig.getValue() / 100.0f)));
                 }
                 case GRIM -> {
-                    if (!Managers.NCP.passed(100)) {
+                    if (!Managers.ANTICHEAT.hasPassed(100)) {
                         return;
                     }
                     event.cancel();
@@ -121,7 +120,7 @@ public class VelocityModule extends ToggleModule {
                     }
                 }
                 case GRIM -> {
-                    if (!Managers.NCP.passed(100)) {
+                    if (!Managers.ANTICHEAT.hasPassed(100)) {
                         return;
                     }
                     event.cancel();
@@ -146,7 +145,7 @@ public class VelocityModule extends ToggleModule {
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE && cancelVelocity) {
-            if (modeConfig.getValue() == VelocityMode.GRIM && checkGrimPhased() && Managers.NCP.passed(100)) {
+            if (modeConfig.getValue() == VelocityMode.GRIM && checkGrimPhased() && Managers.ANTICHEAT.hasPassed(100)) {
                 // Fixes issue with rotations
                 float yaw = mc.player.getYaw();
                 float pitch = mc.player.getPitch();
@@ -186,7 +185,7 @@ public class VelocityModule extends ToggleModule {
     }
 
     public boolean checkGrimPhased() {
-        return !Managers.GRIM.isGrimCC() || !isGrimPhased();
+        return !Managers.NETWORK.isGrimCC() || !isGrimPhased();
     }
 
     public boolean isGrimPhased() {

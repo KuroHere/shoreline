@@ -914,7 +914,7 @@ public class AutoCrystalModule extends RotationModule {
         if (!mc.world.isAir(p2) && !state2.isOf(Blocks.FIRE)) {
             return false;
         } else {
-            final Box bb = Managers.NCP.isCrystalPvpCC() ? HALF_CRYSTAL_BB : FULL_CRYSTAL_BB;
+            final Box bb = Managers.NETWORK.isCrystalPvpCC() ? HALF_CRYSTAL_BB : FULL_CRYSTAL_BB;
             double d = p2.getX();
             double e = p2.getY();
             double f = p2.getZ();

@@ -158,7 +158,7 @@ public class SpeedModule extends ToggleModule {
             }
             // ~29 kmh
             if (speedModeConfig.getValue() == Speed.STRAFE || speedModeConfig.getValue() == Speed.STRAFE_B_HOP) {
-                if (!Managers.NCP.passed(100)) {
+                if (!Managers.ANTICHEAT.hasPassed(100)) {
                     return;
                 }
                 if (timerConfig.getValue()) {
@@ -196,7 +196,7 @@ public class SpeedModule extends ToggleModule {
             }
             // ~26-27 kmh
             else if (speedModeConfig.getValue() == Speed.STRAFE_STRICT) {
-                if (!Managers.NCP.passed(100)) {
+                if (!Managers.ANTICHEAT.hasPassed(100)) {
                     return;
                 }
                 if (strafe == 1) {
@@ -239,7 +239,7 @@ public class SpeedModule extends ToggleModule {
                 event.setZ(motion.y);
                 strafe++;
             } else if (speedModeConfig.getValue() == Speed.LOW_HOP) {
-                if (!Managers.NCP.passed(100)) {
+                if (!Managers.ANTICHEAT.hasPassed(100)) {
                     return;
                 }
                 if (timerConfig.getValue()) {
@@ -286,7 +286,7 @@ public class SpeedModule extends ToggleModule {
                 event.setZ(motion.y);
                 strafe++;
             } else if (speedModeConfig.getValue() == Speed.GAY_HOP) {
-                if (!Managers.NCP.passed(100)) {
+                if (!Managers.ANTICHEAT.hasPassed(100)) {
                     strafe = 1;
                     return;
                 }
@@ -320,7 +320,7 @@ public class SpeedModule extends ToggleModule {
                 }
                 strafe++;
             } else if (speedModeConfig.getValue() == Speed.V_HOP) {
-                if (!Managers.NCP.passed(100)) {
+                if (!Managers.ANTICHEAT.hasPassed(100)) {
                     strafe = 1;
                     return;
                 }
@@ -374,7 +374,7 @@ public class SpeedModule extends ToggleModule {
                 event.setZ(motion.y);
                 strafe++;
             } else if (speedModeConfig.getValue() == Speed.B_HOP) {
-                if (!Managers.NCP.passed(100)) {
+                if (!Managers.ANTICHEAT.hasPassed(100)) {
                     strafe = 4;
                     return;
                 }

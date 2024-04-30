@@ -7,6 +7,7 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.event.listener.EventListener;
 import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.imixin.IClientPlayNetworkHandler;
+import net.shoreline.client.init.Managers;
 import net.shoreline.client.mixin.accessor.AccessorClientWorld;
 import net.shoreline.client.util.Globals;
 
@@ -113,6 +114,17 @@ public class NetworkManager implements Globals {
 
     public void setInfo(ServerInfo info) {
         this.info = info;
+    }
+
+    public boolean isCrystalPvpCC() {
+        if (info != null) {
+            return info.address.equalsIgnoreCase("us.crystalpvp.cc") || info.address.equalsIgnoreCase("crystalpvp.cc");
+        }
+        return false;
+    }
+
+    public boolean isGrimCC() {
+        return info != null && info.address.equalsIgnoreCase("grim.crystalpvp.cc");
     }
 
     /**

@@ -84,7 +84,7 @@ public class FastFallModule extends ToggleModule {
                     || mc.player.input.sneaking) {
                 return;
             }
-            if (!Managers.NCP.passed(1000) || !fallTimer.passed(1000)
+            if (!Managers.ANTICHEAT.hasPassed(1000) || !fallTimer.passed(1000)
                     || Modules.SPEED.isEnabled()
                     || Modules.LONG_JUMP.isEnabled()
                     || Modules.FLIGHT.isEnabled()
