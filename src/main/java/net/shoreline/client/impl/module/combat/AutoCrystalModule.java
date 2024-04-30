@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- * @author Shoreline
+ * @author linus & hockeyl8
  * @since 1.0
  */
 public class AutoCrystalModule extends RotationModule {
@@ -134,10 +134,10 @@ public class AutoCrystalModule extends RotationModule {
     Config<Boolean> extrapolateRangeConfig = new BooleanConfig("ExtrapolateRange", "Accounts for motion when calculating ranges", false);
     Config<Integer> extrapolateTicksConfig = new NumberConfig<>("ExtrapolationTicks", "Accounts for motion when calculating enemy positions, not fully accurate.", 0, 0, 10);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders the current placement", true);
+    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out", false, () -> renderConfig.getValue());
+    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Timer for the fade", 0, 250, 1000, () -> renderConfig.getValue() && fadeConfig.getValue());
     Config<Boolean> damageNametagConfig = new BooleanConfig("Render-Damage", "Renders the current expected damage of a place/attack", false, () -> renderConfig.getValue());
-    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out", false);
-    Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Timer for the fade", 0, 250, 1000);
-    Config<Boolean> breakDebugConfig = new BooleanConfig("Break-Debug", "Debugs break ms in data", false);
+    Config<Boolean> breakDebugConfig = new BooleanConfig("Break-Debug", "Debugs break ms in data", false, () -> renderConfig.getValue());
     //
     Config<Boolean> disableDeathConfig = new BooleanConfig("DisableOnDeath", "Disables during disconnect/death", false);
     //
@@ -169,12 +169,9 @@ public class AutoCrystalModule extends RotationModule {
     //gonna make a better solution for this in the future.
     private final Map<BlockPos, TimeAnimation> fadeBoxes = new HashMap<>();
     private final Map<BlockPos, TimeAnimation> fadeLines = new HashMap<>();
-    //
+
     private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
-    /**
-     *
-     */
     public AutoCrystalModule() {
         super("AutoCrystal", "Attacks entities with end crystals",
                 ModuleCategory.COMBAT, 750);
