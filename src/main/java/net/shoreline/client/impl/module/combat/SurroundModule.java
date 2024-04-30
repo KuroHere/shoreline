@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * @author linus, hockeyl8 & lolwut2
+ * @author linus & hockeyl8
  * @since 1.0
  */
 public class SurroundModule extends ObsidianPlacerModule {
