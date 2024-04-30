@@ -23,10 +23,8 @@ import net.shoreline.client.util.math.timer.TickTimer;
 public class AutoXPModule extends RotationModule {
 
     Config<Float> delayConfig = new NumberConfig<>("Delay", "Delay to throw xp in ticks.", 1.0f, 1.0f, 10.0f, NumberDisplay.DEFAULT);
-    Config<Boolean> xpCheckConfig = new BooleanConfig("XPCheck", "Check if you have xp in your hotbar disables if you dont.", true);
     Config<Boolean> durabilityCheckConfig = new BooleanConfig("DurabilityCheck", "Check if your armor and held item durability is full then disables if it is.", true);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates the player while throwing xp.", false);
-    Config<Boolean> rotateSilentConfig = new BooleanConfig("RotateSilent", "Rotates the player silently while throwing xp.", false, () -> rotateConfig.getValue());
     Config<Boolean> swingConfig = new BooleanConfig("Swing", "Swings hand while throwing xp.", false);
 
     private final TickTimer delayTimer = new TickTimer();
@@ -55,20 +53,13 @@ public class AutoXPModule extends RotationModule {
             }
         }
         if (slot == -1) {
-            if (xpCheckConfig.getValue()) {
-                disable();
-                return;
-            }
+            disable();
+            return;
         }
 
         Managers.INVENTORY.setSlot(slot);
         if (rotateConfig.getValue()) {
-            if (rotateSilentConfig.getValue()) {
-                setRotationSilent(mc.player.getYaw(), 90.0f);
-            }
-            else {
-                setRotation(mc.player.getYaw(), 90.0f);
-            }
+            setRotation(mc.player.getYaw(), 90.0f);
             if (isRotationBlocked()) return;
         }
         Managers.NETWORK.sendSequencedPacket(id -> new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, id));
