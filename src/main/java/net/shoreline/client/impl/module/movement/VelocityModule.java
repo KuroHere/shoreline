@@ -10,7 +10,7 @@ import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.NumberDisplay;
 import net.shoreline.client.api.config.setting.BooleanConfig;
@@ -29,7 +29,6 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.mixin.accessor.AccessorClientWorld;
 import net.shoreline.client.mixin.accessor.AccessorEntityVelocityUpdateS2CPacket;
 import net.shoreline.client.mixin.accessor.AccessorExplosionS2CPacket;
-import net.shoreline.client.util.math.position.PositionUtil;
 import net.shoreline.client.util.string.EnumFormatter;
 
 import java.text.DecimalFormat;
@@ -145,7 +144,7 @@ public class VelocityModule extends ToggleModule {
     @EventListener
     public void onTick(TickEvent event) {
         if (event.getStage() == EventStage.PRE && cancelVelocity) {
-            if (modeConfig.getValue() == VelocityMode.GRIM && checkGrimPhased() && Managers.ANTICHEAT.hasPassed(100)) {
+            if (modeConfig.getValue() == VelocityMode.GRIM && Managers.ANTICHEAT.hasPassed(100)) {
                 // Fixes issue with rotations
                 float yaw = mc.player.getYaw();
                 float pitch = mc.player.getPitch();
@@ -156,8 +155,10 @@ public class VelocityModule extends ToggleModule {
                 }
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
                         mc.player.getY(), mc.player.getZ(), yaw, pitch, mc.player.isOnGround()));
+                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
+                        mc.player.getBlockPos().up(), Direction.DOWN));
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                        mc.player.getBlockPos(), mc.player.getHorizontalFacing().getOpposite()));
+                        mc.player.getBlockPos().up(), Direction.DOWN));
             }
             cancelVelocity = false;
         }
@@ -182,19 +183,6 @@ public class VelocityModule extends ToggleModule {
         if (pushLiquidsConfig.getValue()) {
             event.cancel();
         }
-    }
-
-    public boolean checkGrimPhased() {
-        return !Managers.NETWORK.isGrimCC() || !isGrimPhased();
-    }
-
-    public boolean isGrimPhased() {
-        for (BlockPos pos : PositionUtil.getAllInBox(mc.player.getBoundingBox(), mc.player.getBlockPos())) {
-            if (!mc.world.getBlockState(pos).isAir()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private enum VelocityMode {

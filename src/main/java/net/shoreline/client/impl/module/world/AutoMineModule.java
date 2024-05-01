@@ -248,7 +248,7 @@ public final class AutoMineModule extends RotationModule
         }
         Managers.NETWORK.sendSequencedPacket((sequence) -> new PlayerActionC2SPacket(
                 STOP_DESTROY_BLOCK, blockBreakData.getPos(), blockBreakData.getDirection(), sequence));
-        if (grimConfig.getValue())
+        if (grimConfig.getValue() && damageConfig.getValue() == 0.7f)
         {
             Managers.NETWORK.sendSequencedPacket((sequence) -> new PlayerActionC2SPacket(
                     ABORT_DESTROY_BLOCK, blockBreakData.getPos().up(500),
