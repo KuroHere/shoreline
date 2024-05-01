@@ -146,13 +146,8 @@ public class VelocityModule extends ToggleModule {
         if (event.getStage() == EventStage.PRE && cancelVelocity) {
             if (modeConfig.getValue() == VelocityMode.GRIM && Managers.ANTICHEAT.hasPassed(100)) {
                 // Fixes issue with rotations
-                float yaw = mc.player.getYaw();
-                float pitch = mc.player.getPitch();
-                if (Managers.ROTATION.isRotating())
-                {
-                    yaw = Managers.ROTATION.getRotationYaw();
-                    pitch = Managers.ROTATION.getRotationPitch();
-                }
+                float yaw = Managers.ROTATION.getServerYaw();
+                float pitch = Managers.ROTATION.getServerPitch();
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
                         mc.player.getY(), mc.player.getZ(), yaw, pitch, mc.player.isOnGround()));
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
