@@ -88,6 +88,7 @@ public class ModuleManager {
                 new FakePlayerModule(),
                 new InvCleanerModule(),
                 new MiddleClickModule(),
+                new NoPacketKickModule(),
                 new NoSoundLagModule(),
                 new TimerModule(),
                 new TrueDurabilityModule(),
