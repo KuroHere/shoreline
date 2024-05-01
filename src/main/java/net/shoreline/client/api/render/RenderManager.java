@@ -302,14 +302,24 @@ public class RenderManager implements Globals {
             y1 = y2;
             y2 = i;
         }
-
-        QUADS.begin(matrix4f);
-        QUADS.color(color);
-        QUADS.vertex(x1, y1, z);
-        QUADS.vertex(x1, y2, z);
-        QUADS.vertex(x2, y2, z);
-        QUADS.vertex(x2, y1, z);
-        QUADS.end();
+        float f = (float) ColorHelper.Argb.getAlpha(color) / 255.0f;
+        float g = (float) ColorHelper.Argb.getRed(color) / 255.0f;
+        float h = (float) ColorHelper.Argb.getGreen(color) / 255.0f;
+        float j = (float) ColorHelper.Argb.getBlue(color) / 255.0f;
+        RenderSystem.enableBlend();
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        BUFFER.begin(VertexFormat.DrawMode.QUADS,
+                VertexFormats.POSITION_COLOR);
+        BUFFER.vertex(matrix4f, (float) x1, (float) y1, (float) z)
+                .color(g, h, j, f).next();
+        BUFFER.vertex(matrix4f, (float) x1, (float) y2, (float) z)
+                .color(g, h, j, f).next();
+        BUFFER.vertex(matrix4f, (float) x2, (float) y2, (float) z)
+                .color(g, h, j, f).next();
+        BUFFER.vertex(matrix4f, (float) x2, (float) y1, (float) z)
+                .color(g, h, j, f).next();
+        BufferRenderer.drawWithGlobalProgram(BUFFER.end());
+        RenderSystem.disableBlend();
     }
 
     /**
