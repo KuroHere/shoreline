@@ -141,11 +141,11 @@ public class ModuleManager {
                 new ViewModelModule(),
                 // new WaypointsModule(),
                 // World
-                new AirPlaceModule(),
                 new AntiInteractModule(),
                 new AutoMineModule(),
                 new AutoToolModule(),
                 new AvoidModule(),
+                new BlockInteractModule(),
                 new FastDropModule(),
                 new FastPlaceModule(),
                 new MultitaskModule(),

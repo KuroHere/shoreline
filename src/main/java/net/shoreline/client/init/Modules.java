@@ -134,11 +134,11 @@ public class Modules {
     public static ViewModelModule VIEW_MODEL;
     // public static WaypointsModule WAYPOINTS;
     // World
-    public static AirPlaceModule AIR_PLACE;
     public static AntiInteractModule ANTI_INTERACT;
     public static AutoMineModule AUTO_MINE;
     public static AutoToolModule AUTO_TOOL;
     public static AvoidModule AVOID;
+    public static BlockInteractModule BLOCK_INTERACT;
     public static FastDropModule FAST_DROP;
     public static FastPlaceModule FAST_PLACE;
     public static MultitaskModule MULTITASK;
@@ -291,11 +291,11 @@ public class Modules {
             VIEW_CLIP = (ViewClipModule) getRegisteredModule("viewclip-module");
             VIEW_MODEL = (ViewModelModule) getRegisteredModule("viewmodel-module");
             // WAYPOINTS = (WaypointsModule) getRegisteredModule("waypoints-module");
-            AIR_PLACE = (AirPlaceModule) getRegisteredModule("airplace-module");
             ANTI_INTERACT = (AntiInteractModule) getRegisteredModule("antiinteract-module");
             AUTO_MINE = (AutoMineModule) getRegisteredModule("automine-module");
             AUTO_TOOL = (AutoToolModule) getRegisteredModule("autotool-module");
             AVOID = (AvoidModule) getRegisteredModule("avoid-module");
+            BLOCK_INTERACT = (BlockInteractModule) getRegisteredModule("blockinteract-module");
             FAST_DROP = (FastDropModule) getRegisteredModule("fastdrop-module");
             FAST_PLACE = (FastPlaceModule) getRegisteredModule("fastplace-module");
             MULTITASK = (MultitaskModule) getRegisteredModule("multitask-module");
