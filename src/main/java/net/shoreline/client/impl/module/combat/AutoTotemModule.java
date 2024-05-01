@@ -4,10 +4,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
+import net.minecraft.item.*;
 import net.minecraft.screen.slot.SlotActionType;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
@@ -141,7 +138,8 @@ public final class AutoTotemModule extends ToggleModule
             }
         }
         // If offhand gap is enabled & the use key is pressed down, equip a golden apple.
-        if (gappleConfig.getValue() && mc.options.useKey.isPressed() && mc.player.getMainHandStack().getItem() instanceof SwordItem)
+        if (gappleConfig.getValue() && mc.options.useKey.isPressed() && (mc.player.getMainHandStack().getItem() instanceof SwordItem
+                || mc.player.getMainHandStack().getItem() instanceof TridentItem || mc.player.getMainHandStack().getItem() instanceof AxeItem))
         {
             return getGoldenAppleType();
         }

@@ -77,16 +77,17 @@ public class VelocityModule extends ToggleModule {
     @Override
     public void onDisable() {
         if (cancelVelocity) {
-            if (modeConfig.getValue() == VelocityMode.GRIM && Managers.ANTICHEAT.hasPassed(100)) {
-                // Fixes issue with rotations
+            if (modeConfig.getValue() == VelocityMode.GRIM) {
                 float yaw = Managers.ROTATION.getServerYaw();
                 float pitch = Managers.ROTATION.getServerPitch();
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
                         mc.player.getY(), mc.player.getZ(), yaw, pitch, mc.player.isOnGround()));
-                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
-                        mc.player.getBlockPos().up(), Direction.DOWN));
+                if (!mc.player.isCrawling()) {
+                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
+                            mc.player.getBlockPos().up(), Direction.DOWN));
+                }
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                        mc.player.getBlockPos().up(), Direction.DOWN));
+                        mc.player.isCrawling() ? mc.player.getBlockPos() : mc.player.getBlockPos().up(), Direction.DOWN));
             }
             cancelVelocity = false;
         }
@@ -168,10 +169,12 @@ public class VelocityModule extends ToggleModule {
                 float pitch = Managers.ROTATION.getServerPitch();
                 Managers.NETWORK.sendPacket(new PlayerMoveC2SPacket.Full(mc.player.getX(),
                         mc.player.getY(), mc.player.getZ(), yaw, pitch, mc.player.isOnGround()));
-                Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
-                        mc.player.getBlockPos().up(), Direction.DOWN));
+                if (!mc.player.isCrawling()) {
+                    Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK,
+                            mc.player.getBlockPos().up(), Direction.DOWN));
+                }
                 Managers.NETWORK.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
-                        mc.player.getBlockPos().up(), Direction.DOWN));
+                        mc.player.isCrawling() ? mc.player.getBlockPos() : mc.player.getBlockPos().up(), Direction.DOWN));
             }
             cancelVelocity = false;
         }
