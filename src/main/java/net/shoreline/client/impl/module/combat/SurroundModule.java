@@ -103,7 +103,7 @@ public class SurroundModule extends ObsidianPlacerModule {
     public void onPlayerTick(PlayerTickEvent event) {
         // Do we need this check?? Surround is always highest prio
         blocksPlaced = 0;
-        if (jumpDisableConfig.getValue() && mc.player.getY() > prevY) {
+        if (jumpDisableConfig.getValue() && Math.abs(mc.player.getY() - prevY) > 0.5) {
             disable();
             return;
         }
@@ -121,7 +121,7 @@ public class SurroundModule extends ObsidianPlacerModule {
         }
 
         surround = getSurroundPositions(pos);
-        placements = surround.stream().filter(mc.world::isAir).toList();
+        placements = surround.stream().filter(blockPos -> mc.world.getBlockState(pos).isReplaceable()).toList();
         // We should not be doing anything if we have nothing to place
         if (placements.isEmpty())
         {

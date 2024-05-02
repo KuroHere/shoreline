@@ -111,7 +111,7 @@ public final class SelfTrapModule extends ObsidianPlacerModule
     {
         // Do we need this check?? Surround is always highest prio
         blocksPlaced = 0;
-        if (autoDisableConfig.getValue() && mc.player.getY() > prevY) {
+        if (autoDisableConfig.getValue() && Math.abs(mc.player.getY() - prevY) > 0.5) {
             disable();
             return;
         }
@@ -122,7 +122,7 @@ public final class SelfTrapModule extends ObsidianPlacerModule
             return;
         }
         surround = getSelfTrapPositions(pos);
-        placements = surround.stream().filter(mc.world::isAir).toList();
+        placements = surround.stream().filter(blockPos -> mc.world.getBlockState(pos).isReplaceable()).toList();
 
         if (placements.isEmpty())
         {
