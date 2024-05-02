@@ -122,7 +122,7 @@ public final class SelfTrapModule extends ObsidianPlacerModule
             return;
         }
         surround = getSelfTrapPositions(pos);
-        placements = surround.stream().filter(blockPos -> mc.world.getBlockState(pos).isReplaceable()).toList();
+        placements = surround.stream().filter(blockPos -> mc.world.getBlockState(blockPos).isReplaceable()).toList();
 
         if (placements.isEmpty())
         {

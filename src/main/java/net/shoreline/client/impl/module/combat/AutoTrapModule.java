@@ -121,7 +121,7 @@ public final class AutoTrapModule extends ObsidianPlacerModule
             return;
         }
         surround = getAutoTrapPositions(pos);
-        placements = surround.stream().filter(blockPos -> mc.world.getBlockState(pos).isReplaceable()).toList();
+        placements = surround.stream().filter(blockPos -> mc.world.getBlockState(blockPos).isReplaceable()).toList();
 
         if (placements.isEmpty())
         {

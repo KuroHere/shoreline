@@ -121,7 +121,7 @@ public class SurroundModule extends ObsidianPlacerModule {
         }
 
         surround = getSurroundPositions(pos);
-        placements = surround.stream().filter(blockPos -> mc.world.getBlockState(pos).isReplaceable()).toList();
+        placements = surround.stream().filter(blockPos -> mc.world.getBlockState(blockPos).isReplaceable()).toList();
         // We should not be doing anything if we have nothing to place
         if (placements.isEmpty())
         {
