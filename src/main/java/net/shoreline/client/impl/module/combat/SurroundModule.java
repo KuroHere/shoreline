@@ -56,7 +56,6 @@ public class SurroundModule extends ObsidianPlacerModule {
     Config<Integer> shiftDelayConfig = new NumberConfig<>("ShiftDelay", "The delay between each block placement interval", 0, 1, 5);
     Config<Boolean> jumpDisableConfig = new BooleanConfig("AutoDisable", "Disables after moving out of the hole", true);
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders where scaffold is placing blocks", false);
-    Config<Boolean> fadeConfig = new BooleanConfig("Fade", "Fades old renders out.", true, () -> renderConfig.getValue());
     Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000, () -> false);
 
     private final Map<BlockPos, TimeAnimation> fadeBoxes = new HashMap<>();
@@ -288,44 +287,32 @@ public class SurroundModule extends ObsidianPlacerModule {
     {
         if (renderConfig.getValue())
         {
-            if (fadeConfig.getValue())
+            for (Map.Entry<BlockPos, TimeAnimation> set : fadeBoxes.entrySet())
             {
-                for (Map.Entry<BlockPos, TimeAnimation> set : fadeBoxes.entrySet())
-                {
-                    set.getValue().setState(false);
-                    set.getValue().setState(false);
-                    int alpha = (int) set.getValue().getCurrent();
-                    Color color = Modules.COLORS.getColor(alpha);
-                    RenderManager.renderBox(event.getMatrices(), set.getKey(), color.getRGB());
-                }
-
-                for (Map.Entry<BlockPos, TimeAnimation> set : fadeLines.entrySet())
-                {
-                    set.getValue().setState(false);
-                    int alpha = (int) set.getValue().getCurrent();
-                    Color color = Modules.COLORS.getColor(alpha);
-                    RenderManager.renderBoundingBox(event.getMatrices(), set.getKey(), 1.5f, color.getRGB());
-                }
+                set.getValue().setState(false);
+                set.getValue().setState(false);
+                int alpha = (int) set.getValue().getCurrent();
+                Color color = Modules.COLORS.getColor(alpha);
+                RenderManager.renderBox(event.getMatrices(), set.getKey(), color.getRGB());
             }
 
+            for (Map.Entry<BlockPos, TimeAnimation> set : fadeLines.entrySet())
+            {
+                set.getValue().setState(false);
+                int alpha = (int) set.getValue().getCurrent();
+                Color color = Modules.COLORS.getColor(alpha);
+                RenderManager.renderBoundingBox(event.getMatrices(), set.getKey(), 1.5f, color.getRGB());
+            }
             if (placements.isEmpty())
             {
                 return;
             }
             for (BlockPos pos : placements)
             {
-                if (!fadeConfig.getValue())
-                {
-                    RenderManager.renderBox(event.getMatrices(), pos, Modules.COLORS.getRGB(80));
-                    RenderManager.renderBoundingBox(event.getMatrices(), pos, 1.5f, Modules.COLORS.getRGB(145));
-                }
-                else
-                {
-                    TimeAnimation boxAnimation = new TimeAnimation(true, 0, 80, fadeTimeConfig.getValue());
-                    TimeAnimation lineAnimation = new TimeAnimation(true, 0, 145, fadeTimeConfig.getValue());
-                    fadeBoxes.put(pos, boxAnimation);
-                    fadeLines.put(pos, lineAnimation);
-                }
+                TimeAnimation boxAnimation = new TimeAnimation(true, 0, 80, fadeTimeConfig.getValue());
+                TimeAnimation lineAnimation = new TimeAnimation(true, 0, 145, fadeTimeConfig.getValue());
+                fadeBoxes.put(pos, boxAnimation);
+                fadeLines.put(pos, lineAnimation);
             }
         }
     }

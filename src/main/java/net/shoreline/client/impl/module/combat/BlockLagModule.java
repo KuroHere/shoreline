@@ -24,7 +24,7 @@ public class BlockLagModule extends ObsidianPlacerModule {
     //
     Config<Boolean> selfFillConfig = new BooleanConfig("SelfFill", "Fills in the block beneath you", false);
     Config<Boolean> rotateConfig = new BooleanConfig("Rotate", "Rotates before placing the block", false);
-    Config<Boolean> strictConfig = new BooleanConfig("Strict", "NCP-Updated bypass for lagging", false);
+    Config<Boolean> strictConfig = new BooleanConfig("Strict", "Allows you to fake lag on strict servers", false);
     Config<Boolean> attackConfig = new BooleanConfig("Attack", "crystals in the way of block", true);
     Config<Boolean> autoDisableConfig = new BooleanConfig("AutoDisable", "Automatically disables after placing block", false);
     //
