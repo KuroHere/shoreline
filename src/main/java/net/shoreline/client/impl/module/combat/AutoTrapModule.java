@@ -168,20 +168,13 @@ public final class AutoTrapModule extends ObsidianPlacerModule
         {
             if (rotateConfig.getValue())
             {
-                if (grimConfig.getValue())
+                if (state)
                 {
-                    if (state)
-                    {
-                        Managers.ROTATION.setRotationSilent(angles[0], angles[1], true);
-                    }
-                    else
-                    {
-                        Managers.ROTATION.setRotationSilentSync(true);
-                    }
+                    Managers.ROTATION.setRotationSilent(angles[0], angles[1], grimConfig.getValue());
                 }
-                else if (state)
+                else
                 {
-                    setRotation(angles[0], angles[1]);
+                    Managers.ROTATION.setRotationSilentSync(grimConfig.getValue());
                 }
             }
         });
