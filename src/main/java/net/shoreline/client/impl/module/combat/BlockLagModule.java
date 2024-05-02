@@ -20,7 +20,6 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.math.position.PositionUtil;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author linus

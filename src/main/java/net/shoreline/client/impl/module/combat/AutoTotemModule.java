@@ -37,6 +37,7 @@ public final class AutoTotemModule extends ToggleModule
     BooleanConfig gappleConfig = new BooleanConfig("OffhandGapple", "If to equip a golden apple if holding down the item use button", true);
     BooleanConfig crappleConfig = new BooleanConfig("Crapple", "If to use a normal golden apple if Absorption is present", true);
     Config<Boolean> lethalConfig = new BooleanConfig("Lethal", "Calculate lethal damage sources", false);
+    Config<Boolean> fastConfig = new BooleanConfig("FastSwap", "Allows you to swap using faster packets", false);
     private int lastSlot;
 
     public AutoTotemModule()
@@ -77,8 +78,19 @@ public final class AutoTotemModule extends ToggleModule
                 lastSlot = itemSlot;
             }
             // Do another quick swap (equivalent to hovering over an item & pressing F)
-            mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
-                    itemSlot < 9 ? itemSlot + 36 : itemSlot, 40, SlotActionType.SWAP, mc.player);
+            if (fastConfig.getValue()) {
+                mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
+                        itemSlot < 9 ? itemSlot + 36 : itemSlot, 0, SlotActionType.SWAP, mc.player);
+            } else {
+                mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
+                        itemSlot < 9 ? itemSlot + 36 : itemSlot, 0, SlotActionType.PICKUP, mc.player);
+                mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
+                        45, 0, SlotActionType.PICKUP, mc.player);
+                if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+                    mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
+                            itemSlot < 9 ? itemSlot + 36 : itemSlot, 0, SlotActionType.PICKUP, mc.player);
+                }
+            }
         }
     }
 
