@@ -23,7 +23,7 @@ import java.util.List;
 
 /**
  * @author xgraza
- * @since 03/29/24
+ * @since 1.0
  */
 public final class AutoTotemModule extends ToggleModule
 {
@@ -80,7 +80,7 @@ public final class AutoTotemModule extends ToggleModule
             // Do another quick swap (equivalent to hovering over an item & pressing F)
             if (fastConfig.getValue()) {
                 mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
-                        itemSlot < 9 ? itemSlot + 36 : itemSlot, 0, SlotActionType.SWAP, mc.player);
+                        itemSlot < 9 ? itemSlot + 36 : itemSlot, 40, SlotActionType.SWAP, mc.player);
             } else {
                 mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
                         itemSlot < 9 ? itemSlot + 36 : itemSlot, 0, SlotActionType.PICKUP, mc.player);
