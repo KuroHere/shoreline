@@ -125,7 +125,7 @@ public class AutoMineModule extends RotationModule {
         {
             final double distance = miningData.getPos().getSquaredDistance(
                     mc.player.getX(), mc.player.getY(), mc.player.getZ());
-            if (distance > ((NumberConfig<Float>) rangeConfig).getValueSq() || miningData.getBreakPackets() >= 3)
+            if (distance > ((NumberConfig<Float>) rangeConfig).getValueSq())
             {
                 abortMining(miningData);
                 miningData = null;
@@ -160,7 +160,7 @@ public class AutoMineModule extends RotationModule {
                     miningData.getState(), mc.world, miningData.getPos());
             if (miningData.damage(damageDelta) >= miningData.getSpeed() || miningData.isInstantRemine())
             {
-                if (mc.player.isUsingItem() && !multitaskConfig.getValue() || System.currentTimeMillis() - lastBreak <= 200)
+                if (mc.player.isUsingItem() && !multitaskConfig.getValue())
                 {
                     return;
                 }
