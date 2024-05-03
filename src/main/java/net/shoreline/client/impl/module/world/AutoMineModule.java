@@ -57,6 +57,15 @@ public class AutoMineModule extends RotationModule {
     }
 
     @Override
+    public String getModuleData() {
+        if (miningData != null)
+        {
+            return String.format("%.1f", Math.min(miningData.getBlockDamage(), miningData.getSpeed()));
+        }
+        return super.getModuleData();
+    }
+
+    @Override
     protected void onDisable()
     {
         if (miningData != null && miningData.isStarted())
@@ -298,6 +307,10 @@ public class AutoMineModule extends RotationModule {
         }
         Managers.NETWORK.sendSequencedPacket(id -> new PlayerActionC2SPacket(
                 PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, data.getPos(), data.getDirection(), id));
+        if (grimConfig.getValue()) {
+            Managers.NETWORK.sendSequencedPacket(id -> new PlayerActionC2SPacket(
+                    PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, data.getPos().up(500), data.getDirection(), id));
+        }
         data.setBroken();
         lastBreak = System.currentTimeMillis();
         if (canSwap) {
