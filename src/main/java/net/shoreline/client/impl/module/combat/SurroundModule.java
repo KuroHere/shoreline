@@ -180,24 +180,7 @@ public class SurroundModule extends ObsidianPlacerModule {
     }
 
     public List<BlockPos> getSurroundPositions(BlockPos pos) {
-        List<BlockPos> entities = new LinkedList<>();
-        entities.add(pos);
-        if (extendConfig.getValue()) {
-            for (Direction dir : Direction.values()) {
-                if (!dir.getAxis().isHorizontal()) {
-                    continue;
-                }
-                BlockPos pos1 = pos.add(dir.getVector());
-                List<Entity> box = mc.world.getOtherEntities(null, new Box(pos1))
-                        .stream().filter(e -> !isEntityBlockingSurround(e)).toList();
-                if (box.isEmpty()) {
-                    continue;
-                }
-                for (Entity entity : box) {
-                    entities.addAll(PositionUtil.getAllInBox(entity.getBoundingBox(), pos));
-                }
-            }
-        }
+        List<BlockPos> entities = getSurroundEntities(pos);
         List<BlockPos> blocks = new CopyOnWriteArrayList<>();
         for (BlockPos epos : entities) {
             for (Direction dir2 : Direction.values()) {
@@ -230,6 +213,64 @@ public class SurroundModule extends ObsidianPlacerModule {
             blocks.add(entityPos.down());
         }
         Collections.reverse(blocks);
+        return blocks;
+    }
+
+    public List<BlockPos> getSurroundEntities(Entity entity) {
+        List<BlockPos> entities = new LinkedList<>();
+        entities.add(entity.getBlockPos());
+        if (extendConfig.getValue()) {
+            for (Direction dir : Direction.values()) {
+                if (!dir.getAxis().isHorizontal()) {
+                    continue;
+                }
+                entities.addAll(PositionUtil.getAllInBox(entity.getBoundingBox(), entity.getBlockPos()));
+            }
+        }
+        return entities;
+    }
+
+    public List<BlockPos> getSurroundEntities(BlockPos pos) {
+        List<BlockPos> entities = new LinkedList<>();
+        entities.add(pos);
+        if (extendConfig.getValue()) {
+            for (Direction dir : Direction.values()) {
+                if (!dir.getAxis().isHorizontal()) {
+                    continue;
+                }
+                BlockPos pos1 = pos.add(dir.getVector());
+                List<Entity> box = mc.world.getOtherEntities(null, new Box(pos1))
+                        .stream().filter(e -> !isEntityBlockingSurround(e)).toList();
+                if (box.isEmpty()) {
+                    continue;
+                }
+                for (Entity entity : box) {
+                    entities.addAll(PositionUtil.getAllInBox(entity.getBoundingBox(), pos));
+                }
+            }
+        }
+        return entities;
+    }
+
+    public List<BlockPos> getEntitySurroundNoSupport(Entity entity) {
+        List<BlockPos> entities = getSurroundEntities(entity);
+        List<BlockPos> blocks = new CopyOnWriteArrayList<>();
+        for (BlockPos epos : entities) {
+            for (Direction dir2 : Direction.values()) {
+                if (!dir2.getAxis().isHorizontal()) {
+                    continue;
+                }
+                BlockPos pos2 = epos.add(dir2.getVector());
+                if (entities.contains(pos2) || blocks.contains(pos2)) {
+                    continue;
+                }
+                double dist = mc.player.squaredDistanceTo(pos2.toCenterPos());
+                if (dist > ((NumberConfig) placeRangeConfig).getValueSq()) {
+                    continue;
+                }
+                blocks.add(pos2);
+            }
+        }
         return blocks;
     }
 

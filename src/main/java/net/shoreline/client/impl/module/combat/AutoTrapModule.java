@@ -73,7 +73,7 @@ public final class AutoTrapModule extends ObsidianPlacerModule
     public AutoTrapModule()
     {
         super("AutoTrap", "Automatically traps nearby players in blocks",
-                ModuleCategory.COMBAT);
+                ModuleCategory.COMBAT, 800);
     }
 
     @Override

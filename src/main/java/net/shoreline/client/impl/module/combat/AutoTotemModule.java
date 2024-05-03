@@ -82,10 +82,8 @@ public final class AutoTotemModule extends ToggleModule
                 mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
                         itemSlot < 9 ? itemSlot + 36 : itemSlot, 40, SlotActionType.SWAP, mc.player);
             } else {
-                mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
-                        itemSlot < 9 ? itemSlot + 36 : itemSlot, 0, SlotActionType.PICKUP, mc.player);
-                mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
-                        45, 0, SlotActionType.PICKUP, mc.player);
+                mc.interactionManager.clickSlot(INVENTORY_SYNC_ID, itemSlot < 9 ? itemSlot + 36 : itemSlot, 0, SlotActionType.PICKUP, mc.player);
+                mc.interactionManager.clickSlot(INVENTORY_SYNC_ID, 45, 0, SlotActionType.PICKUP, mc.player);
                 if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
                     mc.interactionManager.clickSlot(INVENTORY_SYNC_ID,
                             itemSlot < 9 ? itemSlot + 36 : itemSlot, 0, SlotActionType.PICKUP, mc.player);
