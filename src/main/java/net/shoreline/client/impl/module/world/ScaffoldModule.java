@@ -189,7 +189,7 @@ public final class ScaffoldModule extends RotationModule
             if (renderConfig.getValue())
             {
                 Animation animation = new Animation(true, fadeTimeConfig.getValue());
-                fadeList.put(lastBlockData.getPos(), animation);
+                fadeList.put(lastBlockData.getPos().offset(lastBlockData.getSide()), animation);
             }
 
             fadeList.entrySet().removeIf(e ->
