@@ -55,7 +55,13 @@ public class KeyboardUtil {
             return GLFW.GLFW_KEY_UNKNOWN;
         }
         // Keyboard Keys
-        for (int i = 39; i < 97; i++) {
+        for (int i = 32; i < 97; i++) {
+            if (key.equalsIgnoreCase(getKeyName(i,
+                    GLFW.glfwGetKeyScancode(i)))) {
+                return i;
+            }
+        }
+        for (int i = 256; i < 349; i++) {
             if (key.equalsIgnoreCase(getKeyName(i,
                     GLFW.glfwGetKeyScancode(i)))) {
                 return i;
