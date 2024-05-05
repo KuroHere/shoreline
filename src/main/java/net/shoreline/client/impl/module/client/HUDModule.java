@@ -24,12 +24,12 @@ import net.shoreline.client.api.module.Module;
 import net.shoreline.client.api.module.ModuleCategory;
 import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.api.render.RenderManager;
-import net.shoreline.client.api.render.anim.Animation;
 import net.shoreline.client.impl.event.gui.hud.RenderOverlayEvent;
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.StreamUtils;
 import net.shoreline.client.util.render.ColorUtil;
+import net.shoreline.client.util.render.animation.Animation;
 import net.shoreline.client.util.string.EnumFormatter;
 
 import java.awt.*;
@@ -85,7 +85,7 @@ public class HUDModule extends ToggleModule {
 
     private void arrayListRenderModule(RenderOverlayEvent.Post event, ToggleModule toggleModule) {
         final Animation anim = toggleModule.getAnimation();
-        float factor = anim.getScaledTime();
+        float factor = (float) anim.getFactor();
         if (factor <= 0.01f || toggleModule.isHidden()) {
             return;
         }

@@ -35,7 +35,6 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.init.Modules;
 import net.shoreline.client.util.player.PlayerUtil;
 import net.shoreline.client.util.render.animation.Animation;
-import net.shoreline.client.util.render.animation.TimeAnimation;
 
 import java.awt.*;
 import java.util.*;
