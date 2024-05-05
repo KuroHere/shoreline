@@ -27,7 +27,6 @@ import net.shoreline.client.util.player.PlayerUtil;
 import net.shoreline.client.util.player.RayCastUtil;
 import net.shoreline.client.util.player.RotationUtil;
 import net.shoreline.client.util.render.animation.Animation;
-import net.shoreline.client.util.render.animation.TimeAnimation;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -47,7 +46,7 @@ public final class ScaffoldModule extends RotationModule
     Config<Boolean> renderConfig = new BooleanConfig("Render", "Renders where scaffold is placing blocks", false);
     Config<Integer> fadeTimeConfig = new NumberConfig<>("Fade-Time", "Timer for the fade", 0, 250, 1000, () -> false);
 
-    private Map<BlockPos, Animation> fadeList = new HashMap<>();
+    private final Map<BlockPos, Animation> fadeList = new HashMap<>();
     private BlockData lastBlockData;
     private boolean sneakOverride;
 
